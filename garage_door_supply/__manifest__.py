@@ -28,6 +28,7 @@
         'data/warehouse_data.xml',
         'data/pos_config_data.xml',
         'data/website_data.xml',
+        'data/partners_taxes_data.xml',
     ],
     'installable': True,
     'application': True,
