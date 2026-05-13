@@ -31,11 +31,11 @@
         'data/partners_taxes_data.xml',
         'data/arrow_products_data.xml',
         'data/hinge_additions_data.xml',
-        'data/hardware_kit_data.xml',
-        'data/hardware_kit_4panel_data.xml',
         'views/website_brand.xml',
+        'views/website_homepage.xml',
     ],
     'installable': True,
     'application': True,
     'license': 'LGPL-3',
+    'post_init_hook': 'post_init_hook',
 }
