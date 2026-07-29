@@ -44,16 +44,69 @@ class GlassDoorPortal(CustomerPortal):
 
     @http.route('/my/doors/new', type='http', auth='user', website=True)
     def portal_door_new(self, **kw):
+        partner = request.env.user.partner_id
         glass_types = request.env['glass.door.glass.type'].search([])
         interlayers = request.env['glass.door.interlayer'].search([])
         finishes = request.env['glass.door.frame.finish'].search([])
+        clients = request.env['glass.door.dealer.client'].search([
+            ('dealer_id', '=', partner.id)
+        ])
         return request.render('glass_door.portal_door_form', {
             'glass_types': glass_types,
             'interlayers': interlayers,
             'finishes': finishes,
+            'clients': clients,
             'page_name': 'doors',
             'order': None,
         })
+
+    # ── Manage Clients ────────────────────────────────────────────────────────
+
+    @http.route('/my/clients', type='http', auth='user', website=True)
+    def portal_clients(self, **kw):
+        partner = request.env.user.partner_id
+        clients = request.env['glass.door.dealer.client'].search([
+            ('dealer_id', '=', partner.id)
+        ])
+        return request.render('glass_door.portal_client_list', {
+            'clients': clients,
+            'page_name': 'clients',
+        })
+
+    @http.route('/my/clients/save', type='http', auth='user', website=True, methods=['POST'])
+    def portal_client_save(self, **post):
+        partner = request.env.user.partner_id
+        client_id = int(post.get('client_id', 0))
+
+        vals = {
+            'name': post.get('name', ''),
+            'dealer_id': partner.id,
+            'markup': float(post.get('markup', 0)),
+            'phone': post.get('phone', ''),
+            'email': post.get('email', ''),
+        }
+
+        if client_id:
+            client = request.env['glass.door.dealer.client'].search([
+                ('id', '=', client_id), ('dealer_id', '=', partner.id)
+            ], limit=1)
+            if client:
+                client.sudo().write(vals)
+        else:
+            request.env['glass.door.dealer.client'].sudo().create(vals)
+
+        return request.redirect('/my/clients')
+
+    @http.route('/my/clients/create_ajax', type='jsonrpc', auth='user')
+    def portal_client_create_ajax(self, name, **kw):
+        """Quick-create a client inline from the quote form."""
+        partner = request.env.user.partner_id
+        client = request.env['glass.door.dealer.client'].sudo().create({
+            'name': name,
+            'dealer_id': partner.id,
+            'markup': 0.0,
+        })
+        return {'id': client.id, 'name': client.name, 'markup': client.markup}
 
     # ── Order Detail ──────────────────────────────────────────────────────────
 
@@ -80,6 +133,9 @@ class GlassDoorPortal(CustomerPortal):
         vals = {
             'dealer_id': partner.id,
             'job_name': post.get('job_name', ''),
+            'po_number': post.get('po_number', ''),
+            'dealer_client_id': int(post.get('dealer_client_id', 0)) or False,
+            'job_markup': float(post.get('job_markup', 0)),
             'series': post.get('series', '1200'),
             'design_pressure': post.get('design_pressure', 'dp20'),
             'lites': int(post.get('lites', 1)),
@@ -99,7 +155,7 @@ class GlassDoorPortal(CustomerPortal):
 
     # ── Compute Price (AJAX) ───────────────────────────────────────────────────
 
-    @http.route('/my/doors/compute_price', type='json', auth='user')
+    @http.route('/my/doors/compute_price', type='jsonrpc', auth='user')
     def compute_price(self, **kw):
         partner = request.env.user.partner_id
         try:

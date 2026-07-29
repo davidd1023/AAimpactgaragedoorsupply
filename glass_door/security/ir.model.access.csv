@@ -1,4 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_glass_door_dealer_client_user,glass.door.dealer.client user,model_glass_door_dealer_client,base.group_user,1,1,1,1
+access_glass_door_dealer_client_portal,glass.door.dealer.client portal,model_glass_door_dealer_client,base.group_portal,1,1,1,1
 access_glass_door_order_user,glass.door.order user,model_glass_door_order,base.group_user,1,1,1,1
 access_glass_door_order_portal,glass.door.order portal,model_glass_door_order,base.group_portal,1,1,1,0
 access_glass_door_extrusion_line_user,glass.door.extrusion.line user,model_glass_door_extrusion_line,base.group_user,1,1,1,1

@@ -53,7 +53,12 @@ class GlassDoorOrder(models.Model):
     # ── Parties ─────────────────────────────────────────────────────────────────
     dealer_id = fields.Many2one('res.partner', 'Dealer', required=True,
                                  domain=[('is_dealer', '=', True)], tracking=True)
+    dealer_client_id = fields.Many2one('glass.door.dealer.client', 'Client',
+                                        tracking=True,
+                                        help="The dealer's end customer for this job.")
     job_name = fields.Char('Job Name', required=True, tracking=True)
+    po_number = fields.Char('PO #', tracking=True,
+                             help="Dealer's purchase order or reference number.")
 
     # ── Door Specifications ──────────────────────────────────────────────────────
     series = fields.Selection([
@@ -86,6 +91,11 @@ class GlassDoorOrder(models.Model):
         ('pvc', 'PVC (Standard)'),
         ('aluminum', 'Aluminum'),
     ], string='Trim Type', default='pvc', required=True)
+
+    job_markup = fields.Float(
+        'Job Markup (%)', digits=(5, 2), default=0.0,
+        help='Extra markup for this specific job, added on top of the client\'s standard markup.'
+    )
 
     include_reinforcement = fields.Boolean(
         'Add Internal Reinforcement (104)',
@@ -177,14 +187,24 @@ class GlassDoorOrder(models.Model):
 
             order.door_weight = aluminum_weight + glass_weight
 
-    @api.depends('dealer_id.dealer_markup', 'extrusion_line_ids.total_cost',
+    @api.depends('dealer_id.dealer_markup', 'dealer_client_id.markup', 'job_markup',
+                 'extrusion_line_ids.total_cost',
                  'glass_type_id.price_per_sqft', 'interlayer_id.price_per_sqft',
                  'frame_finish_id.requires_paint', 'frame_finish_id.paint_cost_per_sqft',
                  'num_panels', 'lites', 'glass_width', 'glass_height',
                  'frame_width', 'frame_height', 'quantity')
     def _compute_price(self):
         for order in self:
-            markup = 1.0 + (order.dealer_id.dealer_markup or 0.0) / 100.0
+            # Markup layers:
+            # 1. dealer_markup  — our markup to the dealer (set on dealer account)
+            # 2. client markup  — dealer's standard markup to their client (set on client record)
+            # 3. job_markup     — extra markup for this specific job
+            total_markup_pct = (
+                (order.dealer_id.dealer_markup or 0.0)
+                + (order.dealer_client_id.markup or 0.0)
+                + (order.job_markup or 0.0)
+            )
+            markup = 1.0 + total_markup_pct / 100.0
 
             # Aluminum cost
             aluminum_cost = sum(line.total_cost for line in order.extrusion_line_ids)

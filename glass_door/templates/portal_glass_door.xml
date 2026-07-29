@@ -9,6 +9,11 @@
                 <t t-set="url">/my/doors</t>
                 <t t-set="count" t-value="door_count"/>
             </t>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">My Clients</t>
+                <t t-set="url">/my/clients</t>
+                <t t-set="count" t-value="0"/>
+            </t>
         </xpath>
     </template>
 
@@ -86,20 +91,98 @@
     <template id="portal_door_form" name="New Glass Door Order">
         <t t-call="portal.portal_layout">
             <t t-set="o_portal_fullwidth_alert" t-value="True"/>
+
+            <!-- ── Opening Popup Modal ─────────────────────────────────────── -->
+            <div class="modal fade" id="jobInfoModal" tabindex="-1"
+                 data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">New Quote — Job Info</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Job Name *</label>
+                                <input type="text" id="modal_job_name" class="form-control"
+                                       placeholder="e.g. Smith Residence" required="1"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">PO # <small class="text-muted">(optional)</small></label>
+                                <input type="text" id="modal_po_number" class="form-control"
+                                       placeholder="Your PO or reference number"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Client</label>
+                                <div class="input-group">
+                                    <select id="modal_client" class="form-select">
+                                        <option value="">— No client / New client —</option>
+                                        <t t-foreach="clients" t-as="c">
+                                            <option t-att-value="c.id"
+                                                    t-att-data-markup="c.markup">
+                                                <t t-esc="c.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                    <button type="button" class="btn btn-outline-secondary"
+                                            id="btn_new_client" title="Create new client">+</button>
+                                </div>
+                                <!-- Inline new client creation -->
+                                <div id="new_client_form" class="mt-2 p-2 border rounded bg-light d-none">
+                                    <input type="text" id="new_client_name" class="form-control form-control-sm"
+                                           placeholder="New client name"/>
+                                    <button type="button" class="btn btn-sm btn-primary mt-1"
+                                            id="btn_save_new_client">Save Client</button>
+                                    <button type="button" class="btn btn-sm btn-link mt-1"
+                                            id="btn_cancel_new_client">Cancel</button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Additional Job Markup (%)</label>
+                                <div class="input-group">
+                                    <input type="number" id="modal_job_markup" class="form-control"
+                                           value="0" min="0" step="0.5"/>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div class="form-text">Added on top of client's standard rate for this job.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="/my/doors" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="button" class="btn btn-primary" id="btn_start_quote">
+                                Continue to Quote →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="container mt-4" style="max-width:860px">
-                <h2 class="mb-4">New Glass Door Order</h2>
+                <h2 class="mb-1">New Glass Door Quote</h2>
+
+                <!-- Job info summary bar (filled by modal) -->
+                <div class="alert alert-light border d-flex justify-content-between align-items-center mb-4"
+                     id="job_summary_bar">
+                    <div>
+                        <strong id="summary_job_name">—</strong>
+                        <span class="text-muted ms-2" id="summary_client"></span>
+                        <span class="badge text-bg-secondary ms-2" id="summary_po"></span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            data-bs-toggle="modal" data-bs-target="#jobInfoModal">Edit</button>
+                </div>
+
                 <form action="/my/doors/submit" method="post" id="door_order_form">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="job_name" id="field_job_name"/>
+                    <input type="hidden" name="po_number" id="field_po_number"/>
+                    <input type="hidden" name="dealer_client_id" id="field_client_id"/>
+                    <input type="hidden" name="job_markup" id="field_job_markup" value="0"/>
 
-                    <!-- Job Info -->
+                    <!-- Quantity (moved here from job info) -->
                     <div class="card mb-3">
-                        <div class="card-header fw-bold">Job Information</div>
+                        <div class="card-header fw-bold">Order Info</div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Job Name *</label>
-                                    <input type="text" name="job_name" class="form-control" required="1"/>
-                                </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Quantity *</label>
                                     <input type="number" name="quantity" class="form-control"
@@ -291,11 +374,94 @@
                 </form>
             </div>
 
-            <!-- Live price calculation script -->
+            <!-- Portal scripts: modal + price calculator -->
             <script>
                 (function () {
-                    var fields = ['frame_width', 'frame_height', 'lites', 'glass_type_id',
-                                  'interlayer_id', 'trim_type', 'include_reinforcement'];
+
+                    /* ── MODAL HANDLING ──────────────────────────────────────── */
+                    var modal = new bootstrap.Modal(document.getElementById('jobInfoModal'), {
+                        backdrop: 'static', keyboard: false
+                    });
+
+                    // Auto-open on page load
+                    document.addEventListener('DOMContentLoaded', function () {
+                        modal.show();
+                    });
+
+                    // "Continue to Quote" button — validate then copy to hidden fields
+                    document.getElementById('btn_start_quote').addEventListener('click', function () {
+                        var jobName = document.getElementById('modal_job_name').value.trim();
+                        if (!jobName) {
+                            document.getElementById('modal_job_name').classList.add('is-invalid');
+                            return;
+                        }
+                        document.getElementById('modal_job_name').classList.remove('is-invalid');
+
+                        var clientSel = document.getElementById('modal_client');
+                        var clientId   = clientSel.value;
+                        var clientName = clientId
+                            ? clientSel.options[clientSel.selectedIndex].textContent.trim()
+                            : '';
+                        var poNum  = document.getElementById('modal_po_number').value.trim();
+                        var markup = document.getElementById('modal_job_markup').value || '0';
+
+                        // Copy to hidden form fields
+                        document.getElementById('field_job_name').value  = jobName;
+                        document.getElementById('field_po_number').value = poNum;
+                        document.getElementById('field_client_id').value = clientId;
+                        document.getElementById('field_job_markup').value = markup;
+
+                        // Update summary bar
+                        document.getElementById('summary_job_name').textContent = jobName;
+                        document.getElementById('summary_client').textContent   = clientName ? '· ' + clientName : '';
+                        document.getElementById('summary_po').textContent       = poNum ? 'PO: ' + poNum : '';
+                        document.getElementById('summary_po').style.display     = poNum ? '' : 'none';
+
+                        modal.hide();
+                    });
+
+                    // Toggle inline new-client form
+                    document.getElementById('btn_new_client').addEventListener('click', function () {
+                        document.getElementById('new_client_form').classList.toggle('d-none');
+                        document.getElementById('new_client_name').focus();
+                    });
+                    document.getElementById('btn_cancel_new_client').addEventListener('click', function () {
+                        document.getElementById('new_client_form').classList.add('d-none');
+                        document.getElementById('new_client_name').value = '';
+                    });
+
+                    // Quick-create client via AJAX
+                    document.getElementById('btn_save_new_client').addEventListener('click', function () {
+                        var name = document.getElementById('new_client_name').value.trim();
+                        if (!name) return;
+
+                        fetch('/my/clients/create_ajax', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            body: JSON.stringify({jsonrpc: '2.0', method: 'call', params: {name: name}}),
+                        })
+                        .then(function(r) { return r.json(); })
+                        .then(function(res) {
+                            if (res.result &amp;&amp; res.result.id) {
+                                var c = res.result;
+                                var opt = document.createElement('option');
+                                opt.value = c.id;
+                                opt.textContent = c.name;
+                                opt.dataset.markup = c.markup;
+                                opt.selected = true;
+                                document.getElementById('modal_client').appendChild(opt);
+                                document.getElementById('new_client_form').classList.add('d-none');
+                                document.getElementById('new_client_name').value = '';
+                            }
+                        });
+                    });
+
+                    /* ── PRICE CALCULATOR ────────────────────────────────────── */
+                    var priceFields = ['frame_width', 'frame_height', 'lites', 'glass_type_id',
+                                       'interlayer_id', 'trim_type', 'include_reinforcement'];
 
                     function getFormData() {
                         return {
@@ -307,9 +473,10 @@
                             quantity: parseInt(document.querySelector('[name=quantity]').value) || 1,
                             series: document.querySelector('[name=series]').value,
                             design_pressure: document.querySelector('[name=design_pressure]').value,
-                            frame_finish_id: document.querySelector('[name=frame_finish_id]').value,
+                            frame_finish_id: parseInt(document.querySelector('[name=frame_finish_id]').value) || 0,
                             trim_type: document.getElementById('trim_type').value,
                             include_reinforcement: document.getElementById('include_reinforcement').checked,
+                            job_markup: parseFloat(document.getElementById('field_job_markup').value) || 0,
                         };
                     }
 
@@ -321,7 +488,7 @@
                             return;
                         }
 
-                        // Auto-enforce min 2 lites
+                        // Auto-enforce min 2 lites for wide doors
                         if (data.frame_width > 144 &amp;&amp; data.lites &lt; 2) {
                             document.getElementById('lites').value = 2;
                             data.lites = 2;
@@ -346,16 +513,24 @@
                                 document.getElementById('door_preview').classList.remove('d-none');
                                 document.getElementById('price_unit').textContent = fmt(r.unit_price);
                                 document.getElementById('price_total').textContent = fmt(r.total_price);
-                                document.getElementById('price_note').textContent = 'Price includes your dealer markup';
+                                document.getElementById('price_note').textContent = 'Price includes your markups';
                             }
                         });
                     }
 
-                    fields.forEach(function(id) {
+                    priceFields.forEach(function(id) {
                         var el = document.getElementById(id);
                         if (el) el.addEventListener('change', updatePrice);
                     });
                     document.querySelector('[name=quantity]').addEventListener('input', updatePrice);
+
+                    // Form submit guard — ensure modal data was filled
+                    document.getElementById('door_order_form').addEventListener('submit', function (e) {
+                        if (!document.getElementById('field_job_name').value) {
+                            e.preventDefault();
+                            modal.show();
+                        }
+                    });
                 })();
             </script>
         </t>
@@ -372,7 +547,15 @@
                             <t t-if="order.name != 'New'">WO# <t t-esc="order.name"/></t>
                             <t t-else="">Quote <t t-esc="order.quote_number"/></t>
                         </h2>
-                        <small class="text-muted">Job: <t t-esc="order.job_name"/></small>
+                        <div class="text-muted">
+                            Job: <strong><t t-esc="order.job_name"/></strong>
+                            <t t-if="order.dealer_client_id">
+                                · Client: <t t-esc="order.dealer_client_id.name"/>
+                            </t>
+                            <t t-if="order.po_number">
+                                · PO: <t t-esc="order.po_number"/>
+                            </t>
+                        </div>
                     </div>
                     <span t-attf-class="badge fs-6 #{
                         'text-bg-secondary' if order.state == 'draft' else
@@ -440,6 +623,140 @@
                 <a href="/my/doors" class="btn btn-outline-secondary mb-5">← Back to My Orders</a>
                 <a href="/my/doors/new" class="btn btn-primary mb-5 ms-2">+ New Order</a>
             </div>
+        </t>
+    </template>
+
+    <!-- ── Client List ───────────────────────────────────────────────────────── -->
+    <template id="portal_client_list" name="My Clients">
+        <t t-call="portal.portal_layout">
+            <t t-set="o_portal_fullwidth_alert" t-value="True"/>
+            <div class="container mt-4" style="max-width:860px">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">My Clients</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal"
+                            id="btn_add_client">+ Add Client</button>
+                </div>
+
+                <t t-if="not clients">
+                    <div class="alert alert-info">
+                        No clients yet. Add your first client to save their markup for future quotes.
+                    </div>
+                </t>
+
+                <t t-if="clients">
+                    <div class="card mb-4">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Client Name</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Markup</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="clients" t-as="c">
+                                    <tr>
+                                        <td><strong><t t-esc="c.name"/></strong></td>
+                                        <td><t t-esc="c.phone or '—'"/></td>
+                                        <td><t t-esc="c.email or '—'"/></td>
+                                        <td><t t-esc="'%.1f' % c.markup"/>%</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-outline-secondary btn-edit-client"
+                                                    t-att-data-id="c.id"
+                                                    t-att-data-name="c.name"
+                                                    t-att-data-markup="c.markup"
+                                                    t-att-data-phone="c.phone or ''"
+                                                    t-att-data-email="c.email or ''"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#clientModal">Edit</button>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+
+                <a href="/my/doors" class="btn btn-outline-secondary">← My Orders</a>
+            </div>
+
+            <!-- Client Edit/Create Modal -->
+            <div class="modal fade" id="clientModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="clientModalTitle">Client Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"/>
+                        </div>
+                        <form action="/my/clients/save" method="post">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="client_id" id="edit_client_id" value="0"/>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Client Name *</label>
+                                    <input type="text" name="name" id="edit_name"
+                                           class="form-control" required="1"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Markup (%)</label>
+                                    <div class="input-group">
+                                        <input type="number" name="markup" id="edit_markup"
+                                               class="form-control" step="0.5" min="0" value="0"/>
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                    <div class="form-text">
+                                        This markup is private — only visible here when editing.
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Phone</label>
+                                        <input type="text" name="phone" id="edit_phone"
+                                               class="form-control" placeholder="Optional"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" name="email" id="edit_email"
+                                               class="form-control" placeholder="Optional"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save Client</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                (function () {
+                    // Populate modal when editing
+                    document.querySelectorAll('.btn-edit-client').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            document.getElementById('clientModalTitle').textContent = 'Edit Client';
+                            document.getElementById('edit_client_id').value = btn.dataset.id;
+                            document.getElementById('edit_name').value     = btn.dataset.name;
+                            document.getElementById('edit_markup').value   = btn.dataset.markup;
+                            document.getElementById('edit_phone').value    = btn.dataset.phone;
+                            document.getElementById('edit_email').value    = btn.dataset.email;
+                        });
+                    });
+                    // Reset for "Add Client"
+                    document.getElementById('btn_add_client').addEventListener('click', function () {
+                        document.getElementById('clientModalTitle').textContent = 'New Client';
+                        document.getElementById('edit_client_id').value = '0';
+                        document.getElementById('edit_name').value      = '';
+                        document.getElementById('edit_markup').value    = '0';
+                        document.getElementById('edit_phone').value     = '';
+                        document.getElementById('edit_email').value     = '';
+                    });
+                })();
+            </script>
         </t>
     </template>
 
