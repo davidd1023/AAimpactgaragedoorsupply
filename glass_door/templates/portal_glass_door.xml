@@ -343,6 +343,119 @@
                         </div>
                     </div>
 
+                    <!-- Track Options -->
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Track Options</div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                <div class="col-6 col-md-3">
+                                    <input type="radio" class="btn-check" name="track_type"
+                                           id="track_standard" value="standard" checked="1"/>
+                                    <label class="btn btn-outline-secondary w-100 text-start p-3"
+                                           for="track_standard">
+                                        <strong class="d-block">Standard Lift</strong>
+                                        <small class="text-muted">Most common residential</small>
+                                    </label>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <input type="radio" class="btn-check" name="track_type"
+                                           id="track_high_lift" value="high_lift"/>
+                                    <label class="btn btn-outline-secondary w-100 text-start p-3"
+                                           for="track_high_lift">
+                                        <strong class="d-block">High Lift</strong>
+                                        <small class="text-muted">Taller clearance, lifts, RVs</small>
+                                    </label>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <input type="radio" class="btn-check" name="track_type"
+                                           id="track_vertical" value="vertical"/>
+                                    <label class="btn btn-outline-secondary w-100 text-start p-3"
+                                           for="track_vertical">
+                                        <strong class="d-block">Full Vertical</strong>
+                                        <small class="text-muted">Commercial / forklifts</small>
+                                    </label>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <input type="radio" class="btn-check" name="track_type"
+                                           id="track_low_headroom" value="low_headroom"/>
+                                    <label class="btn btn-outline-secondary w-100 text-start p-3"
+                                           for="track_low_headroom">
+                                        <strong class="d-block">Low Headroom</strong>
+                                        <small class="text-muted">Limited overhead space</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Motor / Opener -->
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+                            Motor / Opener
+                            <span class="badge text-bg-secondary fw-normal">Optional</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">Select Motor</label>
+                                    <select name="motor_id" id="motor_id" class="form-select">
+                                        <option value="">— Door Only (No Motor) —</option>
+                                        <t t-foreach="motors" t-as="m">
+                                            <option t-att-value="m.id"
+                                                    t-attf-data-hp="#{m.horsepower or ''}"
+                                                    t-attf-data-drive="#{m.drive_type or ''}">
+                                                <t t-esc="m.brand"/> <t t-esc="m.name"/>
+                                                <t t-if="m.horsepower"> — <t t-esc="m.horsepower"/> HP</t>
+                                                <t t-if="m.drive_type"> (<t t-esc="dict([('belt','Belt'),('chain','Chain'),('direct','Direct'),('jackshaft','Jackshaft')]).get(m.drive_type, m.drive_type)"/> Drive)</t>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <div id="motor_detail" class="text-muted small d-none">
+                                        <span id="motor_hp_label"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div t-if="not motors" class="mt-2 text-muted small">
+                                No motors configured yet. Contact your rep to add motors.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Miscellaneous Items -->
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+                            Miscellaneous Items
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                    id="btn_add_misc">+ Add Item</button>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm mb-0" id="misc_table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Description</th>
+                                        <th style="width:80px">Qty</th>
+                                        <th style="width:120px">Unit Price</th>
+                                        <th style="width:100px" class="text-end">Total</th>
+                                        <th style="width:40px"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="misc_tbody">
+                                    <!-- Rows added by JS -->
+                                </tbody>
+                                <tfoot>
+                                    <tr id="misc_empty_row">
+                                        <td colspan="5" class="text-center text-muted py-3">
+                                            <small>No misc items. Click "+ Add Item" to include handles, remotes, hardware, etc.</small>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <input type="hidden" name="misc_items_json" id="misc_items_json" value="[]"/>
+                    </div>
+
                     <!-- Price Summary -->
                     <div class="card mb-4 border-primary">
                         <div class="card-header bg-primary text-white fw-bold">Price Summary</div>
@@ -459,9 +572,114 @@
                         });
                     });
 
+                    /* ── MISC ITEMS TABLE ───────────────────────────────────── */
+                    var miscRows = [];
+
+                    function fmtMoney(n) {
+                        return '$' + parseFloat(n || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                    }
+
+                    function mkInput(type, cls, val, field, idx, extra) {
+                        var el = document.createElement('input');
+                        el.type = type;
+                        el.className = cls;
+                        el.value = val;
+                        el.dataset.field = field;
+                        el.dataset.idx = idx;
+                        if (extra) extra(el);
+                        return el;
+                    }
+
+                    function renderMiscTable() {
+                        var tbody = document.getElementById('misc_tbody');
+                        var empty = document.getElementById('misc_empty_row');
+                        tbody.innerHTML = '';
+                        empty.style.display = miscRows.length ? 'none' : '';
+
+                        miscRows.forEach(function (row, idx) {
+                            var tr = document.createElement('tr');
+
+                            // Description
+                            var td1 = document.createElement('td'); td1.className = 'ps-3';
+                            td1.appendChild(mkInput('text', 'form-control form-control-sm',
+                                row.description || '', 'description', idx, null));
+                            tr.appendChild(td1);
+
+                            // Qty
+                            var td2 = document.createElement('td');
+                            var qEl = mkInput('number', 'form-control form-control-sm text-center',
+                                row.qty, 'qty', idx, function(e){ e.min=1; e.style.width='70px'; });
+                            td2.appendChild(qEl);
+                            tr.appendChild(td2);
+
+                            // Unit price
+                            var td3 = document.createElement('td');
+                            var ig = document.createElement('div'); ig.className = 'input-group input-group-sm';
+                            var span = document.createElement('span'); span.className = 'input-group-text'; span.textContent = '$';
+                            var pEl = mkInput('number', 'form-control form-control-sm',
+                                row.unit_price, 'unit_price', idx, function(e){ e.step='0.01'; e.min='0'; });
+                            ig.appendChild(span); ig.appendChild(pEl);
+                            td3.appendChild(ig);
+                            tr.appendChild(td3);
+
+                            // Total
+                            var td4 = document.createElement('td');
+                            td4.className = 'text-end pe-3 align-middle misc-total';
+                            td4.textContent = fmtMoney(row.qty * row.unit_price);
+                            tr.appendChild(td4);
+
+                            // Delete
+                            var td5 = document.createElement('td'); td5.className = 'text-center align-middle';
+                            var btn = document.createElement('button');
+                            btn.type = 'button'; btn.className = 'btn btn-sm btn-link text-danger p-0 btn-remove-misc';
+                            btn.dataset.idx = idx; btn.textContent = '✕';
+                            td5.appendChild(btn);
+                            tr.appendChild(td5);
+
+                            tbody.appendChild(tr);
+                        });
+
+                        // Attach listeners
+                        tbody.querySelectorAll('input[data-field]').forEach(function (inp) {
+                            inp.addEventListener('input', function () {
+                                var i = parseInt(inp.dataset.idx);
+                                var f = inp.dataset.field;
+                                miscRows[i][f] = f === 'description' ? inp.value : parseFloat(inp.value) || 0;
+                                if (f !== 'description') {
+                                    var totals = tbody.querySelectorAll('.misc-total');
+                                    if (totals[i]) totals[i].textContent = fmtMoney(miscRows[i].qty * miscRows[i].unit_price);
+                                }
+                                saveMiscJson();
+                                updatePrice();
+                            });
+                        });
+                        tbody.querySelectorAll('.btn-remove-misc').forEach(function (btn) {
+                            btn.addEventListener('click', function () {
+                                miscRows.splice(parseInt(btn.dataset.idx), 1);
+                                renderMiscTable();
+                                saveMiscJson();
+                                updatePrice();
+                            });
+                        });
+                    }
+
+                    function saveMiscJson() {
+                        document.getElementById('misc_items_json').value = JSON.stringify(miscRows);
+                    }
+
+                    document.getElementById('btn_add_misc').addEventListener('click', function () {
+                        miscRows.push({description: '', qty: 1, unit_price: 0});
+                        renderMiscTable();
+                        // Focus new description field
+                        var inputs = document.querySelectorAll('#misc_tbody input[data-field="description"]');
+                        if (inputs.length) inputs[inputs.length - 1].focus();
+                    });
+
+                    renderMiscTable();
+
                     /* ── PRICE CALCULATOR ────────────────────────────────────── */
                     var priceFields = ['frame_width', 'frame_height', 'lites', 'glass_type_id',
-                                       'interlayer_id', 'trim_type', 'include_reinforcement'];
+                                       'interlayer_id', 'trim_type', 'include_reinforcement', 'motor_id'];
 
                     function getFormData() {
                         return {
@@ -476,7 +694,9 @@
                             frame_finish_id: parseInt(document.querySelector('[name=frame_finish_id]').value) || 0,
                             trim_type: document.getElementById('trim_type').value,
                             include_reinforcement: document.getElementById('include_reinforcement').checked,
+                            motor_id: parseInt(document.getElementById('motor_id').value) || 0,
                             job_markup: parseFloat(document.getElementById('field_job_markup').value) || 0,
+                            misc_total: miscRows.reduce(function(s, r) { return s + (r.qty * r.unit_price); }, 0),
                         };
                     }
 
@@ -523,6 +743,11 @@
                         if (el) el.addEventListener('change', updatePrice);
                     });
                     document.querySelector('[name=quantity]').addEventListener('input', updatePrice);
+
+                    // Track type radio buttons
+                    document.querySelectorAll('[name=track_type]').forEach(function(r) {
+                        r.addEventListener('change', updatePrice);
+                    });
 
                     // Form submit guard — ensure modal data was filled
                     document.getElementById('door_order_form').addEventListener('submit', function (e) {
@@ -580,7 +805,11 @@
                                     <tr><th>Panels</th><td><t t-esc="order.num_panels"/></td></tr>
                                     <tr><th>Lites</th><td><t t-esc="order.lites"/></td></tr>
                                     <tr><th>Frame Finish</th><td><t t-esc="order.frame_finish_id.name"/></td></tr>
-                                    <tr><th>Trim</th><td><t t-esc="order.trim_type.upper()"/></td></tr>
+                                    <tr><th>Trim</th><td><t t-esc="dict([('pvc','PVC'),('aluminum','Aluminum')]).get(order.trim_type, order.trim_type)"/></td></tr>
+                                    <tr><th>Track</th><td><t t-esc="dict([('standard','Standard Lift'),('high_lift','High Lift'),('vertical','Full Vertical'),('low_headroom','Low Headroom')]).get(order.track_type, '')"/></td></tr>
+                                    <t t-if="order.motor_id">
+                                        <tr><th>Motor</th><td><t t-esc="order.motor_id.brand"/> <t t-esc="order.motor_id.name"/></td></tr>
+                                    </t>
                                 </table>
                             </div>
                         </div>
@@ -619,6 +848,32 @@
                         </div>
                     </div>
                 </div>
+
+                <t t-if="order.misc_line_ids">
+                    <div class="card mb-4">
+                        <div class="card-header fw-bold">Miscellaneous Items</div>
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Description</th>
+                                    <th class="text-center" style="width:80px">Qty</th>
+                                    <th class="text-end" style="width:120px">Unit</th>
+                                    <th class="text-end pe-3" style="width:110px">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="order.misc_line_ids" t-as="ml">
+                                    <tr>
+                                        <td class="ps-3"><t t-esc="ml.description"/></td>
+                                        <td class="text-center"><t t-esc="ml.qty"/></td>
+                                        <td class="text-end">$<t t-esc="'%.2f' % ml.unit_price"/></td>
+                                        <td class="text-end pe-3">$<t t-esc="'%.2f' % ml.total_price"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
 
                 <a href="/my/doors" class="btn btn-outline-secondary mb-5">← Back to My Orders</a>
                 <a href="/my/doors/new" class="btn btn-primary mb-5 ms-2">+ New Order</a>

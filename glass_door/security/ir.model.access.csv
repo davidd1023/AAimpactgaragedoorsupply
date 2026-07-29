@@ -13,3 +13,7 @@ access_glass_door_interlayer_user,glass.door.interlayer user,model_glass_door_in
 access_glass_door_interlayer_portal,glass.door.interlayer portal,model_glass_door_interlayer,base.group_portal,1,0,0,0
 access_glass_door_frame_finish_user,glass.door.frame.finish user,model_glass_door_frame_finish,base.group_user,1,1,1,1
 access_glass_door_frame_finish_portal,glass.door.frame.finish portal,model_glass_door_frame_finish,base.group_portal,1,0,0,0
+access_glass_door_motor_user,glass.door.motor user,model_glass_door_motor,base.group_user,1,1,1,1
+access_glass_door_motor_portal,glass.door.motor portal,model_glass_door_motor,base.group_portal,1,0,0,0
+access_glass_door_order_misc_line_user,glass.door.order.misc.line user,model_glass_door_order_misc_line,base.group_user,1,1,1,1
+access_glass_door_order_misc_line_portal,glass.door.order.misc.line portal,model_glass_door_order_misc_line,base.group_portal,1,1,1,1

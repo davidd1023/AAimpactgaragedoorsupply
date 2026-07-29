@@ -92,6 +92,20 @@ class GlassDoorOrder(models.Model):
         ('aluminum', 'Aluminum'),
     ], string='Trim Type', default='pvc', required=True)
 
+    track_type = fields.Selection([
+        ('standard', 'Standard Lift'),
+        ('high_lift', 'High Lift'),
+        ('vertical', 'Full Vertical Lift'),
+        ('low_headroom', 'Low Headroom'),
+    ], string='Track Type', default='standard', required=True,
+       help='Standard: door follows a standard arc. High Lift/Vertical: clears more headroom. '
+            'Low Headroom: limited space above opening.')
+
+    motor_id = fields.Many2one(
+        'glass.door.motor', 'Motor / Opener',
+        help='Leave blank for door-only orders. Motor cost is subject to dealer markup.'
+    )
+
     job_markup = fields.Float(
         'Job Markup (%)', digits=(5, 2), default=0.0,
         help='Extra markup for this specific job, added on top of the client\'s standard markup.'
@@ -101,6 +115,13 @@ class GlassDoorOrder(models.Model):
         'Add Internal Reinforcement (104)',
         help='Automatically enabled for doors wider than 16\'2". Can also be manually requested '
              'to increase design pressure.',
+    )
+
+    # ── Misc Add-on Items ────────────────────────────────────────────────────────
+    misc_line_ids = fields.One2many(
+        'glass.door.order.misc.line', 'order_id', 'Miscellaneous Items',
+        help='Extra items quoted on this order (handles, remotes, installation hardware, etc.). '
+             'Dealer enters sell price — not subject to the markup calculation.'
     )
 
     # ── Computed Door Properties ─────────────────────────────────────────────────
@@ -191,6 +212,7 @@ class GlassDoorOrder(models.Model):
                  'extrusion_line_ids.total_cost',
                  'glass_type_id.price_per_sqft', 'interlayer_id.price_per_sqft',
                  'frame_finish_id.requires_paint', 'frame_finish_id.paint_cost_per_sqft',
+                 'motor_id.cost', 'misc_line_ids.total_price',
                  'num_panels', 'lites', 'glass_width', 'glass_height',
                  'frame_width', 'frame_height', 'quantity')
     def _compute_price(self):
@@ -221,9 +243,17 @@ class GlassDoorOrder(models.Model):
                 door_face_sqft = (order.frame_width * order.frame_height) / 144.0
                 paint_cost = door_face_sqft * (order.frame_finish_id.paint_cost_per_sqft or 0.0)
 
-            unit = (aluminum_cost + glass_cost + interlayer_cost + paint_cost) * markup
-            order.unit_price = unit
-            order.total_price = unit * (order.quantity or 1)
+            # Motor cost (markup applies)
+            motor_cost = order.motor_id.cost or 0.0
+
+            # Door unit price (markup on door + motor, not on misc)
+            door_unit = (aluminum_cost + glass_cost + interlayer_cost + paint_cost + motor_cost) * markup
+
+            # Misc items — dealer-entered sell prices, added directly (no extra markup)
+            misc_total = sum(line.total_price for line in order.misc_line_ids)
+
+            order.unit_price = door_unit + misc_total
+            order.total_price = order.unit_price * (order.quantity or 1)
 
     # ─────────────────────────────────────────────────────────────────────────────
     # Onchange / Constraints
@@ -395,3 +425,22 @@ class GlassDoorExtrusionLine(models.Model):
             line.total_length = tl
             line.total_cost = tl * (line.profile_id.price_per_inch or 0.0)
             line.total_weight = tl * (line.profile_id.weight_per_inch or 0.0)
+
+
+class GlassDoorOrderMiscLine(models.Model):
+    _name = 'glass.door.order.misc.line'
+    _description = 'Miscellaneous Order Item'
+    _order = 'sequence, id'
+
+    order_id = fields.Many2one('glass.door.order', required=True, ondelete='cascade')
+    sequence = fields.Integer(default=10)
+    description = fields.Char('Description', required=True)
+    qty = fields.Integer('Qty', default=1, required=True)
+    unit_price = fields.Float('Unit Price', digits=(10, 2),
+                               help='Sell price per unit. Entered directly — no markup applied.')
+    total_price = fields.Float('Total', compute='_compute_total', store=True, digits=(10, 2))
+
+    @api.depends('qty', 'unit_price')
+    def _compute_total(self):
+        for line in self:
+            line.total_price = (line.qty or 0) * (line.unit_price or 0.0)

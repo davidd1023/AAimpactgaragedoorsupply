@@ -55,3 +55,28 @@ class GlassDoorFrameFinish(models.Model):
         'Paint Cost per Sq Ft', digits=(10, 4),
         help='Cost per square foot of door face area when sent to paint.'
     )
+
+
+class GlassDoorMotor(models.Model):
+    _name = 'glass.door.motor'
+    _description = 'Door Motor / Opener'
+    _order = 'brand, name'
+
+    brand = fields.Char('Brand', required=True)
+    name = fields.Char('Model Name', required=True)
+    horsepower = fields.Selection([
+        ('1/2', '1/2 HP'),
+        ('3/4', '3/4 HP'),
+        ('1', '1 HP'),
+        ('1_1_4', '1-1/4 HP'),
+        ('2', '2 HP'),
+    ], string='Horsepower')
+    drive_type = fields.Selection([
+        ('belt', 'Belt Drive'),
+        ('chain', 'Chain Drive'),
+        ('direct', 'Direct Drive'),
+        ('jackshaft', 'Jackshaft'),
+    ], string='Drive Type')
+    cost = fields.Float('Our Cost', digits=(10, 2),
+                        help='Our cost for this unit. Dealer markup is applied on top.')
+    active = fields.Boolean(default=True)

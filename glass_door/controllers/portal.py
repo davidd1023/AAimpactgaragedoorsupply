@@ -1,4 +1,5 @@
 import json
+import ast
 from odoo import http, _
 from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
@@ -48,6 +49,7 @@ class GlassDoorPortal(CustomerPortal):
         glass_types = request.env['glass.door.glass.type'].search([])
         interlayers = request.env['glass.door.interlayer'].search([])
         finishes = request.env['glass.door.frame.finish'].search([])
+        motors = request.env['glass.door.motor'].search([('active', '=', True)])
         clients = request.env['glass.door.dealer.client'].search([
             ('dealer_id', '=', partner.id)
         ])
@@ -55,6 +57,7 @@ class GlassDoorPortal(CustomerPortal):
             'glass_types': glass_types,
             'interlayers': interlayers,
             'finishes': finishes,
+            'motors': motors,
             'clients': clients,
             'page_name': 'doors',
             'order': None,
@@ -146,10 +149,30 @@ class GlassDoorPortal(CustomerPortal):
             'interlayer_id': int(post.get('interlayer_id', 0)) or False,
             'quantity': int(post.get('quantity', 1)),
             'trim_type': post.get('trim_type', 'pvc'),
+            'track_type': post.get('track_type', 'standard'),
+            'motor_id': int(post.get('motor_id', 0)) or False,
             'include_reinforcement': post.get('include_reinforcement') == 'on',
         }
 
         order = request.env['glass.door.order'].sudo().create(vals)
+
+        # Misc items — submitted as a JSON array in the hidden field
+        misc_json = post.get('misc_items_json', '[]')
+        try:
+            misc_items = json.loads(misc_json)
+        except (ValueError, TypeError):
+            misc_items = []
+        for item in misc_items:
+            desc = str(item.get('description', '')).strip()
+            if not desc:
+                continue
+            request.env['glass.door.order.misc.line'].sudo().create({
+                'order_id': order.id,
+                'description': desc,
+                'qty': int(item.get('qty', 1)) or 1,
+                'unit_price': float(item.get('unit_price', 0)),
+            })
+
         order.sudo().action_submit()
         return request.redirect(f'/my/doors/{order.id}')
 
@@ -167,6 +190,9 @@ class GlassDoorPortal(CustomerPortal):
             quantity = int(kw.get('quantity', 1))
             trim_type = kw.get('trim_type', 'pvc')
             include_reinforcement = kw.get('include_reinforcement', False)
+            motor_id = int(kw.get('motor_id', 0))
+            misc_total = float(kw.get('misc_total', 0))
+            job_markup = float(kw.get('job_markup', 0))
 
             # Adjust lites if needed
             if frame_width > 144 and lites < 2:
@@ -183,11 +209,19 @@ class GlassDoorPortal(CustomerPortal):
                 'quantity': quantity,
                 'trim_type': trim_type,
                 'include_reinforcement': include_reinforcement,
+                'motor_id': motor_id or False,
+                'job_markup': job_markup,
                 'series': kw.get('series', '1200'),
                 'design_pressure': kw.get('design_pressure', 'dp20'),
                 'frame_finish_id': int(kw.get('frame_finish_id', 0)) or False,
+                'track_type': kw.get('track_type', 'standard'),
                 'job_name': 'preview',
             })
+
+            # unit_price from the computed field covers door + motor markup
+            # misc_total is added directly (dealer entered sell price)
+            unit = round(order.unit_price + misc_total, 2)
+            total = round(unit * quantity, 2)
 
             return {
                 'num_panels': order.num_panels,
@@ -195,8 +229,8 @@ class GlassDoorPortal(CustomerPortal):
                 'glass_width': order.glass_width,
                 'glass_height': order.glass_height,
                 'door_weight': round(order.door_weight, 2),
-                'unit_price': round(order.unit_price, 2),
-                'total_price': round(order.total_price, 2),
+                'unit_price': unit,
+                'total_price': total,
                 'lites': lites,
             }
         except Exception as e:

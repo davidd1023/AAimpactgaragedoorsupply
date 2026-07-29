@@ -114,10 +114,14 @@
                     <group>
                         <group string="Order Info">
                             <field name="dealer_id"/>
+                            <field name="dealer_client_id"
+                                   domain="[('dealer_id','=',dealer_id)]"/>
                             <field name="job_name"/>
+                            <field name="po_number"/>
                             <field name="quantity"/>
                         </group>
                         <group string="Pricing">
+                            <field name="job_markup" string="Job Markup (%)"/>
                             <field name="unit_price"/>
                             <field name="total_price"/>
                         </group>
@@ -148,6 +152,8 @@
                                 </group>
                                 <group string="Options">
                                     <field name="trim_type"/>
+                                    <field name="track_type"/>
+                                    <field name="motor_id"/>
                                     <field name="include_reinforcement"/>
                                     <field name="reinforcement_required" readonly="1"/>
                                     <field name="door_weight" readonly="1"/>
@@ -167,6 +173,18 @@
                                     <field name="total_length" string="Total (in)"/>
                                     <field name="total_cost" string="Cost"/>
                                     <field name="total_weight" string="Weight (lbs)"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Misc Items">
+                            <field name="misc_line_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" column_invisible="1"/>
+                                    <field name="description"/>
+                                    <field name="qty"/>
+                                    <field name="unit_price" string="Unit Price"/>
+                                    <field name="total_price" string="Total" readonly="1"/>
                                 </list>
                             </field>
                         </page>
