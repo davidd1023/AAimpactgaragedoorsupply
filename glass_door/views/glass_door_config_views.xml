@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extrusion Profiles -->
+    <record id="view_extrusion_profile_list" model="ir.ui.view">
+        <field name="name">glass.door.extrusion.profile.list</field>
+        <field name="model">glass.door.extrusion.profile</field>
+        <field name="arch" type="xml">
+            <list string="Extrusion Profiles" editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="price_per_inch"/>
+                <field name="weight_per_inch"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_extrusion_profile" model="ir.actions.act_window">
+        <field name="name">Extrusion Profiles (101–110)</field>
+        <field name="res_model">glass.door.extrusion.profile</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Glass Types -->
+    <record id="view_glass_type_list" model="ir.ui.view">
+        <field name="name">glass.door.glass.type.list</field>
+        <field name="model">glass.door.glass.type</field>
+        <field name="arch" type="xml">
+            <list string="Glass Types" editable="bottom">
+                <field name="name"/>
+                <field name="thickness"/>
+                <field name="price_per_sqft"/>
+                <field name="weight_per_sqft"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_glass_type" model="ir.actions.act_window">
+        <field name="name">Glass Types</field>
+        <field name="res_model">glass.door.glass.type</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Interlayers -->
+    <record id="view_interlayer_list" model="ir.ui.view">
+        <field name="name">glass.door.interlayer.list</field>
+        <field name="model">glass.door.interlayer</field>
+        <field name="arch" type="xml">
+            <list string="Interlayers" editable="bottom">
+                <field name="name"/>
+                <field name="price_per_sqft"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_interlayer" model="ir.actions.act_window">
+        <field name="name">Interlayers</field>
+        <field name="res_model">glass.door.interlayer</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Frame Finishes -->
+    <record id="view_frame_finish_list" model="ir.ui.view">
+        <field name="name">glass.door.frame.finish.list</field>
+        <field name="model">glass.door.frame.finish</field>
+        <field name="arch" type="xml">
+            <list string="Frame Finishes" editable="bottom">
+                <field name="name"/>
+                <field name="code"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_frame_finish" model="ir.actions.act_window">
+        <field name="name">Frame Finishes</field>
+        <field name="res_model">glass.door.frame.finish</field>
+        <field name="view_mode">list</field>
+    </record>
+
+</odoo>

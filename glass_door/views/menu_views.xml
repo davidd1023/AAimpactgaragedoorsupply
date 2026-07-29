@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- App root menu -->
+    <menuitem id="menu_glass_door_root"
+              name="Glass Doors"
+              sequence="20"
+              web_icon="glass_door,static/description/icon.png"/>
+
+    <!-- Orders -->
+    <menuitem id="menu_glass_door_orders"
+              name="Orders"
+              parent="menu_glass_door_root"
+              sequence="10"/>
+
+    <menuitem id="menu_glass_door_kanban"
+              name="Dashboard"
+              parent="menu_glass_door_orders"
+              action="action_glass_door_order"
+              sequence="10"/>
+
+    <menuitem id="menu_glass_door_submitted"
+              name="Pending Approval"
+              parent="menu_glass_door_orders"
+              action="action_glass_door_order_submitted"
+              sequence="20"/>
+
+    <menuitem id="menu_glass_door_all"
+              name="All Orders"
+              parent="menu_glass_door_orders"
+              action="action_glass_door_order_all"
+              sequence="30"/>
+
+    <!-- Configuration -->
+    <menuitem id="menu_glass_door_config"
+              name="Configuration"
+              parent="menu_glass_door_root"
+              sequence="90"/>
+
+    <menuitem id="menu_glass_door_extrusions"
+              name="Extrusion Profiles (101–110)"
+              parent="menu_glass_door_config"
+              action="action_extrusion_profile"
+              sequence="10"/>
+
+    <menuitem id="menu_glass_door_glass_types"
+              name="Glass Types"
+              parent="menu_glass_door_config"
+              action="action_glass_type"
+              sequence="20"/>
+
+    <menuitem id="menu_glass_door_interlayers"
+              name="Interlayers"
+              parent="menu_glass_door_config"
+              action="action_interlayer"
+              sequence="30"/>
+
+    <menuitem id="menu_glass_door_finishes"
+              name="Frame Finishes"
+              parent="menu_glass_door_config"
+              action="action_frame_finish"
+              sequence="40"/>
+</odoo>

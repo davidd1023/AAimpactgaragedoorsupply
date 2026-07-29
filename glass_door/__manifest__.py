@@ -1,0 +1,20 @@
+{
+    'name': 'Glass Door Orders',
+    'version': '19.0.1.0.0',
+    'summary': 'Glass door order management with dealer portal and cutting list',
+    'author': 'AA Impact Garage Door Supply',
+    'category': 'Manufacturing',
+    'depends': ['base', 'portal', 'mail'],
+    'data': [
+        'security/ir.model.access.csv',
+        'data/sequences.xml',
+        'views/glass_door_config_views.xml',
+        'views/glass_door_order_views.xml',
+        'views/res_partner_views.xml',
+        'views/menu_views.xml',
+        'templates/portal_glass_door.xml',
+    ],
+    'installable': True,
+    'application': True,
+    'license': 'LGPL-3',
+}

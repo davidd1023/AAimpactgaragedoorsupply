@@ -1,0 +1,147 @@
+import json
+from odoo import http, _
+from odoo.http import request
+from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
+
+
+class GlassDoorPortal(CustomerPortal):
+
+    def _prepare_home_portal_values(self, counters):
+        values = super()._prepare_home_portal_values(counters)
+        if 'door_count' in counters:
+            partner = request.env.user.partner_id
+            values['door_count'] = request.env['glass.door.order'].search_count(
+                [('dealer_id', '=', partner.id)]
+            )
+        return values
+
+    # ── Order List ────────────────────────────────────────────────────────────
+
+    @http.route(['/my/doors', '/my/doors/page/<int:page>'], type='http',
+                auth='user', website=True)
+    def portal_doors(self, page=1, **kw):
+        partner = request.env.user.partner_id
+        domain = [('dealer_id', '=', partner.id)]
+
+        total = request.env['glass.door.order'].search_count(domain)
+        pager = portal_pager(
+            url='/my/doors',
+            total=total,
+            page=page,
+            step=20,
+        )
+        orders = request.env['glass.door.order'].search(
+            domain, order='id desc',
+            limit=20, offset=pager['offset']
+        )
+        return request.render('glass_door.portal_door_list', {
+            'orders': orders,
+            'pager': pager,
+            'page_name': 'doors',
+        })
+
+    # ── New Order Form ────────────────────────────────────────────────────────
+
+    @http.route('/my/doors/new', type='http', auth='user', website=True)
+    def portal_door_new(self, **kw):
+        glass_types = request.env['glass.door.glass.type'].search([])
+        interlayers = request.env['glass.door.interlayer'].search([])
+        finishes = request.env['glass.door.frame.finish'].search([])
+        return request.render('glass_door.portal_door_form', {
+            'glass_types': glass_types,
+            'interlayers': interlayers,
+            'finishes': finishes,
+            'page_name': 'doors',
+            'order': None,
+        })
+
+    # ── Order Detail ──────────────────────────────────────────────────────────
+
+    @http.route('/my/doors/<int:order_id>', type='http', auth='user', website=True)
+    def portal_door_detail(self, order_id, **kw):
+        partner = request.env.user.partner_id
+        order = request.env['glass.door.order'].search([
+            ('id', '=', order_id),
+            ('dealer_id', '=', partner.id),
+        ], limit=1)
+        if not order:
+            return request.redirect('/my/doors')
+        return request.render('glass_door.portal_door_detail', {
+            'order': order,
+            'page_name': 'doors',
+        })
+
+    # ── Submit Order ──────────────────────────────────────────────────────────
+
+    @http.route('/my/doors/submit', type='http', auth='user', website=True, methods=['POST'])
+    def portal_door_submit(self, **post):
+        partner = request.env.user.partner_id
+
+        vals = {
+            'dealer_id': partner.id,
+            'job_name': post.get('job_name', ''),
+            'series': post.get('series', '1200'),
+            'design_pressure': post.get('design_pressure', 'dp20'),
+            'lites': int(post.get('lites', 1)),
+            'frame_finish_id': int(post.get('frame_finish_id', 0)) or False,
+            'frame_width': float(post.get('frame_width', 0)),
+            'frame_height': float(post.get('frame_height', 0)),
+            'glass_type_id': int(post.get('glass_type_id', 0)) or False,
+            'interlayer_id': int(post.get('interlayer_id', 0)) or False,
+            'quantity': int(post.get('quantity', 1)),
+            'trim_type': post.get('trim_type', 'pvc'),
+            'include_reinforcement': post.get('include_reinforcement') == 'on',
+        }
+
+        order = request.env['glass.door.order'].sudo().create(vals)
+        order.sudo().action_submit()
+        return request.redirect(f'/my/doors/{order.id}')
+
+    # ── Compute Price (AJAX) ───────────────────────────────────────────────────
+
+    @http.route('/my/doors/compute_price', type='json', auth='user')
+    def compute_price(self, **kw):
+        partner = request.env.user.partner_id
+        try:
+            lites = int(kw.get('lites', 1))
+            frame_width = float(kw.get('frame_width', 0))
+            frame_height = float(kw.get('frame_height', 0))
+            glass_type_id = int(kw.get('glass_type_id', 0))
+            interlayer_id = int(kw.get('interlayer_id', 0))
+            quantity = int(kw.get('quantity', 1))
+            trim_type = kw.get('trim_type', 'pvc')
+            include_reinforcement = kw.get('include_reinforcement', False)
+
+            # Adjust lites if needed
+            if frame_width > 144 and lites < 2:
+                lites = 2
+
+            # Build a temporary (unsaved) record to compute values
+            order = request.env['glass.door.order'].new({
+                'dealer_id': partner.id,
+                'frame_width': frame_width,
+                'frame_height': frame_height,
+                'lites': lites,
+                'glass_type_id': glass_type_id,
+                'interlayer_id': interlayer_id,
+                'quantity': quantity,
+                'trim_type': trim_type,
+                'include_reinforcement': include_reinforcement,
+                'series': kw.get('series', '1200'),
+                'design_pressure': kw.get('design_pressure', 'dp20'),
+                'frame_finish_id': int(kw.get('frame_finish_id', 0)) or False,
+                'job_name': 'preview',
+            })
+
+            return {
+                'num_panels': order.num_panels,
+                'panel_height': round(order.panel_height, 4),
+                'glass_width': order.glass_width,
+                'glass_height': order.glass_height,
+                'door_weight': round(order.door_weight, 2),
+                'unit_price': round(order.unit_price, 2),
+                'total_price': round(order.total_price, 2),
+                'lites': lites,
+            }
+        except Exception as e:
+            return {'error': str(e)}

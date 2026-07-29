@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="aa_impact_brand_colors" name="AA Impact Brand Colors"
+            inherit_id="website.layout" active="True">
+    <xpath expr="//head" position="inside">
+      <style>
+        :root {
+          --color-primary: #0d2764;
+          --color-secondary: #32373c;
+        }
+        .btn-primary, .o_btn_primary {
+          background-color: #0d2764 !important;
+          border-color: #0d2764 !important;
+        }
+        .btn-primary:hover {
+          background-color: #0a1e4f !important;
+          border-color: #0a1e4f !important;
+        }
+        .navbar, .o_header_standard, nav.navbar {
+          background-color: #0d2764 !important;
+        }
+        .navbar .nav-link, .navbar .navbar-brand {
+          color: #ffffff !important;
+        }
+        .navbar .nav-link:hover {
+          color: #f0f0f0 !important;
+        }
+        h1, h2, h3 {
+          color: #0d2764;
+        }
+        .o_wsale_product_btn .btn {
+          background-color: #0d2764 !important;
+          border-color: #0d2764 !important;
+          color: #fff !important;
+        }
+        footer, .o_footer {
+          background-color: #32373c !important;
+          color: #fff !important;
+        }
+        footer a, .o_footer a {
+          color: #ccc !important;
+        }
+      </style>
+    </xpath>
+  </template>
+</odoo>

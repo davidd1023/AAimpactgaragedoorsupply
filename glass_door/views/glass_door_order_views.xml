@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── List View ───────────────────────────────────────────────────────── -->
+    <record id="view_glass_door_order_list" model="ir.ui.view">
+        <field name="name">glass.door.order.list</field>
+        <field name="model">glass.door.order</field>
+        <field name="arch" type="xml">
+            <list string="Glass Door Orders" decoration-info="state == 'draft'"
+                  decoration-warning="state == 'submitted'"
+                  decoration-success="state in ('ready_pickup','ready_ship')"
+                  decoration-muted="state == 'approved'">
+                <field name="name"/>
+                <field name="quote_number"/>
+                <field name="dealer_id"/>
+                <field name="job_name"/>
+                <field name="series"/>
+                <field name="frame_width"/>
+                <field name="frame_height"/>
+                <field name="quantity"/>
+                <field name="total_price" widget="monetary" options="{'currency_field': false}"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state == 'submitted'"
+                       decoration-primary="state in ('cutting','punching','prepping','assembly','glazing','packing')"
+                       decoration-success="state in ('ready_pickup','ready_ship')"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Kanban View ─────────────────────────────────────────────────────── -->
+    <record id="view_glass_door_order_kanban" model="ir.ui.view">
+        <field name="name">glass.door.order.kanban</field>
+        <field name="model">glass.door.order</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="dealer_id"/>
+                <field name="job_name"/>
+                <field name="series"/>
+                <field name="total_price"/>
+                <field name="state"/>
+                <field name="door_image"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_image" t-if="record.door_image.raw_value">
+                                <img t-att-src="kanban_image('glass.door.order', 'door_image', record.id.raw_value)"
+                                     alt="Door" class="o_image_64_cover"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong><field name="name"/></strong>
+                                <div><field name="dealer_id"/></div>
+                                <div><field name="job_name"/></div>
+                                <div>Series <field name="series"/></div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="total_price" widget="monetary" options="{'currency_field': false}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ── Form View ───────────────────────────────────────────────────────── -->
+    <record id="view_glass_door_order_form" model="ir.ui.view">
+        <field name="name">glass.door.order.form</field>
+        <field name="model">glass.door.order</field>
+        <field name="arch" type="xml">
+            <form string="Glass Door Order">
+                <header>
+                    <button name="action_submit" string="Submit" type="object"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve" type="object"
+                            class="oe_highlight" invisible="state != 'submitted'"/>
+                    <button name="action_cutting" string="→ Cutting" type="object"
+                            invisible="state != 'approved'"/>
+                    <button name="action_punching" string="→ Punching" type="object"
+                            invisible="state != 'cutting'"/>
+                    <button name="action_prepping" string="→ Prepping" type="object"
+                            invisible="state != 'punching'"/>
+                    <button name="action_assembly" string="→ Assembly" type="object"
+                            invisible="state != 'prepping'"/>
+                    <button name="action_glazing" string="→ Glazing" type="object"
+                            invisible="state != 'assembly'"/>
+                    <button name="action_packing" string="→ Packing" type="object"
+                            invisible="state != 'glazing'"/>
+                    <button name="action_ready_pickup" string="Ready for Pickup" type="object"
+                            class="oe_highlight" invisible="state != 'packing'"/>
+                    <button name="action_ready_ship" string="Ready to Ship" type="object"
+                            class="oe_highlight" invisible="state != 'packing'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,approved,cutting,assembly,glazing,packing,ready_ship"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <widget name="web_ribbon" title="Ready for Pickup"
+                            bg_color="text-bg-success"
+                            invisible="state != 'ready_pickup'"/>
+                    <widget name="web_ribbon" title="Ready to Ship"
+                            bg_color="text-bg-success"
+                            invisible="state != 'ready_ship'"/>
+                    <field name="door_image" widget="image" class="oe_avatar"
+                           options="{'preview_image': 'door_image'}"/>
+                    <div class="oe_title">
+                        <label for="name" string="Work Order #"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                        <label for="quote_number" string="Quote #"/>
+                        <h2><field name="quote_number" readonly="1"/></h2>
+                    </div>
+
+                    <group>
+                        <group string="Order Info">
+                            <field name="dealer_id"/>
+                            <field name="job_name"/>
+                            <field name="quantity"/>
+                        </group>
+                        <group string="Pricing">
+                            <field name="unit_price"/>
+                            <field name="total_price"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Door Specifications">
+                            <group>
+                                <group string="Series &amp; Pressure">
+                                    <field name="series"/>
+                                    <field name="design_pressure"/>
+                                    <field name="lites"/>
+                                    <field name="frame_finish_id"/>
+                                </group>
+                                <group string="Frame Dimensions">
+                                    <field name="frame_width"/>
+                                    <field name="frame_height"/>
+                                    <field name="num_panels" readonly="1"/>
+                                    <field name="panel_height" readonly="1"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Glass">
+                                    <field name="glass_type_id"/>
+                                    <field name="interlayer_id"/>
+                                    <field name="glass_width" readonly="1"/>
+                                    <field name="glass_height" readonly="1"/>
+                                </group>
+                                <group string="Options">
+                                    <field name="trim_type"/>
+                                    <field name="include_reinforcement"/>
+                                    <field name="reinforcement_required" readonly="1"/>
+                                    <field name="door_weight" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Cutting List">
+                            <field name="extrusion_line_ids" readonly="1">
+                                <list>
+                                    <field name="sequence" column_invisible="1"/>
+                                    <field name="profile_code" string="Code"/>
+                                    <field name="profile_name" string="Profile"/>
+                                    <field name="orientation"/>
+                                    <field name="qty"/>
+                                    <field name="length" string="Length (in)"/>
+                                    <field name="total_length" string="Total (in)"/>
+                                    <field name="total_cost" string="Cost"/>
+                                    <field name="total_weight" string="Weight (lbs)"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Search View ─────────────────────────────────────────────────────── -->
+    <record id="view_glass_door_order_search" model="ir.ui.view">
+        <field name="name">glass.door.order.search</field>
+        <field name="model">glass.door.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Work Order #"/>
+                <field name="quote_number"/>
+                <field name="dealer_id"/>
+                <field name="job_name"/>
+                <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                <filter name="submitted" string="Submitted" domain="[('state','=','submitted')]"/>
+                <filter name="approved" string="Approved" domain="[('state','=','approved')]"/>
+                <filter name="in_production" string="In Production"
+                        domain="[('state','in',['cutting','punching','prepping','assembly','glazing','packing'])]"/>
+                <filter name="ready" string="Ready"
+                        domain="[('state','in',['ready_pickup','ready_ship'])]"/>
+                <filter name="group_dealer" string="Dealer" context="{'group_by': 'dealer_id'}"/>
+                <filter name="group_series" string="Series" context="{'group_by': 'series'}"/>
+                <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── Action ──────────────────────────────────────────────────────────── -->
+    <record id="action_glass_door_order" model="ir.actions.act_window">
+        <field name="name">Glass Door Orders</field>
+        <field name="res_model">glass.door.order</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_glass_door_order_search"/>
+        <field name="context">{'search_default_in_production': 1}</field>
+    </record>
+
+    <record id="action_glass_door_order_all" model="ir.actions.act_window">
+        <field name="name">All Orders</field>
+        <field name="res_model">glass.door.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_glass_door_order_search"/>
+    </record>
+
+    <record id="action_glass_door_order_submitted" model="ir.actions.act_window">
+        <field name="name">Pending Approval</field>
+        <field name="res_model">glass.door.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state','=','submitted')]</field>
+        <field name="search_view_id" ref="view_glass_door_order_search"/>
+    </record>
+
+</odoo>
