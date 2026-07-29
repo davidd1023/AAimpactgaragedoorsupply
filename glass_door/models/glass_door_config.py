@@ -47,3 +47,11 @@ class GlassDoorFrameFinish(models.Model):
 
     name = fields.Char('Name', required=True)
     code = fields.Char('Code')
+    requires_paint = fields.Boolean(
+        'Requires Local Paint',
+        help='Mill finish aluminum sent to local paint shop. Paint cost is charged per sq ft.'
+    )
+    paint_cost_per_sqft = fields.Float(
+        'Paint Cost per Sq Ft', digits=(10, 4),
+        help='Cost per square foot of door face area when sent to paint.'
+    )

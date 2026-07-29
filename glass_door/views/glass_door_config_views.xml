@@ -67,6 +67,10 @@
             <list string="Frame Finishes" editable="bottom">
                 <field name="name"/>
                 <field name="code"/>
+                <field name="requires_paint"/>
+                <field name="paint_cost_per_sqft"
+                       column_invisible="not requires_paint"
+                       string="Paint Cost/SqFt"/>
             </list>
         </field>
     </record>

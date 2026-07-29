@@ -179,7 +179,9 @@ class GlassDoorOrder(models.Model):
 
     @api.depends('dealer_id.dealer_markup', 'extrusion_line_ids.total_cost',
                  'glass_type_id.price_per_sqft', 'interlayer_id.price_per_sqft',
-                 'num_panels', 'lites', 'glass_width', 'glass_height', 'quantity')
+                 'frame_finish_id.requires_paint', 'frame_finish_id.paint_cost_per_sqft',
+                 'num_panels', 'lites', 'glass_width', 'glass_height',
+                 'frame_width', 'frame_height', 'quantity')
     def _compute_price(self):
         for order in self:
             markup = 1.0 + (order.dealer_id.dealer_markup or 0.0) / 100.0
@@ -193,7 +195,13 @@ class GlassDoorOrder(models.Model):
             glass_cost = glass_area_sqft * (order.glass_type_id.price_per_sqft or 0.0) * glass_panes
             interlayer_cost = glass_area_sqft * (order.interlayer_id.price_per_sqft or 0.0) * glass_panes
 
-            unit = (aluminum_cost + glass_cost + interlayer_cost) * markup
+            # Paint cost (mill finish sent to local painter — per sq ft of door face)
+            paint_cost = 0.0
+            if order.frame_finish_id.requires_paint:
+                door_face_sqft = (order.frame_width * order.frame_height) / 144.0
+                paint_cost = door_face_sqft * (order.frame_finish_id.paint_cost_per_sqft or 0.0)
+
+            unit = (aluminum_cost + glass_cost + interlayer_cost + paint_cost) * markup
             order.unit_price = unit
             order.total_price = unit * (order.quantity or 1)
 
