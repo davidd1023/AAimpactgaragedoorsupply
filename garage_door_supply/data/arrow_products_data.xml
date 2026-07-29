@@ -1,0 +1,789 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+    <!-- Arrow Tru-Line vendor -->
+    <record id="vendor_arrow_truline" model="res.partner">
+      <field name="name">Arrow Tru-Line, Inc.</field>
+      <field name="supplier_rank">1</field>
+      <field name="customer_rank">0</field>
+      <field name="company_type">company</field>
+    </record>
+
+    <!-- Arrow Tru-Line Products -->
+    <record id="product_atl_044019inva" model="product.template">
+      <field name="name">19&quot; Vertical Angle</field>
+      <field name="default_code">ATL-044019INVA</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_tracks"/>
+      <field name="standard_price">1.8532</field>
+      <field name="list_price">3.71</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_044019inva_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_044019inva"/>
+      <field name="product_code">044019INVA</field>
+      <field name="price">1.8532</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_1031141308" model="product.template">
+      <field name="name">Strut 1-1/4&quot; x 13GA x 8ft</field>
+      <field name="default_code">ATL-1031141308</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_struts"/>
+      <field name="standard_price">4.899</field>
+      <field name="list_price">9.8</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_1031141308_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_1031141308"/>
+      <field name="product_code">1031141308</field>
+      <field name="price">4.899</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_1031141310" model="product.template">
+      <field name="name">Strut 1-1/4&quot; x 13GA x 10ft</field>
+      <field name="default_code">ATL-1031141310</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_struts"/>
+      <field name="standard_price">6.1237</field>
+      <field name="list_price">12.25</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_1031141310_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_1031141310"/>
+      <field name="product_code">1031141310</field>
+      <field name="price">6.1237</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_610j10jbbr" model="product.template">
+      <field name="name">J-10 Jamb Bracket</field>
+      <field name="default_code">ATL-610J10JBBR</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_brackets"/>
+      <field name="standard_price">0.6661</field>
+      <field name="list_price">1.33</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_610j10jbbr_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_610j10jbbr"/>
+      <field name="product_code">610J10JBBR</field>
+      <field name="price">0.6661</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_614j12jbbr" model="product.template">
+      <field name="name">J-12 Jamb Bracket</field>
+      <field name="default_code">ATL-614J12JBBR</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_brackets"/>
+      <field name="standard_price">0.8165</field>
+      <field name="list_price">1.63</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_614j12jbbr_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_614j12jbbr"/>
+      <field name="product_code">614J12JBBR</field>
+      <field name="price">0.8165</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_616j14jbbr" model="product.template">
+      <field name="name">J-14 Jamb Bracket</field>
+      <field name="default_code">ATL-616J14JBBR</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_brackets"/>
+      <field name="standard_price">0.9024</field>
+      <field name="list_price">1.8</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_616j14jbbr_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_616j14jbbr"/>
+      <field name="product_code">616J14JBBR</field>
+      <field name="price">0.9024</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_616j16jbbr" model="product.template">
+      <field name="name">J-16 Jamb Bracket</field>
+      <field name="default_code">ATL-616J16JBBR</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_brackets"/>
+      <field name="standard_price">1.0743</field>
+      <field name="list_price">2.15</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_616j16jbbr_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_616j16jbbr"/>
+      <field name="product_code">616J16JBBR</field>
+      <field name="price">1.0743</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_812eb3389l" model="product.template">
+      <field name="name">EBF-338 End Bearing Flange LH</field>
+      <field name="default_code">ATL-812EB3389L</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_brackets"/>
+      <field name="standard_price">3.9278</field>
+      <field name="list_price">7.86</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_812eb3389l_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_812eb3389l"/>
+      <field name="product_code">812EB3389L</field>
+      <field name="price">3.9278</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_812eb3389r" model="product.template">
+      <field name="name">EBF-338 End Bearing Flange RH</field>
+      <field name="default_code">ATL-812EB3389R</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_brackets"/>
+      <field name="standard_price">3.9278</field>
+      <field name="list_price">7.86</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_812eb3389r_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_812eb3389r"/>
+      <field name="product_code">812EB3389R</field>
+      <field name="price">3.9278</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_852cbb953l" model="product.template">
+      <field name="name">CBB-95-3 Center Bearing Bracket LH</field>
+      <field name="default_code">ATL-852CBB953L</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_brackets"/>
+      <field name="standard_price">2.6235</field>
+      <field name="list_price">5.25</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_852cbb953l_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_852cbb953l"/>
+      <field name="product_code">852CBB953L</field>
+      <field name="price">2.6235</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_852cbb953r" model="product.template">
+      <field name="name">CBB-95-3 Center Bearing Bracket RH</field>
+      <field name="default_code">ATL-852CBB953R</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_brackets"/>
+      <field name="standard_price">2.6235</field>
+      <field name="list_price">5.25</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_852cbb953r_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_852cbb953r"/>
+      <field name="product_code">852CBB953R</field>
+      <field name="price">2.6235</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_853adjtfco" model="product.template">
+      <field name="name">Adj. Top Fixture Commercial</field>
+      <field name="default_code">ATL-853ADJTFCO</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_brackets"/>
+      <field name="standard_price">2.6579</field>
+      <field name="list_price">5.32</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_853adjtfco_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_853adjtfco"/>
+      <field name="product_code">853ADJTFCO</field>
+      <field name="price">2.6579</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9091316asp" model="product.template">
+      <field name="name">13-16 Adj. Splice Plate</field>
+      <field name="default_code">ATL-9091316ASP</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_tracks"/>
+      <field name="standard_price">0.5941</field>
+      <field name="list_price">1.19</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9091316asp_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9091316asp"/>
+      <field name="product_code">9091316ASP</field>
+      <field name="price">0.5941</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9091518asp" model="product.template">
+      <field name="name">15-18 Adj. Splice Plate</field>
+      <field name="default_code">ATL-9091518ASP</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_tracks"/>
+      <field name="standard_price">0.622</field>
+      <field name="list_price">1.24</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9091518asp_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9091518asp"/>
+      <field name="product_code">9091518ASP</field>
+      <field name="price">0.622</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_914can7brg" model="product.template">
+      <field name="name">Bearing 1&quot; ID Flanged</field>
+      <field name="default_code">ATL-914CAN7BRG</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_hardware"/>
+      <field name="standard_price">1.3956</field>
+      <field name="list_price">2.79</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_914can7brg_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_914can7brg"/>
+      <field name="product_code">914CAN7BRG</field>
+      <field name="price">1.3956</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000185" model="product.template">
+      <field name="name">5/16 x 1-5/8 Hex Lag Bolt</field>
+      <field name="default_code">ATL-9150000185</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_hardware"/>
+      <field name="standard_price">0.1074</field>
+      <field name="list_price">0.21</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000185_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000185"/>
+      <field name="product_code">9150000185</field>
+      <field name="price">0.1074</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000207" model="product.template">
+      <field name="name">7/16 Pushnut Flat Head</field>
+      <field name="default_code">ATL-9150000207</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_hardware"/>
+      <field name="standard_price">0.0505</field>
+      <field name="list_price">0.1</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000207_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000207"/>
+      <field name="product_code">9150000207</field>
+      <field name="price">0.0505</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000604" model="product.template">
+      <field name="name">1/8&quot; 7x19 Cable 500ft Reel</field>
+      <field name="default_code">ATL-9150000604</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">109.3868</field>
+      <field name="list_price">218.77</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000604_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000604"/>
+      <field name="product_code">9150000604</field>
+      <field name="price">109.3868</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000608" model="product.template">
+      <field name="name">5/32&quot; 7x19 Cable 500ft Reel</field>
+      <field name="default_code">ATL-9150000608</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">106.2519</field>
+      <field name="list_price">212.5</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000608_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000608"/>
+      <field name="product_code">9150000608</field>
+      <field name="price">106.2519</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000612" model="product.template">
+      <field name="name">3/16&quot; 7x19 Cable 500ft Reel</field>
+      <field name="default_code">ATL-9150000612</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">174.208</field>
+      <field name="list_price">348.42</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000612_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000612"/>
+      <field name="product_code">9150000612</field>
+      <field name="price">174.208</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000621" model="product.template">
+      <field name="name">1/8&quot; Cable Sleeve (100 pk)</field>
+      <field name="default_code">ATL-9150000621</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">33.9168</field>
+      <field name="list_price">67.83</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000621_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000621"/>
+      <field name="product_code">9150000621</field>
+      <field name="price">33.9168</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000622" model="product.template">
+      <field name="name">5/32&quot; Cable Sleeve (100 pk)</field>
+      <field name="default_code">ATL-9150000622</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">44.47</field>
+      <field name="list_price">88.94</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000622_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000622"/>
+      <field name="product_code">9150000622</field>
+      <field name="price">44.47</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000623" model="product.template">
+      <field name="name">3/16&quot; Cable Sleeve (100 pk)</field>
+      <field name="default_code">ATL-9150000623</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">97.4961</field>
+      <field name="list_price">194.99</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000623_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000623"/>
+      <field name="product_code">9150000623</field>
+      <field name="price">97.4961</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000627" model="product.template">
+      <field name="name">1/8&quot; Cable Stop (100 pk)</field>
+      <field name="default_code">ATL-9150000627</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">22.4536</field>
+      <field name="list_price">44.91</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000627_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000627"/>
+      <field name="product_code">9150000627</field>
+      <field name="price">22.4536</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000628" model="product.template">
+      <field name="name">5/32&quot; Cable Stop (100 pk)</field>
+      <field name="default_code">ATL-9150000628</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">0.3191</field>
+      <field name="list_price">0.64</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000628_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000628"/>
+      <field name="product_code">9150000628</field>
+      <field name="price">0.3191</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000629" model="product.template">
+      <field name="name">3/16&quot; Cable Stop (100 pk)</field>
+      <field name="default_code">ATL-9150000629</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">30.8442</field>
+      <field name="list_price">61.69</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000629_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000629"/>
+      <field name="product_code">9150000629</field>
+      <field name="price">30.8442</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000633" model="product.template">
+      <field name="name">1/8&quot; Cable Thimble (100 pk)</field>
+      <field name="default_code">ATL-9150000633</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">51.4661</field>
+      <field name="list_price">102.93</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000633_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000633"/>
+      <field name="product_code">9150000633</field>
+      <field name="price">51.4661</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000634" model="product.template">
+      <field name="name">5/32&quot; Cable Thimble (100 pk)</field>
+      <field name="default_code">ATL-9150000634</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">52.2128</field>
+      <field name="list_price">104.43</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000634_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000634"/>
+      <field name="product_code">9150000634</field>
+      <field name="price">52.2128</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_9150000635" model="product.template">
+      <field name="name">3/16&quot; Cable Thimble (100 pk)</field>
+      <field name="default_code">ATL-9150000635</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_lift_cables"/>
+      <field name="standard_price">58.474</field>
+      <field name="list_price">116.95</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_9150000635_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_9150000635"/>
+      <field name="product_code">9150000635</field>
+      <field name="price">58.474</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_956usa08pr" model="product.template">
+      <field name="name">End Bearing Plate 8GA LH</field>
+      <field name="default_code">ATL-956USA08PR</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_brackets"/>
+      <field name="standard_price">3.4379</field>
+      <field name="list_price">6.88</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_956usa08pr_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_956usa08pr"/>
+      <field name="product_code">956USA08PR</field>
+      <field name="price">3.4379</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_956usapx08" model="product.template">
+      <field name="name">End Bearing Plate 8GA RH</field>
+      <field name="default_code">ATL-956USAPX08</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_brackets"/>
+      <field name="standard_price">3.4379</field>
+      <field name="list_price">6.88</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_956usapx08_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_956usapx08"/>
+      <field name="product_code">956USAPX08</field>
+      <field name="price">3.4379</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_a10000850l" model="product.template">
+      <field name="name">400-8 Cable Drum LH</field>
+      <field name="default_code">ATL-A10000850L</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">3.5797</field>
+      <field name="list_price">7.16</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_a10000850l_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_a10000850l"/>
+      <field name="product_code">A10000850L</field>
+      <field name="price">3.5797</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_a10000850r" model="product.template">
+      <field name="name">400-8 Cable Drum RH</field>
+      <field name="default_code">ATL-A10000850R</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">3.5797</field>
+      <field name="list_price">7.16</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_a10000850r_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_a10000850r"/>
+      <field name="product_code">A10000850R</field>
+      <field name="price">3.5797</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_a10000950l" model="product.template">
+      <field name="name">400-12 Cable Drum LH</field>
+      <field name="default_code">ATL-A10000950L</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">5.7144</field>
+      <field name="list_price">11.43</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_a10000950l_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_a10000950l"/>
+      <field name="product_code">A10000950L</field>
+      <field name="price">5.7144</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_a10000950r" model="product.template">
+      <field name="name">400-12 Cable Drum RH</field>
+      <field name="default_code">ATL-A10000950R</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">5.7144</field>
+      <field name="list_price">11.43</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_a10000950r_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_a10000950r"/>
+      <field name="product_code">A10000950R</field>
+      <field name="price">5.7144</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_a10001050l" model="product.template">
+      <field name="name">5250-18 Cable Drum LH</field>
+      <field name="default_code">ATL-A10001050L</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">14.0727</field>
+      <field name="list_price">28.15</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_a10001050l_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_a10001050l"/>
+      <field name="product_code">A10001050L</field>
+      <field name="price">14.0727</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_a10001050r" model="product.template">
+      <field name="name">5250-18 Cable Drum RH</field>
+      <field name="default_code">ATL-A10001050R</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">14.0727</field>
+      <field name="list_price">28.15</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_a10001050r_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_a10001050r"/>
+      <field name="product_code">A10001050R</field>
+      <field name="price">14.0727</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_a10004050l" model="product.template">
+      <field name="name">5250-54 Hi-Lift Drum LH</field>
+      <field name="default_code">ATL-A10004050L</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">16.3944</field>
+      <field name="list_price">32.79</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_a10004050l_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_a10004050l"/>
+      <field name="product_code">A10004050L</field>
+      <field name="price">16.3944</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_a10004050r" model="product.template">
+      <field name="name">5250-54 Hi-Lift Drum RH</field>
+      <field name="default_code">ATL-A10004050R</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">16.3944</field>
+      <field name="list_price">32.79</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_a10004050r_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_a10004050r"/>
+      <field name="product_code">A10004050R</field>
+      <field name="price">16.3944</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_a100090330" model="product.template">
+      <field name="name">Coupler 1&quot; Bore Adj.</field>
+      <field name="default_code">ATL-A100090330</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">21.7747</field>
+      <field name="list_price">43.55</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_a100090330_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_a100090330"/>
+      <field name="product_code">A100090330</field>
+      <field name="price">21.7747</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_a100090340" model="product.template">
+      <field name="name">Bent Shaft Key</field>
+      <field name="default_code">ATL-A100090340</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">0.2546</field>
+      <field name="list_price">0.51</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_a100090340_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_a100090340"/>
+      <field name="product_code">A100090340</field>
+      <field name="price">0.2546</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_a200093150" model="product.template">
+      <field name="name">9'6&quot; Keyed Shaft 1&quot; Zinc Plt</field>
+      <field name="default_code">ATL-A200093150</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">56.5133</field>
+      <field name="list_price">113.03</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_a200093150_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_a200093150"/>
+      <field name="product_code">A200093150</field>
+      <field name="price">56.5133</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+    <record id="product_atl_t150000565" model="product.template">
+      <field name="name">.995 x 11GA x 20'10 Torsion Tube</field>
+      <field name="default_code">ATL-T150000565</field>
+      <field name="type">consu</field>
+      <field name="categ_id" ref="garage_door_supply.product_category_drums"/>
+      <field name="standard_price">34.4647</field>
+      <field name="list_price">68.93</field>
+      <field name="purchase_ok" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+    </record>
+    <record id="product_atl_t150000565_sinfo" model="product.supplierinfo">
+      <field name="partner_id" ref="vendor_arrow_truline"/>
+      <field name="product_tmpl_id" ref="product_atl_t150000565"/>
+      <field name="product_code">T150000565</field>
+      <field name="price">34.4647</field>
+      <field name="min_qty">0.0</field>
+    </record>
+
+  </data>
+</odoo>

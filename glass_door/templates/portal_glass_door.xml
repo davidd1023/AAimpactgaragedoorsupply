@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Portal Home Counter ──────────────────────────────────────────────── -->
+    <template id="portal_my_home_glass_door" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">My Door Orders</t>
+                <t t-set="url">/my/doors</t>
+                <t t-set="count" t-value="door_count"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- ── Order List ────────────────────────────────────────────────────────── -->
+    <template id="portal_door_list" name="My Door Orders">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Door Orders</t>
+            </t>
+            <t t-if="not orders">
+                <div class="alert alert-info">
+                    No door orders yet.
+                    <a href="/my/doors/new" class="btn btn-primary ms-2">Place Your First Order</a>
+                </div>
+            </t>
+            <t t-if="orders">
+                <div class="card">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Quote #</th>
+                                <th>Work Order #</th>
+                                <th>Job Name</th>
+                                <th>Series</th>
+                                <th>Dimensions</th>
+                                <th>Qty</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="orders" t-as="order">
+                                <tr>
+                                    <td>
+                                        <a t-attf-href="/my/doors/#{order.id}">
+                                            <t t-esc="order.quote_number"/>
+                                        </a>
+                                    </td>
+                                    <td><t t-esc="order.name if order.name != 'New' else '—'"/></td>
+                                    <td><t t-esc="order.job_name"/></td>
+                                    <td><t t-esc="order.series"/></td>
+                                    <td>
+                                        <t t-esc="order.frame_width"/>″ ×
+                                        <t t-esc="order.frame_height"/>″
+                                    </td>
+                                    <td><t t-esc="order.quantity"/></td>
+                                    <td>$<t t-esc="'%.2f' % order.total_price"/></td>
+                                    <td>
+                                        <span t-attf-class="badge #{
+                                            'text-bg-secondary' if order.state == 'draft' else
+                                            'text-bg-warning' if order.state == 'submitted' else
+                                            'text-bg-primary' if order.state == 'approved' else
+                                            'text-bg-success' if order.state in ('ready_pickup','ready_ship') else
+                                            'text-bg-info'}">
+                                            <t t-esc="dict(order._fields['state'].selection).get(order.state)"/>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3">
+                    <a href="/my/doors/new" class="btn btn-primary">+ New Order</a>
+                </div>
+                <div t-if="pager" class="o_portal_pager text-center mt-3">
+                    <t t-call="web.pager"><t t-set="pager" t-value="pager"/></t>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- ── New Order Form ────────────────────────────────────────────────────── -->
+    <template id="portal_door_form" name="New Glass Door Order">
+        <t t-call="portal.portal_layout">
+            <t t-set="o_portal_fullwidth_alert" t-value="True"/>
+            <div class="container mt-4" style="max-width:860px">
+                <h2 class="mb-4">New Glass Door Order</h2>
+                <form action="/my/doors/submit" method="post" id="door_order_form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                    <!-- Job Info -->
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Job Information</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Job Name *</label>
+                                    <input type="text" name="job_name" class="form-control" required="1"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Quantity *</label>
+                                    <input type="number" name="quantity" class="form-control"
+                                           value="1" min="1" required="1"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Door Specs -->
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Door Specifications</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Series *</label>
+                                    <select name="series" class="form-select" required="1">
+                                        <option value="1200">Series 1200</option>
+                                        <option value="1600">Series 1600</option>
+                                        <option value="1800">Series 1800</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Design Pressure *</label>
+                                    <select name="design_pressure" class="form-select" required="1">
+                                        <option value="dp15">DP 15</option>
+                                        <option value="dp20">DP 20</option>
+                                        <option value="dp25">DP 25</option>
+                                        <option value="dp30">DP 30</option>
+                                        <option value="dp35">DP 35</option>
+                                        <option value="dp40">DP 40</option>
+                                        <option value="dp50">DP 50</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Frame Finish *</label>
+                                    <select name="frame_finish_id" class="form-select" required="1">
+                                        <option value="">— Select —</option>
+                                        <t t-foreach="finishes" t-as="f">
+                                            <option t-att-value="f.id">
+                                                <t t-esc="f.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dimensions -->
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Dimensions</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Width (inches) *</label>
+                                    <input type="number" name="frame_width" id="frame_width"
+                                           class="form-control" step="0.001" min="1" required="1"/>
+                                    <div class="form-text">e.g. 144 = 12'0"</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Height (inches) *</label>
+                                    <input type="number" name="frame_height" id="frame_height"
+                                           class="form-control" step="0.001" min="1" required="1"/>
+                                    <div class="form-text">e.g. 99.625 = 8'3⅝"</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Lites *</label>
+                                    <select name="lites" id="lites" class="form-select" required="1">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Live preview -->
+                            <div id="door_preview" class="mt-3 p-3 bg-light rounded d-none">
+                                <div class="row text-center">
+                                    <div class="col">
+                                        <div class="fw-bold" id="prev_panels">—</div>
+                                        <small class="text-muted">Panels</small>
+                                    </div>
+                                    <div class="col">
+                                        <div class="fw-bold" id="prev_glass_w">—</div>
+                                        <small class="text-muted">Glass Width (in)</small>
+                                    </div>
+                                    <div class="col">
+                                        <div class="fw-bold" id="prev_glass_h">—</div>
+                                        <small class="text-muted">Glass Height (in)</small>
+                                    </div>
+                                    <div class="col">
+                                        <div class="fw-bold" id="prev_weight">—</div>
+                                        <small class="text-muted">Est. Weight (lbs)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Glass -->
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Glass</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Glass Type *</label>
+                                    <select name="glass_type_id" id="glass_type_id"
+                                            class="form-select" required="1">
+                                        <option value="">— Select —</option>
+                                        <t t-foreach="glass_types" t-as="g">
+                                            <option t-att-value="g.id">
+                                                <t t-esc="g.name"/> (<t t-esc="g.thickness"/>)
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Interlayer *</label>
+                                    <select name="interlayer_id" id="interlayer_id"
+                                            class="form-select" required="1">
+                                        <option value="">— Select —</option>
+                                        <t t-foreach="interlayers" t-as="i">
+                                            <option t-att-value="i.id">
+                                                <t t-esc="i.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="card mb-3">
+                        <div class="card-header fw-bold">Options</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Trim Type</label>
+                                    <select name="trim_type" id="trim_type" class="form-select">
+                                        <option value="pvc">PVC (Standard)</option>
+                                        <option value="aluminum">Aluminum</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="include_reinforcement"
+                                               id="include_reinforcement" class="form-check-input"/>
+                                        <label class="form-check-label" for="include_reinforcement">
+                                            Add Internal Reinforcement (104)
+                                            <small class="text-muted d-block">Increases design pressure</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price Summary -->
+                    <div class="card mb-4 border-primary">
+                        <div class="card-header bg-primary text-white fw-bold">Price Summary</div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-6">
+                                    <div class="fs-5 fw-bold" id="price_unit">$—</div>
+                                    <small class="text-muted">Unit Price</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="fs-4 fw-bold text-primary" id="price_total">$—</div>
+                                    <small class="text-muted">Total Price</small>
+                                </div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <small class="text-muted" id="price_note">
+                                    Fill in dimensions and glass to see your price
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mb-5">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Submit Order
+                        </button>
+                        <a href="/my/doors" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Live price calculation script -->
+            <script>
+                (function () {
+                    var fields = ['frame_width', 'frame_height', 'lites', 'glass_type_id',
+                                  'interlayer_id', 'trim_type', 'include_reinforcement'];
+
+                    function getFormData() {
+                        return {
+                            frame_width: parseFloat(document.getElementById('frame_width').value) || 0,
+                            frame_height: parseFloat(document.getElementById('frame_height').value) || 0,
+                            lites: parseInt(document.getElementById('lites').value) || 1,
+                            glass_type_id: parseInt(document.getElementById('glass_type_id').value) || 0,
+                            interlayer_id: parseInt(document.getElementById('interlayer_id').value) || 0,
+                            quantity: parseInt(document.querySelector('[name=quantity]').value) || 1,
+                            series: document.querySelector('[name=series]').value,
+                            design_pressure: document.querySelector('[name=design_pressure]').value,
+                            frame_finish_id: document.querySelector('[name=frame_finish_id]').value,
+                            trim_type: document.getElementById('trim_type').value,
+                            include_reinforcement: document.getElementById('include_reinforcement').checked,
+                        };
+                    }
+
+                    function fmt(n) { return '$' + parseFloat(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+                    function updatePrice() {
+                        var data = getFormData();
+                        if (!data.frame_width || !data.frame_height || !data.glass_type_id || !data.interlayer_id) {
+                            return;
+                        }
+
+                        // Auto-enforce min 2 lites
+                        if (data.frame_width > 144 &amp;&amp; data.lites &lt; 2) {
+                            document.getElementById('lites').value = 2;
+                            data.lites = 2;
+                        }
+
+                        fetch('/my/doors/compute_price', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            body: JSON.stringify({jsonrpc: '2.0', method: 'call', params: data}),
+                        })
+                        .then(function(r) { return r.json(); })
+                        .then(function(res) {
+                            if (res.result &amp;&amp; !res.result.error) {
+                                var r = res.result;
+                                document.getElementById('prev_panels').textContent = r.num_panels;
+                                document.getElementById('prev_glass_w').textContent = r.glass_width + '"';
+                                document.getElementById('prev_glass_h').textContent = r.glass_height + '"';
+                                document.getElementById('prev_weight').textContent = r.door_weight + ' lbs';
+                                document.getElementById('door_preview').classList.remove('d-none');
+                                document.getElementById('price_unit').textContent = fmt(r.unit_price);
+                                document.getElementById('price_total').textContent = fmt(r.total_price);
+                                document.getElementById('price_note').textContent = 'Price includes your dealer markup';
+                            }
+                        });
+                    }
+
+                    fields.forEach(function(id) {
+                        var el = document.getElementById(id);
+                        if (el) el.addEventListener('change', updatePrice);
+                    });
+                    document.querySelector('[name=quantity]').addEventListener('input', updatePrice);
+                })();
+            </script>
+        </t>
+    </template>
+
+    <!-- ── Order Detail ───────────────────────────────────────────────────────── -->
+    <template id="portal_door_detail" name="Door Order Detail">
+        <t t-call="portal.portal_layout">
+            <t t-set="o_portal_fullwidth_alert" t-value="True"/>
+            <div class="container mt-4" style="max-width:860px">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="mb-0">
+                            <t t-if="order.name != 'New'">WO# <t t-esc="order.name"/></t>
+                            <t t-else="">Quote <t t-esc="order.quote_number"/></t>
+                        </h2>
+                        <small class="text-muted">Job: <t t-esc="order.job_name"/></small>
+                    </div>
+                    <span t-attf-class="badge fs-6 #{
+                        'text-bg-secondary' if order.state == 'draft' else
+                        'text-bg-warning' if order.state == 'submitted' else
+                        'text-bg-primary' if order.state == 'approved' else
+                        'text-bg-success' if order.state in ('ready_pickup','ready_ship') else
+                        'text-bg-info'}">
+                        <t t-esc="dict(order._fields['state'].selection).get(order.state)"/>
+                    </span>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header fw-bold">Door Specifications</div>
+                            <div class="card-body">
+                                <table class="table table-sm mb-0">
+                                    <tr><th>Series</th><td><t t-esc="order.series"/></td></tr>
+                                    <tr><th>Design Pressure</th><td><t t-esc="order.design_pressure.upper()"/></td></tr>
+                                    <tr><th>Width</th><td><t t-esc="order.frame_width"/>″</td></tr>
+                                    <tr><th>Height</th><td><t t-esc="order.frame_height"/>″</td></tr>
+                                    <tr><th>Panels</th><td><t t-esc="order.num_panels"/></td></tr>
+                                    <tr><th>Lites</th><td><t t-esc="order.lites"/></td></tr>
+                                    <tr><th>Frame Finish</th><td><t t-esc="order.frame_finish_id.name"/></td></tr>
+                                    <tr><th>Trim</th><td><t t-esc="order.trim_type.upper()"/></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header fw-bold">Glass</div>
+                            <div class="card-body">
+                                <table class="table table-sm mb-0">
+                                    <tr><th>Glass Type</th><td><t t-esc="order.glass_type_id.name"/></td></tr>
+                                    <tr><th>Interlayer</th><td><t t-esc="order.interlayer_id.name"/></td></tr>
+                                    <tr><th>Glass Width</th><td><t t-esc="order.glass_width"/>″</td></tr>
+                                    <tr><th>Glass Height</th><td><t t-esc="order.glass_height"/>″</td></tr>
+                                    <tr><th>Door Weight</th><td><t t-esc="'%.2f' % order.door_weight"/> lbs</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header fw-bold">Pricing</div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col">
+                                <div class="fs-5">Qty: <strong><t t-esc="order.quantity"/></strong></div>
+                            </div>
+                            <div class="col">
+                                <div class="fs-5">Unit: <strong>$<t t-esc="'%.2f' % order.unit_price"/></strong></div>
+                            </div>
+                            <div class="col">
+                                <div class="fs-4 text-primary fw-bold">
+                                    Total: $<t t-esc="'%.2f' % order.total_price"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/my/doors" class="btn btn-outline-secondary mb-5">← Back to My Orders</a>
+                <a href="/my/doors/new" class="btn btn-primary mb-5 ms-2">+ New Order</a>
+            </div>
+        </t>
+    </template>
+
+</odoo>

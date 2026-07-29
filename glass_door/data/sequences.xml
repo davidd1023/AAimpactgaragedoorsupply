@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="seq_glass_door_quote" model="ir.sequence">
+        <field name="name">Glass Door Quote</field>
+        <field name="code">glass.door.quote</field>
+        <field name="prefix">Q-</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <record id="seq_glass_door_order" model="ir.sequence">
+        <field name="name">Glass Door Work Order</field>
+        <field name="code">glass.door.order</field>
+        <field name="prefix">WO-</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+</odoo>
