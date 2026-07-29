@@ -92,6 +92,13 @@ class GlassDoorOrder(models.Model):
         ('aluminum', 'Aluminum'),
     ], string='Trim Type', default='pvc', required=True)
 
+    hardware_color = fields.Selection([
+        ('mill', 'Mill Finish'),
+        ('white', 'White'),
+        ('black', 'Black'),
+    ], string='Hardware Color', default='mill', required=True,
+       help='Color of hinges, handles, springs, and other hardware.')
+
     track_type = fields.Selection([
         ('standard', 'Standard Lift'),
         ('high_lift', 'High Lift'),

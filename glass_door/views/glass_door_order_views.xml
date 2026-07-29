@@ -152,6 +152,7 @@
                                 </group>
                                 <group string="Options">
                                     <field name="trim_type"/>
+                                    <field name="hardware_color"/>
                                     <field name="track_type"/>
                                     <field name="motor_id"/>
                                     <field name="include_reinforcement"/>

@@ -321,7 +321,7 @@
                     <div class="card mb-3">
                         <div class="card-header fw-bold">Options</div>
                         <div class="card-body">
-                            <div class="row g-3">
+                            <div class="row g-3 mb-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Trim Type</label>
                                     <select name="trim_type" id="trim_type" class="form-select">
@@ -338,6 +338,34 @@
                                             <small class="text-muted d-block">Increases design pressure</small>
                                         </label>
                                     </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label fw-semibold">Hardware Color</label>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <input type="radio" class="btn-check" name="hardware_color"
+                                           id="hw_mill" value="mill" checked="1"/>
+                                    <label class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3 py-2"
+                                           for="hw_mill">
+                                        <span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:#b8b8b8;border:1px solid #999;flex-shrink:0"></span>
+                                        Mill Finish
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="hardware_color"
+                                           id="hw_white" value="white"/>
+                                    <label class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3 py-2"
+                                           for="hw_white">
+                                        <span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:#fff;border:1px solid #aaa;flex-shrink:0"></span>
+                                        White
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="hardware_color"
+                                           id="hw_black" value="black"/>
+                                    <label class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3 py-2"
+                                           for="hw_black">
+                                        <span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:#1a1a1a;border:1px solid #555;flex-shrink:0"></span>
+                                        Black
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -806,6 +834,7 @@
                                     <tr><th>Lites</th><td><t t-esc="order.lites"/></td></tr>
                                     <tr><th>Frame Finish</th><td><t t-esc="order.frame_finish_id.name"/></td></tr>
                                     <tr><th>Trim</th><td><t t-esc="dict([('pvc','PVC'),('aluminum','Aluminum')]).get(order.trim_type, order.trim_type)"/></td></tr>
+                                    <tr><th>Hardware Color</th><td><t t-esc="dict([('mill','Mill Finish'),('white','White'),('black','Black')]).get(order.hardware_color, '')"/></td></tr>
                                     <tr><th>Track</th><td><t t-esc="dict([('standard','Standard Lift'),('high_lift','High Lift'),('vertical','Full Vertical'),('low_headroom','Low Headroom')]).get(order.track_type, '')"/></td></tr>
                                     <t t-if="order.motor_id">
                                         <tr><th>Motor</th><td><t t-esc="order.motor_id.brand"/> <t t-esc="order.motor_id.name"/></td></tr>

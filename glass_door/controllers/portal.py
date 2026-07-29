@@ -149,6 +149,7 @@ class GlassDoorPortal(CustomerPortal):
             'interlayer_id': int(post.get('interlayer_id', 0)) or False,
             'quantity': int(post.get('quantity', 1)),
             'trim_type': post.get('trim_type', 'pvc'),
+            'hardware_color': post.get('hardware_color', 'mill'),
             'track_type': post.get('track_type', 'standard'),
             'motor_id': int(post.get('motor_id', 0)) or False,
             'include_reinforcement': post.get('include_reinforcement') == 'on',
