@@ -1,5 +1,4 @@
 import json
-import ast
 from odoo import http, _
 from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
@@ -53,8 +52,16 @@ class GlassDoorPortal(CustomerPortal):
         clients = request.env['glass.door.dealer.client'].search([
             ('dealer_id', '=', partner.id)
         ])
+        # Pass glass types as JSON for JS cascading (thickness → tint → type)
+        glass_types_json = json.dumps([{
+            'id': g.id,
+            'name': g.name,
+            'thickness': g.thickness or '',
+            'tint': g.tint or '',
+        } for g in glass_types])
         return request.render('glass_door.portal_door_form', {
             'glass_types': glass_types,
+            'glass_types_json': glass_types_json,
             'interlayers': interlayers,
             'finishes': finishes,
             'motors': motors,
@@ -140,7 +147,7 @@ class GlassDoorPortal(CustomerPortal):
             'dealer_client_id': int(post.get('dealer_client_id', 0)) or False,
             'job_markup': float(post.get('job_markup', 0)),
             'series': post.get('series', '1200'),
-            'design_pressure': post.get('design_pressure', 'dp20'),
+            # design_pressure is computed — do not accept from form
             'lites': int(post.get('lites', 1)),
             'frame_finish_id': int(post.get('frame_finish_id', 0)) or False,
             'frame_width': float(post.get('frame_width', 0)),
@@ -151,6 +158,8 @@ class GlassDoorPortal(CustomerPortal):
             'trim_type': post.get('trim_type', 'pvc'),
             'hardware_color': post.get('hardware_color', 'mill'),
             'track_type': post.get('track_type', 'standard'),
+            'track_size': post.get('track_size', '2_inch'),
+            'track_radius': post.get('track_radius', '12_radius'),
             'motor_id': int(post.get('motor_id', 0)) or False,
             'include_reinforcement': post.get('include_reinforcement') == 'on',
         }
@@ -190,6 +199,7 @@ class GlassDoorPortal(CustomerPortal):
             interlayer_id = int(kw.get('interlayer_id', 0))
             quantity = int(kw.get('quantity', 1))
             trim_type = kw.get('trim_type', 'pvc')
+            series = kw.get('series', '1200')
             include_reinforcement = kw.get('include_reinforcement', False)
             motor_id = int(kw.get('motor_id', 0))
             misc_total = float(kw.get('misc_total', 0))
@@ -198,6 +208,10 @@ class GlassDoorPortal(CustomerPortal):
             # Adjust lites if needed
             if frame_width > 144 and lites < 2:
                 lites = 2
+
+            # Series 1800 always requires reinforcement
+            if series == '1800':
+                include_reinforcement = True
 
             # Build a temporary (unsaved) record to compute values
             order = request.env['glass.door.order'].new({
@@ -212,8 +226,7 @@ class GlassDoorPortal(CustomerPortal):
                 'include_reinforcement': include_reinforcement,
                 'motor_id': motor_id or False,
                 'job_markup': job_markup,
-                'series': kw.get('series', '1200'),
-                'design_pressure': kw.get('design_pressure', 'dp20'),
+                'series': series,
                 'frame_finish_id': int(kw.get('frame_finish_id', 0)) or False,
                 'track_type': kw.get('track_type', 'standard'),
                 'job_name': 'preview',
@@ -224,6 +237,14 @@ class GlassDoorPortal(CustomerPortal):
             unit = round(order.unit_price + misc_total, 2)
             total = round(unit * quantity, 2)
 
+            # Format DP as "+X / −Y PSF"
+            pos = order.dp_positive
+            neg = order.dp_negative
+            if pos or neg:
+                dp_display = f'+{pos:g} / −{neg:g} PSF'
+            else:
+                dp_display = 'Pending'
+
             return {
                 'num_panels': order.num_panels,
                 'panel_height': round(order.panel_height, 4),
@@ -233,6 +254,8 @@ class GlassDoorPortal(CustomerPortal):
                 'unit_price': unit,
                 'total_price': total,
                 'lites': lites,
+                'design_pressure': dp_display,
+                'reinf_forced': include_reinforcement,
             }
         except Exception as e:
             return {'error': str(e)}

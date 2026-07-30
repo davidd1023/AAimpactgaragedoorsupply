@@ -19,7 +19,7 @@ class GlassDoorExtrusionProfile(models.Model):
 class GlassDoorGlassType(models.Model):
     _name = 'glass.door.glass.type'
     _description = 'Glass Type'
-    _order = 'name'
+    _order = 'thickness, tint, name'
 
     name = fields.Char('Name', required=True)
     thickness = fields.Selection([
@@ -27,6 +27,14 @@ class GlassDoorGlassType(models.Model):
         ('7/16', '7/16"'),
         ('13/16', '13/16" Insulated Laminated'),
     ], string='Thickness', required=True)
+    tint = fields.Selection([
+        ('clear',   'Clear'),
+        ('bronze',  'Bronze'),
+        ('gray',    'Gray'),
+        ('blue',    'Blue / Blue-Green'),
+        ('low_e',   'Low-E'),
+        ('obscure', 'Obscure / Frosted'),
+    ], string='Tint / Type')
     price_per_sqft = fields.Float('Price per Sq Ft', digits=(10, 4))
     weight_per_sqft = fields.Float('Weight per Sq Ft (lbs)', digits=(10, 4))
 

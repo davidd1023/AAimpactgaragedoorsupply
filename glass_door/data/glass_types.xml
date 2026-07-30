@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- ── Interlayers ──────────────────────────────────────────────────────────
+         noupdate=1 so dealer-entered prices are never wiped on upgrade.
+    ──────────────────────────────────────────────────────────────────────────── -->
+    <record id="interlayer_clear_pvb" model="glass.door.interlayer">
+        <field name="name">Clear PVB (0.030")</field>
+        <field name="price_per_sqft">0.0</field>
+    </record>
+    <record id="interlayer_sgp" model="glass.door.interlayer">
+        <field name="name">Clear SGP (Sentry)</field>
+        <field name="price_per_sqft">0.0</field>
+    </record>
+    <record id="interlayer_bronze_pvb" model="glass.door.interlayer">
+        <field name="name">Bronze PVB (0.030")</field>
+        <field name="price_per_sqft">0.0</field>
+    </record>
+
+    <!-- ── Glass Types — 5/16" Tempered (Monolithic) ──────────────────────────
+         Weight: ~3.27 lbs/sqft. Prices to be filled in by admin.
+    ──────────────────────────────────────────────────────────────────────────── -->
+    <record id="glass_516_clear" model="glass.door.glass.type">
+        <field name="name">5/16" Clear Tempered</field>
+        <field name="thickness">5/16</field>
+        <field name="tint">clear</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">3.27</field>
+    </record>
+    <record id="glass_516_bronze" model="glass.door.glass.type">
+        <field name="name">5/16" Bronze Tempered</field>
+        <field name="thickness">5/16</field>
+        <field name="tint">bronze</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">3.27</field>
+    </record>
+    <record id="glass_516_gray" model="glass.door.glass.type">
+        <field name="name">5/16" Gray Tempered</field>
+        <field name="thickness">5/16</field>
+        <field name="tint">gray</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">3.27</field>
+    </record>
+    <record id="glass_516_obscure" model="glass.door.glass.type">
+        <field name="name">5/16" Obscure / Frosted Tempered</field>
+        <field name="thickness">5/16</field>
+        <field name="tint">obscure</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">3.27</field>
+    </record>
+
+    <!-- ── Glass Types — 7/16" Laminated ─────────────────────────────────────
+         Two lites of 3/16" + PVB. Weight: ~4.90 lbs/sqft.
+    ──────────────────────────────────────────────────────────────────────────── -->
+    <record id="glass_716_clear" model="glass.door.glass.type">
+        <field name="name">7/16" Clear Laminated</field>
+        <field name="thickness">7/16</field>
+        <field name="tint">clear</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">4.90</field>
+    </record>
+    <record id="glass_716_bronze" model="glass.door.glass.type">
+        <field name="name">7/16" Bronze Laminated</field>
+        <field name="thickness">7/16</field>
+        <field name="tint">bronze</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">4.90</field>
+    </record>
+    <record id="glass_716_gray" model="glass.door.glass.type">
+        <field name="name">7/16" Gray Laminated</field>
+        <field name="thickness">7/16</field>
+        <field name="tint">gray</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">4.90</field>
+    </record>
+    <record id="glass_716_blue" model="glass.door.glass.type">
+        <field name="name">7/16" Blue / Blue-Green Laminated</field>
+        <field name="thickness">7/16</field>
+        <field name="tint">blue</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">4.90</field>
+    </record>
+    <record id="glass_716_low_e" model="glass.door.glass.type">
+        <field name="name">7/16" Low-E Laminated</field>
+        <field name="thickness">7/16</field>
+        <field name="tint">low_e</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">4.90</field>
+    </record>
+
+    <!-- ── Glass Types — 13/16" Insulated Laminated ───────────────────────────
+         Dual-pane: 3/16" outer + air/argon + 3/16" inner laminated.
+         Weight: ~7.0 lbs/sqft.
+    ──────────────────────────────────────────────────────────────────────────── -->
+    <record id="glass_1316_clear" model="glass.door.glass.type">
+        <field name="name">13/16" Clear Insulated Laminated</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">clear</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">7.00</field>
+    </record>
+    <record id="glass_1316_bronze" model="glass.door.glass.type">
+        <field name="name">13/16" Bronze Insulated Laminated</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">bronze</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">7.00</field>
+    </record>
+    <record id="glass_1316_gray" model="glass.door.glass.type">
+        <field name="name">13/16" Gray Insulated Laminated</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">gray</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">7.00</field>
+    </record>
+
+</odoo>

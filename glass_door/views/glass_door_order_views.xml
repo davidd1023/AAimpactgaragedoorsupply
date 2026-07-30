@@ -130,9 +130,10 @@
                     <notebook>
                         <page string="Door Specifications">
                             <group>
-                                <group string="Series &amp; Pressure">
+                                <group string="Series &amp; Design Pressure">
                                     <field name="series"/>
-                                    <field name="design_pressure"/>
+                                    <field name="dp_positive" string="DP Positive (PSF)" readonly="1"/>
+                                    <field name="dp_negative" string="DP Negative (PSF)" readonly="1"/>
                                     <field name="lites"/>
                                     <field name="frame_finish_id"/>
                                 </group>
@@ -154,6 +155,8 @@
                                     <field name="trim_type"/>
                                     <field name="hardware_color"/>
                                     <field name="track_type"/>
+                                    <field name="track_size"/>
+                                    <field name="track_radius"/>
                                     <field name="motor_id"/>
                                     <field name="include_reinforcement"/>
                                     <field name="reinforcement_required" readonly="1"/>

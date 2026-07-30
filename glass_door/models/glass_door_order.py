@@ -18,6 +18,24 @@ PANEL_THRESHOLDS = [
 MAX_WIDTH_1_LITE = 144.0    # 12'0" — wider doors require minimum 2 lites
 WIDTH_104_REQUIRED = 194.0  # 16'2" — internal reinforcement mandatory above this width
 
+# Design Pressure is COMPUTED by the system — dealers do not choose it.
+# Positive and negative pressures are tracked separately (PSF).
+# Table: (series, has_reinforcement) → (positive_psf, negative_psf)
+# ⚠ PLACEHOLDER VALUES — update with certified ratings when available.
+DP_TABLE = {
+    ('1200', False): (50.0, 60.0),   # certified +50 / -60 PSF
+    ('1200', True):  (50.0, 60.0),   # same approval with reinforcement
+    ('1600', False): (46.0, 55.0),   # certified +46 / -55 PSF
+    ('1600', True):  (50.0, 60.0),   # certified +50 / -60 PSF with reinforcement
+    ('1800', False): (46.0, 55.0),   # 1800 always gets reinf — same rating
+    ('1800', True):  (46.0, 55.0),   # certified +46 / -55 PSF
+}
+
+def _calc_design_pressure(series, include_reinforcement):
+    """Return (positive_psf, negative_psf) for the given series + reinforcement."""
+    key = (series or '1200', bool(include_reinforcement))
+    return DP_TABLE.get(key, (0.0, 0.0))
+
 
 def _round_even_inch(value):
     """Round up to the nearest even inch."""
@@ -67,23 +85,24 @@ class GlassDoorOrder(models.Model):
         ('1800', 'Series 1800'),
     ], string='Series', required=True, tracking=True)
 
-    design_pressure = fields.Selection([
-        ('dp15', 'DP 15'),
-        ('dp20', 'DP 20'),
-        ('dp25', 'DP 25'),
-        ('dp30', 'DP 30'),
-        ('dp35', 'DP 35'),
-        ('dp40', 'DP 40'),
-        ('dp50', 'DP 50'),
-    ], string='Design Pressure', required=True, tracking=True)
+    dp_positive = fields.Float(
+        'Design Pressure (+)', digits=(6, 2), tracking=True,
+        compute='_compute_design_pressure', store=True, readonly=False,
+        help='Positive (inward) design pressure in PSF. Computed from Series + Reinforcement.'
+    )
+    dp_negative = fields.Float(
+        'Design Pressure (−)', digits=(6, 2), tracking=True,
+        compute='_compute_design_pressure', store=True, readonly=False,
+        help='Negative (outward / suction) design pressure in PSF. Computed from Series + Reinforcement.'
+    )
 
     lites = fields.Integer('Lites', default=1, required=True, tracking=True,
                             help='Number of vertical glass sections per panel (1–5).')
-    frame_finish_id = fields.Many2one('glass.door.frame.finish', 'Frame Finish', required=True)
+    frame_finish_id = fields.Many2one('glass.door.frame.finish', 'Frame Color')
     frame_width = fields.Float('Width (inches)', required=True, digits=(10, 3), tracking=True)
     frame_height = fields.Float('Height (inches)', required=True, digits=(10, 3), tracking=True)
     glass_type_id = fields.Many2one('glass.door.glass.type', 'Glass Type', required=True)
-    interlayer_id = fields.Many2one('glass.door.interlayer', 'Interlayer', required=True)
+    interlayer_id = fields.Many2one('glass.door.interlayer', 'Glass Insulator')
     quantity = fields.Integer('Quantity', default=1, required=True)
     door_image = fields.Image('Door Image', max_width=1024, max_height=1024)
 
@@ -100,13 +119,23 @@ class GlassDoorOrder(models.Model):
        help='Color of hinges, handles, springs, and other hardware.')
 
     track_type = fields.Selection([
-        ('standard', 'Standard Lift'),
-        ('high_lift', 'High Lift'),
-        ('vertical', 'Full Vertical Lift'),
+        ('standard',     'Standard Lift'),
+        ('high_lift',    'High Lift'),
+        ('vertical',     'Full Vertical Lift'),
         ('low_headroom', 'Low Headroom'),
-    ], string='Track Type', default='standard', required=True,
-       help='Standard: door follows a standard arc. High Lift/Vertical: clears more headroom. '
-            'Low Headroom: limited space above opening.')
+    ], string='Track Type', default='standard', required=True)
+
+    track_size = fields.Selection([
+        ('2_inch', '2 Inch'),
+        ('3_inch', '3 Inch'),
+    ], string='Track Size', default='2_inch', required=True,
+       help='2" track for residential; 3" track for commercial / heavier doors.')
+
+    track_radius = fields.Selection([
+        ('12_radius', '12" Radius'),
+        ('15_radius', '15" Radius'),
+    ], string='Track Radius', default='12_radius', required=True,
+       help='Radius of the curved section where the door transitions from vertical to horizontal.')
 
     motor_id = fields.Many2one(
         'glass.door.motor', 'Motor / Opener',
@@ -266,6 +295,13 @@ class GlassDoorOrder(models.Model):
     # Onchange / Constraints
     # ─────────────────────────────────────────────────────────────────────────────
 
+    @api.depends('series', 'include_reinforcement')
+    def _compute_design_pressure(self):
+        for order in self:
+            pos, neg = _calc_design_pressure(order.series, order.include_reinforcement)
+            order.dp_positive = pos
+            order.dp_negative = neg
+
     @api.onchange('frame_width', 'lites')
     def _onchange_lites(self):
         if self.frame_width > MAX_WIDTH_1_LITE and self.lites == 1:
@@ -276,9 +312,10 @@ class GlassDoorOrder(models.Model):
                               'Lites has been set to 2.'),
             }}
 
-    @api.onchange('frame_width')
+    @api.onchange('frame_width', 'series')
     def _onchange_reinforcement(self):
-        if self.frame_width > WIDTH_104_REQUIRED:
+        """Auto-enable reinforcement for wide doors AND for Series 1800 (always required)."""
+        if self.frame_width > WIDTH_104_REQUIRED or self.series == '1800':
             self.include_reinforcement = True
 
     @api.constrains('lites', 'frame_width')
