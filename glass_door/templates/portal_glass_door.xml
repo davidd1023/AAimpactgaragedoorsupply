@@ -32,7 +32,12 @@
             config_card=True makes Clients tile always visible (no count needed).
         -->
         <div id="portal_service_category" position="inside">
+            <!--
+                config_card=True keeps this tile visible even when count=0.
+                New dealers must always be able to reach My Door Orders.
+            -->
             <t t-call="portal.portal_docs_entry">
+                <t t-set="config_card" t-value="True"/>
                 <t t-set="placeholder_count" t-value="'door_count'"/>
                 <t t-set="title">My Door Orders</t>
                 <t t-set="url" t-value="'/my/doors'"/>
