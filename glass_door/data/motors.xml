@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!--
+        LiftMaster motor / opener catalog.
+        noupdate="1": admin-entered costs survive upgrades.
+        Set cost (our cost) in backend → Glass Door → Configuration → Motors.
+
+        98022  — 1/2 HP commercial trolley, chain drive
+        98032  — 3/4 HP commercial trolley, chain drive
+        MAXUM  — 1-1/4 HP heavy-duty commercial, chain drive (high-cycle)
+        6690L  — 3/4 HP commercial jackshaft (low-headroom / limited ceiling)
+    -->
+
+    <record id="motor_98022" model="glass.door.motor">
+        <field name="brand">LiftMaster</field>
+        <field name="name">98022</field>
+        <field name="horsepower">1/2</field>
+        <field name="drive_type">chain</field>
+        <field name="cost">0.0</field>
+        <field name="active">True</field>
+    </record>
+
+    <record id="motor_98032" model="glass.door.motor">
+        <field name="brand">LiftMaster</field>
+        <field name="name">98032</field>
+        <field name="horsepower">3/4</field>
+        <field name="drive_type">chain</field>
+        <field name="cost">0.0</field>
+        <field name="active">True</field>
+    </record>
+
+    <record id="motor_maxum" model="glass.door.motor">
+        <field name="brand">LiftMaster</field>
+        <field name="name">MAXUM</field>
+        <field name="horsepower">1_1_4</field>
+        <field name="drive_type">chain</field>
+        <field name="cost">0.0</field>
+        <field name="active">True</field>
+    </record>
+
+    <record id="motor_6690l" model="glass.door.motor">
+        <field name="brand">LiftMaster</field>
+        <field name="name">6690L</field>
+        <field name="horsepower">3/4</field>
+        <field name="drive_type">jackshaft</field>
+        <field name="cost">0.0</field>
+        <field name="active">True</field>
+    </record>
+
+</odoo>
