@@ -125,6 +125,12 @@ class GlassDoorOrder(models.Model):
         ('low_headroom', 'Low Headroom'),
     ], string='Track Type', default='standard', required=True)
 
+    high_lift_amount = fields.Float(
+        'High Lift Amount (inches)', digits=(10, 2),
+        help='Additional vertical travel above the standard lift height. Only used when '
+             'Track Type is High Lift. Specified in inches by the dealer.',
+    )
+
     track_size = fields.Selection([
         ('2_inch', '2 Inch'),
         ('3_inch', '3 Inch'),

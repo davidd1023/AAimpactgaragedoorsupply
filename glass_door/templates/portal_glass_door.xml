@@ -487,45 +487,31 @@
                         <div class="card-body">
 
                             <!-- 7a · Track Type -->
+                            <!-- 7a · Lift Type dropdown -->
                             <div class="mb-4">
-                                <label class="form-label fw-semibold mb-2">Track Type</label>
-                                <div class="row g-2">
-                                    <div class="col-6 col-md-3">
-                                        <input type="radio" class="btn-check" name="track_type"
-                                               id="track_standard" value="standard" checked="1"/>
-                                        <label class="btn btn-outline-secondary w-100 p-3 text-start h-100"
-                                               for="track_standard">
-                                            <strong class="d-block mb-1">Standard</strong>
-                                            <small class="text-muted">Most common residential</small>
-                                        </label>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <input type="radio" class="btn-check" name="track_type"
-                                               id="track_high_lift" value="high_lift"/>
-                                        <label class="btn btn-outline-secondary w-100 p-3 text-start h-100"
-                                               for="track_high_lift">
-                                            <strong class="d-block mb-1">High Lift</strong>
-                                            <small class="text-muted">Car lifts, RV bays</small>
-                                        </label>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <input type="radio" class="btn-check" name="track_type"
-                                               id="track_vertical" value="vertical"/>
-                                        <label class="btn btn-outline-secondary w-100 p-3 text-start h-100"
-                                               for="track_vertical">
-                                            <strong class="d-block mb-1">Full Vertical</strong>
-                                            <small class="text-muted">Commercial / forklifts</small>
-                                        </label>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <input type="radio" class="btn-check" name="track_type"
-                                               id="track_low_headroom" value="low_headroom"/>
-                                        <label class="btn btn-outline-secondary w-100 p-3 text-start h-100"
-                                               for="track_low_headroom">
-                                            <strong class="d-block mb-1">Low Headroom</strong>
-                                            <small class="text-muted">Limited overhead</small>
-                                        </label>
-                                    </div>
+                                <label class="form-label fw-semibold" for="track_type">Lift Type</label>
+                                <select name="track_type" id="track_type"
+                                        class="form-select" style="max-width:260px;">
+                                    <option value="standard">Standard Lift</option>
+                                    <option value="high_lift">High Lift</option>
+                                    <option value="vertical">Vertical Lift</option>
+                                </select>
+                            </div>
+
+                            <!-- High Lift amount — shown only when High Lift is selected -->
+                            <div class="mb-4" id="high_lift_section" style="display:none;">
+                                <label class="form-label fw-semibold" for="high_lift_amount">
+                                    High Lift Amount
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <p class="text-muted small mb-2">
+                                    Specify exactly how much additional vertical travel is needed.
+                                </p>
+                                <div class="input-group" style="max-width:220px;">
+                                    <input type="number" name="high_lift_amount" id="high_lift_amount"
+                                           class="form-control" step="0.5" min="1"
+                                           placeholder="e.g. 24"/>
+                                    <span class="input-group-text">inches</span>
                                 </div>
                             </div>
 
@@ -1090,10 +1076,24 @@
                     }
                 });
                 document.querySelectorAll('input[name="lites"],input[name="frame_finish_id"],'
-                    +'input[name="track_type"],input[name="track_size"],input[name="track_radius"],'
+                    +'input[name="track_size"],input[name="track_radius"],'
                     +'input[name="hardware_color"]').forEach(function(el){
                     el.addEventListener('change', updatePrice);
                 });
+
+                // Track type dropdown — show/hide high lift amount field
+                (function(){
+                    var sel     = document.getElementById('track_type');
+                    var hlSec   = document.getElementById('high_lift_section');
+                    var hlInput = document.getElementById('high_lift_amount');
+                    function onTrackChange() {
+                        var isHL = sel.value === 'high_lift';
+                        hlSec.style.display = isHL ? '' : 'none';
+                        if (!isHL) hlInput.value = '';
+                    }
+                    sel.addEventListener('change', onTrackChange);
+                    onTrackChange(); // run once on load
+                })();
 
             })();
             </script>

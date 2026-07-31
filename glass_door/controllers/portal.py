@@ -158,6 +158,7 @@ class GlassDoorPortal(CustomerPortal):
             'trim_type': post.get('trim_type', 'pvc'),
             'hardware_color': post.get('hardware_color', 'mill'),
             'track_type': post.get('track_type', 'standard'),
+            'high_lift_amount': float(post.get('high_lift_amount', 0) or 0),
             'track_size': post.get('track_size', '2_inch'),
             'track_radius': post.get('track_radius', '12_radius'),
             'motor_id': int(post.get('motor_id', 0)) or False,
