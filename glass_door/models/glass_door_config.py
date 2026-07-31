@@ -31,6 +31,7 @@ class GlassDoorGlassType(models.Model):
         ('clear',   'Clear'),
         ('bronze',  'Bronze'),
         ('gray',    'Gray'),
+        ('green',   'Green'),
         ('blue',    'Blue / Blue-Green'),
         ('low_e',   'Low-E'),
         ('obscure', 'Obscure / Frosted'),
