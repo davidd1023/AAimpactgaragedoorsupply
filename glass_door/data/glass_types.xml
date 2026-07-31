@@ -179,4 +179,95 @@
         <field name="weight_per_sqft">4.90</field>
     </record>
 
+    <!-- ════════════════════════════════════════════════════════════════════════
+         13/16" INSULATED LAMINATED
+         Outer:  5/32" Clear Tempered (monolithic)
+         Gap:    3/8" air space
+         Inner:  5/16" Laminated  (1/8" HS + 0.090 PVB + 1/8" HS)
+         Color comes from the inner laminated pane — outer is always clear.
+
+         Weight estimate:
+           5/32" tempered  ≈ 2.04 lbs/sqft
+           5/16" laminated ≈ 3.28 lbs/sqft
+           Total           ≈ 5.32 lbs/sqft (spacer/sealant negligible)
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- BRONZE (inner pane) -->
+    <record id="glass_1316_bronze_cg_clear" model="glass.door.glass.type">
+        <field name="name">5/32 CLEAR TEMP + 3/8 AIR + 1/8 BRONZE HS (CG 62/27 FACE #3) + 0.090 PVB + 1/8 CLEAR HS</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">bronze</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">5.32</field>
+    </record>
+    <record id="glass_1316_bronze_bronze" model="glass.door.glass.type">
+        <field name="name">5/32 CLEAR TEMP + 3/8 AIR + 1/8 BRONZE HS + 0.090 PVB + 1/8 BRONZE HS</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">bronze</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">5.32</field>
+    </record>
+    <record id="glass_1316_bronze_clear" model="glass.door.glass.type">
+        <field name="name">5/32 CLEAR TEMP + 3/8 AIR + 1/8 BRONZE HS + 0.090 PVB + 1/8 CLEAR HS</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">bronze</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">5.32</field>
+    </record>
+
+    <!-- CLEAR (inner pane) -->
+    <record id="glass_1316_clear_cg_clear" model="glass.door.glass.type">
+        <field name="name">5/32 CLEAR TEMP + 3/8 AIR + 1/8 CLEAR HS (CG 62/27 FACE #2) + 0.090 PVB + 1/8 CLEAR HS</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">clear</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">5.32</field>
+    </record>
+    <record id="glass_1316_clear_clear" model="glass.door.glass.type">
+        <field name="name">5/32 CLEAR TEMP + 3/8 AIR + 1/8 CLEAR HS + 0.090 PVB + 1/8 CLEAR HS</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">clear</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">5.32</field>
+    </record>
+
+    <!-- GRAY (inner pane) -->
+    <record id="glass_1316_gray_cg_clear" model="glass.door.glass.type">
+        <field name="name">5/32 CLEAR TEMP + 3/8 AIR + 1/8 GRAY HS (CG 62/27 FACE #3) + 0.090 PVB + 1/8 CLEAR HS</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">gray</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">5.32</field>
+    </record>
+    <record id="glass_1316_gray_clear" model="glass.door.glass.type">
+        <field name="name">5/32 CLEAR TEMP + 3/8 AIR + 1/8 GRAY HS + 0.090 PVB + 1/8 CLEAR HS</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">gray</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">5.32</field>
+    </record>
+    <record id="glass_1316_gray_gray" model="glass.door.glass.type">
+        <field name="name">5/32 CLEAR TEMP + 3/8 AIR + 1/8 GRAY HS + 0.090 PVB + 1/8 GRAY HS</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">gray</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">5.32</field>
+    </record>
+
+    <!-- GREEN (inner pane) -->
+    <record id="glass_1316_green_cg_clear" model="glass.door.glass.type">
+        <field name="name">5/32 CLEAR TEMP + 3/8 AIR + 1/8 GREEN HS (CG 62/27 FACE #3) + 0.090 PVB + 1/8 CLEAR HS</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">green</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">5.32</field>
+    </record>
+    <record id="glass_1316_green_clear" model="glass.door.glass.type">
+        <field name="name">5/32 CLEAR TEMP + 3/8 AIR + 1/8 GREEN HS + 0.090 PVB + 1/8 CLEAR HS</field>
+        <field name="thickness">13/16</field>
+        <field name="tint">green</field>
+        <field name="price_per_sqft">0.0</field>
+        <field name="weight_per_sqft">5.32</field>
+    </record>
+
 </odoo>
