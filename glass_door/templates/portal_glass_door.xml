@@ -419,32 +419,33 @@
                         </div>
                         <div class="card-body">
 
-                            <!-- 5a · Thickness -->
+                            <!-- 5a · Thickness dropdown -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Glass Thickness</label>
-                                <div class="d-flex gap-2 flex-wrap" id="thickness_btns">
-                                    <!-- built by JS from glass_types_json -->
-                                </div>
-                                <div id="glass_empty_notice" class="text-warning small d-none">
+                                <div id="glass_empty_notice" class="text-warning small d-none mb-2">
                                     &#x26A0; No glass types configured yet — contact your rep.
                                 </div>
-                                <input type="hidden" id="sel_thickness"/>
+                                <select id="thickness_select" class="form-select" style="max-width:260px;">
+                                    <option value="">— Select thickness —</option>
+                                </select>
                             </div>
 
-                            <!-- 5b · Tint / Color Family -->
-                            <div class="mb-4" id="tint_section" style="display:none;">
-                                <label class="form-label fw-semibold">Glass Color</label>
-                                <div class="d-flex gap-2 flex-wrap" id="tint_btns"></div>
-                                <input type="hidden" id="sel_tint"/>
+                            <!-- 5b · All compositions for selected thickness -->
+                            <div class="mb-4" id="composition_section" style="display:none;">
+                                <label class="form-label fw-semibold">Glass Composition</label>
+                                <div class="d-flex flex-column gap-2 mt-2" id="glass_type_btns"></div>
                             </div>
 
-                            <!-- 5c · Specific Glass Construction -->
-                            <div class="mb-4" id="glass_type_section" style="display:none;">
-                                <label class="form-label fw-semibold">Glass Construction</label>
-                                <small class="text-muted d-block mb-2">
-                                    Select the exact lite + interlayer combination.
-                                </small>
-                                <div class="d-flex flex-column gap-2" id="glass_type_btns"></div>
+                            <!-- 5c · PVB Interlayer Color -->
+                            <div class="mb-2" id="interlayer_section" style="display:none;">
+                                <label class="form-label fw-semibold">PVB Interlayer Color</label>
+                                <select name="interlayer_id" id="interlayer_id"
+                                        class="form-select" style="max-width:280px;">
+                                    <option value="">— Select PVB color —</option>
+                                    <t t-foreach="interlayers" t-as="i">
+                                        <option t-att-value="i.id"><t t-esc="i.name"/></option>
+                                    </t>
+                                </select>
                             </div>
 
                         </div>
@@ -831,147 +832,70 @@
 
                 /* ── GLASS CASCADE ────────────────────────────────────────────── */
                 var glassData = JSON.parse(document.getElementById('glass_types_data').textContent || '[]');
-                var selThickness = '';
-                var selTint      = '';
 
-                // Thickness labels
-                var thickLabels = {'5/16':'5/16"','7/16':'7/16"','13/16':'13/16" Insulated'};
-                // Tint (color family) labels
-                var tintLabels = {
-                    'clear':'Clear','bronze':'Bronze','gray':'Gray','green':'Green',
-                    'blue':'Blue / Blue-Green','low_e':'Low-E','obscure':'Obscure / Frosted',
-                    '': 'Standard'
-                };
+                // Thickness labels for the dropdown
+                var thickLabels = {'5/16':'5/16" Laminated','7/16':'7/16" Laminated','13/16':'13/16" Insulated Laminated'};
 
-                function uniqueThicknesses() {
-                    var seen = {}; var out = [];
-                    glassData.forEach(function(g){ if (!seen[g.thickness]){seen[g.thickness]=1;out.push(g.thickness);} });
-                    return out;
-                }
-
-                function tintsForThickness(th) {
-                    var seen = {}; var out = [];
+                function buildThicknessDropdown() {
+                    var sel    = document.getElementById('thickness_select');
+                    var notice = document.getElementById('glass_empty_notice');
+                    var seen   = {}; var thicknesses = [];
                     glassData.forEach(function(g){
-                        if (g.thickness === th) {
-                            var key = g.tint || '';
-                            if (!seen[key]){ seen[key]=1; out.push(key); }
-                        }
+                        if (!seen[g.thickness]){ seen[g.thickness]=1; thicknesses.push(g.thickness); }
                     });
-                    return out;
-                }
-
-                function makeRadioBtn(name, id, value, label, onChange) {
-                    var inp = document.createElement('input');
-                    inp.type = 'radio'; inp.className = 'btn-check';
-                    inp.name = name; inp.id = id; inp.value = value;
-                    inp.addEventListener('change', onChange);
-                    var lbl = document.createElement('label');
-                    lbl.className = 'btn btn-outline-secondary px-3 fw-semibold';
-                    lbl.setAttribute('for', id);
-                    lbl.textContent = label;
-                    return [inp, lbl];
-                }
-
-                function buildThicknessButtons() {
-                    var container = document.getElementById('thickness_btns');
-                    var notice    = document.getElementById('glass_empty_notice');
-                    container.innerHTML = '';
-                    var thicknesses = uniqueThicknesses();
-                    if (!thicknesses.length) {
-                        notice.classList.remove('d-none');
-                        return;
-                    }
+                    if (!thicknesses.length) { notice.classList.remove('d-none'); return; }
                     notice.classList.add('d-none');
-                    thicknesses.forEach(function (th) {
-                        var els = makeRadioBtn('_thickness', 'th_'+th.replace('/','_'), th,
-                            thickLabels[th] || th,
-                            function(){ onThicknessChange(th); });
-                        container.appendChild(els[0]);
-                        container.appendChild(els[1]);
+                    thicknesses.forEach(function(th){
+                        var opt = document.createElement('option');
+                        opt.value = th;
+                        opt.textContent = thickLabels[th] || th;
+                        sel.appendChild(opt);
+                    });
+                    sel.addEventListener('change', function(){
+                        var th = this.value;
+                        document.getElementById('composition_section').style.display = 'none';
+                        document.getElementById('interlayer_section').style.display  = 'none';
+                        document.getElementById('glass_type_btns').innerHTML = '';
+                        document.getElementById('field_glass_type_id').value = '';
+                        if (th) buildCompositionList(th);
                     });
                 }
 
-                function buildTintButtons(th) {
-                    var container = document.getElementById('tint_btns');
-                    container.innerHTML = '';
-                    document.getElementById('glass_type_btns').innerHTML = '';
-                    document.getElementById('glass_type_section').style.display = 'none';
-                    document.getElementById('field_glass_type_id').value = '';
-
-                    var tints = tintsForThickness(th);
-
-                    // Only one color family — skip color buttons, go straight to construction
-                    if (tints.length === 1) {
-                        document.getElementById('tint_section').style.display = 'none';
-                        buildGlassTypeSection(th, tints[0]);
-                        return;
-                    }
-
-                    document.getElementById('tint_section').style.display = '';
-                    tints.forEach(function (tint) {
-                        var els = makeRadioBtn('_tint', 'tint_'+tint, tint,
-                            tintLabels[tint] || tint || 'Standard',
-                            function(){ onTintChange(th, tint); });
-                        container.appendChild(els[0]);
-                        container.appendChild(els[1]);
-                    });
-                }
-
-                function buildGlassTypeSection(th, tint) {
-                    var types = glassData.filter(function(g) {
-                        return g.thickness === th &amp;&amp; (g.tint || '') === tint;
-                    });
-                    var section   = document.getElementById('glass_type_section');
+                function buildCompositionList(th) {
+                    var types     = glassData.filter(function(g){ return g.thickness === th; });
+                    var section   = document.getElementById('composition_section');
                     var container = document.getElementById('glass_type_btns');
                     container.innerHTML = '';
                     document.getElementById('field_glass_type_id').value = '';
-
+                    document.getElementById('interlayer_section').style.display = 'none';
                     if (!types.length) return;
-
-                    // Auto-select when only one construction exists for this tint
-                    if (types.length === 1) {
-                        document.getElementById('field_glass_type_id').value = types[0].id;
-                        section.style.display = 'none';
-                        updatePrice();
-                        return;
-                    }
-
                     section.style.display = '';
-                    types.forEach(function(gt) {
+                    types.forEach(function(gt){
                         var inp = document.createElement('input');
-                        inp.type = 'radio'; inp.className = 'btn-check';
-                        inp.name = '_glass_type'; inp.id = 'gt_' + gt.id; inp.value = gt.id;
-                        inp.addEventListener('change', function() {
+                        inp.type='radio'; inp.className='btn-check';
+                        inp.name='_glass_type'; inp.id='gt_'+gt.id; inp.value=gt.id;
+                        inp.addEventListener('change', function(){
                             document.getElementById('field_glass_type_id').value = gt.id;
+                            document.getElementById('interlayer_section').style.display = '';
                             updatePrice();
                         });
                         var lbl = document.createElement('label');
                         lbl.className = 'btn btn-outline-secondary text-start py-2 px-3 w-100';
-                        lbl.setAttribute('for', 'gt_' + gt.id);
+                        lbl.setAttribute('for', 'gt_'+gt.id);
                         lbl.style.fontFamily = 'monospace';
-                        lbl.style.fontSize = '0.82rem';
-                        lbl.textContent = gt.name;
+                        lbl.style.fontSize   = '0.82rem';
+                        lbl.textContent      = gt.name;
                         container.appendChild(inp);
                         container.appendChild(lbl);
                     });
                 }
 
-                function onThicknessChange(th) {
-                    selThickness = th;
-                    selTint = '';
-                    document.getElementById('field_glass_type_id').value = '';
-                    document.getElementById('tint_section').style.display = 'none';
-                    document.getElementById('glass_type_section').style.display = 'none';
-                    document.getElementById('glass_type_btns').innerHTML = '';
-                    buildTintButtons(th);
-                }
+                // PVB color change triggers price recalc
+                document.getElementById('interlayer_id').addEventListener('change', function(){
+                    updatePrice();
+                });
 
-                function onTintChange(th, tint) {
-                    selTint = tint;
-                    buildGlassTypeSection(th, tint);
-                }
-
-                buildThicknessButtons();
+                buildThicknessDropdown();
 
                 /* ── MISC ITEMS ───────────────────────────────────────────────── */
                 var miscRows = [];
