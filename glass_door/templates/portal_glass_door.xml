@@ -544,7 +544,7 @@
                                         <input type="radio" class="btn-check" name="track_radius"
                                                id="track_r12" value="12_radius" checked="1"/>
                                         <label class="btn btn-outline-secondary px-4 py-2 fw-semibold"
-                                               for="track_r12">
+                                               id="track_r12_label" for="track_r12">
                                             12" Radius
                                         </label>
 
@@ -555,7 +555,9 @@
                                             15" Radius
                                         </label>
                                     </div>
-                                    <div class="form-text">12" standard · 15" for larger / heavier doors</div>
+                                    <div class="form-text" id="radius_note">
+                                        12" standard · 15" for larger / heavier doors
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1093,6 +1095,35 @@
                     }
                     sel.addEventListener('change', onTrackChange);
                     onTrackChange(); // run once on load
+                })();
+
+                // Track size ↔ radius constraint: 12" radius only available with 2" track
+                (function(){
+                    var size2   = document.getElementById('track_2inch');
+                    var size3   = document.getElementById('track_3inch');
+                    var r12     = document.getElementById('track_r12');
+                    var r15     = document.getElementById('track_r15');
+                    var r12lbl  = document.getElementById('track_r12_label');
+                    var note    = document.getElementById('radius_note');
+                    function onSizeChange() {
+                        var is3inch = size3.checked;
+                        if (is3inch) {
+                            // 12" radius not available with 3" track — force 15"
+                            r12.checked  = false;
+                            r12.disabled = true;
+                            r12lbl.classList.add('disabled');
+                            r15.checked  = true;
+                            note.textContent = '12" radius not available with 3" track.';
+                        } else {
+                            r12.disabled = false;
+                            r12lbl.classList.remove('disabled');
+                            note.textContent = '12” standard · 15” for larger / heavier doors';
+                        }
+                        updatePrice();
+                    }
+                    size2.addEventListener('change', onSizeChange);
+                    size3.addEventListener('change', onSizeChange);
+                    onSizeChange(); // run once on load
                 })();
 
             })();
