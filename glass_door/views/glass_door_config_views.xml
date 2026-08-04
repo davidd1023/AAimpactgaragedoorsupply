@@ -59,6 +59,29 @@
         <field name="view_mode">list</field>
     </record>
 
+    <!-- Motors / Openers -->
+    <record id="view_glass_door_motor_list" model="ir.ui.view">
+        <field name="name">glass.door.motor.list</field>
+        <field name="model">glass.door.motor</field>
+        <field name="arch" type="xml">
+            <list string="Motors / Openers" editable="bottom">
+                <field name="brand"/>
+                <field name="name" string="Model"/>
+                <field name="horsepower"/>
+                <field name="drive_type"/>
+                <field name="cost"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_glass_door_motor" model="ir.actions.act_window">
+        <field name="name">Motors / Openers</field>
+        <field name="res_model">glass.door.motor</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'active_test': False}</field>
+    </record>
+
     <!-- Frame Finishes -->
     <record id="view_frame_finish_list" model="ir.ui.view">
         <field name="name">glass.door.frame.finish.list</field>
@@ -67,6 +90,10 @@
             <list string="Frame Finishes" editable="bottom">
                 <field name="name"/>
                 <field name="code"/>
+                <field name="requires_paint"/>
+                <field name="paint_cost_per_sqft"
+                       column_invisible="not requires_paint"
+                       string="Paint Cost/SqFt"/>
             </list>
         </field>
     </record>

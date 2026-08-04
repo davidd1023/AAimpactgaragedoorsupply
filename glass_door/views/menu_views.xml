@@ -59,4 +59,10 @@
               parent="menu_glass_door_config"
               action="action_frame_finish"
               sequence="40"/>
+
+    <menuitem id="menu_glass_door_motors"
+              name="Motors / Openers"
+              parent="menu_glass_door_config"
+              action="action_glass_door_motor"
+              sequence="50"/>
 </odoo>

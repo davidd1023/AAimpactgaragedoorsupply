@@ -8,6 +8,9 @@
     'data': [
         'security/ir.model.access.csv',
         'data/sequences.xml',
+        'data/glass_types.xml',
+        'data/frame_finishes.xml',
+        'data/motors.xml',
         'views/glass_door_config_views.xml',
         'views/glass_door_order_views.xml',
         'views/res_partner_views.xml',
