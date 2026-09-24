@@ -1,0 +1,272 @@
+/* =========================================
+   MAIN CALCULATOR
+   ========================================= */
+
+.spring-engineering {
+    width: 100%;
+    min-height: 100vh;
+
+    background: #eeeeee;
+
+    font-family: Arial, sans-serif;
+    color: #333;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   CURRENT SETUP
+   ========================================= */
+
+.se-section-title {
+    height: 70px;
+
+    background: #eeeeee;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 25px;
+    font-weight: bold;
+
+    color: #555;
+}
+
+
+/* =========================================
+   ROWS
+   ========================================= */
+
+.se-row {
+    min-height: 72px;
+
+    background: white;
+
+    border-bottom: 1px solid #ddd;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    white-space: nowrap;
+
+    padding: 0 28px;
+
+    box-sizing: border-box;
+}
+
+.se-row > span {
+    font-size: 22px;
+}
+
+/* =========================================
+   ROWS-RESULTS
+   ========================================= */
+
+.se-rowR {
+    min-height: 72px;
+
+    background: rgb(193, 192, 192);
+
+    border-bottom: 1px solid #ddd;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    white-space: nowrap;
+
+    padding: 0 28px;
+
+    box-sizing: border-box;
+}
+
+.se-rowR > span {
+    font-size: 22px;
+}
+
+
+/* =========================================
+   SELECT BOXES
+   ========================================= */
+
+.se-select {
+    border: none;
+
+    background: transparent;
+
+    font-size: 21px;
+    font-weight: bold;
+
+    text-align: right;
+
+    min-width: 180px;
+
+    cursor: pointer;
+}
+
+
+/* =========================================
+   BUTTON GROUPS
+   ========================================= */
+
+.se-buttons {
+    display: flex;
+
+    height: 72px;
+}
+
+.se-buttons button {
+    min-width: 70px;
+
+    border: none;
+
+    background: white;
+
+    font-size: 22px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: background 0.1s ease;
+}
+
+.se-buttons button:hover {
+    background: #f5f5f5;
+}
+
+.se-buttons button.selected {
+    background: #ed1b35;
+    color: white;
+}
+
+
+/* =========================================
+   DIVIDER
+   ========================================= */
+
+.se-divider {
+    height: 28px;
+
+    background: #eeeeee;
+}
+
+
+/* =========================================
+   MEASUREMENTS
+   ========================================= */
+
+.se-measurement {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+.se-input {
+    width: 65px;
+
+    border: none;
+
+    background: transparent;
+
+    font-size: 22px;
+    font-weight: bold;
+
+    text-align: center;
+}
+
+.se-measurement span {
+    font-size: 22px;
+}
+
+
+/* =========================================
+   WEIGHT
+   ========================================= */
+
+.se-number-input {
+    width: 180px;
+
+    border: none;
+
+    border-bottom: 1px solid #ccc;
+
+    background: transparent;
+
+    font-size: 22px;
+
+    text-align: right;
+}
+
+
+/* =========================================
+   PITCH
+   ========================================= */
+
+.se-pitch {
+    display: flex;
+
+    border: 2px solid #ed1b35;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.se-pitch button {
+    width: 125px;
+
+    height: 55px;
+
+    border: none;
+
+    background: white;
+
+    color: #ed1b35;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.se-pitch button.selected {
+    background: #ed1b35;
+
+    color: white;
+}
+
+
+/* =========================================
+   ODOO PAGE FIX
+   ========================================= */
+
+/*
+   Make the Odoo action area allow scrolling.
+*/
+
+.o_action_manager {
+    overflow-y: auto !important;
+}
+
+.o_action {
+    overflow-y: auto !important;
+}
+
+.o_content {
+    overflow-y: auto !important;
+}
+
+/*
+   Make the calculator occupy the available screen.
+*/
+
+.o_action_manager,
+.o_action,
+.o_content {
+    min-height: 50vh !important;
+}

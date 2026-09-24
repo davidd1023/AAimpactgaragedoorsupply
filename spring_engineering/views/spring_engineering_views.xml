@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <record id="action_spring_engineering" model="ir.actions.client">
+        <field name="name">Spring Engineering</field>
+        <field name="tag">spring_engineering.calculator</field>
+    </record>
+
+    <menuitem
+        id="menu_spring_engineering"
+        name="Spring Engineering"
+        action="action_spring_engineering"
+        sequence="10"
+    />
+
+</odoo>
