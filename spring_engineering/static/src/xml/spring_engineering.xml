@@ -1019,14 +1019,14 @@
 
                     <input
                         type="number"
-                        value="7"
+                        t-model.number="state.doorHeightFeet"
                         class="se-input"/>
 
                     <span>'</span>
 
                     <input
                         type="number"
-                        value="0"
+                        t-model.number="state.doorHeightInches"
                         class="se-input"/>
 
                     <span>"</span>
@@ -1179,14 +1179,14 @@
 
             <div class="se-rowR">
                     <span>Turns</span>
-                    <span class="se-value" t-esc="state.turns"/>
+                    <span class="se-value" t-esc="turns"/>
             </div>
 
             <!-- Results Multiplier -->
 
             <div class="se-rowR">
                     <span>Multiplier</span>
-                    <span class="se-value" t-esc="state.multiplier"/>
+                    <span class="se-value" t-esc="multiplier"/>
             </div>
 
             <!-- Results TIPPT -->

@@ -41,29 +41,106 @@ const CYCLE_WIRE_EXPONENT = 2.79;
 const CYCLE_EXPONENT = 4.67;
 
 // --- Drum table -----------------------------------------------------------
-// `turns` is the FULL-PRECISION turn count at full wind. The 2-decimal value
-// (7.94 / 7.88 / 6.05) is only what the reference calculator DISPLAYS, and is
-// NOT good enough to compute with: cycle life goes as torque^-4.67, so the
-// rounding is amplified ~4.67x into the result. Using the displayed 6.05 for
-// D525-216 instead of 6.0533223 understated torque by 0.055% and overstated
-// every cycle count by 0.257% (2,199,266 instead of 2,193,635).
+// Each drum carries:
 //
-// Each drum's turns is pinned by 3 reference results - 20/300/1000 lb over
-// 0.125"-0.625" wire, spanning 12.5k to 7.2M cycles. For every drum the three
-// independent solution windows overlap in a band under 1e-6 turns wide, which
-// both fixes the value and confirms the cycle formula above is right: a wrong
-// exponent could not fit all three points at once, and in fact the error
-// before this fix was a CONSTANT percentage per drum across that whole range,
-// which is the signature of a torque scale error, not a formula error.
+//   rEff        Effective drum radius in inches, = multiplier * turns. Peak
+//               torque at full wind is weight * rEff, so rEff belongs to the
+//               DRUM ALONE and does not change with door height. Pinned per
+//               drum from 3 reference cycle counts (20/300/1000 lb over
+//               0.125"-0.625" wire, 12.5k to 7.2M cycles), whose solution
+//               windows overlap in a band under 1e-6 wide.
 //
-// Pin any drum added later the same way: 3 reference cycle counts at spread
-// weights and wire sizes, then solve for turns. Do not trust the displayed
-// 2-decimal turns.
+//   turnsCurve  Coefficients of the turns-vs-height formula below. Turns and
+//               the multiplier are COMPUTED from door height, not looked up
+//               per foot, so any height works - inches included.
+//
+// Why rEff is height-independent: on all three drums a measured 4-10 ft sweep
+// holds multiplier * turns constant (2.2754 / 2.2934 / 2.9365; the ~0.14%
+// spread is only the 2-decimal rounding of the reference turns). Physically
+// that is static balance at full wind - the spring holds weight * drum radius
+// and the door height does not enter. So raising the door LOWERS the multiplier
+// and RAISES the turns, leaving peak torque, and therefore the CYCLE COUNT,
+// unchanged. Only TIPPT and spring length move with height.
 const DRUMS = {
-    "CANIMEX/TF D400-144": { multiplier: 0.291033, turns: 7.8800510 },
-    "CANIMEX/TF D400-96": { multiplier: 0.286584, turns: 7.9395642 },
-    "CANIMEX/TF D525-216": { multiplier: 0.485098, turns: 6.0533223 },
+    "CANIMEX/TF D400-144": {
+        rEff: 2.2933549,
+        turnsCurve: {
+            a: 0.918018474,
+            b: 1.224217309,
+            c: 0.903742416,
+            d: 6.136653231,
+            e: -11.978871764,
+            f: 24.691717891,
+        },
+    },
+    "CANIMEX/TF D400-96": {
+        rEff: 2.2753521,
+        turnsCurve: {
+            a: 0.926270103,
+            b: 1.182458766,
+            c: 1.622498182,
+            d: 1.457531341,
+            e: 3.164283001,
+            f: 5.912155063,
+        },
+    },
+    "CANIMEX/TF D525-216": {
+        rEff: 2.9364545,
+        turnsCurve: {
+            a: 0.702285693,
+            b: 0.936356104,
+            c: 0.999506286,
+            d: 3.138832124,
+            e: -3.937059973,
+            f: 13.452757892,
+        },
+    },
 };
+
+// Turns at full wind for a door of `heightFeet` (fractional - inches go in as
+// inches/12):
+//
+//     turns = a*H + b + c/H + d/H^2 + e/H^3 + f/H^4
+//
+// Fitted per drum against 22 reference multipliers in total: a 4-10 ft
+// whole-foot sweep for each drum, plus 7'6" on D400-96. That off-grid point
+// started as a PREDICTION (0.271486) which the reference calculator then
+// confirmed exactly, so the curve is checked between the feet, not only on
+// them. Worst error over all 22 points is 2.3e-7, i.e. every reference
+// multiplier reproduces to the full 6 displayed decimals.
+//
+// A straight line misses by 1.33%, so the curvature is real, and the inverse
+// powers are what buy the last decimals - dropping 1/H^3 costs 1e-5, which
+// shows in the 5th decimal of the displayed multiplier.
+//
+// This is an empirical fit, not a derived law: no drum geometry reproduces it
+// (a constant-radius drum makes turns linear in height, which this is not; a
+// linear taper misses by 5.5%). Trust it across the measured 4-10 ft band and
+// a little beyond; it stays smooth and monotonic out to 16 ft, but a new drum
+// needs its own sweep rather than borrowing another drum's coefficients.
+const CURVE_MIN_FEET = 3;
+
+function drumTurns(drum, heightFeet) {
+    if (!drum.turnsCurve) {
+        return 0;
+    }
+
+    // Far below the measured band the inverse-power terms take over and the
+    // curve stops being monotonic (turns would start RISING as the door gets
+    // shorter), so clamp short of that. No real door is this low.
+    const height = Math.max(Number(heightFeet) || 0, CURVE_MIN_FEET);
+
+    const { a, b, c, d, e, f } = drum.turnsCurve;
+
+    return (
+        a * height +
+        b +
+        c / height +
+        d / height ** 2 +
+        e / height ** 3 +
+        f / height ** 4
+    );
+}
 
 export class SpringEngineering extends Component {
 
@@ -88,10 +165,6 @@ export class SpringEngineering extends Component {
             pitchAmount: "0/12",
             wireSize: '0.125"',
 
-            //stuff
-            multiplier: 0,
-            turns: 0,
-            turnsExact: 0,
 
         });
     }
@@ -117,13 +190,53 @@ get springIdNumber() {
     return Number(value);
 }
 
+get doorHeightTotalFeet() {
+    return (
+        Number(this.state.doorHeightFeet || 0) +
+        Number(this.state.doorHeightInches || 0) / 12
+    );
+}
+
+get drumData() {
+    return DRUMS[this.state.drum] || null;
+}
+
+get turnsExact() {
+    // Full-precision turns at the current door height. Everything computes
+    // from this; `turns` below is only what the Turns row shows.
+    if (!this.drumData) {
+        return 0;
+    }
+
+    return drumTurns(this.drumData, this.doorHeightTotalFeet);
+}
+
+get turns() {
+    return Math.round(this.turnsExact * 100) / 100;
+}
+
+get multiplierExact() {
+    // Derived from turns via the constant drum radius, which is what keeps the
+    // cycle count height-independent.
+    if (!this.drumData || !this.turnsExact) {
+        return 0;
+    }
+
+    return this.drumData.rEff / this.turnsExact;
+}
+
+get multiplier() {
+    // The reference calculator shows 6 decimals.
+    return Math.round(this.multiplierExact * 1000000) / 1000000;
+}
+
 get tipptExact() {
     // Unrounded IPPT. `tippt` below is rounded to 2 dp for display and for the
     // spring-length formula (which matches the reference results exactly that
     // way). Cycle life must NOT use the rounded value: it varies as the 4.67th
     // power of torque, so a 0.01 rounding of IPPT moves the cycle count by
     // ~0.05% - enough to miss by 179 cycles at 150 lb.
-    return this.state.multiplier * Number(this.state.weight || 0);
+    return this.multiplierExact * Number(this.state.weight || 0);
 }
 
 get tippt() {
@@ -151,11 +264,11 @@ get divider() {
 get springTorque() {
     // Torque carried by ONE spring at full wind, in in-lb. Set entirely by the
     // door and drum - spring geometry does not enter it.
-    if (!this.state.springs || !this.state.turnsExact) {
+    if (!this.state.springs || !this.turnsExact) {
         return 0;
     }
 
-    return (this.tipptExact / this.state.springs) * this.state.turnsExact;
+    return (this.tipptExact / this.state.springs) * this.turnsExact;
 }
 
 get cycleLife() {
@@ -221,16 +334,6 @@ get springLength() {
 
     selectDrum(event) {
         this.state.drum = event.target.value;
-
-        //these numbers are at 7ft in height and need to change depending on the height
-        const drum = DRUMS[this.state.drum];
-
-        this.state.multiplier = drum ? drum.multiplier : 0;
-
-        // turnsExact drives the torque and so the cycle count; state.turns is
-        // the rounded value shown in the Turns row.
-        this.state.turnsExact = drum ? drum.turns : 0;
-        this.state.turns = Math.round(this.state.turnsExact * 100) / 100;
     }
 
     selectWeight(event) {
