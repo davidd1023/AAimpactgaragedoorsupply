@@ -262,7 +262,7 @@
                     <option value="" style="color: red;">Select a Drum</option>
 
                     <t t-if="state.liftType === 'Standard'">
-
+<!--
                     <option value="AMBASSADOR D-101">
                         AMBASSADOR D-101
                     </option>
@@ -318,15 +318,15 @@
                     <option value="CANIMEX/TF D400-123">
                         CANIMEX/TF D400-123
                     </option>
-
+-->
                     <option value="CANIMEX/TF D400-144">
                         CANIMEX/TF D400-144
                     </option>
-
+<!--
                     <option value="CANIMEX/TF D400-156">
                         CANIMEX/TF D400-156
                     </option>
-
+-->
                     <option value="CANIMEX/TF D400-96">
                         CANIMEX/TF D400-96
                     </option>
@@ -334,7 +334,7 @@
                     <option value="CANIMEX/TF D525-216">
                         CANIMEX/TF D525-216
                     </option>
-
+<!--
                     <option value="CANIMEX/TF D800-312">
                         CANIMEX/TF D800-312
                     </option>
@@ -578,6 +578,7 @@
                     <option value="WHITING 2 5/8 TT">
                         WHITING 2 5/8 TT
                     </option>
+                        -->
 
                     </t>
 
@@ -1175,27 +1176,6 @@
                     <span class="se-value" t-esc="state.springId"/>
             </div>
 
-            <!-- Results Turns -->
-
-            <div class="se-rowR">
-                    <span>Turns</span>
-                    <span class="se-value" t-esc="turns"/>
-            </div>
-
-            <!-- Results Multiplier -->
-
-            <div class="se-rowR">
-                    <span>Multiplier</span>
-                    <span class="se-value" t-esc="multiplier"/>
-            </div>
-
-            <!-- Results TIPPT -->
-
-            <div class="se-rowR">
-                <span>TIPPT</span>
-                <span class="se-value" t-esc="tippt"/>
-            </div>
-
             <!-- Results SpringLength -->
 
             <div class="se-rowR">
@@ -1208,6 +1188,27 @@
             <div class="se-rowR">
                     <span>Cycles</span>
                     <span class="se-value" t-esc="cycleLife"/>
+            </div>
+
+            <!-- Results Multiplier -->
+
+            <div class="se-rowR">
+                    <span>Multiplier</span>
+                    <span class="se-value" t-esc="multiplier"/>
+            </div>
+
+            <!-- Results Turns -->
+
+            <div class="se-rowR">
+                    <span>Turns</span>
+                    <span class="se-value" t-esc="turns"/>
+            </div>
+
+            <!-- Results TIPPT -->
+
+            <div class="se-rowR">
+                <span>TIPPT</span>
+                <span class="se-value" t-esc="tippt"/>
             </div>
             
 
