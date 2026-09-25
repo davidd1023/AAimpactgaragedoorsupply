@@ -40,6 +40,27 @@ const CYCLE_COEFFICIENT = 124205;
 const CYCLE_WIRE_EXPONENT = 2.79;
 const CYCLE_EXPONENT = 4.67;
 
+// --- Spring weight --------------------------------------------------------
+// The steel weight of ONE spring: wire cross-section * wire length * density.
+//
+//   coils      = springLength / wire          (closed-wound body)
+//   wireLength = pi * (springID + wire) * coils
+//   volume     = (pi/4) * wire^2 * wireLength
+//   weight     = STEEL_DENSITY * volume
+//              = STEEL_DENSITY * (pi^2/4) * wire * (springID + wire) * length
+//
+// Derived, not fitted. Solving for the density each reference result implies
+// (12.00 / 12.18 / 12.30 lb) gives the window 0.283484-0.283672 lb/in^3, and
+// 0.2836 - the textbook density of spring steel - falls inside it and
+// reproduces all three to the cent. Because the constant is a real material
+// property rather than a tuned coefficient, this should hold for any spring
+// ID, wire size and length, not just near those three points.
+//
+// Per SPRING, not per set: springLength is the length of each individual
+// spring (it scales with the spring count, since each spring in a set of n
+// carries IPPT/n and so is softer and longer).
+const STEEL_DENSITY = 0.2836;   // lb/in^3
+
 // --- Drum table -----------------------------------------------------------
 // Each drum carries:
 //
@@ -288,7 +309,7 @@ get cycleLife() {
     return Math.round(cycles).toLocaleString("en-US");
 }
 
-get springLength() {
+get springLengthExact() {
     if (!this.tippt) {
         return 0;
     }
@@ -300,11 +321,30 @@ get springLength() {
 
     const endAddition = endCoils * this.wireSizeNumber;
 
-    const baseLength =
-        (this.state.springs * this.divider) / this.tippt + endAddition;
-
-    return Math.round(baseLength * 100) / 100;
+    return (this.state.springs * this.divider) / this.tippt + endAddition;
 }
+
+get springLength() {
+    return Math.round(this.springLengthExact * 100) / 100;
+}
+
+get springWeight() {
+    // Steel weight of one spring, in lb. See STEEL_DENSITY above.
+    // `meanDiameter` is springID + wire, which is exactly the coil diameter
+    // the wire follows.
+    if (!this.springLengthExact || !this.wireSizeNumber) {
+        return 0;
+    }
+
+    const volume =
+        ((Math.PI ** 2) / 4) *
+        this.wireSizeNumber *
+        this.meanDiameter *
+        this.springLengthExact;
+
+    return Math.round(STEEL_DENSITY * volume * 100) / 100;
+}
+
 // here ends divider
 
     selectSprings(event) {

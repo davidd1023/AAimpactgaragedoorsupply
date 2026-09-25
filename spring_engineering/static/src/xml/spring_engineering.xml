@@ -1183,6 +1183,13 @@
                     <span class="se-value" t-esc="springLength + '&quot;'"/>
             </div>
 
+            <!-- Results Spring Weight -->
+
+            <div class="se-rowR">
+                    <span>Spring Weight</span>
+                    <span class="se-value" t-esc="springWeight + ' lb'"/>
+            </div>
+
             <!-- Results Cycles -->
 
             <div class="se-rowR">
