@@ -1202,6 +1202,13 @@
                     <span>Spring Length</span>
                     <span class="se-value" t-esc="springLength + '&quot;'"/>
             </div>
+
+            <!-- Results Cycles -->
+
+            <div class="se-rowR">
+                    <span>Cycles</span>
+                    <span class="se-value" t-esc="cycleLife"/>
+            </div>
             
 
         </div>
