@@ -40,6 +40,31 @@ const CYCLE_COEFFICIENT = 124205;
 const CYCLE_WIRE_EXPONENT = 2.79;
 const CYCLE_EXPONENT = 4.67;
 
+// --- Drum table -----------------------------------------------------------
+// `turns` is the FULL-PRECISION turn count at full wind. The 2-decimal value
+// (7.94 / 7.88 / 6.05) is only what the reference calculator DISPLAYS, and is
+// NOT good enough to compute with: cycle life goes as torque^-4.67, so the
+// rounding is amplified ~4.67x into the result. Using the displayed 6.05 for
+// D525-216 instead of 6.0533223 understated torque by 0.055% and overstated
+// every cycle count by 0.257% (2,199,266 instead of 2,193,635).
+//
+// Each drum's turns is pinned by 3 reference results - 20/300/1000 lb over
+// 0.125"-0.625" wire, spanning 12.5k to 7.2M cycles. For every drum the three
+// independent solution windows overlap in a band under 1e-6 turns wide, which
+// both fixes the value and confirms the cycle formula above is right: a wrong
+// exponent could not fit all three points at once, and in fact the error
+// before this fix was a CONSTANT percentage per drum across that whole range,
+// which is the signature of a torque scale error, not a formula error.
+//
+// Pin any drum added later the same way: 3 reference cycle counts at spread
+// weights and wire sizes, then solve for turns. Do not trust the displayed
+// 2-decimal turns.
+const DRUMS = {
+    "CANIMEX/TF D400-144": { multiplier: 0.291033, turns: 7.8800510 },
+    "CANIMEX/TF D400-96": { multiplier: 0.286584, turns: 7.9395642 },
+    "CANIMEX/TF D525-216": { multiplier: 0.485098, turns: 6.0533223 },
+};
+
 export class SpringEngineering extends Component {
 
     static template = "spring_engineering.Calculator";
@@ -66,6 +91,7 @@ export class SpringEngineering extends Component {
             //stuff
             multiplier: 0,
             turns: 0,
+            turnsExact: 0,
 
         });
     }
@@ -125,11 +151,11 @@ get divider() {
 get springTorque() {
     // Torque carried by ONE spring at full wind, in in-lb. Set entirely by the
     // door and drum - spring geometry does not enter it.
-    if (!this.state.springs || !this.state.turns) {
+    if (!this.state.springs || !this.state.turnsExact) {
         return 0;
     }
 
-    return (this.tipptExact / this.state.springs) * this.state.turns;
+    return (this.tipptExact / this.state.springs) * this.state.turnsExact;
 }
 
 get cycleLife() {
@@ -194,24 +220,17 @@ get springLength() {
     }
 
     selectDrum(event) {
-    this.state.drum = event.target.value;
+        this.state.drum = event.target.value;
+
         //these numbers are at 7ft in height and need to change depending on the height
-    if (this.state.drum === "CANIMEX/TF D400-144") {
-        this.state.multiplier = 0.291033;
-        this.state.turns = 7.88;
-    }
-    else if (this.state.drum === "CANIMEX/TF D400-96") {
-        this.state.multiplier = 0.286584;
-        this.state.turns = 7.94;
-    } 
-    else if (this.state.drum === "CANIMEX/TF D525-216") {
-        this.state.multiplier = 0.485098;
-        this.state.turns = 6.05;
-    } 
-    else {
-        this.state.multiplier = 0;
-        this.state.turns = 0;
-    }
+        const drum = DRUMS[this.state.drum];
+
+        this.state.multiplier = drum ? drum.multiplier : 0;
+
+        // turnsExact drives the torque and so the cycle count; state.turns is
+        // the rounded value shown in the Turns row.
+        this.state.turnsExact = drum ? drum.turns : 0;
+        this.state.turns = Math.round(this.state.turnsExact * 100) / 100;
     }
 
     selectWeight(event) {
