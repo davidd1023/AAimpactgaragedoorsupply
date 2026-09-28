@@ -163,6 +163,128 @@ function drumTurns(drum, heightFeet) {
     );
 }
 
+// --- Hi-Lift drums --------------------------------------------------------
+// A hi-lift drum is a different animal from the standard drums above. The
+// cable no longer sees one profile: the high-lift extension winds on a flat
+// spiral section, and the door-height portion on its own section. Two things
+// follow, both confirmed across 175 reference values:
+//
+//   1. rEff depends on the HI-LIFT ONLY, never on door height. A full 4-10 ft
+//      sweep returns an identical cycle count at every hi-lift tried (3998 at
+//      12", 2949 at 24", 2253 at 36", 1991 at 42", 1583 at 54"), and peak
+//      torque is weight * rEff, so rEff is pinned by hi-lift alone.
+//
+//   2. rEff^2 is EXACTLY LINEAR in hi-lift. d(rEff^2)/dHL measures
+//      0.0996617 +/- 1e-6 at every hi-lift with a 6-digit cycle count. That is
+//      flat-spiral cable geometry and not a fit:
+//
+//          r(n) = r0 + p*n   =>   L = pi*(r^2 - r0^2)/p
+//                            =>   rEff^2 = r0^2 + (p/pi)*HL
+//
+//      giving a base radius r0 = sqrt(A) = 2.719421" and a cable pitch
+//      p = pi*B = 0.313097". The independently measured sub-12" clamp value is
+//      2.7194206 - the same number to 6e-7, so the clamp is simply HL = 0 on
+//      this curve rather than a constant of its own.
+//
+// Below MIN_HI_LIFT the reference calculator freezes: 6", 8", 9", 10" and 11"
+// all return bit-identical output, equal to HL = 0. At exactly 0 it hides the
+// results rows instead (see `resultsVisible`).
+const HILIFT_MIN = 12;
+
+// Unlike the standard drums, it is the MULTIPLIER - not the turns - that is
+// smooth in door height here, and it follows the very same 6-term family the
+// standard drums use for turns:
+//
+//     multiplier = a*H + b + c/H + d/H^2 + e/H^3 + f/H^4
+//     turns      = rEff / multiplier
+//
+// That ordering is forced by the data, not chosen. At 54" of hi-lift the
+// multiplier collapses through zero just under 4 ft, so turns has a genuine
+// pole there (the reference prints 1620.05 turns and a 3858.95" spring at
+// 4'0"/54"). Fitting TURNS with the 6-term form misses by 362%; fitting the
+// MULTIPLIER with it lands at 0.0009%, and the pole falls out for free.
+//
+// Each of a..f is then a quintic in u = rEff - r0, interpolated through the
+// six measured hi-lift columns (0/12/24/36/42/54). rEff is used as the
+// interpolation variable rather than hi-lift itself because it halves the
+// residual - it is the drum's own geometric coordinate.
+//
+// Held out from the fit entirely and then predicted: 7'3"/30" and 5'6"/42"
+// came back within 2e-6 and 4e-6, and 6'6"/12" was predicted at 0.484240
+// before the reference confirmed 0.484240 exactly.
+//
+// Accuracy: 169 of the 175 reported display values reproduce exactly. The six
+// that do not are last-digit rounding at a boundary - three turns cells, and
+// the 4'0"/54" pole row, where the reference's own 6-decimal multiplier
+// (0.002206) carries only 4 significant figures and 1/multiplier amplifies it
+// into a 0.09" spring-length difference. A 3721-point search over the spiral
+// constants found no setting that does better; the residual conflict is
+// between the reference's displayed turns and its displayed cycles, which
+// disagree by 0.003% at 36" and 54" under this file's cycle law.
+const HILIFT_DRUMS = {
+    "CANIMEX/TF 525-54HL": {
+        spiralA: 7.3952515,      // r0^2
+        spiralB: 0.099661766,    // p/pi
+        multCoeffs: [
+            [-1.319237311599656e-06, -0.0016344760924833605, 0.01669819788227263, -0.05573510317140107, 0.07466492981829372, -0.0344128621693411],
+            [3.960125905526815e-05, 0.052452637217159974, -0.5361653881591721, 1.7935526153774979, -2.4067095438958654, 1.1086242783026363],
+            [3.86960178358562, 0.7692767006011653, 6.685863406482316, -22.407748517920883, 30.094803859189586, -13.828953800792886],
+            [-2.900256482837781, -13.655562511737713, -40.29346731987498, 136.39394326043143, -181.4331247650827, 82.83811944656046],
+            [-0.005522552882827296, -11.399633134303011, 114.0215025064608, -405.13917233690313, 521.183049546905, -233.07046922855912],
+            [0.005265468793582319, 12.364865160322623, -125.95235614710633, 418.9639666876059, -550.4250674078384, 221.4245107209963],
+        ],
+    },
+};
+
+// Hi-lift actually used by the model: anything under a full 12" behaves as 0.
+function hiLiftApplied(hiLiftInches) {
+    const hl = Number(hiLiftInches) || 0;
+
+    return hl >= HILIFT_MIN ? hl : 0;
+}
+
+function hiLiftREff(drum, hiLiftInches) {
+    return Math.sqrt(drum.spiralA + drum.spiralB * hiLiftApplied(hiLiftInches));
+}
+
+function hiLiftMultiplier(drum, heightFeet, hiLiftInches) {
+    const height = Number(heightFeet) || 0;
+
+    if (height <= 0) {
+        return 0;
+    }
+
+    // u is measured from the drum's base radius so the quintics stay
+    // well conditioned - u runs 0 to 0.855 over the whole hi-lift range.
+    const u = hiLiftREff(drum, hiLiftInches) - Math.sqrt(drum.spiralA);
+
+    const basis = [
+        height,
+        1,
+        1 / height,
+        1 / height ** 2,
+        1 / height ** 3,
+        1 / height ** 4,
+    ];
+
+    let multiplier = 0;
+
+    for (let i = 0; i < basis.length; i++) {
+        const coeffs = drum.multCoeffs[i];
+
+        // Horner, highest power first.
+        let term = 0;
+
+        for (let j = coeffs.length - 1; j >= 0; j--) {
+            term = term * u + coeffs[j];
+        }
+
+        multiplier += term * basis[i];
+    }
+
+    return multiplier;
+}
+
 export class SpringEngineering extends Component {
 
     static template = "spring_engineering.Calculator";
@@ -222,9 +344,38 @@ get drumData() {
     return DRUMS[this.state.drum] || null;
 }
 
+get hiLiftDrumData() {
+    return HILIFT_DRUMS[this.state.drum] || null;
+}
+
+get hiLiftInches() {
+    return Number(this.state.liftin) || 0;
+}
+
+get rEffExact() {
+    // Effective drum radius at full wind. Constant for a standard drum;
+    // set by the hi-lift alone (never by door height) for a hi-lift drum.
+    if (this.hiLiftDrumData) {
+        return hiLiftREff(this.hiLiftDrumData, this.hiLiftInches);
+    }
+
+    return this.drumData ? this.drumData.rEff : 0;
+}
+
 get turnsExact() {
     // Full-precision turns at the current door height. Everything computes
     // from this; `turns` below is only what the Turns row shows.
+    //
+    // The two drum families are solved in opposite directions. A standard
+    // drum has a smooth turns curve and the multiplier falls out of it; a
+    // hi-lift drum has a smooth MULTIPLIER and the turns fall out of that,
+    // which is what lets turns go to a pole where the multiplier crosses zero.
+    if (this.hiLiftDrumData) {
+        const multiplier = this.multiplierExact;
+
+        return multiplier > 0 ? this.rEffExact / multiplier : 0;
+    }
+
     if (!this.drumData) {
         return 0;
     }
@@ -237,6 +388,14 @@ get turns() {
 }
 
 get multiplierExact() {
+    if (this.hiLiftDrumData) {
+        return hiLiftMultiplier(
+            this.hiLiftDrumData,
+            this.doorHeightTotalFeet,
+            this.hiLiftInches
+        );
+    }
+
     // Derived from turns via the constant drum radius, which is what keeps the
     // cycle count height-independent.
     if (!this.drumData || !this.turnsExact) {
@@ -244,6 +403,23 @@ get multiplierExact() {
     }
 
     return this.drumData.rEff / this.turnsExact;
+}
+
+get resultsVisible() {
+    // The reference calculator reveals the results rows only once it has
+    // everything it needs. A hi-lift drum with the hi-lift left at 0 (or
+    // blank) is the case that matters here - it shows nothing at all, so
+    // neither do we. Anything from 1" up computes, clamped to 0 below 12".
+    //
+    // The multiplier check covers the far corner of the surface: short door,
+    // long hi-lift. The multiplier collapses through zero there, and past the
+    // crossing turns would go negative, which the reference has never been
+    // observed to display.
+    if (this.hiLiftDrumData) {
+        return this.hiLiftInches > 0 && this.multiplierExact > 0;
+    }
+
+    return true;
 }
 
 get multiplier() {
@@ -261,6 +437,7 @@ get tipptExact() {
 }
 
 get tippt() {
+    // Display only. Nothing computes from this - see springLengthExact.
     return Math.round(this.tipptExact * 100) / 100;
 }
 
@@ -310,7 +487,7 @@ get cycleLife() {
 }
 
 get springLengthExact() {
-    if (!this.tippt) {
+    if (!this.tipptExact) {
         return 0;
     }
 
@@ -321,7 +498,14 @@ get springLengthExact() {
 
     const endAddition = endCoils * this.wireSizeNumber;
 
-    return (this.state.springs * this.divider) / this.tippt + endAddition;
+    // Unrounded IPPT, not the 2-decimal display value. The hi-lift data
+    // settles this: at 10'0"/12" the rounded IPPT gives 25.51" where the
+    // reference says 25.52", and at 9'0"/36" it gives 25.12" against 25.11" -
+    // two clean counterexamples, with none the other way. Rounding also
+    // wrecks the collapse corner, where IPPT falls under 1 in-lb and a 0.005
+    // rounding moves the spring length by ten inches (4'0"/54": 3869.59" from
+    // the rounded value against a reference 3858.95").
+    return (this.state.springs * this.divider) / this.tipptExact + endAddition;
 }
 
 get springLength() {
@@ -386,6 +570,10 @@ get springWeight() {
 
     selectWireSize(event) {
         this.state.wireSize = event.target.value;
+    }
+
+    selectLiftIn(event) {
+        this.state.liftin = event.target.value;
     }
 
     selectLiftType(event) {

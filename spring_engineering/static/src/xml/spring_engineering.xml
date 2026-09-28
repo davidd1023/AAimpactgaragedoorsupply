@@ -199,7 +199,9 @@
 
                 <input
                     type="number"
-                    class="se-number-input"/>
+                    class="se-number-input"
+                    t-att-value="state.liftin"
+                    t-on-input="selectLiftIn"/>
 
             </div>
             </t>
@@ -1169,6 +1171,12 @@
 
             </div>
 
+            <!-- Results rows: hidden until the inputs are sufficient.
+                 A hi-lift drum with no hi-lift entered shows nothing, which
+                 is what the reference calculator does. -->
+
+            <t t-if="resultsVisible">
+
             <!-- Results Spring ID -->
 
             <div class="se-rowR">
@@ -1217,6 +1225,8 @@
                 <span>TIPPT</span>
                 <span class="se-value" t-esc="tippt"/>
             </div>
+
+            </t>
             
 
         </div>
