@@ -428,11 +428,17 @@ get multiplier() {
 }
 
 get tipptExact() {
-    // Unrounded IPPT. `tippt` below is rounded to 2 dp for display and for the
-    // spring-length formula (which matches the reference results exactly that
-    // way). Cycle life must NOT use the rounded value: it varies as the 4.67th
-    // power of torque, so a 0.01 rounding of IPPT moves the cycle count by
-    // ~0.05% - enough to miss by 179 cycles at 150 lb.
+    // Unrounded IPPT. NOTHING computes from the rounded `tippt` below - it is
+    // display only. An earlier note here claimed the reference rounded IPPT
+    // before the spring-length formula; that is wrong, and it was checked
+    // directly. On D400-96, 10'0", 250 lb, ID 2 5/8", wire 0.25", rounding
+    // gives 38.58" where the reference says 38.57". The hi-lift drum gives
+    // three more counterexamples (10'0"/12" and 9'0"/36" on 525-54HL), with
+    // none the other way.
+    //
+    // Cycle life likewise must use the unrounded value: it varies as the
+    // 4.67th power of torque, so a 0.01 rounding of IPPT moves the cycle
+    // count by ~0.05% - enough to miss by 179 cycles at 150 lb.
     return this.multiplierExact * Number(this.state.weight || 0);
 }
 
