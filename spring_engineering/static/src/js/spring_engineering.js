@@ -293,7 +293,7 @@ export class SpringEngineering extends Component {
         this.state = useState({
             assembly: "Single",
             springs: 2,
-            springId: '1 19/32"',
+            springId: '2 5/8"',
             cycles: "10,000",
             liftType: "Standard",
             liftin: "",
