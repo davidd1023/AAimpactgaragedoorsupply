@@ -247,30 +247,39 @@ const HL575_NODE_B = 0.099471839;  // catalog (5/16")/pi
 const HL575_A = 8.8176917;         // calculator r0^2, r0 = 2.96946"
 const HL575_B = 0.099661791;       // calculator pitch/pi, pitch = 0.313097"
 
-// Correction from the published surface onto the reference calculator's.
+// Correction onto the reference calculator, one curve per measured hi-lift
+// column rather than a single global formula.
 //
-// Tempting to assume the two share one multiplier function and differ only in
-// the hi-lift -> radius mapping; they do not. Feeding the calculator's radius
-// into the catalog's surface makes the error worse (0.20% -> 0.63%), so the
-// gap has to be fitted.
+// The first attempt fitted a full quadratic in (hi-lift, 1/height) to the
+// whole surface and stalled: 0.0272% worst, 0.0068% median over 58 reference
+// points. The offset's shape ACROSS height changes with hi-lift - flat and
+// within the catalog's own rounding at 24" (+0.012% to -0.004%, pure
+// scatter), steep at 72" (+0.234% at 6' falling to +0.048% at 18') - and no
+// low-order product form covers both. Fitting a curve per column and
+// interpolating those, the same structure the surface itself uses, gives
+// 0.0087% worst and 0.0013% median over 65 points: worst cut by a third,
+// median by five times.
 //
-// Three terms - (hl^2/h^2), (1/h), (hl^3/h^2) - chosen by greedy forward
-// selection under leave-one-out over 44 reference multipliers spanning
-// 6'-20' doors and 12"-120" of hi-lift. Worst error 0.027% in-sample,
-// 0.036% leave-one-out, against 0.20% uncorrected.
-//
-// This is at the floor of what the catalog can support, and adding terms or
-// points does not help: the surface fitted to the catalog reproduces its
-// printed values to 6.7e-5, which on a 0.25 multiplier is 0.027% - the same
-// size as the correction itself. The catalog prints 4 decimals; the reference
-// calculator gives 6. Going below ~0.03% therefore means dropping the catalog
-// as a base and fitting the calculator directly, which a 48-point trial could
-// not do (0.48% leave-one-out) - that route needs on the order of 100 points
-// to cover this domain, against roughly 70 for the much smaller 525-54HL.
-const HL575_CORRECTION = [
-    0.0017100094,
-    -0.0000537585,
-    -0.0002815375
+// Each row is [hiLift, a, b, c, d] for
+//     offset = a + b*(10/H) + c*(10/H)^2 + d*(10/H)^3
+// with the term count per column chosen by leave-one-out, so a thinly
+// sampled column cannot overfit. The 24" column resolves to a single
+// constant because its offset is genuinely flat - the residual there is the
+// catalog's 4-decimal rounding, which at a multiplier of 0.3 to 0.5 is
+// itself 0.01 to 0.017%, so that column cannot be improved by more runs.
+const HL575_OFFSET_COLUMNS = [
+        [  0, -0.0002652091,  0.0000000000,  0.0000000000,  0.0000000000],
+        [ 12, -0.0003500735,  0.0005080514, -0.0002187039,  0.0000000000],
+        [ 24,  0.0000470968,  0.0000000000,  0.0000000000,  0.0000000000],
+        [ 36, -0.0000285671,  0.0002564019,  0.0000000000,  0.0000000000],
+        [ 48,  0.0004627047, -0.0006666301,  0.0005494695,  0.0000000000],
+        [ 60,  0.0022910666, -0.0064359252,  0.0063270691, -0.0017123162],
+        [ 72,  0.0012969913, -0.0024405486,  0.0018323139,  0.0000000000],
+        [ 84,  0.0005465707, -0.0010155875,  0.0014308454,  0.0000000000],
+        [ 90, -0.0015614725,  0.0070670816, -0.0080342972,  0.0036354436],
+        [ 96, -0.0003655542,  0.0015779125,  0.0000000000,  0.0000000000],
+        [108, -0.0003333715,  0.0016686279,  0.0000000000,  0.0000000000],
+        [120,  0.0002946135,  0.0003244492,  0.0010317381,  0.0000000000],
 ];
 
 // One row per printed hi-lift column:
@@ -343,11 +352,15 @@ const HL575_MAX = 120;             // last printed hi-lift column
 function hl575Applied(hiLiftInches) {
     const hl = Number(hiLiftInches) || 0;
 
-    if (hl < HILIFT_MIN) {
+    // Below 12" and ABOVE the maximum both fall back to the 0" row - above
+    // the maximum it is a fallback, not a clamp. Measured on this drum at
+    // 125", which returns the 0" cycle count of 3762 rather than the 120"
+    // one, and on the D800-120, which behaves the same way.
+    if (hl < HILIFT_MIN || hl > HL575_MAX) {
         return 0;
     }
 
-    return Math.min(hl, HL575_MAX);
+    return hl;
 }
 
 function hl575REff(hiLiftInches) {
@@ -362,37 +375,50 @@ function hl575Node(hiLift) {
 }
 
 function hl575Correction(heightFeet, hiLift) {
-    const y = hiLift / 100;
-    const z = 10 / heightFeet;
+    const u = hl575Node(hiLift);
 
-    // Order must match HL575_CORRECTION: y^2*z^2, z, y^3*z^2.
-    const terms = [y * y * z * z, z, y * y * y * z * z];
+    let nearest = 0;
 
-    let sum = 0;
-
-    for (let i = 0; i < terms.length; i++) {
-        sum += HL575_CORRECTION[i] * terms[i];
-    }
-
-    return 1 + sum;
-}
-
-// Lowest door height the catalog covers at this hi-lift. The published
-// columns stop short at low heights - the catalog prints nothing once the
-// hi-lift exceeds the door height - so anything below this is extrapolation
-// off the end of the data, which is exactly where a 6-term inverse-power
-// basis misbehaves.
-function hl575MinHeight(hiLiftInches) {
-    const hl = hl575Applied(hiLiftInches);
-    let min = HL575_COLUMNS[0][1];
-
-    for (const row of HL575_COLUMNS) {
-        if (row[0] <= hl) {
-            min = row[1];
+    for (let i = 1; i < HL575_OFFSET_COLUMNS.length; i++) {
+        if (
+            Math.abs(hl575Node(HL575_OFFSET_COLUMNS[i][0]) - u) <
+            Math.abs(hl575Node(HL575_OFFSET_COLUMNS[nearest][0]) - u)
+        ) {
+            nearest = i;
         }
     }
 
-    return min;
+    const start = Math.max(
+        0,
+        Math.min(nearest - 1, HL575_OFFSET_COLUMNS.length - 3)
+    );
+    const window = HL575_OFFSET_COLUMNS.slice(start, start + 3);
+    const nodes = window.map((row) => hl575Node(row[0]));
+
+    const inv = 10 / heightFeet;
+    const shape = [1, inv, inv ** 2, inv ** 3];
+
+    let offset = 0;
+
+    for (let a = 0; a < 4; a++) {
+        let term = 0;
+
+        for (let j = 0; j < window.length; j++) {
+            let weight = 1;
+
+            for (let m = 0; m < nodes.length; m++) {
+                if (m !== j) {
+                    weight *= (u - nodes[m]) / (nodes[j] - nodes[m]);
+                }
+            }
+
+            term += weight * window[j][a + 1];
+        }
+
+        offset += term * shape[a];
+    }
+
+    return 1 + offset;
 }
 
 function hl575Multiplier(heightFeet, hiLiftInches) {
@@ -545,12 +571,13 @@ const HL800_COLUMNS = [
 // with the term count per column chosen by leave-one-out, so a column with
 // few measured heights cannot overfit. The 0" row is a single anchor.
 //
-// One measured point is deliberately excluded: 11'0" at 120", reported as
-// 0.301582. Its column's other seven heights fit a three-term curve to
-// 5.5e-05, and including it degrades that to 1.8e-04 while predicting
-// 0.301658 for the point itself. A 0.025% outlier against a column whose
-// scatter is 0.005% is more likely a mis-keyed digit than a real feature, so
-// it is left out pending a re-run.
+// Every measured point is included. 11'0" at 120" was briefly suspected of
+// being a mis-key, because dropping it improves that column's fit from
+// 1.8e-04 to 5.5e-05. It was re-run and confirmed. The explanation is the
+// catalog, not the datum: at 120" the multipliers run 0.24 to 0.38, where
+// the catalog's 4-decimal rounding is +/-5e-05 - which is +/-1.3e-04 to
+// +/-2e-04 once divided through into the offset. That column is at the
+// catalog's precision floor, and no number of extra runs will move it.
 const HL800_OFFSET_COLUMNS = [
         [  0, -0.0001294229,  0.0000000000,  0.0000000000,  0.0000000000],
         [ 18,  0.0001615367,  0.0000000000,  0.0000000000,  0.0000000000],
@@ -560,7 +587,7 @@ const HL800_OFFSET_COLUMNS = [
         [ 78,  0.0008421350, -0.0017933223,  0.0017675247,  0.0000000000],
         [ 96, -0.0004523175,  0.0045373726, -0.0070243310,  0.0040413309],
         [108,  0.0008287370, -0.0016324146,  0.0023095161,  0.0000000000],
-        [120,  0.0011632634, -0.0029148431,  0.0038709401,  0.0000000000],
+        [120,  0.0011691323, -0.0028491072,  0.0037063837,  0.0000000000],
 ];
 
 function hl800Applied(hiLiftInches) {
@@ -681,19 +708,6 @@ function hl800Multiplier(heightFeet, hiLiftInches) {
     return base * (1 + offset);
 }
 
-// Lowest and highest door height the catalog publishes at this hi-lift.
-function hl800HeightRange(hiLiftInches) {
-    const hl = hl800Applied(hiLiftInches);
-    let row = HL800_COLUMNS[0];
-
-    for (const candidate of HL800_COLUMNS) {
-        if (candidate[0] <= hl) {
-            row = candidate;
-        }
-    }
-
-    return [row[1], row[2]];
-}
 
 // --- Hi-Lift drums --------------------------------------------------------
 // A hi-lift drum is a different animal from the standard drums above. The
@@ -754,9 +768,6 @@ const HILIFT_DRUMS = {
         catalog: true,
         reff: hl800REff,
         multiplier: hl800Multiplier,
-        heightRange: hl800HeightRange,
-        maxHiLift: HL800_MAX,
-        fallbackAboveMax: true,
     },
     // Catalog-built. See the HL575_* block above for how it differs from the
     // reverse-engineered drums, and why.
@@ -764,8 +775,6 @@ const HILIFT_DRUMS = {
         catalog: true,
         reff: hl575REff,
         multiplier: hl575Multiplier,
-        minHeight: hl575MinHeight,
-        maxHiLift: HL575_MAX,
     },
     "CANIMEX/TF 525-54HL": {
         spiralA: 7.3952515,      // r0^2
