@@ -860,7 +860,7 @@ export class SpringEngineering extends Component {
             weight: "",
             pitch: false,
             pitchAmount: "0/12",
-            wireSize: '0.125"',
+            wireSize: '0.25"',
 
 
         });

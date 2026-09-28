@@ -1146,7 +1146,13 @@
                     <option value='0.2253"'>0.2253"</option>
                     <option value='0.2343"'>0.2343"</option>
                     <option value='0.2437"'>0.2437"</option>
-                    <option value='0.25"'>0.25"</option>
+                    <!-- Marked selected so the box shows the state default.
+                         Every other dropdown's default happens to be its first
+                         option, so they need nothing; 0.25" is the 17th wire
+                         size, and without this the box would read 0.125" while
+                         every calculation used 0.25". -->
+                    <option value='0.25"'
+                            t-att-selected="state.wireSize === '0.25&quot;'">0.25"</option>
                     <option value='0.2625"'>0.2625"</option>
                     <option value='0.273"'>0.273"</option>
                     <option value='0.283"'>0.283"</option>
