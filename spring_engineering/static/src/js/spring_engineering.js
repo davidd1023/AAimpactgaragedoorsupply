@@ -36,6 +36,43 @@ const LARGE_ID_THRESHOLD = 4.5;
 //     strength falling with wire diameter, as in the ASTM spring-wire grades.
 // Equivalent stress form: cycles = (1265142 / (S * wire^0.21))^4.67,
 // with S = 32*torque/(pi*wire^3).
+// Calibration of the effective drum radius, for HI-LIFT DRUMS ONLY.
+//
+// rEff and CYCLE_COEFFICIENT are DEGENERATE: scaling both by the same factor
+// leaves every cycle count identical, because cycles depend only on their
+// ratio. Cycle counts fix the ratio, never the absolute radius - so a radius
+// derived from cycle counts inherits whatever scale the coefficient had.
+//
+// A displayed multiplier times a displayed turns count gives rEff with no
+// cycle law involved, and on the hi-lift drums those products sit consistently
+// BELOW the radii derived from cycles. The manufacturer's catalog agrees: it
+// prints 2.719 for D525-54 where cycles imply 2.71942.
+//
+// This is NOT a global miscalibration, which was checked and ruled out. The
+// windows of scale factors that reproduce every reported turns row are
+//     525-54HL          [0.9998215, 0.9998448]
+//     D400-96 standard  [0.9999303, 1.0008714]
+// and they do not intersect. One factor cannot serve both.
+//
+// The split has a cause. CYCLE_COEFFICIENT above is documented as accurate
+// over 494 to 320,090 cycles. The hi-lift radii were pinned from 100 lb cycle
+// counts as high as 959,433 - outside that range, where the law drifts - while
+// the standard drums were pinned from counts inside it. So the bias belongs to
+// the hi-lift family, and scoping the correction to that family is the correct
+// scope rather than a patch.
+//
+// Applied together with a matching scale on the cycle coefficient, so hi-lift
+// cycle counts are unchanged; only their displayed turns move, by 0.0167%.
+// Standard drums are untouched in every respect.
+//
+// The 575-120 wants a slightly different window ([0.9994499, 0.9997869]), but
+// that window is computed through its own multiplier surface, which still
+// carries the catalog's 0.03% error - so it reflects that error, not a real
+// disagreement. The value here is taken from the 525, whose multipliers are
+// good to 1e-6. The two should reconcile once the 575 is fitted to the
+// calculator directly.
+const HILIFT_RADIUS_SCALE = 0.9998332;
+
 const CYCLE_COEFFICIENT = 124205;
 const CYCLE_WIRE_EXPONENT = 2.79;
 const CYCLE_EXPONENT = 4.67;
@@ -163,6 +200,12 @@ function drumTurns(drum, heightFeet) {
     );
 }
 
+// Hi-lift below a full 12" is frozen to 0" by the reference calculator.
+// Confirmed on the 525-54HL, where 6", 8", 9", 10" and 11" all return
+// bit-identical output, and on the 575-120, where 7'0"/6" returns the
+// 7'0"/0" value. Shared by both hi-lift drum families.
+const HILIFT_MIN = 12;
+
 // --- CANIMEX/TF 575-120 ---------------------------------------------------
 // Built from the manufacturer's own published tables (Canimex Cable Drum
 // Catalog, D575-120, "MULTIPLIER FOR HIGH-LIFT DRUM"), not reverse-engineered
@@ -187,9 +230,48 @@ function drumTurns(drum, heightFeet) {
 // engineering-significant, but the two sources are not identical. This is a
 // deliberate, temporary choice: ship from the catalog now, re-fit against the
 // reference calculator later.
-const HL575_A = 8.814961;          // r0^2, r0 = 2.969"
-const HL575_B = 0.099471839;       // (5/16")/pi
-const HL575_R0 = 2.969;
+// Two sets of spiral constants, because the catalog and the reference
+// calculator genuinely disagree.
+//
+// NODE_* are the catalog's own (r0 = 2.969", pitch exactly 5/16"). They fix
+// where the interpolation columns below sit, so they are part of how the
+// published surface is indexed and must not be retuned.
+//
+// HL575_A/B are the reference calculator's, recovered from its 100 lb cycle
+// counts. The implied pitch is 0.313097" - the same constant the 525-54HL
+// turned out to use, to seven figures. So the calculator applies one pitch
+// across drums and the catalog's clean 5/16" is the outlier. These drive
+// rEff, and therefore turns and cycle life.
+const HL575_NODE_A = 8.814961;     // catalog r0^2
+const HL575_NODE_B = 0.099471839;  // catalog (5/16")/pi
+const HL575_A = 8.8176917;         // calculator r0^2, r0 = 2.96946"
+const HL575_B = 0.099661791;       // calculator pitch/pi, pitch = 0.313097"
+
+// Correction from the published surface onto the reference calculator's.
+//
+// Tempting to assume the two share one multiplier function and differ only in
+// the hi-lift -> radius mapping; they do not. Feeding the calculator's radius
+// into the catalog's surface makes the error worse (0.20% -> 0.63%), so the
+// gap has to be fitted.
+//
+// Three terms - (hl^2/h^2), (1/h), (hl^3/h^2) - chosen by greedy forward
+// selection under leave-one-out over 44 reference multipliers spanning
+// 6'-20' doors and 12"-120" of hi-lift. Worst error 0.027% in-sample,
+// 0.036% leave-one-out, against 0.20% uncorrected.
+//
+// This is at the floor of what the catalog can support, and adding terms or
+// points does not help: the surface fitted to the catalog reproduces its
+// printed values to 6.7e-5, which on a 0.25 multiplier is 0.027% - the same
+// size as the correction itself. The catalog prints 4 decimals; the reference
+// calculator gives 6. Going below ~0.03% therefore means dropping the catalog
+// as a base and fitting the calculator directly, which a 48-point trial could
+// not do (0.48% leave-one-out) - that route needs on the order of 100 points
+// to cover this domain, against roughly 70 for the much smaller 525-54HL.
+const HL575_CORRECTION = [
+    0.0017100094,
+    -0.0000537585,
+    -0.0002815375
+];
 
 // One row per printed hi-lift column:
 //   [hiLift, lowest door height the catalog publishes for it, a, b, c, d, e, f]
@@ -252,10 +334,47 @@ const HL575_COLUMNS = [
 
 const HL575_MAX = 120;             // last printed hi-lift column
 
-function hl575REff(hiLiftInches) {
-    const hl = Math.min(Math.max(Number(hiLiftInches) || 0, 0), HL575_MAX);
+// The reference calculator freezes everything below a full 12" of hi-lift to
+// the 0" row - confirmed on this drum (7'0"/6" returns 0.5886, the 7'0"/0"
+// value) and on the 525-54HL, where 6", 8", 9", 10" and 11" all returned
+// bit-identical output. The catalog does NOT do this: it prints real entries
+// at 3", 6" and 9". The clamp is a property of the calculator rather than of
+// the drum, so it applies to catalog-built drums too.
+function hl575Applied(hiLiftInches) {
+    const hl = Number(hiLiftInches) || 0;
 
-    return Math.sqrt(HL575_A + HL575_B * hl);
+    if (hl < HILIFT_MIN) {
+        return 0;
+    }
+
+    return Math.min(hl, HL575_MAX);
+}
+
+function hl575REff(hiLiftInches) {
+    return Math.sqrt(HL575_A + HL575_B * hl575Applied(hiLiftInches));
+}
+
+// Where a hi-lift sits along the catalog's own radius axis - the coordinate
+// the interpolation columns are keyed by. Deliberately the catalog constants,
+// not the calculator's.
+function hl575Node(hiLift) {
+    return Math.sqrt(HL575_NODE_A + HL575_NODE_B * hiLift);
+}
+
+function hl575Correction(heightFeet, hiLift) {
+    const y = hiLift / 100;
+    const z = 10 / heightFeet;
+
+    // Order must match HL575_CORRECTION: y^2*z^2, z, y^3*z^2.
+    const terms = [y * y * z * z, z, y * y * y * z * z];
+
+    let sum = 0;
+
+    for (let i = 0; i < terms.length; i++) {
+        sum += HL575_CORRECTION[i] * terms[i];
+    }
+
+    return 1 + sum;
 }
 
 // Lowest door height the catalog covers at this hi-lift. The published
@@ -264,7 +383,7 @@ function hl575REff(hiLiftInches) {
 // off the end of the data, which is exactly where a 6-term inverse-power
 // basis misbehaves.
 function hl575MinHeight(hiLiftInches) {
-    const hl = Number(hiLiftInches) || 0;
+    const hl = hl575Applied(hiLiftInches);
     let min = HL575_COLUMNS[0][1];
 
     for (const row of HL575_COLUMNS) {
@@ -283,15 +402,16 @@ function hl575Multiplier(heightFeet, hiLiftInches) {
         return 0;
     }
 
-    const u = hl575REff(hiLiftInches);
+    const applied = hl575Applied(hiLiftInches);
+    const u = hl575Node(applied);
 
     // Four nearest columns, clamped to stay inside the table.
     let nearest = 0;
 
     for (let i = 1; i < HL575_COLUMNS.length; i++) {
         if (
-            Math.abs(Math.sqrt(HL575_A + HL575_B * HL575_COLUMNS[i][0]) - u) <
-            Math.abs(Math.sqrt(HL575_A + HL575_B * HL575_COLUMNS[nearest][0]) - u)
+            Math.abs(hl575Node(HL575_COLUMNS[i][0]) - u) <
+            Math.abs(hl575Node(HL575_COLUMNS[nearest][0]) - u)
         ) {
             nearest = i;
         }
@@ -299,7 +419,7 @@ function hl575Multiplier(heightFeet, hiLiftInches) {
 
     const start = Math.max(0, Math.min(nearest - 1, HL575_COLUMNS.length - 4));
     const window = HL575_COLUMNS.slice(start, start + 4);
-    const nodes = window.map((row) => Math.sqrt(HL575_A + HL575_B * row[0]));
+    const nodes = window.map((row) => hl575Node(row[0]));
 
     const inv = 10 / height;
     const basis = [height / 10, 1, inv, inv ** 2, inv ** 3, inv ** 4];
@@ -324,7 +444,7 @@ function hl575Multiplier(heightFeet, hiLiftInches) {
         multiplier += value * basis[a];
     }
 
-    return multiplier;
+    return multiplier * hl575Correction(height, applied);
 }
 
 // --- Hi-Lift drums --------------------------------------------------------
@@ -350,10 +470,6 @@ function hl575Multiplier(heightFeet, hiLiftInches) {
 //      2.7194206 - the same number to 6e-7, so the clamp is simply HL = 0 on
 //      this curve rather than a constant of its own.
 //
-// Below MIN_HI_LIFT the reference calculator freezes: 6", 8", 9", 10" and 11"
-// all return bit-identical output, equal to HL = 0. At exactly 0 it hides the
-// results rows instead (see `resultsVisible`).
-const HILIFT_MIN = 12;
 
 // Unlike the standard drums, it is the MULTIPLIER - not the turns - that is
 // smooth in door height here, and it follows the very same 6-term family the
@@ -530,10 +646,11 @@ get rEffExact() {
     // set by the hi-lift alone (never by door height) for a hi-lift drum.
     if (this.hiLiftDrumData) {
         const drum = this.hiLiftDrumData;
-
-        return drum.catalog
+        const raw = drum.catalog
             ? drum.reff(this.hiLiftInches)
             : hiLiftREff(drum, this.hiLiftInches);
+
+        return HILIFT_RADIUS_SCALE * raw;
     }
 
     return this.drumData ? this.drumData.rEff : 0;
@@ -585,7 +702,7 @@ get multiplierExact() {
         return 0;
     }
 
-    return this.drumData.rEff / this.turnsExact;
+    return this.rEffExact / this.turnsExact;
 }
 
 get resultsVisible() {
@@ -686,9 +803,15 @@ get cycleLife() {
         return 0;
     }
 
+    // The hi-lift radius scale above is carried into the coefficient too, so
+    // that the ratio the cycle count actually depends on is unchanged and
+    // these counts stay exactly where they were.
+    const coefficient = this.hiLiftDrumData
+        ? CYCLE_COEFFICIENT * HILIFT_RADIUS_SCALE
+        : CYCLE_COEFFICIENT;
+
     const cycles = Math.pow(
-        (CYCLE_COEFFICIENT *
-            Math.pow(this.wireSizeNumber, CYCLE_WIRE_EXPONENT)) /
+        (coefficient * Math.pow(this.wireSizeNumber, CYCLE_WIRE_EXPONENT)) /
             torque,
         CYCLE_EXPONENT
     );
