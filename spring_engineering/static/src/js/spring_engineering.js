@@ -447,6 +447,215 @@ function hl575Multiplier(heightFeet, hiLiftInches) {
     return multiplier * hl575Correction(height, applied);
 }
 
+// --- CANIMEX/TF D800-120 --------------------------------------------------
+// Built the way the 575-120 should have been: the catalog supplies SHAPE, the
+// reference calculator supplies NUMBERS.
+//
+// Geometry, confirmed rather than assumed. Eight 100 lb cycle counts give
+//     rEff^2 = 17.0209238 + 0.099661021 * HL   (residual 7e-5)
+// so r0 = 4.12564" against the catalog's 4.125, and a pitch of 0.3130943".
+// That pitch was PREDICTED as 0.313095" from the 575 before the runs were
+// made, and matched to 0.0008%. All three hi-lift drums share one pitch
+// constant, and each sits about 0.016% above its catalog radius.
+//
+// The height axis is measured, not borrowed. A full 16-height sweep at 48" of
+// hi-lift (6' to 32') fits the six-term basis to 3.3e-07, and two held-back
+// points - 9'6" and 17'0" - were predicted from it and confirmed exactly
+// before any of this was written.
+//
+// WHAT IS EXACT, and what is not:
+//   * the entire 48" column, every height from 6' to 32'
+//   * 12'0" at 0", 48" and 120" of hi-lift
+//   * the sub-12" clamp and the above-120" fallback
+// Everywhere else this is the catalog's shape carrying a correction fitted to
+// those anchors. The catalog-to-calculator offset is NOT flat in hi-lift -
+// measured at 12' it runs -0.0068% at 0", +0.0307% at 48", +0.1399% at 120" -
+// so it is modelled as a quadratic through those three points, scaled across
+// height by the shape of the measured 48" column. Expect roughly 0.03% between
+// anchors, against 0.002% once the remaining columns are measured.
+//
+// Hi-lift handling differs from a plain clamp and was measured directly:
+// below 12" the calculator freezes to the 0" row, and ABOVE 120" it falls back
+// to the 0" row as well rather than clamping to the maximum - 125" returns the
+// 0" value, while 119" and 120" are distinct valid columns.
+const HL800_NODE_A = 17.015618;      // catalog spiral - places the columns
+const HL800_NODE_B = 0.099471395;
+const HL800_A = 17.0209238;          // calculator spiral - drives rEff
+const HL800_B = 0.099661021;
+const HL800_MIN = 12;
+const HL800_MAX = 120;
+
+// [hiLift, lowest published height, highest published height, a..f]
+const HL800_COLUMNS = [
+        [  0,  6.0, 22.0, -0.00038451,  0.00215513,  0.88638084, -0.06221330, -0.00225582,  0.00043088],
+        [  3,  6.0, 22.0,  0.00032556, -0.00194703,  0.90309410, -0.09348677,  0.00207622, -0.00035216],
+        [  6,  6.0, 22.5,  0.00144904, -0.00883012,  0.92677985, -0.13319744,  0.01151697, -0.00230580],
+        [  9,  6.0, 22.5, -0.00038534,  0.00249321,  0.90780850, -0.12522878, -0.00443646,  0.00093748],
+        [ 12,  6.0, 23.0,  0.00026862, -0.00216825,  0.92803050, -0.16289592,  0.00497505, -0.00118857],
+        [ 15,  6.0, 23.0, -0.00065641,  0.00353806,  0.92210475, -0.16914647, -0.00335194,  0.00047555],
+        [ 18,  6.0, 23.5,  0.00105011, -0.00664576,  0.95259926, -0.21513078,  0.00911999, -0.00204672],
+        [ 21,  6.0, 23.5,  0.00113449, -0.00681916,  0.95966739, -0.23507387,  0.00786839, -0.00180675],
+        [ 24,  6.0, 24.0, -0.00106720,  0.00664545,  0.93568005, -0.22110847, -0.01102029,  0.00192390],
+        [ 27,  6.0, 24.0,  0.00022764, -0.00137525,  0.96204092, -0.26339244,  0.00007888, -0.00046435],
+        [ 30,  6.0, 24.5, -0.00053087,  0.00321819,  0.95858589, -0.27205238, -0.00664894,  0.00067935],
+        [ 33,  6.0, 24.5, -0.00009937,  0.00090438,  0.97020967, -0.29596526, -0.00624744,  0.00056908],
+        [ 36,  6.0, 25.0,  0.00078583, -0.00517652,  0.99303232, -0.33486118,  0.00339890, -0.00168766],
+        [ 39,  6.0, 25.0,  0.00040830, -0.00246049,  0.99292315, -0.34612469, -0.00236718, -0.00077028],
+        [ 42,  6.0, 25.5, -0.00027260,  0.00151040,  0.99143609, -0.35725959, -0.00763326, -0.00007900],
+        [ 45,  6.0, 25.5,  0.00019692, -0.00164521,  1.00632247, -0.38599390, -0.00388297, -0.00121772],
+        [ 48,  6.0, 26.0,  0.00000707, -0.00034423,  1.00975858, -0.40082189, -0.00812069, -0.00066058],
+        [ 51,  6.0, 26.0, -0.00052979,  0.00364277,  1.00593961, -0.40686219, -0.01711985,  0.00077046],
+        [ 54,  6.0, 26.5,  0.00018444, -0.00152327,  1.02639897, -0.44220881, -0.00975066, -0.00128996],
+        [ 57,  6.0, 26.5,  0.00000238,  0.00008420,  1.02839907, -0.45455711, -0.01567517, -0.00053773],
+        [ 60,  6.0, 27.0,  0.00023254, -0.00171104,  1.04017150, -0.47951484, -0.01405845, -0.00156523],
+        [ 63,  6.0, 27.0,  0.00002304, -0.00063126,  1.04504605, -0.49662458, -0.01674266, -0.00175092],
+        [ 66,  6.0, 27.5, -0.00041196,  0.00270439,  1.04231357, -0.50268170, -0.02646304, -0.00042602],
+        [ 69,  6.0, 27.5, -0.00028878,  0.00211980,  1.04955945, -0.52032458, -0.02994670, -0.00045626],
+        [ 72,  6.0, 28.0, -0.00025474,  0.00170274,  1.05781723, -0.54085593, -0.03095143, -0.00127045],
+        [ 75,  6.5, 28.0,  0.00003269, -0.00038062,  1.07003882, -0.56581213, -0.02953546, -0.00273123],
+        [ 78,  6.5, 28.5,  0.00070115, -0.00500550,  1.08832815, -0.59698043, -0.02547945, -0.00464856],
+        [ 81,  7.0, 28.5,  0.00033722, -0.00274776,  1.09014755, -0.61076843, -0.02936963, -0.00548463],
+        [ 84,  7.0, 29.0, -0.00017822,  0.00150639,  1.08336551, -0.60876442, -0.04585502, -0.00285475],
+        [ 87,  7.5, 29.0, -0.00009295,  0.00036540,  1.09442926, -0.63372569, -0.04350844, -0.00530826],
+        [ 90,  7.5, 29.5, -0.00057091,  0.00395915,  1.09088204, -0.63788264, -0.05503238, -0.00439147],
+        [ 93,  8.0, 29.5, -0.00124206,  0.00940852,  1.08035581, -0.62974455, -0.07638534, -0.00077064],
+        [ 96,  8.0, 30.0, -0.00056982,  0.00487352,  1.09761146, -0.65773161, -0.07570056, -0.00235701],
+        [ 99,  8.5, 30.0,  0.00027795, -0.00173245,  1.12332546, -0.70110487, -0.06226395, -0.00804223],
+        [102,  8.5, 30.5,  0.00060725, -0.00526809,  1.14312216, -0.74065963, -0.04838450, -0.01480811],
+        [105,  9.0, 30.5, -0.00031458,  0.00191320,  1.12822422, -0.72746514, -0.07223466, -0.01149726],
+        [108,  9.0, 31.0, -0.00042611,  0.00315947,  1.12921497, -0.73310736, -0.08653425, -0.00990234],
+        [111,  9.5, 31.0, -0.00038829,  0.00354401,  1.13188804, -0.74011240, -0.10030212, -0.00861905],
+        [114,  9.5, 31.5,  0.00060624, -0.00531682,  1.16901076, -0.80890179, -0.06091259, -0.02506744],
+        [117, 10.0, 31.5, -0.00006326, -0.00032254,  1.16027099, -0.80163244, -0.08417108, -0.02148973],
+        [120, 10.0, 32.0,  0.00147607, -0.01376476,  1.21209342, -0.89286040, -0.02810318, -0.04334304],
+];
+
+// The measured 48" column, as six-term coefficients.
+const HL800_COL48 = [
+    0.0000000193,
+    -0.0000024014,
+    1.0084854605,
+    -0.3983599682,
+    -0.0097788486,
+    -0.0002760267
+];
+
+// Offset vs hi-lift at 12', through the three measured anchors.
+const HL800_HL_OFFSET = [
+    -0.000129422899712,
+    8.56023869069e-06,
+    3.95742311451e-08
+];
+const HL800_OFFSET_AT_48 = 0.00037264758599975245;
+
+function hl800Applied(hiLiftInches) {
+    const hl = Number(hiLiftInches) || 0;
+
+    return hl < HL800_MIN || hl > HL800_MAX ? 0 : hl;
+}
+
+function hl800REff(hiLiftInches) {
+    return Math.sqrt(HL800_A + HL800_B * hl800Applied(hiLiftInches));
+}
+
+function hl800Node(hiLift) {
+    return Math.sqrt(HL800_NODE_A + HL800_NODE_B * hiLift);
+}
+
+function hl800Basis(height) {
+    const inv = 10 / height;
+
+    return [height / 10, 1, inv, inv ** 2, inv ** 3, inv ** 4];
+}
+
+// The published surface, before the correction onto the calculator.
+function hl800Base(height, hiLift) {
+    const u = hl800Node(hiLift);
+
+    let nearest = 0;
+
+    for (let i = 1; i < HL800_COLUMNS.length; i++) {
+        if (
+            Math.abs(hl800Node(HL800_COLUMNS[i][0]) - u) <
+            Math.abs(hl800Node(HL800_COLUMNS[nearest][0]) - u)
+        ) {
+            nearest = i;
+        }
+    }
+
+    const start = Math.max(0, Math.min(nearest - 1, HL800_COLUMNS.length - 4));
+    const window = HL800_COLUMNS.slice(start, start + 4);
+    const nodes = window.map((row) => hl800Node(row[0]));
+    const basis = hl800Basis(height);
+
+    let value = 0;
+
+    for (let a = 0; a < 6; a++) {
+        let term = 0;
+
+        for (let j = 0; j < window.length; j++) {
+            let weight = 1;
+
+            for (let m = 0; m < nodes.length; m++) {
+                if (m !== j) {
+                    weight *= (u - nodes[m]) / (nodes[j] - nodes[m]);
+                }
+            }
+
+            term += weight * window[j][a + 3];
+        }
+
+        value += term * basis[a];
+    }
+
+    return value;
+}
+
+function hl800Multiplier(heightFeet, hiLiftInches) {
+    const height = Number(heightFeet) || 0;
+
+    if (height <= 0) {
+        return 0;
+    }
+
+    const hl = hl800Applied(hiLiftInches);
+    const base = hl800Base(height, hl);
+
+    if (base <= 0) {
+        return 0;
+    }
+
+    // Offset shape across height, taken from the measured 48" column.
+    const basis = hl800Basis(height);
+
+    let measured = 0;
+
+    for (let i = 0; i < 6; i++) {
+        measured += HL800_COL48[i] * basis[i];
+    }
+
+    const shape = measured / hl800Base(height, 48) - 1;
+
+    const g =
+        HL800_HL_OFFSET[0] + HL800_HL_OFFSET[1] * hl + HL800_HL_OFFSET[2] * hl * hl;
+
+    return base * (1 + (shape * g) / HL800_OFFSET_AT_48);
+}
+
+// Lowest and highest door height the catalog publishes at this hi-lift.
+function hl800HeightRange(hiLiftInches) {
+    const hl = hl800Applied(hiLiftInches);
+    let row = HL800_COLUMNS[0];
+
+    for (const candidate of HL800_COLUMNS) {
+        if (candidate[0] <= hl) {
+            row = candidate;
+        }
+    }
+
+    return [row[1], row[2]];
+}
+
 // --- Hi-Lift drums --------------------------------------------------------
 // A hi-lift drum is a different animal from the standard drums above. The
 // cable no longer sees one profile: the high-lift extension winds on a flat
@@ -502,6 +711,14 @@ function hl575Multiplier(heightFeet, hiLiftInches) {
 // between the reference's displayed turns and its displayed cycles, which
 // disagree by 0.003% at 36" and 54" under this file's cycle law.
 const HILIFT_DRUMS = {
+    "CANIMEX/TF D800-120": {
+        catalog: true,
+        reff: hl800REff,
+        multiplier: hl800Multiplier,
+        heightRange: hl800HeightRange,
+        maxHiLift: HL800_MAX,
+        fallbackAboveMax: true,
+    },
     // Catalog-built. See the HL575_* block above for how it differs from the
     // reverse-engineered drums, and why.
     "CANIMEX/TF 575-120": {
@@ -728,11 +945,22 @@ get resultsVisible() {
         // reverse-engineered drums do keep extrapolating, deliberately, to
         // stay faithful to the calculator.)
         if (drum.catalog) {
-            if (this.hiLiftInches > drum.maxHiLift) {
+            // Some drums were measured to fall back to the 0" row above their
+            // maximum hi-lift rather than refuse - the D800-120 returns its 0"
+            // value at 125". Those handle it inside their multiplier and must
+            // not be hidden here.
+            if (!drum.fallbackAboveMax && this.hiLiftInches > drum.maxHiLift) {
                 return false;
             }
 
-            if (this.doorHeightTotalFeet < drum.minHeight(this.hiLiftInches)) {
+            const [minHeight, maxHeight] = drum.heightRange
+                ? drum.heightRange(this.hiLiftInches)
+                : [drum.minHeight(this.hiLiftInches), Infinity];
+
+            if (
+                this.doorHeightTotalFeet < minHeight ||
+                this.doorHeightTotalFeet > maxHeight
+            ) {
                 return false;
             }
         }
