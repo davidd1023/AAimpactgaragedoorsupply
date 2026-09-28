@@ -704,7 +704,7 @@
                     </t>
 
                     <t t-if="state.liftType === 'Hi-Lift'">
-
+<!--
                     <option value="AMBASSADOR B-260-E">
                         AMBASSADOR B-260-E
                     </option>
@@ -736,7 +736,7 @@
                     <option value="CANIMEX/TF 400-54HL">
                         CANIMEX/TF 400-54HL
                     </option>
-
+-->
                     <option value="CANIMEX/TF 525-54HL">
                         CANIMEX/TF 525-54HL
                     </option>
@@ -744,15 +744,15 @@
                     <option value="CANIMEX/TF 575-120">
                         CANIMEX/TF 575-120
                     </option>
-
+<!--
                     <option value="CANIMEX/TF D6375-164">
                         CANIMEX/TF D6375-164
                     </option>
-
+-->
                     <option value="CANIMEX/TF D800-120">
                         CANIMEX/TF D800-120
                     </option>
-
+<!--
                     <option value="CRAWFORD A65A-15 &amp; 16">
                         CRAWFORD A65A-15 &amp; 16
                     </option>
@@ -984,7 +984,7 @@
                     <option value="WESTERN WD5-2">
                         WESTERN WD5-2
                     </option>
-
+-->
                     </t>
 
                 </select>
