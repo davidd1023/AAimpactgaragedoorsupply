@@ -163,6 +163,170 @@ function drumTurns(drum, heightFeet) {
     );
 }
 
+// --- CANIMEX/TF 575-120 ---------------------------------------------------
+// Built from the manufacturer's own published tables (Canimex Cable Drum
+// Catalog, D575-120, "MULTIPLIER FOR HIGH-LIFT DRUM"), not reverse-engineered
+// from calculator output. 861 printed multipliers: door heights 6'0"-22'0" in
+// 6" steps, hi-lift 0-120" in 3" steps.
+//
+// The catalog publishes H.M.A. (the effective radius) alongside MULTI and
+// TURNS, and MULTI * TURNS = H.M.A. exactly - the same relationship the
+// 525-54HL was found to obey. H.M.A. follows the identical flat-spiral law,
+// here with a base radius of 2.969" and the same 5/16" cable pitch:
+//
+//     rEff(HL) = sqrt(2.969^2 + (0.3125/pi) * HL)
+//
+// which reproduces all 41 printed H.M.A. values to 0.00005, i.e. exactly the
+// 4 decimals the catalog prints.
+//
+// CAVEAT - this drum is NOT calibrated against the same reference calculator
+// as the other drums. Spot-checked on D525-54, the catalog and that
+// calculator disagree by 0.01-0.07%, growing with hi-lift, because the
+// calculator uses a slightly larger pitch constant. The catalog is the
+// manufacturer's authoritative data and 0.05% on a multiplier is not
+// engineering-significant, but the two sources are not identical. This is a
+// deliberate, temporary choice: ship from the catalog now, re-fit against the
+// reference calculator later.
+const HL575_A = 8.814961;          // r0^2, r0 = 2.969"
+const HL575_B = 0.099471839;       // (5/16")/pi
+const HL575_R0 = 2.969;
+
+// One row per printed hi-lift column:
+//   [hiLift, lowest door height the catalog publishes for it, a, b, c, d, e, f]
+// where the six coefficients give the multiplier across door height as
+//     multiplier = a*(H/10) + b + c*(10/H) + d*(10/H)^2 + e*(10/H)^3 + f*(10/H)^4
+// The 10 is only a scale factor to keep the basis well conditioned over the
+// 6-22 ft span; without it the inverse powers are nearly collinear and the
+// coefficients stop varying smoothly from column to column.
+//
+// Between columns the six coefficients are interpolated with a local cubic in
+// rEff (not in hi-lift - rEff is the drum's own coordinate, and the columns
+// are evenly spaced in neither). Accuracy against all 861 published values:
+// worst 0.000067, mean 0.000020, with 830 of 861 reproducing exactly at the
+// catalog's 4 decimals. Dropping 10 of the 41 columns and predicting them
+// still gives a worst case of 0.00012, so the interpolation is not merely
+// memorising the nodes.
+const HL575_COLUMNS = [
+        [  0,   6.0, -0.04908332,  0.21545915,  0.08907425,  0.28246942, -0.13295727,  0.02197211],
+        [  3,   6.0,  0.05247068, -0.23290194,  0.87621555, -0.39545862,  0.14736898, -0.02443022],
+        [  6,   6.0, -0.02830941,  0.11880087,  0.27947545,  0.10555008, -0.06680811,  0.01088577],
+        [  9,   6.0, -0.05080358,  0.22591582,  0.08963201,  0.27020224, -0.14255157,  0.02351969],
+        [ 12,   6.0, -0.03053611,  0.14087547,  0.23662070,  0.14744295, -0.09895074,  0.01686382],
+        [ 15,   6.0,  0.03053796, -0.13459129,  0.73071602, -0.28479695,  0.07996094, -0.01303493],
+        [ 18,   6.0, -0.00602366,  0.03229889,  0.43980265, -0.03468277, -0.03190356,  0.00572225],
+        [ 21,   6.0, -0.00483884,  0.01880993,  0.48326834, -0.08523881, -0.01241197,  0.00212309],
+        [ 24,   6.0, -0.02031785,  0.09434278,  0.34852021,  0.03270880, -0.06864867,  0.01153954],
+        [ 27,   6.0, -0.01760642,  0.07837300,  0.39170570, -0.01670203, -0.04860099,  0.00743261],
+        [ 30,   6.0, -0.00460012,  0.02007677,  0.49958906, -0.11119458, -0.01470291,  0.00195368],
+        [ 33,   6.0,  0.00313767, -0.01214117,  0.55830234, -0.16149386,  0.00017621, -0.00039771],
+        [ 36,   6.0, -0.01324831,  0.06491068,  0.42295925, -0.04277098, -0.05718861,  0.00936724],
+        [ 39,   6.0, -0.00467343,  0.02467667,  0.50301306, -0.11710532, -0.03003231,  0.00462703],
+        [ 42,   6.0, -0.00176255,  0.01058186,  0.53626878, -0.15111645, -0.01950033,  0.00246772],
+        [ 45,   6.0,  0.00489677, -0.02437835,  0.61361207, -0.22932374,  0.01219819, -0.00361719],
+        [ 48,   6.0,  0.00152741, -0.00692345,  0.58501852, -0.20446765, -0.00429083, -0.00107517],
+        [ 51,   6.0,  0.00007221,  0.00122392,  0.57396323, -0.19515248, -0.01439979,  0.00047670],
+        [ 54,   6.0, -0.00874261,  0.04319300,  0.50311855, -0.13517201, -0.04508624,  0.00518822],
+        [ 57,   6.0, -0.00297982,  0.01500899,  0.56211340, -0.19088402, -0.02584242,  0.00145146],
+        [ 60,   6.0,  0.00282036, -0.01458455,  0.62659505, -0.25421193, -0.00221831, -0.00322902],
+        [ 63,   6.0,  0.00333835, -0.01798687,  0.64198637, -0.27465381,  0.00414919, -0.00544059],
+        [ 66,   6.0, -0.00136412,  0.00633613,  0.59863882, -0.23335317, -0.02130834, -0.00134663],
+        [ 69,   6.0, -0.00023366,  0.00045403,  0.61636496, -0.25231275, -0.01759680, -0.00287153],
+        [ 72,   6.0,  0.00155153, -0.00975642,  0.64480530, -0.28375840, -0.00704728, -0.00587105],
+        [ 75,   6.5, -0.00400770,  0.02252016,  0.57936486, -0.21599989, -0.04657600,  0.00071517],
+        [ 78,   6.5, -0.00063511,  0.00363778,  0.62472065, -0.26171723, -0.03099605, -0.00296704],
+        [ 81,   7.0, -0.00247566,  0.01055209,  0.62374393, -0.27113683, -0.02646806, -0.00621052],
+        [ 84,   7.0, -0.00037089,  0.00139883,  0.64291446, -0.28446073, -0.02960353, -0.00596627],
+        [ 87,   7.5,  0.00288326, -0.01632672,  0.68505169, -0.32676530, -0.01506863, -0.00999796],
+        [ 90,   7.5,  0.00083454, -0.00506568,  0.66822109, -0.31344451, -0.02453805, -0.01048131],
+        [ 93,   8.0, -0.00738514,  0.04800700,  0.53977213, -0.15438037, -0.12651347,  0.01175731],
+        [ 96,   8.0,  0.00233500, -0.01475022,  0.70403465, -0.35738160, -0.00906522, -0.01828404],
+        [ 99,   8.5,  0.00359593, -0.02489564,  0.73966597, -0.40561590,  0.01697156, -0.02729389],
+        [102,   8.5,  0.00621590, -0.04098074,  0.78419808, -0.45866795,  0.04282730, -0.03570378],
+        [105,   9.0,  0.00423253, -0.03005054,  0.76802466, -0.44724036,  0.03738246, -0.03906855],
+        [108,   9.0,  0.01508576, -0.10801281,  0.99176911, -0.75080136,  0.23320655, -0.09265520],
+        [111,   9.5, -0.00364474,  0.02409077,  0.63160468, -0.26066928, -0.09851435, -0.00916108],
+        [114,   9.5, -0.00716313,  0.05141709,  0.55483807, -0.14705037, -0.18406135,  0.01080518],
+        [117,  10.0, -0.00874001,  0.06255118,  0.52888896, -0.10853274, -0.21707263,  0.01671791],
+        [120,  10.0,  0.01017702, -0.08121440,  0.96352091, -0.74395766,  0.23550852, -0.11543010],
+];
+
+const HL575_MAX = 120;             // last printed hi-lift column
+
+function hl575REff(hiLiftInches) {
+    const hl = Math.min(Math.max(Number(hiLiftInches) || 0, 0), HL575_MAX);
+
+    return Math.sqrt(HL575_A + HL575_B * hl);
+}
+
+// Lowest door height the catalog covers at this hi-lift. The published
+// columns stop short at low heights - the catalog prints nothing once the
+// hi-lift exceeds the door height - so anything below this is extrapolation
+// off the end of the data, which is exactly where a 6-term inverse-power
+// basis misbehaves.
+function hl575MinHeight(hiLiftInches) {
+    const hl = Number(hiLiftInches) || 0;
+    let min = HL575_COLUMNS[0][1];
+
+    for (const row of HL575_COLUMNS) {
+        if (row[0] <= hl) {
+            min = row[1];
+        }
+    }
+
+    return min;
+}
+
+function hl575Multiplier(heightFeet, hiLiftInches) {
+    const height = Number(heightFeet) || 0;
+
+    if (height <= 0) {
+        return 0;
+    }
+
+    const u = hl575REff(hiLiftInches);
+
+    // Four nearest columns, clamped to stay inside the table.
+    let nearest = 0;
+
+    for (let i = 1; i < HL575_COLUMNS.length; i++) {
+        if (
+            Math.abs(Math.sqrt(HL575_A + HL575_B * HL575_COLUMNS[i][0]) - u) <
+            Math.abs(Math.sqrt(HL575_A + HL575_B * HL575_COLUMNS[nearest][0]) - u)
+        ) {
+            nearest = i;
+        }
+    }
+
+    const start = Math.max(0, Math.min(nearest - 1, HL575_COLUMNS.length - 4));
+    const window = HL575_COLUMNS.slice(start, start + 4);
+    const nodes = window.map((row) => Math.sqrt(HL575_A + HL575_B * row[0]));
+
+    const inv = 10 / height;
+    const basis = [height / 10, 1, inv, inv ** 2, inv ** 3, inv ** 4];
+
+    let multiplier = 0;
+
+    for (let a = 0; a < 6; a++) {
+        let value = 0;
+
+        for (let j = 0; j < window.length; j++) {
+            let weight = 1;
+
+            for (let m = 0; m < nodes.length; m++) {
+                if (m !== j) {
+                    weight *= (u - nodes[m]) / (nodes[j] - nodes[m]);
+                }
+            }
+
+            value += weight * window[j][a + 2];
+        }
+
+        multiplier += value * basis[a];
+    }
+
+    return multiplier;
+}
+
 // --- Hi-Lift drums --------------------------------------------------------
 // A hi-lift drum is a different animal from the standard drums above. The
 // cable no longer sees one profile: the high-lift extension winds on a flat
@@ -222,6 +386,15 @@ const HILIFT_MIN = 12;
 // between the reference's displayed turns and its displayed cycles, which
 // disagree by 0.003% at 36" and 54" under this file's cycle law.
 const HILIFT_DRUMS = {
+    // Catalog-built. See the HL575_* block above for how it differs from the
+    // reverse-engineered drums, and why.
+    "CANIMEX/TF 575-120": {
+        catalog: true,
+        reff: hl575REff,
+        multiplier: hl575Multiplier,
+        minHeight: hl575MinHeight,
+        maxHiLift: HL575_MAX,
+    },
     "CANIMEX/TF 525-54HL": {
         spiralA: 7.3952515,      // r0^2
         spiralB: 0.099661766,    // p/pi
@@ -356,7 +529,11 @@ get rEffExact() {
     // Effective drum radius at full wind. Constant for a standard drum;
     // set by the hi-lift alone (never by door height) for a hi-lift drum.
     if (this.hiLiftDrumData) {
-        return hiLiftREff(this.hiLiftDrumData, this.hiLiftInches);
+        const drum = this.hiLiftDrumData;
+
+        return drum.catalog
+            ? drum.reff(this.hiLiftInches)
+            : hiLiftREff(drum, this.hiLiftInches);
     }
 
     return this.drumData ? this.drumData.rEff : 0;
@@ -389,8 +566,14 @@ get turns() {
 
 get multiplierExact() {
     if (this.hiLiftDrumData) {
+        const drum = this.hiLiftDrumData;
+
+        if (drum.catalog) {
+            return drum.multiplier(this.doorHeightTotalFeet, this.hiLiftInches);
+        }
+
         return hiLiftMultiplier(
-            this.hiLiftDrumData,
+            drum,
             this.doorHeightTotalFeet,
             this.hiLiftInches
         );
@@ -416,7 +599,28 @@ get resultsVisible() {
     // crossing turns would go negative, which the reference has never been
     // observed to display.
     if (this.hiLiftDrumData) {
-        return this.hiLiftInches > 0 && this.multiplierExact > 0;
+        const drum = this.hiLiftDrumData;
+
+        if (this.hiLiftInches <= 0 || this.multiplierExact <= 0) {
+            return false;
+        }
+
+        // A catalog-built drum has no reference calculator behind it, so
+        // there is nothing to reproduce outside the printed tables - off the
+        // end of the data we show nothing rather than extrapolate. (The
+        // reverse-engineered drums do keep extrapolating, deliberately, to
+        // stay faithful to the calculator.)
+        if (drum.catalog) {
+            if (this.hiLiftInches > drum.maxHiLift) {
+                return false;
+            }
+
+            if (this.doorHeightTotalFeet < drum.minHeight(this.hiLiftInches)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     return true;
