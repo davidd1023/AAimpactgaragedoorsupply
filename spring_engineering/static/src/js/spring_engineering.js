@@ -530,23 +530,38 @@ const HL800_COLUMNS = [
         [120, 10.0, 32.0,  0.00147607, -0.01376476,  1.21209342, -0.89286040, -0.02810318, -0.04334304],
 ];
 
-// The measured 48" column, as six-term coefficients.
-const HL800_COL48 = [
-    0.0000000193,
-    -0.0000024014,
-    1.0084854605,
-    -0.3983599682,
-    -0.0097788486,
-    -0.0002760267
+// Correction onto the reference calculator, one curve per measured hi-lift
+// column rather than a single global formula.
+//
+// A global polynomial in (hi-lift, 1/height) was tried and stalls at 0.031%:
+// the offset's SHAPE across height changes with hi-lift - nearly flat at 18"
+// (+0.016% from 7' to 20') and steep at 120" (+0.21% at 10' down to +0.060%
+// at 28') - which no low-order product form captures. Fitting a curve per
+// column and interpolating those, exactly as the surface itself is built,
+// reaches 0.0066% worst and 0.0011% median over 57 reference points.
+//
+// Each row is [hiLift, a, b, c, d] for
+//     offset = a + b*(10/H) + c*(10/H)^2 + d*(10/H)^3
+// with the term count per column chosen by leave-one-out, so a column with
+// few measured heights cannot overfit. The 0" row is a single anchor.
+//
+// One measured point is deliberately excluded: 11'0" at 120", reported as
+// 0.301582. Its column's other seven heights fit a three-term curve to
+// 5.5e-05, and including it degrades that to 1.8e-04 while predicting
+// 0.301658 for the point itself. A 0.025% outlier against a column whose
+// scatter is 0.005% is more likely a mis-keyed digit than a real feature, so
+// it is left out pending a re-run.
+const HL800_OFFSET_COLUMNS = [
+        [  0, -0.0001294229,  0.0000000000,  0.0000000000,  0.0000000000],
+        [ 18,  0.0001615367,  0.0000000000,  0.0000000000,  0.0000000000],
+        [ 36,  0.0001641541,  0.0001093716,  0.0000000000,  0.0000000000],
+        [ 48,  0.0003029403, -0.0000527805,  0.0001547716,  0.0000000000],
+        [ 66,  0.0004732692, -0.0005552553,  0.0006765056,  0.0000000000],
+        [ 78,  0.0008421350, -0.0017933223,  0.0017675247,  0.0000000000],
+        [ 96, -0.0004523175,  0.0045373726, -0.0070243310,  0.0040413309],
+        [108,  0.0008287370, -0.0016324146,  0.0023095161,  0.0000000000],
+        [120,  0.0011632634, -0.0029148431,  0.0038709401,  0.0000000000],
 ];
-
-// Offset vs hi-lift at 12', through the three measured anchors.
-const HL800_HL_OFFSET = [
-    -0.000129422899712,
-    8.56023869069e-06,
-    3.95742311451e-08
-];
-const HL800_OFFSET_AT_48 = 0.00037264758599975245;
 
 function hl800Applied(hiLiftInches) {
     const hl = Number(hiLiftInches) || 0;
@@ -620,26 +635,50 @@ function hl800Multiplier(heightFeet, hiLiftInches) {
 
     const hl = hl800Applied(hiLiftInches);
     const base = hl800Base(height, hl);
+    const u = hl800Node(hl);
 
-    if (base <= 0) {
-        return 0;
+    let nearest = 0;
+
+    for (let i = 1; i < HL800_OFFSET_COLUMNS.length; i++) {
+        if (
+            Math.abs(hl800Node(HL800_OFFSET_COLUMNS[i][0]) - u) <
+            Math.abs(hl800Node(HL800_OFFSET_COLUMNS[nearest][0]) - u)
+        ) {
+            nearest = i;
+        }
     }
 
-    // Offset shape across height, taken from the measured 48" column.
-    const basis = hl800Basis(height);
+    const start = Math.max(
+        0,
+        Math.min(nearest - 1, HL800_OFFSET_COLUMNS.length - 3)
+    );
+    const window = HL800_OFFSET_COLUMNS.slice(start, start + 3);
+    const nodes = window.map((row) => hl800Node(row[0]));
 
-    let measured = 0;
+    const inv = 10 / height;
+    const shape = [1, inv, inv ** 2, inv ** 3];
 
-    for (let i = 0; i < 6; i++) {
-        measured += HL800_COL48[i] * basis[i];
+    let offset = 0;
+
+    for (let a = 0; a < 4; a++) {
+        let term = 0;
+
+        for (let j = 0; j < window.length; j++) {
+            let weight = 1;
+
+            for (let m = 0; m < nodes.length; m++) {
+                if (m !== j) {
+                    weight *= (u - nodes[m]) / (nodes[j] - nodes[m]);
+                }
+            }
+
+            term += weight * window[j][a + 1];
+        }
+
+        offset += term * shape[a];
     }
 
-    const shape = measured / hl800Base(height, 48) - 1;
-
-    const g =
-        HL800_HL_OFFSET[0] + HL800_HL_OFFSET[1] * hl + HL800_HL_OFFSET[2] * hl * hl;
-
-    return base * (1 + (shape * g) / HL800_OFFSET_AT_48);
+    return base * (1 + offset);
 }
 
 // Lowest and highest door height the catalog publishes at this hi-lift.
@@ -884,7 +923,10 @@ get turnsExact() {
     if (this.hiLiftDrumData) {
         const multiplier = this.multiplierExact;
 
-        return multiplier > 0 ? this.rEffExact / multiplier : 0;
+        // Not `> 0`: past the drum's range the multiplier genuinely goes
+        // negative and the reference shows the negative turns that follow,
+        // so only an exact zero is guarded here.
+        return multiplier !== 0 ? this.rEffExact / multiplier : 0;
     }
 
     if (!this.drumData) {
@@ -923,49 +965,22 @@ get multiplierExact() {
 }
 
 get resultsVisible() {
-    // The reference calculator reveals the results rows only once it has
-    // everything it needs. A hi-lift drum with the hi-lift left at 0 (or
-    // blank) is the case that matters here - it shows nothing at all, so
-    // neither do we. Anything from 1" up computes, clamped to 0 below 12".
+    // The only input the reference calculator refuses is a hi-lift of zero or
+    // blank, which hides the results rows entirely. Everything else it
+    // computes and shows - including past the drum's published range, where
+    // the multiplier crosses zero and goes NEGATIVE.
     //
-    // The multiplier check covers the far corner of the surface: short door,
-    // long hi-lift. The multiplier collapses through zero there, and past the
-    // crossing turns would go negative, which the reference has never been
-    // observed to display.
+    // Measured on the D800-120: a 7'0" door is 84", so 96" of hi-lift is past
+    // its limit, and the reference returns -0.000230 there, -0.173892 at 108"
+    // and -0.362278 at 120". The surface reaches those on its own by
+    // extrapolating its own columns, landing within 0.0005 at 96" and 108"
+    // and 0.005 at 120".
+    //
+    // Out there the numbers are not engineering answers - negative spring
+    // lengths and negative turns - but they are what the reference produces,
+    // and matching it is the point.
     if (this.hiLiftDrumData) {
-        const drum = this.hiLiftDrumData;
-
-        if (this.hiLiftInches <= 0 || this.multiplierExact <= 0) {
-            return false;
-        }
-
-        // A catalog-built drum has no reference calculator behind it, so
-        // there is nothing to reproduce outside the printed tables - off the
-        // end of the data we show nothing rather than extrapolate. (The
-        // reverse-engineered drums do keep extrapolating, deliberately, to
-        // stay faithful to the calculator.)
-        if (drum.catalog) {
-            // Some drums were measured to fall back to the 0" row above their
-            // maximum hi-lift rather than refuse - the D800-120 returns its 0"
-            // value at 125". Those handle it inside their multiplier and must
-            // not be hidden here.
-            if (!drum.fallbackAboveMax && this.hiLiftInches > drum.maxHiLift) {
-                return false;
-            }
-
-            const [minHeight, maxHeight] = drum.heightRange
-                ? drum.heightRange(this.hiLiftInches)
-                : [drum.minHeight(this.hiLiftInches), Infinity];
-
-            if (
-                this.doorHeightTotalFeet < minHeight ||
-                this.doorHeightTotalFeet > maxHeight
-            ) {
-                return false;
-            }
-        }
-
-        return true;
+        return this.hiLiftInches > 0;
     }
 
     return true;
