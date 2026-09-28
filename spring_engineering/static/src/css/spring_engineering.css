@@ -70,7 +70,7 @@
 .se-rowR {
     min-height: 72px;
 
-    background: rgb(193, 192, 192);
+    background: white;
 
     border-bottom: 1px solid #ddd;
 
@@ -86,6 +86,25 @@
 
 .se-rowR > span {
     font-size: 22px;
+}
+
+/* The computed value on the right of each results row - the number and its
+   unit, not the label beside it. Scoped to .se-rowR so it can only ever
+   affect the results block.
+
+   Contrast against the white row background:
+
+       #4caf50  (this one)      2.8:1
+       #2e7d32  green 700/800   5.1:1
+       #0b5c26  dark green      8.2:1
+
+   Dropping the old grey row background nearly doubled this, from 1.5:1 to
+   2.8:1. It is still under the 4.5:1 usually wanted at this size, so if the
+   numbers look faint on a bright screen, #2e7d32 reads as the same green
+   while clearing the threshold comfortably. */
+.se-rowR .se-value {
+    color: #4caf50;
+    font-weight: 600;
 }
 
 
