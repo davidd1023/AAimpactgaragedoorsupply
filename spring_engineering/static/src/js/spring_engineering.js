@@ -865,6 +865,38 @@ const DRUM_LIMITS = {
     "CANIMEX/TF D525-216": { maxHeight: 216, maxWeight: 1500, maxCable: '3/16"' },
 };
 
+// --- Wire size limits per spring ID ---------------------------------------
+// The band of wire a given inside diameter can actually be wound with. Both
+// bounds are inclusive - a wire exactly on the limit passes, only one past it
+// is flagged.
+//
+// The display strings are the reference calculator's own, trailing zero and
+// all, which is why 2 5/8"'s minimum reads 0.1770" in the message where the
+// Wire Size dropdown spells the same size 0.177". Kept verbatim rather than
+// normalised so the two calculators can be read side by side.
+//
+// Only the three Single IDs are covered. The Duplex pairs have no published
+// band yet, so they raise nothing rather than borrowing a neighbour's.
+const WIRE_LIMITS = {
+    '2 5/8"': {
+        min: 0.177,  minText: '0.1770"',
+        max: 0.331,  maxText: '0.331"',
+    },
+    '3 3/4"': {
+        min: 0.2253, minText: '0.2253"',
+        max: 0.4062, maxText: '0.4062"',
+    },
+    '5 1/4"': {
+        min: 0.2625, minText: '0.2625"',
+        max: 0.4375, maxText: '0.4375"',
+    },
+};
+
+// The ceiling on the cycle formula itself. Past this the reference stops
+// trusting its own answer rather than reporting a larger number, so this is a
+// bound on the CALCULATION, not on any spring.
+const CYCLE_MAX = 350000;
+
 // Shown once, as its own message, whenever any warning is raised.
 const WARNING_NOTE =
     "Use extreme caution when designing springs for use with this drum.";
@@ -1256,9 +1288,19 @@ get drumLimits() {
     return DRUM_LIMITS[this.state.drum] || null;
 }
 
-// Every warning the current inputs raise, worst first. Each carries its own
-// severity and text so the colour and the Error Manager come from one place
-// and cannot disagree.
+get wireLimits() {
+    return WIRE_LIMITS[this.state.springId] || null;
+}
+
+// Every warning the current inputs raise, red before yellow. Each carries its
+// own severity and text so the colour and the Error Manager come from one
+// place and cannot disagree.
+//
+// Nothing here narrows the wire the calculator picks on its own. The
+// selection stays what it was - the smallest size reaching the cycle target,
+// with the largest as a fallback - and is then judged. So a light door still
+// lands on a wire under the ID's minimum and is told so, rather than being
+// quietly bumped up to a size the reference would not have chosen.
 get warnings() {
     const found = [];
 
@@ -1266,37 +1308,100 @@ get warnings() {
         return found;
     }
 
+    // --- Wire size against the spring ID ---------------------------------
+
+    const wireLimits = this.wireLimits;
+    const wire = this.wireSizeNumber;
+
+    if (wireLimits && wire) {
+        if (wire > wireLimits.max) {
+            found.push({
+                id: "wire-over-max",
+                severity: "red",
+                message:
+                    "Wire size exceeds " +
+                    wireLimits.maxText +
+                    " maximum for this I.D.",
+            });
+        }
+
+        if (wire < wireLimits.min) {
+            found.push({
+                id: "wire-under-min",
+                severity: "red",
+                message:
+                    "Wire size is less than the minimum of " +
+                    wireLimits.minText +
+                    " for this I.D.",
+            });
+        }
+    }
+
+    // --- Cycle life ------------------------------------------------------
+    // Exclusive by construction: a count over the ceiling cannot also be
+    // under the target unless the target itself is over the ceiling, and
+    // there the out-of-bounds message is the one worth showing.
+
+    const cycles = this.cyclesForWire(wire);
+
+    if (cycles > CYCLE_MAX) {
+        found.push({
+            id: "cycles-over-max",
+            severity: "red",
+            message:
+                "Calculations for this wire size result in an out of bounds " +
+                "cycle count, Cycle Calculation Maximum (" +
+                CYCLE_MAX.toLocaleString("en-US") +
+                ") Exceeded",
+        });
+    } else if (cycles && this.cycleTarget && cycles < this.cycleTarget) {
+        found.push({
+            id: "cycles-low",
+            severity: "red",
+            message:
+                "This wire size computes to " +
+                this.cycleLife +
+                ". Low Cycle Life",
+        });
+    }
+
+    // --- Drum ratings ----------------------------------------------------
+
     const limits = this.drumLimits;
 
-    if (!limits) {
-        return found;
+    if (limits) {
+        const heightInches = this.doorHeightTotalFeet * 12;
+
+        if (heightInches > limits.maxHeight) {
+            found.push({
+                id: "height-over-max",
+                severity: "yellow",
+                message:
+                    "The current height entered is greater than this drum " +
+                    "will allow! The maximum height of this drum is " +
+                    limits.maxHeight +
+                    '".',
+            });
+        }
+
+        if (Number(this.state.weight) > limits.maxWeight) {
+            found.push({
+                id: "weight-over-max",
+                severity: "yellow",
+                message:
+                    "The current weight entered is heavier than this drum " +
+                    "will allow! The maximum weight of this drum is " +
+                    limits.maxWeight +
+                    " lb.",
+            });
+        }
     }
 
-    const heightInches = this.doorHeightTotalFeet * 12;
+    // Worst first. Sort is stable, so within a severity the order above is
+    // the order shown.
+    const rank = { red: 0, yellow: 1 };
 
-    if (heightInches > limits.maxHeight) {
-        found.push({
-            id: "height-over-max",
-            severity: "yellow",
-            message:
-                "The current height entered is greater than this drum will " +
-                "allow! The maximum height of this drum is " +
-                limits.maxHeight +
-                '".',
-        });
-    }
-
-    if (Number(this.state.weight) > limits.maxWeight) {
-        found.push({
-            id: "weight-over-max",
-            severity: "yellow",
-            message:
-                "The current weight entered is heavier than this drum will " +
-                "allow! The maximum weight of this drum is " +
-                limits.maxWeight +
-                " lb.",
-        });
-    }
+    found.sort((a, b) => rank[a.severity] - rank[b.severity]);
 
     return found;
 }
