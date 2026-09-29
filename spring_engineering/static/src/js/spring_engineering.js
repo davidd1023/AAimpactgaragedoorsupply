@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, useState } from "@odoo/owl";
+import { Component, useEffect, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 
 // --- Spring length constants ---------------------------------------------
@@ -778,6 +778,23 @@ function radiusTurnDrop(drumName, radius, heightFeet) {
     );
 }
 
+// The selectable wire sizes, ascending. MUST match the Wire Size dropdown in
+// the template - the auto-selection below walks this list and picks the first
+// entry that meets the cycle target, so a size present in one and not the
+// other would either be unreachable or offered and never chosen.
+const WIRE_SIZES = [
+    0.125, 0.135, 0.142, 0.1483, 0.1562, 0.162, 0.17, 0.177, 0.1875, 0.192,
+    0.2, 0.207, 0.2187, 0.2253, 0.2343, 0.2437, 0.25, 0.2625, 0.273, 0.283,
+    0.289, 0.295, 0.3065, 0.3125, 0.3195, 0.331, 0.3437, 0.3625, 0.375,
+    0.3938, 0.4062, 0.4218, 0.4305, 0.4375, 0.4531, 0.4615, 0.4687, 0.49,
+    0.5, 0.5312, 0.5625, 0.625,
+];
+
+// Back to the exact string the dropdown uses, so the select matches.
+function formatWire(wire) {
+    return String(wire) + '"';
+}
+
 // The starting values, in one place so setup() and the Clear button cannot
 // drift apart. Returns a fresh object each time - handing the same one to
 // useState twice would let a reset alias the original.
@@ -808,6 +825,28 @@ export class SpringEngineering extends Component {
 
     setup() {
         this.state = useState(defaultState());
+
+        // Re-pick the wire whenever anything that feeds torque changes, or
+        // the cycle target does. A size chosen by hand therefore survives
+        // only until the next such change, which is how the reference
+        // behaves. useEffect runs after the render, so it never races the
+        // t-model that just wrote the value.
+        useEffect(
+            () => {
+                const wire = this.recommendedWire;
+
+                if (wire !== null) {
+                    this.state.wireSize = formatWire(wire);
+                }
+            },
+            () => [
+                this.state.weight,
+                this.state.springs,
+                this.state.drum,
+                this.state.liftin,
+                this.state.cycles,
+            ]
+        );
     }
 
     //start divider
@@ -1007,27 +1046,68 @@ get springTorque() {
     return (this.tipptExact / this.state.springs) * this.turnsExact;
 }
 
-get cycleLife() {
+cyclesForWire(wire) {
     const torque = this.springTorque;
 
-    if (!torque || !this.wireSizeNumber) {
+    if (!torque || !wire) {
         return 0;
     }
 
-    // The hi-lift radius scale above is carried into the coefficient too, so
-    // that the ratio the cycle count actually depends on is unchanged and
-    // these counts stay exactly where they were.
+    // The hi-lift radius scale is carried into the coefficient too, so that
+    // the ratio the cycle count actually depends on is unchanged.
     const coefficient = this.hiLiftDrumData
         ? CYCLE_COEFFICIENT * HILIFT_RADIUS_SCALE
         : CYCLE_COEFFICIENT;
 
-    const cycles = Math.pow(
-        (coefficient * Math.pow(this.wireSizeNumber, CYCLE_WIRE_EXPONENT)) /
-            torque,
+    return Math.pow(
+        (coefficient * Math.pow(wire, CYCLE_WIRE_EXPONENT)) / torque,
         CYCLE_EXPONENT
     );
+}
 
-    return Math.round(cycles).toLocaleString("en-US");
+get cycleLife() {
+    const cycles = this.cyclesForWire(this.wireSizeNumber);
+
+    return cycles ? Math.round(cycles).toLocaleString("en-US") : 0;
+}
+
+get cycleTarget() {
+    return Number(String(this.state.cycles).replace(/,/g, "")) || 0;
+}
+
+// The wire the calculator picks on its own: the SMALLEST size whose cycle
+// life reaches the Cycles target.
+//
+// Established from 14 reference runs and matching all 14. The only input
+// that matters is the torque one spring carries, weight * rEff / springs,
+// which is why weight and spring count dominate and the drum and hi-lift
+// move it too - they reach torque through rEff. Door height, radius and
+// spring ID were each measured and change nothing: rEff does not depend on
+// height, radius moves turns and the multiplier in opposite directions so
+// their product is unchanged, and spring ID never enters torque at all.
+//
+// 600 lb on 2 springs and 300 lb on 1 both give 682.61 in-lb and both pick
+// 0.3195", which is what rules out any rule based on weight or spring count
+// separately.
+//
+// If no size reaches the target the largest is returned, which is what the
+// reference does: 250,000 and 300,000 both land on 0.3195" because that wire
+// is good for 318,763 cycles and nothing larger is needed for either.
+get recommendedWire() {
+    // Tied to resultsVisible so the wire is only ever changed while there is
+    // something on screen. Otherwise picking a hi-lift drum before entering
+    // a hi-lift would silently rewrite the wire behind a hidden row.
+    if (!this.resultsVisible || !this.springTorque || !this.cycleTarget) {
+        return null;
+    }
+
+    for (const wire of WIRE_SIZES) {
+        if (this.cyclesForWire(wire) >= this.cycleTarget) {
+            return wire;
+        }
+    }
+
+    return WIRE_SIZES[WIRE_SIZES.length - 1];
 }
 
 get springLengthExact() {
