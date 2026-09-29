@@ -9,7 +9,7 @@
     background: #eeeeee;
 
     font-family: Arial, sans-serif;
-    color: #333;
+    color: #000;
 
     overflow-y: auto;
     overflow-x: hidden;
@@ -34,7 +34,7 @@
     font-size: 25px;
     font-weight: bold;
 
-    color: #555;
+    color: #000;
 }
 
 
@@ -484,7 +484,7 @@
 .se-warn-box-title {
     font-size: 24px;
     font-weight: bold;
-    color: #333333;
+    color: #000000;
 
     margin-bottom: 18px;
 }
@@ -504,7 +504,7 @@
 
     font-size: 18px;
     line-height: 1.45;
-    color: #333333;
+    color: #000000;
 
     padding: 16px 18px;
 
@@ -590,7 +590,7 @@
     gap: 20px;
 
     font-size: 19px;
-    color: #333333;
+    color: #000000;
 
     padding: 14px 2px;
     border-bottom: 1px solid #dddddd;
@@ -610,5 +610,5 @@
 .se-info-empty {
     font-size: 19px;
     line-height: 1.45;
-    color: #333333;
+    color: #000000;
 }
