@@ -925,22 +925,30 @@ get multiplierExact() {
 }
 
 get resultsVisible() {
-    // The only input the reference calculator refuses is a hi-lift of zero or
-    // blank, which hides the results rows entirely. Everything else it
-    // computes and shows - including past the drum's published range, where
-    // the multiplier crosses zero and goes NEGATIVE.
+    // Nothing is shown until the calculator has what it needs: a drum, and a
+    // weight above zero. Without both, every result would read 0 or NaN,
+    // which looks like an answer rather than a missing input.
+    if (!this.state.drum) {
+        return false;
+    }
+
+    if (!(Number(this.state.weight) > 0)) {
+        return false;
+    }
+
+    // Hi-lift needs one more: the hi-lift itself. This keys off the LIFT TYPE
+    // rather than whether the drum has a model behind it, so an unimplemented
+    // hi-lift drum is gated the same way.
     //
-    // Measured on the D800-120: a 7'0" door is 84", so 96" of hi-lift is past
-    // its limit, and the reference returns -0.000230 there, -0.173892 at 108"
-    // and -0.362278 at 120". The surface reaches those on its own by
-    // extrapolating its own columns, landing within 0.0005 at 96" and 108"
-    // and 0.005 at 120".
-    //
-    // Out there the numbers are not engineering answers - negative spring
-    // lengths and negative turns - but they are what the reference produces,
-    // and matching it is the point.
-    if (this.hiLiftDrumData) {
-        return this.hiLiftInches > 0;
+    // Note this is the one input the reference calculator also refuses -
+    // it hides its results rows at a hi-lift of zero. Everything else it
+    // computes and shows, including past a drum's published range where the
+    // multiplier crosses zero and goes NEGATIVE: on the D800-120 a 7'0" door
+    // returns -0.000230 at 96" of hi-lift, -0.173892 at 108" and -0.362278 at
+    // 120". Those are not engineering answers, but they are what the
+    // reference produces, and matching it is the point.
+    if (this.state.liftType === "Hi-Lift" && !(this.hiLiftInches > 0)) {
+        return false;
     }
 
     return true;

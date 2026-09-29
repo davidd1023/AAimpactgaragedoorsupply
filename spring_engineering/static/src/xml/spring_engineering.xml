@@ -1119,7 +1119,10 @@
 
             <div class="se-divider"></div>
 
-            <!-- Wire Size -->
+            <!-- Wire Size: only meaningful once there is something to
+                 calculate, so it appears with the results. -->
+
+            <t t-if="resultsVisible">
 
             <div class="se-row">
 
@@ -1182,9 +1185,9 @@
 
             </div>
 
-            <!-- Results rows: hidden until the inputs are sufficient.
-                 A hi-lift drum with no hi-lift entered shows nothing, which
-                 is what the reference calculator does. -->
+            </t>
+
+            <!-- Results: same gate as the wire size above. -->
 
             <t t-if="resultsVisible">
 
