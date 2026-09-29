@@ -715,6 +715,69 @@ function hiLiftMultiplier(drum, heightFeet, hiLiftInches) {
     return multiplier;
 }
 
+// --- Track radius --------------------------------------------------------
+// The Radius control (12", 15", LHR) applies to standard lift only - hi-lift
+// forces 15 and vertical hides the row. Until now it was written to state and
+// read by nothing, so all three settings gave identical results.
+//
+// It changes TURNS AND NOTHING ELSE. Across 62 reference runs the cycle count
+// never moved - 13,045 at all three radii on the D400-96 - and cycle life
+// depends only on weight * rEff / springs, so rEff is untouched. Confirmed
+// directly too: multiplier * turns comes to 2.27548 / 2.27635 / 2.27532
+// against a stored rEff of 2.27535. So spring length, spring weight and cycle
+// life all follow from the turns change with nothing else to model.
+//
+// Radius 15 is the baseline the drum curves above were built on. 12" and LHR
+// each REMOVE turns, by an amount that shrinks as the door gets taller:
+// on the D400-96, 0.303 turns at 7 ft against 0.250 at 14 ft for radius 12.
+// Neither a constant offset nor a constant ratio fits - both were tried
+// against measurements and both missed.
+//
+// The drop is a property of the TRACK, not the drum, which shows up as
+// drop * rEff being nearly constant across drums - the track removes a fixed
+// length of CABLE, and turns = cable / (2*pi*r). Tempting to ship that as one
+// shared curve, and it was tried: it predicts the D400-144 to 1e-04 but misses
+// the D525-216 by up to 1.7e-02, because that drum's taper puts the affected
+// cable at a different radius. So each drum carries its own pair, fitted from
+// 62 reference multipliers over 6-22 ft.
+//
+// 55 of the 62 reproduce exactly at 6 decimals; the rest miss in the seventh.
+// Between measured heights the curves hold to 1e-06 (D400-96) and 1e-04
+// (D400-144), the difference being how many heights each has.
+//
+//     turns(radius) = turns(15) - (a + b/H + c/H^2 + d/H^3 + e/H^4 + f/H^5)
+const RADIUS_TURN_DROP = {
+    "CANIMEX/TF D400-144|12": [0.1656285206, 2.3076617446, -30.0048033058, 260.8643203117, -1078.6832652560, 1784.5220533614],
+    "CANIMEX/TF D400-144|LHR": [0.5135293100, 2.8661567110, -28.2453217629, 251.8661379208, -1028.4071457077, 1692.6747680490],
+    "CANIMEX/TF D400-96|12": [0.2111860473, 0.4705702303, 0.6897970776, 7.1265035538, -37.9881874300, 92.1914437055],
+    "CANIMEX/TF D400-96|LHR": [0.5640194687, 0.9484105635, 3.6996361562, -9.5661849635, 29.6419173980, 0.0000000000],
+    "CANIMEX/TF D525-216|12": [0.1506627488, 0.8904460305, -7.6392969827, 70.2416578278, -283.0436720321, 468.7138807192],
+    "CANIMEX/TF D525-216|LHR": [0.4206159324, 1.4306546927, -8.1013920108, 81.1690285358, -327.0608469821, 548.1638483334],
+};
+
+// Turns removed by the selected track radius. Radius 15 is the baseline, and
+// anything without a measured curve - including hi-lift and vertical, which
+// do not offer the choice - drops nothing.
+function radiusTurnDrop(drumName, radius, heightFeet) {
+    const coefficients = RADIUS_TURN_DROP[drumName + "|" + radius];
+    const height = Number(heightFeet) || 0;
+
+    if (!coefficients || height <= 0) {
+        return 0;
+    }
+
+    const inv = 1 / height;
+
+    return (
+        coefficients[0] +
+        coefficients[1] * inv +
+        coefficients[2] * inv ** 2 +
+        coefficients[3] * inv ** 3 +
+        coefficients[4] * inv ** 4 +
+        coefficients[5] * inv ** 5
+    );
+}
+
 export class SpringEngineering extends Component {
 
     static template = "spring_engineering.Calculator";
@@ -818,7 +881,14 @@ get turnsExact() {
         return 0;
     }
 
-    return drumTurns(this.drumData, this.doorHeightTotalFeet);
+    return (
+        drumTurns(this.drumData, this.doorHeightTotalFeet) -
+        radiusTurnDrop(
+            this.state.drum,
+            this.state.radius,
+            this.doorHeightTotalFeet
+        )
+    );
 }
 
 get turns() {
