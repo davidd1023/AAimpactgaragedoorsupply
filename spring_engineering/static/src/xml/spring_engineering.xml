@@ -19,6 +19,12 @@
 
                 <span>Assembly</span>
 
+                <div class="se-select-wrap">
+
+                    <!-- Sizes the wrapper to the value on show, so the
+                         select below covers that text and nothing more. -->
+                    <span class="se-select-sizer" t-esc="state.assembly"/>
+
                 <select
                     t-model="state.assembly"
                     class="se-select">
@@ -28,6 +34,8 @@
                     <option value="Triplex">Triplex</option>
 
                 </select>
+
+                </div>
 
             </div>
 
@@ -80,6 +88,12 @@
             <div class="se-row">
 
                 <span>Spring ID</span>
+
+                <div class="se-select-wrap">
+
+                    <!-- Sizes the wrapper to the value on show, so the
+                         select below covers that text and nothing more. -->
+                    <span class="se-select-sizer" t-esc="state.springId"/>
 
                 <select
                     t-model="state.springId"
@@ -142,6 +156,8 @@
 
                 </select>
 
+                </div>
+
             </div>
 
         </t>
@@ -152,6 +168,12 @@
             <div class="se-row">
 
                 <span>Cycles</span>
+
+                <div class="se-select-wrap">
+
+                    <!-- Sizes the wrapper to the value on show, so the
+                         select below covers that text and nothing more. -->
+                    <span class="se-select-sizer" t-esc="state.cycles"/>
 
                 <select
                     t-model="state.cycles"
@@ -170,6 +192,8 @@
 
                 </select>
 
+                </div>
+
             </div>
 
 
@@ -184,6 +208,12 @@
 
                 <span>Lift Type</span>
 
+                <div class="se-select-wrap">
+
+                    <!-- Sizes the wrapper to the value on show, so the
+                         select below covers that text and nothing more. -->
+                    <span class="se-select-sizer" t-esc="state.liftType"/>
+
                 <select
                     t-model="state.liftType"
                     t-on-change="selectLiftType"
@@ -194,6 +224,8 @@
                     <option value="Hi-Lift">Hi-Lift</option>
 
                 </select>
+
+                </div>
 
             </div>
 
@@ -262,7 +294,34 @@
 
             <div class="se-row">
 
-                <span>Drum</span>
+                <span class="se-label-with-info">
+
+                    Drum
+
+                    <!-- Always present, so it can explain itself before a
+                         drum has been picked. -->
+                    <button class="se-info-badge"
+                            t-on-click.stop="toggleDrumInfo"
+                            t-att-aria-label="drumInfoLabel">
+
+                        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"
+                                    fill="none" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="12" cy="7.2" r="1.25" fill="currentColor"/>
+                            <line x1="12" y1="10.5" x2="12" y2="17"
+                                  stroke="currentColor" stroke-width="2"
+                                  stroke-linecap="round"/>
+                        </svg>
+
+                    </button>
+
+                </span>
+
+                <div class="se-select-wrap">
+
+                    <!-- Sizes the wrapper to the value on show, so the
+                         select below covers that text and nothing more. -->
+                    <span class="se-select-sizer" t-esc="state.drum || 'Select a Drum'"/>
 
                 <select
                     t-model="state.drum"
@@ -989,6 +1048,8 @@
 
                 </select>
 
+                </div>
+
             </div>
 
 
@@ -1092,6 +1153,12 @@
 
                 <span>Pitch Amount</span>
 
+                <div class="se-select-wrap">
+
+                    <!-- Sizes the wrapper to the value on show, so the
+                         select below covers that text and nothing more. -->
+                    <span class="se-select-sizer" t-esc="state.pitchAmount"/>
+
                 <select
                     t-model="state.pitchAmount"
                     class="se-select">
@@ -1113,11 +1180,42 @@
 
                 </select>
 
+                </div>
+
             </div>
 
-             <!-- SECTION DIVIDER -->
+             <!-- SECTION DIVIDER, and the warning symbol.
+                  A circle for red, a triangle for yellow; shown only when
+                  something is actually wrong. -->
 
-            <div class="se-divider"></div>
+            <div class="se-divider se-divider-warn">
+
+                <t t-if="warningLevel">
+
+                    <button class="se-warn-badge"
+                            t-att-class="'se-warn-' + warningLevel"
+                            t-on-click.stop="toggleWarnings"
+                            t-att-aria-label="warnings.length + ' warning(s) - open the Error Manager'">
+
+                        <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+                            <circle t-if="warningLevel === 'red'"
+                                    cx="12" cy="12" r="10"
+                                    fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path t-if="warningLevel === 'yellow'"
+                                  d="M12 2.5 L22.5 21 L1.5 21 Z"
+                                  fill="none" stroke="currentColor"
+                                  stroke-width="2" stroke-linejoin="round"/>
+                            <line x1="12" y1="8" x2="12" y2="14"
+                                  stroke="currentColor" stroke-width="2"
+                                  stroke-linecap="round"/>
+                            <circle cx="12" cy="17.2" r="1.25" fill="currentColor"/>
+                        </svg>
+
+                    </button>
+
+                </t>
+
+            </div>
 
             <!-- Wire Size: only meaningful once there is something to
                  calculate, so it appears with the results. -->
@@ -1127,6 +1225,12 @@
             <div class="se-row">
 
                 <span>Wire Size</span>
+
+                <div class="se-select-wrap">
+
+                    <!-- Sizes the wrapper to the value on show, so the
+                         select below covers that text and nothing more. -->
+                    <span class="se-select-sizer" t-esc="state.wireSize"/>
 
                 <select
                     t-model="state.wireSize"
@@ -1183,6 +1287,8 @@
 
                 </select>
 
+                </div>
+
             </div>
 
             </t>
@@ -1195,50 +1301,114 @@
 
             <div class="se-rowR">
                     <span>Spring ID</span>
-                    <span class="se-value" t-esc="state.springId"/>
+                    <span t-att-class="valueClass" t-esc="state.springId"/>
             </div>
 
             <!-- Results SpringLength -->
 
             <div class="se-rowR">
                     <span>Spring Length</span>
-                    <span class="se-value" t-esc="springLength + '&quot;'"/>
+                    <span t-att-class="valueClass" t-esc="springLength + '&quot;'"/>
             </div>
 
             <!-- Results Spring Weight -->
 
             <div class="se-rowR">
                     <span>Spring Weight</span>
-                    <span class="se-value" t-esc="springWeight + ' lb'"/>
+                    <span t-att-class="valueClass" t-esc="springWeight + ' lb'"/>
             </div>
 
             <!-- Results Cycles -->
 
             <div class="se-rowR">
                     <span>Cycles</span>
-                    <span class="se-value" t-esc="cycleLife"/>
+                    <span t-att-class="valueClass" t-esc="cycleLife"/>
             </div>
 
             <!-- Results Multiplier -->
 
             <div class="se-rowR">
                     <span>Multiplier</span>
-                    <span class="se-value" t-esc="multiplier"/>
+                    <span t-att-class="valueClass" t-esc="multiplier"/>
             </div>
 
             <!-- Results Turns -->
 
             <div class="se-rowR">
                     <span>Turns</span>
-                    <span class="se-value" t-esc="turns"/>
+                    <span t-att-class="valueClass" t-esc="turns"/>
             </div>
 
             <!-- Results TIPPT -->
 
             <div class="se-rowR">
                 <span>TIPPT</span>
-                <span class="se-value" t-esc="tippt"/>
+                <span t-att-class="valueClass" t-esc="tippt"/>
             </div>
+
+            </t>
+
+            <!-- DRUM SPECIFICATIONS. Same backdrop behaviour as the Error
+                 Manager: a click anywhere outside closes it. Rows rather
+                 than boxes, matching the results styling. -->
+
+            <t t-if="state.showDrumInfo">
+
+                <div class="se-warn-backdrop" t-on-click="closeDrumInfo">
+
+                    <div class="se-warn-box" t-on-click.stop="">
+
+                        <div class="se-warn-box-title" t-esc="drumInfoTitle"/>
+
+                        <!-- Specifications when there are any, otherwise a
+                             line saying why there are none. -->
+                        <div class="se-info-rows" t-if="drumInfo">
+                            <div class="se-info-row"
+                                 t-foreach="drumInfo" t-as="spec" t-key="spec[0]">
+                                <span t-esc="spec[0]"/>
+                                <span class="se-info-value" t-esc="spec[1]"/>
+                            </div>
+                        </div>
+
+                        <div class="se-info-empty" t-if="!drumInfo" t-esc="drumInfoMessage"/>
+
+                    </div>
+
+                </div>
+
+            </t>
+
+            <!-- ERROR MANAGER. The backdrop covers the page so a click
+                 anywhere outside the box closes it; the box itself stops the
+                 click so clicking inside does not. -->
+
+            <t t-if="state.showWarnings and warningLevel">
+
+                <div class="se-warn-backdrop" t-on-click="closeWarnings">
+
+                    <div class="se-warn-box" t-on-click.stop="">
+
+                        <div class="se-warn-box-title">Error Manager</div>
+
+                        <div class="se-warn-list">
+
+                            <div class="se-warn-item"
+                                 t-foreach="warnings" t-as="warning" t-key="warning.id">
+                                <span t-att-class="'se-warn-dot se-warn-' + warning.severity">!</span>
+                                <span t-esc="warning.message"/>
+                            </div>
+
+                            <!-- The caution note is its own message, not a
+                                 tail repeated on every warning above. -->
+                            <div class="se-warn-item se-warn-note">
+                                <span t-esc="warningSuffix"/>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
 
             </t>
 

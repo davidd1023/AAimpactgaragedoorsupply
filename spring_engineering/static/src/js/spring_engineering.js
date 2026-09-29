@@ -795,6 +795,80 @@ function formatWire(wire) {
     return String(wire) + '"';
 }
 
+// What the info panel shows for each drum, in display order.
+//
+// The three standard drums carry the figures the reference calculator uses,
+// which are also what DRUM_LIMITS checks against.
+//
+// The hi-lift entries are from the manufacturer's catalog and have NOT been
+// confirmed against the reference calculator. Max weight in particular is
+// inferred: the catalog quotes a load per drum, and on the standard drums
+// the calculator's limit came out at exactly twice that, since a door hangs
+// on two. The same doubling is assumed here and is marked below.
+const DRUM_INFO = {
+    "CANIMEX/TF D400-96": [
+        ["Max Height", '96"'],
+        ["Max Weight", "530 lb"],
+        ["Max Cable Diameter", '1/8"'],
+    ],
+    "CANIMEX/TF D400-144": [
+        ["Max Height", '144"'],
+        ["Max Weight", "750 lb"],
+        ["Max Cable Diameter", '5/32"'],
+    ],
+    "CANIMEX/TF D525-216": [
+        ["Max Height", '216"'],
+        ["Max Weight", "1500 lb"],
+        ["Max Cable Diameter", '3/16"'],
+    ],
+    "CANIMEX/TF 525-54HL": [
+        ["Max High Lift", '54"'],
+        ["Cable Capacity of Flat", '179"'],
+        ["Max Weight", "1000 lb"],
+        ["Max Cable Diameter", '3/16"'],
+        ["Drum Radius", '2.719"'],
+    ],
+    "CANIMEX/TF 575-120": [
+        ["Max High Lift", '118"'],
+        ["Cable Capacity of Flat", '145"'],
+        ["Max Weight", "1000 lb"],
+        ["Max Cable Diameter", '3/16"'],
+        ["Drum Radius", '2.969"'],
+    ],
+    "CANIMEX/TF D800-120": [
+        ["Max High Lift", '119"'],
+        ["Cable Capacity of Flat", '266"'],
+        ["Max Weight", "2200 lb"],
+        ["Max Cable Diameter", '1/4"'],
+        ["Drum Radius", '4.125"'],
+    ],
+};
+
+// --- Drum limits and warnings --------------------------------------------
+// The calculator still computes past these; it flags the result rather than
+// refusing. Yellow means the inputs exceed what the drum is rated for, red
+// (not yet implemented) means the design itself is unsafe.
+//
+// maxHeight is the nameplate figure - the trailing number in each drum's name
+// is its rating in inches - not the catalog's cable capacity, which runs a
+// little higher (98, 148 and 231 for these three).
+//
+// maxWeight is the whole DOOR, which is twice the catalog's "max load per
+// drum" because a door hangs on two: 265, 375 and 750 lb per drum become
+// 530, 750 and 1500 here.
+//
+// maxCable is carried for completeness and is NOT yet checked - the app has
+// no cable-size input to compare it against.
+const DRUM_LIMITS = {
+    "CANIMEX/TF D400-96": { maxHeight: 96, maxWeight: 530, maxCable: '1/8"' },
+    "CANIMEX/TF D400-144": { maxHeight: 144, maxWeight: 750, maxCable: '5/32"' },
+    "CANIMEX/TF D525-216": { maxHeight: 216, maxWeight: 1500, maxCable: '3/16"' },
+};
+
+// Shown once, as its own message, whenever any warning is raised.
+const WARNING_NOTE =
+    "Use extreme caution when designing springs for use with this drum.";
+
 // The starting values, in one place so setup() and the Clear button cannot
 // drift apart. Returns a fresh object each time - handing the same one to
 // useState twice would let a reset alias the original.
@@ -816,6 +890,8 @@ function defaultState() {
         pitch: false,
         pitchAmount: "0/12",
         wireSize: '0.25"',
+        showWarnings: false,
+        showDrumInfo: false,
     };
 }
 
@@ -1175,6 +1251,121 @@ get springWeight() {
             this.state.radius = "15";
         }
     }
+
+get drumLimits() {
+    return DRUM_LIMITS[this.state.drum] || null;
+}
+
+// Every warning the current inputs raise, worst first. Each carries its own
+// severity and text so the colour and the Error Manager come from one place
+// and cannot disagree.
+get warnings() {
+    const found = [];
+
+    if (!this.resultsVisible) {
+        return found;
+    }
+
+    const limits = this.drumLimits;
+
+    if (!limits) {
+        return found;
+    }
+
+    const heightInches = this.doorHeightTotalFeet * 12;
+
+    if (heightInches > limits.maxHeight) {
+        found.push({
+            id: "height-over-max",
+            severity: "yellow",
+            message:
+                "The current height entered is greater than this drum will " +
+                "allow! The maximum height of this drum is " +
+                limits.maxHeight +
+                '".',
+        });
+    }
+
+    if (Number(this.state.weight) > limits.maxWeight) {
+        found.push({
+            id: "weight-over-max",
+            severity: "yellow",
+            message:
+                "The current weight entered is heavier than this drum will " +
+                "allow! The maximum weight of this drum is " +
+                limits.maxWeight +
+                " lb.",
+        });
+    }
+
+    return found;
+}
+
+// Red outranks yellow; null when there is nothing to report.
+get warningLevel() {
+    if (this.warnings.some((w) => w.severity === "red")) {
+        return "red";
+    }
+
+    return this.warnings.length ? "yellow" : null;
+}
+
+// Applied to every results value. The warnings raised so far are about the
+// inputs as a whole rather than one row, so they colour the whole block.
+get valueClass() {
+    return this.warningLevel
+        ? "se-value se-value-" + this.warningLevel
+        : "se-value";
+}
+
+get warningSuffix() {
+    return WARNING_NOTE;
+}
+
+toggleWarnings() {
+    // Only one panel open at a time.
+    this.state.showDrumInfo = false;
+    this.state.showWarnings = !this.state.showWarnings;
+}
+
+closeWarnings() {
+    this.state.showWarnings = false;
+}
+
+get drumInfo() {
+    return DRUM_INFO[this.state.drum] || null;
+}
+
+// The panel opens whether or not a drum is chosen, so it can say what it
+// wants from the user instead of the symbol simply not being there.
+get drumInfoTitle() {
+    return this.state.drum || "No drum selected!";
+}
+
+// Only used when there are no specification rows to show.
+get drumInfoMessage() {
+    if (!this.state.drum) {
+        return "Please select a drum on the right and tap this again to " +
+               "see details about the selected drum.";
+    }
+    return "No specifications are available for this drum yet.";
+}
+
+get drumInfoLabel() {
+    return this.state.drum
+        ? "Specifications for " + this.state.drum
+        : "No drum selected";
+}
+
+toggleDrumInfo() {
+    // Only one panel open at a time.
+    this.state.showWarnings = false;
+    this.state.showDrumInfo = !this.state.showDrumInfo;
+}
+
+closeDrumInfo() {
+    this.state.showDrumInfo = false;
+}
 
     clearAll() {
         // Mutate in place rather than reassigning this.state - replacing the
