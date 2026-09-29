@@ -805,14 +805,20 @@ function formatWire(wire) {
 
 // What the info panel shows for each drum, in display order.
 //
-// The three standard drums carry the figures the reference calculator uses,
-// which are also what DRUM_LIMITS checks against.
+// All six drums now carry supplied figures rather than catalog readings, and
+// every one shows the same three rows, so the panel reads the same whichever
+// drum is selected.
 //
-// The hi-lift entries are from the manufacturer's catalog and have NOT been
-// confirmed against the reference calculator. Max weight in particular is
-// inferred: the catalog quotes a load per drum, and on the standard drums
-// the calculator's limit came out at exactly twice that, since a door hangs
-// on two. The same doubling is assumed here and is marked below.
+// The hi-lift entries used to carry max hi-lift, cable capacity of flat and
+// drum radius as well; those are gone. Max hi-lift in particular was worth
+// removing rather than correcting - it read 118" and 119" from the catalog
+// where the entry is actually bounded at 120", so the panel and the warning
+// disagreed on screen.
+//
+// The earlier max weights were INFERRED, by doubling the catalog's load per
+// drum on the theory that a door hangs on two. The supplied figures came back
+// 1000, 1000 and 2200, which is exactly what that doubling predicted, so the
+// assumption held on the hi-lift drums as it had on the standard ones.
 const DRUM_INFO = {
     "CANIMEX/TF D400-96": [
         ["Max Height", '96"'],
@@ -830,25 +836,19 @@ const DRUM_INFO = {
         ["Max Cable Diameter", '3/16"'],
     ],
     "CANIMEX/TF 525-54HL": [
-        ["Max High Lift", '54"'],
-        ["Cable Capacity of Flat", '179"'],
+        ["Max Height", '234"'],
         ["Max Weight", "1000 lb"],
         ["Max Cable Diameter", '3/16"'],
-        ["Drum Radius", '2.719"'],
     ],
     "CANIMEX/TF 575-120": [
-        ["Max High Lift", '118"'],
-        ["Cable Capacity of Flat", '145"'],
+        ["Max Height", '264"'],
         ["Max Weight", "1000 lb"],
         ["Max Cable Diameter", '3/16"'],
-        ["Drum Radius", '2.969"'],
     ],
     "CANIMEX/TF D800-120": [
-        ["Max High Lift", '119"'],
-        ["Cable Capacity of Flat", '266"'],
+        ["Max Height", '384"'],
         ["Max Weight", "2200 lb"],
         ["Max Cable Diameter", '1/4"'],
-        ["Drum Radius", '4.125"'],
     ],
 };
 
