@@ -1297,6 +1297,95 @@
 
             <t t-if="resultsVisible">
 
+            <!-- DUPLEX RESULTS. Placeholder UI only: every value is a
+                 literal 0 and nothing below is computed. Three black bars
+                 split the outer spring, the inner spring, and the figures
+                 that belong to the pair rather than to either spring.
+
+                 The rows reuse .se-rowR wholesale, so they pick up the
+                 height, white background, bottom border and green value
+                 already defined for the Single results. Turns and TIPPT
+                 share one row, each half a plain .se-rowR inside a flex
+                 wrapper that draws the divider between them.
+
+                 Scoped to Duplex. Triplex still falls through to the
+                 Single layout, which is what it did before. -->
+
+            <t t-if="state.assembly === 'Duplex'">
+
+            <div class="se-rowR-header">Outer</div>
+
+            <div class="se-rowR">
+                    <span>Wire Size</span>
+                    <span class="se-value">0</span>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Spring ID</span>
+                    <span class="se-value">0</span>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Spring Length</span>
+                    <span class="se-value">0</span>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Weight</span>
+                    <span class="se-value">0</span>
+            </div>
+
+            <div class="se-rowR-header">Inner</div>
+
+            <div class="se-rowR">
+                    <span>Wire Size</span>
+                    <span class="se-value">0</span>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Spring ID</span>
+                    <span class="se-value">0</span>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Spring Length</span>
+                    <span class="se-value">0</span>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Weight</span>
+                    <span class="se-value">0</span>
+            </div>
+
+            <div class="se-rowR-header">Other</div>
+
+            <div class="se-rowR">
+                    <span>Cycles</span>
+                    <span class="se-value">0</span>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Multiplier</span>
+                    <span class="se-value">0</span>
+            </div>
+
+            <div class="se-rowR-split">
+                <div class="se-rowR">
+                    <span>Turns</span>
+                    <span class="se-value">0</span>
+                </div>
+                <div class="se-rowR">
+                    <span>TIPPT</span>
+                    <span class="se-value">0</span>
+                </div>
+            </div>
+
+            </t>
+
+            <t t-else="">
+
+            <!-- Single and Triplex: unchanged. -->
+
             <!-- Results Spring ID -->
 
             <div class="se-rowR">
@@ -1345,6 +1434,8 @@
                 <span>TIPPT</span>
                 <span t-att-class="valueClass" t-esc="tippt"/>
             </div>
+
+            </t>
 
             </t>
 
