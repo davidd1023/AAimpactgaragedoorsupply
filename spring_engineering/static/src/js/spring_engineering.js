@@ -639,8 +639,14 @@ function hl800Multiplier(heightFeet, hiLiftInches) {
 // constants found no setting that does better; the residual conflict is
 // between the reference's displayed turns and its displayed cycles, which
 // disagree by 0.003% at 36" and 54" under this file's cycle law.
+// maxHiLift is the most hi-lift each drum accepts. As with the standard
+// drums, the trailing number in the name is the rating: 120, 120 and 54.
+// Past it the entry is refused rather than extrapolated - which matters here,
+// because the fitted curves go NEGATIVE above the measured band and would
+// otherwise hand back a confident-looking wrong answer.
 const HILIFT_DRUMS = {
     "CANIMEX/TF D800-120": {
+        maxHiLift: 120,
         catalog: true,
         reff: hl800REff,
         multiplier: hl800Multiplier,
@@ -648,11 +654,13 @@ const HILIFT_DRUMS = {
     // Catalog-built. See the HL575_* block above for how it differs from the
     // reverse-engineered drums, and why.
     "CANIMEX/TF 575-120": {
+        maxHiLift: 120,
         catalog: true,
         reff: hl575REff,
         multiplier: hl575Multiplier,
     },
     "CANIMEX/TF 525-54HL": {
+        maxHiLift: 54,
         spiralA: 7.3952515,      // r0^2
         spiralB: 0.099661766,    // p/pi
         multCoeffs: [
@@ -1426,6 +1434,46 @@ get warnings() {
                 this.cycleLife +
                 ". Low Cycle Life",
         });
+    }
+
+    // --- Hi-lift against the drum ----------------------------------------
+    // Only reachable with the lift type set to Hi-Lift, which is the only way
+    // the input is on screen at all.
+    //
+    // Under 12" is yellow rather than red: the calculator has a defined
+    // answer there, it just is not the one the entry asks for, because
+    // anything short of a full 12" is frozen to 0" (see HILIFT_MIN). Over the
+    // drum's rating is red - past that the fitted curves leave their measured
+    // band entirely.
+    //
+    // A zero raises nothing. The results are already hidden at that point, so
+    // there is nothing on screen to qualify, and an empty field is an input
+    // not yet given rather than a wrong one.
+
+    if (this.state.liftType === "Hi-Lift" && this.hiLiftInches > 0) {
+        const hiLift = this.hiLiftInches;
+        const maxHiLift = this.hiLiftDrumData
+            ? this.hiLiftDrumData.maxHiLift
+            : null;
+
+        if (maxHiLift && hiLift > maxHiLift) {
+            found.push({
+                id: "hilift-over-max",
+                severity: "red",
+                message:
+                    "The value you entered (" +
+                    hiLift +
+                    ") is greater than the maximum allowed(" +
+                    maxHiLift +
+                    ")",
+            });
+        } else if (hiLift < HILIFT_MIN) {
+            found.push({
+                id: "hilift-under-min",
+                severity: "yellow",
+                message: "Must be " + HILIFT_MIN + " or more",
+            });
+        }
     }
 
     // --- Assembly against the door width ---------------------------------
