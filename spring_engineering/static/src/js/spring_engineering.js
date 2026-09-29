@@ -221,37 +221,44 @@ const HL575_B = 0.099661791;       // pitch/pi, pitch = 0.313097"
 const HL575_MIN = 12;
 const HL575_MAX = 120;
 
-// [hiLift, lowest measured height, highest measured height, a, b, c, d, e, f]
+// [hiLift, a, b, c, d, e, f, g] for
 //     multiplier = a*(H/10) + b + c*(10/H) + d*(10/H)^2 + e*(10/H)^3
-//                  + f*(10/H)^4
-// the same six-term family the standard drums use; H/10 and 10/H only keep
-// the basis conditioned across the span. Between columns the six
-// coefficients are interpolated with a local cubic in rEff, the drum's own
-// coordinate.
+//                  + f*(10/H)^4 + g*(10/H)^5
+// the standard drums' six-term family plus an optional seventh. The seventh
+// is only needed by columns reaching past about 20 ft - without it they sit
+// at 1.1e-06 instead of 4e-07 - so it is chosen per column by leave-one-out
+// and left at zero where six terms do better. H/10 and 10/H only keep the
+// basis conditioned across the span.
 //
-// ACCURACY, and where it is not yet good enough. All 116 measured points are
-// exact to 6 decimals, and within a column a withheld height lands at 1e-06
-// to 6e-06. BETWEEN columns it is much looser: withholding a whole column and
-// predicting it from its neighbours misses by up to 5.5e-04, always on the
-// 6 ft row at 72" of hi-lift, where a 6 ft door sits exactly on the collapse
-// edge - multiplier 0.200 against 0.253 half a foot higher - and the surface
-// turns faster than 12"-spaced columns can follow. The three columns spaced
-// 6" apart (84, 90, 96) are ten times better than the rest, which says what
-// the fix is: more columns below 72", not more heights. Columns at 6, 18, 30,
-// 42, 54 and 66 would be the next step.
+// Between columns the coefficients are interpolated with a local cubic in
+// rEff, the drum's own coordinate.
+//
+// 190 six-decimal reference multipliers, 15 hi-lift columns, door heights
+// from 6 to 32 ft. 186 of the 190 reproduce exactly; four miss in the
+// seventh decimal.
+//
+// WHAT IS STILL LOOSE. Within a column, predicting a withheld height lands
+// at 1e-06 to 6e-06. BETWEEN columns it is 2.1e-04 at worst and 4.3e-05
+// median, concentrated on the lowest row of each column where the
+// multiplier collapses. Adding the 18", 66" and 78" columns halved it from
+// 5.5e-04, and the pattern holds that closer column spacing helps rather
+// than more heights: columns at 6", 30", 42" and 54" are the next step.
 const HL575_COLUMNS = [
-        [  0,  6.0, 12.0, -0.0000487740,  0.0003262464,  0.4606775188, -0.0338070764, -0.0003996994,  0.0000762250],
-        [ 12,  6.0, 13.0,  0.0000827149, -0.0003450987,  0.4922785504, -0.0795908713, -0.0001051385, -0.0000206436],
-        [ 24,  6.0, 14.0,  0.0000603446, -0.0003014621,  0.5208509964, -0.1211854800, -0.0011979138, -0.0000633049],
-        [ 36,  6.0, 14.5, -0.0000389049,  0.0002031602,  0.5469139031, -0.1586462566, -0.0042301838, -0.0000853768],
-        [ 48,  6.0, 16.0,  0.0000574234, -0.0003163026,  0.5737830270, -0.1951611656, -0.0079408608, -0.0005076004],
-        [ 60,  6.0, 15.5,  0.0001266253, -0.0007509320,  0.5995738500, -0.2290769198, -0.0130619299, -0.0014726624],
-        [ 72,  6.0, 18.0,  0.0002936128, -0.0019029394,  0.6263998974, -0.2629054733, -0.0180405697, -0.0036659793],
-        [ 84,  7.0, 18.5,  0.0003196601, -0.0024161492,  0.6515772317, -0.2942524594, -0.0235113088, -0.0074939573],
-        [ 90,  8.0, 19.0,  0.0004246081, -0.0031397231,  0.6648343444, -0.3100484548, -0.0259414803, -0.0102532141],
-        [ 96,  8.0, 20.0,  0.0008296758, -0.0060667865,  0.6841956060, -0.3339490594, -0.0226647398, -0.0151035557],
-        [108,  9.0, 21.0,  0.0007987675, -0.0065855661,  0.7095918802, -0.3656474090, -0.0236115558, -0.0255709557],
-        [120, 10.0, 20.0,  0.0017396608, -0.0140781694,  0.7545182406, -0.4245599503, -0.0026277081, -0.0458691509],
+        [  0,  -0.0000060557,   0.0000390956,   0.4613358759,  -0.0344926349,  -0.0000659246,   0.0000144417,   0.0000000000],
+        [ 12,   0.0000041957,   0.0000041460,   0.4916691235,  -0.0790692597,  -0.0003242280,   0.0000155106,   0.0000000000],
+        [ 18,  -0.0000416799,   0.0002979434,   0.5053590803,  -0.0990953336,  -0.0016132647,   0.0003524751,  -0.0000562322],
+        [ 24,  -0.0014256751,   0.0080764309,   0.5015392858,  -0.0978885289,  -0.0167155303,   0.0053504287,  -0.0007733789],
+        [ 36,   0.0000546232,  -0.0004115481,   0.5485383893,  -0.1608589044,  -0.0025891039,  -0.0007149759,   0.0000978079],
+        [ 48,  -0.0000023606,   0.0000037512,   0.5731257401,  -0.1945130659,  -0.0082484460,  -0.0004512108,   0.0000000000],
+        [ 60,   0.0000656664,  -0.0004553287,   0.5990170812,  -0.2285674349,  -0.0132887300,  -0.0014333021,   0.0000000000],
+        [ 66,   0.0000613650,  -0.0004978692,   0.6112944345,  -0.2444038525,  -0.0163756071,  -0.0022344814,   0.0000000000],
+        [ 72,   0.0002936128,  -0.0019029394,   0.6263998974,  -0.2629054733,  -0.0180405697,  -0.0036659793,   0.0000000000],
+        [ 78,  -0.0000355262,   0.0003061307,   0.6318796070,  -0.2679906058,  -0.0296067749,  -0.0016031413,  -0.0006357620],
+        [ 84,  -0.0002480766,   0.0016174980,   0.6399158368,  -0.2766992129,  -0.0380200869,  -0.0012482515,  -0.0010947119],
+        [ 90,   0.0004246081,  -0.0031397231,   0.6648343444,  -0.3100484548,  -0.0259414803,  -0.0102532141,   0.0000000000],
+        [ 96,  -0.0000317925,   0.0003606592,   0.6646483482,  -0.3029092141,  -0.0498332864,  -0.0026619689,  -0.0023315713],
+        [108,  -0.0000388435,   0.0004665227,   0.6853128621,  -0.3218906285,  -0.0671630412,  -0.0028639628,  -0.0048478981],
+        [120,  -0.0001238582,   0.0014822503,   0.7010986174,  -0.3280035357,  -0.0995926207,   0.0054551090,  -0.0111930374],
 ];
 
 // Below 12" and above the maximum both fall back to the 0" row - above the
@@ -301,11 +308,19 @@ function hl575Multiplier(heightFeet, hiLiftInches) {
     const nodes = window.map((row) => hl575ColumnREff(row[0]));
 
     const inv = 10 / height;
-    const basis = [height / 10, 1, inv, inv ** 2, inv ** 3, inv ** 4];
+    const basis = [
+        height / 10,
+        1,
+        inv,
+        inv ** 2,
+        inv ** 3,
+        inv ** 4,
+        inv ** 5,
+    ];
 
     let multiplier = 0;
 
-    for (let a = 0; a < 6; a++) {
+    for (let a = 0; a < basis.length; a++) {
         let term = 0;
 
         for (let j = 0; j < window.length; j++) {
@@ -317,7 +332,7 @@ function hl575Multiplier(heightFeet, hiLiftInches) {
                 }
             }
 
-            term += weight * window[j][a + 3];
+            term += weight * window[j][a + 1];
         }
 
         multiplier += term * basis[a];
