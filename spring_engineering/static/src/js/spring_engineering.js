@@ -778,31 +778,36 @@ function radiusTurnDrop(drumName, radius, heightFeet) {
     );
 }
 
+// The starting values, in one place so setup() and the Clear button cannot
+// drift apart. Returns a fresh object each time - handing the same one to
+// useState twice would let a reset alias the original.
+function defaultState() {
+    return {
+        assembly: "Single",
+        springs: 2,
+        springId: '2 5/8"',
+        cycles: "10,000",
+        liftType: "Standard",
+        liftin: "",
+        radius: "15",
+        drum: "",
+        doorWidthFeet: 9,
+        doorWidthInches: 0,
+        doorHeightFeet: 7,
+        doorHeightInches: 0,
+        weight: "",
+        pitch: false,
+        pitchAmount: "0/12",
+        wireSize: '0.25"',
+    };
+}
+
 export class SpringEngineering extends Component {
 
     static template = "spring_engineering.Calculator";
 
     setup() {
-        this.state = useState({
-            assembly: "Single",
-            springs: 2,
-            springId: '2 5/8"',
-            cycles: "10,000",
-            liftType: "Standard",
-            liftin: "",
-            radius: "15",
-            drum: "",
-            doorWidthFeet: 9,
-            doorWidthInches: 0,
-            doorHeightFeet: 7,
-            doorHeightInches: 0,
-            weight: "",
-            pitch: false,
-            pitchAmount: "0/12",
-            wireSize: '0.25"',
-
-
-        });
+        this.state = useState(defaultState());
     }
 
     //start divider
@@ -1075,45 +1080,19 @@ get springWeight() {
         this.state.pitch = event.currentTarget.dataset.value === "yes";
     }
 
-    selectAssembly(event) {
-        this.state.assembly = event.target.value;
+    selectLiftType() {
+        // t-model already stored the new lift type. Only the side effect is
+        // left: hi-lift offers no radius choice, so force it back to 15.
+        if (this.state.liftType === "Hi-Lift") {
+            this.state.radius = "15";
+        }
     }
 
-    selectSpringId(event) {
-        this.state.springId = event.target.value;
+    clearAll() {
+        // Mutate in place rather than reassigning this.state - replacing the
+        // useState proxy would detach the component from its reactivity.
+        Object.assign(this.state, defaultState());
     }
-
-    selectCycles(event) {
-        this.state.cycles = event.target.value;
-    }
-
-    selectDrum(event) {
-        this.state.drum = event.target.value;
-    }
-
-    selectWeight(event) {
-    this.state.weight = event.target.value;
-    }   
-
-    selectPitchAmount(event) {
-        this.state.pitchAmount = event.target.value;
-    }
-
-    selectWireSize(event) {
-        this.state.wireSize = event.target.value;
-    }
-
-    selectLiftIn(event) {
-        this.state.liftin = event.target.value;
-    }
-
-    selectLiftType(event) {
-        this.state.liftType = event.target.value;
-
-    if (this.state.liftType === 'Hi-Lift') {
-        this.state.radius = '15';
-    }
-}
 }
 
 registry

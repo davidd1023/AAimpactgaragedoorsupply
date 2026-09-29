@@ -289,3 +289,50 @@
 .o_content {
     min-height: 50vh !important;
 }
+
+/* =========================================
+   CLEAR
+   ========================================= */
+
+/* Sits below the results and resets every input to its starting value.
+   Full width so it cannot be confused with the inline choice buttons
+   above, which are toggles rather than actions. */
+.se-clear-row {
+    display: flex;
+    justify-content: center;
+
+    padding: 24px 28px 40px;
+
+    box-sizing: border-box;
+}
+
+.se-clear {
+    width: 100%;
+    max-width: 420px;
+    min-height: 56px;
+
+    background: #000000;
+    color: #ffffff;
+
+    border: none;
+    border-radius: 6px;
+
+    font-size: 22px;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+
+    cursor: pointer;
+}
+
+.se-clear:hover {
+    background: #222222;
+}
+
+.se-clear:active {
+    background: #3a3a3a;
+}
+
+.se-clear:focus-visible {
+    outline: 3px solid #666666;
+    outline-offset: 2px;
+}
