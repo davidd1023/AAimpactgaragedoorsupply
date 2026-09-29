@@ -892,6 +892,45 @@ const WIRE_LIMITS = {
     },
 };
 
+// --- Torsion assembly length ----------------------------------------------
+// What the assembly measures along the shaft, against the width it has to fit
+// inside. Reverse-engineered from two reference readings:
+//
+//   springs  door width   reference length
+//   2        9'0" (108")  115.40103713850469"
+//   1        4'0" (48")    48.67261549495042"
+//
+//   assembly = springs * (springLength + turns * wire) + ASSEMBLY_HARDWARE
+//
+// Three pieces:
+//
+//   springLength * springs   The springs themselves. springLength is per
+//                            spring and already scales with the count.
+//
+//   turns * wire             How much each spring's body GROWS as it is
+//                            wound. A torsion spring lengthens by one wire
+//                            diameter per turn, so a fully wound spring is
+//                            longer than the one you ordered - and it is the
+//                            wound length that has to fit.
+//
+//   ASSEMBLY_HARDWARE        Cones, centre bracket, drums and end bearing
+//                            plates. FLAT, not per spring. This is the part
+//                            the second reading settled: at one spring a
+//                            per-spring 12" would have predicted 36.673"
+//                            where the reference says 48.673".
+//
+// Both readings land within 0.0006%, which is the error in the fitted turns
+// curve rather than anything structural.
+//
+// ONE PIECE IS NOT FULLY PINNED. Both readings share a door height, so both
+// share a turns value, which means `turns * wire` and a flat 2.2298" per
+// spring fit them equally well. turns * wire is the textbook behaviour and
+// the numbers agree with it, so that is what is used here - but a reading at
+// a different height is what would actually prove it. The two only diverge by
+// under 1% of the assembly length, so the warning fires in much the same
+// place either way.
+const ASSEMBLY_HARDWARE = 24;
+
 // The ceiling on the cycle formula itself. Past this the reference stops
 // trusting its own answer rather than reporting a larger number, so this is a
 // bound on the CALCULATION, not on any spring.
@@ -982,6 +1021,13 @@ get doorHeightTotalFeet() {
     return (
         Number(this.state.doorHeightFeet || 0) +
         Number(this.state.doorHeightInches || 0) / 12
+    );
+}
+
+get doorWidthTotalInches() {
+    return (
+        Number(this.state.doorWidthFeet || 0) * 12 +
+        Number(this.state.doorWidthInches || 0)
     );
 }
 
@@ -1261,6 +1307,23 @@ get springWeight() {
     return Math.round(STEEL_DENSITY * volume * 100) / 100;
 }
 
+// How much shaft the finished assembly takes up, wound and with its hardware.
+// See ASSEMBLY_HARDWARE above for where the three terms come from.
+get assemblyLengthExact() {
+    if (!this.springLengthExact) {
+        return 0;
+    }
+
+    const woundPerSpring =
+        this.springLengthExact + this.turnsExact * this.wireSizeNumber;
+
+    return this.state.springs * woundPerSpring + ASSEMBLY_HARDWARE;
+}
+
+get assemblyLength() {
+    return Math.round(this.assemblyLengthExact * 100) / 100;
+}
+
 // here ends divider
 
     selectSprings(event) {
@@ -1362,6 +1425,26 @@ get warnings() {
                 "This wire size computes to " +
                 this.cycleLife +
                 ". Low Cycle Life",
+        });
+    }
+
+    // --- Assembly against the door width ---------------------------------
+    // The reference prints the ASSEMBLY LENGTH into a sentence that reads as
+    // though it were the door width, which is how both reverse-engineering
+    // readings were taken. Kept, so the two calculators say the same thing -
+    // but rounded to 2dp like every other length here, where the reference
+    // spills the raw float (48.67261549495042").
+
+    const width = this.doorWidthTotalInches;
+
+    if (width > 0 && this.assemblyLengthExact > width) {
+        found.push({
+            id: "assembly-too-long",
+            severity: "red",
+            message:
+                "Torsion assembly will be too long for " +
+                this.assemblyLength +
+                '" wide door!',
         });
     }
 
