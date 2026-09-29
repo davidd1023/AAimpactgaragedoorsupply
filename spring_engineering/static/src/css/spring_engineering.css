@@ -151,6 +151,10 @@
 }
 
 .se-select {
+    /* Not inherited: form controls use the UA default, which is
+       the system tint (blue) on iOS. */
+    color: #000;
+
     position: absolute;
     inset: 0;
 
@@ -182,6 +186,9 @@
 }
 
 .se-buttons button {
+    /* Not inherited - see .se-select. */
+    color: #000;
+
     min-width: 70px;
 
     border: none;
@@ -229,6 +236,9 @@
 }
 
 .se-input {
+    /* Not inherited - see .se-select. */
+    color: #000;
+
     width: 65px;
 
     border: none;
@@ -251,6 +261,9 @@
    ========================================= */
 
 .se-number-input {
+    /* Not inherited - see .se-select. */
+    color: #000;
+
     width: 180px;
 
     border: none;
