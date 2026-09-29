@@ -425,37 +425,45 @@ const HL800_COLUMNS = [
 ];
 
 // Correction onto the reference calculator, one curve per measured hi-lift
-// column rather than a single global formula.
+// column, refitted against 122 six-decimal reference multipliers.
 //
-// A global polynomial in (hi-lift, 1/height) was tried and stalls at 0.031%:
-// the offset's SHAPE across height changes with hi-lift - nearly flat at 18"
-// (+0.016% from 7' to 20') and steep at 120" (+0.21% at 10' down to +0.060%
-// at 28') - which no low-order product form captures. Fitting a curve per
-// column and interpolating those, exactly as the surface itself is built,
-// reaches 0.0066% worst and 0.0011% median over 57 reference points.
+// Each row is [hiLift, a, b, c, d, e, f] for
+//     offset = a + b*(10/H) + c*(10/H)^2 + ... + f*(10/H)^5
+// with the term count per column chosen by leave-one-out, so a thinly
+// sampled column cannot overfit.
 //
-// Each row is [hiLift, a, b, c, d] for
-//     offset = a + b*(10/H) + c*(10/H)^2 + d*(10/H)^3
-// with the term count per column chosen by leave-one-out, so a column with
-// few measured heights cannot overfit. The 0" row is a single anchor.
+// WHY THIS DRUM KEEPS THE CATALOG AND THE 575-120 DOES NOT. A direct fit,
+// throwing the catalog away and building each column from reference data
+// alone, was tried and rejected. It reproduces all 122 measured points
+// exactly - but this drum has only 9 measured hi-lift columns, spaced 12 to
+// 18 inches, and without the catalog underneath, interpolating between them
+// costs 1.7e-03. The catalog supplies a 41-column scaffold at 3 inch
+// spacing, which is structure no amount of reference data here replaces.
+// The 575-120 could go direct because it has 15 columns.
 //
-// Every measured point is included. 11'0" at 120" was briefly suspected of
-// being a mis-key, because dropping it improves that column's fit from
-// 1.8e-04 to 5.5e-05. It was re-run and confirmed. The explanation is the
-// catalog, not the datum: at 120" the multipliers run 0.24 to 0.38, where
-// the catalog's 4-decimal rounding is +/-5e-05 - which is +/-1.3e-04 to
-// +/-2e-04 once divided through into the offset. That column is at the
-// catalog's precision floor, and no number of extra runs will move it.
+// Accuracy: worst 3.1e-05, median 2.9e-06 across all 122 points, of which
+// 65 were never used to fit it. That is roughly 8x better than the previous
+// build. Nothing is exact to 6 decimals, and cannot be: the catalog prints
+// 4, so its rounding is the floor.
+//
+// MORE RUNS WILL NOT FIX THAT, which was measured rather than assumed.
+// Subsampling the catalog at 18, 12, 9 and 6 inch column spacing gives
+// interpolation errors of 2.0e-04, 1.6e-04, 1.0e-04 and 1.1e-04 - tripling
+// the runs from 84 to 252 moves the median not at all. The error sits on
+// the bottom row of each column, where the multiplier collapses toward zero
+// and the surface turns faster than any practical spacing follows. Exactness
+// at every whole inch of hi-lift from 12 to 120 would need 109 columns,
+// about 1300 runs.
 const HL800_OFFSET_COLUMNS = [
-        [  0, -0.0001294229,  0.0000000000,  0.0000000000,  0.0000000000],
-        [ 18,  0.0001615367,  0.0000000000,  0.0000000000,  0.0000000000],
-        [ 36,  0.0001641541,  0.0001093716,  0.0000000000,  0.0000000000],
-        [ 48,  0.0003029403, -0.0000527805,  0.0001547716,  0.0000000000],
-        [ 66,  0.0004732692, -0.0005552553,  0.0006765056,  0.0000000000],
-        [ 78,  0.0008421350, -0.0017933223,  0.0017675247,  0.0000000000],
-        [ 96, -0.0004523175,  0.0045373726, -0.0070243310,  0.0040413309],
-        [108,  0.0008287370, -0.0016324146,  0.0023095161,  0.0000000000],
-        [120,  0.0011691323, -0.0028491072,  0.0037063837,  0.0000000000],
+        [  0,    0.0000668730,    0.0000000000,    0.0000000000,    0.0000000000,    0.0000000000,    0.0000000000],
+        [ 18,    0.0001187193,    0.0000520070,    0.0000000000,    0.0000000000,    0.0000000000,    0.0000000000],
+        [ 36,    0.0001477844,    0.0001290967,    0.0000000000,    0.0000000000,    0.0000000000,    0.0000000000],
+        [ 48,    0.0003995922,   -0.0002475937,    0.0002426016,    0.0000000000,    0.0000000000,    0.0000000000],
+        [ 66,    0.0010749243,   -0.0044286410,    0.0092568029,   -0.0076372031,    0.0023287213,    0.0000000000],
+        [ 78,   -0.0046636031,    0.0369272645,   -0.1019315952,    0.1338522575,   -0.0834740707,    0.0200444264],
+        [ 96,    0.0002540913,    0.0001379090,    0.0026766379,   -0.0049721575,    0.0029970599,    0.0000000000],
+        [108,    0.0023154905,   -0.0122893279,    0.0297245819,   -0.0298609333,    0.0116230522,    0.0000000000],
+        [120,   -0.0090575428,    0.0851109694,   -0.2939191042,    0.4957483924,   -0.4055693673,    0.1297975767],
 ];
 
 function hl800Applied(hiLiftInches) {
@@ -551,11 +559,11 @@ function hl800Multiplier(heightFeet, hiLiftInches) {
     const nodes = window.map((row) => hl800Node(row[0]));
 
     const inv = 10 / height;
-    const shape = [1, inv, inv ** 2, inv ** 3];
+    const shape = [1, inv, inv ** 2, inv ** 3, inv ** 4, inv ** 5];
 
     let offset = 0;
 
-    for (let a = 0; a < 4; a++) {
+    for (let a = 0; a < shape.length; a++) {
         let term = 0;
 
         for (let j = 0; j < window.length; j++) {
