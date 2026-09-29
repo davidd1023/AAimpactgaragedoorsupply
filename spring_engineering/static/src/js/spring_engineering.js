@@ -948,6 +948,21 @@ const CYCLE_MAX = 350000;
 const WARNING_NOTE =
     "Use extreme caution when designing springs for use with this drum.";
 
+// The Spring ID each assembly opens on - the FIRST option its dropdown
+// offers, which matters because that is what a browser falls back to showing
+// when the stored value is not in the new list.
+//
+// The two lists share no strings: Single offers 3 3/4" where Duplex offers
+// 3 3/4" inside 6". So every assembly switch leaves the old value orphaned,
+// which is the whole reason the handler below exists.
+//
+// Triplex is absent on purpose - its Spring ID row is hidden entirely, so
+// there is nothing to pick and nothing to measure.
+const FIRST_SPRING_ID = {
+    Single: '2 5/8"',
+    Duplex: '3 3/4" inside 6"',
+};
+
 // The starting values, in one place so setup() and the Clear button cannot
 // drift apart. Returns a fresh object each time - handing the same one to
 // useState twice would let a reset alias the original.
@@ -1099,6 +1114,18 @@ get turnsExact() {
 
 get turns() {
     return Math.round(this.turnsExact * 100) / 100;
+}
+
+// The Wire Size dropdown. Hidden on Duplex, where the outer and inner
+// springs each carry their own wire size in the results and one shared
+// selection above them would be meaningless.
+//
+// The auto-pick still runs underneath and still writes state.wireSize; it
+// is simply not on screen. Nothing reads it in Duplex, whose results are
+// placeholder zeros, so leaving it alone keeps Single unchanged when the
+// assembly is switched back.
+get wireSizeVisible() {
+    return this.resultsVisible && this.state.assembly !== "Duplex";
 }
 
 get multiplierExact() {
@@ -1345,6 +1372,27 @@ get assemblyLength() {
 
     togglePitch(event) {
         this.state.pitch = event.currentTarget.dataset.value === "yes";
+    }
+
+    selectAssembly() {
+        // t-model already stored the new assembly. The side effect is the
+        // Spring ID, which is almost certainly now a value the new dropdown
+        // does not offer.
+        //
+        // Left alone, the browser shows its first option while the hidden
+        // sizer still measures the OLD string - and since the select is
+        // stretched over exactly the sizer's width, a longer value is
+        // clipped. Switching to Duplex showed "3 3/4" in" because the
+        // wrapper was still sized for "2 5/8"". Picking any value fixed it
+        // for good, because that finally wrote the real string into state.
+        //
+        // Writing the new default keeps state and the DOM agreeing, which is
+        // what the sizer depends on.
+        const first = FIRST_SPRING_ID[this.state.assembly];
+
+        if (first) {
+            this.state.springId = first;
+        }
     }
 
     selectLiftType() {

@@ -27,6 +27,7 @@
 
                 <select
                     t-model="state.assembly"
+                    t-on-change="selectAssembly"
                     class="se-select">
 
                     <option value="Single">Single</option>
@@ -1218,9 +1219,10 @@
             </div>
 
             <!-- Wire Size: only meaningful once there is something to
-                 calculate, so it appears with the results. -->
+                 calculate, so it appears with the results - and not at all
+                 on Duplex, which carries a wire size per spring instead. -->
 
-            <t t-if="resultsVisible">
+            <t t-if="wireSizeVisible">
 
             <div class="se-row">
 
