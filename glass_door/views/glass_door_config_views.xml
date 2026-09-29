@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extrusion Profiles -->
+    <record id="view_extrusion_profile_list" model="ir.ui.view">
+        <field name="name">glass.door.extrusion.profile.list</field>
+        <field name="model">glass.door.extrusion.profile</field>
+        <field name="arch" type="xml">
+            <list string="Extrusion Profiles" editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="price_per_inch"/>
+                <field name="weight_per_inch"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_extrusion_profile" model="ir.actions.act_window">
+        <field name="name">Extrusion Profiles (101–110)</field>
+        <field name="res_model">glass.door.extrusion.profile</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Glass Types -->
+    <record id="view_glass_type_list" model="ir.ui.view">
+        <field name="name">glass.door.glass.type.list</field>
+        <field name="model">glass.door.glass.type</field>
+        <field name="arch" type="xml">
+            <list string="Glass Types" editable="bottom">
+                <field name="name"/>
+                <field name="thickness"/>
+                <field name="price_per_sqft"/>
+                <field name="weight_per_sqft"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_glass_type" model="ir.actions.act_window">
+        <field name="name">Glass Types</field>
+        <field name="res_model">glass.door.glass.type</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Interlayers -->
+    <record id="view_interlayer_list" model="ir.ui.view">
+        <field name="name">glass.door.interlayer.list</field>
+        <field name="model">glass.door.interlayer</field>
+        <field name="arch" type="xml">
+            <list string="Interlayers" editable="bottom">
+                <field name="name"/>
+                <field name="price_per_sqft"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_interlayer" model="ir.actions.act_window">
+        <field name="name">Interlayers</field>
+        <field name="res_model">glass.door.interlayer</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Motors / Openers -->
+    <record id="view_glass_door_motor_list" model="ir.ui.view">
+        <field name="name">glass.door.motor.list</field>
+        <field name="model">glass.door.motor</field>
+        <field name="arch" type="xml">
+            <list string="Motors / Openers" editable="bottom">
+                <field name="brand"/>
+                <field name="name" string="Model"/>
+                <field name="horsepower"/>
+                <field name="drive_type"/>
+                <field name="cost"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_glass_door_motor" model="ir.actions.act_window">
+        <field name="name">Motors / Openers</field>
+        <field name="res_model">glass.door.motor</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'active_test': False}</field>
+    </record>
+
+    <!-- Frame Finishes -->
+    <record id="view_frame_finish_list" model="ir.ui.view">
+        <field name="name">glass.door.frame.finish.list</field>
+        <field name="model">glass.door.frame.finish</field>
+        <field name="arch" type="xml">
+            <list string="Frame Finishes" editable="bottom">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="requires_paint"/>
+                <field name="paint_cost_per_sqft"
+                       column_invisible="not requires_paint"
+                       string="Paint Cost/SqFt"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_frame_finish" model="ir.actions.act_window">
+        <field name="name">Frame Finishes</field>
+        <field name="res_model">glass.door.frame.finish</field>
+        <field name="view_mode">list</field>
+    </record>
+
+</odoo>

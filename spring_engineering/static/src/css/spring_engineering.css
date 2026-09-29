@@ -1,0 +1,614 @@
+/* =========================================
+   MAIN CALCULATOR
+   ========================================= */
+
+.spring-engineering {
+    width: 100%;
+    min-height: 100vh;
+
+    background: #eeeeee;
+
+    font-family: Arial, sans-serif;
+    color: #333;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   CURRENT SETUP
+   ========================================= */
+
+.se-section-title {
+    height: 70px;
+
+    background: #eeeeee;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 25px;
+    font-weight: bold;
+
+    color: #555;
+}
+
+
+/* =========================================
+   ROWS
+   ========================================= */
+
+.se-row {
+    min-height: 72px;
+
+    background: white;
+
+    border-bottom: 1px solid #ddd;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    white-space: nowrap;
+
+    padding: 0 28px;
+
+    box-sizing: border-box;
+}
+
+.se-row > span {
+    font-size: 22px;
+}
+
+/* =========================================
+   ROWS-RESULTS
+   ========================================= */
+
+.se-rowR {
+    min-height: 72px;
+
+    background: white;
+
+    border-bottom: 1px solid #ddd;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    white-space: nowrap;
+
+    padding: 0 28px;
+
+    box-sizing: border-box;
+}
+
+.se-rowR > span {
+    font-size: 22px;
+}
+
+/* The computed value on the right of each results row - the number and its
+   unit, not the label beside it. Scoped to .se-rowR so it can only ever
+   affect the results block.
+
+   Contrast against the white row background:
+
+       #4caf50  (this one)      2.8:1
+       #2e7d32  green 700/800   5.1:1
+       #0b5c26  dark green      8.2:1
+
+   Dropping the old grey row background nearly doubled this, from 1.5:1 to
+   2.8:1. It is still under the 4.5:1 usually wanted at this size, so if the
+   numbers look faint on a bright screen, #2e7d32 reads as the same green
+   while clearing the threshold comfortably. */
+.se-rowR .se-value {
+    color: #4caf50;
+    font-weight: 600;
+}
+
+
+/* =========================================
+   SELECT BOXES
+   ========================================= */
+
+/* A bare <select> is as wide as its WIDEST option, not as wide as the value
+   on show. On the drum row that is a 19-character CANIMEX part number, so
+   the invisible box reached most of the way across the row and a tap well
+   to the left of the value still opened the list - 247px of target for
+   140px of text.
+
+   So the wrapper is sized by a hidden copy of the current value and the
+   select is stretched over exactly that, which keeps the tap area on the
+   text. The value itself does not move: the select still reserves the same
+   room for the browser's dropdown arrow at its right edge. */
+.se-select-wrap {
+    position: relative;
+
+    flex: 0 0 auto;
+
+    display: inline-flex;
+    align-items: center;
+
+    /* Short values like "15" would otherwise be an awkward target. */
+    min-height: 44px;
+}
+
+.se-select-sizer {
+    visibility: hidden;
+
+    font-size: 21px;
+    font-weight: bold;
+
+    white-space: nowrap;
+
+    /* Room for the dropdown arrow drawn inside the select. Chrome reserves
+       20.6px at this size; slightly over keeps the value from being
+       squeezed where a browser draws a wider one. */
+    padding-right: 22px;
+
+    min-width: 56px;
+}
+
+.se-select {
+    position: absolute;
+    inset: 0;
+
+    width: auto;
+    min-width: 0;
+
+    border: none;
+
+    background: transparent;
+
+    font-family: inherit;
+    font-size: 21px;
+    font-weight: bold;
+
+    text-align: right;
+
+    cursor: pointer;
+}
+
+
+/* =========================================
+   BUTTON GROUPS
+   ========================================= */
+
+.se-buttons {
+    display: flex;
+
+    height: 72px;
+}
+
+.se-buttons button {
+    min-width: 70px;
+
+    border: none;
+
+    background: white;
+
+    font-size: 22px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: background 0.1s ease;
+}
+
+.se-buttons button:hover {
+    background: #f5f5f5;
+}
+
+.se-buttons button.selected {
+    background: #ed1b35;
+    color: white;
+}
+
+
+/* =========================================
+   DIVIDER
+   ========================================= */
+
+.se-divider {
+    height: 28px;
+
+    background: #eeeeee;
+}
+
+
+/* =========================================
+   MEASUREMENTS
+   ========================================= */
+
+.se-measurement {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+.se-input {
+    width: 65px;
+
+    border: none;
+
+    background: transparent;
+
+    font-size: 22px;
+    font-weight: bold;
+
+    text-align: center;
+}
+
+.se-measurement span {
+    font-size: 22px;
+}
+
+
+/* =========================================
+   WEIGHT
+   ========================================= */
+
+.se-number-input {
+    width: 180px;
+
+    border: none;
+
+    border-bottom: 1px solid #ccc;
+
+    background: transparent;
+
+    font-size: 22px;
+
+    text-align: right;
+}
+
+
+/* =========================================
+   PITCH
+   ========================================= */
+
+.se-pitch {
+    display: flex;
+
+    border: 2px solid #ed1b35;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.se-pitch button {
+    width: 125px;
+
+    height: 55px;
+
+    border: none;
+
+    background: white;
+
+    color: #ed1b35;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.se-pitch button.selected {
+    background: #ed1b35;
+
+    color: white;
+}
+
+
+/* =========================================
+   ODOO PAGE FIX
+   ========================================= */
+
+/*
+   Make the Odoo action area allow scrolling.
+*/
+
+.o_action_manager {
+    overflow-y: auto !important;
+}
+
+.o_action {
+    overflow-y: auto !important;
+}
+
+.o_content {
+    overflow-y: auto !important;
+}
+
+/*
+   Make the calculator occupy the available screen.
+*/
+
+.o_action_manager,
+.o_action,
+.o_content {
+    min-height: 50vh !important;
+}
+
+/* =========================================
+   CLEAR
+   ========================================= */
+
+/* Sits below the results and resets every input to its starting value.
+   Full width so it cannot be confused with the inline choice buttons
+   above, which are toggles rather than actions. */
+.se-clear-row {
+    display: flex;
+    justify-content: center;
+
+    padding: 24px 28px 40px;
+
+    box-sizing: border-box;
+}
+
+.se-clear {
+    width: 100%;
+    max-width: 420px;
+    min-height: 56px;
+
+    background: #000000;
+    color: #ffffff;
+
+    border: none;
+    border-radius: 6px;
+
+    font-size: 22px;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+
+    cursor: pointer;
+}
+
+.se-clear:hover {
+    background: #222222;
+}
+
+.se-clear:active {
+    background: #3a3a3a;
+}
+
+.se-clear:focus-visible {
+    outline: 3px solid #666666;
+    outline-offset: 2px;
+}
+
+/* =========================================
+   WARNINGS
+   ========================================= */
+
+/* Results values recolour by severity. Both sit on the white results rows,
+   so both are chosen for contrast there rather than for vividness:
+
+       #b45309  amber   5.0:1
+       #c62828  red     5.4:1
+
+   A literal yellow is unusable here - #ffd700 on white is 1.3:1, which is
+   invisible. These read as amber and red while staying legible. */
+/* Specificity matters here. The green is set by `.se-rowR .se-value`, which
+   scores 0,2,0 - a bare `.se-value-yellow` at 0,1,0 loses to it and the
+   numbers stay green. Matching both classes inside the row scores 0,3,0 and
+   wins. */
+.se-rowR .se-value.se-value-yellow {
+    color: #b45309;
+}
+
+.se-rowR .se-value.se-value-red {
+    color: #c62828;
+}
+
+/* The symbol lives in the divider strip above the results. The divider is
+   28px tall, so the strip grows to hold the badge and stays 28px when there
+   is nothing to show. */
+.se-divider-warn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    height: auto;
+    min-height: 28px;
+
+    padding: 0 28px;
+
+    box-sizing: border-box;
+}
+
+.se-warn-badge {
+    background: none;
+    border: none;
+    padding: 4px;
+    margin: 4px 0;
+
+    display: flex;
+    align-items: center;
+
+    cursor: pointer;
+    line-height: 0;
+}
+
+.se-warn-badge.se-warn-yellow {
+    color: #b45309;
+}
+
+.se-warn-badge.se-warn-red {
+    color: #c62828;
+}
+
+.se-warn-badge:focus-visible {
+    outline: 3px solid #666666;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Backdrop covers the viewport so a click anywhere outside the box closes
+   it. Transparent rather than dimmed - the results underneath are what the
+   warning is about, so they stay readable. */
+.se-warn-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    background: rgba(0, 0, 0, 0.25);
+
+    box-sizing: border-box;
+}
+
+.se-warn-box {
+    width: 100%;
+    max-width: 560px;
+    max-height: 70vh;
+    overflow-y: auto;
+
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+    padding: 24px 28px 28px;
+
+    box-sizing: border-box;
+}
+
+.se-warn-box-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333333;
+
+    margin-bottom: 18px;
+}
+
+.se-warn-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* One box per message, including the caution note, which is its own message
+   rather than a tail on each warning. */
+.se-warn-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+
+    font-size: 18px;
+    line-height: 1.45;
+    color: #333333;
+
+    padding: 16px 18px;
+
+    border: 1px solid #dddddd;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.se-warn-item.se-warn-note {
+    font-weight: bold;
+    background: #ffffff;
+}
+
+.se-warn-dot {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid currentColor;
+    border-radius: 50%;
+
+    font-weight: bold;
+}
+
+.se-warn-dot.se-warn-yellow {
+    color: #b45309;
+}
+
+.se-warn-dot.se-warn-red {
+    color: #c62828;
+}
+
+/* =========================================
+   DRUM INFO
+   ========================================= */
+
+/* The label and its symbol sit together on the left of the row, so the
+   select keeps its place on the right. */
+.se-label-with-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.se-info-badge {
+    background: none;
+    border: none;
+    padding: 2px;
+
+    display: flex;
+    align-items: center;
+
+    color: #1565c0;
+    cursor: pointer;
+    line-height: 0;
+}
+
+.se-info-badge:hover {
+    color: #0d47a1;
+}
+
+.se-info-badge:focus-visible {
+    outline: 3px solid #666666;
+    outline-offset: 2px;
+    border-radius: 50%;
+}
+
+/* Rows rather than boxes, so the specifications read like the results
+   block: label on the left, value on the right. */
+.se-info-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.se-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    font-size: 19px;
+    color: #333333;
+
+    padding: 14px 2px;
+    border-bottom: 1px solid #dddddd;
+}
+
+.se-info-row:last-child {
+    border-bottom: none;
+}
+
+.se-info-value {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Shown in place of the rows when there is nothing to list - before a drum
+   is chosen, or for one whose specifications are not carried yet. */
+.se-info-empty {
+    font-size: 19px;
+    line-height: 1.45;
+    color: #333333;
+}

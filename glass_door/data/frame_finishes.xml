@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!--
+        Frame finish catalog.
+        noupdate="1": admin-entered paint costs survive upgrades.
+
+        "2605" suffix = AAMA 2605 grade powder coat (highest architectural
+        rating — superior UV and weather resistance vs standard 2604/2603).
+        Wood Grain finishes are sublimated thermal-transfer over aluminum.
+        None of these require local painting (all factory-applied).
+    -->
+
+    <record id="finish_black" model="glass.door.frame.finish">
+        <field name="name">Black</field>
+        <field name="requires_paint">False</field>
+    </record>
+    <record id="finish_black_2605" model="glass.door.frame.finish">
+        <field name="name">Black 2605</field>
+        <field name="requires_paint">False</field>
+    </record>
+    <record id="finish_bronze" model="glass.door.frame.finish">
+        <field name="name">Bronze</field>
+        <field name="requires_paint">False</field>
+    </record>
+    <record id="finish_bronze_2605" model="glass.door.frame.finish">
+        <field name="name">Bronze 2605</field>
+        <field name="requires_paint">False</field>
+    </record>
+    <record id="finish_silver" model="glass.door.frame.finish">
+        <field name="name">Silver</field>
+        <field name="requires_paint">False</field>
+    </record>
+    <record id="finish_silver_2605" model="glass.door.frame.finish">
+        <field name="name">Silver 2605</field>
+        <field name="requires_paint">False</field>
+    </record>
+    <record id="finish_white" model="glass.door.frame.finish">
+        <field name="name">White</field>
+        <field name="requires_paint">False</field>
+    </record>
+    <record id="finish_white_2605" model="glass.door.frame.finish">
+        <field name="name">White 2605</field>
+        <field name="requires_paint">False</field>
+    </record>
+    <record id="finish_wood_dark_walnut" model="glass.door.frame.finish">
+        <field name="name">Wood Grain Dark Walnut</field>
+        <field name="requires_paint">False</field>
+    </record>
+    <record id="finish_wood_light_java" model="glass.door.frame.finish">
+        <field name="name">Wood Grain Light Java</field>
+        <field name="requires_paint">False</field>
+    </record>
+
+</odoo>
