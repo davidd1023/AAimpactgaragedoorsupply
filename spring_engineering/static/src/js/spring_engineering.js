@@ -1029,6 +1029,37 @@ const DUPLEX_ALIASES = {
 // The reference prints duplex cycle counts to the nearest thousand.
 const DUPLEX_CYCLE_ROUNDING = 1000;
 
+// The stiffest wire combination each cycle line offers. Measured: a 10,000
+// target dead-ends at 0.2950/0.2343 while 25,000 reaches 0.3195/0.2625,
+// 50,000 reaches 0.3310/0.2730 and 100,000 reaches 0.3625/0.2830.
+//
+// Held as the S value (2 x the two dividers) of the largest combination seen
+// at or below each target, so it compares directly against a candidate's own
+// stiffness. Above the last entry the list is left open.
+const DUPLEX_CATALOGUE = [
+    { maxTarget: 10000, maxS: 3140 },     // 0.2950/0.2343, S 3130.1
+    { maxTarget: 25000, maxS: 4940 },     // 0.3195/0.2625, S 4926.4
+    { maxTarget: 50000, maxS: 5920 },     // 0.3310/0.2730, S 5908.7
+    { maxTarget: 100000, maxS: 8450 },    // 0.3625/0.2830, S 8434.9
+];
+
+// Pair 2's own combinations were all measured at a 10,000 target, so the
+// table is only known to apply to pair 1. For any other pair the list stays
+// open rather than being capped on a guess.
+function duplexCatalogueLimit(pair, target) {
+    if (!target || pair.innerId !== 3.75) {
+        return Infinity;
+    }
+
+    for (const line of DUPLEX_CATALOGUE) {
+        if (target <= line.maxTarget) {
+            return line.maxS;
+        }
+    }
+
+    return Infinity;
+}
+
 // THE LENGTH RULE, corrected against a 19-reading sweep of one wire
 // combination across three door heights:
 //
@@ -1655,15 +1686,24 @@ get duplexCandidates() {
     }));
     const seen = new Set(out.map((c) => c.outerWire + "/" + c.innerWire));
 
-    // Fill in combinations between and beyond the measured ones.
+    // THE LIST IS CAPPED PER CYCLE TARGET.
     //
-    // This was briefly CAPPED at the largest measured pair, on the reasoning
-    // that a 750 lb 12'0" door fell back to 0.2950/0.2343 and warned rather
-    // than stepping up. That was wrong: raising the cycle target on the same
-    // door walks the reference straight past it, through 0.3195/0.2625 and
-    // 0.3310/0.2730 to 0.3625/0.2830. It fell back because those are 37" to
-    // 60" long and will not fit a 108" door - not because they do not exist.
-    const maxS = Infinity;
+    // Torsion springs are sold BY CYCLE RATING - a 10,000-cycle line, a
+    // 25,000-cycle line - so the target picks which catalogue is on offer,
+    // not merely a threshold to clear. Two 750 lb doors at 8'0" and 12'0",
+    // both at a 10,000 target, both stop dead at 0.2950/0.2343 and say so:
+    // "cycle life calculation of 9,000.00 is less than the 10,000 cycle
+    // minimum". The same door at 25,000 uses 0.3195/0.2625 without trouble.
+    // The combination exists; it was not AVAILABLE at the lower target.
+    //
+    // (Those two doors landing on the same 9,000 is itself a good check: peak
+    // torque is weight times drum radius and does not depend on height, so
+    // one door weight gives one cycle life at every height. 196.4 x 8.8 and
+    // 139.2 x 12.4 are both 1727.)
+    //
+    // An earlier note blamed door width for the same behaviour. That was
+    // wrong - changing the width changes nothing in the reference's output.
+    const maxS = duplexCatalogueLimit(pair, this.cycleTarget);
     const last = pair.calibration[pair.calibration.length - 1];
     const oFrom = WIRE_SIZES.indexOf(last.outerWire);
     const iFrom = WIRE_SIZES.indexOf(last.innerWire);
@@ -1714,31 +1754,50 @@ get duplexCandidates() {
     // long where the reference had used the weaker inner. The two wires do not
     // step in lockstep, so "the next combination up" has to be decided by
     // total stiffness, not by which ones happen to have been measured.
-    return out.concat(extra).sort((a, b) => a.S - b.S);
+    //
+    // The catalogue limit applies to MEASURED entries too. A combination being
+    // in the table means it was seen once, not that it is on offer at every
+    // cycle target: 0.3195/0.2625 is measured, and at a 10,000 target the
+    // reference will not use it.
+    const all = out
+        .concat(extra)
+        .filter((c) => c.S <= maxS)
+        .sort((a, b) => a.S - b.S);
+
+    // Never return nothing - if the limit excludes everything, fall back to
+    // the single smallest combination rather than leaving the caller empty.
+    return all.length ? all : [out.sort((a, b) => a.S - b.S)[0]];
 }
 
 // The wire combination the reference picks: the SMALLEST whose cycle life
 // reaches the target. Same rule the Single path uses.
 //
 // KNOWN GAP - THIS IS NOT THE WHOLE RULE. Raising the cycle target on one
-// 750 lb 12'0" door on a 108" opening shows the reference weighing spring
-// LENGTH against cycle life, and doing it inconsistently:
+// 750 lb 12'0" door walks the reference up its sequence:
 //
-//   target  10,000 -> 0.2950/0.2343    9,000 cycles, 23" long, fits,     warns
-//   target  25,000 -> 0.3195/0.2625   31,000 cycles, 37" long, too long, errors
-//   target  50,000 -> 0.3310/0.2730   49,000 cycles, 44" long, too long, errors
-//   target 100,000 -> 0.3625/0.2830  115,000 cycles, 60" long, too long, errors
+//   target  10,000 -> 0.2950/0.2343    9,000 cycles   BELOW target
+//   target  25,000 -> 0.3195/0.2625   31,000 cycles   above
+//   target  50,000 -> 0.3310/0.2730   49,000 cycles   BELOW target
+//   target 100,000 -> 0.3625/0.2830  115,000 cycles   above
 //
-// At 10,000 it took a combination BELOW the target because the one that met
-// it would not fit the door. At 25,000 it took one that did not fit and
-// errored instead. At 50,000 the one it took is below target AND too long.
-// Fit wins at one target and loses at the next.
+// Twice it takes a combination that does not reach the target, so "smallest
+// meeting the target" is not what it does. The sequence is coarse - a wire
+// step is about a threefold jump in cycle life, since life goes as roughly
+// the thirteenth power of wire - so the reference is taking whichever
+// neighbour lands nearest, not the first one over.
 //
-// "Closest to target" was tried as the unifying rule: it reproduces that
-// sweep and breaks seven other readings, so it is not the rule either.
+// DOOR WIDTH IS NOT INVOLVED. An earlier note here blamed it, reasoning that
+// the 10,000 case fell back because 0.3195/0.2625 is 37" long and would not
+// fit a 108" opening. That was wrong: changing the door width changes nothing
+// in the reference's output. Width only ever drives the too-long message.
 //
-// So door width is part of the selection and the rule is not yet known. The
-// cost is one reading - that 750 lb 12'0" door at 10,000, which picks
+// "Closest to target" was tried as the unifying rule: it reproduces the sweep
+// above exactly and breaks SEVEN other readings. It may still be the right
+// rule with cycle counts this model cannot compute finely enough - near a
+// step the two neighbours can sit within a percent of each other, which is
+// inside this model's error.
+//
+// The cost is one reading: that 750 lb 12'0" door at 10,000, which picks
 // 0.3195/0.2625 here and comes out 14" long. Every other reading is right.
 get duplexStep() {
     const pair = this.duplexPair;
