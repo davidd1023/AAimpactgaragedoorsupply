@@ -149,7 +149,7 @@
                     <t t-if="state.assembly === 'Duplex'">
 
                     <option value='3 3/4" inside 6"'>3 3/4" inside 6"</option>
-                    <option value='2 5/8" inside 5/14"'>2 5/8" inside 5/14"</option>
+                    <option value='2 5/8" inside 5 1/4"'>2 5/8" inside 5 1/4"</option>
                     <option value='3 1/2" inside 5 1/2" (Raynor)'>3 1/2" inside 5 1/2" (Raynor)</option>
                     <option value='3 3/8" inside 5 7/8" (Overhead)'>3 3/8" inside 5 7/8" (Overhead)</option>
 
@@ -1299,19 +1299,9 @@
 
             <t t-if="resultsVisible">
 
-            <!-- DUPLEX RESULTS. Placeholder UI only: every value is a
-                 literal 0 and nothing below is computed. Three black bars
-                 split the outer spring, the inner spring, and the figures
-                 that belong to the pair rather than to either spring.
-
-                 The rows reuse .se-rowR wholesale, so they pick up the
-                 height, white background, bottom border and green value
-                 already defined for the Single results. Turns and TIPPT
-                 share one row, each half a plain .se-rowR inside a flex
-                 wrapper that draws the divider between them.
-
-                 Scoped to Duplex. Triplex still falls through to the
-                 Single layout, which is what it did before. -->
+            <!-- DUPLEX RESULTS. Reverse-engineered from 17 reference
+                 readings - see DUPLEX_PAIRS in the JS for the length rule,
+                 the wire steps and what is measured against bracketed. -->
 
             <t t-if="state.assembly === 'Duplex'">
 
@@ -1319,66 +1309,66 @@
 
             <div class="se-rowR">
                     <span>Wire Size</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="duplexOuterWire"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring ID</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="duplexOuterId"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring Length</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="duplexOuterLength.toFixed(2) + '&quot;'"/>
             </div>
 
             <div class="se-rowR">
                     <span>Weight</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="duplexOuterWeight.toFixed(2) + ' lb'"/>
             </div>
 
             <div class="se-rowR-header">Inner</div>
 
             <div class="se-rowR">
                     <span>Wire Size</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="duplexInnerWire"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring ID</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="duplexInnerId"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring Length</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="duplexInnerLength.toFixed(2) + '&quot;'"/>
             </div>
 
             <div class="se-rowR">
                     <span>Weight</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="duplexInnerWeight.toFixed(2) + ' lb'"/>
             </div>
 
             <div class="se-rowR-header">Other</div>
 
             <div class="se-rowR">
                     <span>Cycles</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="duplexCycles"/>
             </div>
 
             <div class="se-rowR">
                     <span>Multiplier</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="multiplier"/>
             </div>
 
             <div class="se-rowR-split">
                 <div class="se-rowR">
                     <span>Turns</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="turns"/>
                 </div>
                 <div class="se-rowR">
                     <span>TIPPT</span>
-                    <span class="se-value">0</span>
+                    <span class="se-value" t-esc="tippt"/>
                 </div>
             </div>
 

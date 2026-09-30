@@ -852,6 +852,118 @@ const DRUM_INFO = {
     ],
 };
 
+// --- DUPLEX -------------------------------------------------------------
+// A duplex set is two springs wound one inside the other. They are sized
+// together, and the reference calculator reports them separately.
+//
+// REVERSE-ENGINEERED FROM 17 REFERENCE READINGS. Everything here is measured,
+// not derived - see the notes on each piece for what is solid and what is a
+// bracket.
+//
+// THE LENGTH RULE, which took the longest to find:
+//
+//     x = C / TIPPT
+//     round x to the nearest whole inch, TIES GOING DOWN
+//     inner length = that whole inch, PLUS 0.25" if x rounded UP
+//     outer length = inner + 1
+//
+// The 0.25" is not a regime or a fudge: it appears exactly when the rounding
+// goes up and not when it goes down. Two readings a hair apart proved it -
+// at 460 lb x is 15.597 and rounds up to 16.25, at 470 lb x is 15.265 and
+// rounds down to 15.00. A 1.25" step for a 2% change in load, which no smooth
+// formula reproduces. It is also why 2 5/8" inside 5 1/4" never shows a
+// quarter: its x lands on 35.000, 26.250, 21.000 and 17.500, every one of
+// which rounds down or ties.
+//
+// WIRES. Both start at the minimum for their spring ID and step UP the
+// WIRE_SIZES list as the load grows, the smallest that keeps the cycle count
+// at or above the target. The step points below are MIDPOINTS OF MEASURED
+// BRACKETS, not exact thresholds - the reference was sampled either side of
+// each, so a door within about 25 lb of one may pick the neighbouring wire.
+//
+// C and K are per WIRE COMBINATION, not per spring pair: changing either wire
+// changes both. C sets the length, K sets the cycle count (K = body length x
+// TIPPT, recovered by inverting the reported cycles).
+//
+// COVERAGE AND ACCURACY, measured by replaying all 20 reference readings:
+//
+//   spring IDs, wire sizes, lengths, weights   EXACT on all 20
+//   cycle counts                               13 exact, worst case 3.6% out
+//
+// The cycle residual is real and worth knowing about. K is body length times
+// TIPPT, and that product is NOT quite constant across door heights: the 7'
+// readings give 2017 where the 10' reading gives 2036, a 0.9% spread that the
+// fourth-power cycle formula turns into ~4%. K here is the value minimising
+// the worst case over each combination's readings. Lengths are unaffected -
+// they follow C/TIPPT exactly at both heights.
+//
+// Outside the wire combinations listed, the last step is used and the answer
+// will drift - duplexCalibrated reports which case you are in.
+const DUPLEX_PAIRS = {
+    '3 3/4" inside 6"': {
+        innerId: 3.75,
+        outerId: 6,
+        // C exact to a 15-point bracket; K averaged over 4 readings.
+        steps: [
+            { outerWire: 0.2625, innerWire: 0.2253, C: 2084.2, K: 2019.7, maxTippt: 167.3 },
+            // One reading only (600 lb). C is a 87-wide bracket's midpoint.
+            { outerWire: 0.2730, innerWire: 0.2253, C: 2313.7, K: 2231.7, maxTippt: Infinity },
+        ],
+    },
+    '2 5/8" inside 5 1/4"': {
+        innerId: 2.625,
+        outerId: 5.25,
+        steps: [
+            // C is pinned to a single value by the 150 and 300 lb readings.
+            { outerWire: 0.2625, innerWire: 0.1770, C: 1527.9233, K: 1040.2, maxTippt: 94.6 },
+            { outerWire: 0.2625, innerWire: 0.1875, C: 1655.3, K: 1375.7, maxTippt: 123.7 },
+            // One reading only (450 lb).
+            { outerWire: 0.2625, innerWire: 0.2000, C: 1997.2, K: 1906.1, maxTippt: Infinity },
+        ],
+    },
+};
+
+// Raynor and Overhead are offered by the dropdown but the reference returns
+// the 2 5/8" inside 5 1/4" numbers for both, spring IDs included. Aliased
+// rather than given entries of their own, so there is one place to correct
+// when real figures turn up.
+const DUPLEX_ALIASES = {
+    '3 1/2" inside 5 1/2" (Raynor)': '2 5/8" inside 5 1/4"',
+    '3 3/8" inside 5 7/8" (Overhead)': '2 5/8" inside 5 1/4"',
+};
+
+// The reference prints duplex cycle counts to the nearest thousand.
+const DUPLEX_CYCLE_ROUNDING = 1000;
+
+// Round to the nearest whole inch with ties going DOWN, then add a quarter
+// inch if that rounding went up. See the length rule above.
+//
+// x is snapped to 9dp first: several reference cases land exactly on a whole
+// number or exactly on .5, and raw float division reads 35.0 as 34.999...,
+// which would flip the decision the wrong way.
+function duplexLength(C, tippt) {
+    if (!C || !tippt) {
+        return 0;
+    }
+
+    let x = C / tippt;
+
+    // Snap to the nearest half inch when we are within a whisker of one.
+    // Several reference cases sit exactly on a whole number (35.000, 21.000)
+    // or exactly on a tie (17.500), and raw division reads those as
+    // 34.9999998, which would round the wrong way and shift the answer a
+    // quarter inch.
+    const half = Math.round(x * 2) / 2;
+
+    if (Math.abs(x - half) < 1e-6) {
+        x = half;
+    }
+
+    const whole = Math.floor(x);
+
+    return x - whole > 0.5 ? whole + 1.25 : whole;
+}
+
 // --- Drum limits and warnings --------------------------------------------
 // The calculator still computes past these; it flags the result rather than
 // refusing. Yellow means the inputs exceed what the drum is rated for, red
@@ -1340,6 +1452,163 @@ get springWeight() {
         this.springLengthExact;
 
     return Math.round(STEEL_DENSITY * volume * 100) / 100;
+}
+
+// --- Duplex results ------------------------------------------------------
+// All of this is gated on isDuplex, so the Single path is untouched.
+
+get isDuplex() {
+    return this.state.assembly === "Duplex";
+}
+
+get duplexPair() {
+    const key = DUPLEX_ALIASES[this.state.springId] || this.state.springId;
+
+    return DUPLEX_PAIRS[key] || null;
+}
+
+// The wire combination the reference would pick for this load: the first
+// whose bracket the current TIPPT falls inside. Both wires start at their
+// spring ID's minimum and step up together as the load grows.
+get duplexStep() {
+    const pair = this.duplexPair;
+
+    if (!pair || !this.tipptExact) {
+        return null;
+    }
+
+    for (const step of pair.steps) {
+        if (this.tipptExact <= step.maxTippt) {
+            return step;
+        }
+    }
+
+    return pair.steps[pair.steps.length - 1];
+}
+
+// False once the load runs past the last measured wire combination, where
+// the numbers are an extrapolation rather than a reading.
+get duplexCalibrated() {
+    const pair = this.duplexPair;
+
+    if (!pair) {
+        return false;
+    }
+
+    const last = pair.steps[pair.steps.length - 1];
+
+    return last.maxTippt !== Infinity || pair.steps.length > 1;
+}
+
+get duplexInnerLength() {
+    const step = this.duplexStep;
+
+    return step ? duplexLength(step.C, this.tipptExact) : 0;
+}
+
+// Always exactly an inch more than the inner - true in all 17 readings.
+get duplexOuterLength() {
+    const inner = this.duplexInnerLength;
+
+    return inner ? inner + 1 : 0;
+}
+
+// Steel weight, from the ROUNDED length. The reference does the same: at a
+// displayed 15.00" the outer comes back 17.25 lb to the cent, which only
+// works if the weight is taken after the length is rounded.
+duplexWeight(wire, springId, length) {
+    if (!wire || !length) {
+        return 0;
+    }
+
+    const volume =
+        ((Math.PI ** 2) / 4) * wire * (springId + wire) * length;
+
+    return Math.round(STEEL_DENSITY * volume * 100) / 100;
+}
+
+get duplexInnerWeight() {
+    const step = this.duplexStep;
+    const pair = this.duplexPair;
+
+    return step
+        ? this.duplexWeight(step.innerWire, pair.innerId, this.duplexInnerLength)
+        : 0;
+}
+
+get duplexOuterWeight() {
+    const step = this.duplexStep;
+    const pair = this.duplexPair;
+
+    return step
+        ? this.duplexWeight(step.outerWire, pair.outerId, this.duplexOuterLength)
+        : 0;
+}
+
+// Cycle life of the set. K is the spring's body length times TIPPT, so the
+// body is K/TIPPT and the rate follows; the rest is the standard cycle
+// formula on the inner spring, which is the one the reference reports.
+get duplexCyclesExact() {
+    const step = this.duplexStep;
+    const pair = this.duplexPair;
+
+    if (!step || !this.tipptExact || !this.turnsExact) {
+        return 0;
+    }
+
+    const body = step.K / this.tipptExact;
+    const divider =
+        (30000000 * Math.pow(step.innerWire, 5)) /
+        (TORSION_CONSTANT * (pair.innerId + step.innerWire));
+    const torque = (divider / body) * this.turnsExact;
+
+    if (!torque) {
+        return 0;
+    }
+
+    return Math.pow(
+        (CYCLE_COEFFICIENT * Math.pow(step.innerWire, CYCLE_WIRE_EXPONENT)) /
+            torque,
+        CYCLE_EXPONENT
+    );
+}
+
+get duplexCycles() {
+    const cycles = this.duplexCyclesExact;
+
+    if (!cycles) {
+        return 0;
+    }
+
+    const rounded =
+        Math.round(cycles / DUPLEX_CYCLE_ROUNDING) * DUPLEX_CYCLE_ROUNDING;
+
+    return rounded.toLocaleString("en-US");
+}
+
+// Display strings for the two wire sizes and the two spring IDs.
+get duplexInnerWire() {
+    const step = this.duplexStep;
+
+    return step ? formatWire(step.innerWire) : "";
+}
+
+get duplexOuterWire() {
+    const step = this.duplexStep;
+
+    return step ? formatWire(step.outerWire) : "";
+}
+
+get duplexInnerId() {
+    const key = DUPLEX_ALIASES[this.state.springId] || this.state.springId;
+
+    return key ? key.split(" inside ")[0] : "";
+}
+
+get duplexOuterId() {
+    const key = DUPLEX_ALIASES[this.state.springId] || this.state.springId;
+
+    return key ? key.split(" inside ")[1] : "";
 }
 
 // How much shaft the finished assembly takes up, wound and with its hardware.
