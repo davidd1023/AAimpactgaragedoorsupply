@@ -915,12 +915,22 @@ const DRUM_INFO = {
 //   spring IDs, wire sizes, lengths, weights   EXACT on all 20
 //   cycle counts                               13 exact, worst case 3.6% out
 //
-// The cycle residual is real and worth knowing about. K is body length times
-// TIPPT, and that product is NOT quite constant across door heights: the 7'
-// readings give 2017 where the 10' reading gives 2036, a 0.9% spread that the
-// fourth-power cycle formula turns into ~4%. K here is the value minimising
-// the worst case over each combination's readings. Lengths are unaffected -
-// they follow C/TIPPT exactly at both heights.
+// K IS CONSTANT ACROSS DOOR HEIGHTS. An earlier note here claimed it was not,
+// on the strength of the 7' readings giving 2017 against the 10' one's 2036.
+// That was wrong, and the way it was wrong is worth recording.
+//
+// Six responses straight from the reference's own API - one wire combination,
+// 300 lb, heights 84" to 144" - invert to K = 2020.4, 2021.2, 2024.6, 2022.5,
+// 2026.5, 2025.8. A 0.30% spread, which is constant.
+//
+// The apparent height dependence came from MY TURNS CURVE, not from K: at
+// those heights it runs -0.25% to +0.52% against the reference's own turns,
+// and cycle life goes as turns^-4.67, so half a percent of turns is well over
+// two percent of cycles. The cycle model was never the problem.
+//
+// What is left is bounded at roughly 2-3%, from that turns error plus the
+// reference rounding its own TIPPT and turns to one decimal before using
+// them. Lengths are unaffected and exact.
 //
 // Outside the wire combinations listed, the last step is used and the answer
 // will drift - duplexCalibrated reports which case you are in.
@@ -936,7 +946,7 @@ const DUPLEX_PAIRS = {
         calibration: [
             // 14 readings across 7'0", 9'0" and 10'0"; C reproduces 13 of the
             // 14 lengths - see the note on boundary cases below.
-            { outerWire: 0.2625, innerWire: 0.2253, C: 2113.2, tau: 15.5, K: 2024.5 },
+            { outerWire: 0.2625, innerWire: 0.2253, C: 2113.2, tau: 15.5, K: 2023.0 },
             // Two readings (600 lb at 7'0", 572 lb at 11'2").
             { outerWire: 0.2730, innerWire: 0.2253, C: 2328.1, tau: 27.0, K: 2252.0 },
             // Two readings, both 500 lb on the D525-216, at 7'0" and 10'8".
