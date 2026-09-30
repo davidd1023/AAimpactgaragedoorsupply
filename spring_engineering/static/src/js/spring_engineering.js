@@ -875,11 +875,17 @@ const DRUM_INFO = {
 // quarter: its x lands on 35.000, 26.250, 21.000 and 17.500, every one of
 // which rounds down or ties.
 //
-// WIRES. Both start at the minimum for their spring ID and step UP the
-// WIRE_SIZES list as the load grows, the smallest that keeps the cycle count
-// at or above the target. The step points below are MIDPOINTS OF MEASURED
-// BRACKETS, not exact thresholds - the reference was sampled either side of
-// each, so a door within about 25 lb of one may pick the neighbouring wire.
+// WIRES. Both start at the minimum for their spring ID and step UP together
+// as the load grows: the reference takes the FIRST combination whose cycle
+// count reaches the target, which is what duplexStep below evaluates.
+//
+// This was originally a TIPPT threshold per step, fitted to the 7'0" readings,
+// and it was WRONG. Cycle life depends on torque, which is rate times TURNS,
+// and turns grows with door height - so at 11'2" a door needs a bigger wire
+// than the same TIPPT at 7'0" does. A 572 lb 11'2" door came back one wire
+// size light, at 9,000 cycles against a 10,000 target, with the app's own
+// cycle figure already showing it had missed. Evaluating the target directly
+// has no such blind spot and needs no thresholds at all.
 //
 // C and K are per WIRE COMBINATION, not per spring pair: changing either wire
 // changes both. C sets the length, K sets the cycle count (K = body length x
@@ -905,9 +911,9 @@ const DUPLEX_PAIRS = {
         outerId: 6,
         // C exact to a 15-point bracket; K averaged over 4 readings.
         steps: [
-            { outerWire: 0.2625, innerWire: 0.2253, C: 2084.2, K: 2019.7, maxTippt: 167.3 },
-            // One reading only (600 lb). C is a 87-wide bracket's midpoint.
-            { outerWire: 0.2730, innerWire: 0.2253, C: 2313.7, K: 2231.7, maxTippt: Infinity },
+            { outerWire: 0.2625, innerWire: 0.2253, C: 2084.2, K: 2019.7 },
+            // Two readings (600 lb at 7'0", 572 lb at 11'2"); C bracketed to 48 wide.
+            { outerWire: 0.2730, innerWire: 0.2253, C: 2294.3, K: 2252.1 },
         ],
     },
     '2 5/8" inside 5 1/4"': {
@@ -915,10 +921,10 @@ const DUPLEX_PAIRS = {
         outerId: 5.25,
         steps: [
             // C is pinned to a single value by the 150 and 300 lb readings.
-            { outerWire: 0.2625, innerWire: 0.1770, C: 1527.9233, K: 1040.2, maxTippt: 94.6 },
-            { outerWire: 0.2625, innerWire: 0.1875, C: 1655.3, K: 1375.7, maxTippt: 123.7 },
+            { outerWire: 0.2625, innerWire: 0.1770, C: 1527.9233, K: 1040.2 },
+            { outerWire: 0.2625, innerWire: 0.1875, C: 1655.3, K: 1375.7 },
             // One reading only (450 lb).
-            { outerWire: 0.2625, innerWire: 0.2000, C: 1997.2, K: 1906.1, maxTippt: Infinity },
+            { outerWire: 0.2625, innerWire: 0.2000, C: 1997.2, K: 1906.1 },
         ],
     },
 };
@@ -1467,9 +1473,38 @@ get duplexPair() {
     return DUPLEX_PAIRS[key] || null;
 }
 
-// The wire combination the reference would pick for this load: the first
-// whose bracket the current TIPPT falls inside. Both wires start at their
-// spring ID's minimum and step up together as the load grows.
+// Cycle life for one wire combination. K is the spring's body length times
+// TIPPT, so the body is K/TIPPT and the rate follows; the rest is the
+// standard cycle formula on the inner spring, which is the one the reference
+// reports.
+duplexCyclesForStep(step) {
+    const pair = this.duplexPair;
+
+    if (!step || !pair || !this.tipptExact || !this.turnsExact) {
+        return 0;
+    }
+
+    const body = step.K / this.tipptExact;
+    const divider =
+        (30000000 * Math.pow(step.innerWire, 5)) /
+        (TORSION_CONSTANT * (pair.innerId + step.innerWire));
+    const torque = (divider / body) * this.turnsExact;
+
+    if (!torque) {
+        return 0;
+    }
+
+    return Math.pow(
+        (CYCLE_COEFFICIENT * Math.pow(step.innerWire, CYCLE_WIRE_EXPONENT)) /
+            torque,
+        CYCLE_EXPONENT
+    );
+}
+
+// The wire combination the reference picks: the SMALLEST whose cycle life
+// reaches the target. Same rule the Single path uses, and the same fallback -
+// if nothing reaches it, the largest is used and the low-cycle warning is
+// what tells the user.
 get duplexStep() {
     const pair = this.duplexPair;
 
@@ -1477,9 +1512,13 @@ get duplexStep() {
         return null;
     }
 
-    for (const step of pair.steps) {
-        if (this.tipptExact <= step.maxTippt) {
-            return step;
+    const target = this.cycleTarget;
+
+    if (target) {
+        for (const step of pair.steps) {
+            if (this.duplexCyclesForStep(step) >= target) {
+                return step;
+            }
         }
     }
 
@@ -1495,9 +1534,15 @@ get duplexCalibrated() {
         return false;
     }
 
+    // Past the largest wire combination the table knows, the answer is an
+    // extrapolation: the cycle target is no longer reachable and the last
+    // step is used regardless.
     const last = pair.steps[pair.steps.length - 1];
 
-    return last.maxTippt !== Infinity || pair.steps.length > 1;
+    return (
+        !this.cycleTarget ||
+        this.duplexCyclesForStep(last) >= this.cycleTarget
+    );
 }
 
 get duplexInnerLength() {
@@ -1549,28 +1594,7 @@ get duplexOuterWeight() {
 // body is K/TIPPT and the rate follows; the rest is the standard cycle
 // formula on the inner spring, which is the one the reference reports.
 get duplexCyclesExact() {
-    const step = this.duplexStep;
-    const pair = this.duplexPair;
-
-    if (!step || !this.tipptExact || !this.turnsExact) {
-        return 0;
-    }
-
-    const body = step.K / this.tipptExact;
-    const divider =
-        (30000000 * Math.pow(step.innerWire, 5)) /
-        (TORSION_CONSTANT * (pair.innerId + step.innerWire));
-    const torque = (divider / body) * this.turnsExact;
-
-    if (!torque) {
-        return 0;
-    }
-
-    return Math.pow(
-        (CYCLE_COEFFICIENT * Math.pow(step.innerWire, CYCLE_WIRE_EXPONENT)) /
-            torque,
-        CYCLE_EXPONENT
-    );
+    return this.duplexCyclesForStep(this.duplexStep);
 }
 
 get duplexCycles() {
