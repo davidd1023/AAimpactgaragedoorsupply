@@ -919,33 +919,35 @@ const DUPLEX_PAIRS = {
         outerId: 6,
         // C and K against S, least squares over the measured combinations.
         // See the note on cSlope below for why these are LINES and not ratios.
-        cSlope: 0.94814, cIntercept: 156.69,
-        kSlope: 0.87716, kIntercept: 255.52,
+        cSlope: 0.96043, cIntercept: 160.82,
+        kSlope: 0.87572, kIntercept: 259.69,
+        defaultTau: 40,
         calibration: [
             // 14 readings across 7'0", 9'0" and 10'0"; C reproduces 13 of the
             // 14 lengths - see the note on boundary cases below.
-            { outerWire: 0.2625, innerWire: 0.2253, C: 2084.3, K: 2022.5 },
+            { outerWire: 0.2625, innerWire: 0.2253, C: 2113.2, tau: 15.5, K: 2024.5 },
             // Two readings (600 lb at 7'0", 572 lb at 11'2").
-            { outerWire: 0.2730, innerWire: 0.2253, C: 2294.3, K: 2252.0 },
+            { outerWire: 0.2730, innerWire: 0.2253, C: 2328.1, tau: 27.0, K: 2252.0 },
             // One reading (683 lb at 11'2").
-            { outerWire: 0.2830, innerWire: 0.2343, C: 2802.2, K: 2708.0 },
+            { outerWire: 0.2830, innerWire: 0.2343, C: 2837.0, tau: 17.0, K: 2708.0 },
             // Two readings (749 lb at 10'8", 750 lb at 9'0").
-            { outerWire: 0.2950, innerWire: 0.2343, C: 3100.5, K: 2971.5 },
+            { outerWire: 0.2950, innerWire: 0.2343, C: 3144.8, tau: 57.0, K: 2971.5 },
         ],
     },
     '2 5/8" inside 5 1/4"': {
         innerId: 2.625,
         outerId: 5.25,
-        cSlope: 1.13872, cIntercept: -358.38,
+        cSlope: 1.15491, cIntercept: -362.27,
         kSlope: 1.50247, kIntercept: -1221.56,
+        defaultTau: 40,
         calibration: [
             // C is pinned to a single value by the 150 and 300 lb readings.
-            { outerWire: 0.2625, innerWire: 0.1770, C: 1527.9233, K: 1040.0 },
-            { outerWire: 0.2625, innerWire: 0.1875, C: 1655.3, K: 1375.5 },
-            { outerWire: 0.2625, innerWire: 0.2000, C: 1997.3, K: 1906.0 },
-            { outerWire: 0.2625, innerWire: 0.2070, C: 2073.6, K: 2243.5 },
-            { outerWire: 0.2730, innerWire: 0.2187, C: 2662.9, K: 2921.5 },
-            { outerWire: 0.2890, innerWire: 0.2343, C: 3717.9, K: 4021.5 },
+            { outerWire: 0.2625, innerWire: 0.1770, C: 1549.5, tau: 56.0, K: 1040.0 },
+            { outerWire: 0.2625, innerWire: 0.1875, C: 1680.4, tau: 43.0, K: 1375.5 },
+            { outerWire: 0.2625, innerWire: 0.2000, C: 2029.6, tau: 31.5, K: 1906.0 },
+            { outerWire: 0.2625, innerWire: 0.2070, C: 2109.6, tau: 39.5, K: 2243.5 },
+            { outerWire: 0.2730, innerWire: 0.2187, C: 2706.1, tau: 44.5, K: 2921.5 },
+            { outerWire: 0.2890, innerWire: 0.2343, C: 3768.3, tau: 36.5, K: 4021.5 },
         ],
     },
 };
@@ -962,33 +964,32 @@ const DUPLEX_ALIASES = {
 // The reference prints duplex cycle counts to the nearest thousand.
 const DUPLEX_CYCLE_ROUNDING = 1000;
 
-// Round to the nearest whole inch with ties going DOWN, then add a quarter
-// inch if that rounding went up. See the length rule above.
+// THE LENGTH RULE, corrected against a 19-reading sweep of one wire
+// combination across three door heights:
 //
-// x is snapped to 9dp first: several reference cases land exactly on a whole
-// number or exactly on .5, and raw float division reads 35.0 as 34.999...,
-// which would flip the decision the wrong way.
-function duplexLength(C, tippt) {
+//     x = C / TIPPT
+//     x <  tau  ->  inner length = floor(x)
+//     x >= tau  ->  inner length = round(x) + 0.25
+//
+// What was here before was "floor(x) + 1.25 when frac(x) > 0.5". That agrees
+// with this on most 7'0" doors, which is exactly why eleven readings at that
+// one height could not tell the two apart - and why it then failed at 9'0".
+// Two 9'0" readings had looked mutually contradictory under the old rule, to
+// the point of being provably unfittable; under this one they are not, and
+// neither is any other reading.
+//
+// tau belongs to the wire combination. On 0.2625/0.2253, sampled 19 times, it
+// is 15.5 and well determined. On combinations with one or two readings it is
+// only bounded from below, and a large value simply records that every
+// reading seen so far fell in the floor regime.
+function duplexLength(C, tippt, tau) {
     if (!C || !tippt) {
         return 0;
     }
 
-    let x = C / tippt;
+    const x = C / tippt;
 
-    // Snap to the nearest half inch when we are within a whisker of one.
-    // Several reference cases sit exactly on a whole number (35.000, 21.000)
-    // or exactly on a tie (17.500), and raw division reads those as
-    // 34.9999998, which would round the wrong way and shift the answer a
-    // quarter inch.
-    const half = Math.round(x * 2) / 2;
-
-    if (Math.abs(x - half) < 1e-6) {
-        x = half;
-    }
-
-    const whole = Math.floor(x);
-
-    return x - whole > 0.5 ? whole + 1.25 : whole;
+    return x < tau ? Math.floor(x + 1e-9) : Math.round(x) + 0.25;
 }
 
 // --- Drum limits and warnings --------------------------------------------
@@ -1594,6 +1595,7 @@ get duplexCandidates() {
                 innerWire,
                 C: pair.cSlope * S + pair.cIntercept,
                 K: pair.kSlope * S + pair.kIntercept,
+                tau: pair.defaultTau,
                 S,
                 measured: false,
             });
@@ -1657,7 +1659,7 @@ get duplexCalibrated() {
 get duplexInnerLength() {
     const step = this.duplexStep;
 
-    return step ? duplexLength(step.C, this.tipptExact) : 0;
+    return step ? duplexLength(step.C, this.tipptExact, step.tau) : 0;
 }
 
 // Always exactly an inch more than the inner - true in all 17 readings.
