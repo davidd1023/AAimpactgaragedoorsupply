@@ -909,17 +909,27 @@ const DUPLEX_PAIRS = {
     '3 3/4" inside 6"': {
         innerId: 3.75,
         outerId: 6,
-        // C exact to a 15-point bracket; K averaged over 4 readings.
-        steps: [
+        // ratios of C and K to S = 2*(outer divider + inner divider), averaged
+        // over the measured combinations; used for anything not measured.
+        cRatio: 1.0183,
+        kRatio: 0.9900,
+        calibration: [
             { outerWire: 0.2625, innerWire: 0.2253, C: 2084.2, K: 2019.7 },
-            // Two readings (600 lb at 7'0", 572 lb at 11'2"); C bracketed to 48 wide.
+            // Two readings (600 lb at 7'0", 572 lb at 11'2").
             { outerWire: 0.2730, innerWire: 0.2253, C: 2294.3, K: 2252.1 },
+            // One reading (683 lb at 11'2").
+            { outerWire: 0.2830, innerWire: 0.2343, C: 2802.2, K: 2708.0 },
         ],
     },
     '2 5/8" inside 5 1/4"': {
         innerId: 2.625,
         outerId: 5.25,
-        steps: [
+        // These ratios are far less stable than pair 1's (K/S runs 0.61 to 0.95
+        // across the three measured combinations), so extrapolation here is
+        // rougher and the warning matters more.
+        cRatio: 0.9381,
+        kRatio: 0.7756,
+        calibration: [
             // C is pinned to a single value by the 150 and 300 lb readings.
             { outerWire: 0.2625, innerWire: 0.1770, C: 1527.9233, K: 1040.2 },
             { outerWire: 0.2625, innerWire: 0.1875, C: 1655.3, K: 1375.7 },
@@ -1505,6 +1515,83 @@ duplexCyclesForStep(step) {
 // reaches the target. Same rule the Single path uses, and the same fallback -
 // if nothing reaches it, the largest is used and the low-cycle warning is
 // what tells the user.
+// Every wire combination the calculator may choose from, smallest first.
+//
+// The measured ones lead, in the order the reference was seen to use them.
+// After those the list CONTINUES, generated across the whole WIRE_SIZES
+// table, so a heavy or tall door can never run off the end - which is what
+// went wrong before: the table stopped at 0.2730/0.2253 and every door past
+// it silently got that combination and badly wrong numbers.
+//
+// Generated entries get C and K from the pair's cRatio and kRatio applied to
+// S = 2*(outer divider + inner divider). That is a physical handle rather
+// than a curve fit: S is what the two springs' rates sum to, and on pair 1
+// K/S sits at 0.99 across every measured combination. They are still
+// ESTIMATES, and duplexExtrapolated flags when one is in use.
+get duplexCandidates() {
+    const pair = this.duplexPair;
+
+    if (!pair) {
+        return [];
+    }
+
+    const divider = (wire, id) =>
+        (30000000 * Math.pow(wire, 5)) / (TORSION_CONSTANT * (id + wire));
+
+    const out = pair.calibration.map((c) => ({ ...c, measured: true }));
+    const seen = new Set(out.map((c) => c.outerWire + "/" + c.innerWire));
+
+    // Continue past the measured set by stepping both wires up their own
+    // lists, starting from the largest measured pair, and ordering what that
+    // produces by total stiffness.
+    const last = pair.calibration[pair.calibration.length - 1];
+    const oFrom = WIRE_SIZES.indexOf(last.outerWire);
+    const iFrom = WIRE_SIZES.indexOf(last.innerWire);
+    const extra = [];
+
+    for (let o = Math.max(oFrom, 0); o < WIRE_SIZES.length; o++) {
+        for (let i = Math.max(iFrom, 0); i < WIRE_SIZES.length; i++) {
+            const outerWire = WIRE_SIZES[o];
+            const innerWire = WIRE_SIZES[i];
+
+            // The inner spring has to fit inside the outer one.
+            if (pair.innerId + 2 * innerWire >= pair.outerId) {
+                continue;
+            }
+
+            const key = outerWire + "/" + innerWire;
+
+            if (seen.has(key)) {
+                continue;
+            }
+
+            seen.add(key);
+
+            const S =
+                2 *
+                (divider(outerWire, pair.outerId) +
+                    divider(innerWire, pair.innerId));
+
+            extra.push({
+                outerWire,
+                innerWire,
+                C: pair.cRatio * S,
+                K: pair.kRatio * S,
+                S,
+                measured: false,
+            });
+        }
+    }
+
+    extra.sort((a, b) => a.S - b.S);
+
+    return out.concat(extra);
+}
+
+// The wire combination the reference picks: the SMALLEST whose cycle life
+// reaches the target. Same rule the Single path uses, and the same fallback -
+// if nothing reaches it, the largest is used and the low-cycle warning is
+// what tells the user.
 get duplexStep() {
     const pair = this.duplexPair;
 
@@ -1512,37 +1599,39 @@ get duplexStep() {
         return null;
     }
 
+    const candidates = this.duplexCandidates;
     const target = this.cycleTarget;
 
+    // A hair of tolerance on the comparison. K is stored to a decimal place
+    // and the cycle formula is a fourth power, so a combination fitted to
+    // land exactly ON the target can compute as 9999.6 and be skipped -
+    // stepping the wire a size for a rounding error. 0.1% is far inside the
+    // few percent this cycle model is good to, so it cannot mask a real miss.
+    const reach = target * 0.999;
+
     if (target) {
-        for (const step of pair.steps) {
-            if (this.duplexCyclesForStep(step) >= target) {
+        for (const step of candidates) {
+            if (this.duplexCyclesForStep(step) >= reach) {
                 return step;
             }
         }
     }
 
-    return pair.steps[pair.steps.length - 1];
+    return candidates[candidates.length - 1] || null;
+}
+
+// True when the chosen combination was never measured, so its length, weight
+// and cycle figures are estimates from the pair's ratios rather than readings.
+get duplexExtrapolated() {
+    const step = this.duplexStep;
+
+    return !!step && !step.measured;
 }
 
 // False once the load runs past the last measured wire combination, where
 // the numbers are an extrapolation rather than a reading.
 get duplexCalibrated() {
-    const pair = this.duplexPair;
-
-    if (!pair) {
-        return false;
-    }
-
-    // Past the largest wire combination the table knows, the answer is an
-    // extrapolation: the cycle target is no longer reachable and the last
-    // step is used regardless.
-    const last = pair.steps[pair.steps.length - 1];
-
-    return (
-        !this.cycleTarget ||
-        this.duplexCyclesForStep(last) >= this.cycleTarget
-    );
+    return !!this.duplexPair && !this.duplexExtrapolated;
 }
 
 get duplexInnerLength() {
@@ -1815,6 +1904,22 @@ get warnings() {
                 message: "Must be " + HILIFT_MIN + " or more",
             });
         }
+    }
+
+    // --- Duplex outside its measured ground ------------------------------
+    // Yellow, not red: the numbers are the right shape and come from the
+    // pair's own stiffness ratios, they are simply not backed by a reading.
+    // Saying so beats printing an estimate that looks like a measurement.
+
+    if (this.isDuplex && this.duplexExtrapolated) {
+        found.push({
+            id: "duplex-extrapolated",
+            severity: "yellow",
+            message:
+                "This wire combination has not been checked against the " +
+                "reference calculator. Lengths, weights and cycles are " +
+                "estimated and may be off by a size.",
+        });
     }
 
     // --- Assembly against the door width ---------------------------------
