@@ -888,7 +888,18 @@ const DRUM_INFO = {
 // has no such blind spot and needs no thresholds at all.
 //
 // C and K are per WIRE COMBINATION, not per spring pair: changing either wire
-// changes both. C sets the length, K sets the cycle count (K = body length x
+// changes both.
+//
+// THEY ARE ALSO PER SPRING COUNT, and every reading behind them was taken at
+// TWO springs. The catalog settles how they scale:
+//
+//     LENGTH OF ACTIVE COILS = SPRING QTY x DIVIDER / IPPT
+//
+// so the active length is PROPORTIONAL to the spring quantity, and C scales
+// with it. K is body length times TIPPT and the body scales the same way, so
+// K does too. Both are therefore multiplied by springs/2 at the point of use
+// - see duplexSpringScale. Before this they were used raw, which meant the
+// spring count changed nothing at all in Duplex. C sets the length, K sets the cycle count (K = body length x
 // TIPPT, recovered by inverting the reported cycles).
 //
 // C IS VERY SLIGHTLY HEIGHT-DEPENDENT, which three heights now expose. For
@@ -1489,6 +1500,15 @@ get isDuplex() {
     return this.state.assembly === "Duplex";
 }
 
+// Every calibration reading was taken at 2 springs, and both constants are
+// proportional to the count. UNCONFIRMED AGAINST THE REFERENCE at any other
+// count - it follows from the catalog's formula, not from a reading.
+get duplexSpringScale() {
+    const springs = Number(this.state.springs) || 2;
+
+    return springs / 2;
+}
+
 get duplexPair() {
     const key = DUPLEX_ALIASES[this.state.springId] || this.state.springId;
 
@@ -1506,7 +1526,7 @@ duplexCyclesForStep(step) {
         return 0;
     }
 
-    const body = step.K / this.tipptExact;
+    const body = (step.K * this.duplexSpringScale) / this.tipptExact;
     const divider =
         (30000000 * Math.pow(step.innerWire, 5)) /
         (TORSION_CONSTANT * (pair.innerId + step.innerWire));
@@ -1659,7 +1679,13 @@ get duplexCalibrated() {
 get duplexInnerLength() {
     const step = this.duplexStep;
 
-    return step ? duplexLength(step.C, this.tipptExact, step.tau) : 0;
+    return step
+        ? duplexLength(
+              step.C * this.duplexSpringScale,
+              this.tipptExact,
+              step.tau
+          )
+        : 0;
 }
 
 // Always exactly an inch more than the inner - true in all 17 readings.
