@@ -946,9 +946,9 @@ const DUPLEX_PAIRS = {
         calibration: [
             // 14 readings across 7'0", 9'0" and 10'0"; C reproduces 13 of the
             // 14 lengths - see the note on boundary cases below.
-            { outerWire: 0.2625, innerWire: 0.2253, C: 2113.2, tau: 15.5, K: 2023.0 },
+            { outerWire: 0.2625, innerWire: 0.2253, C: 2113.2, tau: 15.5, K: 2022.2 },
             // Two readings (600 lb at 7'0", 572 lb at 11'2").
-            { outerWire: 0.2730, innerWire: 0.2253, C: 2328.1, tau: 27.0, K: 2252.0 },
+            { outerWire: 0.2730, innerWire: 0.2253, C: 2328.1, tau: 27.0, K: 2255.1 },
             // Two readings, both 500 lb on the D525-216, at 7'0" and 10'8".
             // Same outer wire as the entry below but a WEAKER inner - the two
             // wires do not step in lockstep, which is what the stiffness
@@ -959,16 +959,16 @@ const DUPLEX_PAIRS = {
             // single reading fixes a combination only to within a bracket, and
             // on a rule that floors to the whole inch that is a whole inch of
             // slack.
-            { outerWire: 0.2830, innerWire: 0.2253, C: 2622.5, tau: 40, K: 2446.5 },
+            { outerWire: 0.2830, innerWire: 0.2253, C: 2622.5, tau: 40, K: 2449.4 },
             // Three readings, all 683 lb, at 11'2", 11'0" and 9'0". Two were
             // not enough: they bracketed tau only to 17.5-21.4 and the 19.3
             // taken from that range put an 11'0" door on the wrong side. The
             // third narrows it to 20.25-21.25, and 11'0" (x 20.62) and 11'2"
             // (x 20.89) now sit either side of the boundary, which is what
             // makes it sharp.
-            { outerWire: 0.2830, innerWire: 0.2343, C: 2820.9, tau: 20.75, K: 2708.0 },
+            { outerWire: 0.2830, innerWire: 0.2343, C: 2820.9, tau: 20.75, K: 2700.5 },
             // Two readings (749 lb at 10'8", 750 lb at 9'0").
-            { outerWire: 0.2950, innerWire: 0.2343, C: 3144.8, tau: 57.0, K: 2971.5 },
+            { outerWire: 0.2950, innerWire: 0.2343, C: 3144.8, tau: 57.0, K: 2957.4 },
         ],
     },
     '2 5/8" inside 5 1/4"': {
@@ -979,12 +979,12 @@ const DUPLEX_PAIRS = {
         defaultTau: 40,
         calibration: [
             // C is pinned to a single value by the 150 and 300 lb readings.
-            { outerWire: 0.2625, innerWire: 0.1770, C: 1549.5, tau: 56.0, K: 1040.0 },
-            { outerWire: 0.2625, innerWire: 0.1875, C: 1680.4, tau: 43.0, K: 1375.5 },
-            { outerWire: 0.2625, innerWire: 0.2000, C: 2029.6, tau: 31.5, K: 1906.0 },
-            { outerWire: 0.2625, innerWire: 0.2070, C: 2109.6, tau: 39.5, K: 2243.5 },
-            { outerWire: 0.2730, innerWire: 0.2187, C: 2706.1, tau: 44.5, K: 2921.5 },
-            { outerWire: 0.2890, innerWire: 0.2343, C: 3768.3, tau: 36.5, K: 4021.5 },
+            { outerWire: 0.2625, innerWire: 0.1770, C: 1549.5, tau: 56.0, K: 1043.1 },
+            { outerWire: 0.2625, innerWire: 0.1875, C: 1680.4, tau: 43.0, K: 1379.4 },
+            { outerWire: 0.2625, innerWire: 0.2000, C: 2029.6, tau: 31.5, K: 1911.4 },
+            { outerWire: 0.2625, innerWire: 0.2070, C: 2109.6, tau: 39.5, K: 2249.1 },
+            { outerWire: 0.2730, innerWire: 0.2187, C: 2706.1, tau: 44.5, K: 2928.4 },
+            { outerWire: 0.2890, innerWire: 0.2343, C: 3768.3, tau: 36.5, K: 4031.1 },
         ],
     },
 };
@@ -1552,11 +1552,28 @@ duplexCyclesForStep(step) {
         return 0;
     }
 
-    const body = (step.K * this.duplexSpringScale) / this.tipptExact;
+    // TIPPT and turns are rounded to ONE DECIMAL first, because the reference
+    // does: its API returns them at exactly that precision and computes from
+    // them. It shows in its own output - six responses at a fixed load and
+    // rising height gave cycle counts wandering 173,000 to 182,000 for a
+    // quantity that is physically constant, which is the rounding, not the
+    // spring.
+    //
+    // Replicating it nearly doubled the exact matches across 42 readings and
+    // halved the worst error, 4.77% to 2.90%. Rounding to two decimals gives
+    // back the unrounded figures exactly, so one decimal is the real rule and
+    // not a fudge that happens to help.
+    //
+    // CONFINED TO DUPLEX. tipptExact and turnsExact are untouched, so nothing
+    // in the Single path moves.
+    const tippt = Math.round(this.tipptExact * 10) / 10;
+    const turns = Math.round(this.turnsExact * 10) / 10;
+
+    const body = (step.K * this.duplexSpringScale) / tippt;
     const divider =
         (30000000 * Math.pow(step.innerWire, 5)) /
         (TORSION_CONSTANT * (pair.innerId + step.innerWire));
-    const torque = (divider / body) * this.turnsExact;
+    const torque = (divider / body) * turns;
 
     if (!torque) {
         return 0;
@@ -1680,15 +1697,19 @@ get duplexStep() {
     const candidates = this.duplexCandidates;
     const target = this.cycleTarget;
 
-    // Tolerance on the comparison, and it has to be real rather than token.
-    // The reference habitually lands EXACTLY on the target - a 750 lb 9'0"
-    // door reports precisely 10,000 - so the deciding combination is the one
-    // sitting on the boundary, where this model's own error decides the
-    // answer. That model is good to a few percent; at 0.1% a case computing
-    // 9,966 was rejected and the wire stepped a size, which is a whole inch
-    // of length for a third of a percent of cycle life. 1% is still inside
-    // the model's accuracy and stops the boundary from being a coin toss.
-    const reach = target * 0.99;
+    // Tolerance on the comparison, set to the cycle model's OWN worst error
+    // rather than picked by feel. The reference habitually lands exactly on
+    // the target, so the deciding combination is always the one sitting on
+    // the boundary - where this model's error, not the spring, decides the
+    // answer. Measured worst case is 2.9%, so 3% it is.
+    //
+    // It was 1%, and that was too tight once the cycle constants were
+    // refitted: a 683 lb 11'2" door computed 9,882 against a 10,000 target,
+    // was rejected by 1.2%, stepped a wire size and came out 1.75" long.
+    // Anything from 1.5% down to 4% gives the same clean result across all
+    // 39 readings, so 3% sits in the middle of a plateau rather than on an
+    // edge.
+    const reach = target * 0.97;
 
     if (target) {
         for (const step of candidates) {
