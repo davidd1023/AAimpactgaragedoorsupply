@@ -997,6 +997,11 @@ const DUPLEX_PAIRS = {
             { outerWire: 0.3195, innerWire: 0.2625, C: 5012.7, tau: 10, K: 4853.5 },
             { outerWire: 0.3310, innerWire: 0.2730, C: 5987.4, tau: 10, K: 5822.9 },
             { outerWire: 0.3625, innerWire: 0.2830, C: 8285.0, tau: 40, K: 7549.6 },
+            // From a ONE-SPRING door (750 lb 8'0", target 10,000). At one
+            // spring each carries twice the torque, so the reference reaches
+            // far up its sequence - this is the only reading that names this
+            // combination.
+            { outerWire: 0.3750, innerWire: 0.3065, C: 11192.1, tau: 40, K: 10390.3 },
         ],
     },
     '2 5/8" inside 5 1/4"': {
@@ -1026,6 +1031,9 @@ const DUPLEX_ALIASES = {
     '3 3/8" inside 5 7/8" (Overhead)': '2 5/8" inside 5 1/4"',
 };
 
+// How the duplex constants scale with spring count - see duplexSpringScale.
+const DUPLEX_COUNT_SCALE_EXPONENT = 0.99;
+
 // The reference prints duplex cycle counts to the nearest thousand.
 const DUPLEX_CYCLE_ROUNDING = 1000;
 
@@ -1036,6 +1044,19 @@ const DUPLEX_CYCLE_ROUNDING = 1000;
 // Held as the S value (2 x the two dividers) of the largest combination seen
 // at or below each target, so it compares directly against a candidate's own
 // stiffness. Above the last entry the list is left open.
+//
+// THE LIMIT MOVES WITH SPRING COUNT. Measured at two springs; at ONE spring
+// the same door and target reach 0.3750/0.3065, S 10765, against 0.2950/
+// 0.2343's S 3130 - a factor of 3.44, not the 2 that halving the count might
+// suggest. Each spring carries twice the torque, so a far stiffer one is
+// needed to arrive at the same cycle life, and both configurations do end up
+// at the same 9,000 cycles for this door.
+//
+// DUPLEX_COUNT_EXPONENT is fitted to exactly those two points - 2^1.78 =
+// 3.44 - so it reproduces one and two springs and is a guess at three and
+// four. One reading at four springs would settle it.
+const DUPLEX_COUNT_EXPONENT = 1.78;
+
 const DUPLEX_CATALOGUE = [
     { maxTarget: 10000, maxS: 3140 },     // 0.2950/0.2343, S 3130.1
     { maxTarget: 25000, maxS: 4940 },     // 0.3195/0.2625, S 4926.4
@@ -1046,14 +1067,14 @@ const DUPLEX_CATALOGUE = [
 // Pair 2's own combinations were all measured at a 10,000 target, so the
 // table is only known to apply to pair 1. For any other pair the list stays
 // open rather than being capped on a guess.
-function duplexCatalogueLimit(pair, target) {
+function duplexCatalogueLimit(pair, target, springs) {
     if (!target || pair.innerId !== 3.75) {
         return Infinity;
     }
 
     for (const line of DUPLEX_CATALOGUE) {
         if (target <= line.maxTarget) {
-            return line.maxS;
+            return line.maxS * Math.pow(2 / springs, DUPLEX_COUNT_EXPONENT);
         }
     }
 
@@ -1585,13 +1606,23 @@ get isDuplex() {
     return this.state.assembly === "Duplex";
 }
 
-// Every calibration reading was taken at 2 springs, and both constants are
-// proportional to the count. UNCONFIRMED AGAINST THE REFERENCE at any other
-// count - it follows from the catalog's formula, not from a reading.
+// Every calibration reading was taken at 2 springs, and both constants scale
+// with the count - the catalog's own formula has the active length
+// proportional to spring quantity.
+//
+// NOT QUITE PROPORTIONAL, though. A 4-spring door measured 21.25" where a
+// straight springs/2 gives 22.25": x lands at 21.525 and needs to be under
+// 21.5. The gap is 0.11%, so the exponent is a hair under 1 rather than
+// exactly 1.
+//
+// 0.99 is the flattest value fitting both ends: at 4 springs it gives 1.986,
+// inside the 1.905-1.998 the reading allows, and at 2 springs it is exactly
+// 1, so every 2-spring reading is untouched. Fitted to two points - one and
+// four springs - so three springs is still interpolation.
 get duplexSpringScale() {
     const springs = Number(this.state.springs) || 2;
 
-    return springs / 2;
+    return Math.pow(springs / 2, DUPLEX_COUNT_SCALE_EXPONENT);
 }
 
 get duplexPair() {
@@ -1703,7 +1734,11 @@ get duplexCandidates() {
     //
     // An earlier note blamed door width for the same behaviour. That was
     // wrong - changing the width changes nothing in the reference's output.
-    const maxS = duplexCatalogueLimit(pair, this.cycleTarget);
+    const maxS = duplexCatalogueLimit(
+        pair,
+        this.cycleTarget,
+        Number(this.state.springs) || 2
+    );
     const last = pair.calibration[pair.calibration.length - 1];
     const oFrom = WIRE_SIZES.indexOf(last.outerWire);
     const iFrom = WIRE_SIZES.indexOf(last.innerWire);
