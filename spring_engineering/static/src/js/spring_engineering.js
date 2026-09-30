@@ -966,9 +966,30 @@ const DUPLEX_PAIRS = {
             // third narrows it to 20.25-21.25, and 11'0" (x 20.62) and 11'2"
             // (x 20.89) now sit either side of the boundary, which is what
             // makes it sharp.
-            { outerWire: 0.2830, innerWire: 0.2343, C: 2820.9, tau: 20.75, K: 2700.5 },
-            // Two readings (749 lb at 10'8", 750 lb at 9'0").
-            { outerWire: 0.2950, innerWire: 0.2343, C: 3144.8, tau: 57.0, K: 2957.4 },
+            { outerWire: 0.2830, innerWire: 0.2343, C: 2820.9, tau: 20.75, K: 2714.7 },
+            // Three readings at 11'0": 688 lb, and the 726/727 lb pair either
+            // side of the reference's own accept/reject line for this
+            // combination. That pair pins K far harder than a cycle count
+            // can: accepting at 726 needs K >= 2865.7, rejecting at 727 needs
+            // K < 2869.6, so K is bracketed 4 wide where the 688 lb reading
+            // alone allowed 47. A BOUNDARY IS WORTH MORE THAN A READING.
+            { outerWire: 0.2890, innerWire: 0.2343, C: 2963.3, tau: 40, K: 2867.6 },
+            // FIVE readings: 749 lb 10'8", 750 lb 9'0", and 727/750 lb 11'0",
+            // 750 lb 10'0". Four of the five agree on K in [2960.6, 2988.3);
+            // the 727 lb one wants K < 2956.8 and cannot be had with them, a
+            // 0.13% conflict between selected readings on the same
+            // combination. That is my cycle model disagreeing with theirs at
+            // the fourth decimal, not a choice.
+            //
+            // 2965 satisfies the four and keeps EVERY wire choice, length and
+            // weight right across all 43 readings. The 727 lb case pays with
+            // a cycle count one step high.
+            //
+            // I also checked whether the cycle exponent was to blame: no
+            // value of it satisfies this combination's readings better, and
+            // 4.67 is the best over all eleven combinations. The residual is
+            // not the exponent.
+            { outerWire: 0.2950, innerWire: 0.2343, C: 3144.8, tau: 57.0, K: 2965.0 },
         ],
     },
     '2 5/8" inside 5 1/4"': {
@@ -1631,9 +1652,17 @@ get duplexCandidates() {
     }));
     const seen = new Set(out.map((c) => c.outerWire + "/" + c.innerWire));
 
-    // Continue past the measured set by stepping both wires up their own
-    // lists, starting from the largest measured pair, and ordering what that
-    // produces by total stiffness.
+    // Fill in combinations BETWEEN the measured ones, but never past the
+    // largest of them.
+    //
+    // The reference's list is CAPPED, which a 750 lb 12'0" door proved: even
+    // its stiffest combination only reaches 9,000 cycles against a 10,000
+    // target, and rather than step to a bigger wire it used that combination
+    // anyway and warned - "cycle life calculation of 9,000.00 is less than
+    // the 10,000 cycle minimum". If anything stiffer existed it would have
+    // been used. Generating past the cap sent that door to 0.3065/0.2343 and
+    // three inches long.
+    const maxS = Math.max(...out.map((c) => c.S));
     const last = pair.calibration[pair.calibration.length - 1];
     const oFrom = WIRE_SIZES.indexOf(last.outerWire);
     const iFrom = WIRE_SIZES.indexOf(last.innerWire);
@@ -1661,6 +1690,10 @@ get duplexCandidates() {
                 2 *
                 (divider(outerWire, pair.outerId) +
                     divider(innerWire, pair.innerId));
+
+            if (S > maxS) {
+                continue;
+            }
 
             extra.push({
                 outerWire,
@@ -1697,19 +1730,22 @@ get duplexStep() {
     const candidates = this.duplexCandidates;
     const target = this.cycleTarget;
 
-    // Tolerance on the comparison, set to the cycle model's OWN worst error
-    // rather than picked by feel. The reference habitually lands exactly on
-    // the target, so the deciding combination is always the one sitting on
-    // the boundary - where this model's error, not the spring, decides the
-    // answer. Measured worst case is 2.9%, so 3% it is.
+    // NO TOLERANCE. There was one, growing from 0.1% to 3% as each boundary
+    // case arrived, and it was the wrong tool throughout - it was hiding K
+    // values that sat too low.
     //
-    // It was 1%, and that was too tight once the cycle constants were
-    // refitted: a 683 lb 11'2" door computed 9,882 against a 10,000 target,
-    // was rejected by 1.2%, stepped a wire size and came out 1.75" long.
-    // Anything from 1.5% down to 4% gives the same clean result across all
-    // 39 readings, so 3% sits in the middle of a plateau rather than on an
-    // edge.
-    const reach = target * 0.97;
+    // What killed it: a 683 lb door computing 9,882 that the reference
+    // ACCEPTS, against a 727 lb door computing 9,967 that it REJECTS. The
+    // rejected case computes HIGHER than the accepted one, so no single
+    // threshold can separate them. They are different wire combinations, and
+    // the fault was K for 0.283/0.2343, not the comparison.
+    //
+    // Fixed at the cause instead. Each K is now bracketed by what its own
+    // readings prove: a reading that was SELECTED had cycles at or above the
+    // target, and its displayed count fixes them within 500. Those two
+    // together pin K to a few units, where a cycle count alone allowed
+    // dozens. The comparison can then be exact, as the reference's is.
+    const reach = target;
 
     if (target) {
         for (const step of candidates) {
