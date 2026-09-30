@@ -950,8 +950,13 @@ const DUPLEX_PAIRS = {
             // on a rule that floors to the whole inch that is a whole inch of
             // slack.
             { outerWire: 0.2830, innerWire: 0.2253, C: 2622.5, tau: 40, K: 2446.5 },
-            // One reading (683 lb at 11'2").
-            { outerWire: 0.2830, innerWire: 0.2343, C: 2837.0, tau: 17.0, K: 2708.0 },
+            // Three readings, all 683 lb, at 11'2", 11'0" and 9'0". Two were
+            // not enough: they bracketed tau only to 17.5-21.4 and the 19.3
+            // taken from that range put an 11'0" door on the wrong side. The
+            // third narrows it to 20.25-21.25, and 11'0" (x 20.62) and 11'2"
+            // (x 20.89) now sit either side of the boundary, which is what
+            // makes it sharp.
+            { outerWire: 0.2830, innerWire: 0.2343, C: 2820.9, tau: 20.75, K: 2708.0 },
             // Two readings (749 lb at 10'8", 750 lb at 9'0").
             { outerWire: 0.2950, innerWire: 0.2343, C: 3144.8, tau: 57.0, K: 2971.5 },
         ],
