@@ -939,6 +939,10 @@ const DUPLEX_PAIRS = {
             { outerWire: 0.2625, innerWire: 0.2253, C: 2113.2, tau: 15.5, K: 2024.5 },
             // Two readings (600 lb at 7'0", 572 lb at 11'2").
             { outerWire: 0.2730, innerWire: 0.2253, C: 2328.1, tau: 27.0, K: 2252.0 },
+            // One reading (500 lb at 7'0" on the D525-216). Same outer wire as
+            // the entry below but a WEAKER inner - the two wires do not step in
+            // lockstep, which is what the stiffness ordering below is for.
+            { outerWire: 0.2830, innerWire: 0.2253, C: 2546.8, tau: 40, K: 2426.0 },
             // One reading (683 lb at 11'2").
             { outerWire: 0.2830, innerWire: 0.2343, C: 2837.0, tau: 17.0, K: 2708.0 },
             // Two readings (749 lb at 10'8", 750 lb at 9'0").
@@ -1576,7 +1580,16 @@ get duplexCandidates() {
     const divider = (wire, id) =>
         (30000000 * Math.pow(wire, 5)) / (TORSION_CONSTANT * (id + wire));
 
-    const out = pair.calibration.map((c) => ({ ...c, measured: true }));
+    const stiffness = (c) =>
+        2 *
+        (divider(c.outerWire, pair.outerId) +
+            divider(c.innerWire, pair.innerId));
+
+    const out = pair.calibration.map((c) => ({
+        ...c,
+        S: stiffness(c),
+        measured: true,
+    }));
     const seen = new Set(out.map((c) => c.outerWire + "/" + c.innerWire));
 
     // Continue past the measured set by stepping both wires up their own
@@ -1622,9 +1635,13 @@ get duplexCandidates() {
         }
     }
 
-    extra.sort((a, b) => a.S - b.S);
-
-    return out.concat(extra);
+    // Sorted MEASURED AND GENERATED TOGETHER. Listing the measured ones first
+    // was a bug: 0.2830/0.2343 is in the table and 0.2830/0.2253 was not, so a
+    // 500 lb door on the D525-216 took the stiffer pair and came out an inch
+    // long where the reference had used the weaker inner. The two wires do not
+    // step in lockstep, so "the next combination up" has to be decided by
+    // total stiffness, not by which ones happen to have been measured.
+    return out.concat(extra).sort((a, b) => a.S - b.S);
 }
 
 // The wire combination the reference picks: the SMALLEST whose cycle life
