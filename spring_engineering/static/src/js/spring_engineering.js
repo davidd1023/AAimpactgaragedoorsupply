@@ -909,26 +909,27 @@ const DUPLEX_PAIRS = {
     '3 3/4" inside 6"': {
         innerId: 3.75,
         outerId: 6,
-        // ratios of C and K to S = 2*(outer divider + inner divider), averaged
-        // over the measured combinations; used for anything not measured.
-        cRatio: 1.0183,
-        kRatio: 0.9900,
+        // C and K against S, least squares over the measured combinations.
+        // See the note on cSlope below for why these are LINES and not ratios.
+        cSlope: 0.96440, cIntercept: 120.22,
+        kSlope: 0.87766, kIntercept: 253.12,
         calibration: [
             { outerWire: 0.2625, innerWire: 0.2253, C: 2084.2, K: 2019.7 },
             // Two readings (600 lb at 7'0", 572 lb at 11'2").
             { outerWire: 0.2730, innerWire: 0.2253, C: 2294.3, K: 2252.1 },
             // One reading (683 lb at 11'2").
             { outerWire: 0.2830, innerWire: 0.2343, C: 2802.2, K: 2708.0 },
+            // One reading (749 lb at 10'8").
+            { outerWire: 0.2950, innerWire: 0.2343, C: 3120.4, K: 2969.7 },
         ],
     },
     '2 5/8" inside 5 1/4"': {
         innerId: 2.625,
         outerId: 5.25,
-        // These ratios are far less stable than pair 1's (K/S runs 0.61 to 0.95
-        // across the three measured combinations), so extrapolation here is
-        // rougher and the warning matters more.
-        cRatio: 0.9381,
-        kRatio: 0.7756,
+        // Only three measured combinations here against pair 1's four, and they
+        // span a narrower range, so these lines extrapolate less confidently.
+        cSlope: 1.58234, cIntercept: -1177.15,
+        kSlope: 2.87493, kIntercept: -3835.50,
         calibration: [
             // C is pinned to a single value by the 150 and 300 lb readings.
             { outerWire: 0.2625, innerWire: 0.1770, C: 1527.9233, K: 1040.2 },
@@ -1523,11 +1524,17 @@ duplexCyclesForStep(step) {
 // went wrong before: the table stopped at 0.2730/0.2253 and every door past
 // it silently got that combination and badly wrong numbers.
 //
-// Generated entries get C and K from the pair's cRatio and kRatio applied to
-// S = 2*(outer divider + inner divider). That is a physical handle rather
-// than a curve fit: S is what the two springs' rates sum to, and on pair 1
-// K/S sits at 0.99 across every measured combination. They are still
-// ESTIMATES, and duplexExtrapolated flags when one is in use.
+// Generated entries get C and K from a LINE through S = 2*(outer divider +
+// inner divider), the quantity the two springs' rates sum to.
+//
+// A fixed RATIO to S was tried first and was not good enough: C/S drifts from
+// 1.027 to 0.997 and K/S from 0.995 to 0.949 as the springs stiffen, and a
+// 749 lb door at 10'8" landed on an estimated C 2% high - which pushed x past
+// a rounding boundary and added a whole 1.25" to the length. On a rule that
+// rounds to the inch, a 2% error in C is not a 2% error in the answer.
+//
+// A line holds the measured points to about 1%. They are still ESTIMATES, and
+// duplexExtrapolated flags when one is in use.
 get duplexCandidates() {
     const pair = this.duplexPair;
 
@@ -1575,8 +1582,8 @@ get duplexCandidates() {
             extra.push({
                 outerWire,
                 innerWire,
-                C: pair.cRatio * S,
-                K: pair.kRatio * S,
+                C: pair.cSlope * S + pair.cIntercept,
+                K: pair.kSlope * S + pair.kIntercept,
                 S,
                 measured: false,
             });
