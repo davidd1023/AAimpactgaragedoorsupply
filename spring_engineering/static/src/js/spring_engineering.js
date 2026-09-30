@@ -939,10 +939,17 @@ const DUPLEX_PAIRS = {
             { outerWire: 0.2625, innerWire: 0.2253, C: 2113.2, tau: 15.5, K: 2024.5 },
             // Two readings (600 lb at 7'0", 572 lb at 11'2").
             { outerWire: 0.2730, innerWire: 0.2253, C: 2328.1, tau: 27.0, K: 2252.0 },
-            // One reading (500 lb at 7'0" on the D525-216). Same outer wire as
-            // the entry below but a WEAKER inner - the two wires do not step in
-            // lockstep, which is what the stiffness ordering below is for.
-            { outerWire: 0.2830, innerWire: 0.2253, C: 2546.8, tau: 40, K: 2426.0 },
+            // Two readings, both 500 lb on the D525-216, at 7'0" and 10'8".
+            // Same outer wire as the entry below but a WEAKER inner - the two
+            // wires do not step in lockstep, which is what the stiffness
+            // ordering below is for.
+            //
+            // The first reading alone left C bracketed 240 wide and the
+            // midpoint, 2546.8, fell BELOW what the second reading allows. A
+            // single reading fixes a combination only to within a bracket, and
+            // on a rule that floors to the whole inch that is a whole inch of
+            // slack.
+            { outerWire: 0.2830, innerWire: 0.2253, C: 2622.5, tau: 40, K: 2446.5 },
             // One reading (683 lb at 11'2").
             { outerWire: 0.2830, innerWire: 0.2343, C: 2837.0, tau: 17.0, K: 2708.0 },
             // Two readings (749 lb at 10'8", 750 lb at 9'0").
