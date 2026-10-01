@@ -1012,6 +1012,40 @@ const DUPLEX_PAIRS = {
                 // either side of a step is worth far more than readings away
                 // from one.
                 //
+                // WHAT THE LONG RANGE ACTUALLY IS - found by searching rather
+                // than patching, and worth recording even though it does not
+                // ship.
+                //
+                //     L = round(1.041 x active) + 0.25
+                //
+                // One constant, no threshold, and it is EXACT on all 16
+                // readings with active above 20 - including the 205 lb case
+                // that the shipped rule needs its 0.065 split to handle. The k
+                // window that achieves 16/16 is [1.0385, 1.0435], half a
+                // percent wide. It also explains why every long reading ends
+                // in .25: the quarter is unconditional.
+                //
+                // IT IS NOT SHIPPED because it scores 20/25 overall, not 25/25.
+                // It gets only 4 of the 9 short readings, and using it above 20
+                // with the short rule below would tie at 25/25 while loosening
+                // the regime boundary from the 0.5" bracket measured above back
+                // to the 8.4" gap between 15.85 and 24.27. A cleaner form with
+                // a looser boundary is not a better answer.
+                //
+                // WHAT IT MEANS. The short range is not the same law with
+                // different parameters - it is a different mechanism. And a
+                // multiplicative k near 1.04 hints the divider constant may be
+                // ~4% low for Duplex, though the Single path is exact against
+                // 11 readings with the current value, so it cannot simply be
+                // wrong everywhere.
+                //
+                // SEARCHED AND RULED OUT over these 25 readings, none reaching
+                // 21/25: any quantise(a*active + b) to a quarter inch; the same
+                // with a turns term; coil-count quantisation at full, half and
+                // quarter coils on either wire; quantising to the wire diameter
+                // itself; and round(k*active) with a frac-threshold choice of
+                // offset, which peaks at 21/25.
+                //
                 // THE TWO-REGIME MODEL IS A SIMPLIFICATION, and this pair shows
                 // why. Both share floor(active) = 25, so within ONE integer
                 // part frac 0.290 is short and frac 0.807 is long. What is
