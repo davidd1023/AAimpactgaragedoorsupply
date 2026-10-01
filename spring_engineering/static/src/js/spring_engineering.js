@@ -987,12 +987,41 @@ const DUPLEX_PAIRS = {
                 outerWire: 0.2625, innerWire: 0.2253, K: 2008.0, n: 10,
                 // short range: active 14.5-15.8, 9 readings
                 tLo: 0.000, tHi: 0.530,
-                // long range: 11 readings from active 30.7 to 38.2. `from` is
-                // the one GUESSED number here - the two ranges are separated by
-                // an unsampled gap from 15.8 to 30.7, so any boundary inside it
-                // fits the data equally well and 23 is simply its midpoint.
-                // Three readings between active 18 and 28 would pin it.
-                long: { from: 23, split: 0.065, above: 2.25 },
+                // long range: 13 readings from active 26.9 to 38.2.
+                //
+                // `from` IS BRACKETED BY MEASUREMENT, not guessed. Three doors
+                // at 3 springs, radius 12, 9'2" - one configuration with only
+                // the weight varied, so active length is the only thing that
+                // differs between them:
+                //
+                //     521 lb   active 24.271   +1.25   short
+                //     470 lb   active 26.905   +2.25   long
+                //     410 lb   active 30.842   +2.25   long
+                //
+                // Two more on the same configuration closed it to half an inch:
+                //
+                //     500 lb   active 25.290   +1.25   short
+                //     490 lb   active 25.807   +2.25   long
+                //
+                // so the boundary is above 25.290 and at or below 25.807. The
+                // 25.5 here was chosen before those two were taken and sits
+                // inside the bracket, so they CONFIRM it rather than move it.
+                // The window has gone 14.8" -> 2.6" -> 0.5".
+                //
+                // It pinned the way K's accept/reject boundaries did: a pair
+                // either side of a step is worth far more than readings away
+                // from one.
+                //
+                // THE TWO-REGIME MODEL IS A SIMPLIFICATION, and this pair shows
+                // why. Both share floor(active) = 25, so within ONE integer
+                // part frac 0.290 is short and frac 0.807 is long. What is
+                // being called a boundary in active length is really the point
+                // where the upper band switches from +1 to +2.25, and the
+                // within-floor threshold drifts too - it is near 0.6 at floor
+                // 15 and at or below 0.110 by floor 36. The two regimes
+                // reproduce all 27 readings on this rung, but they are a
+                // bracketing of that drift, not the law behind it.
+                long: { from: 25.5, split: 0.065, above: 2.25 },
             },
             { outerWire: 0.2730, innerWire: 0.2253, K:  2231.7, n:  9 , tLo: 0.514, tHi: 0.632 },
             { outerWire: 0.2830, innerWire: 0.2253, K:  2428.3, n:  1 },

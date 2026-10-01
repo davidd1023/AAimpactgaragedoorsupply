@@ -3566,6 +3566,253 @@
         "is unsampled, so any boundary in that gap fits equally well; 23 is its",
         "midpoint. Three readings between active 18 and 28 would pin it."
       ]
+    },
+    {
+      "id": "p1-2625-2253-521lb-9ft2-3spr-r12",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01 from live testing. Lands in the unsampled gap between the two length regimes - the one guessed number in the model.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D400-144",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "12",
+        "cycles": "10,000",
+        "weight": "521",
+        "doorHeightFeet": 9,
+        "doorHeightInches": 2
+      },
+      "expect": {
+        "duplexInnerWire": "0.2253\"",
+        "duplexOuterWire": "0.2625\"",
+        "duplexInnerLength": 25.25,
+        "duplexOuterLength": 26.25,
+        "duplexInnerWeight": 15.82,
+        "duplexOuterWeight": 30.2
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 90000,
+      "note": [
+        "THIS MOVED THE REGIME BOUNDARY, which was the one number in the length",
+        "rule with nothing behind it.",
+        "",
+        "active 24.271, frac 0.271, reference bonus +1.25. That is SHORT-regime",
+        "behaviour: the short rule gives frac 0.271 < tHi 0.530 -> +1.25 -> 25.25,",
+        "which is right. The long regime would have given +2.25 -> 26.25.",
+        "",
+        "The boundary was guessed at 23, the midpoint of the then-unsampled gap",
+        "(15.845, 30.659]. This reading proves it is above 24.271, so the gap is",
+        "now (24.271, 30.659] and the boundary is set to 27.5, its midpoint.",
+        "",
+        "The STRUCTURE held - only the boundary moved. Two more readings inside the",
+        "remaining gap would close it: roughly 3 springs at radius 12, 9'2\",",
+        "410-470 lb on this rung.",
+        "",
+        "Also an off-grid height, 9'2\", where the multiplier came back to 1e-6."
+      ]
+    },
+    {
+      "id": "p1-2625-2253-410lb-9ft2-3spr-r12",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01. Requested pair either side of the length-regime boundary, same configuration as the 521 lb reading with only the weight varied.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D400-144",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "12",
+        "cycles": "10,000",
+        "doorHeightFeet": 9,
+        "doorHeightInches": 2,
+        "weight": "410"
+      },
+      "expect": {
+        "duplexInnerWire": "0.2253\"",
+        "duplexOuterWire": "0.2625\"",
+        "duplexInnerLength": 32.25,
+        "duplexOuterLength": 33.25,
+        "duplexInnerWeight": 20.21,
+        "duplexOuterWeight": 38.25
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 277000,
+      "note": [
+        "THE PAIR THAT BRACKETED THE REGIME BOUNDARY.",
+        "",
+        "  wt    active    frac    refL    bonus   regime",
+        " 521   24.271   0.271   25.25   +1.25   short",
+        " 470   26.905   0.905   28.25   +2.25   long",
+        " 410   30.842   0.842   32.25   +2.25   long",
+        "",
+        "One configuration, only the weight varied, so active length is the only",
+        "thing separating them. The boundary is therefore above 24.271 and at or",
+        "below 26.905 - a 2.6\" window, down from the 14.8\" the original guess of 23",
+        "was drawn from. `from` is now 25.5, inside the bracket.",
+        "",
+        "Note how it was pinned: a PAIR either side of the step, which is the same",
+        "thing that pinned K from the accept/reject boundaries. Readings away from a",
+        "step are worth far less.",
+        "",
+        "470 lb also rules out a short-regime explanation of itself: frac 0.905 under",
+        "the short rule gives +1 -> 27\", and the reference says 28.25\"."
+      ]
+    },
+    {
+      "id": "p1-2625-2253-470lb-9ft2-3spr-r12",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01. Requested pair either side of the length-regime boundary, same configuration as the 521 lb reading with only the weight varied.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D400-144",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "12",
+        "cycles": "10,000",
+        "doorHeightFeet": 9,
+        "doorHeightInches": 2,
+        "weight": "470"
+      },
+      "expect": {
+        "duplexInnerWire": "0.2253\"",
+        "duplexOuterWire": "0.2625\"",
+        "duplexInnerLength": 28.25,
+        "duplexOuterLength": 29.25,
+        "duplexInnerWeight": 17.7,
+        "duplexOuterWeight": 33.65
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 146000,
+      "note": [
+        "THE PAIR THAT BRACKETED THE REGIME BOUNDARY.",
+        "",
+        "  wt    active    frac    refL    bonus   regime",
+        " 521   24.271   0.271   25.25   +1.25   short",
+        " 470   26.905   0.905   28.25   +2.25   long",
+        " 410   30.842   0.842   32.25   +2.25   long",
+        "",
+        "One configuration, only the weight varied, so active length is the only",
+        "thing separating them. The boundary is therefore above 24.271 and at or",
+        "below 26.905 - a 2.6\" window, down from the 14.8\" the original guess of 23",
+        "was drawn from. `from` is now 25.5, inside the bracket.",
+        "",
+        "Note how it was pinned: a PAIR either side of the step, which is the same",
+        "thing that pinned K from the accept/reject boundaries. Readings away from a",
+        "step are worth far less.",
+        "",
+        "470 lb also rules out a short-regime explanation of itself: frac 0.905 under",
+        "the short rule gives +1 -> 27\", and the reference says 28.25\"."
+      ]
+    },
+    {
+      "id": "p1-2625-2253-490lb-9ft2-3spr-r12",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01. Requested pair straddling the length-regime boundary, same configuration as the 521/470/410 lb readings with only the weight varied.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D400-144",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "12",
+        "cycles": "10,000",
+        "doorHeightFeet": 9,
+        "doorHeightInches": 2,
+        "weight": "490"
+      },
+      "expect": {
+        "duplexInnerWire": "0.2253\"",
+        "duplexOuterWire": "0.2625\"",
+        "duplexInnerLength": 27.25,
+        "duplexOuterLength": 28.25,
+        "duplexInnerWeight": 17.08,
+        "duplexOuterWeight": 32.5
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 121000,
+      "note": [
+        "THE PAIR THAT CLOSED THE REGIME BOUNDARY TO HALF AN INCH.",
+        "",
+        "  wt    active   floor  frac    refL   bonus   regime",
+        " 521   24.271     24   0.271   25.25  +1.25   short",
+        " 500   25.290     25   0.290   26.25  +1.25   short",
+        " 490   25.807     25   0.807   27.25  +2.25   long",
+        " 470   26.905     26   0.905   28.25  +2.25   long",
+        " 410   30.842     30   0.842   32.25  +2.25   long",
+        "",
+        "Boundary is above 25.290 and at or below 25.807. The 25.5 in the code was",
+        "chosen before these were taken, so they confirm it rather than move it. The",
+        "window has gone 14.8\" -> 2.6\" -> 0.5\" across three rounds of readings.",
+        "",
+        "THEY ALSO EXPOSE THE MODEL'S LIMIT. 500 and 490 lb share floor(active) = 25,",
+        "so within one integer part frac 0.290 is short and 0.807 is long. The",
+        "'active-length boundary' is therefore not the real mechanism - it is where",
+        "the upper band switches from +1 to +2.25. The within-floor threshold drifts",
+        "as well: about 0.6 at floor 15, at or below 0.110 by floor 36. The two",
+        "regimes reproduce every reading on this rung but they bracket that drift",
+        "rather than explain it."
+      ]
+    },
+    {
+      "id": "p1-2625-2253-500lb-9ft2-3spr-r12",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01. Requested pair straddling the length-regime boundary, same configuration as the 521/470/410 lb readings with only the weight varied.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D400-144",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "12",
+        "cycles": "10,000",
+        "doorHeightFeet": 9,
+        "doorHeightInches": 2,
+        "weight": "500"
+      },
+      "expect": {
+        "duplexInnerWire": "0.2253\"",
+        "duplexOuterWire": "0.2625\"",
+        "duplexInnerLength": 26.25,
+        "duplexOuterLength": 27.25,
+        "duplexInnerWeight": 16.45,
+        "duplexOuterWeight": 31.35
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 110000,
+      "note": [
+        "THE PAIR THAT CLOSED THE REGIME BOUNDARY TO HALF AN INCH.",
+        "",
+        "  wt    active   floor  frac    refL   bonus   regime",
+        " 521   24.271     24   0.271   25.25  +1.25   short",
+        " 500   25.290     25   0.290   26.25  +1.25   short",
+        " 490   25.807     25   0.807   27.25  +2.25   long",
+        " 470   26.905     26   0.905   28.25  +2.25   long",
+        " 410   30.842     30   0.842   32.25  +2.25   long",
+        "",
+        "Boundary is above 25.290 and at or below 25.807. The 25.5 in the code was",
+        "chosen before these were taken, so they confirm it rather than move it. The",
+        "window has gone 14.8\" -> 2.6\" -> 0.5\" across three rounds of readings.",
+        "",
+        "THEY ALSO EXPOSE THE MODEL'S LIMIT. 500 and 490 lb share floor(active) = 25,",
+        "so within one integer part frac 0.290 is short and 0.807 is long. The",
+        "'active-length boundary' is therefore not the real mechanism - it is where",
+        "the upper band switches from +1 to +2.25. The within-floor threshold drifts",
+        "as well: about 0.6 at floor 15, at or below 0.110 by floor 36. The two",
+        "regimes reproduce every reading on this rung but they bracket that drift",
+        "rather than explain it."
+      ]
     }
   ]
 }
