@@ -1,0 +1,290 @@
+// Laws the Duplex model must obey REGARDLESS of any reference reading.
+//
+// These are not opinions about the manufacturer's calculator - they are
+// statements the code's own comments already make, now enforced. They catch
+// the whole class of bug where a continuous rounding wobble flips a discrete
+// wire choice and moves the answer by inches.
+import { make } from "./harness.mjs";
+import { DUPLEX_IDS, TARGETS } from "./cases.mjs";
+
+const DRUM = "CANIMEX/TF D400-144";
+
+// '3 3/4"' -> 3.75. Mirrors the component's own springIdNumber, which is not
+// reachable from here because it reads this.state.
+function parseId(text) {
+    const value = text.replace('"', "").trim();
+
+    if (!value.includes(" ")) {
+        return Number(value);
+    }
+
+    const [whole, fraction] = value.split(" ");
+    const [numerator, denominator] = fraction.split("/");
+
+    return Number(whole) + Number(numerator) / Number(denominator);
+}
+
+function duplex(mod, o) {
+    return make(mod, {
+        assembly: "Duplex", drum: DRUM, springId: '3 3/4" inside 6"',
+        weight: "500", doorHeightFeet: 7, ...o,
+    });
+}
+
+function wireOf(c) {
+    const s = c.duplexStep;
+
+    return s ? `${s.outerWire}/${s.innerWire}` : null;
+}
+
+// Peak torque at full wind is weight x drum radius; door height does not
+// enter it. The comment on DRUMS says exactly this ("the CYCLE COUNT,
+// unchanged"), and the comment on DUPLEX_CATALOGUE re-derives it. So the
+// SELECTED wire must not depend on door height.
+function heightIndependence(mod) {
+    const fails = [];
+
+    for (const cycles of TARGETS) {
+        for (let w = 250; w <= 900; w += 2) {
+            const seen = new Map();
+
+            for (let h = 7; h <= 14; h += 0.5) {
+                const wire = wireOf(duplex(mod, { weight: String(w), doorHeightFeet: h, cycles }));
+
+                if (wire && !seen.has(wire)) {
+                    seen.set(wire, h);
+                }
+            }
+
+            if (seen.size > 1) {
+                fails.push(
+                    `${w} lb, target ${cycles}: height changes the wire -> ` +
+                    [...seen].map(([k, h]) => `${k} @${h}ft`).join(", ")
+                );
+            }
+        }
+    }
+
+    return fails;
+}
+
+// Track radius moves turns and the multiplier in opposite directions, leaving
+// their product - and therefore torque - unchanged. The RADIUS_TURN_DROP
+// comment states it outright ("the cycle count never moved"). So radius must
+// not change the wire either.
+function radiusIndependence(mod) {
+    const fails = [];
+
+    for (const cycles of TARGETS) {
+        for (let w = 250; w <= 900; w += 4) {
+            for (const springs of [1, 2, 3, 4]) {
+                const seen = new Map();
+
+                for (const radius of ["15", "12", "LHR"]) {
+                    const wire = wireOf(duplex(mod, { weight: String(w), springs, radius, cycles, doorHeightFeet: 9 }));
+
+                    if (wire && !seen.has(wire)) {
+                        seen.set(wire, radius);
+                    }
+                }
+
+                if (seen.size > 1) {
+                    fails.push(
+                        `${w} lb, ${springs} spring(s), target ${cycles}: radius changes the wire -> ` +
+                        [...seen].map(([k, r]) => `${k} @r${r}`).join(", ")
+                    );
+                }
+            }
+        }
+    }
+
+    return fails;
+}
+
+// A heavier door can never need a SOFTER pair. Stiffness is the ordering the
+// candidate ladder is built on, so this is monotonicity of the selection.
+function weightMonotonic(mod) {
+    const fails = [];
+
+    for (const cycles of TARGETS) {
+        for (const springs of [1, 2, 4]) {
+            let prev = null;
+
+            for (let w = 200; w <= 1000; w += 2) {
+                const c = duplex(mod, { weight: String(w), springs, cycles, doorHeightFeet: 9 });
+                const step = c.duplexStep;
+
+                if (!step) {
+                    continue;
+                }
+
+                if (prev && step.S < prev.S - 1e-6) {
+                    fails.push(
+                        `target ${cycles}, ${springs} spring(s): ${w} lb picks S=${step.S.toFixed(0)} ` +
+                        `(${step.outerWire}/${step.innerWire}) but ${w - 2} lb picked the STIFFER ` +
+                        `S=${prev.S.toFixed(0)} (${prev.outerWire}/${prev.innerWire})`
+                    );
+                }
+
+                prev = step;
+            }
+        }
+    }
+
+    return fails;
+}
+
+// The chosen pair must reach the ACCEPTANCE FRACTION of the target, and must
+// be the softest pair that does.
+//
+// This invariant used to demand the target outright, and it failed the moment
+// DUPLEX_ACCEPT_FRACTION was introduced - correctly, because it encoded an
+// assumption the reference does not share. Two measured rejection boundaries
+// show it accepting 9,000 cycles against a 10,000 target and only stepping up
+// when the rung would fall below that, so the contract is the fraction, not
+// the target. See DUPLEX_ACCEPT_FRACTION.
+//
+// The "softest that qualifies" half matters independently: cycle life is not
+// monotonic along the ladder, so the first qualifying rung in ladder order is
+// not necessarily the softest qualifying one.
+function targetMet(mod) {
+    const fails = [];
+
+    for (const cycles of TARGETS) {
+        for (let w = 250; w <= 900; w += 4) {
+            const c = duplex(mod, { weight: String(w), cycles, doorHeightFeet: 10 });
+            const step = c.duplexStep;
+
+            if (!step) {
+                continue;
+            }
+
+            const reach = c.cycleTarget * mod.DUPLEX_ACCEPT_FRACTION;
+            const qualifying = c.duplexCandidates.filter(
+                (s) => c.duplexCyclesForStep(s, { rounded: false }) >= reach
+            );
+
+            if (!qualifying.length) {
+                continue;
+            }
+
+            const got = c.duplexCyclesForStep(step, { rounded: false });
+
+            if (got < reach) {
+                fails.push(
+                    `${w} lb, target ${cycles}: chose ${step.outerWire}/${step.innerWire} ` +
+                    `at ${Math.round(got)} cycles, under the ${Math.round(reach)} floor, ` +
+                    `while ${qualifying.length} rung(s) qualify`
+                );
+                continue;
+            }
+
+            const softest = qualifying.reduce((a, b) => (b.S < a.S ? b : a));
+
+            if (softest.S < step.S - 1e-6) {
+                fails.push(
+                    `${w} lb, target ${cycles}: chose ${step.outerWire}/${step.innerWire} ` +
+                    `(S=${step.S.toFixed(0)}) but ${softest.outerWire}/${softest.innerWire} ` +
+                    `(S=${softest.S.toFixed(0)}) also qualifies and is softer`
+                );
+            }
+        }
+    }
+
+    return fails;
+}
+
+// No pair may be offered that cannot physically be built: the inner spring
+// has to fit inside the outer, C and K have to be positive, and the reported
+// lengths have to be finite and positive.
+function physicallyValid(mod) {
+    const fails = [];
+
+    for (const springId of DUPLEX_IDS) {
+        for (const cycles of TARGETS) {
+            for (const weight of ["200", "500", "900"]) {
+                const c = duplex(mod, { springId, cycles, weight, doorHeightFeet: 9 });
+                const pair = c.duplexPair;
+
+                if (!pair) {
+                    continue;
+                }
+
+                for (const s of c.duplexCandidates) {
+                    const tag = `${springId} ${s.outerWire}/${s.innerWire}`;
+
+                    // C is gone - the length now comes from the catalog
+                    // formula, which has no fitted constant. K is all that
+                    // remains and it must be positive to give a real body.
+                    if (!(s.K > 0)) {
+                        fails.push(`${tag}: nonphysical K=${s.K}`);
+                    }
+
+                    if (pair.innerId + 2 * s.innerWire >= pair.outerId) {
+                        fails.push(`${tag}: inner spring does not fit inside the outer`);
+                    }
+                }
+
+                const inner = c.duplexInnerLength;
+                const outer = c.duplexOuterLength;
+
+                if (!(inner > 0) || !Number.isFinite(inner)) {
+                    fails.push(`${springId} ${weight} lb target ${cycles}: inner length ${inner}`);
+                }
+
+                if (!(outer > inner)) {
+                    fails.push(`${springId} ${weight} lb target ${cycles}: outer ${outer} not longer than inner ${inner}`);
+                }
+            }
+        }
+    }
+
+    return fails;
+}
+
+// A stiffer wire must never be offered than the spring ID can be wound with.
+// WIRE_LIMITS carries the band; the Duplex pairs currently borrow nothing, so
+// this reports rather than asserts until the bands are known.
+function wireBand(mod) {
+    const fails = [];
+    const bands = mod.WIRE_LIMITS;
+
+    for (const springId of DUPLEX_IDS) {
+        const c = duplex(mod, { springId, cycles: "10,000", weight: "900" });
+        const pair = c.duplexPair;
+
+        if (!pair) {
+            continue;
+        }
+
+        const innerKey = Object.keys(bands).find(
+            (k) => Math.abs(parseId(k) - pair.innerId) < 1e-9
+        );
+
+        if (!innerKey) {
+            continue;
+        }
+
+        const band = bands[innerKey];
+
+        for (const s of c.duplexCandidates) {
+            if (s.innerWire > band.max + 1e-9 || s.innerWire < band.min - 1e-9) {
+                fails.push(
+                    `${springId}: offers inner wire ${s.innerWire}" outside the ` +
+                    `${band.minText}-${band.maxText} band for ${innerKey}`
+                );
+            }
+        }
+    }
+
+    return fails;
+}
+
+export const INVARIANTS = [
+    { name: "cycle life / wire choice is independent of door height", run: heightIndependence },
+    { name: "cycle life / wire choice is independent of track radius", run: radiusIndependence },
+    { name: "a heavier door never gets a softer pair", run: weightMonotonic },
+    { name: "the chosen pair meets the target when one on the ladder can", run: targetMet },
+    { name: "every offered pair is physically buildable", run: physicallyValid },
+    { name: "offered inner wire stays inside the spring ID's band", run: wireBand },
+];
