@@ -77,9 +77,21 @@ Against 39 reference-API readings on the D400-144, all assertable:
 
 | | before this work | now |
 |---|---|---|
-| wire choice | 8/11 | **26/27** |
-| corpus reproduced exactly | — | **36/39** |
+| wire choice | 8/11 | **44/45** |
+| corpus reproduced exactly | — | **44/45** |
 | Single assembly | — | **725/725 byte-identical** |
+
+Readings now span all three standard drums, 1-2 springs, door heights 6'4" to
+10'4", weights 200-750 lb and cycle targets 10,000-200,000.
+
+### Drum independence: verified
+
+Every reading was on the D400-144 until a six-reading set on the D400-96 and
+D525-216 was taken specifically to test it. **Wire choice came back 6/6.** The
+D525-216's effective radius is 28% above the D400s', which is precisely what
+the old `tau` threshold could not survive; with `tau` gone there is nothing
+left that can be drum-specific. This closes the original complaint that the
+calculator "sucks for any drum that isn't 400-144".
 
 ### What is derived, with no fitted constant
 

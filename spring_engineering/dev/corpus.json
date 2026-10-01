@@ -2634,6 +2634,258 @@
         "tested. On the rung they did use, active is 13.855 and 13.751, frac 0.855 and",
         "0.751, both giving floor+1 - consistent with the model, not decisive for it."
       ]
+    },
+    {
+      "id": "d40096-2625-2253-470lb-7ft-2spr",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01. DRUM VERIFICATION set: every other reading in this file is on the D400-144, so these six test whether removing tau really made the model drum-independent. Predictions were published before the readings were taken.",
+      "state": {
+        "assembly": "Duplex",
+        "springId": "3 3/4\" inside 6\"",
+        "radius": "15",
+        "cycles": "10,000",
+        "doorHeightInches": 0,
+        "drum": "CANIMEX/TF D400-96",
+        "springs": 2,
+        "weight": "470",
+        "doorHeightFeet": 7
+      },
+      "expect": {
+        "duplexInnerWire": "0.2253\"",
+        "duplexOuterWire": "0.2625\"",
+        "duplexInnerLength": 16.25,
+        "duplexOuterLength": 17.25,
+        "duplexInnerWeight": 10.18,
+        "duplexOuterWeight": 19.84
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 23000,
+      "note": [
+        "WIRE CHOICE WAS 6/6 ACROSS BOTH OTHER DRUMS, which closes the original",
+        "complaint that the calculator 'sucks for any drum that isn't 400-144'.",
+        "The D525-216's rEff is 28% above the D400s' and that is exactly what the",
+        "old tau threshold could not survive; with tau gone there is nothing left",
+        "that can be drum-specific, and these readings confirm it.",
+        "",
+        "LENGTH WAS 4/6. Both misses are frac(active) near 0.6 on rungs that have",
+        "no fitted thresholds, so round(active) rounds up where the reference",
+        "floors. That is the known quarter-inch gap, not a drum problem - and",
+        "these two readings are what finally bound those rungs' tLo."
+      ]
+    },
+    {
+      "id": "d40096-2625-2253-530lb-7ft-2spr",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01. DRUM VERIFICATION set: every other reading in this file is on the D400-144, so these six test whether removing tau really made the model drum-independent. Predictions were published before the readings were taken.",
+      "state": {
+        "assembly": "Duplex",
+        "springId": "3 3/4\" inside 6\"",
+        "radius": "15",
+        "cycles": "10,000",
+        "doorHeightInches": 0,
+        "drum": "CANIMEX/TF D400-96",
+        "springs": 2,
+        "weight": "530",
+        "doorHeightFeet": 7
+      },
+      "expect": {
+        "duplexInnerWire": "0.2253\"",
+        "duplexOuterWire": "0.2625\"",
+        "duplexInnerLength": 14.25,
+        "duplexOuterLength": 15.25,
+        "duplexInnerWeight": 8.93,
+        "duplexOuterWeight": 17.54
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 13000,
+      "note": [
+        "Entered as 620 lb; the reference CLAMPED to this drum's 530 lb maximum and said so. Recorded at 530 because that is what it computed with (TIPPT 151.9 = 0.286584 x 530). NOTE: the app does not clamp - it warns and computes on the entered weight, so at 620 lb it disagrees for that reason alone.",
+        "",
+        "WIRE CHOICE WAS 6/6 ACROSS BOTH OTHER DRUMS, which closes the original",
+        "complaint that the calculator 'sucks for any drum that isn't 400-144'.",
+        "The D525-216's rEff is 28% above the D400s' and that is exactly what the",
+        "old tau threshold could not survive; with tau gone there is nothing left",
+        "that can be drum-specific, and these readings confirm it.",
+        "",
+        "LENGTH WAS 4/6. Both misses are frac(active) near 0.6 on rungs that have",
+        "no fitted thresholds, so round(active) rounds up where the reference",
+        "floors. That is the known quarter-inch gap, not a drum problem - and",
+        "these two readings are what finally bound those rungs' tLo."
+      ]
+    },
+    {
+      "id": "d40096-3195-2625-470lb-7ft-1spr",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01. DRUM VERIFICATION set: every other reading in this file is on the D400-144, so these six test whether removing tau really made the model drum-independent. Predictions were published before the readings were taken.",
+      "state": {
+        "assembly": "Duplex",
+        "springId": "3 3/4\" inside 6\"",
+        "radius": "15",
+        "cycles": "10,000",
+        "doorHeightInches": 0,
+        "drum": "CANIMEX/TF D400-96",
+        "springs": 1,
+        "weight": "470",
+        "doorHeightFeet": 7
+      },
+      "expect": {
+        "duplexInnerWire": "0.2625\"",
+        "duplexOuterWire": "0.3195\"",
+        "duplexInnerLength": 18,
+        "duplexOuterLength": 19,
+        "duplexInnerWeight": 13.27,
+        "duplexOuterWeight": 26.84
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "WIRE CHOICE WAS 6/6 ACROSS BOTH OTHER DRUMS, which closes the original",
+        "complaint that the calculator 'sucks for any drum that isn't 400-144'.",
+        "The D525-216's rEff is 28% above the D400s' and that is exactly what the",
+        "old tau threshold could not survive; with tau gone there is nothing left",
+        "that can be drum-specific, and these readings confirm it.",
+        "",
+        "LENGTH WAS 4/6. Both misses are frac(active) near 0.6 on rungs that have",
+        "no fitted thresholds, so round(active) rounds up where the reference",
+        "floors. That is the known quarter-inch gap, not a drum problem - and",
+        "these two readings are what finally bound those rungs' tLo."
+      ]
+    },
+    {
+      "id": "d525-273-2253-470lb-7ft-2spr",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01. DRUM VERIFICATION set: every other reading in this file is on the D400-144, so these six test whether removing tau really made the model drum-independent. Predictions were published before the readings were taken.",
+      "state": {
+        "assembly": "Duplex",
+        "springId": "3 3/4\" inside 6\"",
+        "radius": "15",
+        "cycles": "10,000",
+        "doorHeightInches": 0,
+        "drum": "CANIMEX/TF D525-216",
+        "springs": 2,
+        "weight": "470",
+        "doorHeightFeet": 7
+      },
+      "expect": {
+        "duplexInnerWire": "0.2253\"",
+        "duplexOuterWire": "0.273\"",
+        "duplexInnerLength": 10,
+        "duplexOuterLength": 11,
+        "duplexInnerWeight": 6.27,
+        "duplexOuterWeight": 13.18
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "WIRE CHOICE WAS 6/6 ACROSS BOTH OTHER DRUMS, which closes the original",
+        "complaint that the calculator 'sucks for any drum that isn't 400-144'.",
+        "The D525-216's rEff is 28% above the D400s' and that is exactly what the",
+        "old tau threshold could not survive; with tau gone there is nothing left",
+        "that can be drum-specific, and these readings confirm it.",
+        "",
+        "LENGTH WAS 4/6. Both misses are frac(active) near 0.6 on rungs that have",
+        "no fitted thresholds, so round(active) rounds up where the reference",
+        "floors. That is the known quarter-inch gap, not a drum problem - and",
+        "these two readings are what finally bound those rungs' tLo."
+      ]
+    },
+    {
+      "id": "d525-3065-2437-620lb-7ft-2spr",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01. DRUM VERIFICATION set: every other reading in this file is on the D400-144, so these six test whether removing tau really made the model drum-independent. Predictions were published before the readings were taken.",
+      "state": {
+        "assembly": "Duplex",
+        "springId": "3 3/4\" inside 6\"",
+        "radius": "15",
+        "cycles": "10,000",
+        "doorHeightInches": 0,
+        "drum": "CANIMEX/TF D525-216",
+        "springs": 2,
+        "weight": "620",
+        "doorHeightFeet": 7
+      },
+      "expect": {
+        "duplexInnerWire": "0.2437\"",
+        "duplexOuterWire": "0.3065\"",
+        "duplexInnerLength": 12,
+        "duplexOuterLength": 13,
+        "duplexInnerWeight": 8.17,
+        "duplexOuterWeight": 17.58
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 12000,
+      "note": [
+        "LENGTH MISS: active 12.598, frac 0.598, and the reference FLOORS to 12 where round gives 13. Together with the 470 lb 2-spring t100k reading on this same rung (frac 0.702, also floored) this bounds tLo > 0.702.",
+        "",
+        "WIRE CHOICE WAS 6/6 ACROSS BOTH OTHER DRUMS, which closes the original",
+        "complaint that the calculator 'sucks for any drum that isn't 400-144'.",
+        "The D525-216's rEff is 28% above the D400s' and that is exactly what the",
+        "old tau threshold could not survive; with tau gone there is nothing left",
+        "that can be drum-specific, and these readings confirm it.",
+        "",
+        "LENGTH WAS 4/6. Both misses are frac(active) near 0.6 on rungs that have",
+        "no fitted thresholds, so round(active) rounds up where the reference",
+        "floors. That is the known quarter-inch gap, not a drum problem - and",
+        "these two readings are what finally bound those rungs' tLo."
+      ]
+    },
+    {
+      "id": "d525-3625-283-470lb-9ft-1spr",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01. DRUM VERIFICATION set: every other reading in this file is on the D400-144, so these six test whether removing tau really made the model drum-independent. Predictions were published before the readings were taken.",
+      "state": {
+        "assembly": "Duplex",
+        "springId": "3 3/4\" inside 6\"",
+        "radius": "15",
+        "cycles": "10,000",
+        "doorHeightInches": 0,
+        "drum": "CANIMEX/TF D525-216",
+        "springs": 1,
+        "weight": "470",
+        "doorHeightFeet": 9
+      },
+      "expect": {
+        "duplexInnerWire": "0.283\"",
+        "duplexOuterWire": "0.3625\"",
+        "duplexInnerLength": 22,
+        "duplexOuterLength": 23,
+        "duplexInnerWeight": 17.57,
+        "duplexOuterWeight": 37.12
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 12000,
+      "note": [
+        "LENGTH MISS: active 22.623, frac 0.623, floored to 22 where round gives 23. With the 632 lb reading on this rung (frac 0.214, floored) this bounds tLo > 0.623.",
+        "",
+        "WIRE CHOICE WAS 6/6 ACROSS BOTH OTHER DRUMS, which closes the original",
+        "complaint that the calculator 'sucks for any drum that isn't 400-144'.",
+        "The D525-216's rEff is 28% above the D400s' and that is exactly what the",
+        "old tau threshold could not survive; with tau gone there is nothing left",
+        "that can be drum-specific, and these readings confirm it.",
+        "",
+        "LENGTH WAS 4/6. Both misses are frac(active) near 0.6 on rungs that have",
+        "no fitted thresholds, so round(active) rounds up where the reference",
+        "floors. That is the known quarter-inch gap, not a drum problem - and",
+        "these two readings are what finally bound those rungs' tLo."
+      ]
     }
   ]
 }

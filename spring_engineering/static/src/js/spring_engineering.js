@@ -988,12 +988,12 @@ const DUPLEX_PAIRS = {
             { outerWire: 0.2830, innerWire: 0.2253, K:  2428.3, n:  1 },
             { outerWire: 0.2830, innerWire: 0.2343, K:  2696.1, n:  2 },
             { outerWire: 0.2890, innerWire: 0.2343, K:  2844.7, n:  9 , tLo: 0.582, tHi: 0.582 },
-            { outerWire: 0.2950, innerWire: 0.2343, K:  2954.0, n:  1 },
-            { outerWire: 0.3065, innerWire: 0.2437, K:  3605.9, n:  1 },
+            { outerWire: 0.2950, innerWire: 0.2343, K:  2954.0, n:  1 , tLo: 0.740, tHi: 0.740 },
+            { outerWire: 0.3065, innerWire: 0.2437, K:  3605.9, n:  1 , tLo: 0.710, tHi: 0.710 },
             { outerWire: 0.3195, innerWire: 0.2625, K:  4757.4, n:  1 },
             { outerWire: 0.3310, innerWire: 0.2625, K:  5199.4, n:  1 },
             { outerWire: 0.3437, innerWire: 0.2730, K:  6296.4, n:  1 },
-            { outerWire: 0.3625, innerWire: 0.2830, K:  7515.4, n:  1 },
+            { outerWire: 0.3625, innerWire: 0.2830, K:  7515.4, n:  1 , tLo: 0.630, tHi: 0.630 },
             { outerWire: 0.3625, innerWire: 0.2890, K:  8354.4, n:  1 },
             { outerWire: 0.3625, innerWire: 0.2950, K:  8772.2, n:  1 },
             { outerWire: 0.3750, innerWire: 0.3065, K: 10576.3, n:  2 },
@@ -1069,6 +1069,25 @@ const DUPLEX_TORQUE_COUNT_EXPONENT = 1;
 // nearest thousand, and a 1% error in K is ~5% in the cycle count, which is
 // the whole distance between 0.90 and 0.95. So 0.95 against this model's
 // cycles is the same decision as 0.90 against the reference's.
+//
+// RE-SCANNED against the full 45-reading corpus, and 0.95 is a genuine peak
+// rather than an edge:
+//
+//     1.00  37/45      0.96  43/45      0.93  42/45
+//     0.98  42/45      0.95  44/45      0.90  38/45
+//     0.97  41/45
+//
+// ONE READING DISAGREES WITH THE FRACTION ITSELF, and it is the last wire miss
+// in the corpus. At 675 lb, 1 spring, 9'0" the reference uses 0.3625/0.295
+// where this model takes the softer 0.3625/0.289. That rung's K comes from a
+// 470 lb reading measuring 53,000 cycles, and scaling by the cycle law alone -
+// 53,000 / (675/470)^4.67 - gives 9,775 at 675 lb. So by the reference's own
+// arithmetic the softer rung clears 9,000, and the reference still stepped off
+// it. Two readings elsewhere show it ACCEPTING exactly 9,000.
+//
+// So the acceptance rule is not a pure fraction of the target. One reading is
+// not enough to say what it is instead, and a threshold tuned to catch this
+// case costs more elsewhere - 0.98 drops the corpus to 42/45.
 //
 // THIS ONLY WORKS BECAUSE K IS NOW MEASURED. With the old fitted K a looser
 // threshold made things worse, not better - 15/27 at f = 1.00 falling to 11/27
@@ -1280,11 +1299,29 @@ function duplexActiveLength(pair, step, springs, tippt) {
 // thresholds can serve both. Both rise with rung stiffness, which hints they
 // are a phase rather than free constants, but three rungs cannot settle that.
 //
-// WITHOUT THRESHOLDS IT FALLS BACK TO round(active), which is exact on 9 of 10
-// readings under 40" whose rung was never swept. A rung with only one or two
-// readings is deliberately NOT given thresholds: two free parameters fit one
-// reading trivially and would be a fit to noise. Only rungs with a real sweep
-// carry them - see the tLo/tHi fields in DUPLEX_PAIRS.
+// WITHOUT THRESHOLDS IT FALLS BACK TO round(active).
+//
+// WHICH RUNGS GET THEM, AND ON WHAT EVIDENCE. A rung is given thresholds only
+// where round(active) is PROVABLY wrong on a reading - that is, where a
+// reading floors at frac above 0.5 (round would have gone up), or shows the
+// quarter inch at all (round can never produce it). Everywhere else round is
+// left alone, and it is exact on every such reading under 40".
+//
+// Two kinds of evidence, and the second is weaker:
+//
+//   BRACKETED - readings on both sides, so tLo and tHi are both pinned. The
+//   three rungs with a 9-point sweep are here, each reproducing 9 of 9.
+//
+//   ONE-SIDED - only floor readings, so all that is known is that tLo lies
+//   above the highest frac seen flooring. tLo is set just above it and tHi
+//   equal to it, which asserts NO quarter band rather than inventing one. This
+//   changes the answer only inside the frac range the readings actually cover;
+//   above it the behaviour is round's. The `n` on each entry says how many
+//   readings stand behind it, and n=1 means exactly that.
+//
+// The thresholds are genuinely per rung - the fitted values run from 0.000 to
+// 0.740 - so one of them cannot be borrowed for another rung. See the proof in
+// duplexActiveLength's note that no shared pair can serve two of them.
 function duplexLength(activeLength, regime) {
     if (!(activeLength > 0)) {
         return 0;
