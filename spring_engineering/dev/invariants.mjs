@@ -346,6 +346,51 @@ function noStaleWireWarnings(mod) {
     return fails;
 }
 
+// Nothing in the Duplex path may depend on the Wire Size dropdown.
+//
+// This is the general form of two bugs that were found separately: four
+// warnings computed from the dropdown, and the assembly length built from the
+// Single spring length and the dropdown wire. Duplex picks both its wires, so
+// every Duplex output must be invariant to that control.
+function duplexIgnoresWireDropdown(mod) {
+    const sizes = ['0.125"', '0.2253"', '0.25"', '0.375"', '0.625"'];
+    const outputs = [
+        "duplexInnerLength",
+        "duplexOuterLength",
+        "duplexInnerWire",
+        "duplexOuterWire",
+        "duplexCycles",
+        "assemblyLengthExact",
+    ];
+    const fails = [];
+
+    for (const weight of ["200", "348", "470", "750"]) {
+        for (const springs of [1, 2, 3]) {
+            const seen = {};
+
+            for (const wireSize of sizes) {
+                const c = duplex(mod, { weight, springs, wireSize, showWarnings: true });
+
+                for (const key of outputs) {
+                    const value = String(c[key]);
+
+                    if (seen[key] === undefined) {
+                        seen[key] = { value, wireSize };
+                    } else if (seen[key].value !== value) {
+                        fails.push(
+                            `${weight} lb ${springs} spring(s): ${key} changed with the ` +
+                            `dropdown - ${seen[key].value} at ${seen[key].wireSize}, ` +
+                            `${value} at ${wireSize}`
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    return fails;
+}
+
 export const INVARIANTS = [
     { name: "cycle life / wire choice is independent of door height", run: heightIndependence },
     { name: "cycle life / wire choice is independent of track radius", run: radiusIndependence },
@@ -355,4 +400,5 @@ export const INVARIANTS = [
     { name: "offered inner wire stays inside the spring ID's band", run: wireBand },
     { name: "the weight used never exceeds the drum's rating", run: weightClamped },
     { name: "Duplex raises no Wire-Size-dropdown warning", run: noStaleWireWarnings },
+    { name: "no Duplex output depends on the Wire Size dropdown", run: duplexIgnoresWireDropdown },
 ];

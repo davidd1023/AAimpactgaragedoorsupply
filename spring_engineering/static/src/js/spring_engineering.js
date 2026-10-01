@@ -983,7 +983,17 @@ const DUPLEX_PAIRS = {
         innerId: 3.75,
         outerId: 6,
         calibration: [
-            { outerWire: 0.2625, innerWire: 0.2253, K:  2008.0, n: 10 , tLo: 0.000, tHi: 0.530 },
+            {
+                outerWire: 0.2625, innerWire: 0.2253, K: 2008.0, n: 10,
+                // short range: active 14.5-15.8, 9 readings
+                tLo: 0.000, tHi: 0.530,
+                // long range: 11 readings from active 30.7 to 38.2. `from` is
+                // the one GUESSED number here - the two ranges are separated by
+                // an unsampled gap from 15.8 to 30.7, so any boundary inside it
+                // fits the data equally well and 23 is simply its midpoint.
+                // Three readings between active 18 and 28 would pin it.
+                long: { from: 23, split: 0.065, above: 2.25 },
+            },
             { outerWire: 0.2730, innerWire: 0.2253, K:  2231.7, n:  9 , tLo: 0.514, tHi: 0.632 },
             { outerWire: 0.2830, innerWire: 0.2253, K:  2428.3, n:  1 },
             { outerWire: 0.2830, innerWire: 0.2343, K:  2696.1, n:  2 },
@@ -1373,6 +1383,25 @@ function duplexLength(activeLength, regime) {
 
     const whole = Math.floor(activeLength);
     const frac = activeLength - whole;
+
+    // A SECOND REGIME AT LONG ACTIVE LENGTHS, where one has been measured.
+    //
+    // An 8-point sweep at active 35.3-38.2 came back as floor(active) + 2.25
+    // on EVERY reading, across frac 0.110 to 0.798 - a constant bonus with no
+    // threshold inside that span. Adding the other long readings on the same
+    // rung gives 10 of 11 at +2.25, the only exception being frac 0.020, which
+    // takes +1.25. So the split sits between 0.020 and 0.110.
+    //
+    // Compare the short range on the same rung, 9 readings at active 14.5-15.8:
+    // there the split is between 0.529 and 0.673 and the upper band is +1, not
+    // +2.25. Same shape, different numbers - so the thresholds depend on the
+    // active length as well as the rung, which is what the 0.273/0.2253
+    // counterexample was already pointing at.
+    if (regime.long && activeLength >= regime.long.from) {
+        return frac < regime.long.split
+            ? whole + 1.25
+            : whole + regime.long.above;
+    }
 
     if (frac < regime.tLo) {
         return whole;
@@ -2649,6 +2678,34 @@ get duplexOuterId() {
 // How much shaft the finished assembly takes up, wound and with its hardware.
 // See ASSEMBLY_HARDWARE above for where the three terms come from.
 get assemblyLengthExact() {
+    // DUPLEX USES ITS OWN SPRING, which it has to: springLengthExact and
+    // wireSizeNumber below both come from the Single path and the Wire Size
+    // dropdown, and Duplex uses neither. Reading them gave 98.86" for a 348 lb
+    // 3-spring door whose assembly is really 126.33", so the too-long warning
+    // never fired - and the reference calls that door unbuildable, returning
+    // "Torsion assembly will be too long for a 108\" wide door!".
+    //
+    // That is the same leak as the stale wire warnings, except it fails the
+    // dangerous way round: a spurious warning is noise, a missing one lets an
+    // assembly through that will not fit the opening.
+    //
+    // THE OUTER SPRING GOVERNS. The pair is nested, so what the shaft sees is
+    // the outer spring - it is the longer of the two by exactly an inch, and
+    // its wire is the thicker, so it also grows more as it winds. Taking the
+    // inner would understate the assembly twice over.
+    if (this.isDuplex) {
+        const outer = this.duplexOuterLength;
+        const step = this.duplexStep;
+
+        if (!outer || !step) {
+            return 0;
+        }
+
+        const woundPerSpring = outer + this.turnsExact * step.outerWire;
+
+        return this.duplexSpringCount * woundPerSpring + ASSEMBLY_HARDWARE;
+    }
+
     if (!this.springLengthExact) {
         return 0;
     }
@@ -2862,11 +2919,21 @@ get warnings() {
     }
 
     // --- Assembly against the door width ---------------------------------
-    // The reference prints the ASSEMBLY LENGTH into a sentence that reads as
-    // though it were the door width, which is how both reverse-engineering
-    // readings were taken. Kept, so the two calculators say the same thing -
-    // but rounded to 2dp like every other length here, where the reference
-    // spills the raw float (48.67261549495042").
+    // THE MESSAGE NAMES THE DOOR WIDTH, not the assembly length.
+    //
+    // A note here used to claim the opposite - that the reference printed the
+    // assembly length into a sentence reading as though it were the width, and
+    // that this app matched it deliberately. A reading settled it: a 348 lb
+    // 3-spring door on a 9'0" opening came back with
+    //
+    //     "Torsion assembly will be too long for a 108 \" wide door!"
+    //
+    // and 108 is the door width. The assembly is 126.33". So the old claim was
+    // wrong, probably from misreading one of the two original readings, where
+    // the width was 108" and the assembly 115.40".
+    //
+    // The reference's own spacing is reproduced, odd as it is - "a 108 " wide
+    // door" with a space before the inch mark.
 
     const width = this.doorWidthTotalInches;
 
@@ -2875,9 +2942,9 @@ get warnings() {
             id: "assembly-too-long",
             severity: "red",
             message:
-                "Torsion assembly will be too long for " +
-                this.assemblyLength +
-                '" wide door!',
+                "Torsion assembly will be too long for a " +
+                width +
+                ' " wide door!',
         });
     }
 
