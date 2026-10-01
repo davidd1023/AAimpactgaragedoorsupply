@@ -996,10 +996,10 @@ const DUPLEX_PAIRS = {
             { outerWire: 0.3625, innerWire: 0.2830, K:  7515.4, n:  1 , tLo: 0.630, tHi: 0.630 },
             { outerWire: 0.3625, innerWire: 0.2890, K:  8354.4, n:  1 },
             { outerWire: 0.3625, innerWire: 0.2950, K:  8772.2, n:  1 },
-            { outerWire: 0.3750, innerWire: 0.3065, K: 10576.3, n:  2 },
+            { outerWire: 0.3750, innerWire: 0.3065, K: 10576.3, n:  2 , tLo: 0.002, tHi: 0.002 },
             { outerWire: 0.3938, innerWire: 0.3065, K: 11160.7, n:  1 },
-            { outerWire: 0.3938, innerWire: 0.3195, K: 13216.5, n:  1 },
-            { outerWire: 0.4062, innerWire: 0.3310, K: 15543.1, n:  1 },
+            { outerWire: 0.3938, innerWire: 0.3195, K: 13216.5, n:  1 , tLo: 0.002, tHi: 0.002 },
+            { outerWire: 0.4062, innerWire: 0.3310, K: 15543.1, n:  1 , tLo: 0.002, tHi: 0.002 },
         ],
     },
     '2 5/8" inside 5 1/4"': {
@@ -1198,18 +1198,28 @@ const DUPLEX_CYCLE_ROUNDING = 1000;
 //     150,000   0.3938/0.3195    49.440       50      MISS  +0.56
 //     200,000   0.4062/0.331     58.052       59      MISS  +0.95
 //
-// So 10 of the 14 whole-inch readings are exact and all four failures are at
-// 40" or longer. The reference's own spring weights confirm its lengths, so
-// the disagreement is real: at 100,000 it reports 45" where the required rate
-// demands 46.19", which means it is ACCEPTING a 2.6% rate error. Something
-// quantises the long springs and it is not this formula.
+// THE "LONG SPRING" FRAMING WAS WRONG, and a later reading settled it. Ordered
+// by active length the remaining failures run 30.66, 34.87 and 46.19 while
+// 31.89 and 33.94 pass, so breakage is not a function of length. Three of the
+// four cases above were simply rungs that add a whole inch BELOW frac 0.5,
+// which round() floors; a ceil-side threshold fixes them and they now
+// reproduce. See the note on regimes further down.
 //
-// The 75,000 and 100,000 readings pin it down most sharply - same inner wire,
-// outer stepping 0.375 to 0.3938, and the reference lengthens by 5" where the
-// divider sum demands 6.84".
+// WHAT IS ACTUALLY LEFT is three readings needing a bonus the three regimes
+// cannot express:
 //
-// PRACTICAL EFFECT: high-cycle doors get long springs, so this is exactly
-// where the app is still wrong. Below 34" it is exact.
+//     +2.25   348 lb 3-spring LHR (active 30.659 -> 32.25)
+//     +2.25   200 lb 2-spring     (active 34.871 -> 36.25)
+//      -1     470 lb 1-spring t100,000 (active 46.182 -> 45)
+//
+// The two +2.25 cases are both on the softest rung and both over the
+// reference's own 350,000 cycle maximum, which it returns as an error. That
+// may be the pattern or may be coincidence - two readings cannot say. The -1
+// case has the reference ACCEPTING a 2.6% rate error, reporting 45" where the
+// required rate demands 46.19", and its own spring weights confirm the 45".
+//
+// A third over-maximum reading on a different rung would settle whether the
+// +2.25 belongs to that regime.
 //
 // --- THE QUARTER INCH: STRUCTURE FOUND, CALIBRATION MISSING ---------------
 //
@@ -1312,12 +1322,42 @@ function duplexActiveLength(pair, step, springs, tippt) {
 //   BRACKETED - readings on both sides, so tLo and tHi are both pinned. The
 //   three rungs with a 9-point sweep are here, each reproducing 9 of 9.
 //
-//   ONE-SIDED - only floor readings, so all that is known is that tLo lies
-//   above the highest frac seen flooring. tLo is set just above it and tHi
-//   equal to it, which asserts NO quarter band rather than inventing one. This
-//   changes the answer only inside the frac range the readings actually cover;
-//   above it the behaviour is round's. The `n` on each entry says how many
-//   readings stand behind it, and n=1 means exactly that.
+//   ONE-SIDED, FLOOR - only floor readings, so all that is known is that tLo
+//   lies above the highest frac seen flooring. tLo is set just above it and
+//   tHi equal to it, which asserts NO quarter band rather than inventing one.
+//
+//   ONE-SIDED, CEIL - the mirror case. Some rungs are seen adding a whole inch
+//   at a frac BELOW 0.5, which round() gets wrong by flooring. There tLo is set
+//   to 0.002, so everything ceils except an active length that is already a
+//   whole number. 0.375/0.3065 is the clearest: two readings, frac 0.350 and
+//   0.940, both +1, and round only gets the second.
+//
+// Either way the change is confined to the frac range the readings cover, and
+// the `n` on each entry says how many stand behind it - n=1 means exactly that.
+//
+// THE MODEL IS LOCALLY VALID, NOT CORRECT, and one reading proves it. On
+// 0.273/0.2253:
+//
+//     580 lb   active 13.513   frac 0.513   reference bonus +0.00
+//     286 lb   active 27.404   frac 0.404   reference bonus +1.25
+//
+// frac 0.513 requires tLo > 0.513 while frac 0.404 requires tLo <= 0.404, so
+// no threshold on frac(active) satisfies both. What separates them is the
+// INTEGER part of active, 13 against 27 - and this rung's thresholds were
+// fitted on a sweep that never left active 13.5.
+//
+// It does not always fail that way: the 0.2625/0.2253 thresholds were fitted
+// near active 15 and are correct at active 34.020. So frac(active) is a
+// coordinate that correlates locally with whatever the reference quantises,
+// and transfers sometimes.
+//
+// The thresholds are kept because they are right on 48 of 49 readings. Closing
+// this properly needs a dense sweep at a SECOND integer part of active on the
+// same rung, which is a different experiment from the three already done.
+//
+// RULED OUT, with a designed probe: being over the reference's 350,000 cycle
+// maximum does NOT cause the +2.25 bonus. A 205 lb door returns 1,042,000
+// cycles and still takes the ordinary +1.25.
 //
 // The thresholds are genuinely per rung - the fitted values run from 0.000 to
 // 0.740 - so one of them cannot be borrowed for another rung. See the proof in
@@ -1947,6 +1987,46 @@ get duplexSpringCount() {
     return Number(this.state.springs) || 2;
 }
 
+// THE DOOR WEIGHT THE DRUM WILL ACTUALLY CARRY.
+//
+// The reference CAPS the weight at the drum's rating and recomputes, saying so
+// as it goes: "The current weight entered is heavier than this drum will
+// allow! The weight will be set to the drums maximum weight of 530". It is not
+// just a warning - the whole answer that comes back is for the capped weight.
+// A 620 lb door on the D400-96 returns TIPPT 151.9, which is 0.286584 x 530,
+// not x 620.
+//
+// Two readings confirm it: 620 lb on the D400-96 computed at 530, and 765 lb on
+// the D400-144 computed at 750.
+//
+// This app used to warn and then compute on the entered figure, which gave a
+// different wire AND a 1.25" different spring on that 620 lb door - a different
+// part ordered. The warning (see `warnings`) is unchanged and still fires;
+// what changes is that the arithmetic now honours it.
+//
+// CONFINED TO DUPLEX, which is why this exists instead of clamping inside
+// tipptExact. The cap is a property of the DRUM, so the Single path almost
+// certainly needs it too - but Single has no reference reading to confirm the
+// behaviour and is explicitly out of scope, so it is left alone and this is
+// recorded as a known inconsistency rather than a silent change. One Single
+// reading over a drum's rating would settle it.
+get duplexEffectiveWeight() {
+    const entered = Number(this.state.weight) || 0;
+    const limits = DRUM_LIMITS[this.state.drum];
+
+    if (!limits || !limits.maxWeight) {
+        return entered;
+    }
+
+    return Math.min(entered, limits.maxWeight);
+}
+
+// TIPPT on the effective weight. Everything in the Duplex path computes from
+// this rather than tipptExact, which stays on the entered weight for Single.
+get duplexTipptExact() {
+    return this.multiplierExact * this.duplexEffectiveWeight;
+}
+
 // Scales K, which sets the TORQUE one spring carries and hence the cycle
 // count. Every K in the table was fitted at 2 springs, so this is the factor
 // off that baseline. Exactly reciprocal in the spring count.
@@ -2092,7 +2172,7 @@ get duplexPair() {
 duplexCyclesForStep(step, { rounded = true } = {}) {
     const pair = this.duplexPair;
 
-    if (!step || !pair || !this.tipptExact || !this.turnsExact) {
+    if (!step || !pair || !this.duplexTipptExact || !this.turnsExact) {
         return 0;
     }
 
@@ -2113,8 +2193,8 @@ duplexCyclesForStep(step, { rounded = true } = {}) {
     // ROUNDED FOR DISPLAY ONLY - never for the wire decision. See the note
     // below the formula.
     const tippt = rounded
-        ? Math.round(this.tipptExact * 10) / 10
-        : this.tipptExact;
+        ? Math.round(this.duplexTipptExact * 10) / 10
+        : this.duplexTipptExact;
     const turns = rounded
         ? Math.round(this.turnsExact * 10) / 10
         : this.turnsExact;
@@ -2402,7 +2482,7 @@ get duplexCandidates() {
 get duplexStep() {
     const pair = this.duplexPair;
 
-    if (!pair || !this.tipptExact) {
+    if (!pair || !this.duplexTipptExact) {
         return null;
     }
 
@@ -2478,7 +2558,7 @@ get duplexActiveLength() {
         this.duplexPair,
         this.duplexStep,
         this.duplexSpringCount,
-        this.tipptExact
+        this.duplexTipptExact
     );
 }
 
@@ -2652,60 +2732,77 @@ get warnings() {
     }
 
     // --- Wire size against the spring ID ---------------------------------
+    // SKIPPED ENTIRELY ON DUPLEX. Everything from here to the end of the cycle
+    // block is derived from the Wire Size dropdown, and Duplex neither uses
+    // that control nor shows it (see wireSizeVisible) - it picks both wires
+    // itself. Computing warnings from a stale dropdown value meant a red
+    // "Low Cycle Life" fired on 7 of 8 Duplex doors, quoting a cycle count
+    // with no relation to the answer on screen: at 470 lb on 2 springs it
+    // claimed 1,545 cycles where the Duplex result is 21,000.
+    //
+    // The Duplex equivalents already exist and are reported properly - the
+    // cycle count in the results row, and duplex-extrapolated below.
+    //
+    // THE OTHER WARNINGS STILL APPLY TO DUPLEX, deliberately. The reference
+    // raises them on Duplex itself: a 348 lb 3-spring door came back with
+    // "Torsion assembly will be too long for a 108\" wide door!", and a 620 lb
+    // door on the D400-96 with the weight-over-max message. Suppressing those
+    // would be a divergence from the reference, not a fix.
+    if (!this.isDuplex) {
+        const wireLimits = this.wireLimits;
+        const wire = this.wireSizeNumber;
 
-    const wireLimits = this.wireLimits;
-    const wire = this.wireSizeNumber;
+        if (wireLimits && wire) {
+            if (wire > wireLimits.max) {
+                found.push({
+                    id: "wire-over-max",
+                    severity: "red",
+                    message:
+                        "Wire size exceeds " +
+                        wireLimits.maxText +
+                        " maximum for this I.D.",
+                });
+            }
 
-    if (wireLimits && wire) {
-        if (wire > wireLimits.max) {
-            found.push({
-                id: "wire-over-max",
-                severity: "red",
-                message:
-                    "Wire size exceeds " +
-                    wireLimits.maxText +
-                    " maximum for this I.D.",
-            });
+            if (wire < wireLimits.min) {
+                found.push({
+                    id: "wire-under-min",
+                    severity: "red",
+                    message:
+                        "Wire size is less than the minimum of " +
+                        wireLimits.minText +
+                        " for this I.D.",
+                });
+            }
         }
 
-        if (wire < wireLimits.min) {
+        // --- Cycle life --------------------------------------------------
+        // Exclusive by construction: a count over the ceiling cannot also be
+        // under the target unless the target itself is over the ceiling, and
+        // there the out-of-bounds message is the one worth showing.
+
+        const cycles = this.cyclesForWire(wire);
+
+        if (cycles > CYCLE_MAX) {
             found.push({
-                id: "wire-under-min",
+                id: "cycles-over-max",
                 severity: "red",
                 message:
-                    "Wire size is less than the minimum of " +
-                    wireLimits.minText +
-                    " for this I.D.",
+                    "Calculations for this wire size result in an out of bounds " +
+                    "cycle count, Cycle Calculation Maximum (" +
+                    CYCLE_MAX.toLocaleString("en-US") +
+                    ") Exceeded",
+            });
+        } else if (cycles && this.cycleTarget && cycles < this.cycleTarget) {
+            found.push({
+                id: "cycles-low",
+                severity: "red",
+                message:
+                    "This wire size computes to " +
+                    this.cycleLife +
+                    ". Low Cycle Life",
             });
         }
-    }
-
-    // --- Cycle life ------------------------------------------------------
-    // Exclusive by construction: a count over the ceiling cannot also be
-    // under the target unless the target itself is over the ceiling, and
-    // there the out-of-bounds message is the one worth showing.
-
-    const cycles = this.cyclesForWire(wire);
-
-    if (cycles > CYCLE_MAX) {
-        found.push({
-            id: "cycles-over-max",
-            severity: "red",
-            message:
-                "Calculations for this wire size result in an out of bounds " +
-                "cycle count, Cycle Calculation Maximum (" +
-                CYCLE_MAX.toLocaleString("en-US") +
-                ") Exceeded",
-        });
-    } else if (cycles && this.cycleTarget && cycles < this.cycleTarget) {
-        found.push({
-            id: "cycles-low",
-            severity: "red",
-            message:
-                "This wire size computes to " +
-                this.cycleLife +
-                ". Low Cycle Life",
-        });
     }
 
     // --- Hi-lift against the drum ----------------------------------------

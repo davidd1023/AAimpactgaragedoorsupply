@@ -280,6 +280,72 @@ function wireBand(mod) {
     return fails;
 }
 
+// The weight used for the arithmetic may never exceed the drum's rating. The
+// reference caps it and recomputes; this is the enforced version of that.
+function weightClamped(mod) {
+    const fails = [];
+
+    for (const drum of Object.keys(mod.DRUM_LIMITS)) {
+        const max = mod.DRUM_LIMITS[drum].maxWeight;
+
+        if (!max) {
+            continue;
+        }
+
+        for (const weight of [max - 10, max, max + 1, max + 200, max * 2]) {
+            const c = duplex(mod, { drum, weight: String(weight) });
+            const used = c.duplexEffectiveWeight;
+
+            if (used > max + 1e-9) {
+                fails.push(`${drum}: entered ${weight} lb, computed on ${used} lb, over the ${max} lb rating`);
+            }
+
+            if (weight <= max && Math.abs(used - weight) > 1e-9) {
+                fails.push(`${drum}: entered ${weight} lb, under the ${max} lb rating, but computed on ${used} lb`);
+            }
+        }
+    }
+
+    return fails;
+}
+
+// Duplex must raise no warning that is derived from the Wire Size dropdown.
+//
+// Duplex picks both wires itself and does not show that control, so anything
+// computed from it is stale. Before this was gated, a red "Low Cycle Life"
+// fired on 7 of 8 Duplex doors quoting a cycle count unrelated to the result
+// on screen.
+function noStaleWireWarnings(mod) {
+    const stale = new Set([
+        "wire-over-max",
+        "wire-under-min",
+        "cycles-over-max",
+        "cycles-low",
+    ]);
+    const fails = [];
+
+    for (const springId of DUPLEX_IDS) {
+        for (const wireSize of ['0.125"', '0.25"', '0.5"', '0.625"']) {
+            for (const weight of ["200", "470", "750"]) {
+                for (const springs of [1, 2, 4]) {
+                    const c = duplex(mod, { springId, weight, springs, wireSize, showWarnings: true });
+
+                    for (const w of c.warnings || []) {
+                        if (stale.has(w.id)) {
+                            fails.push(
+                                `${springId} ${weight} lb ${springs} spring(s), dropdown at ` +
+                                `${wireSize}: raised ${w.id} - "${w.message.slice(0, 60)}"`
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return fails;
+}
+
 export const INVARIANTS = [
     { name: "cycle life / wire choice is independent of door height", run: heightIndependence },
     { name: "cycle life / wire choice is independent of track radius", run: radiusIndependence },
@@ -287,4 +353,6 @@ export const INVARIANTS = [
     { name: "the chosen pair meets the target when one on the ladder can", run: targetMet },
     { name: "every offered pair is physically buildable", run: physicallyValid },
     { name: "offered inner wire stays inside the spring ID's band", run: wireBand },
+    { name: "the weight used never exceeds the drum's rating", run: weightClamped },
+    { name: "Duplex raises no Wire-Size-dropdown warning", run: noStaleWireWarnings },
 ];

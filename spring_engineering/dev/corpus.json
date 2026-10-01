@@ -420,7 +420,7 @@
       ]
     },
     {
-      "id": "p1-375-3065-750lb-10ft4-1spr",
+      "id": "p1-375-3065-765lb-clamped-10ft4-1spr",
       "status": "verified",
       "source": "Reference calculator API response, supplied by the user 2026-10-01.",
       "state": {
@@ -430,7 +430,7 @@
         "radius": "15",
         "springs": 1,
         "cycles": "10,000",
-        "weight": "750",
+        "weight": "765",
         "doorHeightFeet": 10,
         "doorHeightInches": 4
       },
@@ -448,6 +448,11 @@
       },
       "referenceCycles": 10000,
       "note": [
+        "ALSO A WEIGHT-CLAMP CASE. 765 lb was entered; the reference capped it at the",
+        "D400-144's 750 lb rating. The state carries 765 and the expectations are the",
+        "reference's 750 lb output, so this is a second independent test of the clamp",
+        "on a different drum.",
+        "",
         "Entered as 765 lb; the reference CLAMPED it to the drum's 750 lb maximum",
         "and said so in its messages. Recorded at 750 because that is what it",
         "computed with - TIPPT 158.6 = 0.211435 x 750 confirms it.",
@@ -574,7 +579,7 @@
     },
     {
       "id": "p1-sweep-470lb-7ft-1spr-t75k",
-      "status": "divergent",
+      "status": "verified",
       "source": "Reference calculator API response, supplied by the user 2026-10-01, as part of a TARGET SWEEP on one door: 470 lb, 1 spring, 7'0\", D400-144, radius 15. TIPPT 136.8 and turns 7.9 are identical across the whole sweep, so only the target varies - which is what makes these the cleanest available test of the cycle model.",
       "state": {
         "assembly": "Duplex",
@@ -601,6 +606,11 @@
       },
       "referenceCycles": 88000,
       "note": [
+        "NOW REPRODUCED. This was one of the 'long spring' failures. It turned out not",
+        "to be about length at all: this rung adds a whole inch at frac 0.350, which",
+        "round() gets wrong by flooring. A ceil-side threshold on the rung fixes it,",
+        "and the same rung's other reading at frac 0.940 still comes out right.",
+        "",
         "LENGTH FAILS HERE. active = 39.350 rounds to 39; the reference says 40.",
         "This is the shortest reading where the catalog formula misses, and the",
         "start of the long-spring regime described in duplexActiveLength.",
@@ -668,7 +678,7 @@
     },
     {
       "id": "p1-sweep-470lb-7ft-1spr-t150k",
-      "status": "divergent",
+      "status": "verified",
       "source": "Reference calculator API response, supplied by the user 2026-10-01, as part of a TARGET SWEEP on one door: 470 lb, 1 spring, 7'0\", D400-144, radius 15. TIPPT 136.8 and turns 7.9 are identical across the whole sweep, so only the target varies - which is what makes these the cleanest available test of the cycle model.",
       "state": {
         "assembly": "Duplex",
@@ -695,6 +705,11 @@
       },
       "referenceCycles": 166000,
       "note": [
+        "NOW REPRODUCED. This was one of the 'long spring' failures. It turned out not",
+        "to be about length at all: this rung adds a whole inch at frac 0.350, which",
+        "round() gets wrong by flooring. A ceil-side threshold on the rung fixes it,",
+        "and the same rung's other reading at frac 0.940 still comes out right.",
+        "",
         "FOUR NEW PAIRINGS came out of this sweep - 0.3625/0.289, 0.3938/0.3065,",
         "0.3938/0.3195 and 0.4062/0.331 - none of them in DUPLEX_PAIRS. All four fall",
         "inside duplexPairBalanced's stress window, which is independent confirmation",
@@ -708,7 +723,7 @@
     },
     {
       "id": "p1-sweep-470lb-7ft-1spr-t200k",
-      "status": "divergent",
+      "status": "verified",
       "source": "Reference calculator API response, supplied by the user 2026-10-01, as part of a TARGET SWEEP on one door: 470 lb, 1 spring, 7'0\", D400-144, radius 15. TIPPT 136.8 and turns 7.9 are identical across the whole sweep, so only the target varies - which is what makes these the cleanest available test of the cycle model.",
       "state": {
         "assembly": "Duplex",
@@ -735,6 +750,11 @@
       },
       "referenceCycles": 249000,
       "note": [
+        "NOW REPRODUCED. This was one of the 'long spring' failures. It turned out not",
+        "to be about length at all: this rung adds a whole inch at frac 0.350, which",
+        "round() gets wrong by flooring. A ceil-side threshold on the rung fixes it,",
+        "and the same rung's other reading at frac 0.940 still comes out right.",
+        "",
         "FOUR NEW PAIRINGS came out of this sweep - 0.3625/0.289, 0.3938/0.3065,",
         "0.3938/0.3195 and 0.4062/0.331 - none of them in DUPLEX_PAIRS. All four fall",
         "inside duplexPairBalanced's stress window, which is independent confirmation",
@@ -2677,7 +2697,7 @@
       ]
     },
     {
-      "id": "d40096-2625-2253-530lb-7ft-2spr",
+      "id": "d40096-2625-2253-620lb-clamped-7ft-2spr",
       "status": "verified",
       "source": "Reference API, user-supplied 2026-10-01. DRUM VERIFICATION set: every other reading in this file is on the D400-144, so these six test whether removing tau really made the model drum-independent. Predictions were published before the readings were taken.",
       "state": {
@@ -2688,7 +2708,7 @@
         "doorHeightInches": 0,
         "drum": "CANIMEX/TF D400-96",
         "springs": 2,
-        "weight": "530",
+        "weight": "620",
         "doorHeightFeet": 7
       },
       "expect": {
@@ -2705,12 +2725,16 @@
       },
       "referenceCycles": 13000,
       "note": [
-        "Entered as 620 lb; the reference CLAMPED to this drum's 530 lb maximum and said so. Recorded at 530 because that is what it computed with (TIPPT 151.9 = 0.286584 x 530). NOTE: the app does not clamp - it warns and computes on the entered weight, so at 620 lb it disagrees for that reason alone.",
+        "THE WEIGHT CLAMP, and this reading is now its test.",
         "",
-        "WIRE CHOICE WAS 6/6 ACROSS BOTH OTHER DRUMS, which closes the original",
-        "complaint that the calculator 'sucks for any drum that isn't 400-144'.",
-        "The D525-216's rEff is 28% above the D400s' and that is exactly what the",
-        "old tau threshold could not survive; with tau gone there is nothing left",
+        "620 lb was ENTERED. The reference capped it at this drum's 530 lb rating,",
+        "said so in its messages, and returned a 530 lb answer throughout - TIPPT",
+        "151.9 is 0.286584 x 530, not x 620.",
+        "",
+        "The state below therefore carries 620, the weight a user types, and the",
+        "expectations are the reference's 530 lb output. Before duplexEffectiveWeight",
+        "the app computed on 620 and gave 0.273/0.2253 at 13\" - a different wire and",
+        "a 1.25\" different spring, so a different part ordered.",
         "that can be drum-specific, and these readings confirm it.",
         "",
         "LENGTH WAS 4/6. Both misses are frac(active) near 0.6 on rungs that have",
@@ -2885,6 +2909,157 @@
         "no fitted thresholds, so round(active) rounds up where the reference",
         "floors. That is the known quarter-inch gap, not a drum problem - and",
         "these two readings are what finally bound those rungs' tLo."
+      ]
+    },
+    {
+      "id": "p1-2625-2253-348lb-8ft-3spr-LHR",
+      "status": "divergent",
+      "source": "Reference API, user-supplied 2026-10-01 from live testing. FIRST 3-SPRING reading and FIRST LHR-radius reading in this file. Reference returned status 'error' with two messages: the torsion assembly is too long for a 108\" door, and the 602,000 cycle life exceeds the 350,000 maximum.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D400-144",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "LHR",
+        "cycles": "10,000",
+        "weight": "348",
+        "doorHeightFeet": 8,
+        "doorHeightInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2253\"",
+        "duplexOuterWire": "0.2625\"",
+        "duplexInnerLength": 32.25,
+        "duplexOuterLength": 33.25,
+        "duplexInnerWeight": 20.21,
+        "duplexOuterWeight": 38.25
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 602000,
+      "note": [
+        "WHAT THIS READING VERIFIES, and it is a lot:",
+        "",
+        "  multiplier   0.285354 exact to 6 decimals - the LHR track-radius curve had",
+        "               never been tested on a Duplex reading before",
+        "  turns        8.0369, matching the reference's implied value",
+        "  TIPPT        99.303 against its 99.3",
+        "  wire         0.2625/0.2253, correct - the first 3-SPRING selection tested",
+        "",
+        "So the LHR curve, the 3-spring scaling and the wire ladder are all right here.",
+        "",
+        "WHAT IT DOES NOT: the length. active = 3 x 1014.85 / 99.303 = 30.659, and the",
+        "reference says 32.25 - a bonus of +2.25 over the floor, which none of the",
+        "three regimes can produce (they give +0, +1.25 or +1).",
+        "",
+        "IT ALSO CORRECTS AN EARLIER CLAIM in this file that the length rule was exact",
+        "under 34\". It is not. Ordered by active length the failures now run 30.66,",
+        "34.87, 46.19 while 31.89 and 33.94 pass, so the breakage is not a function of",
+        "length at all and the 'long spring' framing was wrong.",
+        "",
+        "TWO READINGS NOW NEED +2.25 - this one and the 200 lb case. Both are on the",
+        "softest rung, 0.2625/0.2253, and both are over the reference's own 350,000",
+        "cycle maximum, which it reports as an error. That may be the pattern or may be",
+        "coincidence; two readings cannot say. A third over-max case on a different",
+        "rung would settle it."
+      ]
+    },
+    {
+      "id": "p1-2625-2253-205lb-7ft-2spr-overmax",
+      "status": "verified",
+      "source": "Reference API, user-supplied 2026-10-01. Designed probe: same rung, drum, radius, height and target as the two +2.25 readings, varying ONLY frac(active) - 0.020 here against their 0.871 and 0.659.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D400-144",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "cycles": "10,000",
+        "weight": "205"
+      },
+      "expect": {
+        "duplexInnerWire": "0.2253\"",
+        "duplexOuterWire": "0.2625\"",
+        "duplexInnerLength": 35.25,
+        "duplexOuterLength": 36.25,
+        "duplexInnerWeight": 22.09,
+        "duplexOuterWeight": 41.7
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 1042000,
+      "note": [
+        "THIS KILLS THE 'OVER-MAX MEANS +2.25' HYPOTHESIS, and the model was right.",
+        "",
+        "The reference returns 35.25\", which is floor(34.020) + 1.25 - the ordinary",
+        "quarter-inch regime - not the +2.25 that the 200 lb and 348 lb readings show.",
+        "This case is over the 350,000 maximum too (1,042,000 cycles, reported as a",
+        "warning), so being over-max is NOT what produces +2.25.",
+        "",
+        "It also VALIDATES the fitted thresholds well outside the range they came",
+        "from: tLo/tHi for this rung were fitted on a 440-480 lb sweep where active",
+        "runs 14.5-15.8, and they are correct here at active 34.020. So for this rung",
+        "they transfer across more than a doubling of length."
+      ]
+    },
+    {
+      "id": "p1-273-2253-286lb-7ft-2spr-t300k",
+      "status": "divergent",
+      "source": "Reference API, user-supplied 2026-10-01. Designed probe: the shortest over-max design reachable on a rung other than the softest, which needs a 300,000 target.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D400-144",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "cycles": "300,000",
+        "weight": "286"
+      },
+      "expect": {
+        "duplexInnerWire": "0.2253\"",
+        "duplexOuterWire": "0.273\"",
+        "duplexInnerLength": 28.25,
+        "duplexOuterLength": 29.25,
+        "duplexInnerWeight": 17.7,
+        "duplexOuterWeight": 35.05
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 366000,
+      "note": [
+        "THIS FALSIFIES THE THREE-REGIME LENGTH MODEL, and the proof is short.",
+        "",
+        "On this rung, 0.273/0.2253:",
+        "",
+        "    580 lb   active 13.513   frac 0.513   reference bonus +0.00",
+        "    286 lb   active 27.404   frac 0.404   reference bonus +1.25",
+        "",
+        "frac 0.513 requires tLo > 0.513. frac 0.404 requires tLo <= 0.404. No",
+        "threshold on frac(active) satisfies both, so the length cannot be a function",
+        "of frac(active) and a per-rung threshold pair alone.",
+        "",
+        "WHAT SEPARATES THEM is the integer part: 13 against 27. The thresholds for",
+        "this rung were fitted on a 560-600 lb sweep where active stays near 13.5, and",
+        "they are wrong at 27.4. Note the contrast with the 205 lb reading above,",
+        "where the other rung's thresholds DID transfer from active ~15 to ~34. So",
+        "the transfer is not reliable, and frac(active) is evidently a coordinate that",
+        "only correlates locally with whatever the reference actually quantises.",
+        "",
+        "NOT PATCHED. The thresholds stay as fitted because they are right on 47 of",
+        "48 readings; this one is recorded as the counterexample that says the model",
+        "is locally valid rather than correct. Fixing it needs a sweep at a second",
+        "integer part of active on the same rung - weights around 270-300 lb at a",
+        "300,000 target would walk frac across its range near active 27."
       ]
     }
   ]
