@@ -93420,6 +93420,3603 @@
     "duplexOuterWeight": 0.02
    },
    "referenceCycles": 9000
+  },
+  {
+   "id": "f1-575120-3625-289-836lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "836",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 22.87,
+    "duplexOuterWeight": 46.8
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3625-289-837lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "837",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 22.87,
+    "duplexOuterWeight": 46.8
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 9000
+  },
+  {
+   "id": "f1-575120-3625-289-838lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "838",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 22.87,
+    "duplexOuterWeight": 46.8
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 9000
+  },
+  {
+   "id": "f1-575120-3625-295-839lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "839",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 24.22,
+    "duplexOuterWeight": 48.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3625-295-841lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "841",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 24.22,
+    "duplexOuterWeight": 48.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3625-295-842lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "842",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 24.22,
+    "duplexOuterWeight": 48.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3625-295-843lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "843",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 24.22,
+    "duplexOuterWeight": 48.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3625-295-844lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "844",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 24.22,
+    "duplexOuterWeight": 48.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3625-295-846lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "846",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 24.22,
+    "duplexOuterWeight": 48.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3625-295-847lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "847",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 24.22,
+    "duplexOuterWeight": 48.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3625-295-848lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "848",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 24.22,
+    "duplexOuterWeight": 48.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 9000
+  },
+  {
+   "id": "f1-575120-3625-295-849lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "849",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 24.22,
+    "duplexOuterWeight": 48.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 9000
+  },
+  {
+   "id": "f1-575120-375-295-851lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "851",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 32,
+    "duplexOuterLength": 33,
+    "duplexInnerWeight": 26.72,
+    "duplexOuterWeight": 55.2
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "f1-575120-375-295-852lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "852",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 32,
+    "duplexOuterLength": 33,
+    "duplexInnerWeight": 26.72,
+    "duplexOuterWeight": 55.2
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-375-295-853lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "853",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 32,
+    "duplexOuterLength": 33,
+    "duplexInnerWeight": 26.72,
+    "duplexOuterWeight": 55.2
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-375-295-854lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "854",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 32,
+    "duplexOuterLength": 33,
+    "duplexInnerWeight": 26.72,
+    "duplexOuterWeight": 55.2
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-375-295-856lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "856",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 25.89,
+    "duplexOuterWeight": 53.53
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-375-295-857lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "857",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 25.89,
+    "duplexOuterWeight": 53.53
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-375-295-858lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "858",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 25.89,
+    "duplexOuterWeight": 53.53
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-375-295-859lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "859",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 25.89,
+    "duplexOuterWeight": 53.53
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-3065-2437-986lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "986",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-987lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "987",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-988lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "988",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-989lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "989",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-991lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "991",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-992lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "992",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-993lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "993",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-994lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "994",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-995lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "995",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-996lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "996",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-997lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "997",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-998lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "998",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-999lb-120in-4spr-r15-hl60-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "10,000",
+    "weight": "999",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-283-2253-600lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "600",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2253\"",
+    "duplexOuterWire": "0.283\"",
+    "duplexInnerLength": 17.25,
+    "duplexOuterLength": 18.25,
+    "duplexInnerWeight": 10.81,
+    "duplexOuterWeight": 22.71
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "f1-575120-283-2253-606lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "606",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2253\"",
+    "duplexOuterWire": "0.283\"",
+    "duplexInnerLength": 17.25,
+    "duplexOuterLength": 18.25,
+    "duplexInnerWeight": 10.81,
+    "duplexOuterWeight": 22.71
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-283-2253-612lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "612",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2253\"",
+    "duplexOuterWire": "0.283\"",
+    "duplexInnerLength": 17.25,
+    "duplexOuterLength": 18.25,
+    "duplexInnerWeight": 10.81,
+    "duplexOuterWeight": 22.71
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-283-2253-618lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "618",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2253\"",
+    "duplexOuterWire": "0.283\"",
+    "duplexInnerLength": 16.25,
+    "duplexOuterLength": 17.25,
+    "duplexInnerWeight": 10.18,
+    "duplexOuterWeight": 21.46
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-283-2253-624lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "624",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2253\"",
+    "duplexOuterWire": "0.283\"",
+    "duplexInnerLength": 16.25,
+    "duplexOuterLength": 17.25,
+    "duplexInnerWeight": 10.18,
+    "duplexOuterWeight": 21.46
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-283-2343-630lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "630",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.283\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 23.95
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-283-2343-636lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "636",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.283\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 23.95
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-289-2343-642lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "642",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.289\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 24.48
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "f1-575120-289-2343-648lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "648",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.289\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 24.48
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "f1-575120-289-2343-654lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "654",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.289\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 24.48
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-289-2343-660lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "660",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.289\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 24.48
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-289-2343-666lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "666",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.289\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 24.48
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-289-2343-672lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "672",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.289\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 24.48
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-295-2343-678lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "678",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 25.02
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-295-2343-684lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "684",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 25.02
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-575120-295-2343-690lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "690",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 25.02
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-295-2343-696lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "696",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 25.02
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-295-2437-702lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "702",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 20.25,
+    "duplexOuterLength": 21.25,
+    "duplexInnerWeight": 13.79,
+    "duplexOuterWeight": 27.61
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-295-2437-708lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "708",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 19.25,
+    "duplexOuterLength": 20.25,
+    "duplexInnerWeight": 13.11,
+    "duplexOuterWeight": 26.31
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-295-2437-714lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "714",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 19.25,
+    "duplexOuterLength": 20.25,
+    "duplexInnerWeight": 13.11,
+    "duplexOuterWeight": 26.31
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-575120-3065-2437-720lb-120in-3spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "720",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 14000
+  },
+  {
+   "id": "f1-575120-375-295-700lb-120in-2spr-r15-hl48-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "25,000",
+    "weight": "700",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 38,
+    "duplexOuterLength": 39,
+    "duplexInnerWeight": 31.73,
+    "duplexOuterWeight": 65.24
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 29000
+  },
+  {
+   "id": "f1-575120-375-295-708lb-120in-2spr-r15-hl48-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "25,000",
+    "weight": "708",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 38,
+    "duplexOuterLength": 39,
+    "duplexInnerWeight": 31.73,
+    "duplexOuterWeight": 65.24
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 28000
+  },
+  {
+   "id": "f1-575120-375-295-716lb-120in-2spr-r15-hl48-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "25,000",
+    "weight": "716",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 38,
+    "duplexOuterLength": 39,
+    "duplexInnerWeight": 31.73,
+    "duplexOuterWeight": 65.24
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 27000
+  },
+  {
+   "id": "f1-575120-375-295-724lb-120in-2spr-r15-hl48-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "25,000",
+    "weight": "724",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 37,
+    "duplexOuterLength": 38,
+    "duplexInnerWeight": 30.9,
+    "duplexOuterWeight": 63.57
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 25000
+  },
+  {
+   "id": "f1-575120-375-3065-732lb-120in-2spr-r15-hl48-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "25,000",
+    "weight": "732",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 40,
+    "duplexOuterLength": 41,
+    "duplexInnerWeight": 34.8,
+    "duplexOuterWeight": 68.59
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 30000
+  },
+  {
+   "id": "f1-575120-375-3065-740lb-120in-2spr-r15-hl48-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "25,000",
+    "weight": "740",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 40.25,
+    "duplexOuterLength": 41.25,
+    "duplexInnerWeight": 35.02,
+    "duplexOuterWeight": 69
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 29000
+  },
+  {
+   "id": "f1-575120-375-3065-748lb-120in-2spr-r15-hl48-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "25,000",
+    "weight": "748",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 39,
+    "duplexOuterLength": 40,
+    "duplexInnerWeight": 33.93,
+    "duplexOuterWeight": 66.91
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 27000
+  },
+  {
+   "id": "f1-575120-375-3065-756lb-120in-2spr-r15-hl48-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "25,000",
+    "weight": "756",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 39,
+    "duplexOuterLength": 40,
+    "duplexInnerWeight": 33.93,
+    "duplexOuterWeight": 66.91
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 26000
+  },
+  {
+   "id": "f1-575120-375-3065-764lb-120in-2spr-r15-hl48-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "25,000",
+    "weight": "764",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 39.25,
+    "duplexOuterLength": 40.25,
+    "duplexInnerWeight": 34.15,
+    "duplexOuterWeight": 67.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 25000
+  },
+  {
+   "id": "f1-575120-3938-3065-772lb-120in-2spr-r15-hl48-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "25,000",
+    "weight": "772",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 43,
+    "duplexOuterLength": 44,
+    "duplexInnerWeight": 37.41,
+    "duplexOuterWeight": 77.52
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 31000
+  },
+  {
+   "id": "f1-575120-3938-3065-780lb-120in-2spr-r15-hl48-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "25,000",
+    "weight": "780",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 43,
+    "duplexOuterLength": 44,
+    "duplexInnerWeight": 37.41,
+    "duplexOuterWeight": 77.52
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 29000
+  },
+  {
+   "id": "f1-575120-3938-3065-700lb-120in-2spr-r15-hl48-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "50,000",
+    "weight": "700",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 48,
+    "duplexOuterLength": 49,
+    "duplexInnerWeight": 41.76,
+    "duplexOuterWeight": 86.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 49000
+  },
+  {
+   "id": "f1-575120-3938-3125-708lb-120in-2spr-r15-hl48-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "50,000",
+    "weight": "708",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 43.53,
+    "duplexOuterWeight": 88.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 60000
+  },
+  {
+   "id": "f1-575120-3938-3125-716lb-120in-2spr-r15-hl48-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "50,000",
+    "weight": "716",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 43.53,
+    "duplexOuterWeight": 88.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 57000
+  },
+  {
+   "id": "f1-575120-3938-3125-724lb-120in-2spr-r15-hl48-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "50,000",
+    "weight": "724",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 48,
+    "duplexOuterLength": 49,
+    "duplexInnerWeight": 42.64,
+    "duplexOuterWeight": 86.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 54000
+  },
+  {
+   "id": "f1-575120-3938-3125-732lb-120in-2spr-r15-hl48-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "50,000",
+    "weight": "732",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 48,
+    "duplexOuterLength": 49,
+    "duplexInnerWeight": 42.64,
+    "duplexOuterWeight": 86.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 51000
+  },
+  {
+   "id": "f1-575120-3938-3195-740lb-120in-2spr-r15-hl48-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "50,000",
+    "weight": "740",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 50,
+    "duplexOuterLength": 51,
+    "duplexInnerWeight": 45.49,
+    "duplexOuterWeight": 89.86
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 55000
+  },
+  {
+   "id": "f1-575120-3938-3195-748lb-120in-2spr-r15-hl48-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "50,000",
+    "weight": "748",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 44.58,
+    "duplexOuterWeight": 88.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 52000
+  },
+  {
+   "id": "f1-575120-3938-3195-756lb-120in-2spr-r15-hl48-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "50,000",
+    "weight": "756",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 44.58,
+    "duplexOuterWeight": 88.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 50000
+  },
+  {
+   "id": "f1-575120-4062-3195-764lb-120in-2spr-r15-hl48-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "50,000",
+    "weight": "764",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 52,
+    "duplexOuterLength": 53,
+    "duplexInnerWeight": 47.31,
+    "duplexOuterWeight": 96.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 56000
+  },
+  {
+   "id": "f1-575120-4062-3195-772lb-120in-2spr-r15-hl48-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "50,000",
+    "weight": "772",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 52,
+    "duplexOuterLength": 53,
+    "duplexInnerWeight": 47.31,
+    "duplexOuterWeight": 96.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 53000
+  },
+  {
+   "id": "f1-575120-4062-3195-780lb-120in-2spr-r15-hl48-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "50,000",
+    "weight": "780",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 51,
+    "duplexOuterLength": 52,
+    "duplexInnerWeight": 46.4,
+    "duplexOuterWeight": 94.69
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 51000
+  },
+  {
+   "id": "f1-575120-4062-331-700lb-120in-2spr-r15-hl48-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "100,000",
+    "weight": "700",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 62,
+    "duplexOuterLength": 63,
+    "duplexInnerWeight": 58.6,
+    "duplexOuterWeight": 114.72
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 107000
+  },
+  {
+   "id": "f1-575120-4062-331-708lb-120in-2spr-r15-hl48-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "100,000",
+    "weight": "708",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 61,
+    "duplexOuterLength": 62,
+    "duplexInnerWeight": 57.66,
+    "duplexOuterWeight": 112.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 102000
+  },
+  {
+   "id": "f1-575120-4218-331-716lb-120in-2spr-r15-hl48-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "100,000",
+    "weight": "716",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 67,
+    "duplexOuterLength": 68,
+    "duplexInnerWeight": 63.33,
+    "duplexOuterWeight": 128.89
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 121000
+  },
+  {
+   "id": "f1-575120-4218-331-724lb-120in-2spr-r15-hl48-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "100,000",
+    "weight": "724",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 66,
+    "duplexOuterLength": 67,
+    "duplexInnerWeight": 62.39,
+    "duplexOuterWeight": 126.99
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 114000
+  },
+  {
+   "id": "f1-575120-4218-331-732lb-120in-2spr-r15-hl48-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "100,000",
+    "weight": "732",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 65,
+    "duplexOuterLength": 66,
+    "duplexInnerWeight": 61.44,
+    "duplexOuterWeight": 125.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 109000
+  },
+  {
+   "id": "f1-575120-4218-331-740lb-120in-2spr-r15-hl48-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "100,000",
+    "weight": "740",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 65,
+    "duplexOuterLength": 66,
+    "duplexInnerWeight": 61.44,
+    "duplexOuterWeight": 125.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 103000
+  },
+  {
+   "id": "f1-575120-4218-331-748lb-120in-2spr-r15-hl48-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "100,000",
+    "weight": "748",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 64,
+    "duplexOuterLength": 65,
+    "duplexInnerWeight": 60.49,
+    "duplexOuterWeight": 123.2
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 98000
+  },
+  {
+   "id": "f1-575120-4218-3437-756lb-120in-2spr-r15-hl48-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "100,000",
+    "weight": "756",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 69,
+    "duplexOuterLength": 70,
+    "duplexInnerWeight": 67.93,
+    "duplexOuterWeight": 132.68
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 122000
+  },
+  {
+   "id": "f1-575120-4218-3437-764lb-120in-2spr-r15-hl48-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "100,000",
+    "weight": "764",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 69.25,
+    "duplexOuterLength": 70.25,
+    "duplexInnerWeight": 68.18,
+    "duplexOuterWeight": 133.15
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 116000
+  },
+  {
+   "id": "f1-575120-4218-3437-772lb-120in-2spr-r15-hl48-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "100,000",
+    "weight": "772",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 68.25,
+    "duplexOuterLength": 69.25,
+    "duplexInnerWeight": 67.2,
+    "duplexOuterWeight": 131.26
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 111000
+  },
+  {
+   "id": "f1-575120-4218-3437-780lb-120in-2spr-r15-hl48-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "100,000",
+    "weight": "780",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 67,
+    "duplexOuterLength": 68,
+    "duplexInnerWeight": 65.96,
+    "duplexOuterWeight": 128.89
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 105000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-520lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "520",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 22,
+    "duplexOuterLength": 23,
+    "duplexInnerWeight": 14.98,
+    "duplexOuterWeight": 31.11
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 13000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-524lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "524",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 22,
+    "duplexOuterLength": 23,
+    "duplexInnerWeight": 14.98,
+    "duplexOuterWeight": 31.11
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-528lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "528",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 14.3,
+    "duplexOuterWeight": 29.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-532lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "532",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 14.3,
+    "duplexOuterWeight": 29.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-536lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "536",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 14.3,
+    "duplexOuterWeight": 29.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-540lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "540",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 14.3,
+    "duplexOuterWeight": 29.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-544lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "544",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 14.3,
+    "duplexOuterWeight": 29.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-548lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "548",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 14.3,
+    "duplexOuterWeight": 29.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-52554HL-3065-25-560lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "560",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.25\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 22.25,
+    "duplexOuterLength": 23.25,
+    "duplexInnerWeight": 15.57,
+    "duplexOuterWeight": 31.45
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-52554HL-3125-2625-592lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "592",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2625\"",
+    "duplexOuterWire": "0.3125\"",
+    "duplexInnerLength": 24,
+    "duplexOuterLength": 25,
+    "duplexInnerWeight": 17.69,
+    "duplexOuterWeight": 34.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-52554HL-3195-2625-596lb-120in-2spr-r15-hl48-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "10,000",
+    "weight": "596",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2625\"",
+    "duplexOuterWire": "0.3195\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 18.43,
+    "duplexOuterWeight": 36.73
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 13000
+  },
+  {
+   "id": "f1-52554HL-295-2343-760lb-120in-3spr-r15-hl36-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "36",
+    "cycles": "10,000",
+    "weight": "760",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 25.02
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-52554HL-295-2343-768lb-120in-3spr-r15-hl36-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "36",
+    "cycles": "10,000",
+    "weight": "768",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 25.02
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-52554HL-295-2343-776lb-120in-3spr-r15-hl36-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "36",
+    "cycles": "10,000",
+    "weight": "776",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 25.02
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-52554HL-295-2437-784lb-120in-3spr-r15-hl36-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "36",
+    "cycles": "10,000",
+    "weight": "784",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 19.25,
+    "duplexOuterLength": 20.25,
+    "duplexInnerWeight": 13.11,
+    "duplexOuterWeight": 26.31
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "f1-52554HL-295-2437-792lb-120in-3spr-r15-hl36-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "36",
+    "cycles": "10,000",
+    "weight": "792",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 19.25,
+    "duplexOuterLength": 20.25,
+    "duplexInnerWeight": 13.11,
+    "duplexOuterWeight": 26.31
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-800lb-120in-3spr-r15-hl36-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "36",
+    "cycles": "10,000",
+    "weight": "800",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 15000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-808lb-120in-3spr-r15-hl36-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "36",
+    "cycles": "10,000",
+    "weight": "808",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 30.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 14000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-816lb-120in-3spr-r15-hl36-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "36",
+    "cycles": "10,000",
+    "weight": "816",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 20.25,
+    "duplexOuterLength": 21.25,
+    "duplexInnerWeight": 13.79,
+    "duplexOuterWeight": 28.74
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 13000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-824lb-120in-3spr-r15-hl36-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "36",
+    "cycles": "10,000",
+    "weight": "824",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 20.25,
+    "duplexOuterLength": 21.25,
+    "duplexInnerWeight": 13.79,
+    "duplexOuterWeight": 28.74
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 13000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-832lb-120in-3spr-r15-hl36-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "36",
+    "cycles": "10,000",
+    "weight": "832",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 20.25,
+    "duplexOuterLength": 21.25,
+    "duplexInnerWeight": 13.79,
+    "duplexOuterWeight": 28.74
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "f1-52554HL-3065-2437-840lb-120in-3spr-r15-hl36-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch f1). The two weakest drums: 575-120, which had 5 wire failures of 67, swept at one pound either side of both failing switch points (836-860 lb at 2 springs, 986-1000 at 4) plus 3-spring and cycle-target coverage it had none of, and 525-54HL, the thinnest drum at 41 readings, given switch coverage at 2 and 3 springs.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "36",
+    "cycles": "10,000",
+    "weight": "840",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.3065\"",
+    "duplexInnerLength": 20.25,
+    "duplexOuterLength": 21.25,
+    "duplexInnerWeight": 13.79,
+    "duplexOuterWeight": 28.74
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
   }
  ]
 }
