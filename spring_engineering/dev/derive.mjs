@@ -76,7 +76,25 @@ const skip = (why) => { skipped[why] = (skipped[why] ?? 0) + 1; };
 // A file whose name says eval or rand is an evaluation set and is skipped
 // here. Nothing stops it being imported later ON PURPOSE with
 // dev/import.mjs; what must not happen is it arriving by accident.
-const EVAL = /(^|-)(eval|rand)/;
+// EVAL files score the model. BIASED files are real reference data whose
+// SAMPLING makes them unfit to fit on, which is a distinction worth keeping in
+// the filename.
+//
+// dev/biased-soft-weightonly.json is 430 readings on 0.2625/0.2253, the
+// highest-traffic rung, pulled deliberately to densify it. It made that rung
+// WORSE on an external sample - 58.3% to 29.2% - because of how it was swept:
+// weight varied finely at FIXED height and FIXED cycle target. Active length
+// is springs*(dividers)/TIPPT and TIPPT is multiplier*weight, so at fixed
+// height the active length is just 1/weight. Every one of those 430 readings
+// lies on a single one-dimensional curve through the (floor, fraction) plane,
+// and the threshold being fitted is a surface over that plane. The fitter got
+// 430 readings and almost no new information, then followed the curve off into
+// territory the curve never visited.
+//
+// Dense is not diverse. The same flaw is why the five-fold holdout read 98%:
+// the corpus is full of one-pound sweeps, so a withheld reading always has a
+// neighbour one pound away.
+const EVAL = /(^|-)(eval|rand|biased)/;
 
 for (const f of readdirSync(HERE)
     .filter((f) => /^pulled.*\.json$/.test(f) && !EVAL.test(f))) {
@@ -714,21 +732,54 @@ function fitSplit(ls) {
     return best;
 }
 
+// DEFAULT 2, measured. The K-level fitter below handles any number of
+// parallel thresholds and is left in place, but on the external random sample
+// (seed 777001, never fitted) more levels do not pay:
+//
+//   LINE_LEVELS   corpus      external sample   softest rung
+//       2         3153/3181      158/239           58.3%
+//       3         3154/3181      157/239           58.3%
+//       4         3154/3181      157/239           58.3%
+//
+// One corpus reading bought, one external reading lost. The softest rung -
+// which genuinely does take four bonus values, so this was aimed straight at
+// it - does not move at all. Added freedom that does not improve the honest
+// score is not worth carrying.
 const LINE_LEVELS = Number(process.env.LINE_LEVELS || 2);
 
 function fitLine(ls) {
     return fitLineAnyLevels(ls, LINE_LEVELS);
 }
 
+// K PARALLEL THRESHOLDS, all sharing one slope.
+//
+// The bonus on a rung does not take two values. On 0.2625/0.2253 at three and
+// four springs - the single biggest group in the allowed box, 25% of
+// everywhere a random door lands, and the least accurate at 55.6% - it takes
+// FOUR: 0.25, 1.25, 2.25 and 3.25. Those are lo + k for integer k, which is
+// what parallel thresholds mean. One slope plus K-1 intercepts, so a fourth
+// level costs one number rather than another line.
+//
+// WHY THIS IS NOT THE TWO-THRESHOLD FORM ALREADY REJECTED. That was fitted on
+// groups holding 21 readings on average, where many (slope, cuts) reach zero
+// violations, each fold picks a different one, and 894 readings moved together
+// - the holdout fell 97.4% to 84.9%. This group now holds 132 and 173 readings
+// from a dense walk of the fraction, which is what makes the cuts determined.
+// The arbiter is the EXTERNAL random sample, not a local cross-validation: a
+// group can win locally and lose globally, which is exactly what that attempt
+// did.
+//
+// For a fixed slope, u = frac - b*floor turns every threshold into a constant,
+// so readings sorted by u must come out in bonus order and fitting reduces to
+// choosing K-1 cut points. That is a dynamic program over (level, position).
 function fitLineAnyLevels(ls, maxLevels) {
     const vals = [...new Set(ls.map((l) => l.bonus))].sort((x, y) => x - y);
 
-    // LINE_LEVELS caps how many bonus levels a line may carry, so the
-    // two-threshold form can be switched off and measured on its own.
     if (vals.length < 2 || vals.length > maxLevels) {
         return null;
     }
 
+    const K = vals.length;
     const cls = new Map(vals.map((v, i) => [v, i]));
     const pts = ls.map((l) => ({
         F: Math.floor(l.active),
@@ -737,90 +788,80 @@ function fitLineAnyLevels(ls, maxLevels) {
     }));
     let best = null;
 
-    for (let bi = -60; bi <= 180; bi += 1) {
+    // THE SLOPE RANGE HAS TO CONTAIN THE ANSWER. It was [-0.03, 0.09], and
+    // slopes piled up on exactly -0.03000 - which meant the true value lay
+    // past the edge, not that it was undetermined. A dense walk of the
+    // fraction on 0.2625/0.2253 at three springs puts the threshold between
+    // 0.173 and 0.281 at floor 11, between 0.056 and 0.204 at 13, and below
+    // 0.048 by 19: a slope near -0.045.
+    for (let bi = Number(process.env.BLO || -500); bi <= Number(process.env.BHI || 500); bi += 1) {
         const b = bi / 2000;
         const sorted = pts
             .map((p) => ({ u: p.t - b * p.F, c: p.c }))
             .sort((x, y) => x.u - y.u);
         const n = sorted.length;
+        const wrong = [];
 
-        // wrong[k][i] = readings before i that are NOT class k.
-        const wrong = vals.map(() => new Array(n + 1).fill(0));
+        for (let k = 0; k < K; k++) {
+            const row = new Array(n + 1).fill(0);
 
-        for (let i = 0; i < n; i++) {
-            for (let k = 0; k < vals.length; k++) {
-                wrong[k][i + 1] = wrong[k][i] + (sorted[i].c === k ? 0 : 1);
+            for (let i = 0; i < n; i++) {
+                row[i + 1] = row[i] + (sorted[i].c === k ? 0 : 1);
             }
+
+            wrong.push(row);
         }
 
-        const between = (k, i, j) => wrong[k][j] - wrong[k][i];
-        const cut = (i) =>
-            i === 0 ? sorted[0].u - 1e-6
-                : i === n ? sorted[n - 1].u + 1e-6
-                    : (sorted[i - 1].u + sorted[i].u) / 2;
-        // How much room a cut has: half the gap it sits in. A cut outside the
-        // data has none worth counting, because nothing constrains it.
-        const room = (i) =>
-            i === 0 || i === n ? 0 : (sorted[i].u - sorted[i - 1].u) / 2;
-        // PREFER THE FLATTEST SLOPE THAT FITS, then the widest margin.
-        //
-        // The scan used to stop at the first slope reaching zero violations,
-        // starting from -0.03, so an underdetermined fit was handed whatever
-        // extreme the search happened to begin at. It showed: fitted slopes
-        // piled up on exactly -0.03000 and 0.09000, the two ends of the range.
-        //
-        // That matters off the end of the data. A threshold a + b*floor leaves
-        // [0, 1] at some floor and the rule goes degenerate past it - always
-        // the low bonus or always the high one - and with slopes pinned at the
-        // extremes, 66 of 85 thresholds went degenerate before floor 90, which
-        // is where a light door on a 300,000-cycle target lands. A flatter
-        // slope claims less and survives further.
-        const better = (cand) =>
-            !best || cand.bad < best.bad ||
-            (cand.bad === best.bad && Math.abs(cand.b) < Math.abs(best.b) - 1e-12) ||
-            (cand.bad === best.bad && Math.abs(cand.b) <= Math.abs(best.b) + 1e-12 &&
-                cand.margin > best.margin);
+        const span = (k, i, j) => wrong[k][j] - wrong[k][i];
+        let dp = new Array(n + 1);
+        const from = [];
 
-        if (vals.length === 2) {
+        for (let i = 0; i <= n; i++) {
+            dp[i] = span(0, 0, i);
+        }
+
+        for (let k = 1; k < K; k++) {
+            const next = new Array(n + 1).fill(Infinity);
+            const pick = new Array(n + 1).fill(0);
+
             for (let i = 0; i <= n; i++) {
-                const cand = {
-                    bad: between(0, 0, i) + between(1, i, n),
-                    margin: room(i), b, a: cut(i),
-                    lo: vals[0], hi: vals[1],
-                };
+                for (let j = 0; j <= i; j++) {
+                    const cost = dp[j] + span(k, j, i);
 
-                if (better(cand)) {
-                    best = cand;
-                }
-            }
-        } else {
-            for (let i = 0; i <= n; i++) {
-                for (let j = i; j <= n; j++) {
-                    const cand = {
-                        bad: between(0, 0, i) + between(1, i, j) +
-                            between(2, j, n),
-                        margin: Math.min(room(i), room(j)),
-                        b, a: cut(i), a2: cut(j),
-                        lo: vals[0], mid: vals[1], hi: vals[2],
-                    };
-
-                    if (better(cand)) {
-                        best = cand;
+                    if (cost < next[i]) {
+                        next[i] = cost;
+                        pick[i] = j;
                     }
                 }
             }
+
+            from.push(pick);
+            dp = next;
         }
 
-        // NO EARLY BREAK. Taking the first slope that reaches zero violations
-        // means the slope is never fitted at all: with three free parameters
-        // the cuts alone can always reach zero, so every three-level group
-        // ended up at b = -0.03, the first value tried, and extrapolated
-        // terribly. Measured: out-of-sample accuracy fell from 97.4% to 84.9%
-        // while in-sample rose from 99.0% to 99.6%.
-        //
-        // Among the slopes that fit equally well, prefer the one whose cuts
-        // sit furthest from the nearest reading. That is the choice most
-        // likely to survive a reading between them.
+        const bad = dp[n];
+
+        // Among equally good slopes prefer the flattest, which claims least
+        // off the end of the data where these lines are actually used.
+        if (best && (bad > best.bad ||
+            (bad === best.bad && Math.abs(b) >= Math.abs(best.b)))) {
+            continue;
+        }
+
+        const cuts = [];
+        let at = n;
+
+        for (let k = K - 2; k >= 0; k--) {
+            at = from[k][at];
+            cuts.unshift(at);
+        }
+
+        const cutAt = (i) =>
+            i === 0 ? sorted[0].u - 1e-6
+                : i === n ? sorted[n - 1].u + 1e-6
+                    : (sorted[i - 1].u + sorted[i].u) / 2;
+
+        best = { bad, b, a: cuts.map(cutAt) };
     }
 
     if (!best || best.bad !== 0) {
@@ -828,15 +869,15 @@ function fitLineAnyLevels(ls, maxLevels) {
     }
 
     const out = {
-        a: Number(best.a.toFixed(5)),
+        a: Number(best.a[0].toFixed(5)),
         b: Number(best.b.toFixed(5)),
-        lo: best.lo,
-        hi: best.hi,
+        lo: vals[0],
+        hi: vals[vals.length - 1],
     };
 
-    if (best.a2 !== undefined) {
-        out.a2 = Number(best.a2.toFixed(5));
-        out.mid = best.mid;
+    if (K > 2) {
+        out.cuts = best.a.slice(1).map((v) => Number(v.toFixed(5)));
+        out.levels = vals;
     }
 
     return out;

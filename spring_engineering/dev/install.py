@@ -5,12 +5,27 @@
 # with KeyError: 'bands' as soon as regime splits existed, which would have
 # looked like the model failing rather than the script being out of date.
 import json
+import os
 import sys
+
+# The softest rung's long-active-length override is hand-held and predates all
+# of the fitting, so it was measured rather than trusted. LONG_OVERRIDE=0 drops
+# it; on the fresh random sample (seed 777001, never fitted) dropping it costs
+# 14 readings of 239 and takes that rung from 55.6% to 36.1%, and costs 48
+# corpus readings. It stays, and it is now the only hand-written number left in
+# the length rule.
+LONG_OVERRIDE = os.environ.get("LONG_OVERRIDE", "1") != "0"
 
 SRC = "static/src/js/spring_engineering.js"
 
 
 def line_src(line):
+    # K parallel thresholds: one slope, K-1 intercepts, K bonus levels.
+    if "cuts" in line:
+        cuts = ", ".join("%g" % c for c in line["cuts"])
+        levels = ", ".join("%g" % v for v in line["levels"])
+        return ("{ a: %g, b: %g, cuts: [%s], levels: [%s] }"
+                % (line["a"], line["b"], cuts, levels))
     if "mid" in line:
         return ("{ a: %g, b: %g, a2: %g, lo: %g, mid: %g, hi: %g }"
                 % (line["a"], line["b"], line["a2"],
@@ -51,8 +66,8 @@ def main():
         if splits:
             extra += ", splitByCount: { " + ", ".join(splits) + " }"
 
-        # The softest rung's long-active-length override is still hand-held.
-        if abs(row["outer"] - 0.2625) < 1e-9 and abs(row["inner"] - 0.2253) < 1e-9:
+        if LONG_OVERRIDE and abs(row["outer"] - 0.2625) < 1e-9 \
+                and abs(row["inner"] - 0.2253) < 1e-9:
             extra += (", long: { from: 25.5, byCount: { 2: 0.620, 3: 0.050 },"
                       " above: 2.25 }")
 
