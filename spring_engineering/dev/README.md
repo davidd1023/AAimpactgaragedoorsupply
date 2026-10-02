@@ -240,3 +240,60 @@ node dev/import.mjs dev/pulled-hl5.json hl5 "what this batch was for"
 It applies the same strict filter the deriver does - Duplex only, the
 calibrated pair only, both springs present, a recognised lift - and reports
 what it skipped instead of dropping rows quietly.
+
+## The holdout was flattered by where I looked
+
+`dev/coverage.mjs` walks the ALLOWED parameter box per drum - weight to
+`maxWeight`, height to `maxHeight`, every spring count, every radius the drum
+offers, every cycle target - and counts cells with no reading in them:
+
+| drum | cells | covered | % |
+|---|---|---|---|
+| D525-216 | 26,208 | 405 | 1.5% |
+| D800-120 | 9,660 | 64 | 0.7% |
+| D400-144 | 5,544 | 103 | 1.9% |
+| 575-120 | 4,340 | 40 | 0.9% |
+| 525-54HL | 4,340 | 25 | 0.6% |
+| D400-96 | 1,092 | 7 | 0.6% |
+| **total** | **51,184** | **644** | **1.3%** |
+
+2,797 readings cover 1.3% of the box, and the biggest hole on every single
+drum is the same one: **one spring at a 15,000 target**.
+
+`dev/by-drum.mjs` overstates this, and it took a direct question to notice.
+"weights 216-1500 (789)" says nothing about whether the 789 are spread across
+spring counts, radii and targets or piled into one corner - and they were
+piled. A drum with no failures and no coverage reads exactly like a verified
+drum.
+
+### Why the five-fold holdout did not catch it
+
+The holdout withholds CORPUS readings, so it inherits the corpus's bias. It
+answers "can the model predict a reading like the ones it was fitted on",
+which is not the same question as "can it predict a door someone might quote".
+It reported 98.0% while an unbiased sample of the same box came in far lower
+on length.
+
+The fix is `dev/sweeps-rand.json`: cases drawn uniformly at random from the
+allowed box with a fixed seed, pulled fresh. Nobody chose those coordinates,
+so the score on them is an honest estimate. **Draw a NEW seed after fitting to
+them** - once they are in the corpus they are training data like anything else,
+and scoring on them says nothing.
+
+### What it found
+
+Active length is the axis the corpus never covered:
+
+| active length | corpus readings | length correct |
+|---|---|---|
+| under 20" | 593 | 100.0% |
+| 20-30" | 789 | 99.6% |
+| 30-40" | 528 | 100.0% |
+| 40-60" | 558 | 100.0% |
+| 60-90" | 48 | 100.0% |
+| over 90" | ~1 | - |
+
+2,468 of 2,517 readings sit below 60". The random sample reaches far past
+that, because a light door on a 300,000-cycle target gives a very long spring,
+and the length rule had never been tested there. Multiplier and wire choice
+held up at 100% on the sample; only length moved.
