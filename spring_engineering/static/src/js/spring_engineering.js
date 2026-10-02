@@ -647,6 +647,9 @@ function hl800Multiplier(heightFeet, hiLiftInches) {
 const HILIFT_DRUMS = {
     "CANIMEX/TF D800-120": {
         maxHiLift: 120,
+        // No weight cap: the reference tracks the entered weight exactly from
+        // 1062 lb (the first hand reading) to 2000 lb, so there is nothing to
+        // clamp to in any range this calculator is used in.
         catalog: true,
         reff: hl800REff,
         multiplier: hl800Multiplier,
@@ -655,12 +658,14 @@ const HILIFT_DRUMS = {
     // reverse-engineered drums, and why.
     "CANIMEX/TF 575-120": {
         maxHiLift: 120,
+        maxWeight: 1000,
         catalog: true,
         reff: hl575REff,
         multiplier: hl575Multiplier,
     },
     "CANIMEX/TF 525-54HL": {
         maxHiLift: 54,
+        maxWeight: 1000,
         spiralA: 7.3952515,      // r0^2
         spiralB: 0.099661766,    // p/pi
         multCoeffs: [
@@ -983,46 +988,48 @@ const DUPLEX_PAIRS = {
         innerId: 3.75,
         outerId: 6,
         calibration: [
-            { outerWire: 0.2625, innerWire: 0.2253, K: 2003.0, n: 131, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 0.413, bonus: 1.25 }, { upTo: 0.435, bonus: 3.25 }, { upTo: 0.583, bonus: 1.25 }, { upTo: 0.636, bonus: 2.25 }, { upTo: 0.766, bonus: 1 }, { upTo: 0.821, bonus: 2.25 }, { upTo: 0.86, bonus: 1 }, { upTo: 0.882, bonus: 2.25 }, { upTo: 0.911, bonus: 1 }, { upTo: 0.974, bonus: 2.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.256, bonus: 2.25 }, { upTo: 0.278, bonus: 1.25 }, { upTo: 0.288, bonus: 2.25 }, { upTo: 0.414, bonus: 1.25 }, { upTo: 0.578, bonus: 2.25 }, { upTo: 0.639, bonus: 1.25 }, { upTo: 0.744, bonus: 2.25 }, { upTo: 0.796, bonus: 1.25 }, { upTo: 0.949, bonus: 2.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.054, bonus: 0.25 }, { upTo: 0.121, bonus: 1.25 }, { upTo: 0.199, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] }, long: { from: 25.5, byCount: { 2: 0.620, 3: 0.050 }, above: 2.25 } },
-            { outerWire: 0.273, innerWire: 0.2253, K: 2230.7, n: 62, byCount: { 2: [{ upTo: 0.4, bonus: 0 }, { upTo: 0.498, bonus: 1.25 }, { upTo: 0.572, bonus: 0 }, { upTo: 0.681, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.554, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.283, innerWire: 0.2253, K: 2426.1, n: 67, byCount: { 2: [{ upTo: 0.89, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 0.25 }], 4: [{ upTo: 0.809, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.283, innerWire: 0.2343, K: 2688.8, n: 31, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 0.649, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.289, innerWire: 0.2343, K: 2848.7, n: 59, byCount: { 1: [{ upTo: 0.711, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.642, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.671, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.431, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.295, innerWire: 0.2343, K: 2949.1, n: 47, byCount: { 1: [{ upTo: 1, bonus: 0 }], 2: [{ upTo: 1, bonus: 0 }], 3: [{ upTo: 0.809, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 0.25 }] } },
-            { outerWire: 0.295, innerWire: 0.2437, K: 3282.3, n: 38, byCount: { 3: [{ upTo: 0.292, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 0.25 }] } },
-            { outerWire: 0.3065, innerWire: 0.2437, K: 3581.0, n: 52, byCount: { 1: [{ upTo: 1, bonus: 0 }], 2: [{ upTo: 0.818, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.751, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.667, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3065, innerWire: 0.25, K: 3859.8, n: 24, byCount: { 3: [{ upTo: 0.469, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 0.25 }] } },
-            { outerWire: 0.3125, innerWire: 0.25, K: 4058.0, n: 36, byCount: { 3: [{ upTo: 0.68, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.702, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.2625, innerWire: 0.2253, K: 2003.0, n: 139, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 0.09, bonus: 1.25 }, { upTo: 0.112, bonus: -5.75 }, { upTo: 0.413, bonus: 1.25 }, { upTo: 0.435, bonus: 3.25 }, { upTo: 0.583, bonus: 1.25 }, { upTo: 0.666, bonus: 2.25 }, { upTo: 0.766, bonus: 1 }, { upTo: 0.821, bonus: 2.25 }, { upTo: 0.86, bonus: 1 }, { upTo: 0.882, bonus: 2.25 }, { upTo: 0.911, bonus: 1 }, { upTo: 0.974, bonus: 2.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.256, bonus: 2.25 }, { upTo: 0.278, bonus: 1.25 }, { upTo: 0.288, bonus: 2.25 }, { upTo: 0.414, bonus: 1.25 }, { upTo: 0.578, bonus: 2.25 }, { upTo: 0.639, bonus: 1.25 }, { upTo: 0.744, bonus: 2.25 }, { upTo: 0.796, bonus: 1.25 }, { upTo: 0.949, bonus: 2.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.054, bonus: 0.25 }, { upTo: 0.121, bonus: 1.25 }, { upTo: 0.199, bonus: 0.25 }, { upTo: 0.648, bonus: 1.25 }, { upTo: 0.735, bonus: 2.25 }, { upTo: 1, bonus: 1.25 }] }, long: { from: 25.5, byCount: { 2: 0.620, 3: 0.050 }, above: 2.25 } },
+            { outerWire: 0.273, innerWire: 0.2253, K: 2230.7, n: 64, byCount: { 2: [{ upTo: 0.4, bonus: 0 }, { upTo: 0.498, bonus: 1.25 }, { upTo: 0.572, bonus: 0 }, { upTo: 0.681, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.554, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.283, innerWire: 0.2253, K: 2426.1, n: 71, byCount: { 2: [{ upTo: 0.89, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 0.25 }], 4: [{ upTo: 0.809, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.283, innerWire: 0.2343, K: 2688.8, n: 35, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 0.649, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.289, innerWire: 0.2343, K: 2848.7, n: 63, byCount: { 1: [{ upTo: 0.711, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.642, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.671, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.538, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.295, innerWire: 0.2343, K: 2949.9, n: 52, byCount: { 1: [{ upTo: 1, bonus: 0 }], 2: [{ upTo: 0.18, bonus: 4 }, { upTo: 1, bonus: 0 }], 3: [{ upTo: 0.809, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 0.25 }] } },
+            { outerWire: 0.295, innerWire: 0.2437, K: 3282.3, n: 46, byCount: { 3: [{ upTo: 0.292, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.234, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3065, innerWire: 0.2437, K: 3581.0, n: 78, byCount: { 1: [{ upTo: 1, bonus: 0 }], 2: [{ upTo: 0.801, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.713, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.667, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3065, innerWire: 0.25, K: 3859.8, n: 26, byCount: { 3: [{ upTo: 0.469, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 0.25 }] } },
+            { outerWire: 0.3125, innerWire: 0.25, K: 4058.0, n: 38, byCount: { 3: [{ upTo: 0.68, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.702, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
             { outerWire: 0.3125, innerWire: 0.2625, K: 4520.9, n: 8, byCount: { 3: [{ upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3195, innerWire: 0.2625, K: 4810.1, n: 52, byCount: { 1: [{ upTo: 0.296, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.319, bonus: 0 }, { upTo: 1, bonus: 1.25 }], 3: [{ upTo: 0.31, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.517, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.331, innerWire: 0.2625, K: 5164.5, n: 93, byCount: { 1: [{ upTo: 0.717, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.739, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.731, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3195, innerWire: 0.2625, K: 4810.1, n: 68, byCount: { 1: [{ upTo: 0.194, bonus: 0 }, { upTo: 0.257, bonus: 1 }, { upTo: 0.296, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.236, bonus: 1.25 }, { upTo: 0.309, bonus: 0 }, { upTo: 0.668, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.31, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.319, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.331, innerWire: 0.2625, K: 5164.5, n: 101, byCount: { 1: [{ upTo: 0.717, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.739, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.731, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.495, bonus: -0.75 }, { upTo: 1, bonus: 1.25 }] } },
             { outerWire: 0.331, innerWire: 0.273, K: 5779.9, n: 105, byCount: { 1: [{ upTo: 0.201, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.481, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.229, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3437, innerWire: 0.273, K: 6272.3, n: 76, byCount: { 1: [{ upTo: 0.7, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.697, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.393, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 0.25 }] } },
-            { outerWire: 0.3437, innerWire: 0.283, K: 6929.2, n: 117, byCount: { 1: [{ upTo: 0.113, bonus: 0 }, { upTo: 0.131, bonus: 1 }, { upTo: 0.179, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.23, bonus: 0 }, { upTo: 0.534, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.366, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3625, innerWire: 0.283, K: 7479.3, n: 114, byCount: { 1: [{ upTo: 0.853, bonus: 0 }, { upTo: 0.869, bonus: 1 }, { upTo: 0.893, bonus: 0 }, { upTo: 0.907, bonus: 1 }, { upTo: 0.925, bonus: 0 }, { upTo: 0.95, bonus: 1 }, { upTo: 0.982, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.844, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.883, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3625, innerWire: 0.289, K: 8295.6, n: 146, byCount: { 1: [{ upTo: 0.621, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.565, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3625, innerWire: 0.295, K: 8787.3, n: 83, byCount: { 1: [{ upTo: 0.214, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.375, innerWire: 0.295, K: 9179.9, n: 149, byCount: { 1: [{ upTo: 0.673, bonus: 0 }, { upTo: 0.684, bonus: 1 }, { upTo: 0.727, bonus: 0 }, { upTo: 0.743, bonus: 1 }, { upTo: 0.778, bonus: 0 }, { upTo: 0.795, bonus: 1 }, { upTo: 0.809, bonus: 0 }, { upTo: 0.871, bonus: 1 }, { upTo: 0.898, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.691, bonus: 0 }, { upTo: 0.833, bonus: 1 }, { upTo: 1, bonus: 0 }], 3: [{ upTo: 0.736, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.375, innerWire: 0.3065, K: 10478.6, n: 111, byCount: { 1: [{ upTo: 0.077, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.069, bonus: 0 }, { upTo: 0.316, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.075, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3938, innerWire: 0.3065, K: 11086.5, n: 111, byCount: { 1: [{ upTo: 0.187, bonus: 0 }, { upTo: 0.209, bonus: -1 }, { upTo: 0.941, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.227, bonus: -1 }, { upTo: 1, bonus: 0 }], 3: [{ upTo: 0.032, bonus: -0.75 }, { upTo: 1, bonus: 0.25 }] } },
-            { outerWire: 0.3938, innerWire: 0.3125, K: 12197.1, n: 104, byCount: { 1: [{ upTo: 0.476, bonus: 0 }, { upTo: 0.511, bonus: 1 }, { upTo: 0.52, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.685, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3437, innerWire: 0.273, K: 6267.9, n: 109, byCount: { 1: [{ upTo: 0.7, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.745, bonus: 0 }, { upTo: 0.759, bonus: 1 }, { upTo: 0.784, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.393, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 0.25 }] } },
+            { outerWire: 0.3437, innerWire: 0.283, K: 6929.0, n: 164, byCount: { 1: [{ upTo: 0.113, bonus: 0 }, { upTo: 0.131, bonus: 1 }, { upTo: 0.179, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.23, bonus: 0 }, { upTo: 0.517, bonus: 1.25 }, { upTo: 0.95, bonus: 1 }, { upTo: 0.97, bonus: 2.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.366, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3625, innerWire: 0.283, K: 7479.3, n: 216, byCount: { 1: [{ upTo: 0.065, bonus: 0 }, { upTo: 0.092, bonus: -1 }, { upTo: 0.224, bonus: 0 }, { upTo: 0.272, bonus: -1 }, { upTo: 0.853, bonus: 0 }, { upTo: 0.869, bonus: 1 }, { upTo: 0.893, bonus: 0 }, { upTo: 0.907, bonus: 1 }, { upTo: 0.925, bonus: 0 }, { upTo: 0.955, bonus: 1 }, { upTo: 0.982, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.332, bonus: -1 }, { upTo: 0.876, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.883, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3625, innerWire: 0.289, K: 8294.4, n: 267, byCount: { 1: [{ upTo: 0.621, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.565, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3625, innerWire: 0.295, K: 8786.8, n: 174, byCount: { 1: [{ upTo: 0.202, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.375, innerWire: 0.295, K: 9179.9, n: 266, byCount: { 1: [{ upTo: 0.673, bonus: 0 }, { upTo: 0.679, bonus: 1 }, { upTo: 0.701, bonus: 0 }, { upTo: 0.71, bonus: 1 }, { upTo: 0.727, bonus: 0 }, { upTo: 0.743, bonus: 1 }, { upTo: 0.758, bonus: 0 }, { upTo: 0.767, bonus: 1 }, { upTo: 0.778, bonus: 0 }, { upTo: 0.795, bonus: 1 }, { upTo: 0.809, bonus: 0 }, { upTo: 0.811, bonus: 1 }, { upTo: 0.828, bonus: 0 }, { upTo: 0.848, bonus: 1 }, { upTo: 0.855, bonus: 0 }, { upTo: 0.871, bonus: 1 }, { upTo: 0.898, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.188, bonus: 0 }, { upTo: 0.358, bonus: -1 }, { upTo: 0.691, bonus: 0 }, { upTo: 0.861, bonus: 1 }, { upTo: 1, bonus: 0 }], 3: [{ upTo: 0.736, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.375, innerWire: 0.3065, K: 10478.6, n: 164, byCount: { 1: [{ upTo: 0.077, bonus: 0 }, { upTo: 0.939, bonus: 1 }, { upTo: 0.947, bonus: 2 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.069, bonus: 0 }, { upTo: 0.297, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.075, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3938, innerWire: 0.3065, K: 11086.5, n: 129, byCount: { 1: [{ upTo: 0.187, bonus: 0 }, { upTo: 0.209, bonus: -1 }, { upTo: 0.941, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.062, bonus: 0 }, { upTo: 0.157, bonus: -1 }, { upTo: 0.356, bonus: 0 }, { upTo: 0.381, bonus: 5 }, { upTo: 0.416, bonus: 0 }, { upTo: 0.48, bonus: 1 }, { upTo: 0.538, bonus: 0 }, { upTo: 0.559, bonus: 2 }, { upTo: 0.806, bonus: 0 }, { upTo: 0.912, bonus: 4 }, { upTo: 0.958, bonus: 0 }, { upTo: 1, bonus: 7 }], 3: [{ upTo: 0.032, bonus: -0.75 }, { upTo: 1, bonus: 0.25 }] } },
+            { outerWire: 0.3938, innerWire: 0.3125, K: 12199.5, n: 120, byCount: { 1: [{ upTo: 0.476, bonus: 0 }, { upTo: 0.511, bonus: 1 }, { upTo: 0.52, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.019, bonus: 3 }, { upTo: 0.333, bonus: 0 }, { upTo: 0.355, bonus: 6 }, { upTo: 0.38, bonus: 1 }, { upTo: 0.451, bonus: 0 }, { upTo: 0.522, bonus: 1 }, { upTo: 0.557, bonus: 2 }, { upTo: 0.603, bonus: 1 }, { upTo: 0.652, bonus: 5 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.685, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
             { outerWire: 0.3938, innerWire: 0.3195, K: 13120.9, n: 53, byCount: { 1: [{ upTo: 0.134, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.4062, innerWire: 0.3195, K: 13594.4, n: 50, byCount: { 1: [{ upTo: 0.657, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.728, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.771, bonus: 0.25 }, { upTo: 0.829, bonus: 1.25 }, { upTo: 0.875, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.4062, innerWire: 0.331, K: 15433.0, n: 61, byCount: { 1: [{ upTo: 0.942, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 0.219, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.883, bonus: 1.25 }, { upTo: 1, bonus: 2.25 }] } },
+            { outerWire: 0.4062, innerWire: 0.3195, K: 13594.4, n: 54, byCount: { 1: [{ upTo: 0.657, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.806, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.771, bonus: 0.25 }, { upTo: 0.829, bonus: 1.25 }, { upTo: 0.875, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.4062, innerWire: 0.331, K: 15433.0, n: 63, byCount: { 1: [{ upTo: 0.942, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 0.219, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.883, bonus: 1.25 }, { upTo: 1, bonus: 2.25 }] } },
             { outerWire: 0.4218, innerWire: 0.331, K: 16190.5, n: 34, byCount: { 2: [{ upTo: 1, bonus: 0 }], 3: [{ upTo: 0.887, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.4218, innerWire: 0.3437, K: 18569.5, n: 40, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 1, bonus: 1 }], 3: [{ upTo: 0.802, bonus: 1.25 }, { upTo: 1, bonus: 2.25 }] } },
-            { outerWire: 0.4305, innerWire: 0.3437, K: 19476.6, n: 83, byCount: { 1: [{ upTo: 0.327, bonus: 0 }, { upTo: 0.384, bonus: 1 }, { upTo: 0.419, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.325, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 0.25 }] } },
-            { outerWire: 0.4305, innerWire: 0.3625, K: 22005.9, n: 60, byCount: { 1: [{ upTo: 0.043, bonus: 1 }, { upTo: 0.068, bonus: 2 }, { upTo: 0.104, bonus: 1 }, { upTo: 0.438, bonus: 2 }, { upTo: 0.607, bonus: 3 }, { upTo: 0.978, bonus: 2 }, { upTo: 1, bonus: 3 }], 2: [{ upTo: 0.924, bonus: 2.25 }, { upTo: 1, bonus: 3.25 }] } },
-            { outerWire: 0.4375, innerWire: 0.3625, K: 23022.4, n: 105, byCount: { 1: [{ upTo: 0.099, bonus: 1 }, { upTo: 0.113, bonus: 2 }, { upTo: 0.155, bonus: 1 }, { upTo: 0.171, bonus: 2 }, { upTo: 0.219, bonus: 1 }, { upTo: 0.236, bonus: 2 }, { upTo: 0.313, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 0.103, bonus: 1.25 }, { upTo: 0.348, bonus: 1 }, { upTo: 1, bonus: 2.25 }] } },
-            { outerWire: 0.4531, innerWire: 0.3625, K: 25300.5, n: 67, byCount: { 1: [{ upTo: 0.24, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.264, bonus: 0 }, { upTo: 1, bonus: 1 }] } },
-            { outerWire: 0.4531, innerWire: 0.375, K: 27288.0, n: 18, byCount: { 1: [{ upTo: 0.112, bonus: 1 }, { upTo: 0.191, bonus: 2 }, { upTo: 0.244, bonus: 1 }, { upTo: 0.276, bonus: 2 }, { upTo: 0.322, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 1, bonus: 2.25 }] } },
-            { outerWire: 0.4615, innerWire: 0.375, K: 28718.8, n: 92, byCount: { 1: [{ upTo: 0.714, bonus: 1 }, { upTo: 0.721, bonus: 2 }, { upTo: 0.739, bonus: 1 }, { upTo: 1, bonus: 2 }] } },
-            { outerWire: 0.4687, innerWire: 0.375, K: 30056.6, n: 13, byCount: { 1: [{ upTo: 0.193, bonus: 0 }, { upTo: 1, bonus: 1 }] } },
-            { outerWire: 0.4687, innerWire: 0.3938, K: 33254.4, n: 7, byCount: { 1: [{ upTo: 0.08, bonus: 3 }, { upTo: 0.467, bonus: 2 }, { upTo: 1, bonus: 3 }] } },
-            { outerWire: 0.49, innerWire: 0.3938, K: 37641.7, n: 66, byCount: { 1: [{ upTo: 1, bonus: 1 }] } },
-            { outerWire: 0.5, innerWire: 0.3938, K: 37985.5, n: 54, byCount: { 1: [{ upTo: 0.45, bonus: 0 }, { upTo: 0.462, bonus: 1 }, { upTo: 0.514, bonus: 0 }, { upTo: 0.579, bonus: 1 }, { upTo: 0.593, bonus: 0 }, { upTo: 0.624, bonus: 1 }, { upTo: 0.652, bonus: 0 }, { upTo: 0.724, bonus: 1 }, { upTo: 0.748, bonus: 0 }, { upTo: 1, bonus: 1 }] } },
-            { outerWire: 0.5, innerWire: 0.4062, K: 42402.6, n: 56, byCount: { 1: [{ upTo: 0.519, bonus: 1 }, { upTo: 1, bonus: 2 }] } },
+            { outerWire: 0.4218, innerWire: 0.3437, K: 18568.9, n: 88, byCount: { 1: [{ upTo: 0.937, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 0.169, bonus: 1.25 }, { upTo: 0.849, bonus: 1 }, { upTo: 1, bonus: 2.25 }], 3: [{ upTo: 0.802, bonus: 1.25 }, { upTo: 1, bonus: 2.25 }] } },
+            { outerWire: 0.4305, innerWire: 0.3437, K: 19476.6, n: 173, byCount: { 1: [{ upTo: 0.356, bonus: 0 }, { upTo: 0.384, bonus: 1 }, { upTo: 0.405, bonus: 0 }, { upTo: 0.412, bonus: 1 }, { upTo: 0.426, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.325, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 0.25 }] } },
+            { outerWire: 0.4305, innerWire: 0.3625, K: 22005.9, n: 142, byCount: { 1: [{ upTo: 0.041, bonus: 1 }, { upTo: 0.068, bonus: 2 }, { upTo: 0.101, bonus: 1 }, { upTo: 0.438, bonus: 2 }, { upTo: 0.712, bonus: 3 }, { upTo: 0.825, bonus: 2 }, { upTo: 0.845, bonus: 3 }, { upTo: 0.962, bonus: 2 }, { upTo: 0.97, bonus: 3 }, { upTo: 0.978, bonus: 2 }, { upTo: 1, bonus: 3 }], 2: [{ upTo: 0.924, bonus: 2.25 }, { upTo: 1, bonus: 3.25 }] } },
+            { outerWire: 0.4375, innerWire: 0.3625, K: 23022.4, n: 180, byCount: { 1: [{ upTo: 0.099, bonus: 1 }, { upTo: 0.113, bonus: 2 }, { upTo: 0.155, bonus: 1 }, { upTo: 0.16, bonus: 2 }, { upTo: 0.189, bonus: 1 }, { upTo: 0.197, bonus: 2 }, { upTo: 0.219, bonus: 1 }, { upTo: 0.236, bonus: 2 }, { upTo: 0.313, bonus: 1 }, { upTo: 0.915, bonus: 2 }, { upTo: 0.944, bonus: 3 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 0.103, bonus: 1.25 }, { upTo: 0.348, bonus: 1 }, { upTo: 1, bonus: 2.25 }] } },
+            { outerWire: 0.4531, innerWire: 0.3625, K: 25300.5, n: 108, byCount: { 1: [{ upTo: 0.24, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.264, bonus: 0 }, { upTo: 1, bonus: 1 }] } },
+            { outerWire: 0.4531, innerWire: 0.375, K: 27288.0, n: 28, byCount: { 1: [{ upTo: 0.112, bonus: 1 }, { upTo: 0.191, bonus: 2 }, { upTo: 0.244, bonus: 1 }, { upTo: 0.276, bonus: 2 }, { upTo: 0.322, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 1, bonus: 2.25 }] } },
+            { outerWire: 0.4615, innerWire: 0.375, K: 28709.6, n: 191, byCount: { 1: [{ upTo: 0.714, bonus: 1 }, { upTo: 0.721, bonus: 2 }, { upTo: 0.738, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 1, bonus: 2.25 }] } },
+            { outerWire: 0.4687, innerWire: 0.375, K: 29882.1, n: 64, byCount: { 1: [{ upTo: 0.153, bonus: 0 }, { upTo: 0.155, bonus: 1 }, { upTo: 0.181, bonus: 0 }, { upTo: 0.299, bonus: 1 }, { upTo: 0.351, bonus: 0 }, { upTo: 1, bonus: 1 }] } },
+            { outerWire: 0.4687, innerWire: 0.3938, K: 33252.0, n: 18, byCount: { 1: [{ upTo: 0.08, bonus: 3 }, { upTo: 0.525, bonus: 2 }, { upTo: 1, bonus: 3 }] } },
+            { outerWire: 0.49, innerWire: 0.3938, K: 37636.4, n: 198, byCount: { 1: [{ upTo: 0.988, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 1, bonus: 1 }] } },
+            { outerWire: 0.5, innerWire: 0.3938, K: 37985.5, n: 116, byCount: { 1: [{ upTo: 0.45, bonus: 0 }, { upTo: 0.462, bonus: 1 }, { upTo: 0.514, bonus: 0 }, { upTo: 0.537, bonus: 1 }, { upTo: 0.565, bonus: 0 }, { upTo: 0.579, bonus: 1 }, { upTo: 0.593, bonus: 0 }, { upTo: 0.624, bonus: 1 }, { upTo: 0.652, bonus: 0 }, { upTo: 0.657, bonus: 1 }, { upTo: 0.672, bonus: 0 }, { upTo: 0.724, bonus: 1 }, { upTo: 0.738, bonus: 0 }, { upTo: 0.779, bonus: 1 }, { upTo: 0.804, bonus: 0 }, { upTo: 0.836, bonus: 1 }, { upTo: 0.865, bonus: 0 }, { upTo: 0.917, bonus: 1 }, { upTo: 0.922, bonus: 0 }, { upTo: 0.959, bonus: 1 }, { upTo: 0.971, bonus: 0 }, { upTo: 1, bonus: 1 }] } },
+            { outerWire: 0.5, innerWire: 0.4062, K: 42430.9, n: 72, byCount: { 1: [{ upTo: 0.519, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 0.486, bonus: 1 }, { upTo: 1, bonus: 2.25 }] } },
             { outerWire: 0.5312, innerWire: 0.4062, K: 44642.9, n: 8, byCount: { 1: [{ upTo: 1, bonus: -1 }] } },
+            { outerWire: 0.5312, innerWire: 0.4218, K: 52906.0, n: 2 },
+            { outerWire: 0.5625, innerWire: 0.4305, K: 59019.8, n: 2, byCount: { 2: [{ upTo: 1, bonus: -1 }] } },
         ],
     },
     '2 5/8" inside 5 1/4"': {
@@ -2094,7 +2101,16 @@ get duplexSpringCount() {
 // reading over a drum's rating would settle it.
 get duplexEffectiveWeight() {
     const entered = Number(this.state.weight) || 0;
-    const limits = DRUM_LIMITS[this.state.drum];
+    // Hi-lift drums carry their rating in HILIFT_DRUMS, not DRUM_LIMITS, and
+    // looking only in the latter meant hi-lift was never clamped at all. The
+    // reference clamps 575-120 and 525-54HL at 1000 lb - entering 1005 already
+    // comes back as 1000 - so above that we were computing TIPPT on a weight
+    // the reference had thrown away, and picking a stiffer pair than it did.
+    // Measured by backing the weight out of the reference's own TIPPT and
+    // multiplier: see the 575/525 w1200 readings.
+    const limits = (this.state.liftType === "Hi-Lift"
+        ? HILIFT_DRUMS[this.state.drum]
+        : null) || DRUM_LIMITS[this.state.drum];
 
     if (!limits || !limits.maxWeight) {
         return entered;

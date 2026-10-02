@@ -33,6 +33,27 @@ const mod = await load();
 // --- gather every reading, from pulls and from the hand-entered corpus ------
 const readings = [];
 
+// Ingestion is STRICT and it reports what it drops. Every field the model
+// depends on has to be present and unambiguous, because the failure mode here
+// is silent: a row that is quietly mislabelled still produces a band, and that
+// band is indistinguishable from a real one afterwards. Four real hazards sat
+// in the pull directory:
+//
+//   - pulled-hl3/hl4 hold Single rows, and this loop used to hardcode
+//     assembly "Duplex" - so a Single answer would have taught a Duplex band.
+//   - pulled-hl.json spells the lift "Hi-Lift"; pulled-hl5 spells it
+//     "HiLift". Matching one spelling reads the other as standard lift.
+//   - pulled-hl/hl2/hl3/hl4 predate the confirmed hiLift parameter name. The
+//     server ignored the guessed names, so those rows are STANDARD-lift
+//     answers wearing a hi-lift label. They are the most dangerous of the
+//     four and they are why a hi-lift row must carry a numeric hiLift.
+//   - one row has innerSpring null, another has no spring ids at all.
+//
+// So: Duplex only, the calibrated pair only, both springs present, and a lift
+// that is either exactly standard or hi-lift with a number attached.
+const skipped = {};
+const skip = (why) => { skipped[why] = (skipped[why] ?? 0) + 1; };
+
 for (const f of readdirSync(HERE).filter((f) => /^pulled.*\.json$/.test(f))) {
     for (const r of JSON.parse(readFileSync(join(HERE, f), "utf8"))) {
         if (r.error) {
@@ -42,21 +63,65 @@ for (const f of readdirSync(HERE).filter((f) => /^pulled.*\.json$/.test(f))) {
         const i = r.input;
         const d = r.data;
 
+        if (!d || !d.innerSpring || !d.outerSpring) {
+            skip("no spring in response");
+            continue;
+        }
+
+        if ((i.assembly ?? "Duplex") !== "Duplex") {
+            skip(`assembly ${i.assembly}`);
+            continue;
+        }
+
+        if (Number(i.innerId) !== 3.75 || Number(i.outerId) !== 6) {
+            skip(`spring ids ${i.innerId}/${i.outerId}`);
+            continue;
+        }
+
+        // The lift has to be one of exactly two recognised shapes.
+        const raw = i.lift ?? "Standard";
+        const hi = raw === "HiLift";
+
+        if (!hi && raw !== "Standard") {
+            skip(`unrecognised lift ${raw}`);
+            continue;
+        }
+
+        if (hi && !(Number(i.hiLift) > 0)) {
+            skip("hi-lift row without a hiLift value (pre-fix guess)");
+            continue;
+        }
+
         readings.push({
             state: {
                 assembly: "Duplex", drum: i.drum, springId: PAIR,
                 springs: i.springs, radius: String(i.radius),
+                liftType: hi ? "Hi-Lift" : "Standard",
+                liftin: hi ? String(i.hiLift) : "",
                 cycles: Number(i.cycles).toLocaleString("en-US"),
                 weight: String(i.weight),
+                doorWidthFeet: Math.floor((i.widthInches ?? 108) / 12),
+                doorWidthInches: (i.widthInches ?? 108) % 12,
                 doorHeightFeet: Math.floor(i.heightInches / 12),
                 doorHeightInches: i.heightInches % 12,
             },
+            hiLift: hi ? Number(i.hiLift) : 0,
             outer: d.outerSpring.wireSize,
             inner: d.innerSpring.wireSize,
             length: d.innerSpring.springLength,
             cycles: d.cycles,
         });
     }
+}
+
+// stderr, not stdout: --json mode pipes stdout straight into apply.sh, so a
+// human-readable line there is a parse error.
+if (Object.keys(skipped).length) {
+    console.error("skipped rows (not silently - each would have taught a false band):");
+    for (const [why, n] of Object.entries(skipped).sort((a, b) => b[1] - a[1])) {
+        console.error(`  ${String(n).padStart(4)}  ${why}`);
+    }
+    console.error("");
 }
 
 for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).readings) {
@@ -74,6 +139,11 @@ for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).read
 
     readings.push({
         state: r.state,
+        // Same hiLift marker the pull path sets. Without it the hi-lift
+        // holdout below silently withholds nothing from this half of the
+        // data, and reports a perfect out-of-sample score that is really
+        // in-sample. That mistake was made once already.
+        hiLift: r.state.liftType === "Hi-Lift" ? Number(r.state.liftin) || 0 : 0,
         outer: parseFloat(r.expect.duplexOuterWire),
         inner: parseFloat(r.expect.duplexInnerWire),
         length: r.expect.duplexInnerLength,
@@ -188,6 +258,102 @@ function boundsFromSwitches(readings) {
     return out;
 }
 
+// HOLDOUT. With HOLDOUT_MOD=n every nth reading is withheld from the fit, so
+// the model can be scored on readings it never saw. Without it nothing is
+// held back and the fit uses everything.
+const HOLDOUT_MOD = Number(process.env.HOLDOUT_MOD || 0);
+
+if (HOLDOUT_MOD > 1) {
+    const kept = readings.filter((_, i) => i % HOLDOUT_MOD !== 0);
+
+    readings.length = 0;
+    readings.push(...kept);
+}
+
+// DEDUPLICATE. This reads both dev/pulled*.json and dev/corpus.json, and
+// dev/import.mjs folds pulls INTO the corpus - so from the moment the import
+// workflow started, almost every reading has been ingested twice, once as a
+// pull row and once as a corpus row.
+//
+// Uniform double-counting cancels, which is why this hid for eight batches.
+// It stopped cancelling the moment one group was weighted differently from
+// the rest: hi-lift lived only in the pulls (1x) while standard lift was in
+// both (2x), so hi-lift lost every tie. Importing the hi-lift readings made
+// them 2x as well, they started winning those ties instead, and 38 standard
+// -lift readings broke. The band fitter was never at fault - the input was
+// silently weighted.
+//
+// So: collapse exact duplicates, and if the same inputs ever carry DIFFERENT
+// outputs, say so loudly instead of letting the fitter average two readings
+// that cannot both be true.
+const seenKey = new Map();
+const collisions = [];
+const unique = [];
+
+for (const r of readings) {
+    const st = r.state;
+    const key = [
+        st.drum, st.springs, st.radius, st.liftType ?? "Standard", st.liftin ?? "",
+        st.cycles, st.weight, st.doorHeightFeet, st.doorHeightInches,
+    ].join("|");
+    const out = `${r.outer}/${r.inner}/${r.length}`;
+    const prev = seenKey.get(key);
+
+    if (prev === undefined) {
+        seenKey.set(key, out);
+        unique.push(r);
+    } else if (prev !== out) {
+        collisions.push(`  ${key}  ->  ${prev}  vs  ${out}`);
+    }
+}
+
+console.error(`deduplicated: ${readings.length} ingested -> ${unique.length} distinct`);
+
+if (collisions.length) {
+    console.error(`SAME INPUTS, DIFFERENT OUTPUTS (${collisions.length}) - these cannot both be right:`);
+    console.error(collisions.slice(0, 20).join("\n"));
+}
+
+console.error("");
+readings.length = 0;
+readings.push(...unique);
+
+// HI-LIFT HOLDOUT. Runs AFTER the dedup above, and must: a reading arrives
+// twice (once from its pull, once from the corpus), so withholding by
+// ingestion index before dedup would withhold one copy and leave the other
+// in the fit - scoring the model on data it still trained on. Hi-lift is ~48 of ~3900 readings, so the global holdout
+// above barely touches it and an in-sample hi-lift score means nothing. With
+// HL_HOLDOUT_MOD=n and HL_HOLDOUT_REM=k, every hi-lift reading whose hi-lift
+// index is k mod n is withheld - standard lift untouched. Rotating k over
+// 0..n-1 scores every hi-lift reading exactly once, out of sample.
+const HL_MOD = Number(process.env.HL_HOLDOUT_MOD || 0);
+const HL_REM = Number(process.env.HL_HOLDOUT_REM || 0);
+
+if (HL_MOD >= 1) {
+    let seen = -1;
+    const withheld = [];
+    const kept = readings.filter((r) => {
+        if (!r.hiLift) {
+            return true;
+        }
+
+        seen += 1;
+
+        if (seen % HL_MOD !== HL_REM) {
+            return true;
+        }
+
+        withheld.push(`${r.state.weight}|${r.state.doorHeightFeet}|${r.hiLift}|${r.state.springs}|${r.state.cycles}`);
+
+        return false;
+    });
+
+    console.error(`hi-lift holdout: withheld ${withheld.length} of ${seen + 1}`);
+    console.error(withheld.map((w) => `  ${w}`).join("\n") + "\n");
+    readings.length = 0;
+    readings.push(...kept);
+}
+
 const switchBounds = boundsFromSwitches(readings);
 
 const median = (xs) => {
@@ -197,6 +363,8 @@ const median = (xs) => {
 };
 
 const contradictions = [];
+const overfit = [];
+const MAX_BANDS = Number(process.env.MAX_BANDS || 64);
 
 
 // For each rung AND spring count, derive the bonus as a piecewise-constant
@@ -293,8 +461,24 @@ const out = [...rungs.values()]
                 (l) => Math.round(l.active) !== Math.floor(l.active) + l.bonus
             );
 
-            if (needed) {
+            // REFUSE TO OVERFIT. If the bonus needs more than a few bands to
+            // follow the fraction, it is not a function of the fraction: it
+            // depends on the active length as well, the way the softest rung
+            // does. The fitter would otherwise slice frac into alternating
+            // slivers - 0.375/0.295 at one spring wanted EIGHTEEN bands
+            // flipping between 0 and 1 across frac 0.67 to 1.00, which fits
+            // the readings and predicts nothing.
+            //
+            // Past the cap the rung falls back to plain rounding and is named
+            // below, which is a worse answer honestly labelled rather than a
+            // better-looking one that will not hold.
+            if (needed && b.bands.length <= MAX_BANDS) {
                 byCount[sp] = { bands: b.bands, n: ls.length };
+            } else if (needed) {
+                overfit.push(
+                    `${g.outer}/${g.inner} at ${sp} spring(s): ${b.bands.length} bands ` +
+                    `needed over ${ls.length} readings - not a function of frac alone`
+                );
             }
 
             if (!b.clean) {
@@ -334,6 +518,15 @@ if (process.argv.includes("--json")) {
     console.log("\n  n     = readings whose cycle count fed K");
     console.log("  nLen  = readings whose length fed the thresholds");
     console.log("  Nb/nM = N bands derived from M readings; blank = plain round() is already right");
+
+    if (overfit.length) {
+        console.log("\n  RUNGS WHERE THE FRACTION ALONE DOES NOT DETERMINE THE LENGTH");
+        console.log("  (left on plain rounding rather than fitted to slivers):");
+
+        for (const o of overfit) {
+            console.log("    " + o);
+        }
+    }
 
     if (contradictions.length) {
         console.log("\n  RUNGS WHERE ONE THRESHOLD CANNOT FIT THE READINGS:");

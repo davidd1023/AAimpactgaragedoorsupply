@@ -151,3 +151,92 @@ The highest-value readings now are the ones that pin down what is still open:
    reading has a fractional part below 0.5, so both reproduce all of them.
 
 Record both sides of any step, and put the raw API response in `source`.
+
+## Hi-lift (batches 5-7, 2026-10-02)
+
+Hi-lift turned out to need **no new selection machinery**: it enters only
+through the multiplier, and everything downstream - the wire ladder, `K`, the
+length bands - is a function of TIPPT. That was worth proving rather than
+assuming, and the proof is cheap: re-run a failing case with the reference's
+own `multiplier` substituted for ours. On all seven initial length misses the
+answer did not move, so the multiplier surface was not the cause.
+
+| | result |
+|---|---|
+| 131 distinct hi-lift readings | wire and length |
+| in sample | 127/131 |
+| **5-fold holdout, out of sample** | **206/211 (97.6%)** |
+
+Every out-of-sample miss is one of the four already-known in-sample failures,
+so the bands are not overfitted to hi-lift.
+
+What the sweeps actually bought:
+
+- **`hiLift` is the request parameter.** Eight guesses failed; one real URL
+  from the user settled it. One real request beats any amount of probing.
+- **The config payload's drum list is standard-lift only.** `575-120` and
+  `525-54HL` work fine with `lift=HiLift` despite being absent from it, and
+  `D800-312` is refused with it. Absence from that list means nothing.
+- **575-120 and 525-54HL clamp the door weight at 1000 lb**; 1005 already
+  comes back as 1000. `D800-120` does not clamp - it tracks the entered weight
+  exactly to 2000 lb. Found by backing the weight out of the reference's own
+  `totalInchPoundPerTurn / multiplier`, which is the cheapest way to see what
+  the reference thinks the inputs are.
+- **One drum is not a family.** Batch 5 scored 47/47 on `D800-120` and it was
+  tempting to call hi-lift done. The 575 family, swept next, came in at 60/64
+  on wire. Validate per multiplier surface, not per feature.
+
+### Still open on hi-lift
+
+- 850 lb / 2 springs / 575-120 picks one step too soft, and 1000 lb /
+  4 springs / `hl60` picks the inner one step too soft.
+- 1800 and 2000 lb on `D800-120` want `0.5312/0.4218` and `0.5625/0.4305`,
+  rungs the ladder does not reach. Two readings cannot pin a rung's `K`, so
+  these need a sweep of their own before they can be fixed.
+- The HL575 multiplier surface drifts to 9.9e-05 at a 192" door on
+  `525-54HL`, well past the 2.1e-04 worst case but worth watching, since a
+  large enough multiplier error eventually flips a length rounding.
+
+## Two ingestion bugs that cost real accuracy
+
+Both were silent, and both are the same shape: the fitter was fine, the input
+was wrong. Worth re-reading before adding any new data source.
+
+**1. Every reading was counted twice.** `derive.mjs` reads `pulled*.json` AND
+`corpus.json`, and `import.mjs` folds pulls into the corpus - so from the
+moment the import workflow started, almost every reading arrived twice.
+Uniform double-counting cancels, which is why it hid for eight batches. It
+stopped cancelling the moment one group was weighted differently: hi-lift
+lived only in the pulls (1x) while standard lift was in both (2x), so hi-lift
+lost every tie. Importing the hi-lift readings made them 2x too, they started
+winning those ties, and **38 standard-lift readings broke**. The fix is the
+dedup pass in `derive.mjs`; it also checks that identical inputs never carry
+different outputs, and across 4099 ingested rows there were **zero** such
+collisions, which is good evidence the reference is deterministic and the
+labelling is right.
+
+**2. The hi-lift holdout withheld nothing.** It keyed on a `hiLift` marker set
+only in the pull path, so once the readings were also in the corpus it
+withheld one copy and left the other in the fit - and reported a perfect
+out-of-sample score that was really in-sample. It now runs after the dedup
+pass, and the corpus path sets the marker too.
+
+The general lesson: **a holdout that reports a suspiciously good number is
+itself a thing to test.** Both bugs were found by distrusting a good result,
+not a bad one.
+
+## dev/import.mjs
+
+`corpus.json` is what `replay.mjs` asserts against; `derive.mjs` reads the
+pulls directly. So a pull could teach the model a band and never enter the
+regression suite - nothing would notice if a later derive broke it. That is
+exactly what happened to hi-lift: 47 readings trained the bands while only one
+hi-lift reading was ever asserted. Importing was being done by hand, so now:
+
+```sh
+node dev/import.mjs dev/pulled-hl5.json hl5 "what this batch was for"
+```
+
+It applies the same strict filter the deriver does - Duplex only, the
+calibrated pair only, both springs present, a recognised lift - and reports
+what it skipped instead of dropping rows quietly.

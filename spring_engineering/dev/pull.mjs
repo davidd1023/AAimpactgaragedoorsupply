@@ -117,13 +117,18 @@ function query(c) {
         p.set("duplexOuterSpringInnerDiameter", String(c.outerId ?? 6));
     }
 
-    // hi-lift: the parameter name is not yet confirmed, so send the ones it
-    // might be and let the server ignore the rest. Confirm against a reading
-    // taken by hand before trusting any hi-lift pull.
-    if (c.highLiftInches !== undefined) {
-        for (const k of ["highLiftInches", "highLift", "liftInches"]) {
-            p.set(k, String(c.highLiftInches));
-        }
+    // Hi-lift. The parameter is `hiLift`, in inches, and the lift type is
+    // "HiLift" with no hyphen - both confirmed from a request the calculator
+    // itself issued. Eight guessed names had failed before that; the lesson is
+    // that one real request beats any amount of probing.
+    if (c.hiLift !== undefined) {
+        p.set("hiLift", String(c.hiLift));
+    }
+
+    // Single carries its spring ID as `innerDiameter`, where Duplex uses the
+    // two duplex* parameters above.
+    if ((c.assembly ?? "Duplex") === "Single" && c.innerDiameter !== undefined) {
+        p.set("innerDiameter", String(c.innerDiameter));
     }
 
     for (const [k, v] of Object.entries(c.extra ?? {})) {
@@ -180,6 +185,11 @@ for (let i = 0; i < cases.length; i++) {
         );
         results.push({ input: c, status: parsed.status, messages: parsed.messages, data: d });
     }
+
+    // Flush after every reading. A long pull that gets interrupted - lost
+    // shell, compaction, Ctrl-C - used to lose every reading it had already
+    // paid for. The server charge is the expensive part; the write is free.
+    writeFileSync(outFile, JSON.stringify(results, null, 1) + "\n");
 
     if (i < cases.length - 1) {
         await sleep(DELAY_MS);
