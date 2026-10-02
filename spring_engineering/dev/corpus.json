@@ -97017,6 +97017,347 @@
     "duplexOuterWeight": 0.02
    },
    "referenceCycles": 12000
+  },
+  {
+   "id": "a1-D525216-49-3938-622lb-96in-1spr-r15-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch a1). Door-width bisection to measure the reference's assembly length, which it never reports: eleven configurations across 1-4 springs, each swept one inch at a time through the width at which the too-long warning turns on. Also exposed length errors at long active length and high cycle target - 1 spring at 1232 lb t50,000 came back 74 where we computed 102.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "622",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 7,
+    "doorWidthInches": 8
+   },
+   "expect": {
+    "duplexInnerWire": "0.3938\"",
+    "duplexOuterWire": "0.49\"",
+    "duplexInnerLength": 72,
+    "duplexOuterLength": 73,
+    "duplexInnerWeight": 82.21,
+    "duplexOuterWeight": 162.45
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 252000
+  },
+  {
+   "id": "a1-D525216-625-4531-960lb-96in-1spr-r15-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch a1). Door-width bisection to measure the reference's assembly length, which it never reports: eleven configurations across 1-4 springs, each swept one inch at a time through the width at which the too-long warning turns on. Also exposed length errors at long active length and high cycle target - 1 spring at 1232 lb t50,000 came back 74 where we computed 102.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "960",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 12,
+    "doorWidthInches": 8
+   },
+   "expect": {
+    "duplexInnerWire": "0.4531\"",
+    "duplexOuterWire": "0.625\"",
+    "duplexInnerLength": 124,
+    "duplexOuterLength": 125,
+    "duplexInnerWeight": 165.25,
+    "duplexOuterWeight": 362.18
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 216000
+  },
+  {
+   "id": "a1-D525216-5625-4531-1232lb-96in-1spr-r15-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch a1). Door-width bisection to measure the reference's assembly length, which it never reports: eleven configurations across 1-4 springs, each swept one inch at a time through the width at which the too-long warning turns on. Also exposed length errors at long active length and high cycle target - 1 spring at 1232 lb t50,000 came back 74 where we computed 102.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "1232",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 10,
+    "doorWidthInches": 2
+   },
+   "expect": {
+    "duplexInnerWire": "0.4531\"",
+    "duplexOuterWire": "0.5625\"",
+    "duplexInnerLength": 73,
+    "duplexOuterLength": 74,
+    "duplexInnerWeight": 97.28,
+    "duplexOuterWeight": 191.15
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 62000
+  },
+  {
+   "id": "a1-D525216-3437-283-474lb-96in-2spr-r15-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch a1). Door-width bisection to measure the reference's assembly length, which it never reports: eleven configurations across 1-4 springs, each swept one inch at a time through the width at which the too-long warning turns on. Also exposed length errors at long active length and high cycle target - 1 spring at 1232 lb t50,000 came back 74 where we computed 102.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "474",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 7,
+    "doorWidthInches": 9
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 35.25,
+    "duplexOuterLength": 36.25,
+    "duplexInnerWeight": 28.15,
+    "duplexOuterWeight": 55.31
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 225000
+  },
+  {
+   "id": "a1-D525216-3938-3065-652lb-96in-2spr-r15-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch a1). Door-width bisection to measure the reference's assembly length, which it never reports: eleven configurations across 1-4 springs, each swept one inch at a time through the width at which the too-long warning turns on. Also exposed length errors at long active length and high cycle target - 1 spring at 1232 lb t50,000 came back 74 where we computed 102.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "652",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 10,
+    "doorWidthInches": 1
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 43,
+    "duplexOuterLength": 44,
+    "duplexInnerWeight": 37.41,
+    "duplexOuterWeight": 77.52
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 205000
+  },
+  {
+   "id": "a1-D525216-4531-3625-950lb-96in-2spr-r15-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch a1). Door-width bisection to measure the reference's assembly length, which it never reports: eleven configurations across 1-4 springs, each swept one inch at a time through the width at which the too-long warning turns on. Also exposed length errors at long active length and high cycle target - 1 spring at 1232 lb t50,000 came back 74 where we computed 102.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "950",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 12,
+    "doorWidthInches": 8
+   },
+   "expect": {
+    "duplexInnerWire": "0.3625\"",
+    "duplexOuterWire": "0.4531\"",
+    "duplexInnerLength": 64,
+    "duplexOuterLength": 65,
+    "duplexInnerWeight": 66.76,
+    "duplexOuterWeight": 132.99
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 315000
+  },
+  {
+   "id": "a1-D525216-2625-2253-320lb-96in-3spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch a1). Door-width bisection to measure the reference's assembly length, which it never reports: eleven configurations across 1-4 springs, each swept one inch at a time through the width at which the too-long warning turns on. Also exposed length errors at long active length and high cycle target - 1 spring at 1232 lb t50,000 came back 74 where we computed 102.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "320",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 7,
+    "doorWidthInches": 7
+   },
+   "expect": {
+    "duplexInnerWire": "0.2253\"",
+    "duplexOuterWire": "0.2625\"",
+    "duplexInnerLength": 23.25,
+    "duplexOuterLength": 24.25,
+    "duplexInnerWeight": 14.57,
+    "duplexOuterWeight": 27.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 278000
+  },
+  {
+   "id": "a1-D525216-2625-2253-226lb-96in-3spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch a1). Door-width bisection to measure the reference's assembly length, which it never reports: eleven configurations across 1-4 springs, each swept one inch at a time through the width at which the too-long warning turns on. Also exposed length errors at long active length and high cycle target - 1 spring at 1232 lb t50,000 came back 74 where we computed 102.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "226",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 10,
+    "doorWidthInches": 1
+   },
+   "expect": {
+    "duplexInnerWire": "0.2253\"",
+    "duplexOuterWire": "0.2625\"",
+    "duplexInnerLength": 32.25,
+    "duplexOuterLength": 33.25,
+    "duplexInnerWeight": 20.21,
+    "duplexOuterWeight": 38.25
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 1417000
+  },
+  {
+   "id": "a1-D525216-2625-2253-580lb-96in-4spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch a1). Door-width bisection to measure the reference's assembly length, which it never reports: eleven configurations across 1-4 springs, each swept one inch at a time through the width at which the too-long warning turns on. Also exposed length errors at long active length and high cycle target - 1 spring at 1232 lb t50,000 came back 74 where we computed 102.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "580",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 7,
+    "doorWidthInches": 8
+   },
+   "expect": {
+    "duplexInnerWire": "0.2253\"",
+    "duplexOuterWire": "0.2625\"",
+    "duplexInnerLength": 17.25,
+    "duplexOuterLength": 18.25,
+    "duplexInnerWeight": 10.81,
+    "duplexOuterWeight": 20.99
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 66000
+  },
+  {
+   "id": "a1-D525216-295-2343-598lb-96in-4spr-r15-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch a1). Door-width bisection to measure the reference's assembly length, which it never reports: eleven configurations across 1-4 springs, each swept one inch at a time through the width at which the too-long warning turns on. Also exposed length errors at long active length and high cycle target - 1 spring at 1232 lb t50,000 came back 74 where we computed 102.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "598",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 10,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 24.25,
+    "duplexOuterLength": 25.25,
+    "duplexInnerWeight": 15.84,
+    "duplexOuterWeight": 32.81
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 236000
+  },
+  {
+   "id": "a1-D525216-2625-2253-310lb-96in-4spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch a1). Door-width bisection to measure the reference's assembly length, which it never reports: eleven configurations across 1-4 springs, each swept one inch at a time through the width at which the too-long warning turns on. Also exposed length errors at long active length and high cycle target - 1 spring at 1232 lb t50,000 came back 74 where we computed 102.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "310",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 12,
+    "doorWidthInches": 8
+   },
+   "expect": {
+    "duplexInnerWire": "0.2253\"",
+    "duplexOuterWire": "0.2625\"",
+    "duplexInnerLength": 31.25,
+    "duplexOuterLength": 32.25,
+    "duplexInnerWeight": 19.58,
+    "duplexOuterWeight": 37.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 1249000
   }
  ]
 }
