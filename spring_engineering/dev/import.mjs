@@ -39,7 +39,26 @@ const PAIR = '3 3/4" inside 6"';
 const wire = (w) => `${w}"`;
 const r2 = (x) => Math.round(x * 100) / 100;
 const corpus = JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8"));
-const have = new Set(corpus.readings.map((r) => r.id));
+
+// IDENTITY IS THE INPUTS, NOT THE ID STRING.
+//
+// This deduplicated on a display id built from prefix, wire sizes, weight,
+// height, spring count, hi-lift and target - with no DRUM and no RADIUS. Two
+// readings that differed only in drum or in track radius collided, and the
+// second was dropped as "already in corpus". The radius batch lost 71 of 171
+// rows that way, which is why D400-96 and D525-216 ended up with no radius-12
+// readings at all despite being swept at radius 12.
+//
+// An id is a label. What makes a reading distinct is what was asked of the
+// reference, so that is what is compared - the same key the deriver dedups on.
+const inputKey = (state) => [
+    state.drum, state.springs, state.radius, state.liftType ?? "Standard",
+    state.liftin ?? "", state.cycles, state.weight,
+    state.doorHeightFeet, state.doorHeightInches ?? 0,
+].join("|");
+
+const have = new Set(corpus.readings.map((r) => inputKey(r.state)));
+const usedIds = new Set(corpus.readings.map((r) => r.id));
 const skipped = {};
 const skip = (why) => { skipped[why] = (skipped[why] ?? 0) + 1; };
 const added = [];
@@ -84,23 +103,20 @@ for (const r of JSON.parse(readFileSync(pullFile, "utf8"))) {
     const inner = d.innerSpring;
     const outer = d.outerSpring;
     const w = String(i.widthInches ?? 108);
-    const tag = [
+    // The drum and the radius belong in the label too, so a reading can be
+    // identified from its id without opening the file.
+    const base = [
         prefix,
+        i.drum.split(" ").pop().replace(/[^A-Za-z0-9]/g, ""),
         String(outer.wireSize).replace("0.", ""),
         String(inner.wireSize).replace("0.", ""),
         `${i.weight}lb`,
         `${i.heightInches}in`,
         `${i.springs}spr`,
+        `r${i.radius}`,
         hi ? `hl${i.hiLift}` : null,
         `t${i.cycles}`,
     ].filter(Boolean).join("-");
-
-    if (have.has(tag)) {
-        skip("already in corpus");
-        continue;
-    }
-
-    have.add(tag);
 
     const state = {
         assembly: "Duplex",
@@ -116,6 +132,25 @@ for (const r of JSON.parse(readFileSync(pullFile, "utf8"))) {
         doorWidthFeet: Math.floor(Number(w) / 12),
         doorWidthInches: Number(w) % 12,
     };
+
+    const key = inputKey(state);
+
+    if (have.has(key)) {
+        skip("already in corpus (same inputs)");
+        continue;
+    }
+
+    have.add(key);
+
+    // Ids must still be unique even though they no longer define identity.
+    let tag = base;
+    let suffix = 2;
+
+    while (usedIds.has(tag)) {
+        tag = `${base}-${suffix++}`;
+    }
+
+    usedIds.add(tag);
 
     added.push({
         id: tag,
