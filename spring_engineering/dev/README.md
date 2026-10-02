@@ -527,3 +527,54 @@ The one-shift row is the instructive one: a single parameter per group reaches
 83.7% in sample and 53.8% out of it, while the bands reach 99% in and 67% out.
 Simplifying the model does not rescue generalisation here, and neither does
 adding freedom - both were tried and measured.
+
+## The moment arm data: validation, not improvement
+
+The drum record carries the real geometry, and it confirms that the fitted
+constants in this file are physical quantities rather than curve-fitting
+artefacts:
+
+| our constant | what it is | record | agreement |
+|---|---|---|---|
+| `rEff` D400-96 | 2.2753521 | highMomentArm 2.275 | to published precision |
+| `rEff` D400-144 | 2.2933549 | 2.293 | " |
+| `rEff` D525-216 | 2.9364545 | 2.936 | " |
+| `HL800_NODE_A` | 17.015618 | flatMomentArm 4.125² = 17.015625 | **seven figures** |
+| `HL575_A` | 8.8176917 | 2.969² = 8.814961 | ours more precise |
+| `spiralA` 525-54HL | 7.3952515 | 2.719² = 7.392961 | ours more precise |
+| `spiralB` all | ~0.09966 | rateOfRise 0.313/π = 0.0996310 | ✓ |
+
+So `rEff` is the drum's moment arm, `spiralA` is `flatMomentArm²` and `spiralB`
+is `rateOfRise/π`. Nothing changes, because the fitted values carry four more
+digits than the record publishes - but they are no longer magic numbers, and a
+future maintainer can check them against the source.
+
+One deliberate disagreement is worth keeping in mind: `HL800_A` is 17.0209238
+where the record says 17.015625. The record publishes the catalogue nominal and
+the calculator behaves like r0 = 4.1256. `HL800_NODE_A` holds the catalogue
+value, which is why there are two. **Measuring the calculator beat reading the
+catalogue.**
+
+### What it does not give
+
+`turnsCurve` is not in the record and cannot be derived from it. The record's
+`circumference` gives turns as roughly `height/circumference + 1` - the extra
+turn being the spiral first wrap - and that is accurate to about a tenth of a
+turn:
+
+| drum | height | our turns | height/circ | difference |
+|---|---|---|---|---|
+| D525-216 | 84 | 6.053 | 4.918 | 1.135 |
+| D525-216 | 120 | 8.088 | 7.026 | 1.062 |
+| D525-216 | 168 | 10.855 | 9.836 | 1.019 |
+| D525-216 | 216 | 13.642 | 12.646 | 0.996 |
+
+A tenth of a turn is a 1% multiplier error where this file holds 2e-5. Enough
+to offer an unmeasured drum with a warning attached; not enough to match the
+reference. Supporting any of the other 76 standard drums still needs readings
+per drum, but the record supplies `maximumHeight`, `maximumWeight`,
+`maximumDiameter` and the moment arm for free, so only the turns curve has to
+be measured.
+
+And it does not touch the length. The length problem is not geometric - the
+multiplier is already exact to 2e-5 and the length is wrong anyway.

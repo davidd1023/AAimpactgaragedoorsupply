@@ -119,6 +119,24 @@ const STEEL_DENSITY = 0.2836;   // lb/in^3
 // and the door height does not enter. So raising the door LOWERS the multiplier
 // and RAISES the turns, leaving peak torque, and therefore the CYCLE COUNT,
 // unchanged. Only TIPPT and spring length move with height.
+// rEff IS THE DRUM'S MOMENT ARM. These were fitted, and the reference's own
+// drum record confirms what they are:
+// GET /spring-engineering/drum?drumName=... returns highMomentArm, and it
+// agrees with every fitted value to the precision it publishes -
+//
+//   D400-96    fitted 2.2753521   record 2.275
+//   D400-144   fitted 2.2933549   record 2.293
+//   D525-216   fitted 2.9364545   record 2.936
+//
+// so these are geometry, not curve-fitting artefacts. The fitted figures are
+// kept because they carry four more digits than the record publishes.
+//
+// turnsCurve is NOT in the record and cannot be derived from it. The record's
+// `circumference` gives turns to about a tenth of a turn - turns is roughly
+// height/circumference plus one, the extra turn being the spiral first wrap -
+// and a tenth of a turn is a 1% multiplier error where this file holds 2e-5.
+// Good enough to offer an unmeasured drum with a warning; not good enough to
+// match the reference.
 const DRUMS = {
     "CANIMEX/TF D400-144": {
         rEff: 2.2933549,
@@ -216,6 +234,18 @@ const HILIFT_MIN = 12;
 // The spiral is the drum's own, recovered from its 100 lb cycle counts. Its
 // pitch of 0.313097" is the same constant the 525-54HL and D800-120 use, to
 // seven figures - the calculator applies one pitch across hi-lift drums.
+// The hi-lift spiral constants are the record's geometry too:
+// spiralA is flatMomentArm squared and spiralB is rateOfRise/pi.
+//
+//   575-120    A 8.8176917   record 2.969^2 = 8.814961
+//   525-54HL   A 7.3952515   record 2.719^2 = 7.392961
+//   D800-120   A 17.015618   record 4.125^2 = 17.015625  (seven figures)
+//   all        B ~0.09966    record 0.313/pi = 0.0996310
+//
+// HL800_A below is deliberately 17.0209238 rather than the record's 17.015625:
+// the record publishes the catalogue nominal and the calculator behaves like
+// r0 = 4.1256. HL800_NODE_A carries the catalogue value, which is why there are
+// two. Measuring the calculator beat reading the catalogue, and both are kept.
 const HL575_A = 8.8176917;         // r0^2, r0 = 2.96946"
 const HL575_B = 0.099661791;       // pitch/pi, pitch = 0.313097"
 const HL575_MIN = 12;
