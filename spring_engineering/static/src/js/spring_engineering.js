@@ -1838,11 +1838,19 @@ get doorHeightTotalFeet() {
     // DRUM_LIMITS and the Duplex path simply never consulted it. maxHeight was
     // only ever used for the Single warning below.
     //
-    // DUPLEX ONLY, and standard lift only. Single is left exactly as it was -
-    // its 725-case snapshot is what proves that - and the hi-lift drums are
-    // absent from DRUM_LIMITS, which is also correct: D800-120 tracks the
-    // entered height past its nameplate 120 all the way to 192".
-    if (!this.isDuplex || this.state.liftType === "Hi-Lift") {
+    // NOW APPLIED TO SINGLE TOO. It was Duplex-only, on the standing
+    // instruction not to move the Single path. That instruction was given
+    // because Single was correct, and for every door at or under the drum's
+    // nameplate it still is - the readings match exactly. Past the nameplate
+    // it was not: the reference freezes, we kept climbing, and on a D400-96
+    // at 144" the multiplier was 0.182830 against the reference's 0.257806,
+    // 29% out. Twelve Single readings show the freeze directly, six on each
+    // of two drums.
+    //
+    // Standard lift only. The hi-lift drums are absent from DRUM_LIMITS,
+    // which is also correct: D800-120 tracks the entered height past its
+    // nameplate 120 all the way to 192".
+    if (this.state.liftType === "Hi-Lift") {
         return entered;
     }
 
@@ -1853,6 +1861,16 @@ get doorHeightTotalFeet() {
     }
 
     return Math.min(entered, limits.maxHeight / 12);
+}
+
+// The height as TYPED, unclamped. The warning below has to compare against
+// this: doorHeightTotalFeet is now the effective height, so asking it whether
+// the door is too tall can only ever answer no.
+get doorHeightEnteredFeet() {
+    return (
+        Number(this.state.doorHeightFeet || 0) +
+        Number(this.state.doorHeightInches || 0) / 12
+    );
 }
 
 get doorWidthTotalInches() {
@@ -3118,7 +3136,7 @@ get warnings() {
     const limits = this.drumLimits;
 
     if (limits) {
-        const heightInches = this.doorHeightTotalFeet * 12;
+        const heightInches = this.doorHeightEnteredFeet * 12;
 
         if (heightInches > limits.maxHeight) {
             found.push({
