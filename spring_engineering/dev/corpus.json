@@ -76335,6 +76335,2331 @@
     "duplexOuterWeight": 0.02
    },
    "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-400lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "400",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 16.77,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 26000
+  },
+  {
+   "id": "k1-3625-283-401lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "401",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 16.77,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 26000
+  },
+  {
+   "id": "k1-3625-283-402lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "402",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 16.77,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 25000
+  },
+  {
+   "id": "k1-3625-283-403lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "403",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 16.77,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 25000
+  },
+  {
+   "id": "k1-3625-283-404lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "404",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 16.77,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 25000
+  },
+  {
+   "id": "k1-3625-283-405lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "405",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 16.77,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 25000
+  },
+  {
+   "id": "k1-3625-283-406lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "406",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 16.77,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 24000
+  },
+  {
+   "id": "k1-3625-283-407lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "407",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 16.77,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 24000
+  },
+  {
+   "id": "k1-3625-283-408lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "408",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 16.77,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 24000
+  },
+  {
+   "id": "k1-3625-289-409lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "409",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 22,
+    "duplexOuterLength": 23,
+    "duplexInnerWeight": 17.97,
+    "duplexOuterWeight": 37.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 31000
+  },
+  {
+   "id": "k1-3625-289-410lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "410",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 22,
+    "duplexOuterLength": 23,
+    "duplexInnerWeight": 17.97,
+    "duplexOuterWeight": 37.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 31000
+  },
+  {
+   "id": "k1-3625-289-411lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "411",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 22,
+    "duplexOuterLength": 23,
+    "duplexInnerWeight": 17.97,
+    "duplexOuterWeight": 37.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 30000
+  },
+  {
+   "id": "k1-3625-289-412lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "412",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 22,
+    "duplexOuterLength": 23,
+    "duplexInnerWeight": 17.97,
+    "duplexOuterWeight": 37.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 30000
+  },
+  {
+   "id": "k1-3625-289-413lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "413",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 22,
+    "duplexOuterLength": 23,
+    "duplexInnerWeight": 17.97,
+    "duplexOuterWeight": 37.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 30000
+  },
+  {
+   "id": "k1-3625-289-414lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "414",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 22,
+    "duplexOuterLength": 23,
+    "duplexInnerWeight": 17.97,
+    "duplexOuterWeight": 37.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 29000
+  },
+  {
+   "id": "k1-3625-289-415lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "415",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 22,
+    "duplexOuterLength": 23,
+    "duplexInnerWeight": 17.97,
+    "duplexOuterWeight": 37.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 29000
+  },
+  {
+   "id": "k1-3625-289-416lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "416",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 22,
+    "duplexOuterLength": 23,
+    "duplexInnerWeight": 17.97,
+    "duplexOuterWeight": 37.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 29000
+  },
+  {
+   "id": "k1-3625-289-417lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "417",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 17.15,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 28000
+  },
+  {
+   "id": "k1-3625-289-418lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "418",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 17.15,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 28000
+  },
+  {
+   "id": "k1-3625-289-419lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "419",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 17.15,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 28000
+  },
+  {
+   "id": "k1-3625-289-420lb-84in-1spr-t25000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "420",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 17.15,
+    "duplexOuterWeight": 35.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 27000
+  },
+  {
+   "id": "k1-3625-283-488lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "488",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 18,
+    "duplexOuterLength": 19,
+    "duplexInnerWeight": 14.38,
+    "duplexOuterWeight": 30.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-489lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "489",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 17,
+    "duplexOuterLength": 18,
+    "duplexInnerWeight": 13.58,
+    "duplexOuterWeight": 29.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-490lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "490",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 17,
+    "duplexOuterLength": 18,
+    "duplexInnerWeight": 13.58,
+    "duplexOuterWeight": 29.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-491lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "491",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 17,
+    "duplexOuterLength": 18,
+    "duplexInnerWeight": 13.58,
+    "duplexOuterWeight": 29.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-492lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "492",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 17,
+    "duplexOuterLength": 18,
+    "duplexInnerWeight": 13.58,
+    "duplexOuterWeight": 29.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-493lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "493",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 17,
+    "duplexOuterLength": 18,
+    "duplexInnerWeight": 13.58,
+    "duplexOuterWeight": 29.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 9000
+  },
+  {
+   "id": "k1-3625-283-494lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "494",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 17,
+    "duplexOuterLength": 18,
+    "duplexInnerWeight": 13.58,
+    "duplexOuterWeight": 29.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 9000
+  },
+  {
+   "id": "k1-3625-283-495lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "495",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 17,
+    "duplexOuterLength": 18,
+    "duplexInnerWeight": 13.58,
+    "duplexOuterWeight": 29.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 9000
+  },
+  {
+   "id": "k1-3625-283-496lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "496",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 17,
+    "duplexOuterLength": 18,
+    "duplexInnerWeight": 13.58,
+    "duplexOuterWeight": 29.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 9000
+  },
+  {
+   "id": "k1-3625-289-497lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "497",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 18,
+    "duplexOuterLength": 19,
+    "duplexInnerWeight": 14.7,
+    "duplexOuterWeight": 30.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "k1-3625-289-498lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "498",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 18,
+    "duplexOuterLength": 19,
+    "duplexInnerWeight": 14.7,
+    "duplexOuterWeight": 30.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "k1-3625-289-499lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "499",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 18,
+    "duplexOuterLength": 19,
+    "duplexInnerWeight": 14.7,
+    "duplexOuterWeight": 30.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "k1-3625-289-500lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "500",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 18,
+    "duplexOuterLength": 19,
+    "duplexInnerWeight": 14.7,
+    "duplexOuterWeight": 30.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "k1-3625-289-501lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "501",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 18,
+    "duplexOuterLength": 19,
+    "duplexInnerWeight": 14.7,
+    "duplexOuterWeight": 30.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "k1-3625-289-502lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "502",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 18,
+    "duplexOuterLength": 19,
+    "duplexInnerWeight": 14.7,
+    "duplexOuterWeight": 30.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 12000
+  },
+  {
+   "id": "k1-3625-289-503lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "503",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 18,
+    "duplexOuterLength": 19,
+    "duplexInnerWeight": 14.7,
+    "duplexOuterWeight": 30.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-289-504lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "504",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 18,
+    "duplexOuterLength": 19,
+    "duplexInnerWeight": 14.7,
+    "duplexOuterWeight": 30.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-289-505lb-84in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "505",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 18,
+    "duplexOuterLength": 19,
+    "duplexInnerWeight": 14.7,
+    "duplexOuterWeight": 30.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-283-612lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "612",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 20.77,
+    "duplexOuterWeight": 43.58
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-283-613lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "613",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 20.77,
+    "duplexOuterWeight": 43.58
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-283-614lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "614",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 20.77,
+    "duplexOuterWeight": 43.58
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-283-615lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "615",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 20.77,
+    "duplexOuterWeight": 43.58
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-283-616lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "616",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 20.77,
+    "duplexOuterWeight": 43.58
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-283-617lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "617",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 20.77,
+    "duplexOuterWeight": 43.58
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-283-618lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "618",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 20.77,
+    "duplexOuterWeight": 43.58
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-283-619lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "619",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 20.77,
+    "duplexOuterWeight": 43.58
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-283-620lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "620",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "k1-3625-283-621lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "621",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-622lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "622",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-623lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "623",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-624lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "624",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-625lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "625",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-626lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "626",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-627lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "627",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-628lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "628",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-629lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "629",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-630lb-96in-1spr-t10000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "630",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "k1-3625-283-344lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "344",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 53000
+  },
+  {
+   "id": "k1-3625-283-345lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "345",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 52000
+  },
+  {
+   "id": "k1-3625-283-346lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "346",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 52000
+  },
+  {
+   "id": "k1-3625-283-347lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "347",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 51000
+  },
+  {
+   "id": "k1-3625-283-348lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "348",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.97,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 50000
+  },
+  {
+   "id": "k1-3625-283-349lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "349",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 24,
+    "duplexOuterLength": 25,
+    "duplexInnerWeight": 19.17,
+    "duplexOuterWeight": 40.35
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 50000
+  },
+  {
+   "id": "k1-3625-283-350lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "350",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 24,
+    "duplexOuterLength": 25,
+    "duplexInnerWeight": 19.17,
+    "duplexOuterWeight": 40.35
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 49000
+  },
+  {
+   "id": "k1-3625-283-351lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "351",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 24,
+    "duplexOuterLength": 25,
+    "duplexInnerWeight": 19.17,
+    "duplexOuterWeight": 40.35
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 48000
+  },
+  {
+   "id": "k1-3625-289-352lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "352",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 20.42,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 63000
+  },
+  {
+   "id": "k1-3625-289-353lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "353",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 20.42,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 62000
+  },
+  {
+   "id": "k1-3625-289-354lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "354",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 20.42,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 61000
+  },
+  {
+   "id": "k1-3625-289-355lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "355",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 20.42,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 60000
+  },
+  {
+   "id": "k1-3625-289-356lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "356",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 20.42,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 60000
+  },
+  {
+   "id": "k1-3625-289-357lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "357",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 20.42,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 59000
+  },
+  {
+   "id": "k1-3625-289-358lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "358",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 20.42,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 58000
+  },
+  {
+   "id": "k1-3625-289-359lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "359",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 20.42,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 57000
+  },
+  {
+   "id": "k1-3625-289-360lb-84in-1spr-t50000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k1). One-pound sweeps across all four switch points of rung 0.3625/0.283, the one rung whose switch bounds are mutually unsatisfiable: D525-216 1-spring 84in at t25,000 (switches at 409 lb), t10,000 (497 lb) and t50,000 (352 lb), plus D400-144 1-spring 96in at t10,000, where 0.283 extends past 630 lb with no switch at all. Also 12 Single readings probing the door-height cap.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "360",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 20.42,
+    "duplexOuterWeight": 41.96
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 57000
   }
  ]
 }

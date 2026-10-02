@@ -214,8 +214,19 @@ function boundsFromSwitches(readings) {
 
     for (const r of readings) {
         const st = r.state;
+        // The lift MUST be part of the key. A switch point is "the heaviest
+        // door still on this rung, and the next one up" - which only means
+        // anything if the two readings differ in weight alone. Leaving the
+        // hi-lift amount out grouped D800-120 3-spring readings at 900 lb
+        // with hiLift 12, 24, 72 and 96 into one sequence: same weight,
+        // different wire, recorded as a switch at a weight delta of zero.
+        //
+        // That single bogus switch put the hi bound for rung 0.3625/0.283 at
+        // 6565.7 while every real bound on it sits at 7482-7495, which is
+        // what made the rung's bounds unsatisfiable.
         const key = [st.drum, st.springs, st.radius, st.doorHeightFeet,
-                     st.doorHeightInches, st.cycles].join("|");
+                     st.doorHeightInches, st.cycles,
+                     st.liftType ?? "Standard", st.liftin ?? ""].join("|");
 
         if (!cfg.has(key)) {
             cfg.set(key, []);
@@ -247,19 +258,33 @@ function boundsFromSwitches(readings) {
             const springs = Number(a.state.springs) || 2;
 
             if (!out.has(ka)) {
-                out.set(ka, { lo: [], hi: [] });
+                out.set(ka, { lo: [], hi: [], loSrc: [], hiSrc: [] });
             }
 
             for (const [side, reading] of [["lo", a], ["hi", b]]) {
                 const c = make(mod, reading.state);
 
-                if (!c.tipptExact || !c.turnsExact) {
+                // duplexTipptExact, NOT tipptExact: the latter is the Single
+                // path's, computed on the entered weight with no drum cap.
+                // D400-144 is rated 750 lb and the corpus has a 765 lb
+                // reading, so the unclamped figure is a weight the reference
+                // threw away before it picked anything.
+                if (!c.duplexTipptExact || !c.turnsExact) {
                     continue;
                 }
 
                 out.get(ka)[side].push(
-                    divider(a.inner, 3.75) * c.turnsExact * c.tipptExact /
+                    divider(a.inner, 3.75) * c.turnsExact * c.duplexTipptExact /
                     (torque * (springs / 2))
+                );
+                // Keep WHICH reading set each bound. When a rung's bounds
+                // cannot all hold, the only useful question is which reading
+                // disagrees with the rest, and that is unanswerable from the
+                // numbers alone.
+                out.get(ka)[side + "Src"].push(
+                    `${reading.state.drum.split(" ").pop()} ${reading.state.weight}lb ` +
+                    `${reading.state.doorHeightFeet}'${reading.state.doorHeightInches || 0}" ` +
+                    `${reading.state.springs}spr r${reading.state.radius} t${reading.state.cycles}`
                 );
             }
         }
@@ -481,6 +506,15 @@ function pickK(g) {
         }
 
         if (process.env.DUMP_K) {
+            const loAt = b.loSrc?.[b.lo.indexOf(lo)] ?? "?";
+            const hiAt = b.hiSrc?.[b.hi.indexOf(hi)] ?? "?";
+            console.error(`    lo ${lo.toFixed(1)} set by: ${loAt}`);
+            console.error(`    hi ${hi.toFixed(1)} set by: ${hiAt}`);
+            const sorted = b.hi.map((v, n) => [v, b.hiSrc[n]]).sort((x, y) => x[0] - y[0]);
+            console.error("    all hi bounds, lowest first:");
+            for (const [v, who] of sorted.slice(0, 6)) {
+                console.error(`      ${v.toFixed(1).padStart(9)}  ${who}`);
+            }
             console.error(
                 `  ${(g.outer + "/" + g.inner).padEnd(16)} CONTRADICTORY: lo ${lo.toFixed(1)} > hi ${hi.toFixed(1)}` +
                 `  cycles ${fromCycles}  -> K ${best.k.toFixed(1)}` +
