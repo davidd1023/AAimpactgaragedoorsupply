@@ -984,6 +984,10 @@ function pickK(g) {
 }
 
 const out = [...rungs.values()]
+    // A rung with a zero wire size is a malformed reading, not a rung. It
+    // carried K null so install.py skipped it, but it had no business being
+    // here and it made the table unreadable.
+    .filter((g) => g.outer > 0 && g.inner > 0)
     .map((g) => {
         const S = 2 * (divider(g.inner, 3.75) + divider(g.outer, 6));
         const byCount = {};
@@ -1070,8 +1074,25 @@ if (process.argv.includes("--json")) {
     console.log("  outer    inner      S        K       K/S     n  nLen  bands per spring count");
 
     for (const r of out) {
+        // Each spring count may carry bands, a line or a regime split. This
+        // assumed bands and threw, which killed the whole printer - and the
+        // overfit and contradiction reports print AFTER it, so they silently
+        // stopped running the moment lines were introduced. "0 rungs where
+        // frac alone provably fails" was a crashed report, not a clean bill.
         const bc = Object.entries(r.byCount)
-            .map(([sp, v]) => `${sp}spr:${v.bands.length}b/n${v.n}`)
+            .map(([sp, v]) => {
+                if (v.split) {
+                    return `${sp}spr:split@${v.split.from}/n${v.n}`;
+                }
+
+                if (v.line) {
+                    const k = v.line.levels ? v.line.levels.length : 2;
+
+                    return `${sp}spr:line${k}L/n${v.n}`;
+                }
+
+                return `${sp}spr:${v.bands.length}b/n${v.n}`;
+            })
             .join(" ");
 
         console.log(

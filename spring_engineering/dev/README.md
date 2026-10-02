@@ -297,3 +297,90 @@ Active length is the axis the corpus never covered:
 that, because a light door on a 300,000-cycle target gives a very long spring,
 and the length rule had never been tested there. Multiplier and wire choice
 held up at 100% on the sample; only length moved.
+
+## Where this ended up, and why it is not 100%
+
+Run `sh dev/honest.sh`. It prints both numbers, because quoting the first alone
+is misleading:
+
+| | | |
+|---|---|---|
+| in sample | 3153/3181 | what the fitter reproduces of what it was shown |
+| external, seed 777001 | wire 98.7%, length 68.0%, within 1" 92.9% | 225 readings |
+| external, spread sample | wire 100.0%, length 66.3%, within 1" 93.2% | 294 readings |
+
+Two independent uniform draws from the allowed box agree, so ~**99% on wire,
+~67% exact on length, ~93% within an inch** is the real figure. The wire is the
+part that decides which spring to order.
+
+### The length rule cannot be finished in this model class
+
+`(rung, spring count, fraction)` provably does not determine the reference's
+length. The proof is in the deriver's own output on the biggest group in the
+box - `0.2625/0.2253` at four springs, a quarter of everywhere a random door
+lands:
+
+```
+RUNGS WHERE THE FRACTION ALONE DOES NOT DETERMINE THE LENGTH
+  0.2625/0.2253 at 4 spring(s): 97 bands needed over 214 readings
+RUNGS WHERE ONE THRESHOLD CANNOT FIT THE READINGS
+  0.2625/0.2253 at 4 spring(s): bonus is not monotonic in frac
+```
+
+Three independent lines of evidence say the same thing:
+
+1. **A predictor search.** `(rung, springs, frac)` caps at 92.6% and already
+   needs 1355 groups for 3173 readings. Adding `floor` reaches 99.7% with 2535
+   groups - 1.25 readings per group, which is a lookup table, not a rule. Turns,
+   coils and coil-fraction all score ~45%, no better than guessing the modal
+   value.
+2. **Adding good data makes it worse.** A 300-reading sample with height,
+   target and weight drawn independently - properly spread - dropped the
+   external score from 68.0% to 64.9% AND the in-sample score from 3153 to
+   3092, without being asserted at all. Valid readings that make the fitter
+   worse at reproducing the existing corpus mean the new readings contradict
+   the old ones inside a group. That sample is kept as
+   `dev/eval-soft2-spread.json` and is now the second evaluation set.
+3. **Model complexity does not help in either direction.** Fewer bands is
+   worse (2 bands: 60.0%, 4: 62.7%, 8: 63.6%, 64: 68.0%), and more is
+   identical (128 and 64 agree exactly, because no group exceeds 64). K
+   parallel thresholds, built specifically for the four-level group, scored
+   158/239 at two levels against 157/239 at three and four.
+
+What would actually close it is the reference's own length algorithm, or enough
+readings per group to learn a 20-bucket fraction map for each of 150 groups -
+on the order of 15,000 requests, at one per second, and even then capped near
+92.6%.
+
+### Three measurement traps, all of which caught me
+
+Every one produced a number that looked better than the truth.
+
+1. **The deriver read its own evaluation set.** `pulled-rand.json` matched
+   `pulled*.json`, and the pull writes incrementally, so every `apply.sh`
+   folded more of the scoring set into the fit. Reported 91.9%; the honest
+   figure was 63.6%. Evaluation pulls are now named `eval-*` and skipped.
+2. **The five-fold holdout read 98%** against ~67% on a uniform draw, and could
+   not have done otherwise: it withholds CORPUS readings, and the corpus is
+   full of one-pound sweeps, so a withheld reading always has a neighbour one
+   pound away. Locally dense, globally sparse. It answers "can the model
+   predict a reading like the ones it was fitted on", which is not the question.
+3. **A crashed report read as a clean bill.** The table printer assumed every
+   spring count carried bands and threw on lines and splits. The overfit and
+   contradiction reports print after the table, so they stopped running the
+   moment lines were introduced - and "0 rungs where frac alone provably fails"
+   was a crash, not a result. The diagnostic that explains the whole length
+   problem had been suppressed for several commits.
+
+The common thread: **distrust the number that improved.** Each of these was
+found by noticing a figure that got better when nothing relevant had changed.
+
+### Also learned about sweep design
+
+A 430-reading sweep of the highest-traffic rung took it from 58.3% to 29.2%.
+Weight was varied finely at FIXED height and FIXED target - and since active
+length is `springs*(dividers)/TIPPT` with `TIPPT = multiplier*weight`, at fixed
+height that is simply proportional to `1/weight`. All 430 readings lay on one
+one-dimensional curve through the (floor, fraction) plane, while the thing
+being fitted is a surface over it. Dense is not diverse. It is kept as
+`dev/biased-soft-weightonly.json`, excluded from fitting.
