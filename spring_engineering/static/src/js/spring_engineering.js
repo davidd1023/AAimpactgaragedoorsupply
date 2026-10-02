@@ -983,7 +983,7 @@ const DUPLEX_PAIRS = {
         innerId: 3.75,
         outerId: 6,
         calibration: [
-            { outerWire: 0.2625, innerWire: 0.2253, K: 2003.0, n: 129, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 0.413, bonus: 1.25 }, { upTo: 0.435, bonus: 3.25 }, { upTo: 0.583, bonus: 1.25 }, { upTo: 0.636, bonus: 2.25 }, { upTo: 0.766, bonus: 1 }, { upTo: 0.821, bonus: 2.25 }, { upTo: 0.86, bonus: 1 }, { upTo: 0.882, bonus: 2.25 }, { upTo: 0.911, bonus: 1 }, { upTo: 0.974, bonus: 2.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.256, bonus: 2.25 }, { upTo: 0.278, bonus: 1.25 }, { upTo: 0.288, bonus: 2.25 }, { upTo: 0.414, bonus: 1.25 }, { upTo: 0.578, bonus: 2.25 }, { upTo: 0.639, bonus: 1.25 }, { upTo: 0.744, bonus: 2.25 }, { upTo: 0.796, bonus: 1.25 }, { upTo: 0.949, bonus: 2.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.054, bonus: 0.25 }, { upTo: 0.121, bonus: 1.25 }, { upTo: 0.199, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] }, long: { from: 25.5, split: 0.065, above: 2.25 } },
+            { outerWire: 0.2625, innerWire: 0.2253, K: 2003.0, n: 130, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 0.413, bonus: 1.25 }, { upTo: 0.435, bonus: 3.25 }, { upTo: 0.583, bonus: 1.25 }, { upTo: 0.636, bonus: 2.25 }, { upTo: 0.766, bonus: 1 }, { upTo: 0.821, bonus: 2.25 }, { upTo: 0.86, bonus: 1 }, { upTo: 0.882, bonus: 2.25 }, { upTo: 0.911, bonus: 1 }, { upTo: 0.974, bonus: 2.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.256, bonus: 2.25 }, { upTo: 0.278, bonus: 1.25 }, { upTo: 0.288, bonus: 2.25 }, { upTo: 0.414, bonus: 1.25 }, { upTo: 0.578, bonus: 2.25 }, { upTo: 0.639, bonus: 1.25 }, { upTo: 0.744, bonus: 2.25 }, { upTo: 0.796, bonus: 1.25 }, { upTo: 0.949, bonus: 2.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.054, bonus: 0.25 }, { upTo: 0.121, bonus: 1.25 }, { upTo: 0.199, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] }, long: { from: 25.5, byCount: { 2: 0.620, 3: 0.050 }, above: 2.25 } },
             { outerWire: 0.273, innerWire: 0.2253, K: 2230.7, n: 62, byCount: { 2: [{ upTo: 0.4, bonus: 0 }, { upTo: 0.498, bonus: 1.25 }, { upTo: 0.572, bonus: 0 }, { upTo: 0.681, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.554, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
             { outerWire: 0.283, innerWire: 0.2253, K: 2426.1, n: 67, byCount: { 2: [{ upTo: 0.89, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 0.25 }], 4: [{ upTo: 0.809, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
             { outerWire: 0.283, innerWire: 0.2343, K: 2688.8, n: 31, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 0.649, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }] } },
@@ -994,31 +994,34 @@ const DUPLEX_PAIRS = {
             { outerWire: 0.3065, innerWire: 0.25, K: 3859.8, n: 24, byCount: { 3: [{ upTo: 0.469, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 0.25 }] } },
             { outerWire: 0.3125, innerWire: 0.25, K: 4058.0, n: 36, byCount: { 3: [{ upTo: 0.68, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.702, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
             { outerWire: 0.3125, innerWire: 0.2625, K: 4520.9, n: 8, byCount: { 3: [{ upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3195, innerWire: 0.2625, K: 4807.2, n: 28, byCount: { 1: [{ upTo: 0.37, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.319, bonus: 0 }, { upTo: 1, bonus: 1.25 }], 3: [{ upTo: 0.31, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.517, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.331, innerWire: 0.2625, K: 5166.1, n: 47, byCount: { 1: [{ upTo: 0.717, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.739, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.731, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.331, innerWire: 0.273, K: 5798.7, n: 63, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 0.481, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.229, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3437, innerWire: 0.273, K: 6325.9, n: 34, byCount: { 1: [{ upTo: 0.65, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.697, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.393, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 0.25 }] } },
-            { outerWire: 0.3437, innerWire: 0.283, K: 6932.5, n: 56, byCount: { 1: [{ upTo: 0.207, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.23, bonus: 0 }, { upTo: 0.534, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.366, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3625, innerWire: 0.283, K: 7484.7, n: 40, byCount: { 1: [{ upTo: 0.876, bonus: 0 }, { upTo: 0.943, bonus: 1 }, { upTo: 1, bonus: 0 }], 2: [{ upTo: 0.844, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.883, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3625, innerWire: 0.289, K: 8296.5, n: 57, byCount: { 3: [{ upTo: 0.565, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3625, innerWire: 0.295, K: 8783.4, n: 23, byCount: { 1: [{ upTo: 0.271, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.375, innerWire: 0.295, K: 9177.8, n: 68, byCount: { 1: [{ upTo: 0.71, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.691, bonus: 0 }, { upTo: 0.833, bonus: 1 }, { upTo: 1, bonus: 0 }], 3: [{ upTo: 0.736, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.375, innerWire: 0.3065, K: 10478.6, n: 48, byCount: { 1: [{ upTo: 0.061, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.069, bonus: 0 }, { upTo: 0.316, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.075, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3938, innerWire: 0.3065, K: 11082.4, n: 61, byCount: { 1: [{ upTo: 0.149, bonus: 0 }, { upTo: 0.261, bonus: -1 }, { upTo: 1, bonus: 0 }], 2: [{ upTo: 0.227, bonus: -1 }, { upTo: 1, bonus: 0 }], 3: [{ upTo: 0.032, bonus: -0.75 }, { upTo: 1, bonus: 0.25 }] } },
-            { outerWire: 0.3938, innerWire: 0.3125, K: 12199.7, n: 58, byCount: { 3: [{ upTo: 0.685, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3938, innerWire: 0.3195, K: 13120.9, n: 35, byCount: { 1: [{ upTo: 0.277, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3195, innerWire: 0.2625, K: 4810.1, n: 40, byCount: { 1: [{ upTo: 0.296, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.319, bonus: 0 }, { upTo: 1, bonus: 1.25 }], 3: [{ upTo: 0.31, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 0.517, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.331, innerWire: 0.2625, K: 5164.5, n: 70, byCount: { 1: [{ upTo: 0.717, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.739, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.731, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.331, innerWire: 0.273, K: 5782.4, n: 85, byCount: { 1: [{ upTo: 0.201, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.481, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.229, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3437, innerWire: 0.273, K: 6269.0, n: 55, byCount: { 1: [{ upTo: 0.7, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.697, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.393, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 0.25 }] } },
+            { outerWire: 0.3437, innerWire: 0.283, K: 6927.8, n: 83, byCount: { 1: [{ upTo: 0.179, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.23, bonus: 0 }, { upTo: 0.534, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.366, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3625, innerWire: 0.283, K: 7479.3, n: 65, byCount: { 1: [{ upTo: 0.853, bonus: 0 }, { upTo: 0.869, bonus: 1 }, { upTo: 0.891, bonus: 0 }, { upTo: 0.961, bonus: 1 }, { upTo: 0.982, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.844, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.883, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3625, innerWire: 0.289, K: 8295.6, n: 86, byCount: { 1: [{ upTo: 0.616, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.565, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3625, innerWire: 0.295, K: 8787.3, n: 42, byCount: { 1: [{ upTo: 0.214, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.375, innerWire: 0.295, K: 9179.9, n: 94, byCount: { 1: [{ upTo: 0.657, bonus: 0 }, { upTo: 0.684, bonus: 1 }, { upTo: 0.726, bonus: 0 }, { upTo: 0.795, bonus: 1 }, { upTo: 0.809, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.691, bonus: 0 }, { upTo: 0.833, bonus: 1 }, { upTo: 1, bonus: 0 }], 3: [{ upTo: 0.736, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.375, innerWire: 0.3065, K: 10478.6, n: 72, byCount: { 1: [{ upTo: 0.077, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.069, bonus: 0 }, { upTo: 0.316, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.075, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3938, innerWire: 0.3065, K: 11086.5, n: 86, byCount: { 1: [{ upTo: 0.187, bonus: 0 }, { upTo: 0.209, bonus: -1 }, { upTo: 0.941, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.227, bonus: -1 }, { upTo: 1, bonus: 0 }], 3: [{ upTo: 0.032, bonus: -0.75 }, { upTo: 1, bonus: 0.25 }] } },
+            { outerWire: 0.3938, innerWire: 0.3125, K: 12199.5, n: 81, byCount: { 1: [{ upTo: 0.476, bonus: 0 }, { upTo: 0.511, bonus: 1 }, { upTo: 0.52, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.685, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3938, innerWire: 0.3195, K: 13120.9, n: 44, byCount: { 1: [{ upTo: 0.134, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }] } },
             { outerWire: 0.4062, innerWire: 0.3195, K: 13594.4, n: 50, byCount: { 1: [{ upTo: 0.657, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.728, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.771, bonus: 0.25 }, { upTo: 0.829, bonus: 1.25 }, { upTo: 0.875, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
             { outerWire: 0.4062, innerWire: 0.331, K: 15433.0, n: 61, byCount: { 1: [{ upTo: 0.942, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 0.219, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 0.883, bonus: 1.25 }, { upTo: 1, bonus: 2.25 }] } },
             { outerWire: 0.4218, innerWire: 0.331, K: 16190.5, n: 34, byCount: { 2: [{ upTo: 1, bonus: 0 }], 3: [{ upTo: 0.887, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] } },
             { outerWire: 0.4218, innerWire: 0.3437, K: 18569.5, n: 40, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 1, bonus: 1 }], 3: [{ upTo: 0.802, bonus: 1.25 }, { upTo: 1, bonus: 2.25 }] } },
-            { outerWire: 0.4305, innerWire: 0.3437, K: 19477.8, n: 48, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 0.325, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 0.25 }] } },
-            { outerWire: 0.4305, innerWire: 0.3625, K: 22027.8, n: 10, byCount: { 1: [{ upTo: 1, bonus: 2 }], 2: [{ upTo: 0.924, bonus: 2.25 }, { upTo: 1, bonus: 3.25 }] } },
-            { outerWire: 0.4375, innerWire: 0.3625, K: 23018.6, n: 38, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 0.103, bonus: 1.25 }, { upTo: 0.348, bonus: 1 }, { upTo: 1, bonus: 2.25 }] } },
-            { outerWire: 0.4531, innerWire: 0.3625, K: 25305.9, n: 22, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 0.264, bonus: 0 }, { upTo: 1, bonus: 1 }] } },
+            { outerWire: 0.4305, innerWire: 0.3437, K: 19477.8, n: 57, byCount: { 1: [{ upTo: 0.327, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.325, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 0.25 }] } },
+            { outerWire: 0.4305, innerWire: 0.3625, K: 22007.3, n: 23, byCount: { 1: [{ upTo: 0.036, bonus: 1 }, { upTo: 0.068, bonus: 2 }, { upTo: 0.436, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 0.924, bonus: 2.25 }, { upTo: 1, bonus: 3.25 }] } },
+            { outerWire: 0.4375, innerWire: 0.3625, K: 23018.6, n: 56, byCount: { 1: [{ upTo: 0.567, bonus: 1 }, { upTo: 1, bonus: 2 }], 2: [{ upTo: 0.103, bonus: 1.25 }, { upTo: 0.348, bonus: 1 }, { upTo: 1, bonus: 2.25 }] } },
+            { outerWire: 0.4531, innerWire: 0.3625, K: 25305.9, n: 30, byCount: { 1: [{ upTo: 0.219, bonus: 0 }, { upTo: 1, bonus: 1 }], 2: [{ upTo: 0.264, bonus: 0 }, { upTo: 1, bonus: 1 }] } },
             { outerWire: 0.4531, innerWire: 0.375, K: 27632.5, n: 8, byCount: { 1: [{ upTo: 1, bonus: 1 }], 2: [{ upTo: 1, bonus: 2.25 }] } },
+            { outerWire: 0.4615, innerWire: 0.375, K: 28613.2, n: 16, byCount: { 1: [{ upTo: 0.689, bonus: 1 }, { upTo: 1, bonus: 2 }] } },
             { outerWire: 0.4687, innerWire: 0.375, K: 30169.8, n: 8, byCount: { 1: [{ upTo: 1, bonus: 1 }] } },
-            { outerWire: 0.49, innerWire: 0.3938, K: 37971.3, n: 8, byCount: { 1: [{ upTo: 1, bonus: 1 }] } },
-            { outerWire: 0.5, innerWire: 0.3938, K: 38321.7, n: 8 },
+            { outerWire: 0.4687, innerWire: 0.3938, K: 33276.3, n: 2, byCount: { 1: [{ upTo: 1, bonus: 2 }] } },
+            { outerWire: 0.49, innerWire: 0.3938, K: 37702.1, n: 22, byCount: { 1: [{ upTo: 1, bonus: 1 }] } },
+            { outerWire: 0.5, innerWire: 0.3938, K: 37985.5, n: 17, byCount: { 1: [{ upTo: 0.431, bonus: 0 }, { upTo: 0.462, bonus: 1 }, { upTo: 0.49, bonus: 0 }, { upTo: 1, bonus: 1 }] } },
+            { outerWire: 0.5, innerWire: 0.4062, K: 42361.4, n: 23, byCount: { 1: [{ upTo: 0.519, bonus: 1 }, { upTo: 1, bonus: 2 }] } },
             { outerWire: 0.5312, innerWire: 0.4062, K: 44642.9, n: 8, byCount: { 1: [{ upTo: 1, bonus: -1 }] } },
         ],
     },
@@ -1417,13 +1420,27 @@ function duplexLength(activeLength, regime, springs) {
 
     // A SECOND REGIME AT LONG ACTIVE LENGTHS on the softest rung, which the
     // bands below cannot express because they are a function of frac alone and
-    // this one depends on the active length. Measured: 11 readings from active
-    // 30.7 to 38.2 at +2.25, against 9 at active 14.5-15.8 behaving otherwise,
-    // with the boundary bracketed to (25.290, 25.807] by a 500/490 lb pair.
-    if (regime && regime.long && activeLength >= regime.long.from) {
-        return frac < regime.long.split
+    // this one depends on the active length as well. The boundary is bracketed
+    // to (25.290, 25.807] by a 500/490 lb pair.
+    //
+    // THE SPLIT INSIDE IT IS PER SPRING COUNT, which 24 readings above active
+    // 25.5 on this rung make plain:
+    //
+    //     2 springs   n=11   +1.25 at frac 0.020-0.453, +2.25 at 0.786-0.928
+    //                        so the split is in (0.453, 0.786], midpoint 0.620
+    //     3 springs   n=13   +2.25 at every frac from 0.110 to 0.905,
+    //                        so the split is at or below 0.110
+    //
+    // A single split of 0.065 was used before this, fitted when the only
+    // long 2-spring readings were at frac 0.020 and 0.871. It put six 2-spring
+    // doors an inch long. 1 and 4 springs have no readings up here and fall
+    // through to the bands below rather than borrow a split.
+    const long = regime && regime.long;
+
+    if (long && activeLength >= long.from && long.byCount[springs] !== undefined) {
+        return frac < long.byCount[springs]
             ? whole + 1.25
-            : whole + regime.long.above;
+            : whole + long.above;
     }
 
     // DERIVED BANDS, per rung AND per spring count - see dev/derive.mjs.
