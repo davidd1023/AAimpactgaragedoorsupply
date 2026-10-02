@@ -309,6 +309,59 @@ function weightClamped(mod) {
     return fails;
 }
 
+// The door height used must never exceed the drum's nameplate height.
+//
+// The reference FREEZES its answer at maxHeight - on D400-96 at 375 lb the
+// multiplier, turns and TIPPT are identical at 96", 108", 120", 132" and 144"
+// - so a taller door must compute on the cap, not on what was typed. The
+// limit sat in DRUM_LIMITS being used only for a Single warning while the
+// Duplex path fed the entered height straight into the multiplier, growing a
+// 20.25" spring to 29.25".
+//
+// Checked through the multiplier rather than the height getter, because the
+// height only matters insofar as it moves the answer: past the cap the
+// multiplier must stop changing entirely.
+function heightClamped(mod) {
+    const fails = [];
+
+    for (const drum of Object.keys(mod.DRUM_LIMITS)) {
+        const max = mod.DRUM_LIMITS[drum].maxHeight;
+
+        if (!max) {
+            continue;
+        }
+
+        const at = (inches) => duplex(mod, {
+            drum,
+            weight: "375",
+            doorHeightFeet: Math.floor(inches / 12),
+            doorHeightInches: inches % 12,
+        });
+        const capped = at(max).multiplierExact;
+
+        for (const over of [max + 12, max + 24, max + 48, max * 2]) {
+            const m = at(over).multiplierExact;
+
+            if (Math.abs(m - capped) > 1e-12) {
+                fails.push(
+                    `${drum}: ${over}" gives multiplier ${m}, but the ${max}" cap gives ${capped}` +
+                    " - the height is not being clamped"
+                );
+            }
+        }
+
+        // Under the cap it must still track the entered height, or the clamp
+        // has been applied where it does not belong.
+        const under = at(max - 12).multiplierExact;
+
+        if (Math.abs(under - capped) < 1e-12) {
+            fails.push(`${drum}: ${max - 12}" and ${max}" give the same multiplier - over-clamped`);
+        }
+    }
+
+    return fails;
+}
+
 // Duplex must raise no warning that is derived from the Wire Size dropdown.
 //
 // Duplex picks both wires itself and does not show that control, so anything
@@ -399,6 +452,7 @@ export const INVARIANTS = [
     { name: "every offered pair is physically buildable", run: physicallyValid },
     { name: "offered inner wire stays inside the spring ID's band", run: wireBand },
     { name: "the weight used never exceeds the drum's rating", run: weightClamped },
+    { name: "the door height used never exceeds the drum's nameplate", run: heightClamped },
     { name: "Duplex raises no Wire-Size-dropdown warning", run: noStaleWireWarnings },
     { name: "no Duplex output depends on the Wire Size dropdown", run: duplexIgnoresWireDropdown },
 ];

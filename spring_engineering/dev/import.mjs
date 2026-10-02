@@ -25,6 +25,16 @@ if (!pullFile || !prefix) {
     process.exit(1);
 }
 
+// The reference encodes our "LHR" (low headroom) track as radius 10 - it is a
+// radius there, not a lift type, and the user confirmed the two are the same
+// option on the web calculator. Verified on D525-216 at 600 lb / 8'0" /
+// 2 springs: reference r10 gives multiplier 0.477011 and our LHR gives the
+// same to 3.7e-07. Without this mapping every radius-10 reading arrives as
+// radius "10", which the app does not offer, and is scored against the
+// radius-15 baseline instead.
+const REF_RADIUS = { 10: "LHR", 12: "12", 15: "15" };
+const ourRadius = (r) => REF_RADIUS[Number(r)] ?? String(r);
+
 const PAIR = '3 3/4" inside 6"';
 const wire = (w) => `${w}"`;
 const r2 = (x) => Math.round(x * 100) / 100;
@@ -97,7 +107,7 @@ for (const r of JSON.parse(readFileSync(pullFile, "utf8"))) {
         drum: i.drum,
         springId: PAIR,
         springs: i.springs,
-        radius: String(i.radius),
+        radius: ourRadius(i.radius),
         ...(hi ? { liftType: "Hi-Lift", liftin: String(i.hiLift) } : {}),
         cycles: Number(i.cycles).toLocaleString("en-US"),
         weight: String(i.weight),

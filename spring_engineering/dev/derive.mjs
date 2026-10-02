@@ -23,6 +23,16 @@ const TC = 10.2;
 const COEFF = 124205;
 const WEXP = 2.79;
 const CEXP = 4.67;
+// The reference encodes our "LHR" (low headroom) track as radius 10 - it is a
+// radius there, not a lift type, and the user confirmed the two are the same
+// option on the web calculator. Verified on D525-216 at 600 lb / 8'0" /
+// 2 springs: reference r10 gives multiplier 0.477011 and our LHR gives the
+// same to 3.7e-07. Without this mapping every radius-10 reading arrives as
+// radius "10", which the app does not offer, and is scored against the
+// radius-15 baseline instead.
+const REF_RADIUS = { 10: "LHR", 12: "12", 15: "15" };
+const ourRadius = (r) => REF_RADIUS[Number(r)] ?? String(r);
+
 const PAIR = '3 3/4" inside 6"';
 
 const divider = (wire, id) =>
@@ -95,7 +105,7 @@ for (const f of readdirSync(HERE).filter((f) => /^pulled.*\.json$/.test(f))) {
         readings.push({
             state: {
                 assembly: "Duplex", drum: i.drum, springId: PAIR,
-                springs: i.springs, radius: String(i.radius),
+                springs: i.springs, radius: ourRadius(i.radius),
                 liftType: hi ? "Hi-Lift" : "Standard",
                 liftin: hi ? String(i.hiLift) : "",
                 cycles: Number(i.cycles).toLocaleString("en-US"),
@@ -431,8 +441,63 @@ function pickK(g) {
     const lo = Math.max(...b.lo);
     const hi = Math.min(...b.hi);
 
+    // CONTRADICTORY BOUNDS. Each reading says K must clear its own switch
+    // point and stay under the next one up, so lo > hi means two readings on
+    // this rung cannot both be satisfied - our cycle law is slightly wrong
+    // here, not the data.
+    //
+    // This used to fall through to the cycle-count median, silently. On
+    // 0.3625/0.283 that median sits 0.18% above the old feasible midpoint,
+    // and that 0.18% was enough to stop the ladder one rung early on EIGHT
+    // readings - they got 0.3625/0.283 where the reference gives
+    // 0.3625/0.289. A K chosen by a rule that ignores the switch points has
+    // no reason to land anywhere useful.
+    //
+    // So pick the candidate that violates the fewest constraints, breaking
+    // ties on the smallest total relative violation. That is the most
+    // readings this rung can satisfy at once, and it degrades gracefully
+    // instead of jumping.
     if (!(hi > lo)) {
-        return fromCycles;
+        const candidates = [...new Set([...b.lo, ...b.hi,
+            ...(fromCycles === null ? [] : [fromCycles])])];
+        let best = null;
+
+        for (const k of candidates) {
+            let violated = 0;
+            let amount = 0;
+
+            for (const x of b.lo) {
+                if (k < x) { violated += 1; amount += (x - k) / x; }
+            }
+
+            for (const x of b.hi) {
+                if (k > x) { violated += 1; amount += (k - x) / x; }
+            }
+
+            if (!best || violated < best.violated ||
+                (violated === best.violated && amount < best.amount)) {
+                best = { k, violated, amount };
+            }
+        }
+
+        if (process.env.DUMP_K) {
+            console.error(
+                `  ${(g.outer + "/" + g.inner).padEnd(16)} CONTRADICTORY: lo ${lo.toFixed(1)} > hi ${hi.toFixed(1)}` +
+                `  cycles ${fromCycles}  -> K ${best.k.toFixed(1)}` +
+                ` (violates ${best.violated} of ${b.lo.length + b.hi.length})`
+            );
+        }
+
+        return Number(best.k.toFixed(1));
+    }
+
+    if (process.env.DUMP_K) {
+        console.error(
+            `  ${(g.outer + "/" + g.inner).padEnd(16)} lo ${lo.toFixed(1).padStart(9)} ` +
+            `hi ${hi.toFixed(1).padStart(9)}  width ${((hi - lo) / lo * 100).toFixed(2)}%` +
+            `  cycles ${fromCycles}` +
+            `  ${fromCycles !== null && fromCycles >= lo && fromCycles <= hi ? "(cycles used)" : "(midpoint used)"}`
+        );
     }
 
     if (fromCycles !== null && fromCycles >= lo && fromCycles <= hi) {
