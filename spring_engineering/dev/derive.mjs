@@ -293,18 +293,6 @@ function boundsFromSwitches(readings) {
     return out;
 }
 
-// HOLDOUT. With HOLDOUT_MOD=n every nth reading is withheld from the fit, so
-// the model can be scored on readings it never saw. Without it nothing is
-// held back and the fit uses everything.
-const HOLDOUT_MOD = Number(process.env.HOLDOUT_MOD || 0);
-
-if (HOLDOUT_MOD > 1) {
-    const kept = readings.filter((_, i) => i % HOLDOUT_MOD !== 0);
-
-    readings.length = 0;
-    readings.push(...kept);
-}
-
 // DEDUPLICATE. This reads both dev/pulled*.json and dev/corpus.json, and
 // dev/import.mjs folds pulls INTO the corpus - so from the moment the import
 // workflow started, almost every reading has been ingested twice, once as a
@@ -352,6 +340,48 @@ if (collisions.length) {
 console.error("");
 readings.length = 0;
 readings.push(...unique);
+
+// HOLDOUT. Runs AFTER the dedup, for the same reason the hi-lift holdout
+// below does: a reading arrives twice, once from its pull and once from the
+// corpus, so withholding by index BEFORE dedup withholds one copy and leaves
+// the other in the fit - scoring the model on data it still trained on. Any
+// generalisation number taken that way is fiction.
+//
+// With HOLDOUT_MOD=n and HOLDOUT_REM=k every nth reading is withheld every nth reading is withheld from the fit, so
+// the model can be scored on readings it never saw. Without it nothing is
+// held back and the fit uses everything.
+const HOLDOUT_MOD = Number(process.env.HOLDOUT_MOD || 0);
+const HOLDOUT_REM = Number(process.env.HOLDOUT_REM || 0);
+
+if (HOLDOUT_MOD > 1) {
+    const kept = [];
+    const held = [];
+
+    readings.forEach((r, i) => {
+        if (i % HOLDOUT_MOD !== HOLDOUT_REM) {
+            kept.push(r);
+
+            return;
+        }
+
+        const st = r.state;
+
+        held.push([
+            st.drum, st.springs, st.radius, st.liftType ?? "Standard",
+            st.liftin ?? "", st.cycles, st.weight,
+            st.doorHeightFeet, st.doorHeightInches ?? 0,
+        ].join("|"));
+    });
+
+    console.error(`HELD ${held.length} of ${readings.length}`);
+
+    for (const h of held) {
+        console.error(`HELD\t${h}`);
+    }
+
+    readings.length = 0;
+    readings.push(...kept);
+}
 
 // HI-LIFT HOLDOUT. Runs AFTER the dedup above, and must: a reading arrives
 // twice (once from its pull, once from the corpus), so withholding by
@@ -455,6 +485,74 @@ function bands(ls) {
 // tighter than the cycle-count estimate. Where the window and the cycle
 // estimate agree, keep the estimate; where they do not, the window wins,
 // because a rounded cycle count is the weaker evidence.
+// THE THRESHOLD IS LINEAR IN THE INTEGER PART OF THE ACTIVE LENGTH.
+//
+// The band model keyed the bonus on frac(active) alone, and that provably
+// cannot work. On 0.3625/0.283 at one spring, frac 0.815 wants +1 at active
+// 17.815 and 0 at active 25.816: same rung, same spring count, same frac,
+// different answer. What separates them is the integer part, and the
+// threshold moves with it - on that rung the bonus flips at about 0.80 at
+// floor 17, 0.84 at floor 18, 0.91 at floor 24 and never by floor 25.
+//
+// Fitting t = a + b*floor instead explains 39 of the 41 two-bonus groups with
+// ONE line each. That is two numbers where the fitter previously wanted up to
+// twenty-two alternating bands - 0.375/0.295 at one spring needed EIGHTEEN,
+// which fit its readings and predicted nothing. Two parameters over fifteen
+// buckets cannot do that.
+//
+// Returns null unless exactly two bonus values appear and some line satisfies
+// every reading; a group with three or more keeps its bands.
+function fitLine(ls) {
+    const vals = [...new Set(ls.map((l) => l.bonus))].sort((x, y) => x - y);
+
+    if (vals.length !== 2) {
+        return null;
+    }
+
+    const [lo, hi] = vals;
+    const pts = ls.map((l) => ({
+        F: Math.floor(l.active),
+        t: l.active - Math.floor(l.active),
+        high: l.bonus === hi,
+    }));
+
+    let best = null;
+
+    for (let b = -0.03; b <= 0.09; b += 0.0005) {
+        for (let a = -2; a <= 2; a += 0.0025) {
+            let bad = 0;
+
+            for (const pt of pts) {
+                const thr = a + b * pt.F;
+
+                // At or below the threshold takes the low bonus, above it the
+                // high one. Mirrors duplexLength exactly.
+                if (pt.high ? pt.t <= thr : pt.t > thr) {
+                    bad += 1;
+
+                    if (best && bad >= best.bad) {
+                        break;
+                    }
+                }
+            }
+
+            if (!best || bad < best.bad) {
+                best = { a: Number(a.toFixed(4)), b: Number(b.toFixed(5)), bad };
+            }
+
+            if (best.bad === 0) {
+                break;
+            }
+        }
+
+        if (best && best.bad === 0) {
+            break;
+        }
+    }
+
+    return best && best.bad === 0 ? { a: best.a, b: best.b, lo, hi } : null;
+}
+
 const unbounded = [];
 
 function pickK(g) {
@@ -584,7 +682,13 @@ const out = [...rungs.values()]
             // Past the cap the rung falls back to plain rounding and is named
             // below, which is a worse answer honestly labelled rather than a
             // better-looking one that will not hold.
-            if (needed && b.bands.length <= MAX_BANDS) {
+            // A line first - it is two parameters and it explains the frac
+            // collisions that no band arrangement can.
+            const line = needed ? fitLine(ls) : null;
+
+            if (line) {
+                byCount[sp] = { line, n: ls.length };
+            } else if (needed && b.bands.length <= MAX_BANDS) {
                 byCount[sp] = { bands: b.bands, n: ls.length };
             } else if (needed) {
                 overfit.push(

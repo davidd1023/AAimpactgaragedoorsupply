@@ -16,11 +16,16 @@ for r in rows:
     if r['K'] is None: continue
     e=""
     if r['byCount']:
-        parts=[]
+        bandparts=[]; lineparts=[]
         for sp,v in sorted(r['byCount'].items(), key=lambda kv:int(kv[0])):
-            bs=", ".join("{ upTo: %g, bonus: %g }"%(b['upTo'],b['bonus']) for b in v['bands'])
-            parts.append("%s: [%s]"%(sp,bs))
-        e=", byCount: { "+", ".join(parts)+" }"
+            if 'line' in v:
+                L=v['line']
+                lineparts.append("%s: { a: %g, b: %g, lo: %g, hi: %g }"%(sp,L['a'],L['b'],L['lo'],L['hi']))
+            else:
+                bs=", ".join("{ upTo: %g, bonus: %g }"%(b['upTo'],b['bonus']) for b in v['bands'])
+                bandparts.append("%s: [%s]"%(sp,bs))
+        if bandparts: e+=", byCount: { "+", ".join(bandparts)+" }"
+        if lineparts: e+=", lineByCount: { "+", ".join(lineparts)+" }"
     if abs(r['outer']-0.2625)<1e-9 and abs(r['inner']-0.2253)<1e-9:
         e+=", long: { from: 25.5, byCount: { 2: 0.620, 3: 0.050 }, above: 2.25 }"
     lines.append("            { outerWire: %g, innerWire: %g, K: %.1f, n: %d%s },"
