@@ -87154,6 +87154,4098 @@
     "duplexOuterWeight": 0.02
    },
    "referenceCycles": 11000
+  },
+  {
+   "id": "k4-331-2625-240lb-84in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "240",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2625\"",
+    "duplexOuterWire": "0.331\"",
+    "duplexInnerLength": 23,
+    "duplexOuterLength": 24,
+    "duplexInnerWeight": 16.95,
+    "duplexOuterWeight": 35.19
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 108000
+  },
+  {
+   "id": "k4-331-273-250lb-84in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "250",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.331\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.21,
+    "duplexOuterWeight": 38.13
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 101000
+  },
+  {
+   "id": "k4-3437-273-260lb-84in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "260",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 19.98,
+    "duplexOuterWeight": 41.19
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 124000
+  },
+  {
+   "id": "k4-3437-273-270lb-84in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "270",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 19.21,
+    "duplexOuterWeight": 39.67
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 103000
+  },
+  {
+   "id": "k4-3437-283-280lb-84in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "280",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 27,
+    "duplexOuterLength": 28,
+    "duplexInnerWeight": 21.56,
+    "duplexOuterWeight": 42.72
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 98000
+  },
+  {
+   "id": "k4-3625-283-290lb-84in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "290",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 23.16,
+    "duplexOuterWeight": 48.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 119000
+  },
+  {
+   "id": "k4-3625-283-300lb-84in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "300",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 22.36,
+    "duplexOuterWeight": 46.8
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 101000
+  },
+  {
+   "id": "k4-3625-289-310lb-84in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "310",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 23.69,
+    "duplexOuterWeight": 48.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 114000
+  },
+  {
+   "id": "k4-3625-289-320lb-84in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "320",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 22.87,
+    "duplexOuterWeight": 46.8
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 98000
+  },
+  {
+   "id": "k4-375-295-330lb-84in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "330",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 25.89,
+    "duplexOuterWeight": 53.53
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 111000
+  },
+  {
+   "id": "k4-375-295-340lb-84in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "340",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 30,
+    "duplexOuterLength": 31,
+    "duplexInnerWeight": 25.05,
+    "duplexOuterWeight": 51.86
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 97000
+  },
+  {
+   "id": "k4-331-2625-240lb-96in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "240",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2625\"",
+    "duplexOuterWire": "0.331\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 19.16,
+    "duplexOuterWeight": 39.59
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 114000
+  },
+  {
+   "id": "k4-331-273-250lb-96in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "250",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.331\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 21.52,
+    "duplexOuterWeight": 42.52
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 107000
+  },
+  {
+   "id": "k4-3437-273-260lb-96in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "260",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 22.29,
+    "duplexOuterWeight": 45.77
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 131000
+  },
+  {
+   "id": "k4-3437-273-270lb-96in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "270",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 21.52,
+    "duplexOuterWeight": 44.24
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 109000
+  },
+  {
+   "id": "k4-3437-283-280lb-96in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "280",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 30,
+    "duplexOuterLength": 31,
+    "duplexInnerWeight": 23.96,
+    "duplexOuterWeight": 47.3
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 103000
+  },
+  {
+   "id": "k4-3625-283-290lb-96in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "290",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 33,
+    "duplexOuterLength": 34,
+    "duplexInnerWeight": 26.36,
+    "duplexOuterWeight": 54.87
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 125000
+  },
+  {
+   "id": "k4-3625-283-300lb-96in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "300",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 32,
+    "duplexOuterLength": 33,
+    "duplexInnerWeight": 25.56,
+    "duplexOuterWeight": 53.26
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 107000
+  },
+  {
+   "id": "k4-3625-289-310lb-96in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "310",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 32,
+    "duplexOuterLength": 33,
+    "duplexInnerWeight": 26.14,
+    "duplexOuterWeight": 53.26
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 120000
+  },
+  {
+   "id": "k4-3625-289-320lb-96in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "320",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 25.32,
+    "duplexOuterWeight": 51.65
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 104000
+  },
+  {
+   "id": "k4-375-295-330lb-96in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "330",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 35,
+    "duplexOuterLength": 36,
+    "duplexInnerWeight": 29.23,
+    "duplexOuterWeight": 60.22
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 118000
+  },
+  {
+   "id": "k4-375-295-340lb-96in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "340",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 34,
+    "duplexOuterLength": 35,
+    "duplexInnerWeight": 28.39,
+    "duplexOuterWeight": 58.55
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 102000
+  },
+  {
+   "id": "k4-331-2625-240lb-108in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "240",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2625\"",
+    "duplexOuterWire": "0.331\"",
+    "duplexInnerLength": 29,
+    "duplexOuterLength": 30,
+    "duplexInnerWeight": 21.37,
+    "duplexOuterWeight": 43.99
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 112000
+  },
+  {
+   "id": "k4-331-273-250lb-108in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "250",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.331\"",
+    "duplexInnerLength": 30,
+    "duplexOuterLength": 31,
+    "duplexInnerWeight": 23.06,
+    "duplexOuterWeight": 45.46
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 105000
+  },
+  {
+   "id": "k4-3437-273-260lb-108in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "260",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 32,
+    "duplexOuterLength": 33,
+    "duplexInnerWeight": 24.59,
+    "duplexOuterWeight": 50.35
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 129000
+  },
+  {
+   "id": "k4-3437-273-270lb-108in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "270",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 23.82,
+    "duplexOuterWeight": 48.82
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 108000
+  },
+  {
+   "id": "k4-3437-283-280lb-108in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "280",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 32,
+    "duplexOuterLength": 33,
+    "duplexInnerWeight": 25.56,
+    "duplexOuterWeight": 50.35
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 101000
+  },
+  {
+   "id": "k4-3625-283-290lb-108in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "290",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 36,
+    "duplexOuterLength": 37,
+    "duplexInnerWeight": 28.75,
+    "duplexOuterWeight": 59.71
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 123000
+  },
+  {
+   "id": "k4-3625-283-300lb-108in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "300",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 35,
+    "duplexOuterLength": 36,
+    "duplexInnerWeight": 27.95,
+    "duplexOuterWeight": 58.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 105000
+  },
+  {
+   "id": "k4-3625-289-310lb-108in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "310",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 35,
+    "duplexOuterLength": 36,
+    "duplexInnerWeight": 28.59,
+    "duplexOuterWeight": 58.1
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 118000
+  },
+  {
+   "id": "k4-3625-289-320lb-108in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "320",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 34,
+    "duplexOuterLength": 35,
+    "duplexInnerWeight": 27.77,
+    "duplexOuterWeight": 56.49
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 102000
+  },
+  {
+   "id": "k4-375-295-330lb-108in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "330",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 38,
+    "duplexOuterLength": 39,
+    "duplexInnerWeight": 31.73,
+    "duplexOuterWeight": 65.24
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 116000
+  },
+  {
+   "id": "k4-375-295-340lb-108in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "340",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 37,
+    "duplexOuterLength": 38,
+    "duplexInnerWeight": 30.9,
+    "duplexOuterWeight": 63.57
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 100000
+  },
+  {
+   "id": "k4-331-2625-240lb-120in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "240",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2625\"",
+    "duplexOuterWire": "0.331\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 22.85,
+    "duplexOuterWeight": 46.92
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 111000
+  },
+  {
+   "id": "k4-331-273-250lb-120in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "250",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.331\"",
+    "duplexInnerLength": 33,
+    "duplexOuterLength": 34,
+    "duplexInnerWeight": 25.36,
+    "duplexOuterWeight": 49.86
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 104000
+  },
+  {
+   "id": "k4-3437-273-260lb-120in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "260",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 35,
+    "duplexOuterLength": 36,
+    "duplexInnerWeight": 26.9,
+    "duplexOuterWeight": 54.92
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 127000
+  },
+  {
+   "id": "k4-3437-273-270lb-120in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "270",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 34,
+    "duplexOuterLength": 35,
+    "duplexInnerWeight": 26.13,
+    "duplexOuterWeight": 53.4
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 107000
+  },
+  {
+   "id": "k4-3437-283-280lb-120in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "280",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 35,
+    "duplexOuterLength": 36,
+    "duplexInnerWeight": 27.95,
+    "duplexOuterWeight": 54.92
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 100000
+  },
+  {
+   "id": "k4-3625-283-290lb-120in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "290",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 39,
+    "duplexOuterLength": 40,
+    "duplexInnerWeight": 31.15,
+    "duplexOuterWeight": 64.56
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 122000
+  },
+  {
+   "id": "k4-3625-283-300lb-120in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "300",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 38,
+    "duplexOuterLength": 39,
+    "duplexInnerWeight": 30.35,
+    "duplexOuterWeight": 62.94
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 104000
+  },
+  {
+   "id": "k4-3625-289-310lb-120in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "310",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 39,
+    "duplexOuterLength": 40,
+    "duplexInnerWeight": 31.86,
+    "duplexOuterWeight": 64.56
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 117000
+  },
+  {
+   "id": "k4-3625-289-320lb-120in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "320",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 37,
+    "duplexOuterLength": 38,
+    "duplexInnerWeight": 30.22,
+    "duplexOuterWeight": 61.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 101000
+  },
+  {
+   "id": "k4-375-295-330lb-120in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "330",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 42,
+    "duplexOuterLength": 43,
+    "duplexInnerWeight": 35.07,
+    "duplexOuterWeight": 71.93
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 115000
+  },
+  {
+   "id": "k4-375-295-340lb-120in-1spr-t100000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "340",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 40,
+    "duplexOuterLength": 41,
+    "duplexInnerWeight": 33.4,
+    "duplexOuterWeight": 68.59
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 100000
+  },
+  {
+   "id": "k4-3437-283-240lb-84in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "240",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 24.76,
+    "duplexOuterWeight": 48.82
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 201000
+  },
+  {
+   "id": "k4-3625-283-250lb-84in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "250",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 34,
+    "duplexOuterLength": 35,
+    "duplexInnerWeight": 27.15,
+    "duplexOuterWeight": 56.49
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 237000
+  },
+  {
+   "id": "k4-3625-283-260lb-84in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "260",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 33,
+    "duplexOuterLength": 34,
+    "duplexInnerWeight": 26.36,
+    "duplexOuterWeight": 54.87
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 198000
+  },
+  {
+   "id": "k4-3625-289-270lb-84in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "270",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 33,
+    "duplexOuterLength": 34,
+    "duplexInnerWeight": 26.95,
+    "duplexOuterWeight": 54.87
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 218000
+  },
+  {
+   "id": "k4-3625-295-280lb-84in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "280",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 34,
+    "duplexOuterLength": 35,
+    "duplexInnerWeight": 28.39,
+    "duplexOuterWeight": 56.49
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 196000
+  },
+  {
+   "id": "k4-375-295-290lb-84in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "290",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 35,
+    "duplexOuterLength": 36,
+    "duplexInnerWeight": 29.23,
+    "duplexOuterWeight": 60.22
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 204000
+  },
+  {
+   "id": "k4-375-3065-300lb-84in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "300",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 38,
+    "duplexOuterLength": 39,
+    "duplexInnerWeight": 33.06,
+    "duplexOuterWeight": 65.24
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 221000
+  },
+  {
+   "id": "k4-3938-3065-310lb-84in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "310",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 41,
+    "duplexOuterLength": 42,
+    "duplexInnerWeight": 35.67,
+    "duplexOuterWeight": 74
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 246000
+  },
+  {
+   "id": "k4-3938-3065-320lb-84in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "320",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 40,
+    "duplexOuterLength": 41,
+    "duplexInnerWeight": 34.8,
+    "duplexOuterWeight": 72.24
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 212000
+  },
+  {
+   "id": "k4-3938-3125-330lb-84in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "330",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 40,
+    "duplexOuterLength": 41,
+    "duplexInnerWeight": 35.53,
+    "duplexOuterWeight": 72.24
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 237000
+  },
+  {
+   "id": "k4-3938-3125-340lb-84in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "340",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 39,
+    "duplexOuterLength": 40,
+    "duplexInnerWeight": 34.65,
+    "duplexOuterWeight": 70.48
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 206000
+  },
+  {
+   "id": "k4-3437-283-240lb-96in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "240",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 34,
+    "duplexOuterLength": 35,
+    "duplexInnerWeight": 27.15,
+    "duplexOuterWeight": 53.4
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 212000
+  },
+  {
+   "id": "k4-3625-283-250lb-96in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "250",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 38,
+    "duplexOuterLength": 39,
+    "duplexInnerWeight": 30.35,
+    "duplexOuterWeight": 62.94
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 250000
+  },
+  {
+   "id": "k4-3625-283-260lb-96in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "260",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 36,
+    "duplexOuterLength": 37,
+    "duplexInnerWeight": 28.75,
+    "duplexOuterWeight": 59.71
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 209000
+  },
+  {
+   "id": "k4-3625-289-270lb-96in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "270",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 37,
+    "duplexOuterLength": 38,
+    "duplexInnerWeight": 30.22,
+    "duplexOuterWeight": 61.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 230000
+  },
+  {
+   "id": "k4-3625-295-280lb-96in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "280",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 37,
+    "duplexOuterLength": 38,
+    "duplexInnerWeight": 30.9,
+    "duplexOuterWeight": 61.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 206000
+  },
+  {
+   "id": "k4-375-295-290lb-96in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "290",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 39,
+    "duplexOuterLength": 40,
+    "duplexInnerWeight": 32.57,
+    "duplexOuterWeight": 66.91
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 216000
+  },
+  {
+   "id": "k4-375-3065-300lb-96in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "300",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 42,
+    "duplexOuterLength": 43,
+    "duplexInnerWeight": 36.54,
+    "duplexOuterWeight": 71.93
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 233000
+  },
+  {
+   "id": "k4-3938-3065-310lb-96in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "310",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 46,
+    "duplexOuterLength": 47,
+    "duplexInnerWeight": 40.02,
+    "duplexOuterWeight": 82.81
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 259000
+  },
+  {
+   "id": "k4-3938-3065-320lb-96in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "320",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 38.28,
+    "duplexOuterWeight": 79.28
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 224000
+  },
+  {
+   "id": "k4-3938-3125-330lb-96in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "330",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 45,
+    "duplexOuterLength": 46,
+    "duplexInnerWeight": 39.98,
+    "duplexOuterWeight": 81.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 250000
+  },
+  {
+   "id": "k4-3938-3125-340lb-96in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "340",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 39.09,
+    "duplexOuterWeight": 79.28
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 217000
+  },
+  {
+   "id": "k4-3437-283-240lb-108in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "240",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 38,
+    "duplexOuterLength": 39,
+    "duplexInnerWeight": 30.35,
+    "duplexOuterWeight": 59.5
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 209000
+  },
+  {
+   "id": "k4-3625-283-250lb-108in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "250",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 42,
+    "duplexOuterLength": 43,
+    "duplexInnerWeight": 33.54,
+    "duplexOuterWeight": 69.4
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 246000
+  },
+  {
+   "id": "k4-3625-283-260lb-108in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "260",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 40,
+    "duplexOuterLength": 41,
+    "duplexInnerWeight": 31.95,
+    "duplexOuterWeight": 66.17
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 206000
+  },
+  {
+   "id": "k4-3625-289-270lb-108in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "270",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 40,
+    "duplexOuterLength": 41,
+    "duplexInnerWeight": 32.67,
+    "duplexOuterWeight": 66.17
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 226000
+  },
+  {
+   "id": "k4-3625-295-280lb-108in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "280",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 41,
+    "duplexOuterLength": 42,
+    "duplexInnerWeight": 34.24,
+    "duplexOuterWeight": 67.78
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 203000
+  },
+  {
+   "id": "k4-375-295-290lb-108in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "290",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 43,
+    "duplexOuterLength": 44,
+    "duplexInnerWeight": 35.91,
+    "duplexOuterWeight": 73.61
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 212000
+  },
+  {
+   "id": "k4-375-3065-300lb-108in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "300",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 46,
+    "duplexOuterLength": 47,
+    "duplexInnerWeight": 40.02,
+    "duplexOuterWeight": 78.62
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 229000
+  },
+  {
+   "id": "k4-3938-3065-310lb-108in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "310",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 50,
+    "duplexOuterLength": 51,
+    "duplexInnerWeight": 43.5,
+    "duplexOuterWeight": 89.86
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 255000
+  },
+  {
+   "id": "k4-3938-3065-320lb-108in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "320",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 42.63,
+    "duplexOuterWeight": 88.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 221000
+  },
+  {
+   "id": "k4-3938-3125-330lb-108in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "330",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 43.53,
+    "duplexOuterWeight": 88.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 246000
+  },
+  {
+   "id": "k4-3938-3125-340lb-108in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "340",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 48,
+    "duplexOuterLength": 49,
+    "duplexInnerWeight": 42.64,
+    "duplexOuterWeight": 86.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 213000
+  },
+  {
+   "id": "k4-3437-283-240lb-120in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "240",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 41,
+    "duplexOuterLength": 42,
+    "duplexInnerWeight": 32.75,
+    "duplexOuterWeight": 64.08
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 207000
+  },
+  {
+   "id": "k4-3625-283-250lb-120in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "250",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 45,
+    "duplexOuterLength": 46,
+    "duplexInnerWeight": 35.94,
+    "duplexOuterWeight": 74.24
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 244000
+  },
+  {
+   "id": "k4-3625-283-260lb-120in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "260",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 35.14,
+    "duplexOuterWeight": 72.63
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 204000
+  },
+  {
+   "id": "k4-3625-289-270lb-120in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "270",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 35.94,
+    "duplexOuterWeight": 72.63
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 225000
+  },
+  {
+   "id": "k4-3625-295-280lb-120in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "280",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 45,
+    "duplexOuterLength": 46,
+    "duplexInnerWeight": 37.58,
+    "duplexOuterWeight": 74.24
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 201000
+  },
+  {
+   "id": "k4-375-295-290lb-120in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "290",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 47,
+    "duplexOuterLength": 48,
+    "duplexInnerWeight": 39.25,
+    "duplexOuterWeight": 80.3
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 210000
+  },
+  {
+   "id": "k4-375-3065-300lb-120in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "300",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 50,
+    "duplexOuterLength": 51,
+    "duplexInnerWeight": 43.5,
+    "duplexOuterWeight": 85.32
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 227000
+  },
+  {
+   "id": "k4-3938-3065-310lb-120in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "310",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 55,
+    "duplexOuterLength": 56,
+    "duplexInnerWeight": 47.85,
+    "duplexOuterWeight": 98.67
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 253000
+  },
+  {
+   "id": "k4-3938-3065-320lb-120in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "320",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 53,
+    "duplexOuterLength": 54,
+    "duplexInnerWeight": 46.11,
+    "duplexOuterWeight": 95.14
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 218000
+  },
+  {
+   "id": "k4-3938-3125-330lb-120in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "330",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 54,
+    "duplexOuterLength": 55,
+    "duplexInnerWeight": 47.97,
+    "duplexOuterWeight": 96.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 244000
+  },
+  {
+   "id": "k4-3938-3125-340lb-120in-1spr-t200000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "340",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 52,
+    "duplexOuterLength": 53,
+    "duplexInnerWeight": 46.19,
+    "duplexOuterWeight": 93.38
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 212000
+  },
+  {
+   "id": "k4-3625-289-240lb-84in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "240",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 37,
+    "duplexOuterLength": 38,
+    "duplexInnerWeight": 30.22,
+    "duplexOuterWeight": 61.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 379000
+  },
+  {
+   "id": "k4-3625-289-250lb-84in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "250",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 36,
+    "duplexOuterLength": 37,
+    "duplexInnerWeight": 29.4,
+    "duplexOuterWeight": 59.71
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 312000
+  },
+  {
+   "id": "k4-375-295-260lb-84in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "260",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 39,
+    "duplexOuterLength": 40,
+    "duplexInnerWeight": 32.57,
+    "duplexOuterWeight": 66.91
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 341000
+  },
+  {
+   "id": "k4-375-3065-270lb-84in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "270",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 42,
+    "duplexOuterLength": 43,
+    "duplexInnerWeight": 36.54,
+    "duplexOuterWeight": 71.93
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 361000
+  },
+  {
+   "id": "k4-375-3065-280lb-84in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "280",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 40,
+    "duplexOuterLength": 41,
+    "duplexInnerWeight": 34.8,
+    "duplexOuterWeight": 68.59
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 305000
+  },
+  {
+   "id": "k4-3938-3065-290lb-84in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "290",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 38.28,
+    "duplexOuterWeight": 79.28
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 336000
+  },
+  {
+   "id": "k4-3938-3125-300lb-84in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "300",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 39.09,
+    "duplexOuterWeight": 79.28
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 370000
+  },
+  {
+   "id": "k4-3938-3125-310lb-84in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "310",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 43,
+    "duplexOuterLength": 44,
+    "duplexInnerWeight": 38.2,
+    "duplexOuterWeight": 77.52
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 317000
+  },
+  {
+   "id": "k4-3938-3195-320lb-84in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "320",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 40.03,
+    "duplexOuterWeight": 79.28
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 309000
+  },
+  {
+   "id": "k4-4062-3195-330lb-84in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "330",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 46,
+    "duplexOuterLength": 47,
+    "duplexInnerWeight": 41.85,
+    "duplexOuterWeight": 85.58
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 316000
+  },
+  {
+   "id": "k4-4062-331-340lb-84in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "340",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 46.32,
+    "duplexOuterWeight": 91.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 349000
+  },
+  {
+   "id": "k4-3625-289-240lb-96in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "240",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 41,
+    "duplexOuterLength": 42,
+    "duplexInnerWeight": 33.49,
+    "duplexOuterWeight": 67.78
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 399000
+  },
+  {
+   "id": "k4-3625-289-250lb-96in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "250",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 40,
+    "duplexOuterLength": 41,
+    "duplexInnerWeight": 32.67,
+    "duplexOuterWeight": 66.17
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 329000
+  },
+  {
+   "id": "k4-375-295-260lb-96in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "260",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 36.74,
+    "duplexOuterWeight": 75.28
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 359000
+  },
+  {
+   "id": "k4-375-3065-270lb-96in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "270",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 46,
+    "duplexOuterLength": 47,
+    "duplexInnerWeight": 40.02,
+    "duplexOuterWeight": 78.62
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 381000
+  },
+  {
+   "id": "k4-375-3065-280lb-96in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "280",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 45,
+    "duplexOuterLength": 46,
+    "duplexInnerWeight": 39.15,
+    "duplexOuterWeight": 76.95
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 321000
+  },
+  {
+   "id": "k4-3938-3065-290lb-96in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "290",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 42.63,
+    "duplexOuterWeight": 88.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 355000
+  },
+  {
+   "id": "k4-3938-3125-300lb-96in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "300",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 43.53,
+    "duplexOuterWeight": 88.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 390000
+  },
+  {
+   "id": "k4-3938-3125-310lb-96in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "310",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 48,
+    "duplexOuterLength": 49,
+    "duplexInnerWeight": 42.64,
+    "duplexOuterWeight": 86.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 334000
+  },
+  {
+   "id": "k4-3938-3195-320lb-96in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "320",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 44.58,
+    "duplexOuterWeight": 88.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 326000
+  },
+  {
+   "id": "k4-4062-3195-330lb-96in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "330",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 51,
+    "duplexOuterLength": 52,
+    "duplexInnerWeight": 46.4,
+    "duplexOuterWeight": 94.69
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 333000
+  },
+  {
+   "id": "k4-4062-331-340lb-96in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "340",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 54,
+    "duplexOuterLength": 55,
+    "duplexInnerWeight": 51.04,
+    "duplexOuterWeight": 100.15
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 367000
+  },
+  {
+   "id": "k4-3625-289-240lb-108in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "240",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 46,
+    "duplexOuterLength": 47,
+    "duplexInnerWeight": 37.57,
+    "duplexOuterWeight": 75.85
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 393000
+  },
+  {
+   "id": "k4-3625-289-250lb-108in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "250",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 35.94,
+    "duplexOuterWeight": 72.63
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 324000
+  },
+  {
+   "id": "k4-375-295-260lb-108in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "260",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 48,
+    "duplexOuterLength": 49,
+    "duplexInnerWeight": 40.08,
+    "duplexOuterWeight": 81.97
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 354000
+  },
+  {
+   "id": "k4-375-3065-270lb-108in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "270",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 51,
+    "duplexOuterLength": 52,
+    "duplexInnerWeight": 44.37,
+    "duplexOuterWeight": 86.99
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 375000
+  },
+  {
+   "id": "k4-375-3065-280lb-108in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "280",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 42.63,
+    "duplexOuterWeight": 83.64
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 316000
+  },
+  {
+   "id": "k4-3938-3065-290lb-108in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "290",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 54,
+    "duplexOuterLength": 55,
+    "duplexInnerWeight": 46.98,
+    "duplexOuterWeight": 96.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 350000
+  },
+  {
+   "id": "k4-3938-3125-300lb-108in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "300",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 54,
+    "duplexOuterLength": 55,
+    "duplexInnerWeight": 47.97,
+    "duplexOuterWeight": 96.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 384000
+  },
+  {
+   "id": "k4-3938-3125-310lb-108in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "310",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 53,
+    "duplexOuterLength": 54,
+    "duplexInnerWeight": 47.08,
+    "duplexOuterWeight": 95.14
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 329000
+  },
+  {
+   "id": "k4-3938-3195-320lb-108in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "320",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 54,
+    "duplexOuterLength": 55,
+    "duplexInnerWeight": 49.13,
+    "duplexOuterWeight": 96.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 321000
+  },
+  {
+   "id": "k4-4062-3195-330lb-108in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "330",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 56,
+    "duplexOuterLength": 57,
+    "duplexInnerWeight": 50.95,
+    "duplexOuterWeight": 103.79
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 328000
+  },
+  {
+   "id": "k4-4062-331-340lb-108in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "340",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 60,
+    "duplexOuterLength": 61,
+    "duplexInnerWeight": 56.71,
+    "duplexOuterWeight": 111.08
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 361000
+  },
+  {
+   "id": "k4-3625-289-240lb-120in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "240",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 50,
+    "duplexOuterLength": 51,
+    "duplexInnerWeight": 40.84,
+    "duplexOuterWeight": 82.31
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 390000
+  },
+  {
+   "id": "k4-3625-289-250lb-120in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "250",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 48,
+    "duplexOuterLength": 49,
+    "duplexInnerWeight": 39.21,
+    "duplexOuterWeight": 79.08
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 321000
+  },
+  {
+   "id": "k4-375-295-260lb-120in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "260",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 53,
+    "duplexOuterLength": 54,
+    "duplexInnerWeight": 44.26,
+    "duplexOuterWeight": 90.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 350000
+  },
+  {
+   "id": "k4-375-3065-270lb-120in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "270",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 56,
+    "duplexOuterLength": 57,
+    "duplexInnerWeight": 48.72,
+    "duplexOuterWeight": 95.35
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 372000
+  },
+  {
+   "id": "k4-375-3065-280lb-120in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "280",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 54,
+    "duplexOuterLength": 55,
+    "duplexInnerWeight": 46.98,
+    "duplexOuterWeight": 92.01
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 313000
+  },
+  {
+   "id": "k4-3938-3065-290lb-120in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "290",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 59,
+    "duplexOuterLength": 60,
+    "duplexInnerWeight": 51.33,
+    "duplexOuterWeight": 105.71
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 346000
+  },
+  {
+   "id": "k4-3938-3125-300lb-120in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "300",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 59,
+    "duplexOuterLength": 60,
+    "duplexInnerWeight": 52.41,
+    "duplexOuterWeight": 105.71
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 381000
+  },
+  {
+   "id": "k4-3938-3125-310lb-120in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "310",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 57,
+    "duplexOuterLength": 58,
+    "duplexInnerWeight": 50.64,
+    "duplexOuterWeight": 102.19
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 326000
+  },
+  {
+   "id": "k4-3938-3195-320lb-120in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "320",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 59,
+    "duplexOuterLength": 60,
+    "duplexInnerWeight": 53.68,
+    "duplexOuterWeight": 105.71
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 318000
+  },
+  {
+   "id": "k4-4062-3195-330lb-120in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "330",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 62,
+    "duplexOuterLength": 63,
+    "duplexInnerWeight": 56.41,
+    "duplexOuterWeight": 114.72
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 325000
+  },
+  {
+   "id": "k4-4062-331-340lb-120in-1spr-t300000",
+   "status": "verified",
+   "source": "Reference calculator, automated pull 2026-10-02 (batch k4). The long-active-length corner at one spring, which was the thinnest region in the file: 240-340 lb in 10 lb steps, heights 84-120 inches, targets 100k/200k/300k on the D525-216. Light doors on high cycle targets are the only way to reach active lengths past 40 inches, and that is where the threshold slope is determined - it was previously fitted almost entirely from short lengths and extrapolated badly.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "340",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 14,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 65,
+    "duplexOuterLength": 66,
+    "duplexInnerWeight": 61.44,
+    "duplexOuterWeight": 120.18
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 359000
   }
  ]
 }

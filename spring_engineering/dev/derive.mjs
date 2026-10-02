@@ -510,6 +510,57 @@ function bands(ls) {
 // one or two cut points in that sorted list. That is exact and cheap, where
 // searching the intercepts directly is a three-dimensional grid. Only the
 // slope is searched.
+// A REGIME BOUNDARY IN THE ACTIVE LENGTH, where the data shows one.
+//
+// Some three-level groups are not one rule with three levels; they are two
+// rules with two levels each, split at an active length. On 0.3625/0.283 at
+// one spring the -1 bonus appears at floor 29 and above and NEVER below it,
+// and a single threshold line fits each side on its own - 136 readings below,
+// 33 above. The softest rung has had exactly this shape hand-maintained as
+// `long: { from: 25.5 }` since before any of the fitting existed, so the
+// structure is not invented here.
+//
+// WHY THIS IS NOT THE TWO-THRESHOLD FORM AGAIN. That one put two thresholds
+// over the SAME readings, so one slope had to serve every active length and a
+// small error in it misplaced predictions far from where it was fitted - 894
+// readings moving together, holdout 97.4% -> 84.9%. Here each line owns a
+// disjoint, contiguous range of floor, so it is constrained locally, the way
+// a band is. The breakpoint is read off the data (the first floor at which
+// the lowest bonus occurs) rather than fitted.
+//
+// Returns null unless the split is clean: the lowest bonus must be absent
+// below the breakpoint, both sides must fit one line, and both sides must
+// carry enough readings to mean anything.
+function fitSplit(ls) {
+    const vals = [...new Set(ls.map((l) => l.bonus))].sort((x, y) => x - y);
+
+    if (vals.length !== 3) {
+        return null;
+    }
+
+    const lowest = vals[0];
+    const from = Math.min(
+        ...ls.filter((l) => l.bonus === lowest).map((l) => Math.floor(l.active))
+    );
+    const below = ls.filter((l) => Math.floor(l.active) < from);
+    const above = ls.filter((l) => Math.floor(l.active) >= from);
+
+    // A trivial side teaches nothing and would just be noise with a
+    // breakpoint attached.
+    if (below.length < 12 || above.length < 12) {
+        return null;
+    }
+
+    const belowLine = fitLineAnyLevels(below, 2);
+    const aboveLine = fitLineAnyLevels(above, 2);
+
+    if (!belowLine || !aboveLine) {
+        return null;
+    }
+
+    return { from, below: belowLine, above: aboveLine };
+}
+
 // WHICH FORM GENERALISES, DECIDED PER GROUP BY CROSS-VALIDATION.
 //
 // The two-threshold line is not automatically an improvement. Switched on for
@@ -609,11 +660,15 @@ function linePredict(line, active) {
 const LINE_LEVELS = Number(process.env.LINE_LEVELS || 2);
 
 function fitLine(ls) {
+    return fitLineAnyLevels(ls, LINE_LEVELS);
+}
+
+function fitLineAnyLevels(ls, maxLevels) {
     const vals = [...new Set(ls.map((l) => l.bonus))].sort((x, y) => x - y);
 
     // LINE_LEVELS caps how many bonus levels a line may carry, so the
     // two-threshold form can be switched off and measured on its own.
-    if (vals.length < 2 || vals.length > LINE_LEVELS) {
+    if (vals.length < 2 || vals.length > maxLevels) {
         return null;
     }
 
@@ -865,8 +920,12 @@ const out = [...rungs.values()]
                 }
             }
 
+            const split = line ? null : (needed ? fitSplit(ls) : null);
+
             if (line) {
                 byCount[sp] = { line, n: ls.length };
+            } else if (split) {
+                byCount[sp] = { split, n: ls.length };
             } else if (needed && b.bands.length <= MAX_BANDS) {
                 byCount[sp] = { bands: b.bands, n: ls.length };
             } else if (needed) {
