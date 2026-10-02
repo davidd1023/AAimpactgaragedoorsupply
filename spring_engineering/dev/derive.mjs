@@ -528,39 +528,6 @@ function bands(ls) {
 // a band is. The breakpoint is read off the data (the first floor at which
 // the lowest bonus occurs) rather than fitted.
 //
-// Returns null unless the split is clean: the lowest bonus must be absent
-// below the breakpoint, both sides must fit one line, and both sides must
-// carry enough readings to mean anything.
-function fitSplit(ls) {
-    const vals = [...new Set(ls.map((l) => l.bonus))].sort((x, y) => x - y);
-
-    if (vals.length !== 3) {
-        return null;
-    }
-
-    const lowest = vals[0];
-    const from = Math.min(
-        ...ls.filter((l) => l.bonus === lowest).map((l) => Math.floor(l.active))
-    );
-    const below = ls.filter((l) => Math.floor(l.active) < from);
-    const above = ls.filter((l) => Math.floor(l.active) >= from);
-
-    // A trivial side teaches nothing and would just be noise with a
-    // breakpoint attached.
-    if (below.length < 12 || above.length < 12) {
-        return null;
-    }
-
-    const belowLine = fitLineAnyLevels(below, 2);
-    const aboveLine = fitLineAnyLevels(above, 2);
-
-    if (!belowLine || !aboveLine) {
-        return null;
-    }
-
-    return { from, below: belowLine, above: aboveLine };
-}
-
 // WHICH FORM GENERALISES, DECIDED PER GROUP BY CROSS-VALIDATION.
 //
 // The two-threshold line is not automatically an improvement. Switched on for
@@ -657,6 +624,81 @@ function linePredict(line, active) {
 //
 // Single thresholds stay on: there the line is strictly simpler than any band
 // arrangement that fits, and the holdout agrees.
+// THE BREAKPOINT IS SEARCHED, NOT ASSUMED. It was taken to be the floor where
+// the lowest bonus first appears, which is only one candidate and only worked
+// for three groups. Scanning every floor finds breakpoints for three more:
+// 0.4305/0.3625 and 0.375/0.3065 at one spring, and 0.4375/0.3625 at 51.
+//
+// SEVERAL BREAKPOINTS OFTEN WORK - 0.4305/0.3625 fits at 29, 30, 32 and 37 -
+// so the breakpoint is underdetermined, and picking one arbitrarily is exactly
+// what made the two-threshold form unstable. Each group therefore chooses by
+// its own cross-validation, scoring candidates on readings the fit never saw,
+// and ties go to the most balanced split because that is the best-determined
+// one. A group that cannot beat its own bands keeps them.
+//
+// Both sides must carry at least twelve readings; a trivial side is noise with
+// a breakpoint attached.
+function fitSplit(ls) {
+    const vals = [...new Set(ls.map((l) => l.bonus))].sort((x, y) => x - y);
+
+    if (vals.length < 2) {
+        return null;
+    }
+
+    const floors = [...new Set(ls.map((l) => Math.floor(l.active)))]
+        .sort((x, y) => x - y);
+    const viable = [];
+
+    for (const from of floors) {
+        const below = ls.filter((l) => Math.floor(l.active) < from);
+        const above = ls.filter((l) => Math.floor(l.active) >= from);
+
+        if (below.length < 12 || above.length < 12) {
+            continue;
+        }
+
+        const b = fitLineAnyLevels(below, 2);
+        const a = fitLineAnyLevels(above, 2);
+
+        if (b && a) {
+            viable.push({ from, below: b, above: a, balance: Math.min(below.length, above.length) });
+        }
+    }
+
+    if (!viable.length) {
+        return null;
+    }
+
+    let best = null;
+
+    for (const cand of viable) {
+        const score = cvScore(
+            ls,
+            (train) => {
+                const b = fitLineAnyLevels(
+                    train.filter((l) => Math.floor(l.active) < cand.from), 2
+                );
+                const a = fitLineAnyLevels(
+                    train.filter((l) => Math.floor(l.active) >= cand.from), 2
+                );
+
+                return b && a ? { from: cand.from, below: b, above: a } : null;
+            },
+            (model, active) => linePredict(
+                Math.floor(active) >= model.from ? model.above : model.below,
+                active
+            )
+        );
+
+        if (!best || score > best.score ||
+            (score === best.score && cand.balance > best.balance)) {
+            best = { ...cand, score };
+        }
+    }
+
+    return best;
+}
+
 const LINE_LEVELS = Number(process.env.LINE_LEVELS || 2);
 
 function fitLine(ls) {
