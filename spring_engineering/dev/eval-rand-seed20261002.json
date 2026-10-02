@@ -2,7 +2,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -44,7 +43,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -83,7 +81,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -121,7 +118,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -141,7 +137,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -179,7 +174,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -198,7 +192,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -236,7 +229,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -256,7 +248,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -294,7 +285,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -336,7 +326,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -374,7 +363,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -424,7 +412,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -466,7 +453,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -505,7 +491,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -553,7 +538,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -596,7 +580,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -635,7 +618,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -655,7 +637,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -696,7 +677,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -746,7 +726,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -788,7 +767,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -829,7 +807,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -871,7 +848,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -912,7 +888,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -950,7 +925,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -992,7 +966,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -1033,7 +1006,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -1071,7 +1043,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -1115,7 +1086,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -1165,7 +1135,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -1215,7 +1184,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -1254,7 +1222,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -1297,7 +1264,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -1347,7 +1313,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -1385,7 +1350,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -1427,7 +1391,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -1469,7 +1432,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -1508,7 +1470,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -1551,7 +1512,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -1594,7 +1554,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -1636,7 +1595,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -1678,7 +1636,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -1717,7 +1674,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -1758,7 +1714,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -1796,7 +1751,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -1837,7 +1791,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -1879,7 +1832,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -1923,7 +1875,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -1961,7 +1912,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -2003,7 +1953,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -2053,7 +2002,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -2095,7 +2043,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -2143,7 +2090,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -2181,7 +2127,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -2224,7 +2169,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -2273,7 +2217,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -2311,7 +2254,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -2349,7 +2291,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -2390,7 +2331,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -2428,7 +2368,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -2470,7 +2409,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -2520,7 +2458,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -2562,7 +2499,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -2601,7 +2537,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -2639,7 +2574,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -2681,7 +2615,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -2722,7 +2655,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -2763,7 +2695,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -2801,7 +2732,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -2843,7 +2773,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -2884,7 +2813,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -2922,7 +2850,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -2961,7 +2888,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -2999,7 +2925,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -3037,7 +2962,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -3079,7 +3003,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -3117,7 +3040,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -3158,7 +3080,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -3200,7 +3121,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -3241,7 +3161,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -3284,7 +3203,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -3322,7 +3240,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -3360,7 +3277,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -3399,7 +3315,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -3438,7 +3353,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -3476,7 +3390,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -3517,7 +3430,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -3568,7 +3480,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -3610,7 +3521,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -3658,7 +3568,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -3700,7 +3609,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -3738,7 +3646,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -3785,7 +3692,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -3823,7 +3729,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -3865,7 +3770,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -3884,7 +3788,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -3923,7 +3826,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -3961,7 +3863,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -3981,7 +3882,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -4032,7 +3932,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -4073,7 +3972,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -4122,7 +4020,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -4163,7 +4060,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -4202,7 +4098,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -4221,7 +4116,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -4266,7 +4160,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -4308,7 +4201,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -4350,7 +4242,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -4388,7 +4279,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -4431,7 +4321,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -4482,7 +4371,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -4533,7 +4421,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -4572,7 +4459,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -4614,7 +4500,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -4656,7 +4541,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -4694,7 +4578,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -4745,7 +4628,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -4787,7 +4669,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -4838,7 +4719,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -4877,7 +4757,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -4919,7 +4798,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -4961,7 +4839,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -5003,7 +4880,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -5041,7 +4917,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -5083,7 +4958,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -5129,7 +5003,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -5149,7 +5022,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -5199,7 +5071,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -5242,7 +5113,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -5284,7 +5154,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -5326,7 +5195,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -5368,7 +5236,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -5406,7 +5273,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -5448,7 +5314,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -5487,7 +5352,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -5525,7 +5389,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -5563,7 +5426,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -5605,7 +5467,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -5648,7 +5509,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -5689,7 +5549,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -5730,7 +5589,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -5769,7 +5627,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -5811,7 +5668,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -5850,7 +5706,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -5895,7 +5750,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -5933,7 +5787,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -5972,7 +5825,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -6014,7 +5866,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -6052,7 +5903,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -6094,7 +5944,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -6136,7 +5985,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -6174,7 +6022,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -6215,7 +6062,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -6257,7 +6103,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -6296,7 +6141,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -6346,7 +6190,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -6397,7 +6240,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -6435,7 +6277,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -6477,7 +6318,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -6518,7 +6358,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -6562,7 +6401,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -6605,7 +6443,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -6647,7 +6484,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -6686,7 +6522,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -6724,7 +6559,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -6763,7 +6597,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -6801,7 +6634,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -6842,7 +6674,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -6884,7 +6715,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -6922,7 +6752,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -6961,7 +6790,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -7002,7 +6830,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -7044,7 +6871,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -7085,7 +6911,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -7124,7 +6949,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -7162,7 +6986,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -7213,7 +7036,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -7252,7 +7074,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -7291,7 +7112,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -7329,7 +7149,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -7371,7 +7190,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -7412,7 +7230,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -7454,7 +7271,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -7502,7 +7318,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -7544,7 +7359,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -7586,7 +7400,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -7624,7 +7437,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -7662,7 +7474,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -7710,7 +7521,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -7752,7 +7562,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -7793,7 +7602,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -7834,7 +7642,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -7873,7 +7680,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -7915,7 +7721,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -7954,7 +7759,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -7998,7 +7802,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -8037,7 +7840,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -8079,7 +7881,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -8127,7 +7928,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -8177,7 +7977,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -8216,7 +8015,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -8268,7 +8066,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -8306,7 +8103,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -8344,7 +8140,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -8383,7 +8178,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -8421,7 +8215,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -8470,7 +8263,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -8508,7 +8300,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -8547,7 +8338,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -8589,7 +8379,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -8628,7 +8417,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -8669,7 +8457,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -8712,7 +8499,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -8763,7 +8549,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -8804,7 +8589,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -8846,7 +8630,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -8885,7 +8668,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -8935,7 +8717,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -8984,7 +8765,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -9022,7 +8802,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -9064,7 +8843,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -9103,7 +8881,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -9141,7 +8918,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -9180,7 +8956,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -9222,7 +8997,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -9261,7 +9035,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -9303,7 +9076,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -9345,7 +9117,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -9383,7 +9154,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -9422,7 +9192,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -9463,7 +9232,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -9501,7 +9269,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -9540,7 +9307,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -9587,7 +9353,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -9630,7 +9395,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -9669,7 +9433,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -9711,7 +9474,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -9749,7 +9511,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -9797,7 +9558,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -9839,7 +9599,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -9888,7 +9647,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -9937,7 +9695,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -9979,7 +9736,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -10017,7 +9773,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -10061,7 +9816,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -10103,7 +9857,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -10144,7 +9897,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -10186,7 +9938,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -10228,7 +9979,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -10266,7 +10016,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -10308,7 +10057,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -10356,7 +10104,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -10407,7 +10154,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -10448,7 +10194,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -10489,7 +10234,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -10530,7 +10274,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -10571,7 +10314,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -10619,7 +10361,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -10661,7 +10402,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -10700,7 +10440,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -10750,7 +10489,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -10788,7 +10526,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -10829,7 +10566,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -10867,7 +10603,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -10905,7 +10640,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -10944,7 +10678,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -10987,7 +10720,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -11025,7 +10757,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -11045,7 +10776,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -11083,7 +10813,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -11127,7 +10856,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -11165,7 +10893,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -11207,7 +10934,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -11249,7 +10975,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -11291,7 +11016,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -11330,7 +11054,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -11372,7 +11095,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -11413,7 +11135,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -11457,7 +11178,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -11496,7 +11216,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -11535,7 +11254,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -11586,7 +11304,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -11624,7 +11341,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -11666,7 +11382,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -11704,7 +11419,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -11746,7 +11460,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -11787,7 +11500,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -11838,7 +11550,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -11879,7 +11590,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -11917,7 +11627,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -11959,7 +11668,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -11997,7 +11705,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -12039,7 +11746,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -12081,7 +11787,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -12123,7 +11828,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -12161,7 +11865,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -12199,7 +11902,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -12237,7 +11939,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -12275,7 +11976,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -12317,7 +12017,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -12337,7 +12036,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -12379,7 +12077,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -12418,7 +12115,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -12457,7 +12153,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -12499,7 +12194,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -12538,7 +12232,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -12577,7 +12270,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -12619,7 +12311,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -12661,7 +12352,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -12702,7 +12392,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -12740,7 +12429,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -12782,7 +12470,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -12820,7 +12507,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -12858,7 +12544,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -12900,7 +12585,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -12938,7 +12622,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -12979,7 +12662,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -13022,7 +12704,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -13061,7 +12742,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -13099,7 +12779,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -13142,7 +12821,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -13162,7 +12840,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -13201,7 +12878,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -13243,7 +12919,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -13292,7 +12967,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -13330,7 +13004,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -13372,7 +13045,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -13410,7 +13082,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -13449,7 +13120,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -13499,7 +13169,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -13538,7 +13207,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -13576,7 +13244,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -13618,7 +13285,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -13656,7 +13322,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -13694,7 +13359,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -13736,7 +13400,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -13775,7 +13438,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -13816,7 +13478,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -13858,7 +13519,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -13897,7 +13557,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -13936,7 +13595,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -13977,7 +13635,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -14015,7 +13672,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -14057,7 +13713,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -14096,7 +13751,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -14134,7 +13788,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -14176,7 +13829,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -14214,7 +13866,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -14256,7 +13907,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -14300,7 +13950,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -14342,7 +13991,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -14383,7 +14031,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -14421,7 +14068,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -14463,7 +14109,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -14505,7 +14150,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -14543,7 +14187,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -14581,7 +14224,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -14622,7 +14264,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -14660,7 +14301,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -14703,7 +14343,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -14741,7 +14380,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -14779,7 +14417,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -14817,7 +14454,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -14868,7 +14504,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -14910,7 +14545,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -14952,7 +14586,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -14972,7 +14605,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -15010,7 +14642,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -15053,7 +14684,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -15095,7 +14725,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -15133,7 +14762,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -15171,7 +14799,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -15191,7 +14818,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -15230,7 +14856,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -15274,7 +14899,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -15316,7 +14940,6 @@
  {
   "input": {
    "label": "rand 575-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -15336,7 +14959,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -15374,7 +14996,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -15412,7 +15033,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -15454,7 +15074,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -15492,7 +15111,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -15531,7 +15149,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -15572,7 +15189,6 @@
  {
   "input": {
    "label": "rand 525-54HL",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -15611,7 +15227,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -15649,7 +15264,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -15691,7 +15305,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -15733,7 +15346,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 3,
    "innerId": 3.75,
@@ -15774,7 +15386,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -15794,7 +15405,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -15832,7 +15442,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -15873,7 +15482,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -15893,7 +15501,6 @@
  {
   "input": {
    "label": "rand D525-216",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -15938,7 +15545,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -15976,7 +15582,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -16017,7 +15622,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 1,
    "innerId": 3.75,
@@ -16055,7 +15659,6 @@
  {
   "input": {
    "label": "rand D800-120",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
@@ -16100,7 +15703,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -16141,7 +15743,6 @@
  {
   "input": {
    "label": "rand D400-96",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 4,
    "innerId": 3.75,
@@ -16183,7 +15784,6 @@
  {
   "input": {
    "label": "rand D400-144",
-   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
    "assembly": "Duplex",
    "springs": 2,
    "innerId": 3.75,
