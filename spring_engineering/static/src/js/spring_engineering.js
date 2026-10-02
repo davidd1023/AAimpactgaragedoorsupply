@@ -2272,8 +2272,28 @@ get springLengthExact() {
     return (this.state.springs * this.divider) / this.tipptExact + endAddition;
 }
 
+// QUARTER INCH, because that is what the reference quotes and what can be
+// bought. Springs are made to a quarter and the reference's own answers are
+// always a multiple of 0.25 - 30, 33.25, 51.5, 60, 85.75 - while this returned
+// two decimals of the raw computation: 33.20 where the reference says 33.25,
+// 51.45 where it says 51.5.
+//
+// Measured against 176 external readings, feeding the reference's own wire
+// choice back in so the comparison is like for like:
+//
+//   as it was returned, two decimals      4/176    2.3%
+//   rounded to the nearest 1/4"         123/176   69.9%
+//   rounded to the nearest 1/8"          60/176   34.1%
+//
+// The remaining 30% is not this rule: the length is right exactly where the
+// multiplier is (69.9% against 70.5%), so what is left is multiplier error.
+//
+// WHY THIS SURVIVED. dev/single-check.mjs only ever checked the MULTIPLIER,
+// and only on hand-picked readings, where it scored 12/12. The 725-case golden
+// snapshot proves nothing moved, never that it was right. Single's length had
+// never once been compared to the reference.
 get springLength() {
-    return Math.round(this.springLengthExact * 100) / 100;
+    return Math.round(this.springLengthExact * 4) / 4;
 }
 
 get springWeight() {
@@ -2284,11 +2304,16 @@ get springWeight() {
         return 0;
     }
 
+    // FROM THE QUARTER-INCH LENGTH, not the raw one, because that is the
+    // spring that gets built. Proved by inverting the reference's own reported
+    // weights: across 7,941 of them the length implied by the weight matches
+    // the length the reference REPORTS to within 0.005" in 99.9% of cases, so
+    // it weighs the spring it quotes rather than the unrounded computation.
     const volume =
         ((Math.PI ** 2) / 4) *
         this.wireSizeNumber *
         this.meanDiameter *
-        this.springLengthExact;
+        this.springLength;
 
     return Math.round(STEEL_DENSITY * volume * 100) / 100;
 }

@@ -1,0 +1,6074 @@
+[
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 143,
+   "weight": 225
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.3,
+   "totalInchPoundPerTurn": 42,
+   "multiplier": 0.186798,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 1.75,
+    "springLength": 70.75,
+    "springWeight": 29.1734
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 95,
+   "weight": 501
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8,
+   "totalInchPoundPerTurn": 144.3,
+   "multiplier": 0.288075,
+   "cycles": 28000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 5.25,
+    "springLength": 25.25,
+    "springWeight": 31.4412
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 346
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 92.2,
+   "multiplier": 0.26651,
+   "cycles": 123000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 2.625,
+    "springLength": 66.25,
+    "springWeight": 42.5555
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 110,
+   "weight": 319
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.5,
+   "totalInchPoundPerTurn": 76.8,
+   "multiplier": 0.240768,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 2.625,
+    "springLength": 34.25,
+    "springWeight": 18.1662
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 92,
+   "weight": 294
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 78.4,
+   "multiplier": 0.266778,
+   "cycles": 27000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 6,
+    "springLength": 15.75,
+    "springWeight": 18.118
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 561
+  },
+  "status": "error",
+  "messages": [
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8,
+   "totalInchPoundPerTurn": 160.1,
+   "multiplier": 0.285354,
+   "cycles": 222000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5,
+    "innerDiameter": 3.75,
+    "springLength": 137.5,
+    "springWeight": 204.4606
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 101,
+   "weight": 301
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.8,
+   "totalInchPoundPerTurn": 78,
+   "multiplier": 0.259176,
+   "cycles": 107000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 3.75,
+    "springLength": 43,
+    "springWeight": 35.9056
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 124,
+   "weight": 548
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.6,
+   "totalInchPoundPerTurn": 118.8,
+   "multiplier": 0.216728,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 5.25,
+    "springLength": 42.75,
+    "springWeight": 66.4852
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 100,
+   "weight": 707
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.8,
+   "totalInchPoundPerTurn": 184.8,
+   "multiplier": 0.261392,
+   "cycles": 166000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5312,
+    "innerDiameter": 2.625,
+    "springLength": 216,
+    "springWeight": 253.4085
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 139,
+   "weight": 559
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12,
+   "totalInchPoundPerTurn": 107.1,
+   "multiplier": 0.191506,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 6,
+    "springLength": 42,
+    "springWeight": 73.999
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 133,
+   "weight": 575
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.3,
+   "totalInchPoundPerTurn": 117.1,
+   "multiplier": 0.203621,
+   "cycles": 23000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 6,
+    "springLength": 32.5,
+    "springWeight": 47.657
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 160,
+   "weight": 1012
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.4,
+   "totalInchPoundPerTurn": 286,
+   "multiplier": 0.282579,
+   "cycles": 87000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 6,
+    "springLength": 91,
+    "springWeight": 202.5029
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 108,
+   "weight": 535
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9.6,
+   "totalInchPoundPerTurn": 127.1,
+   "multiplier": 0.237656,
+   "cycles": 30000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 2.625,
+    "springLength": 103.5,
+    "springWeight": 93.0751
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 461
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 129.5,
+   "multiplier": 0.281015,
+   "cycles": 68000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 2.625,
+    "springLength": 62.75,
+    "springWeight": 42.9625
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 213,
+   "weight": 802
+  },
+  "status": "error",
+  "messages": [
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13,
+   "totalInchPoundPerTurn": 181.4,
+   "multiplier": 0.226219,
+   "cycles": 29000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5312,
+    "innerDiameter": 4.375,
+    "springLength": 142.5,
+    "springWeight": 259.8741
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 90,
+   "weight": 337
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.4,
+   "totalInchPoundPerTurn": 91.5,
+   "multiplier": 0.271486,
+   "cycles": 294000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 2.625,
+    "springLength": 88,
+    "springWeight": 60.2502
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 104,
+   "weight": 729
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 6.6,
+   "totalInchPoundPerTurn": 323.3,
+   "multiplier": 0.443538,
+   "cycles": 96000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5625,
+    "innerDiameter": 6,
+    "springLength": 79.75,
+    "springWeight": 206.0002
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 140,
+   "weight": 388
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.4,
+   "totalInchPoundPerTurn": 78.1,
+   "multiplier": 0.201381,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 1.75,
+    "springLength": 57.75,
+    "springWeight": 22.3185
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 114,
+   "weight": 469
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.1,
+   "totalInchPoundPerTurn": 106.5,
+   "multiplier": 0.22712,
+   "cycles": 29000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 6,
+    "springLength": 27,
+    "springWeight": 37.2698
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 89,
+   "weight": 362
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.6,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.300902,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 4.375,
+    "springLength": 29.25,
+    "springWeight": 33.1946
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 132,
+   "weight": 734
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.6,
+   "totalInchPoundPerTurn": 251.5,
+   "multiplier": 0.342586,
+   "cycles": 219000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4687,
+    "innerDiameter": 1.75,
+    "springLength": 240.75,
+    "springWeight": 175.1872
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 87,
+   "weight": 686
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.8,
+   "totalInchPoundPerTurn": 201.6,
+   "multiplier": 0.293926,
+   "cycles": 52000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 4.375,
+    "springLength": 47.5,
+    "springWeight": 59.2055
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 1164
+  },
+  "status": "error",
+  "messages": [
+   "Unable to get a Wire Size",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 6.5,
+   "totalInchPoundPerTurn": 525.9,
+   "multiplier": 0.451816,
+   "cycles": 0,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0,
+    "innerDiameter": 3.75,
+    "springLength": 0,
+    "springWeight": 0
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 91,
+   "weight": 501
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 5.9,
+   "totalInchPoundPerTurn": 250.8,
+   "multiplier": 0.500592,
+   "cycles": 202000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4062,
+    "innerDiameter": 5.25,
+    "springLength": 47,
+    "springWeight": 75.5631
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 88,
+   "weight": 494
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.5,
+   "totalInchPoundPerTurn": 150.2,
+   "multiplier": 0.303973,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 3.75,
+    "springLength": 23,
+    "springWeight": 19.2053
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 121,
+   "weight": 291
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.4,
+   "totalInchPoundPerTurn": 64.4,
+   "multiplier": 0.221474,
+   "cycles": 36000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 5.25,
+    "springLength": 40.25,
+    "springWeight": 54.1482
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 164,
+   "weight": 770
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.6,
+   "totalInchPoundPerTurn": 212.8,
+   "multiplier": 0.27642,
+   "cycles": 58000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4305,
+    "innerDiameter": 4.375,
+    "springLength": 87.25,
+    "springWeight": 126.305
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 131,
+   "weight": 587
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.7,
+   "totalInchPoundPerTurn": 125.8,
+   "multiplier": 0.214301,
+   "cycles": 63000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4615,
+    "innerDiameter": 1.75,
+    "springLength": 223.75,
+    "springWeight": 159.7957
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 170,
+   "weight": 1053
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 295.4,
+   "multiplier": 0.280519,
+   "cycles": 207000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5312,
+    "innerDiameter": 2.625,
+    "springLength": 269.5,
+    "springWeight": 316.174
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 90,
+   "weight": 515
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8,
+   "totalInchPoundPerTurn": 147.2,
+   "multiplier": 0.285746,
+   "cycles": 36000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 5.25,
+    "springLength": 48.25,
+    "springWeight": 80.7732
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 200,
+   "weight": 1336
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.7,
+   "totalInchPoundPerTurn": 308.6,
+   "multiplier": 0.230997,
+   "cycles": 22000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.625,
+    "innerDiameter": 5.25,
+    "springLength": 156.5,
+    "springWeight": 402.1136
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 90,
+   "weight": 440
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 123.8,
+   "multiplier": 0.281389,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.283,
+    "innerDiameter": 4.375,
+    "springLength": 20,
+    "springWeight": 18.4488
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 232
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.8,
+   "totalInchPoundPerTurn": 59.8,
+   "multiplier": 0.257806,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2253,
+    "innerDiameter": 1.75,
+    "springLength": 30,
+    "springWeight": 9.3421
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 89,
+   "weight": 1458
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 5.7,
+   "totalInchPoundPerTurn": 744.6,
+   "multiplier": 0.510681,
+   "cycles": 16000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 1.75,
+    "springLength": 102,
+    "springWeight": 78.3418
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 90,
+   "weight": 403
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 113.4,
+   "multiplier": 0.281389,
+   "cycles": 299000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4531,
+    "innerDiameter": 6,
+    "springLength": 78,
+    "springWeight": 159.5895
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 85,
+   "weight": 318
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.3,
+   "totalInchPoundPerTurn": 99.7,
+   "multiplier": 0.313566,
+   "cycles": 141000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 2.625,
+    "springLength": 56,
+    "springWeight": 35.2097
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 144,
+   "weight": 231
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 42.9,
+   "multiplier": 0.185656,
+   "cycles": 106000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 4.375,
+    "springLength": 71.5,
+    "springWeight": 81.1423
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 122,
+   "weight": 416
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.4,
+   "totalInchPoundPerTurn": 91.5,
+   "multiplier": 0.21987,
+   "cycles": 60000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4062,
+    "innerDiameter": 1.75,
+    "springLength": 167,
+    "springWeight": 102.3511
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 88,
+   "weight": 446
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.5,
+   "totalInchPoundPerTurn": 135.6,
+   "multiplier": 0.303973,
+   "cycles": 237000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4615,
+    "innerDiameter": 1.75,
+    "springLength": 207.75,
+    "springWeight": 148.369
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 93,
+   "weight": 441
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 127.5,
+   "multiplier": 0.289211,
+   "cycles": 31000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 3.75,
+    "springLength": 32.25,
+    "springWeight": 28.0586
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 87,
+   "weight": 460
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 133.1,
+   "multiplier": 0.289443,
+   "cycles": 102000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4375,
+    "innerDiameter": 1.75,
+    "springLength": 164,
+    "springWeight": 109.828
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 91,
+   "weight": 460
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.2,
+   "totalInchPoundPerTurn": 128.2,
+   "multiplier": 0.278799,
+   "cycles": 25000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 4.375,
+    "springLength": 28,
+    "springWeight": 28.1143
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 95,
+   "weight": 574
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.7,
+   "totalInchPoundPerTurn": 151.6,
+   "multiplier": 0.264026,
+   "cycles": 120000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 4.375,
+    "springLength": 62.5,
+    "springWeight": 77.902
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 159,
+   "weight": 680
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.3,
+   "totalInchPoundPerTurn": 193.2,
+   "multiplier": 0.284161,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4615,
+    "innerDiameter": 6,
+    "springLength": 50.75,
+    "springWeight": 105.8972
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 166,
+   "weight": 1287
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.7,
+   "totalInchPoundPerTurn": 351.9,
+   "multiplier": 0.273439,
+   "cycles": 27000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.625,
+    "innerDiameter": 2.625,
+    "springLength": 248.25,
+    "springWeight": 352.8573
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 137,
+   "weight": 1044
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.9,
+   "totalInchPoundPerTurn": 346,
+   "multiplier": 0.331395,
+   "cycles": 216000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5312,
+    "innerDiameter": 1.75,
+    "springLength": 318,
+    "springWeight": 269.6456
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 94,
+   "weight": 482
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.4,
+   "totalInchPoundPerTurn": 130.8,
+   "multiplier": 0.271298,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 1.75,
+    "springLength": 66.5,
+    "springWeight": 29.9922
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 92,
+   "weight": 461
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.2,
+   "totalInchPoundPerTurn": 127.4,
+   "multiplier": 0.276254,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 1.75,
+    "springLength": 47,
+    "springWeight": 19.3802
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 119,
+   "weight": 748
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.2,
+   "totalInchPoundPerTurn": 168.1,
+   "multiplier": 0.224753,
+   "cycles": 210000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4305,
+    "innerDiameter": 2.625,
+    "springLength": 171.5,
+    "springWeight": 157.8566
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 94,
+   "weight": 430
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.4,
+   "totalInchPoundPerTurn": 116.7,
+   "multiplier": 0.271298,
+   "cycles": 221000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4531,
+    "innerDiameter": 3.75,
+    "springLength": 116.75,
+    "springWeight": 155.585
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 87,
+   "weight": 237
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 68.6,
+   "multiplier": 0.289443,
+   "cycles": 259000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 4.375,
+    "springLength": 38.5,
+    "springWeight": 36.313
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 123,
+   "weight": 1099
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.3,
+   "totalInchPoundPerTurn": 390.7,
+   "multiplier": 0.355514,
+   "cycles": 55000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.625,
+    "innerDiameter": 3.75,
+    "springLength": 167.25,
+    "springWeight": 320.0153
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 90,
+   "weight": 325
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.6,
+   "totalInchPoundPerTurn": 96.8,
+   "multiplier": 0.297893,
+   "cycles": 59000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 1.75,
+    "springLength": 61.5,
+    "springWeight": 25.3592
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 93,
+   "weight": 586
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.8,
+   "totalInchPoundPerTurn": 172.1,
+   "multiplier": 0.293676,
+   "cycles": 109000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 4.375,
+    "springLength": 55.25,
+    "springWeight": 68.8654
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 122,
+   "weight": 571
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.7,
+   "totalInchPoundPerTurn": 122.4,
+   "multiplier": 0.214401,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 3.75,
+    "springLength": 36.75,
+    "springWeight": 32.647
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 288
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 80.9,
+   "multiplier": 0.281015,
+   "cycles": 79000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 4.375,
+    "springLength": 49.75,
+    "springWeight": 59.7853
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 179,
+   "weight": 1115
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.3,
+   "totalInchPoundPerTurn": 289.7,
+   "multiplier": 0.259858,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4305,
+    "innerDiameter": 6,
+    "springLength": 48,
+    "springWeight": 92.9827
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 89,
+   "weight": 519
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8,
+   "totalInchPoundPerTurn": 147.4,
+   "multiplier": 0.284025,
+   "cycles": 64000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 6,
+    "springLength": 31.25,
+    "springWeight": 47.6773
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 155,
+   "weight": 1280
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9.9,
+   "totalInchPoundPerTurn": 379.5,
+   "multiplier": 0.296466,
+   "cycles": 83000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5312,
+    "innerDiameter": 6,
+    "springLength": 102,
+    "springWeight": 247.6259
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 92,
+   "weight": 453
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 122.7,
+   "multiplier": 0.270915,
+   "cycles": 27000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 4.375,
+    "springLength": 49.5,
+    "springWeight": 65.0477
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 95,
+   "weight": 467
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 125.6,
+   "multiplier": 0.268883,
+   "cycles": 36000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4062,
+    "innerDiameter": 3.75,
+    "springLength": 64.25,
+    "springWeight": 75.9026
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 93,
+   "weight": 291
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 84.2,
+   "multiplier": 0.289211,
+   "cycles": 214000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 3.75,
+    "springLength": 48.25,
+    "springWeight": 41.9792
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 87,
+   "weight": 276
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 79.9,
+   "multiplier": 0.289443,
+   "cycles": 29000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 4.375,
+    "springLength": 32.75,
+    "springWeight": 35.6972
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 115,
+   "weight": 642
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.3,
+   "totalInchPoundPerTurn": 259.7,
+   "multiplier": 0.404456,
+   "cycles": 14000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 4.375,
+    "springLength": 31.75,
+    "springWeight": 38.1544
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 171,
+   "weight": 1420
+  },
+  "status": "error",
+  "messages": [
+   "Unable to get a Wire Size",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 396.1,
+   "multiplier": 0.278963,
+   "cycles": 0,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0,
+    "innerDiameter": 6,
+    "springLength": 0,
+    "springWeight": 0
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 84,
+   "weight": 356
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.6,
+   "totalInchPoundPerTurn": 106.1,
+   "multiplier": 0.297951,
+   "cycles": 107000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 6,
+    "springLength": 27,
+    "springWeight": 37.2698
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 344
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 91.7,
+   "multiplier": 0.26651,
+   "cycles": 35000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.283,
+    "innerDiameter": 2.625,
+    "springLength": 41.5,
+    "springWeight": 23.899
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 141,
+   "weight": 707
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 133.7,
+   "multiplier": 0.189123,
+   "cycles": 29000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 4.375,
+    "springLength": 60,
+    "springWeight": 72.1029
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 212,
+   "weight": 340
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 13.4,
+   "totalInchPoundPerTurn": 74.5,
+   "multiplier": 0.218976,
+   "cycles": 54000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 6,
+    "springLength": 42.5,
+    "springWeight": 60.0473
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 201,
+   "weight": 701
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.8,
+   "totalInchPoundPerTurn": 161.2,
+   "multiplier": 0.229946,
+   "cycles": 115000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5625,
+    "innerDiameter": 1.75,
+    "springLength": 447.25,
+    "springWeight": 407.0986
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 93,
+   "weight": 282
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.6,
+   "totalInchPoundPerTurn": 74.6,
+   "multiplier": 0.26448,
+   "cycles": 33000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 5.25,
+    "springLength": 18.5,
+    "springWeight": 18.7328
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 213,
+   "weight": 1465
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13.5,
+   "totalInchPoundPerTurn": 319.4,
+   "multiplier": 0.21803,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 6,
+    "springLength": 81.75,
+    "springWeight": 181.9188
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 89,
+   "weight": 1007
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 484.7,
+   "multiplier": 0.481367,
+   "cycles": 89000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 2.625,
+    "springLength": 112.5,
+    "springWeight": 120.1589
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 119,
+   "weight": 746
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9.8,
+   "totalInchPoundPerTurn": 174.8,
+   "multiplier": 0.234332,
+   "cycles": 212000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4305,
+    "innerDiameter": 2.625,
+    "springLength": 165,
+    "springWeight": 151.8737
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 103,
+   "weight": 603
+  },
+  "status": "error",
+  "messages": [
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9,
+   "totalInchPoundPerTurn": 153.7,
+   "multiplier": 0.254852,
+   "cycles": 122000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 3.75,
+    "springLength": 130,
+    "springWeight": 188.9968
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 92,
+   "weight": 595
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 161.2,
+   "multiplier": 0.270915,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 5.25,
+    "springLength": 44.25,
+    "springWeight": 74.077
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 115,
+   "weight": 592
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9.5,
+   "totalInchPoundPerTurn": 143.2,
+   "multiplier": 0.241862,
+   "cycles": 380000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5312,
+    "innerDiameter": 1.75,
+    "springLength": 383.5,
+    "springWeight": 325.1858
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 86,
+   "weight": 324
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.3,
+   "totalInchPoundPerTurn": 100.5,
+   "multiplier": 0.310302,
+   "cycles": 326000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 6,
+    "springLength": 62,
+    "springWeight": 117.5162
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 92,
+   "weight": 501
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 133.7,
+   "multiplier": 0.266778,
+   "cycles": 17000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 5.25,
+    "springLength": 38,
+    "springWeight": 59.098
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 187,
+   "weight": 982
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12,
+   "totalInchPoundPerTurn": 241.2,
+   "multiplier": 0.245588,
+   "cycles": 94000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.625,
+    "innerDiameter": 4.375,
+    "springLength": 235.75,
+    "springWeight": 515.5232
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 100,
+   "weight": 1299
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 6.4,
+   "totalInchPoundPerTurn": 597.1,
+   "multiplier": 0.459672,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4687,
+    "innerDiameter": 6,
+    "springLength": 35.75,
+    "springWeight": 75.8456
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 89,
+   "weight": 384
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8,
+   "totalInchPoundPerTurn": 109.1,
+   "multiplier": 0.284025,
+   "cycles": 32000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 3.75,
+    "springLength": 50.25,
+    "springWeight": 54.392
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 124,
+   "weight": 275
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.2,
+   "totalInchPoundPerTurn": 62,
+   "multiplier": 0.225551,
+   "cycles": 146000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 6,
+    "springLength": 56.25,
+    "springWeight": 94.0974
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 524
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 139.7,
+   "multiplier": 0.26651,
+   "cycles": 21000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4062,
+    "innerDiameter": 3.75,
+    "springLength": 58,
+    "springWeight": 68.5191
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 135,
+   "weight": 234
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.4,
+   "totalInchPoundPerTurn": 47,
+   "multiplier": 0.200918,
+   "cycles": 200000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 5.25,
+    "springLength": 70.75,
+    "springWeight": 100.7245
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 329
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 87.7,
+   "multiplier": 0.26651,
+   "cycles": 56000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 1.75,
+    "springLength": 67.75,
+    "springWeight": 27.9363
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 93,
+   "weight": 334
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.6,
+   "totalInchPoundPerTurn": 88.3,
+   "multiplier": 0.26448,
+   "cycles": 39000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 6,
+    "springLength": 33.75,
+    "springWeight": 54.4696
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 111,
+   "weight": 384
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.9,
+   "totalInchPoundPerTurn": 89.2,
+   "multiplier": 0.232273,
+   "cycles": 20000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 5.25,
+    "springLength": 37.75,
+    "springWeight": 53.7434
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 119,
+   "weight": 580
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9.8,
+   "totalInchPoundPerTurn": 135.9,
+   "multiplier": 0.234332,
+   "cycles": 37000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 2.625,
+    "springLength": 71.75,
+    "springWeight": 51.2279
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 306
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 81.6,
+   "multiplier": 0.26651,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 4.375,
+    "springLength": 16.5,
+    "springWeight": 13.3497
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 102,
+   "weight": 705
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 190.4,
+   "multiplier": 0.270035,
+   "cycles": 212000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 4.375,
+    "springLength": 88,
+    "springWeight": 124.5901
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 95,
+   "weight": 295
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.8,
+   "totalInchPoundPerTurn": 76.7,
+   "multiplier": 0.259996,
+   "cycles": 21000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 4.375,
+    "springLength": 34,
+    "springWeight": 37.0597
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 114,
+   "weight": 389
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.8,
+   "totalInchPoundPerTurn": 90.8,
+   "multiplier": 0.233383,
+   "cycles": 29000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 5.25,
+    "springLength": 43.75,
+    "springWeight": 64.5767
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 92,
+   "weight": 349
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.7,
+   "totalInchPoundPerTurn": 103.5,
+   "multiplier": 0.296558,
+   "cycles": 222000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 5.25,
+    "springLength": 68.25,
+    "springWeight": 114.2543
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 319
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.2,
+   "totalInchPoundPerTurn": 152.2,
+   "multiplier": 0.477011,
+   "cycles": 107000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 5.25,
+    "springLength": 46.75,
+    "springWeight": 78.2621
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 143,
+   "weight": 632
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12,
+   "totalInchPoundPerTurn": 120.6,
+   "multiplier": 0.190778,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 1.75,
+    "springLength": 94.75,
+    "springWeight": 45.6691
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 84,
+   "weight": 705
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.6,
+   "totalInchPoundPerTurn": 213.3,
+   "multiplier": 0.302568,
+   "cycles": 130000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4062,
+    "innerDiameter": 1.75,
+    "springLength": 143.5,
+    "springWeight": 87.9484
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 104,
+   "weight": 538
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.4,
+   "totalInchPoundPerTurn": 131.9,
+   "multiplier": 0.245218,
+   "cycles": 32000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 6,
+    "springLength": 29,
+    "springWeight": 42.5247
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 107,
+   "weight": 532
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9.3,
+   "totalInchPoundPerTurn": 131.2,
+   "multiplier": 0.246613,
+   "cycles": 79000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4531,
+    "innerDiameter": 6,
+    "springLength": 67.75,
+    "springWeight": 138.6178
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 92,
+   "weight": 446
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.5,
+   "totalInchPoundPerTurn": 201.5,
+   "multiplier": 0.451799,
+   "cycles": 123000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 5.25,
+    "springLength": 39.5,
+    "springWeight": 58.3035
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 84,
+   "weight": 464
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.6,
+   "totalInchPoundPerTurn": 138.2,
+   "multiplier": 0.297951,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 5.25,
+    "springLength": 29.25,
+    "springWeight": 43.1741
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 94,
+   "weight": 268
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 76.8,
+   "multiplier": 0.286427,
+   "cycles": 16000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 1.75,
+    "springLength": 57,
+    "springWeight": 25.7076
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 108,
+   "weight": 528
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.9,
+   "totalInchPoundPerTurn": 135.3,
+   "multiplier": 0.256264,
+   "cycles": 52000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4375,
+    "innerDiameter": 1.75,
+    "springLength": 161.5,
+    "springWeight": 108.1538
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 85,
+   "weight": 521
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8,
+   "totalInchPoundPerTurn": 147.9,
+   "multiplier": 0.283961,
+   "cycles": 115000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4615,
+    "innerDiameter": 4.375,
+    "springLength": 88.25,
+    "springWeight": 137.8355
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 84,
+   "weight": 356
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.6,
+   "totalInchPoundPerTurn": 106.1,
+   "multiplier": 0.297951,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 4.375,
+    "springLength": 16.25,
+    "springWeight": 13.8426
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 141,
+   "weight": 689
+  },
+  "status": "error",
+  "messages": [
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 130.3,
+   "multiplier": 0.189123,
+   "cycles": 65000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 4.375,
+    "springLength": 133.5,
+    "springWeight": 222.6944
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 85,
+   "weight": 655
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.7,
+   "totalInchPoundPerTurn": 196.3,
+   "multiplier": 0.299634,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4305,
+    "innerDiameter": 5.25,
+    "springLength": 40.25,
+    "springWeight": 68.8761
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 86,
+   "weight": 233
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.8,
+   "totalInchPoundPerTurn": 68.1,
+   "multiplier": 0.292227,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 5.25,
+    "springLength": 16.5,
+    "springWeight": 18.4824
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 88,
+   "weight": 395
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 113.3,
+   "multiplier": 0.28671,
+   "cycles": 28000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 6,
+    "springLength": 31.25,
+    "springWeight": 52.2763
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 198,
+   "weight": 648
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 157.2,
+   "multiplier": 0.242606,
+   "cycles": 61000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4062,
+    "innerDiameter": 5.25,
+    "springLength": 74.25,
+    "springWeight": 119.3736
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 88,
+   "weight": 387
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 111,
+   "multiplier": 0.28671,
+   "cycles": 20000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.283,
+    "innerDiameter": 6,
+    "springLength": 16.25,
+    "springWeight": 20.2189
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 127,
+   "weight": 295
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.8,
+   "totalInchPoundPerTurn": 62.6,
+   "multiplier": 0.212178,
+   "cycles": 105000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 4.375,
+    "springLength": 75.25,
+    "springWeight": 93.794
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 93,
+   "weight": 378
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 101.5,
+   "multiplier": 0.268582,
+   "cycles": 153000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 1.75,
+    "springLength": 180.25,
+    "springWeight": 115.5432
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 179,
+   "weight": 890
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.3,
+   "totalInchPoundPerTurn": 231.3,
+   "multiplier": 0.259858,
+   "cycles": 57000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4531,
+    "innerDiameter": 6,
+    "springLength": 76.75,
+    "springWeight": 157.0319
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 88,
+   "weight": 693
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.2,
+   "totalInchPoundPerTurn": 194.5,
+   "multiplier": 0.28064,
+   "cycles": 32000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 1.75,
+    "springLength": 91.5,
+    "springWeight": 49.0309
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 123,
+   "weight": 439
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.8,
+   "totalInchPoundPerTurn": 93.5,
+   "multiplier": 0.212908,
+   "cycles": 134000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 4.375,
+    "springLength": 65.75,
+    "springWeight": 74.6168
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 185,
+   "weight": 1077
+  },
+  "status": "error",
+  "messages": [
+   "Unable to get a Wire Size",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.3,
+   "totalInchPoundPerTurn": 278.8,
+   "multiplier": 0.258852,
+   "cycles": 0,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0,
+    "innerDiameter": 5.25,
+    "springLength": 0,
+    "springWeight": 0
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 119,
+   "weight": 697
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9.8,
+   "totalInchPoundPerTurn": 163.3,
+   "multiplier": 0.234332,
+   "cycles": 91000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 3.75,
+    "springLength": 84.25,
+    "springWeight": 96.2025
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 140,
+   "weight": 247
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.4,
+   "totalInchPoundPerTurn": 49.7,
+   "multiplier": 0.201381,
+   "cycles": 241000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 2.625,
+    "springLength": 148,
+    "springWeight": 116.5086
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 197,
+   "weight": 1101
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.5,
+   "totalInchPoundPerTurn": 257.9,
+   "multiplier": 0.23421,
+   "cycles": 355000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5625,
+    "innerDiameter": 2.625,
+    "springLength": 405.75,
+    "springWeight": 509.0686
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 100,
+   "weight": 528
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.1,
+   "totalInchPoundPerTurn": 133.7,
+   "multiplier": 0.253252,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 3.75,
+    "springLength": 30.75,
+    "springWeight": 26.7536
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 94,
+   "weight": 267
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 77.7,
+   "multiplier": 0.290849,
+   "cycles": 41000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 4.375,
+    "springLength": 21.75,
+    "springWeight": 18.5278
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 88,
+   "weight": 500
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.2,
+   "totalInchPoundPerTurn": 138.2,
+   "multiplier": 0.276352,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 5.25,
+    "springLength": 37,
+    "springWeight": 57.5428
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 137,
+   "weight": 556
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9.1,
+   "totalInchPoundPerTurn": 180.1,
+   "multiplier": 0.323972,
+   "cycles": 56000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 2.625,
+    "springLength": 150.5,
+    "springWeight": 160.7458
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 94,
+   "weight": 435
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.4,
+   "totalInchPoundPerTurn": 118,
+   "multiplier": 0.271298,
+   "cycles": 34000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 2.625,
+    "springLength": 80.25,
+    "springWeight": 66.757
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 186,
+   "weight": 335
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 84,
+   "multiplier": 0.250814,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.283,
+    "innerDiameter": 5.25,
+    "springLength": 23.75,
+    "springWeight": 26.0233
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 125,
+   "weight": 645
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.9,
+   "totalInchPoundPerTurn": 135.4,
+   "multiplier": 0.209981,
+   "cycles": 32000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4531,
+    "innerDiameter": 3.75,
+    "springLength": 101,
+    "springWeight": 134.596
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 87,
+   "weight": 518
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.2,
+   "totalInchPoundPerTurn": 144.4,
+   "multiplier": 0.278846,
+   "cycles": 14000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 3.75,
+    "springLength": 28.75,
+    "springWeight": 25.0135
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 86,
+   "weight": 291
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.3,
+   "totalInchPoundPerTurn": 90.3,
+   "multiplier": 0.310302,
+   "cycles": 23000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 6,
+    "springLength": 21.5,
+    "springWeight": 31.5269
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 90,
+   "weight": 482
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.6,
+   "totalInchPoundPerTurn": 143.6,
+   "multiplier": 0.297893,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 6,
+    "springLength": 15.5,
+    "springWeight": 20.142
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 86,
+   "weight": 472
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.3,
+   "totalInchPoundPerTurn": 146.5,
+   "multiplier": 0.310302,
+   "cycles": 34000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4062,
+    "innerDiameter": 1.75,
+    "springLength": 105,
+    "springWeight": 64.3525
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 216,
+   "weight": 983
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13.6,
+   "totalInchPoundPerTurn": 211.6,
+   "multiplier": 0.21524,
+   "cycles": 93000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.625,
+    "innerDiameter": 6,
+    "springLength": 202,
+    "springWeight": 585.2802
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 93,
+   "weight": 606
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.2,
+   "totalInchPoundPerTurn": 168.5,
+   "multiplier": 0.277992,
+   "cycles": 27000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4375,
+    "innerDiameter": 4.375,
+    "springLength": 60.25,
+    "springWeight": 88.7665
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 134,
+   "weight": 537
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.9,
+   "totalInchPoundPerTurn": 112.7,
+   "multiplier": 0.209815,
+   "cycles": 52000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 5.25,
+    "springLength": 45.75,
+    "springWeight": 61.5473
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 188,
+   "weight": 1140
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12,
+   "totalInchPoundPerTurn": 278.6,
+   "multiplier": 0.244401,
+   "cycles": 143000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5312,
+    "innerDiameter": 1.75,
+    "springLength": 394,
+    "springWeight": 334.0892
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 89,
+   "weight": 464
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8,
+   "totalInchPoundPerTurn": 131.8,
+   "multiplier": 0.284025,
+   "cycles": 216000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 4.375,
+    "springLength": 60.75,
+    "springWeight": 73.0042
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 113,
+   "weight": 653
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.7,
+   "totalInchPoundPerTurn": 153.6,
+   "multiplier": 0.235187,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 3.75,
+    "springLength": 39,
+    "springWeight": 36.864
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 91,
+   "weight": 360
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 96.9,
+   "multiplier": 0.269113,
+   "cycles": 14000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 2.625,
+    "springLength": 50.75,
+    "springWeight": 36.2344
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 144,
+   "weight": 341
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 66.9,
+   "multiplier": 0.196123,
+   "cycles": 22000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 3.75,
+    "springLength": 34.5,
+    "springWeight": 26.5147
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 105,
+   "weight": 647
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.7,
+   "totalInchPoundPerTurn": 170.1,
+   "multiplier": 0.262971,
+   "cycles": 251000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5312,
+    "innerDiameter": 3.75,
+    "springLength": 173.5,
+    "springWeight": 276.1009
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 89,
+   "weight": 386
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8,
+   "totalInchPoundPerTurn": 109.6,
+   "multiplier": 0.284025,
+   "cycles": 20000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 3.75,
+    "springLength": 42.75,
+    "springWeight": 44.5958
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 94,
+   "weight": 235
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.7,
+   "totalInchPoundPerTurn": 61.6,
+   "multiplier": 0.26222,
+   "cycles": 29000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 1.75,
+    "springLength": 70.5,
+    "springWeight": 31.7962
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 84,
+   "weight": 236
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.2,
+   "totalInchPoundPerTurn": 74.8,
+   "multiplier": 0.316897,
+   "cycles": 126000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 1.75,
+    "springLength": 60.25,
+    "springWeight": 23.2847
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 186,
+   "weight": 384
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.9,
+   "totalInchPoundPerTurn": 94.8,
+   "multiplier": 0.246787,
+   "cycles": 58000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4305,
+    "innerDiameter": 5.25,
+    "springLength": 82,
+    "springWeight": 140.3191
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 86,
+   "weight": 305
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.8,
+   "totalInchPoundPerTurn": 89.1,
+   "multiplier": 0.292227,
+   "cycles": 60000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 6,
+    "springLength": 33.5,
+    "springWeight": 54.0661
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 180,
+   "weight": 1004
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.1,
+   "totalInchPoundPerTurn": 266.8,
+   "multiplier": 0.265694,
+   "cycles": 17000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4305,
+    "innerDiameter": 4.375,
+    "springLength": 70,
+    "springWeight": 101.3335
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 91,
+   "weight": 372
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.2,
+   "totalInchPoundPerTurn": 103.7,
+   "multiplier": 0.278799,
+   "cycles": 105000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4062,
+    "innerDiameter": 5.25,
+    "springLength": 56.75,
+    "springWeight": 91.2384
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 98,
+   "weight": 468
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.6,
+   "totalInchPoundPerTurn": 124.5,
+   "multiplier": 0.265935,
+   "cycles": 35000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4062,
+    "innerDiameter": 5.25,
+    "springLength": 47.5,
+    "springWeight": 76.3669
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 94,
+   "weight": 499
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.3,
+   "totalInchPoundPerTurn": 137.5,
+   "multiplier": 0.275497,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 4.375,
+    "springLength": 22,
+    "springWeight": 21.2087
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 146,
+   "weight": 371
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.4,
+   "totalInchPoundPerTurn": 116.1,
+   "multiplier": 0.31297,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 4.375,
+    "springLength": 41.5,
+    "springWeight": 51.7269
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 97,
+   "weight": 279
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.8,
+   "totalInchPoundPerTurn": 72.4,
+   "multiplier": 0.259614,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2437,
+    "innerDiameter": 6,
+    "springLength": 12,
+    "springWeight": 12.7768
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 134,
+   "weight": 340
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.9,
+   "totalInchPoundPerTurn": 71.3,
+   "multiplier": 0.209815,
+   "cycles": 271000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 5.25,
+    "springLength": 59.75,
+    "springWeight": 77.2362
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 104,
+   "weight": 491
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.1,
+   "totalInchPoundPerTurn": 124.1,
+   "multiplier": 0.252743,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 6,
+    "springLength": 21.25,
+    "springWeight": 28.743
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 213,
+   "weight": 370
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13.3,
+   "totalInchPoundPerTurn": 81.8,
+   "multiplier": 0.221101,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 2.625,
+    "springLength": 90.75,
+    "springWeight": 71.4402
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 15000,
+   "widthInches": 168,
+   "heightInches": 88,
+   "weight": 359
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.2,
+   "totalInchPoundPerTurn": 99.2,
+   "multiplier": 0.276352,
+   "cycles": 28000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 2.625,
+    "springLength": 64,
+    "springWeight": 48.4998
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 144,
+   "weight": 413
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9.5,
+   "totalInchPoundPerTurn": 128.1,
+   "multiplier": 0.310169,
+   "cycles": 32000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 2.625,
+    "springLength": 102.75,
+    "springWeight": 92.4006
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 209,
+   "weight": 1013
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13,
+   "totalInchPoundPerTurn": 228,
+   "multiplier": 0.225053,
+   "cycles": 81000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.625,
+    "innerDiameter": 2.625,
+    "springLength": 381.75,
+    "springWeight": 542.6114
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 84,
+   "weight": 422
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.2,
+   "totalInchPoundPerTurn": 133.7,
+   "multiplier": 0.316897,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.283,
+    "innerDiameter": 6,
+    "springLength": 13.5,
+    "springWeight": 16.7973
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 137,
+   "weight": 544
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 111.8,
+   "multiplier": 0.205512,
+   "cycles": 30000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 4.375,
+    "springLength": 46,
+    "springWeight": 50.1396
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 93,
+   "weight": 315
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.6,
+   "totalInchPoundPerTurn": 83.3,
+   "multiplier": 0.26448,
+   "cycles": 254000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 2.625,
+    "springLength": 81.5,
+    "springWeight": 53.6526
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 95,
+   "weight": 383
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8,
+   "totalInchPoundPerTurn": 108.7,
+   "multiplier": 0.283695,
+   "cycles": 102000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 1.75,
+    "springLength": 88.75,
+    "springWeight": 41.0635
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 105,
+   "weight": 575
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.1,
+   "totalInchPoundPerTurn": 144.1,
+   "multiplier": 0.250667,
+   "cycles": 55000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4531,
+    "innerDiameter": 4.375,
+    "springLength": 83,
+    "springWeight": 127.0561
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 129,
+   "weight": 624
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 135.7,
+   "multiplier": 0.2174,
+   "cycles": 37000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4531,
+    "innerDiameter": 6,
+    "springLength": 65.5,
+    "springWeight": 134.0142
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 141,
+   "weight": 547
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 103.5,
+   "multiplier": 0.189123,
+   "cycles": 108000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4687,
+    "innerDiameter": 1.75,
+    "springLength": 292.25,
+    "springWeight": 212.6624
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 91,
+   "weight": 507
+  },
+  "status": "error",
+  "messages": [
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.2,
+   "totalInchPoundPerTurn": 141.4,
+   "multiplier": 0.278799,
+   "cycles": 284000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 4.375,
+    "springLength": 123.25,
+    "springWeight": 205.5961
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 126,
+   "weight": 728
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.3,
+   "totalInchPoundPerTurn": 161.8,
+   "multiplier": 0.222218,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 5.25,
+    "springLength": 32.25,
+    "springWeight": 43.3858
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 84,
+   "weight": 326
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 93.4,
+   "multiplier": 0.286584,
+   "cycles": 68000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 4.375,
+    "springLength": 51,
+    "springWeight": 63.568
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 87,
+   "weight": 308
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.2,
+   "totalInchPoundPerTurn": 145.4,
+   "multiplier": 0.472095,
+   "cycles": 136000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 5.25,
+    "springLength": 29.75,
+    "springWeight": 38.4565
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 97,
+   "weight": 291
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.5,
+   "totalInchPoundPerTurn": 78.1,
+   "multiplier": 0.268265,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2437,
+    "innerDiameter": 3.75,
+    "springLength": 17.5,
+    "springWeight": 11.9183
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 93,
+   "weight": 254
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.6,
+   "totalInchPoundPerTurn": 67.2,
+   "multiplier": 0.26448,
+   "cycles": 28000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 4.375,
+    "springLength": 19.75,
+    "springWeight": 15.9792
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 115,
+   "weight": 268
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.2,
+   "totalInchPoundPerTurn": 60.4,
+   "multiplier": 0.225451,
+   "cycles": 106000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 4.375,
+    "springLength": 66.25,
+    "springWeight": 79.6136
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 121,
+   "weight": 343
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.4,
+   "totalInchPoundPerTurn": 76,
+   "multiplier": 0.221474,
+   "cycles": 58000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 6,
+    "springLength": 28.25,
+    "springWeight": 36.7104
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 106,
+   "weight": 300
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.3,
+   "totalInchPoundPerTurn": 120.8,
+   "multiplier": 0.40282,
+   "cycles": 229000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4375,
+    "innerDiameter": 6,
+    "springLength": 62,
+    "springWeight": 122.1884
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 168,
+   "heightInches": 210,
+   "weight": 1374
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.8,
+   "totalInchPoundPerTurn": 315.1,
+   "multiplier": 0.229317,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4687,
+    "innerDiameter": 3.75,
+    "springLength": 102.5,
+    "springWeight": 141.8208
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 121,
+   "weight": 604
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.9,
+   "totalInchPoundPerTurn": 139.4,
+   "multiplier": 0.230739,
+   "cycles": 61000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 3.75,
+    "springLength": 66,
+    "springWeight": 68.8497
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 168,
+   "heightInches": 204,
+   "weight": 784
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.9,
+   "totalInchPoundPerTurn": 177.8,
+   "multiplier": 0.226847,
+   "cycles": 68000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5625,
+    "innerDiameter": 5.25,
+    "springLength": 162,
+    "springWeight": 370.6342
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 132,
+   "weight": 1314
+  },
+  "status": "error",
+  "messages": [
+   "Unable to get a Wire Size",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.8,
+   "totalInchPoundPerTurn": 439.7,
+   "multiplier": 0.33459,
+   "cycles": 0,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0,
+    "innerDiameter": 1.75,
+    "springLength": 0,
+    "springWeight": 0
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 168,
+   "heightInches": 177,
+   "weight": 637
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.295 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.9,
+   "totalInchPoundPerTurn": 172,
+   "multiplier": 0.269975,
+   "cycles": 44000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 1.75,
+    "springLength": 153,
+    "springWeight": 90.3843
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 168,
+   "heightInches": 158,
+   "weight": 865
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 168 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.1,
+   "totalInchPoundPerTurn": 252,
+   "multiplier": 0.291341,
+   "cycles": 236000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5,
+    "innerDiameter": 2.625,
+    "springLength": 236,
+    "springWeight": 258.0359
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single",
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 6,
+   "drum": "CANIMEX/TF D400-96",
+   "cycles": 100000,
+   "widthInches": 168,
+   "heightInches": 96,
+   "weight": 434
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.8,
+   "totalInchPoundPerTurn": 111.9,
+   "multiplier": 0.257806,
+   "cycles": 147000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 6,
+    "springLength": 40.75,
+    "springWeight": 62.1712
+   }
+  }
+ }
+]
