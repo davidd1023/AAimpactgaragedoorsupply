@@ -455,11 +455,24 @@ function bands(ls) {
 // tighter than the cycle-count estimate. Where the window and the cycle
 // estimate agree, keep the estimate; where they do not, the window wins,
 // because a rounded cycle count is the weaker evidence.
+const unbounded = [];
+
 function pickK(g) {
     const fromCycles = g.Ks.length ? Number(median(g.Ks).toFixed(1)) : null;
     const b = switchBounds.get(g.outer + "/" + g.inner);
 
+    // NO SWITCH BOUNDS. K then comes from the cycle-count median alone, which
+    // is the weakest way to get it - inverting a rounded cycle count is good
+    // to about 1%, against 0.15% from a switch point.
+    //
+    // This used to be silent, and that silence cost a batch: the stiff end of
+    // the ladder was swept in 25 lb steps, boundsFromSwitches only accepts a
+    // switch pair within 6 lb, so every rung above 1700 lb got no bounds at
+    // all and fell back here. Thirteen wire misses, with nothing in the output
+    // to say why. Rungs that land here are now named.
     if (!b || !b.lo.length || !b.hi.length) {
+        unbounded.push(`${g.outer}/${g.inner} (n=${g.Ks.length})`);
+
         return fromCycles;
     }
 
@@ -617,6 +630,15 @@ if (process.argv.includes("--json")) {
     console.log("\n  n     = readings whose cycle count fed K");
     console.log("  nLen  = readings whose length fed the thresholds");
     console.log("  Nb/nM = N bands derived from M readings; blank = plain round() is already right");
+
+    if (unbounded.length) {
+        console.log("\n  RUNGS WITH NO SWITCH POINT - K from the cycle median only (~1% vs ~0.15%):");
+        console.log("  (sweep either side of where these switch, in steps of 6 lb or less)");
+
+        for (const u of unbounded) {
+            console.log("    " + u);
+        }
+    }
 
     if (overfit.length) {
         console.log("\n  RUNGS WHERE THE FRACTION ALONE DOES NOT DETERMINE THE LENGTH");

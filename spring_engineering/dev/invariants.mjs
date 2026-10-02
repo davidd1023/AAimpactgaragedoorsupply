@@ -268,6 +268,21 @@ function wireBand(mod) {
         const band = bands[innerKey];
 
         for (const s of c.duplexCandidates) {
+            // MEASURED RUNGS ARE EXEMPT, and this invariant used to assert
+            // the opposite. The published band is a SINGLE-spring band; the
+            // reference winds 0.4218, 0.4305 and 0.4615 inner wires on the
+            // 3 3/4" inner spring, all with readings to prove it. Asserting
+            // the Single band over a measured Duplex rung is asserting that
+            // real readings are impossible, and it is what kept the stiff end
+            // of the ladder out of the candidate list.
+            //
+            // What is still worth pinning: a GENERATED rung is pure
+            // extrapolation, and it must stay inside sizes that have been
+            // seen used.
+            if (s.measured) {
+                continue;
+            }
+
             if (s.innerWire > band.max + 1e-9 || s.innerWire < band.min - 1e-9) {
                 fails.push(
                     `${springId}: offers inner wire ${s.innerWire}" outside the ` +
@@ -450,7 +465,7 @@ export const INVARIANTS = [
     { name: "a heavier door never gets a softer pair", run: weightMonotonic },
     { name: "the chosen pair meets the target when one on the ladder can", run: targetMet },
     { name: "every offered pair is physically buildable", run: physicallyValid },
-    { name: "offered inner wire stays inside the spring ID's band", run: wireBand },
+    { name: "generated inner wire stays inside the spring ID's band", run: wireBand },
     { name: "the weight used never exceeds the drum's rating", run: weightClamped },
     { name: "the door height used never exceeds the drum's nameplate", run: heightClamped },
     { name: "Duplex raises no Wire-Size-dropdown warning", run: noStaleWireWarnings },
