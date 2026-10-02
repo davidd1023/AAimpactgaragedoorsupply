@@ -12028,6 +12028,5361 @@
         "it took the corpus from 21 rungs to 29 and gave most of them enough readings to",
         "bracket a threshold instead of falling back to plain rounding."
       ]
+    },
+    {
+      "id": "p4-283-2343-795-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "795",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2343\"",
+        "duplexOuterWire": "0.283\"",
+        "duplexInnerLength": 11.25,
+        "duplexOuterLength": 12.25,
+        "duplexInnerWeight": 7.35,
+        "duplexOuterWeight": 15.24
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-283-2343-800-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "800",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2343\"",
+        "duplexOuterWire": "0.283\"",
+        "duplexInnerLength": 11.25,
+        "duplexOuterLength": 12.25,
+        "duplexInnerWeight": 7.35,
+        "duplexOuterWeight": 15.24
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-289-2343-805-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "805",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2343\"",
+        "duplexOuterWire": "0.289\"",
+        "duplexInnerLength": 11.25,
+        "duplexOuterLength": 12.25,
+        "duplexInnerWeight": 7.35,
+        "duplexOuterWeight": 15.58
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 12000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-295-2343-855-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "855",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2343\"",
+        "duplexOuterWire": "0.295\"",
+        "duplexInnerLength": 11.25,
+        "duplexOuterLength": 12.25,
+        "duplexInnerWeight": 7.35,
+        "duplexOuterWeight": 15.92
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-295-2343-860-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "860",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2343\"",
+        "duplexOuterWire": "0.295\"",
+        "duplexInnerLength": 11.25,
+        "duplexOuterLength": 12.25,
+        "duplexInnerWeight": 7.35,
+        "duplexOuterWeight": 15.92
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-295-2343-865-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "865",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2343\"",
+        "duplexOuterWire": "0.295\"",
+        "duplexInnerLength": 11.25,
+        "duplexOuterLength": 12.25,
+        "duplexInnerWeight": 7.35,
+        "duplexOuterWeight": 15.92
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-295-2343-870-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "870",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2343\"",
+        "duplexOuterWire": "0.295\"",
+        "duplexInnerLength": 11.25,
+        "duplexOuterLength": 12.25,
+        "duplexInnerWeight": 7.35,
+        "duplexOuterWeight": 15.92
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-295-2343-875-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "875",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2343\"",
+        "duplexOuterWire": "0.295\"",
+        "duplexInnerLength": 11.25,
+        "duplexOuterLength": 12.25,
+        "duplexInnerWeight": 7.35,
+        "duplexOuterWeight": 15.92
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-295-2343-880-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "880",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2343\"",
+        "duplexOuterWire": "0.295\"",
+        "duplexInnerLength": 11.25,
+        "duplexOuterLength": 12.25,
+        "duplexInnerWeight": 7.35,
+        "duplexOuterWeight": 15.92
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-295-2437-885-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "885",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2437\"",
+        "duplexOuterWire": "0.295\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.34,
+        "duplexOuterWeight": 17.22
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-295-2437-890-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "890",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2437\"",
+        "duplexOuterWire": "0.295\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.34,
+        "duplexOuterWeight": 17.22
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-295-2437-895-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "895",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2437\"",
+        "duplexOuterWire": "0.295\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.34,
+        "duplexOuterWeight": 17.22
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-295-2437-900-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "900",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2437\"",
+        "duplexOuterWire": "0.295\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.34,
+        "duplexOuterWeight": 17.22
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3065-2437-905-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "905",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2437\"",
+        "duplexOuterWire": "0.3065\"",
+        "duplexInnerLength": 13.25,
+        "duplexOuterLength": 14.25,
+        "duplexInnerWeight": 9.02,
+        "duplexOuterWeight": 19.27
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 14000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3065-25-990-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "990",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3065\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.57,
+        "duplexOuterWeight": 17.92
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3065-25-995-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "995",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3065\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.57,
+        "duplexOuterWeight": 17.92
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3065-25-1000-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1000",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3065\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.57,
+        "duplexOuterWeight": 17.92
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3125-25-1005-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1005",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3125\"",
+        "duplexInnerLength": 13.25,
+        "duplexOuterLength": 14.25,
+        "duplexInnerWeight": 9.27,
+        "duplexOuterWeight": 19.67
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 12000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3125-25-1010-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1010",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3125\"",
+        "duplexInnerLength": 13.25,
+        "duplexOuterLength": 14.25,
+        "duplexInnerWeight": 9.27,
+        "duplexOuterWeight": 19.67
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3125-25-1015-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1015",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3125\"",
+        "duplexInnerLength": 13.25,
+        "duplexOuterLength": 14.25,
+        "duplexInnerWeight": 9.27,
+        "duplexOuterWeight": 19.67
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3125-25-1020-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1020",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3125\"",
+        "duplexInnerLength": 13.25,
+        "duplexOuterLength": 14.25,
+        "duplexInnerWeight": 9.27,
+        "duplexOuterWeight": 19.67
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3125-25-1025-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1025",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3125\"",
+        "duplexInnerLength": 13.25,
+        "duplexOuterLength": 14.25,
+        "duplexInnerWeight": 9.27,
+        "duplexOuterWeight": 19.67
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3125-25-1030-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1030",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3125\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.57,
+        "duplexOuterWeight": 18.29
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3125-25-1035-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1035",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3125\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.57,
+        "duplexOuterWeight": 18.29
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3125-25-1040-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1040",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3125\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.57,
+        "duplexOuterWeight": 18.29
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3125-25-1045-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1045",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3125\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.57,
+        "duplexOuterWeight": 18.29
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3125-25-1050-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1050",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.25\"",
+        "duplexOuterWire": "0.3125\"",
+        "duplexInnerLength": 12.25,
+        "duplexOuterLength": 13.25,
+        "duplexInnerWeight": 8.57,
+        "duplexOuterWeight": 18.29
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3125-2625-1055-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1055",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2625\"",
+        "duplexOuterWire": "0.3125\"",
+        "duplexInnerLength": 14.25,
+        "duplexOuterLength": 15.25,
+        "duplexInnerWeight": 10.5,
+        "duplexOuterWeight": 21.05
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3195-2625-1060-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1060",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.2625\"",
+        "duplexOuterWire": "0.3195\"",
+        "duplexInnerLength": 15.25,
+        "duplexOuterLength": 16.25,
+        "duplexInnerWeight": 11.24,
+        "duplexOuterWeight": 22.96
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 12000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-331-273-1215-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1215",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.273\"",
+        "duplexOuterWire": "0.331\"",
+        "duplexInnerLength": 15.25,
+        "duplexOuterLength": 16.25,
+        "duplexInnerWeight": 11.72,
+        "duplexOuterWeight": 23.83
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-331-273-1220-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1220",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.273\"",
+        "duplexOuterWire": "0.331\"",
+        "duplexInnerLength": 15.25,
+        "duplexOuterLength": 16.25,
+        "duplexInnerWeight": 11.72,
+        "duplexOuterWeight": 23.83
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-331-273-1225-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1225",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.273\"",
+        "duplexOuterWire": "0.331\"",
+        "duplexInnerLength": 15.25,
+        "duplexOuterLength": 16.25,
+        "duplexInnerWeight": 11.72,
+        "duplexOuterWeight": 23.83
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-331-273-1230-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1230",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.273\"",
+        "duplexOuterWire": "0.331\"",
+        "duplexInnerLength": 15.25,
+        "duplexOuterLength": 16.25,
+        "duplexInnerWeight": 11.72,
+        "duplexOuterWeight": 23.83
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-331-273-1235-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1235",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.273\"",
+        "duplexOuterWire": "0.331\"",
+        "duplexInnerLength": 15.25,
+        "duplexOuterLength": 16.25,
+        "duplexInnerWeight": 11.72,
+        "duplexOuterWeight": 23.83
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-331-273-1240-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1240",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.273\"",
+        "duplexOuterWire": "0.331\"",
+        "duplexInnerLength": 15.25,
+        "duplexOuterLength": 16.25,
+        "duplexInnerWeight": 11.72,
+        "duplexOuterWeight": 23.83
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3437-283-1365-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1365",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.283\"",
+        "duplexOuterWire": "0.3437\"",
+        "duplexInnerLength": 16.25,
+        "duplexOuterLength": 17.25,
+        "duplexInnerWeight": 12.98,
+        "duplexOuterWeight": 26.32
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3437-283-1370-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1370",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.283\"",
+        "duplexOuterWire": "0.3437\"",
+        "duplexInnerLength": 16.25,
+        "duplexOuterLength": 17.25,
+        "duplexInnerWeight": 12.98,
+        "duplexOuterWeight": 26.32
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3437-283-1375-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1375",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.283\"",
+        "duplexOuterWire": "0.3437\"",
+        "duplexInnerLength": 16.25,
+        "duplexOuterLength": 17.25,
+        "duplexInnerWeight": 12.98,
+        "duplexOuterWeight": 26.32
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3437-283-1380-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1380",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.283\"",
+        "duplexOuterWire": "0.3437\"",
+        "duplexInnerLength": 16.25,
+        "duplexOuterLength": 17.25,
+        "duplexInnerWeight": 12.98,
+        "duplexOuterWeight": 26.32
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3625-283-1385-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1385",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.283\"",
+        "duplexOuterWire": "0.3625\"",
+        "duplexInnerLength": 18.25,
+        "duplexOuterLength": 19.25,
+        "duplexInnerWeight": 14.58,
+        "duplexOuterWeight": 31.07
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 13000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3625-283-1390-3spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1390",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.283\"",
+        "duplexOuterWire": "0.3625\"",
+        "duplexInnerLength": 18.25,
+        "duplexOuterLength": 19.25,
+        "duplexInnerWeight": 14.58,
+        "duplexOuterWeight": 31.07
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 13000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3625-295-1300-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1300",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.3625\"",
+        "duplexInnerLength": 22.25,
+        "duplexOuterLength": 23.25,
+        "duplexInnerWeight": 18.58,
+        "duplexOuterWeight": 37.52
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 25000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3625-295-1305-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1305",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.3625\"",
+        "duplexInnerLength": 22.25,
+        "duplexOuterLength": 23.25,
+        "duplexInnerWeight": 18.58,
+        "duplexOuterWeight": 37.52
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 25000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3625-295-1310-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1310",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.3625\"",
+        "duplexInnerLength": 22.25,
+        "duplexOuterLength": 23.25,
+        "duplexInnerWeight": 18.58,
+        "duplexOuterWeight": 37.52
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 24000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3625-295-1315-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1315",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.3625\"",
+        "duplexInnerLength": 22.25,
+        "duplexOuterLength": 23.25,
+        "duplexInnerWeight": 18.58,
+        "duplexOuterWeight": 37.52
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 24000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1320-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1320",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 23.25,
+        "duplexOuterLength": 24.25,
+        "duplexInnerWeight": 19.41,
+        "duplexOuterWeight": 40.57
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 29000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1325-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1325",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 23.25,
+        "duplexOuterLength": 24.25,
+        "duplexInnerWeight": 19.41,
+        "duplexOuterWeight": 40.57
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 28000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1330-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1330",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 23.25,
+        "duplexOuterLength": 24.25,
+        "duplexInnerWeight": 19.41,
+        "duplexOuterWeight": 40.57
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 28000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1335-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1335",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 23.25,
+        "duplexOuterLength": 24.25,
+        "duplexInnerWeight": 19.41,
+        "duplexOuterWeight": 40.57
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 27000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1340-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1340",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 23.25,
+        "duplexOuterLength": 24.25,
+        "duplexInnerWeight": 19.41,
+        "duplexOuterWeight": 40.57
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 27000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1345-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1345",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 23.25,
+        "duplexOuterLength": 24.25,
+        "duplexInnerWeight": 19.41,
+        "duplexOuterWeight": 40.57
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 26000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1350-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1350",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 23.25,
+        "duplexOuterLength": 24.25,
+        "duplexInnerWeight": 19.41,
+        "duplexOuterWeight": 40.57
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 26000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1355-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1355",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 23.25,
+        "duplexOuterLength": 24.25,
+        "duplexInnerWeight": 19.41,
+        "duplexOuterWeight": 40.57
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 25000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1360-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1360",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 23.25,
+        "duplexOuterLength": 24.25,
+        "duplexInnerWeight": 19.41,
+        "duplexOuterWeight": 40.57
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 25000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1365-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1365",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 23.25,
+        "duplexOuterLength": 24.25,
+        "duplexInnerWeight": 19.41,
+        "duplexOuterWeight": 40.57
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 24000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1370-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1370",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 23.25,
+        "duplexOuterLength": 24.25,
+        "duplexInnerWeight": 19.41,
+        "duplexOuterWeight": 40.57
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 24000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-295-1375-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1375",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.295\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 22.25,
+        "duplexOuterLength": 23.25,
+        "duplexInnerWeight": 18.58,
+        "duplexOuterWeight": 38.89
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 24000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-3065-1385-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1385",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 24.25,
+        "duplexOuterLength": 25.25,
+        "duplexInnerWeight": 21.1,
+        "duplexOuterWeight": 42.24
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 29000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-3065-1390-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1390",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 24.25,
+        "duplexOuterLength": 25.25,
+        "duplexInnerWeight": 21.1,
+        "duplexOuterWeight": 42.24
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 29000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-3065-1400-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1400",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 24.25,
+        "duplexOuterLength": 25.25,
+        "duplexInnerWeight": 21.1,
+        "duplexOuterWeight": 42.24
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 28000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-3065-1410-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1410",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 24.25,
+        "duplexOuterLength": 25.25,
+        "duplexInnerWeight": 21.1,
+        "duplexOuterWeight": 42.24
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 27000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-3065-1415-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1415",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 24.25,
+        "duplexOuterLength": 25.25,
+        "duplexInnerWeight": 21.1,
+        "duplexOuterWeight": 42.24
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 26000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-3065-1425-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1425",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 24.25,
+        "duplexOuterLength": 25.25,
+        "duplexInnerWeight": 21.1,
+        "duplexOuterWeight": 42.24
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 25000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-3065-1435-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1435",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 24.25,
+        "duplexOuterLength": 25.25,
+        "duplexInnerWeight": 21.1,
+        "duplexOuterWeight": 42.24
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 25000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-375-3065-1440-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1440",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.375\"",
+        "duplexInnerLength": 24.25,
+        "duplexOuterLength": 25.25,
+        "duplexInnerWeight": 21.1,
+        "duplexOuterWeight": 42.24
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 24000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3065-1450-3spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1450",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 26.25,
+        "duplexOuterLength": 27.25,
+        "duplexInnerWeight": 22.84,
+        "duplexOuterWeight": 48.01
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 30000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3065-1255-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1255",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 31.25,
+        "duplexOuterLength": 32.25,
+        "duplexInnerWeight": 27.19,
+        "duplexOuterWeight": 56.82
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 60000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3065-1260-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1260",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 26.32,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 59000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3065-1270-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1270",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 26.32,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 57000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3065-1275-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1275",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 26.32,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 56000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3065-1285-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1285",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 26.32,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 54000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3065-1290-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1290",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 26.32,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 53000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3065-1300-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1300",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 26.32,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 51000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3065-1305-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1305",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 29.25,
+        "duplexOuterLength": 30.25,
+        "duplexInnerWeight": 25.45,
+        "duplexOuterWeight": 53.3
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 50000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3065-1315-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1315",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3065\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 29.25,
+        "duplexOuterLength": 30.25,
+        "duplexInnerWeight": 25.45,
+        "duplexOuterWeight": 53.3
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 48000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3125-1320-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1320",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3125\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 26.87,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 61000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3125-1245-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1245",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3125\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 22,
+        "duplexOuterLength": 23,
+        "duplexInnerWeight": 19.54,
+        "duplexOuterWeight": 40.52
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 12000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3125-1255-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1255",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3125\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 21,
+        "duplexOuterLength": 22,
+        "duplexInnerWeight": 18.66,
+        "duplexOuterWeight": 38.76
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3125-1260-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1260",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3125\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 21,
+        "duplexOuterLength": 22,
+        "duplexInnerWeight": 18.66,
+        "duplexOuterWeight": 38.76
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3125-1270-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1270",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3125\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 21,
+        "duplexOuterLength": 22,
+        "duplexInnerWeight": 18.66,
+        "duplexOuterWeight": 38.76
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3125-1280-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1280",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3125\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 21,
+        "duplexOuterLength": 22,
+        "duplexInnerWeight": 18.66,
+        "duplexOuterWeight": 38.76
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3125-1285-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1285",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3125\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 21,
+        "duplexOuterLength": 22,
+        "duplexInnerWeight": 18.66,
+        "duplexOuterWeight": 38.76
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3125-1295-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1295",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3125\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 21,
+        "duplexOuterLength": 22,
+        "duplexInnerWeight": 18.66,
+        "duplexOuterWeight": 38.76
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3125-1305-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1305",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3125\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 21,
+        "duplexOuterLength": 22,
+        "duplexInnerWeight": 18.66,
+        "duplexOuterWeight": 38.76
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3125-1310-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1310",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3125\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 21,
+        "duplexOuterLength": 22,
+        "duplexInnerWeight": 18.66,
+        "duplexOuterWeight": 38.76
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3195-1320-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1320",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 21,
+        "duplexOuterLength": 22,
+        "duplexInnerWeight": 19.11,
+        "duplexOuterWeight": 38.76
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3195-1405-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1405",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 27.52,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 52000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3195-1410-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1410",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 27.52,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 51000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3195-1415-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1415",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 27.52,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 50000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3195-1420-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1420",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 27.52,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 49000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-3938-3195-1425-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1425",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.3938\"",
+        "duplexInnerLength": 30.25,
+        "duplexOuterLength": 31.25,
+        "duplexInnerWeight": 27.52,
+        "duplexOuterWeight": 55.06
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 48000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-3195-1430-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1430",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 32.25,
+        "duplexOuterLength": 33.25,
+        "duplexInnerWeight": 29.34,
+        "duplexOuterWeight": 60.55
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 56000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-3195-1435-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1435",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 32.25,
+        "duplexOuterLength": 33.25,
+        "duplexInnerWeight": 29.34,
+        "duplexOuterWeight": 60.55
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 55000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-3195-1440-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1440",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 32.25,
+        "duplexOuterLength": 33.25,
+        "duplexInnerWeight": 29.34,
+        "duplexOuterWeight": 60.55
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 55000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-3195-1445-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1445",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 32.25,
+        "duplexOuterLength": 33.25,
+        "duplexInnerWeight": 29.34,
+        "duplexOuterWeight": 60.55
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 54000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-3195-1450-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1450",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 32.25,
+        "duplexOuterLength": 33.25,
+        "duplexInnerWeight": 29.34,
+        "duplexOuterWeight": 60.55
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 53000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-3195-1455-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1455",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 32.25,
+        "duplexOuterLength": 33.25,
+        "duplexInnerWeight": 29.34,
+        "duplexOuterWeight": 60.55
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 52000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-3195-1460-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1460",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 31.25,
+        "duplexOuterLength": 32.25,
+        "duplexInnerWeight": 28.43,
+        "duplexOuterWeight": 58.72
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 51000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-3195-1470-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1470",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 31.25,
+        "duplexOuterLength": 32.25,
+        "duplexInnerWeight": 28.43,
+        "duplexOuterWeight": 58.72
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 49000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-3195-1475-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1475",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 31.25,
+        "duplexOuterLength": 32.25,
+        "duplexInnerWeight": 28.43,
+        "duplexOuterWeight": 58.72
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 49000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-3195-1480-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1480",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3195\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 31.25,
+        "duplexOuterLength": 32.25,
+        "duplexInnerWeight": 28.43,
+        "duplexOuterWeight": 58.72
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 48000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-331-1485-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1485",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 34.25,
+        "duplexOuterLength": 35.25,
+        "duplexInnerWeight": 32.37,
+        "duplexOuterWeight": 64.19
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 60000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-331-1490-3spr-84in-t50000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "50,000",
+        "weight": "1490",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 34.25,
+        "duplexOuterLength": 35.25,
+        "duplexInnerWeight": 32.37,
+        "duplexOuterWeight": 64.19
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 59000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-331-1405-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1405",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 24,
+        "duplexOuterLength": 25,
+        "duplexInnerWeight": 22.69,
+        "duplexOuterWeight": 45.52
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-331-1415-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1415",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 24.25,
+        "duplexOuterLength": 25.25,
+        "duplexInnerWeight": 22.92,
+        "duplexOuterWeight": 45.98
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-331-1420-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1420",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 24.25,
+        "duplexOuterLength": 25.25,
+        "duplexInnerWeight": 22.92,
+        "duplexOuterWeight": 45.98
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-331-1430-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1430",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 23,
+        "duplexOuterLength": 24,
+        "duplexInnerWeight": 21.74,
+        "duplexOuterWeight": 43.7
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-331-1435-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1435",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 23,
+        "duplexOuterLength": 24,
+        "duplexInnerWeight": 21.74,
+        "duplexOuterWeight": 43.7
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-331-1445-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1445",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 23,
+        "duplexOuterLength": 24,
+        "duplexInnerWeight": 21.74,
+        "duplexOuterWeight": 43.7
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-331-1450-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1450",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 23,
+        "duplexOuterLength": 24,
+        "duplexInnerWeight": 21.74,
+        "duplexOuterWeight": 43.7
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 10000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-331-1460-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1460",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 23,
+        "duplexOuterLength": 24,
+        "duplexInnerWeight": 21.74,
+        "duplexOuterWeight": 43.7
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4062-331-1465-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1465",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4062\"",
+        "duplexInnerLength": 23,
+        "duplexOuterLength": 24,
+        "duplexInnerWeight": 21.74,
+        "duplexOuterWeight": 43.7
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 9000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-331-1475-2spr-84in-t10000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "10,000",
+        "weight": "1475",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 25,
+        "duplexOuterLength": 26,
+        "duplexInnerWeight": 23.63,
+        "duplexOuterWeight": 49.28
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 11000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-331-1355-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1355",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 41.25,
+        "duplexOuterLength": 42.25,
+        "duplexInnerWeight": 38.99,
+        "duplexOuterWeight": 80.08
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 115000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-331-1360-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1360",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 40.25,
+        "duplexOuterLength": 41.25,
+        "duplexInnerWeight": 38.05,
+        "duplexOuterWeight": 78.19
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 113000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-331-1370-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1370",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 40.25,
+        "duplexOuterLength": 41.25,
+        "duplexInnerWeight": 38.05,
+        "duplexOuterWeight": 78.19
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 110000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-331-1375-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1375",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 40.25,
+        "duplexOuterLength": 41.25,
+        "duplexInnerWeight": 38.05,
+        "duplexOuterWeight": 78.19
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 108000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-331-1385-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1385",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 40.25,
+        "duplexOuterLength": 41.25,
+        "duplexInnerWeight": 38.05,
+        "duplexOuterWeight": 78.19
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 104000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-331-1390-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1390",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 40.25,
+        "duplexOuterLength": 41.25,
+        "duplexInnerWeight": 38.05,
+        "duplexOuterWeight": 78.19
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 102000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-331-1400-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1400",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 39.25,
+        "duplexOuterLength": 40.25,
+        "duplexInnerWeight": 37.1,
+        "duplexOuterWeight": 76.29
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 99000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-331-1405-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1405",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.331\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 39.25,
+        "duplexOuterLength": 40.25,
+        "duplexInnerWeight": 37.1,
+        "duplexOuterWeight": 76.29
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 97000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-3437-1415-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1415",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 42.25,
+        "duplexOuterLength": 43.25,
+        "duplexInnerWeight": 41.6,
+        "duplexOuterWeight": 81.98
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 123000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-3437-1420-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1420",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 42.25,
+        "duplexOuterLength": 43.25,
+        "duplexInnerWeight": 41.6,
+        "duplexOuterWeight": 81.98
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 121000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-3437-1425-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1425",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 42.25,
+        "duplexOuterLength": 43.25,
+        "duplexInnerWeight": 41.6,
+        "duplexOuterWeight": 81.98
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 119000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-3437-1435-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1435",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 42.25,
+        "duplexOuterLength": 43.25,
+        "duplexInnerWeight": 41.6,
+        "duplexOuterWeight": 81.98
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 115000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-3437-1440-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1440",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 42.25,
+        "duplexOuterLength": 43.25,
+        "duplexInnerWeight": 41.6,
+        "duplexOuterWeight": 81.98
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 114000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-3437-1450-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1450",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 41.25,
+        "duplexOuterLength": 42.25,
+        "duplexInnerWeight": 40.61,
+        "duplexOuterWeight": 80.08
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 110000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-3437-1460-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1460",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 41.25,
+        "duplexOuterLength": 42.25,
+        "duplexInnerWeight": 40.61,
+        "duplexOuterWeight": 80.08
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 106000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-3437-1465-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1465",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 41.25,
+        "duplexOuterLength": 42.25,
+        "duplexInnerWeight": 40.61,
+        "duplexOuterWeight": 80.08
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 105000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-3437-1475-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1475",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 41.25,
+        "duplexOuterLength": 42.25,
+        "duplexInnerWeight": 40.61,
+        "duplexOuterWeight": 80.08
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 101000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-3437-1485-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1485",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 41.25,
+        "duplexOuterLength": 42.25,
+        "duplexInnerWeight": 40.61,
+        "duplexOuterWeight": 80.08
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 98000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4218-3437-1490-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1490",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4218\"",
+        "duplexInnerLength": 40.25,
+        "duplexOuterLength": 41.25,
+        "duplexInnerWeight": 39.63,
+        "duplexOuterWeight": 78.19
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 97000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3437-1500-3spr-84in-t100000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 3,
+        "radius": "15",
+        "cycles": "100,000",
+        "weight": "1500",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 42.25,
+        "duplexOuterLength": 43.25,
+        "duplexInnerWeight": 41.6,
+        "duplexOuterWeight": 83.78
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 117000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3437-1350-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1350",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 31,
+        "duplexOuterLength": 32,
+        "duplexInnerWeight": 30.52,
+        "duplexOuterWeight": 61.99
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 28000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3437-1355-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1355",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 31,
+        "duplexOuterLength": 32,
+        "duplexInnerWeight": 30.52,
+        "duplexOuterWeight": 61.99
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 28000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3437-1360-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1360",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 31,
+        "duplexOuterLength": 32,
+        "duplexInnerWeight": 30.52,
+        "duplexOuterWeight": 61.99
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 27000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3437-1370-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1370",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 31,
+        "duplexOuterLength": 32,
+        "duplexInnerWeight": 30.52,
+        "duplexOuterWeight": 61.99
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 27000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3437-1375-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1375",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 31,
+        "duplexOuterLength": 32,
+        "duplexInnerWeight": 30.52,
+        "duplexOuterWeight": 61.99
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 26000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3437-1380-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1380",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 31,
+        "duplexOuterLength": 32,
+        "duplexInnerWeight": 30.52,
+        "duplexOuterWeight": 61.99
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 26000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3437-1385-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1385",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 31,
+        "duplexOuterLength": 32,
+        "duplexInnerWeight": 30.52,
+        "duplexOuterWeight": 61.99
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 25000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3437-1395-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1395",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 30,
+        "duplexOuterLength": 31,
+        "duplexInnerWeight": 29.54,
+        "duplexOuterWeight": 60.05
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 24000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3437-1400-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1400",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3437\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 30,
+        "duplexOuterLength": 31,
+        "duplexInnerWeight": 29.54,
+        "duplexOuterWeight": 60.05
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 24000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3625-1405-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1405",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3625\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 35.25,
+        "duplexOuterLength": 36.25,
+        "duplexInnerWeight": 36.77,
+        "duplexOuterWeight": 70.22
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 25000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4305-3625-1410-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1410",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3625\"",
+        "duplexOuterWire": "0.4305\"",
+        "duplexInnerLength": 34.25,
+        "duplexOuterLength": 35.25,
+        "duplexInnerWeight": 35.73,
+        "duplexOuterWeight": 68.28
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 24000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4375-3625-1420-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1420",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3625\"",
+        "duplexOuterWire": "0.4375\"",
+        "duplexInnerLength": 35,
+        "duplexOuterLength": 36,
+        "duplexInnerWeight": 36.51,
+        "duplexOuterWeight": 70.95
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 29000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4375-3625-1430-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1430",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3625\"",
+        "duplexOuterWire": "0.4375\"",
+        "duplexInnerLength": 35.25,
+        "duplexOuterLength": 36.25,
+        "duplexInnerWeight": 36.77,
+        "duplexOuterWeight": 71.44
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 28000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4375-3625-1435-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1435",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3625\"",
+        "duplexOuterWire": "0.4375\"",
+        "duplexInnerLength": 35.25,
+        "duplexOuterLength": 36.25,
+        "duplexInnerWeight": 36.77,
+        "duplexOuterWeight": 71.44
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 28000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4375-3625-1445-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1445",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3625\"",
+        "duplexOuterWire": "0.4375\"",
+        "duplexInnerLength": 35.25,
+        "duplexOuterLength": 36.25,
+        "duplexInnerWeight": 36.77,
+        "duplexOuterWeight": 71.44
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 27000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4375-3625-1455-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1455",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3625\"",
+        "duplexOuterWire": "0.4375\"",
+        "duplexInnerLength": 35.25,
+        "duplexOuterLength": 36.25,
+        "duplexInnerWeight": 36.77,
+        "duplexOuterWeight": 71.44
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 26000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4375-3625-1465-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1465",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3625\"",
+        "duplexOuterWire": "0.4375\"",
+        "duplexInnerLength": 34,
+        "duplexOuterLength": 35,
+        "duplexInnerWeight": 35.47,
+        "duplexOuterWeight": 68.98
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 25000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4375-3625-1470-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1470",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3625\"",
+        "duplexOuterWire": "0.4375\"",
+        "duplexInnerLength": 34.25,
+        "duplexOuterLength": 35.25,
+        "duplexInnerWeight": 35.73,
+        "duplexOuterWeight": 69.47
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 25000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4375-3625-1480-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1480",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3625\"",
+        "duplexOuterWire": "0.4375\"",
+        "duplexInnerLength": 34.25,
+        "duplexOuterLength": 35.25,
+        "duplexInnerWeight": 35.73,
+        "duplexOuterWeight": 69.47
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 24000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
+    },
+    {
+      "id": "p4-4531-3625-1490-2spr-84in-t25000",
+      "status": "verified",
+      "source": "Reference calculator, automated pull 2026-10-02 (batch 4, 154/154 successful). Targeted the 18 rungs that had fewer than ten readings - all at the stiff end of the ladder, which is where every wire miss was.",
+      "state": {
+        "assembly": "Duplex",
+        "drum": "CANIMEX/TF D525-216",
+        "springId": "3 3/4\" inside 6\"",
+        "springs": 2,
+        "radius": "15",
+        "cycles": "25,000",
+        "weight": "1490",
+        "doorHeightFeet": 7,
+        "doorHeightInches": 0,
+        "doorWidthFeet": 12,
+        "doorWidthInches": 0
+      },
+      "expect": {
+        "duplexInnerWire": "0.3625\"",
+        "duplexOuterWire": "0.4531\"",
+        "duplexInnerLength": 37,
+        "duplexOuterLength": 38,
+        "duplexInnerWeight": 38.6,
+        "duplexOuterWeight": 77.75
+      },
+      "tolerance": {
+        "duplexInnerWeight": 0.02,
+        "duplexOuterWeight": 0.02
+      },
+      "referenceCycles": 36000,
+      "note": [
+        "From the thin-rung batch. Its purpose was K: the wire misses were all a single",
+        "step too soft, and every one was on a rung whose K rested on one or two readings."
+      ]
     }
   ]
 }

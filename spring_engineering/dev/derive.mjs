@@ -125,51 +125,82 @@ const median = (xs) => {
 
 const contradictions = [];
 
+
+// For each rung AND spring count, derive the bonus as a piecewise-constant
+// function of frac(active).
+//
+// This replaces a single threshold pair per rung. It has to: 1 spring, 2, 3 and
+// 4 sit on different quarter-inch grids and take different bonus values, so one
+// rule per rung cannot describe them. Bands are emitted ONLY where readings
+// cover them, and a rung/count with no readings falls back to plain rounding.
+function bands(ls) {
+    const pts = ls.slice().sort((x, y) => x.frac - y.frac);
+    const groups = [];
+
+    for (const p of pts) {
+        const last = groups[groups.length - 1];
+
+        if (last && last.bonus === p.bonus) {
+            last.hi = p.frac;
+        } else {
+            groups.push({ lo: p.frac, hi: p.frac, bonus: p.bonus });
+        }
+    }
+
+    if (groups.length === 1) {
+        return { bands: [{ upTo: 1, bonus: groups[0].bonus }], clean: true };
+    }
+
+    // a band boundary sits midway between the last frac of one group and the
+    // first of the next; non-monotonic data shows up as groups that interleave
+    const out = [];
+    let clean = true;
+
+    for (let i = 0; i < groups.length; i++) {
+        if (i === groups.length - 1) {
+            out.push({ upTo: 1, bonus: groups[i].bonus });
+            break;
+        }
+
+        const edge = (groups[i].hi + groups[i + 1].lo) / 2;
+
+        if (out.length && edge <= out[out.length - 1].upTo) {
+            clean = false;
+            continue;
+        }
+
+        out.push({ upTo: Number(edge.toFixed(3)), bonus: groups[i].bonus });
+    }
+
+    return { bands: out, clean };
+}
+
 const out = [...rungs.values()]
     .map((g) => {
         const S = 2 * (divider(g.inner, 3.75) + divider(g.outer, 6));
-        // thresholds only from 1- and 2-spring readings: 3 and 4 springs sit on
-        // a different quarter-inch grid, handled by duplexSnapToGrid
-        const low = g.lens.filter((l) => l.springs <= 2);
-        const zero = low.filter((l) => l.bonus === 0).map((l) => l.frac);
-        const one = low.filter((l) => l.bonus === 1).map((l) => l.frac);
-        const quarter = low.filter((l) => l.bonus === 1.25).map((l) => l.frac);
-        let tLo = null;
-        let tHi = null;
+        const byCount = {};
 
-        // only set a threshold where round() is provably wrong: a reading that
-        // floors above frac 0.5, or any quarter-inch bonus at all
-        if ((zero.length && Math.max(...zero) > 0.5) || quarter.length) {
-            const loFloor = zero.length ? Math.max(...zero) : 0;
-            const loCeil = quarter.length
-                ? Math.min(...quarter)
-                : (one.length ? Math.min(...one) : 1);
+        for (const sp of [1, 2, 3, 4]) {
+            const ls = g.lens.filter((l) => l.springs === sp);
 
-            // tLo must be STRICTLY above the highest frac seen flooring, or
-            // that very reading is misclassified. Where the readings bracket
-            // it, take the midpoint; where they only bound it from below, sit
-            // just above the bound and assert nothing more.
-            tLo = loCeil > loFloor
-                ? Number(((loFloor + loCeil) / 2).toFixed(3))
-                : Number((loFloor + 0.005).toFixed(3));
-
-            if (quarter.length && one.length) {
-                const qMax = Math.max(...quarter);
-                const oMin = Math.min(...one);
-
-                tHi = oMin > qMax
-                    ? Number(((qMax + oMin) / 2).toFixed(3))
-                    : Number((qMax + 0.005).toFixed(3));
-            } else {
-                tHi = tLo;
+            if (!ls.length) {
+                continue;
             }
 
-            // contradictory readings - the single-threshold model cannot fit
-            // this rung, so say so rather than silently choosing
-            if (quarter.length && zero.length && Math.min(...quarter) < Math.max(...zero)) {
+            const b = bands(ls);
+
+            // only worth storing where it differs from plain round()
+            const needed = ls.some(
+                (l) => Math.round(l.active) !== Math.floor(l.active) + l.bonus
+            );
+
+            if (needed) {
+                byCount[sp] = { bands: b.bands, n: ls.length };
+            }
+
+            if (!b.clean) {
                 contradictions.push(
-                    `${g.outer}/${g.inner}: floors at frac ${Math.max(...zero).toFixed(3)} ` +
-                    `but adds a quarter at ${Math.min(...quarter).toFixed(3)}`
+                    `${g.outer}/${g.inner} at ${sp} spring(s): bonus is not monotonic in frac`
                 );
             }
         }
@@ -177,7 +208,7 @@ const out = [...rungs.values()]
         return {
             outer: g.outer, inner: g.inner, S,
             K: g.Ks.length ? Number(median(g.Ks).toFixed(1)) : null,
-            n: g.Ks.length, nLen: g.lens.length, tLo, tHi,
+            n: g.Ks.length, nLen: g.lens.length, byCount,
         };
     })
     .sort((a, b) => a.S - b.S);
@@ -186,22 +217,24 @@ if (process.argv.includes("--json")) {
     console.log(JSON.stringify(out, null, 1));
 } else {
     console.log(`${readings.length} readings -> ${out.length} rungs\n`);
-    console.log("  outer    inner      S        K       K/S     n  nLen   tLo    tHi");
+    console.log("  outer    inner      S        K       K/S     n  nLen  bands per spring count");
 
     for (const r of out) {
+        const bc = Object.entries(r.byCount)
+            .map(([sp, v]) => `${sp}spr:${v.bands.length}b/n${v.n}`)
+            .join(" ");
+
         console.log(
             "  " + String(r.outer).padEnd(8) + String(r.inner).padEnd(9) +
             r.S.toFixed(0).padStart(6) + String(r.K ?? "-").padStart(10) +
             (r.K ? (r.K / r.S).toFixed(4) : "     -").padStart(9) +
-            String(r.n).padStart(4) + String(r.nLen).padStart(5) +
-            (r.tLo === null ? "     -      -" :
-                r.tLo.toFixed(3).padStart(8) + r.tHi.toFixed(3).padStart(7))
+            String(r.n).padStart(4) + String(r.nLen).padStart(5) + "  " + bc
         );
     }
 
     console.log("\n  n     = readings whose cycle count fed K");
     console.log("  nLen  = readings whose length fed the thresholds");
-    console.log("  tLo/tHi blank = no evidence that round() is wrong, so it is left alone");
+    console.log("  Nb/nM = N bands derived from M readings; blank = plain round() is already right");
 
     if (contradictions.length) {
         console.log("\n  RUNGS WHERE ONE THRESHOLD CANNOT FIT THE READINGS:");
