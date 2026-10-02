@@ -384,3 +384,69 @@ height that is simply proportional to `1/weight`. All 430 readings lay on one
 one-dimensional curve through the (floor, fraction) plane, while the thing
 being fitted is a surface over it. Dense is not diverse. It is kept as
 `dev/biased-soft-weightonly.json`, excluded from fitting.
+
+## Single was not fine, and the quarter inch is why
+
+Single was believed exact. It was exact on the readings anyone had looked at,
+and nowhere else, because nothing had ever compared its LENGTH to the
+reference:
+
+* `dev/single-check.mjs` checked only the MULTIPLIER, on hand-picked readings,
+  and scored 12/12.
+* the 725-case golden snapshot proves nothing MOVED, never that it was right.
+
+Against 176 readings drawn uniformly from the allowed box, with the
+reference's own wire choice fed back so the comparison is like for like:
+
+| | before | after |
+|---|---|---|
+| multiplier within 2e-5 | 176/176 | 176/176 |
+| length | **4/176 (2.3%)** | **175/176 (99.4%)** |
+
+The reference quotes length on a quarter-inch grid - 30, 33.25, 51.5, 60,
+85.75 - and `springLength` returned two decimals of the raw computation: 33.20
+where the reference says 33.25. Springs are made to a quarter inch. Weight
+follows the quoted length now too, which is 123/123 wherever the length agrees,
+and that is not a guess: inverting the reference's own 7,941 reported weights
+gives back the length it REPORTS, not the raw one.
+
+`dev/single-external.mjs` is the check that was missing, and `sh dev/honest.sh`
+runs it.
+
+### A measurement bug that looked exactly like a model bug
+
+Mid-investigation the Single multiplier read 124/176, with every failure at
+radius 10 - 0 of 54, against 67/67 and 59/59 at radius 12 and 15. That looks
+precisely like a broken LHR curve in the app. It was the scorer: the reference
+encodes our "LHR" as radius 10, the Duplex scorers map it and the Single one
+passed `"10"` straight through, so the app got a radius it does not offer,
+found no turn-drop curve, dropped no turns and failed every one. With the
+mapping added it is 176/176.
+
+Worth remembering next time a failure is suspiciously total: **0 of 54 is a
+wiring fault, not a model that is slightly off.**
+
+## Duplex length: hypotheses tested and rejected
+
+The Duplex active length is about an inch out and the bands absorb it. These
+were each tested against the two external samples and each lost to the bands'
+66.9%:
+
+| hypothesis | result |
+|---|---|
+| quarter-inch quantisation, as Single | 8.3% |
+| round to a whole inch | 15.7% |
+| add an end-coils term, `endCoils * wire`, tried 2 to 8 coils | best 9.1% |
+| nested springs sharing deflection: `t = a/L + b/(L+1)` solved as a quadratic | 11.7% |
+| a scale factor on the active length | correlations 0.16, -0.09, -0.40, 0.23, sign flipping |
+| inner divider only, outer only, harmonic, series | residual 17" to 37" wide against 2.39" |
+
+The last row is the useful one: the CURRENT formula is right in structure, by a
+wide margin. What it is missing is not a constant, a grid, a coil count, or a
+different combination of the two dividers.
+
+Single's formula is now proven exact, and it is
+`(springs * divider) / tippt + endCoils * wire`. The Duplex one is
+`springs * (div_out + div_in) / TIPPT`, which assumes both springs are the same
+length when the reference's outer is exactly one inch longer. Correcting that
+properly makes things worse, so the error is somewhere else again.

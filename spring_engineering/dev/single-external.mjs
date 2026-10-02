@@ -12,6 +12,11 @@ import { load, make } from "./harness.mjs";
 import { readFileSync } from "node:fs";
 
 const mod = await load();
+// The reference encodes our "LHR" low-headroom track as radius 10. Passing
+// "10" straight through gives the app a radius it does not offer, so
+// radiusTurnDrop finds no curve, drops no turns, and every radius-10 reading
+// fails - 0 of 54, which looked exactly like a broken LHR curve in the app.
+const REF_RADIUS = { 10: "LHR", 12: "12", 15: "15" };
 const ID_TEXT = {
     1.75: '1 3/4"', 2.625: '2 5/8"', 3.75: '3 3/4"',
     4.375: '4 3/8"', 5.25: '5 1/4"', 6: '6"',
@@ -47,7 +52,7 @@ for (const file of process.argv.slice(2)) {
 
         const c = make(mod, {
             assembly: "Single", drum: i.drum, springId: ID_TEXT[sp.innerDiameter],
-            springs: i.springs ?? 2, radius: String(i.radius),
+            springs: i.springs ?? 2, radius: REF_RADIUS[Number(i.radius)] ?? String(i.radius),
             wireSize: `${sp.wireSize}"`,
             cycles: Number(i.cycles).toLocaleString("en-US"),
             weight: String(i.weight), doorWidthFeet: 9,

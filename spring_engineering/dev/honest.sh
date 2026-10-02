@@ -26,5 +26,11 @@ for f in dev/eval-rand-seed777001.json dev/eval-soft2-spread.json; do
 done
 
 echo ""
+echo "SINGLE - external random draw, the reference's own wire fed back"
+if [ -f dev/eval-single.json ]; then
+    node dev/single-external.mjs dev/eval-single.json | sed 's/^/  /'
+fi
+
+echo ""
 echo "REFERENCE WARNINGS - agreement reading by reading"
 node dev/warn-check.mjs dev/pulled-0*.json dev/pulled-k*.json dev/pulled-a1.json 2>&1 | sed 's/^/  /'
