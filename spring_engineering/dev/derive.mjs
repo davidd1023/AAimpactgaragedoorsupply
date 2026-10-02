@@ -490,70 +490,233 @@ function bands(ls) {
 // The band model keyed the bonus on frac(active) alone, and that provably
 // cannot work. On 0.3625/0.283 at one spring, frac 0.815 wants +1 at active
 // 17.815 and 0 at active 25.816: same rung, same spring count, same frac,
-// different answer. What separates them is the integer part, and the
-// threshold moves with it - on that rung the bonus flips at about 0.80 at
-// floor 17, 0.84 at floor 18, 0.91 at floor 24 and never by floor 25.
+// different answer. What separates them is the integer part, and the threshold
+// moves with it - on that rung the bonus flips at about 0.80 at floor 17, 0.84
+// at floor 18, 0.91 at floor 24 and never by floor 25.
 //
-// Fitting t = a + b*floor instead explains 39 of the 41 two-bonus groups with
-// ONE line each. That is two numbers where the fitter previously wanted up to
-// twenty-two alternating bands - 0.375/0.295 at one spring needed EIGHTEEN,
-// which fit its readings and predicted nothing. Two parameters over fifteen
-// buckets cannot do that.
+// So the rule is a line, t = a + b*floor, and the bonus steps up where frac
+// crosses it. Two parameters, against the eighteen alternating bands the frac
+// fitter wanted on 0.375/0.295 - which fit their readings and predicted
+// nothing.
 //
-// Returns null unless exactly two bonus values appear and some line satisfies
-// every reading; a group with three or more keeps its bands.
+// TWO PARALLEL THRESHOLDS for a group with three bonus levels. They share one
+// slope and differ only in intercept, so a third level costs one parameter,
+// not another whole line. The rungs that need it are the ones whose bonus
+// reaches -1 as well as 0 and +1, 0.3625/0.283 at one spring among them.
+//
+// HOW IT IS FITTED. For a fixed slope b, write u = frac - b*floor; every
+// threshold is then a constant in u, so the readings sorted by u must come
+// out in bonus order - lowest bonus first - and fitting reduces to choosing
+// one or two cut points in that sorted list. That is exact and cheap, where
+// searching the intercepts directly is a three-dimensional grid. Only the
+// slope is searched.
+// WHICH FORM GENERALISES, DECIDED PER GROUP BY CROSS-VALIDATION.
+//
+// The two-threshold line is not automatically an improvement. Switched on for
+// every three-level group it raised in-sample accuracy from 99.0% to 99.6%
+// and dropped OUT-OF-SAMPLE accuracy from 97.4% to 84.9% - 894 readings sit
+// under those seven groups, and the fit is not unique on them: many
+// (b, a, a2) reach zero violations, each fold picks a different one, and the
+// one it picks mispredicts the fold it never saw. On 0.4305/0.3625 the slope
+// came out at exactly -0.03, the edge of the search, which is the fitter
+// telling you it is not determined.
+//
+// So neither form is assumed. Each group holds out a fifth of its own
+// readings five times, scores the line and the bands on readings each never
+// saw, and keeps whichever wins - the line only on a strict win, since it is
+// the stronger structural claim. A group whose line is genuinely the rule
+// wins easily; a group whose line is one of many equally good fits loses,
+// which is exactly what should happen.
+function cvScore(ls, fit, predict) {
+    let right = 0;
+    let total = 0;
+
+    for (let k = 0; k < 5; k++) {
+        const train = ls.filter((_, i) => i % 5 !== k);
+        const test = ls.filter((_, i) => i % 5 === k);
+
+        if (!train.length || !test.length) {
+            continue;
+        }
+
+        const model = fit(train);
+
+        if (!model) {
+            return -1;
+        }
+
+        for (const l of test) {
+            total += 1;
+            right += predict(model, l.active) === l.bonus ? 1 : 0;
+        }
+    }
+
+    return total ? right / total : -1;
+}
+
+function bandPredict(bs, active) {
+    const frac = active - Math.floor(active);
+
+    for (const b of bs) {
+        if (frac < b.upTo) {
+            return b.bonus;
+        }
+    }
+
+    return Math.round(active) - Math.floor(active);
+}
+
+function linePredict(line, active) {
+    const whole = Math.floor(active);
+    const frac = active - whole;
+    const first = line.a + line.b * whole;
+
+    if (line.mid !== undefined) {
+        const second = line.a2 + line.b * whole;
+
+        return frac > second ? line.hi : frac > first ? line.mid : line.lo;
+    }
+
+    return frac > first ? line.hi : line.lo;
+}
+
+// DEFAULT 2: SINGLE THRESHOLDS ONLY. The two-threshold form is implemented
+// and switchable with LINE_LEVELS=3, and it is OFF because it was measured,
+// not because it was untried:
+//
+//                              in sample   out of sample
+//   single threshold only        99.0%         97.4%
+//   two thresholds, all groups   99.6%         84.9%
+//   two thresholds, per-group CV 99.4%         88.5%
+//
+// It fits better and predicts worse, which is the definition of the thing to
+// avoid. Letting each group choose by its own cross-validation recovered half
+// the loss and still lost - a group can win a local comparison and damage the
+// whole-corpus holdout, because the choice was made on data the holdout then
+// scores.
+//
+// WHY BANDS BEAT IT, which is worth writing down because it is not obvious
+// that 33 bands should generalise better than 3 parameters: a band is LOCAL.
+// A held-out reading falls in a band pinned by the readings either side of
+// it, so an error stays where it is. A line is GLOBAL - one slightly wrong
+// slope misplaces every prediction far from where it was fitted at once. On
+// the three-level groups the fit is not even unique (0.4305/0.3625 came out
+// at exactly -0.03, the edge of the search), so each fold picks a different
+// slope and the 894 readings under those groups move together.
+//
+// Single thresholds stay on: there the line is strictly simpler than any band
+// arrangement that fits, and the holdout agrees.
+const LINE_LEVELS = Number(process.env.LINE_LEVELS || 2);
+
 function fitLine(ls) {
     const vals = [...new Set(ls.map((l) => l.bonus))].sort((x, y) => x - y);
 
-    if (vals.length !== 2) {
+    // LINE_LEVELS caps how many bonus levels a line may carry, so the
+    // two-threshold form can be switched off and measured on its own.
+    if (vals.length < 2 || vals.length > LINE_LEVELS) {
         return null;
     }
 
-    const [lo, hi] = vals;
+    const cls = new Map(vals.map((v, i) => [v, i]));
     const pts = ls.map((l) => ({
         F: Math.floor(l.active),
         t: l.active - Math.floor(l.active),
-        high: l.bonus === hi,
+        c: cls.get(l.bonus),
     }));
-
     let best = null;
 
-    for (let b = -0.03; b <= 0.09; b += 0.0005) {
-        for (let a = -2; a <= 2; a += 0.0025) {
-            let bad = 0;
+    for (let bi = -60; bi <= 180; bi += 1) {
+        const b = bi / 2000;
+        const sorted = pts
+            .map((p) => ({ u: p.t - b * p.F, c: p.c }))
+            .sort((x, y) => x.u - y.u);
+        const n = sorted.length;
 
-            for (const pt of pts) {
-                const thr = a + b * pt.F;
+        // wrong[k][i] = readings before i that are NOT class k.
+        const wrong = vals.map(() => new Array(n + 1).fill(0));
 
-                // At or below the threshold takes the low bonus, above it the
-                // high one. Mirrors duplexLength exactly.
-                if (pt.high ? pt.t <= thr : pt.t > thr) {
-                    bad += 1;
+        for (let i = 0; i < n; i++) {
+            for (let k = 0; k < vals.length; k++) {
+                wrong[k][i + 1] = wrong[k][i] + (sorted[i].c === k ? 0 : 1);
+            }
+        }
 
-                    if (best && bad >= best.bad) {
-                        break;
+        const between = (k, i, j) => wrong[k][j] - wrong[k][i];
+        const cut = (i) =>
+            i === 0 ? sorted[0].u - 1e-6
+                : i === n ? sorted[n - 1].u + 1e-6
+                    : (sorted[i - 1].u + sorted[i].u) / 2;
+        // How much room a cut has: half the gap it sits in. A cut outside the
+        // data has none worth counting, because nothing constrains it.
+        const room = (i) =>
+            i === 0 || i === n ? 0 : (sorted[i].u - sorted[i - 1].u) / 2;
+        const better = (cand) =>
+            !best || cand.bad < best.bad ||
+            (cand.bad === best.bad && cand.margin > best.margin);
+
+        if (vals.length === 2) {
+            for (let i = 0; i <= n; i++) {
+                const cand = {
+                    bad: between(0, 0, i) + between(1, i, n),
+                    margin: room(i), b, a: cut(i),
+                    lo: vals[0], hi: vals[1],
+                };
+
+                if (better(cand)) {
+                    best = cand;
+                }
+            }
+        } else {
+            for (let i = 0; i <= n; i++) {
+                for (let j = i; j <= n; j++) {
+                    const cand = {
+                        bad: between(0, 0, i) + between(1, i, j) +
+                            between(2, j, n),
+                        margin: Math.min(room(i), room(j)),
+                        b, a: cut(i), a2: cut(j),
+                        lo: vals[0], mid: vals[1], hi: vals[2],
+                    };
+
+                    if (better(cand)) {
+                        best = cand;
                     }
                 }
             }
-
-            if (!best || bad < best.bad) {
-                best = { a: Number(a.toFixed(4)), b: Number(b.toFixed(5)), bad };
-            }
-
-            if (best.bad === 0) {
-                break;
-            }
         }
 
-        if (best && best.bad === 0) {
-            break;
-        }
+        // NO EARLY BREAK. Taking the first slope that reaches zero violations
+        // means the slope is never fitted at all: with three free parameters
+        // the cuts alone can always reach zero, so every three-level group
+        // ended up at b = -0.03, the first value tried, and extrapolated
+        // terribly. Measured: out-of-sample accuracy fell from 97.4% to 84.9%
+        // while in-sample rose from 99.0% to 99.6%.
+        //
+        // Among the slopes that fit equally well, prefer the one whose cuts
+        // sit furthest from the nearest reading. That is the choice most
+        // likely to survive a reading between them.
     }
 
-    return best && best.bad === 0 ? { a: best.a, b: best.b, lo, hi } : null;
+    if (!best || best.bad !== 0) {
+        return null;
+    }
+
+    const out = {
+        a: Number(best.a.toFixed(5)),
+        b: Number(best.b.toFixed(5)),
+        lo: best.lo,
+        hi: best.hi,
+    };
+
+    if (best.a2 !== undefined) {
+        out.a2 = Number(best.a2.toFixed(5));
+        out.mid = best.mid;
+    }
+
+    return out;
 }
 
 const unbounded = [];
+const crossValidated = [];
 
 function pickK(g) {
     const fromCycles = g.Ks.length ? Number(median(g.Ks).toFixed(1)) : null;
@@ -682,9 +845,25 @@ const out = [...rungs.values()]
             // Past the cap the rung falls back to plain rounding and is named
             // below, which is a worse answer honestly labelled rather than a
             // better-looking one that will not hold.
-            // A line first - it is two parameters and it explains the frac
-            // collisions that no band arrangement can.
-            const line = needed ? fitLine(ls) : null;
+            // A line where it earns it. For a two-level group the line is
+            // strictly simpler than any band arrangement and is taken on
+            // sight; for a three-level group it is a real structural claim
+            // and has to beat the bands on readings neither has seen.
+            let line = needed ? fitLine(ls) : null;
+
+            if (line && line.mid !== undefined) {
+                const lineCv = cvScore(ls, fitLine, linePredict);
+                const bandCv = cvScore(ls, (t) => bands(t).bands, bandPredict);
+
+                if (!(lineCv > bandCv)) {
+                    crossValidated.push(
+                        `${g.outer}/${g.inner} at ${sp} spring(s): two thresholds ` +
+                        `${(lineCv * 100).toFixed(1)}% vs bands ${(bandCv * 100).toFixed(1)}% ` +
+                        `out of sample over ${ls.length} readings - kept the bands`
+                    );
+                    line = null;
+                }
+            }
 
             if (line) {
                 byCount[sp] = { line, n: ls.length };
@@ -734,6 +913,14 @@ if (process.argv.includes("--json")) {
     console.log("\n  n     = readings whose cycle count fed K");
     console.log("  nLen  = readings whose length fed the thresholds");
     console.log("  Nb/nM = N bands derived from M readings; blank = plain round() is already right");
+
+    if (crossValidated.length) {
+        console.log("\n  GROUPS WHERE THE TWO-THRESHOLD LINE LOST ITS OWN CROSS-VALIDATION:");
+
+        for (const c of crossValidated) {
+            console.log("    " + c);
+        }
+    }
 
     if (unbounded.length) {
         console.log("\n  RUNGS WITH NO SWITCH POINT - K from the cycle median only (~1% vs ~0.15%):");

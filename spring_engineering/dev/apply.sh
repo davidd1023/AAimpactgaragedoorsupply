@@ -20,7 +20,11 @@ for r in rows:
         for sp,v in sorted(r['byCount'].items(), key=lambda kv:int(kv[0])):
             if 'line' in v:
                 L=v['line']
-                lineparts.append("%s: { a: %g, b: %g, lo: %g, hi: %g }"%(sp,L['a'],L['b'],L['lo'],L['hi']))
+                if 'mid' in L:
+                    lineparts.append("%s: { a: %g, b: %g, a2: %g, lo: %g, mid: %g, hi: %g }"
+                                     %(sp,L['a'],L['b'],L['a2'],L['lo'],L['mid'],L['hi']))
+                else:
+                    lineparts.append("%s: { a: %g, b: %g, lo: %g, hi: %g }"%(sp,L['a'],L['b'],L['lo'],L['hi']))
             else:
                 bs=", ".join("{ upTo: %g, bonus: %g }"%(b['upTo'],b['bonus']) for b in v['bands'])
                 bandparts.append("%s: [%s]"%(sp,bs))
