@@ -117,6 +117,79 @@ for (const r of readings) {
     });
 }
 
+// K FROM THE REFERENCE'S OWN SWITCH POINTS, which is far tighter than
+// inverting a cycle count.
+//
+// At the heaviest door still using a rung, that rung must clear
+// DUPLEX_ACCEPT_FRACTION x target; at the next door up it must not. Since
+// cycles rise monotonically with K, each side gives a bound, and a pair of
+// readings a couple of pounds apart pins K to about 0.15% - against roughly 1%
+// from a cycle count, which the reference rounds to the nearest thousand.
+//
+// This is the same lever as the original 726/727 lb accept/reject pair: a
+// boundary is worth far more than a reading away from one.
+function boundsFromSwitches(readings) {
+    const F = mod.DUPLEX_ACCEPT_FRACTION;
+    const cfg = new Map();
+
+    for (const r of readings) {
+        const st = r.state;
+        const key = [st.drum, st.springs, st.radius, st.doorHeightFeet,
+                     st.doorHeightInches, st.cycles].join("|");
+
+        if (!cfg.has(key)) {
+            cfg.set(key, []);
+        }
+
+        cfg.get(key).push(r);
+    }
+
+    const out = new Map();
+
+    for (const rows of cfg.values()) {
+        rows.sort((a, b) => Number(a.state.weight) - Number(b.state.weight));
+
+        for (let n = 1; n < rows.length; n++) {
+            const a = rows[n - 1];
+            const b = rows[n];
+            const ka = a.outer + "/" + a.inner;
+
+            if (ka === b.outer + "/" + b.inner) {
+                continue;
+            }
+
+            if (Number(b.state.weight) - Number(a.state.weight) > 6) {
+                continue;
+            }
+
+            const target = Number(String(a.state.cycles).replace(/,/g, "")) * F;
+            const torque = (COEFF * Math.pow(a.inner, WEXP)) / Math.pow(target, 1 / CEXP);
+            const springs = Number(a.state.springs) || 2;
+
+            if (!out.has(ka)) {
+                out.set(ka, { lo: [], hi: [] });
+            }
+
+            for (const [side, reading] of [["lo", a], ["hi", b]]) {
+                const c = make(mod, reading.state);
+
+                if (!c.tipptExact || !c.turnsExact) {
+                    continue;
+                }
+
+                out.get(ka)[side].push(
+                    divider(a.inner, 3.75) * c.turnsExact * c.tipptExact /
+                    (torque * (springs / 2))
+                );
+            }
+        }
+    }
+
+    return out;
+}
+
+const switchBounds = boundsFromSwitches(readings);
+
 const median = (xs) => {
     const s = xs.slice().sort((a, b) => a - b);
 
@@ -175,6 +248,32 @@ function bands(ls) {
     return { bands: out, clean };
 }
 
+// Prefer the switch-point window where there is one - it is about seven times
+// tighter than the cycle-count estimate. Where the window and the cycle
+// estimate agree, keep the estimate; where they do not, the window wins,
+// because a rounded cycle count is the weaker evidence.
+function pickK(g) {
+    const fromCycles = g.Ks.length ? Number(median(g.Ks).toFixed(1)) : null;
+    const b = switchBounds.get(g.outer + "/" + g.inner);
+
+    if (!b || !b.lo.length || !b.hi.length) {
+        return fromCycles;
+    }
+
+    const lo = Math.max(...b.lo);
+    const hi = Math.min(...b.hi);
+
+    if (!(hi > lo)) {
+        return fromCycles;
+    }
+
+    if (fromCycles !== null && fromCycles >= lo && fromCycles <= hi) {
+        return fromCycles;
+    }
+
+    return Number(((lo + hi) / 2).toFixed(1));
+}
+
 const out = [...rungs.values()]
     .map((g) => {
         const S = 2 * (divider(g.inner, 3.75) + divider(g.outer, 6));
@@ -207,7 +306,7 @@ const out = [...rungs.values()]
 
         return {
             outer: g.outer, inner: g.inner, S,
-            K: g.Ks.length ? Number(median(g.Ks).toFixed(1)) : null,
+            K: pickK(g),
             n: g.Ks.length, nLen: g.lens.length, byCount,
         };
     })
