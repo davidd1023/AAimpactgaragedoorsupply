@@ -109624,6 +109624,254 @@
     "duplexOuterWeight": 0.02
    },
    "referenceCycles": 219000
+  },
+  {
+   "id": "h231-D525216-295-2437-600lb-210in-2spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator 2026-10-02: height sweep confirming the D525-216 caps at 231 inches, not the 216 in its name. The multiplier still moves at 228 and 231 and freezes at 0.202291 from 234, where the over-height warning begins.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "600",
+    "doorHeightFeet": 17,
+    "doorHeightInches": 6,
+    "doorWidthFeet": 16,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 26.25,
+    "duplexOuterLength": 27.25,
+    "duplexInnerWeight": 17.88,
+    "duplexOuterWeight": 35.41
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "h231-D525216-295-2437-600lb-216in-2spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator 2026-10-02: height sweep confirming the D525-216 caps at 231 inches, not the 216 in its name. The multiplier still moves at 228 and 231 and freezes at 0.202291 from 234, where the over-height warning begins.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "600",
+    "doorHeightFeet": 18,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 16,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 17.71,
+    "duplexOuterWeight": 35.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "h231-D525216-295-2437-600lb-222in-2spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator 2026-10-02: height sweep confirming the D525-216 caps at 231 inches, not the 216 in its name. The multiplier still moves at 228 and 231 and freezes at 0.202291 from 234, where the over-height warning begins.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "600",
+    "doorHeightFeet": 18,
+    "doorHeightInches": 6,
+    "doorWidthFeet": 16,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 27,
+    "duplexOuterLength": 28,
+    "duplexInnerWeight": 18.39,
+    "duplexOuterWeight": 36.39
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 9000
+  },
+  {
+   "id": "h231-D525216-295-2437-600lb-228in-2spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator 2026-10-02: height sweep confirming the D525-216 caps at 231 inches, not the 216 in its name. The multiplier still moves at 228 and 231 and freezes at 0.202291 from 234, where the over-height warning begins.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "600",
+    "doorHeightFeet": 19,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 16,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 28.25,
+    "duplexOuterLength": 29.25,
+    "duplexInnerWeight": 19.24,
+    "duplexOuterWeight": 38.01
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "h231-D525216-295-2437-600lb-231in-2spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator 2026-10-02: height sweep confirming the D525-216 caps at 231 inches, not the 216 in its name. The multiplier still moves at 228 and 231 and freezes at 0.202291 from 234, where the over-height warning begins.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "600",
+    "doorHeightFeet": 19,
+    "doorHeightInches": 3,
+    "doorWidthFeet": 16,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 19.07,
+    "duplexOuterWeight": 37.69
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "h231-D525216-295-2437-600lb-234in-2spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator 2026-10-02: height sweep confirming the D525-216 caps at 231 inches, not the 216 in its name. The multiplier still moves at 228 and 231 and freezes at 0.202291 from 234, where the over-height warning begins.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "600",
+    "doorHeightFeet": 19,
+    "doorHeightInches": 6,
+    "doorWidthFeet": 16,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 19.07,
+    "duplexOuterWeight": 37.69
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "h231-D525216-295-2437-600lb-240in-2spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator 2026-10-02: height sweep confirming the D525-216 caps at 231 inches, not the 216 in its name. The multiplier still moves at 228 and 231 and freezes at 0.202291 from 234, where the over-height warning begins.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "600",
+    "doorHeightFeet": 20,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 16,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 19.07,
+    "duplexOuterWeight": 37.69
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "h231-D525216-295-2437-600lb-252in-2spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator 2026-10-02: height sweep confirming the D525-216 caps at 231 inches, not the 216 in its name. The multiplier still moves at 228 and 231 and freezes at 0.202291 from 234, where the over-height warning begins.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "600",
+    "doorHeightFeet": 21,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 16,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 19.07,
+    "duplexOuterWeight": 37.69
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
   }
  ]
 }

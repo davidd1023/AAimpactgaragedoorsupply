@@ -647,9 +647,12 @@ function hl800Multiplier(heightFeet, hiLiftInches) {
 const HILIFT_DRUMS = {
     "CANIMEX/TF D800-120": {
         maxHiLift: 120,
-        // No weight cap: the reference tracks the entered weight exactly from
-        // 1062 lb (the first hand reading) to 2000 lb, so there is nothing to
-        // clamp to in any range this calculator is used in.
+        maxHeight: 384,
+        maxWeight: 2200,
+        // 2200 lb and 384 inches, from the reference's own drum record. The
+        // earlier note here said there was no weight cap because the reference
+        // tracked the entered weight exactly to 2000 lb - which it does, since
+        // 2000 is under 2200. Measuring inside a limit cannot find it.
         catalog: true,
         reff: hl800REff,
         multiplier: hl800Multiplier,
@@ -659,6 +662,7 @@ const HILIFT_DRUMS = {
     "CANIMEX/TF 575-120": {
         maxHiLift: 120,
         maxWeight: 1000,
+        maxHeight: 264,
         catalog: true,
         reff: hl575REff,
         multiplier: hl575Multiplier,
@@ -666,6 +670,7 @@ const HILIFT_DRUMS = {
     "CANIMEX/TF 525-54HL": {
         maxHiLift: 54,
         maxWeight: 1000,
+        maxHeight: 234,
         spiralA: 7.3952515,      // r0^2
         spiralB: 0.099661766,    // p/pi
         multCoeffs: [
@@ -994,7 +999,7 @@ const DUPLEX_PAIRS = {
             { outerWire: 0.283, innerWire: 0.2343, K: 2718.5, n: 46, byCount: { 2: [{ upTo: 0.358, bonus: 0 }, { upTo: 0.627, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.29774, b: 0, lo: 0, hi: 1 } } },
             { outerWire: 0.289, innerWire: 0.2343, K: 2879.1, n: 98, byCount: { 2: [{ upTo: 0.61, bonus: 0 }, { upTo: 0.653, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 1: { a: 0.71116, b: 0, lo: 0, hi: 1 }, 3: { a: 0.58915, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.53783, b: 0, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.295, innerWire: 0.2343, K: 2980.9, n: 103, lineByCount: { 1: { a: 0.75579, b: 0, lo: 0, hi: 1 }, 2: { a: -2.33264, b: 0.246, lo: 0, hi: 4 }, 4: { a: 0.78944, b: 0, lo: 0.25, hi: 1.25 } }, splitByCount: { 3: { from: 18, below: { a: 0.80079, b: 0, lo: 0.25, hi: 1.25 }, above: { a: 0.15261, b: 0, lo: -0.75, hi: 0.25 } } } },
-            { outerWire: 0.295, innerWire: 0.2437, K: 3318.5, n: 73, byCount: { 2: [{ upTo: 0.545, bonus: 0 }, { upTo: 0.8, bonus: 1 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.37186, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.23431, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.295, innerWire: 0.2437, K: 3318.5, n: 89, byCount: { 2: [{ upTo: 0.243, bonus: 0 }, { upTo: 0.337, bonus: 1.25 }, { upTo: 0.501, bonus: 0 }, { upTo: 0.8, bonus: 1 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.37186, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.23431, b: 0, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.3065, innerWire: 0.2437, K: 3617.5, n: 164, byCount: { 1: [{ upTo: 1, bonus: 0 }], 2: [{ upTo: 0.167, bonus: 0 }, { upTo: 0.221, bonus: -1 }, { upTo: 0.819, bonus: 0 }, { upTo: 0.841, bonus: 1 }, { upTo: 0.858, bonus: 0 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.82392, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.84406, b: 0, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.3065, innerWire: 0.25, K: 3902.4, n: 35, byCount: { 2: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 3: { a: 0.46499, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.48714, b: 0, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.3125, innerWire: 0.25, K: 4102.8, n: 43, lineByCount: { 3: { a: 0.67951, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.70211, b: 0, lo: 0.25, hi: 1.25 } } },
@@ -1592,9 +1597,18 @@ function duplexLength(activeLength, regime, springs) {
 // maxCable is carried for completeness and is NOT yet checked - the app has
 // no cable-size input to compare it against.
 const DRUM_LIMITS = {
+    // FROM THE REFERENCE'S OWN DRUM RECORD, not from the nameplate in the name.
+    // GET /spring-engineering/drum?drumName=... returns the drum, and the
+    // D525-216 carries maximumHeight 231 - fifteen inches more than its name
+    // suggests. Confirmed against the calculator: the multiplier still moves at
+    // 228 and 231 and freezes at 0.202291 from 234, where the over-height
+    // warning starts. Capping at 216 shortened the spring on any door between
+    // 217 and 231 inches, which the reference handles perfectly well.
+    //
+    // D400-96 and D400-144 do match their names, at 96 and 144.
     "CANIMEX/TF D400-96": { maxHeight: 96, maxWeight: 530, maxCable: '1/8"' },
     "CANIMEX/TF D400-144": { maxHeight: 144, maxWeight: 750, maxCable: '5/32"' },
-    "CANIMEX/TF D525-216": { maxHeight: 216, maxWeight: 1500, maxCable: '3/16"' },
+    "CANIMEX/TF D525-216": { maxHeight: 231, maxWeight: 1500, maxCable: '3/16"' },
 };
 
 // --- Wire size limits per spring ID ---------------------------------------
@@ -1975,11 +1989,13 @@ get doorHeightTotalFeet() {
     // Standard lift only. The hi-lift drums are absent from DRUM_LIMITS,
     // which is also correct: D800-120 tracks the entered height past its
     // nameplate 120 all the way to 192".
-    if (this.state.liftType === "Hi-Lift") {
-        return entered;
-    }
-
-    const limits = DRUM_LIMITS[this.state.drum];
+    // Hi-lift drums keep their caps in HILIFT_DRUMS, and they DO have height
+    // caps - 384, 264 and 234 inches - which this used to skip entirely on the
+    // grounds that the hi-lift drums were absent from DRUM_LIMITS. They were
+    // absent from the wrong table, not uncapped.
+    const limits = (this.state.liftType === "Hi-Lift"
+        ? HILIFT_DRUMS[this.state.drum]
+        : null) || DRUM_LIMITS[this.state.drum];
 
     if (!limits || !limits.maxHeight) {
         return entered;

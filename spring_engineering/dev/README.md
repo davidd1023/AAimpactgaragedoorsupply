@@ -450,3 +450,80 @@ Single's formula is now proven exact, and it is
 `springs * (div_out + div_in) / TIPPT`, which assumes both springs are the same
 length when the reference's outer is exactly one inch longer. Correcting that
 properly makes things worse, so the error is somewhere else again.
+
+## The reference exposes its own drum table
+
+`common-components-DVPRctXY.js` - the 662KB bundle the earlier search missed,
+because it only looked at four of the eleven script tags - names three
+endpoints that are not the calculator:
+
+```
+GET /spring-engineering/drum-list?liftType=Standard|HiLift|Vertical
+GET /spring-engineering/drum?drumName=...
+GET /spring-engineering/drum-recommendation
+POST /custom/torsion-preview
+```
+
+`drum` returns the drum record, and it settles by authority what had been
+inferred from names and probes:
+
+| drum | maximumHeight | maximumWeight | we had |
+|---|---|---|---|
+| D400-96 | 96 | 530 | both correct |
+| D400-144 | 144 | 750 | both correct |
+| D525-216 | **231** | 1500 | height **216** - wrong by 15" |
+| D800-120 | **384** | **2200** | neither |
+| 575-120 | **264** | 1000 | weight only |
+| 525-54HL | **234** | 1000 | weight only |
+
+The D525-216 carries 231 inches despite its name, confirmed against the
+calculator: the multiplier still moves at 228 and 231 and freezes at 0.202291
+from 234, where the over-height warning starts. Capping at 216 shortened the
+spring on any door between 217 and 231 inches.
+
+The D800-120 note here used to say it had no weight cap, because the reference
+tracked the entered weight exactly to 2000 lb. It does - 2000 is under 2200.
+**Measuring inside a limit cannot find it**, and the record can.
+
+The record also carries `flatMomentArm`, `highMomentArm`, `circumference`,
+`rateOfRise` and `maximumCapacityFlat`, which are the real geometry behind the
+fitted turns and multiplier curves. Those curves are already exact - Single
+176/176, Duplex 99%+ - so they are left alone, but anyone revisiting them
+should start there rather than refitting.
+
+`drum-list` gives 79 standard-lift and 70 hi-lift drums against the 3 and 3 we
+offer, which is the authoritative answer to which drums exist.
+
+## Length: what is now PROVED, and what is left
+
+Proved, so nobody needs to retest it:
+
+* **Length is a function of (rung, spring count, TIPPT) and nothing else.** Of
+  46 pairs sharing a rung, a spring count and a TIPPT but differing in turns by
+  at least 0.3, 45 return the same length. Turns do not enter.
+* **The grid is per spring count**, exactly: 1 spring is always a whole inch
+  (1843 of 1843), 3 and 4 springs are always whole + 0.25 (594 and 413 of
+  each), 2 springs is mixed - .0 on 793 and .25 on 274, and never .5 or .75.
+* **The structure of the active length is right by a wide margin.** Residual
+  spread is 2.39" against 17" to 37" for inner-only, outer-only, harmonic and
+  series combinations of the two dividers.
+* Lengths are **not** a stock list: 272 distinct values, nearly every whole
+  inch from 10 to 119.
+
+Rejected by measurement against the external samples, versus the bands' 66.9%:
+
+| hypothesis | result |
+|---|---|
+| quarter-inch quantisation as in Single | 8.3% |
+| whole-inch rounding | 15.7% |
+| an end-coils term, 2 to 8 coils | best 9.1% |
+| nested springs sharing deflection, `t = a/L + b/(L+1)` | 11.7% |
+| snap the OUTER spring and subtract one | 29.5% |
+| both dividers at one inside diameter | 0.0% |
+| one shift per group - 83.7% in sample | **53.8%** |
+| nearest neighbour in active length | 21.1% |
+
+The one-shift row is the instructive one: a single parameter per group reaches
+83.7% in sample and 53.8% out of it, while the bands reach 99% in and 67% out.
+Simplifying the model does not rescue generalisation here, and neither does
+adding freedom - both were tried and measured.
