@@ -983,96 +983,35 @@ const DUPLEX_PAIRS = {
         innerId: 3.75,
         outerId: 6,
         calibration: [
-            {
-                outerWire: 0.2625, innerWire: 0.2253, K: 2008.0, n: 10,
-                // short range: active 14.5-15.8, 9 readings
-                tLo: 0.000, tHi: 0.530,
-                // long range: 13 readings from active 26.9 to 38.2.
-                //
-                // `from` IS BRACKETED BY MEASUREMENT, not guessed. Three doors
-                // at 3 springs, radius 12, 9'2" - one configuration with only
-                // the weight varied, so active length is the only thing that
-                // differs between them:
-                //
-                //     521 lb   active 24.271   +1.25   short
-                //     470 lb   active 26.905   +2.25   long
-                //     410 lb   active 30.842   +2.25   long
-                //
-                // Two more on the same configuration closed it to half an inch:
-                //
-                //     500 lb   active 25.290   +1.25   short
-                //     490 lb   active 25.807   +2.25   long
-                //
-                // so the boundary is above 25.290 and at or below 25.807. The
-                // 25.5 here was chosen before those two were taken and sits
-                // inside the bracket, so they CONFIRM it rather than move it.
-                // The window has gone 14.8" -> 2.6" -> 0.5".
-                //
-                // It pinned the way K's accept/reject boundaries did: a pair
-                // either side of a step is worth far more than readings away
-                // from one.
-                //
-                // WHAT THE LONG RANGE ACTUALLY IS - found by searching rather
-                // than patching, and worth recording even though it does not
-                // ship.
-                //
-                //     L = round(1.041 x active) + 0.25
-                //
-                // One constant, no threshold, and it is EXACT on all 16
-                // readings with active above 20 - including the 205 lb case
-                // that the shipped rule needs its 0.065 split to handle. The k
-                // window that achieves 16/16 is [1.0385, 1.0435], half a
-                // percent wide. It also explains why every long reading ends
-                // in .25: the quarter is unconditional.
-                //
-                // IT IS NOT SHIPPED because it scores 20/25 overall, not 25/25.
-                // It gets only 4 of the 9 short readings, and using it above 20
-                // with the short rule below would tie at 25/25 while loosening
-                // the regime boundary from the 0.5" bracket measured above back
-                // to the 8.4" gap between 15.85 and 24.27. A cleaner form with
-                // a looser boundary is not a better answer.
-                //
-                // WHAT IT MEANS. The short range is not the same law with
-                // different parameters - it is a different mechanism. And a
-                // multiplicative k near 1.04 hints the divider constant may be
-                // ~4% low for Duplex, though the Single path is exact against
-                // 11 readings with the current value, so it cannot simply be
-                // wrong everywhere.
-                //
-                // SEARCHED AND RULED OUT over these 25 readings, none reaching
-                // 21/25: any quantise(a*active + b) to a quarter inch; the same
-                // with a turns term; coil-count quantisation at full, half and
-                // quarter coils on either wire; quantising to the wire diameter
-                // itself; and round(k*active) with a frac-threshold choice of
-                // offset, which peaks at 21/25.
-                //
-                // THE TWO-REGIME MODEL IS A SIMPLIFICATION, and this pair shows
-                // why. Both share floor(active) = 25, so within ONE integer
-                // part frac 0.290 is short and frac 0.807 is long. What is
-                // being called a boundary in active length is really the point
-                // where the upper band switches from +1 to +2.25, and the
-                // within-floor threshold drifts too - it is near 0.6 at floor
-                // 15 and at or below 0.110 by floor 36. The two regimes
-                // reproduce all 27 readings on this rung, but they are a
-                // bracketing of that drift, not the law behind it.
-                long: { from: 25.5, split: 0.065, above: 2.25 },
-            },
-            { outerWire: 0.2730, innerWire: 0.2253, K:  2231.7, n:  9 , tLo: 0.514, tHi: 0.632 },
-            { outerWire: 0.2830, innerWire: 0.2253, K:  2428.3, n:  1 },
-            { outerWire: 0.2830, innerWire: 0.2343, K:  2696.1, n:  2 },
-            { outerWire: 0.2890, innerWire: 0.2343, K:  2844.7, n:  9 , tLo: 0.582, tHi: 0.582 },
-            { outerWire: 0.2950, innerWire: 0.2343, K:  2954.0, n:  1 , tLo: 0.740, tHi: 0.740 },
-            { outerWire: 0.3065, innerWire: 0.2437, K:  3605.9, n:  1 , tLo: 0.710, tHi: 0.710 },
-            { outerWire: 0.3195, innerWire: 0.2625, K:  4757.4, n:  1 },
-            { outerWire: 0.3310, innerWire: 0.2625, K:  5199.4, n:  1 },
-            { outerWire: 0.3437, innerWire: 0.2730, K:  6296.4, n:  1 },
-            { outerWire: 0.3625, innerWire: 0.2830, K:  7515.4, n:  1 , tLo: 0.630, tHi: 0.630 },
-            { outerWire: 0.3625, innerWire: 0.2890, K:  8354.4, n:  1 },
-            { outerWire: 0.3625, innerWire: 0.2950, K:  8772.2, n:  1 },
-            { outerWire: 0.3750, innerWire: 0.3065, K: 10576.3, n:  2 , tLo: 0.002, tHi: 0.002 },
-            { outerWire: 0.3938, innerWire: 0.3065, K: 11160.7, n:  1 },
-            { outerWire: 0.3938, innerWire: 0.3195, K: 13216.5, n:  1 , tLo: 0.002, tHi: 0.002 },
-            { outerWire: 0.4062, innerWire: 0.3310, K: 15543.1, n:  1 , tLo: 0.002, tHi: 0.002 },
+            { outerWire: 0.2625, innerWire: 0.2253, K:    2023.8, n:  83, tLo: 0.010, tHi: 0.569, long: { from: 25.5, split: 0.065, above: 2.25 } },
+            { outerWire: 0.273,  innerWire: 0.2253, K:    2235.9, n:  24, tLo: 0.518, tHi: 0.635 },
+            { outerWire: 0.283,  innerWire: 0.2253, K:    2436.2, n:  28, tLo: 0.890, tHi: 0.890 },
+            { outerWire: 0.283,  innerWire: 0.2343, K:    2696.1, n:   7, tLo: 0.272, tHi: 0.549 },
+            { outerWire: 0.289,  innerWire: 0.2343, K:    2849.8, n:  19, tLo: 0.642, tHi: 0.642 },
+            { outerWire: 0.295,  innerWire: 0.2343, K:    2944.5, n:   5, tLo: 0.867, tHi: 0.867 },
+            { outerWire: 0.295,  innerWire: 0.2437, K:    3314.8, n:   5 },
+            { outerWire: 0.3065, innerWire: 0.2437, K:    3591.1, n:  24, tLo: 0.818, tHi: 0.818 },
+            { outerWire: 0.3065, innerWire: 0.25,   K:    3890.7, n:   4 },
+            { outerWire: 0.3125, innerWire: 0.25,   K:    4085.3, n:   5 },
+            { outerWire: 0.3195, innerWire: 0.2625, K:    4841.6, n:  13, tLo: 0.340, tHi: 0.423 },
+            { outerWire: 0.331,  innerWire: 0.2625, K:    5184.3, n:  15, tLo: 0.707, tHi: 0.707 },
+            { outerWire: 0.331,  innerWire: 0.273,  K:    5779.9, n:   3 },
+            { outerWire: 0.3437, innerWire: 0.273,  K:    6326.9, n:  26, tLo: 0.688, tHi: 0.688 },
+            { outerWire: 0.3437, innerWire: 0.283,  K:    6993.0, n:   7, tLo: 0.230, tHi: 0.413 },
+            { outerWire: 0.3625, innerWire: 0.283,  K:    7513.1, n:  13, tLo: 0.991, tHi: 0.991 },
+            { outerWire: 0.3625, innerWire: 0.289,  K:    8280.9, n:  10 },
+            { outerWire: 0.3625, innerWire: 0.295,  K:    8837.1, n:   5 },
+            { outerWire: 0.375,  innerWire: 0.295,  K:    9170.9, n:   4, tLo: 0.942, tHi: 0.942 },
+            { outerWire: 0.375,  innerWire: 0.3065, K:   10504.2, n:   8 },
+            { outerWire: 0.3938, innerWire: 0.3065, K:   11107.4, n:   9, tLo: 0.858, tHi: 0.858 },
+            { outerWire: 0.3938, innerWire: 0.3125, K:   12292.4, n:   4 },
+            { outerWire: 0.3938, innerWire: 0.3195, K:   13218.5, n:   4 },
+            { outerWire: 0.4062, innerWire: 0.3195, K:   13683.4, n:   3 },
+            { outerWire: 0.4062, innerWire: 0.331,  K:   15525.3, n:   8, tLo: 0.035, tHi: 0.075 },
+            { outerWire: 0.4218, innerWire: 0.331,  K:   16306.9, n:   3, tLo: 0.662, tHi: 0.662 },
+            { outerWire: 0.4218, innerWire: 0.3437, K:   18675.5, n:   1 },
+            { outerWire: 0.4305, innerWire: 0.3437, K:   19536.6, n:   2 },
+            { outerWire: 0.4375, innerWire: 0.3625, K:   23182.3, n:   2 },
         ],
     },
     '2 5/8" inside 5 1/4"': {
@@ -1435,6 +1374,31 @@ function duplexActiveLength(pair, step, springs, tippt) {
 // The thresholds are genuinely per rung - the fitted values run from 0.000 to
 // 0.740 - so one of them cannot be borrowed for another rung. See the proof in
 // duplexActiveLength's note that no shared pair can serve two of them.
+// THE QUARTER-INCH GRID IS SET BY THE SPRING COUNT, which 116 readings make
+// unambiguous:
+//
+//     1 spring    18 of 18 lengths are a whole inch, none a quarter
+//     2 springs   52 whole, 10 quarter - mixed, and the rung rules handle it
+//     3 springs   20 of 20 are a quarter, none whole
+//     4 springs   16 of 16 are a quarter, none whole
+//
+// At one spring that is p = 4^-18, so it is not chance. The rung rules below
+// were fitted mostly on 1- and 2-spring readings and happily return a whole
+// inch at 3 or 4 springs, which is provably the wrong GRID - and measured
+// against the reference the error was 0.25 LOW in 11 of the 16 cases where the
+// wire was right.
+//
+// So the grid is enforced: at 3 or more springs a whole-inch answer is lifted
+// to the quarter above it. This does not claim to know the full rule - it
+// claims to know which values are POSSIBLE, which is weaker and solid.
+function duplexSnapToGrid(length, springs) {
+    if (!(length > 0) || springs < 3) {
+        return length;
+    }
+
+    return Math.abs(length - Math.round(length)) < 1e-9 ? length + 0.25 : length;
+}
+
 function duplexLength(activeLength, regime) {
     if (!(activeLength > 0)) {
         return 0;
@@ -2639,7 +2603,10 @@ get duplexCalibrated() {
 }
 
 get duplexInnerLength() {
-    return duplexLength(this.duplexActiveLength, this.duplexStep);
+    return duplexSnapToGrid(
+        duplexLength(this.duplexActiveLength, this.duplexStep),
+        this.duplexSpringCount
+    );
 }
 
 // Active coil length of the pair, before rounding. Exposed because the

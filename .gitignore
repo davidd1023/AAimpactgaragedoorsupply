@@ -1,2 +1,6 @@
 __pycache__/
 *.py[cod]
+
+# reference-calculator pulls - may contain account-specific ids
+spring_engineering/dev/pulled*.json
+spring_engineering/dev/sweeps*.json
