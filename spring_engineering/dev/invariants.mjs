@@ -383,6 +383,42 @@ function heightClamped(mod) {
 // computed from it is stale. Before this was gated, a red "Low Cycle Life"
 // fired on 7 of 8 Duplex doors quoting a cycle count unrelated to the result
 // on screen.
+// The cycles-low caution must stay YELLOW.
+//
+// The reference's equivalent is red, and ours cannot be: measured against our
+// computed cycle count, the readings the reference warns on and the ones it
+// passes overlap completely (ratio 0.9646 to 1.0027 on both sides). Every
+// threshold either misses all 184 or raises 393 false alarms. Red would assert
+// a rejection we cannot actually determine, and 393 red errors on 2,936 doors
+// would train the user to ignore the panel.
+//
+// If someone later makes the cycle count accurate enough to separate the two
+// groups, this invariant is the thing to delete - deliberately, with the
+// measurement redone.
+function cyclesLowStaysCaution(mod) {
+    const fails = [];
+
+    for (const drum of Object.keys(mod.DRUM_LIMITS)) {
+        for (const weight of [480, 800, 900, 1200]) {
+            for (const springs of [1, 2, 3, 4]) {
+                const c = duplex(mod, {
+                    drum, springs, weight: String(weight), cycles: "10,000",
+                });
+                const w = (c.warnings || []).find((x) => x.id === "duplex-cycles-low");
+
+                if (w && w.severity !== "yellow") {
+                    fails.push(
+                        `${drum} ${weight}lb ${springs}spr: cycles-low is ` +
+                        `${w.severity}, and it has not earned better than yellow`
+                    );
+                }
+            }
+        }
+    }
+
+    return fails;
+}
+
 function noStaleWireWarnings(mod) {
     const stale = new Set([
         "wire-over-max",
@@ -468,6 +504,7 @@ export const INVARIANTS = [
     { name: "generated inner wire stays inside the spring ID's band", run: wireBand },
     { name: "the weight used never exceeds the drum's rating", run: weightClamped },
     { name: "the door height used never exceeds the drum's nameplate", run: heightClamped },
+    { name: "the cycles-low flag stays a caution, not a verdict", run: cyclesLowStaysCaution },
     { name: "Duplex raises no Wire-Size-dropdown warning", run: noStaleWireWarnings },
     { name: "no Duplex output depends on the Wire Size dropdown", run: duplexIgnoresWireDropdown },
 ];

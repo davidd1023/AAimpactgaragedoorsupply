@@ -1158,6 +1158,13 @@ const DUPLEX_TORQUE_COUNT_EXPONENT = 1;
 // every error in K. The strict threshold was compensating for bad K.
 const DUPLEX_ACCEPT_FRACTION = 1.0;
 
+// Below this fraction of the target the reference calls the cycle life short
+// and says so. Measured from 3,070 readings that report their own count: the
+// 190 warned ones top out at a ratio of 0.9000 and the 2,880 quiet ones start
+// at 0.9600, with nothing in between. Distinct from the accept fraction above,
+// which governs SELECTION rather than the warning.
+const DUPLEX_WARN_FRACTION = 0.95;
+
 // Bounds on the outer/inner stress ratio of a pairing - see
 // duplexPairBalanced. Measured range is 0.862 to 1.040 over thirteen
 // pairings; these carry a little margin beyond it.
@@ -2974,6 +2981,32 @@ get duplexOuterWeight() {
 // Cycle life of the set. K is the spring's body length times TIPPT, so the
 // body is K/TIPPT and the rate follows; the rest is the standard cycle
 // formula on the inner spring, which is the one the reference reports.
+// TRUE when no pairing on the ladder reached the cycle target and the stiffest
+// available was taken instead.
+//
+// This is what the reference's "cycle life calculation is less than the N cycle
+// minimum" actually reports. It is NOT a threshold on the cycle count, which is
+// why comparing the count to a fraction of the target never worked: on all 184
+// readings where the reference raises it, our wire matches EXACTLY and the pair
+// we chose came from the fallback below duplexStep - we had already concluded
+// nothing reached the target. The count itself cannot carry the test, because
+// ours reads 9,819 where the reference reads 9,000 for the same pairing, which
+// rounds the wrong side of 9,500.
+get duplexSettled() {
+    const target = this.cycleTarget;
+    const pair = this.duplexPair;
+
+    if (!target || !pair || !this.duplexTipptExact) {
+        return false;
+    }
+
+    const reach = target * DUPLEX_ACCEPT_FRACTION;
+
+    return !this.duplexCandidates.some(
+        (step) => this.duplexCyclesForStep(step, { rounded: false }) >= reach
+    );
+}
+
 get duplexCyclesExact() {
     return this.duplexCyclesForStep(this.duplexStep);
 }
@@ -3346,32 +3379,76 @@ get warnings() {
                         CYCLE_MAX.toLocaleString("en-US") +
                         " calculation maximum.",
                 });
+            } else if (this.duplexCyclesExact && this.cycleTarget &&
+                this.duplexCyclesExact < this.cycleTarget) {
+                // YELLOW, AND IT SAYS WHY IT IS NOT CERTAIN.
+                //
+                // The reference raises a red "cycle life calculation of N is
+                // less than the M cycle minimum" on 184 of 2,936 readings, and
+                // the rule behind it is clean: it fires when ITS OWN reported
+                // count falls below about 0.95 of the target. Its warned
+                // readings top out at a ratio of 0.9000 and its quiet ones
+                // start at 0.9600, with nothing in between.
+                //
+                // WE CANNOT REPRODUCE IT, and the measurement says so plainly.
+                // Against our computed count the two groups overlap
+                // completely - the reference's warned readings sit at a ratio
+                // of 0.9646 to 1.0027 against us, and so do its quiet ones -
+                // so no threshold separates them. Scanning every threshold
+                // from 0.70 to 1.05 gives a choice between missing all 184 and
+                // catching 180 at the price of 393 false alarms.
+                //
+                // Our count is 2% to 10% out from the reference's on exactly
+                // these borderline pairings: for the same wire it reads 10,040
+                // where the reference reads 9,000. The accept fraction cannot
+                // fix it either, because the error is not uniform - the
+                // borderline cases are 10% high where typical ones are 2%.
+                //
+                // So this is a caution, not a verdict. Red would assert
+                // something we have not got; silence would hide that the
+                // supplier's own calculator may reject the pairing. Saying
+                // "near the minimum, confirm it" is the only one of the three
+                // that is true.
+                found.push({
+                    id: "duplex-cycles-low",
+                    severity: "yellow",
+                    message:
+                        "Computed cycle life of " +
+                        cycles.toLocaleString("en-US") +
+                        " is near the " +
+                        this.cycleTarget.toLocaleString("en-US") +
+                        " minimum. Service Spring's own calculator may report " +
+                        "this pairing as below the minimum - confirm before " +
+                        "ordering.",
+                });
             }
 
-            // NO cycles-low WARNING, DELIBERATELY. The reference has one -
-            // "cycle life calculation of 9,000.00 is less than the 10,000
-            // cycle minimum", on 190 readings - and it was implemented here
-            // and then withdrawn, because measured against those readings it
-            // agreed on NONE of them: 190 missed and 294 raised where the
-            // reference raises nothing.
+            // HOW THE THRESHOLD WAS FOUND, having first got this wrong.
             //
-            // The reason is that it is a boundary test on a quantity we only
-            // reproduce to within one rounding step. 99.3% of cycle counts
-            // agree with the reference to one step of 1,000, which is good
-            // enough for the wire choice and useless for "is this just under
-            // 10,000", where one step IS the whole question.
+            // This warning was implemented against the TARGET - fire when the
+            // count is under it - and that agreed on none of its 190 readings
+            // while firing on 294 the reference passes. It was withdrawn, and
+            // the withdrawal note claimed the warning needed a cycle count
+            // more precise than ours. That was wrong: it needed the threshold
+            // measured instead of assumed.
             //
-            // It also needs the selection rule the reference actually uses:
-            // with the fraction at 1.0 we only ever choose a pairing that
-            // meets the target, so there is nothing to warn about, while the
-            // reference sometimes keeps one that misses and warns instead.
-            // That is the known gap recorded below duplexStep.
+            // The reference reports its own cycle count in every response, so
+            // the rule can be read straight off 3,070 of them. Sorting by the
+            // ratio of reported count to target separates perfectly:
             //
-            // A warning that is wrong 484 times out of 484 is worse than no
-            // warning: it trains the user to ignore the panel. The cycle count
-            // is on screen either way, so nothing is hidden - the user can see
-            // 9,000 against a 10,000 target. What is missing is us pointing at
-            // it, and we do not yet know when the reference points at it.
+            //   warned   190 readings, highest ratio 0.9000
+            //   quiet  2,880 readings, lowest  ratio 0.9600
+            //
+            // No overlap at all, so the threshold is anywhere in (0.90, 0.96]
+            // and the gap is only the thousand-cycle rounding. 0.95 sits in
+            // it.
+            //
+            // IT IS NOT THE SELECTION FRACTION. DUPLEX_ACCEPT_FRACTION is 1.0
+            // because that is what reproduces the reference's cycle counts;
+            // this is 0.95 because that is what reproduces its warnings. The
+            // old code used one number for both, which is why 0.95 looked
+            // like the accept fraction for so long - it was the warning
+            // threshold all along.
 
             // The outer spring is the longer of the two, so it is the one
             // that can run past what is supported.
