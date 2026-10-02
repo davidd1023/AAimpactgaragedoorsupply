@@ -2519,20 +2519,60 @@ get duplexCandidates() {
     // authority; past its stiffest rung a heavy door still needs somewhere to
     // go, and only there is a rung invented.
     //
-    // A generated rung's K is estimated as S times the catalogue's own median
-    // K/S, which is a far better extrapolation than the kSlope line it
-    // replaces - that line ran 8.5% low on the first rung past the table.
+    // A generated rung's K is estimated from the balance law just below.
     // duplexExtrapolated still reports when one is in use.
-    const ratios = pair.calibration.map(
-        (c) =>
-            c.K /
-            (2 *
-                (divider(c.outerWire, pair.outerId) +
-                    divider(c.innerWire, pair.innerId)))
-    );
-    const medianRatio = ratios.slice().sort((x, y) => x - y)[
-        Math.floor(ratios.length / 2)
-    ];
+    //
+    // This replaced, in turn, a kSlope line that ran 8.5% low on the first
+    // rung past the table, and then the catalogue's median K/S - which was
+    // better than the line and is still 17% to 34% out at the stiff end,
+    // because K/S is not constant.
+    //
+    // K/S IS NOT CONSTANT ALONG THE LADDER - it tracks the stress balance.
+    //
+    // Across the 44 calibrated rungs K/S runs 0.72 to 0.99, and it falls as
+    // the outer spring becomes relatively more stressed: Pearson r = -0.906
+    // against the balance ratio. A single median ratio therefore misses by up
+    // to 25%, and it misses worst exactly where it is used - at the stiff end,
+    // past the catalogue, where the balance is furthest from the middle.
+    //
+    // Fitting K/S = a + b*balance on the 40 well-pinned rungs and testing it
+    // on the two whose K has no switch point behind it, so they were never in
+    // the fit:
+    //
+    //                    balance law   median ratio
+    //   0.5625/0.4305       6.4% off     17.3% off
+    //   0.625/0.4615       14.3% off     34.2% off
+    //
+    // Two to three times better where it matters. The law is NOT good enough
+    // to replace a measured K - its worst error on the rungs it was fitted to
+    // is 6.5%, against the 0.15% a switch point gives - so it is used only for
+    // GENERATED rungs, which had no measurement in the first place.
+    const fits = pair.calibration.map((c) => {
+        const stiffness =
+            2 *
+            (divider(c.outerWire, pair.outerId) +
+                divider(c.innerWire, pair.innerId));
+
+        return {
+            ratio: c.K / stiffness,
+            balance:
+                duplexSpringStress(c.outerWire, pair.outerId) /
+                duplexSpringStress(c.innerWire, pair.innerId),
+        };
+    });
+    const mean = (xs) => xs.reduce((t, v) => t + v, 0) / xs.length;
+    const mBal = mean(fits.map((f) => f.balance));
+    const mRatio = mean(fits.map((f) => f.ratio));
+    const varBal = mean(fits.map((f) => (f.balance - mBal) ** 2));
+    const slope = varBal
+        ? mean(fits.map((f) => (f.balance - mBal) * (f.ratio - mRatio))) / varBal
+        : 0;
+    const intercept = mRatio - slope * mBal;
+    const ratioFor = (outerWire, innerWire) =>
+        intercept +
+        slope *
+            (duplexSpringStress(outerWire, pair.outerId) /
+                duplexSpringStress(innerWire, pair.innerId));
     const stiffest = Math.max(...out.map((c) => c.S));
 
     for (let o = 0; o < WIRE_SIZES.length; o++) {
@@ -2563,7 +2603,7 @@ get duplexCandidates() {
             extra.push({
                 outerWire,
                 innerWire,
-                K: S * medianRatio,
+                K: S * ratioFor(outerWire, innerWire),
                 S,
                 measured: false,
             });
