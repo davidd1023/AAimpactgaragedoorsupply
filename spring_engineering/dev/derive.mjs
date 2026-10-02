@@ -747,9 +747,24 @@ function fitLineAnyLevels(ls, maxLevels) {
         // data has none worth counting, because nothing constrains it.
         const room = (i) =>
             i === 0 || i === n ? 0 : (sorted[i].u - sorted[i - 1].u) / 2;
+        // PREFER THE FLATTEST SLOPE THAT FITS, then the widest margin.
+        //
+        // The scan used to stop at the first slope reaching zero violations,
+        // starting from -0.03, so an underdetermined fit was handed whatever
+        // extreme the search happened to begin at. It showed: fitted slopes
+        // piled up on exactly -0.03000 and 0.09000, the two ends of the range.
+        //
+        // That matters off the end of the data. A threshold a + b*floor leaves
+        // [0, 1] at some floor and the rule goes degenerate past it - always
+        // the low bonus or always the high one - and with slopes pinned at the
+        // extremes, 66 of 85 thresholds went degenerate before floor 90, which
+        // is where a light door on a 300,000-cycle target lands. A flatter
+        // slope claims less and survives further.
         const better = (cand) =>
             !best || cand.bad < best.bad ||
-            (cand.bad === best.bad && cand.margin > best.margin);
+            (cand.bad === best.bad && Math.abs(cand.b) < Math.abs(best.b) - 1e-12) ||
+            (cand.bad === best.bad && Math.abs(cand.b) <= Math.abs(best.b) + 1e-12 &&
+                cand.margin > best.margin);
 
         if (vals.length === 2) {
             for (let i = 0; i <= n; i++) {
