@@ -64,7 +64,22 @@ const readings = [];
 const skipped = {};
 const skip = (why) => { skipped[why] = (skipped[why] ?? 0) + 1; };
 
-for (const f of readdirSync(HERE).filter((f) => /^pulled.*\.json$/.test(f))) {
+// EVALUATION PULLS ARE NOT TRAINING DATA.
+//
+// This reads every pulled*.json, and that silently swallowed the random
+// sample: dev/pulled-rand.json is drawn uniformly from the allowed box to
+// SCORE the model, and because the pull writes it incrementally, every
+// apply.sh folded more of it into the fit. The score then climbed from 57.5%
+// to 91.9% while I attributed the gain to a fitter change - the model was
+// being measured on rows it had just been trained on.
+//
+// A file whose name says eval or rand is an evaluation set and is skipped
+// here. Nothing stops it being imported later ON PURPOSE with
+// dev/import.mjs; what must not happen is it arriving by accident.
+const EVAL = /(^|-)(eval|rand)/;
+
+for (const f of readdirSync(HERE)
+    .filter((f) => /^pulled.*\.json$/.test(f) && !EVAL.test(f))) {
     for (const r of JSON.parse(readFileSync(join(HERE, f), "utf8"))) {
         if (r.error) {
             continue;
