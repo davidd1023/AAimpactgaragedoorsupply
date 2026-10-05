@@ -81,6 +81,8 @@ def main():
 
         sm = row.get("sMult", 1) or 1
         stiff = "" if abs(sm - 1) < 1e-9 else ", sMult: %g" % sm
+        if row.get("twoOffset"):
+            stiff += ", twoOffset: %g" % row["twoOffset"]
         out.append("            { outerWire: %g, innerWire: %g, K: %.1f, n: %d%s%s },"
                    % (row["outer"], row["inner"], row["K"], row["n"], stiff, extra))
 

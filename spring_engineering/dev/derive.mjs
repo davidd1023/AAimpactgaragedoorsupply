@@ -257,6 +257,7 @@ for (const g of rungs.values()) {
 
         if (fit && fit.ok > 0) {
             g.sMult = Number(fit.m.toFixed(6));
+            g.twoOffset = fit.twoOffset;
         }
     }
 
@@ -296,18 +297,25 @@ for (const g of rungs.values()) {
 function fitStiffness(ls) {
     let best = null;
 
-    for (let bi = -320; bi <= 320; bi += 1) {
-        const m = 1 + bi / 4000;             // +-8% in 0.025% steps
-        let ok = 0;
+    // The stiffness and the two-spring offset are fitted together, because the
+    // offset shifts where the grid falls and the stiffness shifts what lands
+    // on it - picking either alone picks it against the wrong grid.
+    for (const twoOffset of [0, 0.25]) {
+        for (let bi = -320; bi <= 320; bi += 1) {
+            const m = 1 + bi / 4000;         // +-8% in 0.025% steps
+            let ok = 0;
 
-        for (const l of ls) {
-            if (Math.abs(snapGrid(l.rawActive * m, l.springs) - l.length) < 1e-9) {
-                ok += 1;
+            for (const l of ls) {
+                if (Math.abs(
+                    snapGrid(l.rawActive * m, l.springs, twoOffset) - l.length
+                ) < 1e-9) {
+                    ok += 1;
+                }
             }
-        }
 
-        if (!best || ok > best.ok) {
-            best = { ok, m };
+            if (!best || ok > best.ok) {
+                best = { ok, m, twoOffset };
+            }
         }
     }
 
@@ -318,7 +326,7 @@ function fitStiffness(ls) {
 // plus a quarter (594 and 413 of each), and 2 springs uses both - 793 at .0 and
 // 274 at .25, never .5 or .75. So 2 springs snaps to whichever of {N, N+0.25}
 // is nearer, which is deterministic; there is no free choice to exploit.
-function snapGrid(x, springs) {
+function snapGrid(x, springs, twoOffset) {
     if (springs === 1) {
         return Math.round(x);
     }
@@ -327,10 +335,14 @@ function snapGrid(x, springs) {
         return Math.round(x - 0.25) + 0.25;
     }
 
-    const whole = Math.round(x);
-    const quarter = Math.round(x - 0.25) + 0.25;
+    // TWO SPRINGS TAKES ITS OFFSET FROM THE RUNG. It uses .0 on 799 readings
+    // and .25 on 276, never .5 or .75, and the RUNG alone predicts which on
+    // 86.4% of them - 42 buckets over 1075 readings. Snapping to whichever is
+    // nearer instead was the single biggest source of error on the readings
+    // the reference answers cleanly.
+    const off = twoOffset === undefined ? 0 : twoOffset;
 
-    return Math.abs(x - whole) <= Math.abs(x - quarter) ? whole : quarter;
+    return Math.round(x - off) + off;
 }
 
 // K FROM THE REFERENCE'S OWN SWITCH POINTS, which is far tighter than
@@ -1172,6 +1184,7 @@ const out = [...rungs.values()]
             outer: g.outer, inner: g.inner, S,
             K: pickK(g),
             sMult: g.sMult ?? 1,
+            twoOffset: g.twoOffset ?? 0,
             n: g.Ks.length, nLen: g.lens.length, byCount,
         };
     })
