@@ -1526,7 +1526,15 @@
 
             </t>
 
-            <!-- CLEAR -->
+            <!-- ACTIONS. Behind the same gate as the results and the price,
+                 because they are only meaningful once there is a quote: Add to
+                 Cart has nothing to order, and Clear has nothing to clear -
+                 every input is still at its starting value until the drum and
+                 the weight are in. Two live buttons under an empty calculator
+                 read as a form you have failed to fill in rather than one you
+                 have not finished. -->
+
+            <t t-if="resultsVisible">
 
             <div class="se-clear-row">
                 <button class="se-clear" t-on-click="clearAll">
@@ -1536,6 +1544,8 @@
                     Add to Cart
                 </button>
             </div>
+
+            </t>
 
         </div>
 
