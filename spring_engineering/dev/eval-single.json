@@ -6153,5 +6153,3324 @@
     "springWeight": 8.7036
    }
   }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id2.625 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 2.625,
+    "springLength": 18.75,
+    "springWeight": 8.1597
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id2.625 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 36000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 2.625,
+    "springLength": 26.25,
+    "springWeight": 12.3056
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id2.625 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 2.625,
+    "springLength": 25,
+    "springWeight": 10.8795
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id2.625 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 36000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 2.625,
+    "springLength": 34.5,
+    "springWeight": 16.1731
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id2.625 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 2.625,
+    "springLength": 27.75,
+    "springWeight": 15.3631
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id2.625 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 28000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 2.625,
+    "springLength": 40.25,
+    "springWeight": 24.2618
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id2.625 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 2.625,
+    "springLength": 36.75,
+    "springWeight": 20.3457
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id2.625 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 28000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 2.625,
+    "springLength": 53.25,
+    "springWeight": 32.098
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id3.75 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2253 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 3.75,
+    "springLength": 13.75,
+    "springWeight": 8.351
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id3.75 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 36000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 3.75,
+    "springLength": 19,
+    "springWeight": 12.4114
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id3.75 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2253 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 3.75,
+    "springLength": 18.25,
+    "springWeight": 11.084
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id3.75 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 36000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 3.75,
+    "springLength": 25.25,
+    "springWeight": 16.4941
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id3.75 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 3.75,
+    "springLength": 20.5,
+    "springWeight": 15.7551
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id3.75 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 28000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 3.75,
+    "springLength": 29.5,
+    "springWeight": 24.6329
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id3.75 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 3.75,
+    "springLength": 26.75,
+    "springWeight": 20.5585
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id3.75 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 28000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 3.75,
+    "springLength": 38.75,
+    "springWeight": 32.3568
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id5.25 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 5.25,
+    "springLength": 10,
+    "springWeight": 8.3689
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id5.25 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 36000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 5.25,
+    "springLength": 13.75,
+    "springWeight": 12.3634
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id5.25 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 5.25,
+    "springLength": 13,
+    "springWeight": 10.8796
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id5.25 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 36000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 5.25,
+    "springLength": 18,
+    "springWeight": 16.1849
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id5.25 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 5.25,
+    "springLength": 14.75,
+    "springWeight": 15.5627
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id5.25 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 28000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 5.25,
+    "springLength": 21.25,
+    "springWeight": 24.324
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id5.25 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 5.25,
+    "springLength": 19.5,
+    "springWeight": 20.5744
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 400-144 id5.25 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 28000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 5.25,
+    "springLength": 28.25,
+    "springWeight": 32.3366
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id2.625 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 2.625,
+    "springLength": 16.25,
+    "springWeight": 7.6178
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id2.625 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 2.625,
+    "springLength": 21.75,
+    "springWeight": 10.9389
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id2.625 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 2.625,
+    "springLength": 21.25,
+    "springWeight": 9.9617
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id2.625 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 2.625,
+    "springLength": 28.75,
+    "springWeight": 14.4594
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id2.625 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 2.625,
+    "springLength": 29.5,
+    "springWeight": 18.548
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id2.625 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 25000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 2.625,
+    "springLength": 35.75,
+    "springWeight": 23.5347
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id2.625 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 2.625,
+    "springLength": 39,
+    "springWeight": 24.5211
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id2.625 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 25000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 2.625,
+    "springLength": 47.5,
+    "springWeight": 31.2699
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id3.75 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 3.75,
+    "springLength": 12,
+    "springWeight": 7.8388
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id3.75 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 3.75,
+    "springLength": 16,
+    "springWeight": 11.1958
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id3.75 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 3.75,
+    "springLength": 15.5,
+    "springWeight": 10.1251
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id3.75 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 3.75,
+    "springLength": 21,
+    "springWeight": 14.6945
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id3.75 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 3.75,
+    "springLength": 21.75,
+    "springWeight": 18.9232
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id3.75 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 25000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 3.75,
+    "springLength": 26.5,
+    "springWeight": 24.1106
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id3.75 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 3.75,
+    "springLength": 28.5,
+    "springWeight": 24.796
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id3.75 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 25000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 3.75,
+    "springLength": 34.75,
+    "springWeight": 31.6168
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id5.25 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 5.25,
+    "springLength": 8.5,
+    "springWeight": 7.6429
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id5.25 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 5.25,
+    "springLength": 11.5,
+    "springWeight": 11.0646
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id5.25 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 5.25,
+    "springLength": 11.25,
+    "springWeight": 10.1155
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id5.25 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 5.25,
+    "springLength": 15.25,
+    "springWeight": 14.6726
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id5.25 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 5.25,
+    "springLength": 15.75,
+    "springWeight": 18.7701
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id5.25 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 25000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 5.25,
+    "springLength": 19,
+    "springWeight": 23.6587
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id5.25 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 5.25,
+    "springLength": 20.75,
+    "springWeight": 24.7289
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 525-216 id5.25 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 25000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 5.25,
+    "springLength": 25.25,
+    "springWeight": 31.4412
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id2.625 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.192,
+    "innerDiameter": 2.625,
+    "springLength": 13.5,
+    "springWeight": 5.1092
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id2.625 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 27000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.207,
+    "innerDiameter": 2.625,
+    "springLength": 19,
+    "springWeight": 7.7941
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id2.625 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.192,
+    "innerDiameter": 2.625,
+    "springLength": 17.75,
+    "springWeight": 6.7177
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id2.625 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 27000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.207,
+    "innerDiameter": 2.625,
+    "springLength": 25.25,
+    "springWeight": 10.3579
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id2.625 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 2.625,
+    "springLength": 24.25,
+    "springWeight": 12.1962
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id2.625 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 40000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 2.625,
+    "springLength": 36.5,
+    "springWeight": 20.2073
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id2.625 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 2.625,
+    "springLength": 32,
+    "springWeight": 16.094
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id2.625 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 40000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 2.625,
+    "springLength": 48.5,
+    "springWeight": 26.8508
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id3.75 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2253 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.192,
+    "innerDiameter": 3.75,
+    "springLength": 10,
+    "springWeight": 5.2961
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id3.75 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2253 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 27000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.207,
+    "innerDiameter": 3.75,
+    "springLength": 14,
+    "springWeight": 8.0244
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id3.75 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2253 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.192,
+    "innerDiameter": 3.75,
+    "springLength": 13,
+    "springWeight": 6.8849
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id3.75 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2253 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 27000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.207,
+    "innerDiameter": 3.75,
+    "springLength": 18.25,
+    "springWeight": 10.4604
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id3.75 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 3.75,
+    "springLength": 17.75,
+    "springWeight": 12.4203
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id3.75 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 40000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 3.75,
+    "springLength": 26.75,
+    "springWeight": 20.5585
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id3.75 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 3.75,
+    "springLength": 23.25,
+    "springWeight": 16.2689
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id3.75 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 40000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 3.75,
+    "springLength": 35.25,
+    "springWeight": 27.0911
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id5.25 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.192,
+    "innerDiameter": 5.25,
+    "springLength": 7,
+    "springWeight": 5.1179
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id5.25 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 87.3,
+   "multiplier": 0.291033,
+   "cycles": 27000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.207,
+    "innerDiameter": 5.25,
+    "springLength": 10,
+    "springWeight": 7.9044
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id5.25 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.192,
+    "innerDiameter": 5.25,
+    "springLength": 9.25,
+    "springWeight": 6.7629
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id5.25 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 65.2,
+   "multiplier": 0.217449,
+   "cycles": 27000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.207,
+    "innerDiameter": 5.25,
+    "springLength": 13.25,
+    "springWeight": 10.4734
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id5.25 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 5.25,
+    "springLength": 12.75,
+    "springWeight": 12.2673
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id5.25 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 7.9,
+   "totalInchPoundPerTurn": 174.6,
+   "multiplier": 0.291033,
+   "cycles": 40000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 5.25,
+    "springLength": 19.25,
+    "springWeight": 20.3106
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id5.25 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 5.25,
+    "springLength": 16.75,
+    "springWeight": 16.1158
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 400-144 id5.25 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 130.5,
+   "multiplier": 0.217449,
+   "cycles": 40000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 5.25,
+    "springLength": 25.5,
+    "springWeight": 26.905
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id2.625 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 2.625,
+    "springLength": 15.25,
+    "springWeight": 6.6365
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id2.625 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2253,
+    "innerDiameter": 2.625,
+    "springLength": 17.5,
+    "springWeight": 7.8636
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id2.625 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 2.625,
+    "springLength": 20,
+    "springWeight": 8.7036
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id2.625 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2253,
+    "innerDiameter": 2.625,
+    "springLength": 23,
+    "springWeight": 10.335
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id2.625 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 2.625,
+    "springLength": 22.5,
+    "springWeight": 12.4566
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id2.625 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 2.625,
+    "springLength": 29.5,
+    "springWeight": 17.3842
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id2.625 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 2.625,
+    "springLength": 29.5,
+    "springWeight": 16.3319
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id2.625 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 2.625,
+    "springLength": 38.75,
+    "springWeight": 22.8352
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id3.75 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2253 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 3.75,
+    "springLength": 11.25,
+    "springWeight": 6.8326
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id3.75 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2253,
+    "innerDiameter": 3.75,
+    "springLength": 13,
+    "springWeight": 8.1471
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id3.75 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2253 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 3.75,
+    "springLength": 14.75,
+    "springWeight": 8.9583
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id3.75 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2253,
+    "innerDiameter": 3.75,
+    "springLength": 17,
+    "springWeight": 10.6539
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id3.75 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 3.75,
+    "springLength": 16.5,
+    "springWeight": 12.6809
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id3.75 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 3.75,
+    "springLength": 21.5,
+    "springWeight": 17.5612
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id3.75 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 3.75,
+    "springLength": 21.75,
+    "springWeight": 16.7158
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id3.75 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 3.75,
+    "springLength": 28.5,
+    "springWeight": 23.2788
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id5.25 300lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 5.25,
+    "springLength": 8,
+    "springWeight": 6.6952
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id5.25 300lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 145.5,
+   "multiplier": 0.485098,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2253,
+    "innerDiameter": 5.25,
+    "springLength": 9.25,
+    "springWeight": 7.9844
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id5.25 300lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 5.25,
+    "springLength": 10.5,
+    "springWeight": 8.7874
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id5.25 300lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size does not meet 0.2625 minimum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 108.9,
+   "multiplier": 0.363065,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2253,
+    "innerDiameter": 5.25,
+    "springLength": 12.25,
+    "springWeight": 10.5739
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id5.25 600lb h84 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 5.25,
+    "springLength": 12,
+    "springWeight": 12.6612
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id5.25 600lb h84 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 291.1,
+   "multiplier": 0.485098,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 5.25,
+    "springLength": 15.5,
+    "springWeight": 17.3622
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id5.25 600lb h120 t10000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 5.25,
+    "springLength": 15.75,
+    "springWeight": 16.6178
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 525-216 id5.25 600lb h120 t25000",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 120,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 217.8,
+   "multiplier": 0.363065,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 5.25,
+    "springLength": 20.5,
+    "springWeight": 22.963
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 hl24 300lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 24,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.8,
+   "totalInchPoundPerTurn": 147.8,
+   "multiplier": 0.49274,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2437,
+    "innerDiameter": 2.625,
+    "springLength": 19,
+    "springWeight": 9.2948
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 hl24 600lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 24,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.8,
+   "totalInchPoundPerTurn": 295.6,
+   "multiplier": 0.49274,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 2.625,
+    "springLength": 31.75,
+    "springWeight": 20.3945
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 hl60 300lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 60,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 3
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 103.2,
+   "multiplier": 0.344153,
+   "cycles": 14000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 2.625,
+    "springLength": 38.25,
+    "springWeight": 20.2878
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s3 hl60 600lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 60,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 3
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 206.5,
+   "multiplier": 0.344153,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 2.625,
+    "springLength": 59,
+    "springWeight": 40.395
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 hl24 300lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 24,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.8,
+   "totalInchPoundPerTurn": 147.8,
+   "multiplier": 0.49274,
+   "cycles": 14000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2253,
+    "innerDiameter": 2.625,
+    "springLength": 17.25,
+    "springWeight": 7.7512
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 hl24 600lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 24,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.8,
+   "totalInchPoundPerTurn": 295.6,
+   "multiplier": 0.49274,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.283,
+    "innerDiameter": 2.625,
+    "springLength": 26.25,
+    "springWeight": 15.1169
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 hl60 300lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 60,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 300,
+   "springs": 4
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 103.2,
+   "multiplier": 0.344153,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 2.625,
+    "springLength": 29.25,
+    "springWeight": 13.712
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "s4 hl60 600lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 60,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 84,
+   "weight": 600,
+   "springs": 4
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 206.5,
+   "multiplier": 0.344153,
+   "cycles": 16000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 2.625,
+    "springLength": 54,
+    "springWeight": 33.9522
+   }
+  }
  }
 ]

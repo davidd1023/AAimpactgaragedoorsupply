@@ -681,20 +681,17 @@ function priceAddsUp(mod) {
 // fitted from two readings whose inputs were never written down - so it could
 // not be re-derived, and it was wrong at every spring count.
 //
-// FOUR SPRINGS IS LEFT OUT. The reference warns at every width up to 125,
-// so its assembly is over 125"; ours is 122.4" and would not warn at 123-125.
-// That gap is not the hardware - it is the wire: at four springs the reference
-// picks 0.207" where we pick 0.2", because our cycle life for 0.2" comes to
-// 10,374 against a 10,000 target and the reference puts it below. Its length
-// at 0.207" is 24", which is exactly ours, so only the cycle figure is out,
-// by about 4% right at the threshold. Asserting the bracket here would pin
-// the blame on the wrong constant.
+// FOUR SPRINGS IS IN NOW. It used to fail, and the reason turned out not to
+// be the hardware or the cycle model but a wire size we offered and the
+// reference does not - see WIRE_SIZES. With 0.2" off the ladder our wire at
+// four springs is the reference's 0.207", the length is its 24", and all 72
+// of the swept widths agree.
 function singleAssemblyBrackets(mod) {
     const fails = [];
 
     // springs -> [widest width the reference WARNS at, narrowest it does NOT]
     // null means that side was outside the swept window.
-    const BRACKETS = { 1: [null, 80], 2: [110, 111], 3: [117, 118] };
+    const BRACKETS = { 1: [null, 80], 2: [110, 111], 3: [117, 118], 4: [125, null] };
 
     for (const [springs, [warnAt, fitsAt]] of Object.entries(BRACKETS)) {
         for (const [width, shouldWarn] of [[warnAt, true], [fitsAt, false]]) {
@@ -734,6 +731,56 @@ function singleAssemblyBrackets(mod) {
     return fails;
 }
 
+// The wire the Single path picks must step where the reference steps.
+//
+// A SWITCH WEIGHT IS AN EXACT MEASUREMENT, which the reported cycle figure is
+// not: the reference rounds cycles to the nearest 1000, so near a 10,000
+// target that number alone cannot place anything better than +-5%. The weight
+// at which it abandons one wire for the next is sharp to the pound, and it
+// says the same thing a thousand cycle readings cannot.
+//
+// Stepped a pound at a time on a 4-spring 575-120 door, 7'0", 60" hi-lift,
+// 2 5/8", target 10,000, 125-320 lb (dev/pulled-s5.json, 196 readings). All
+// eight of its switches are below. Seven already matched; the eighth is the
+// one that found the 0.2" problem - the reference goes straight from 0.192"
+// to 0.207" and we stopped in between.
+function singleWireSwitches(mod) {
+    const fails = [];
+
+    // [from, to, the weight at which the reference first returns `to`]
+    const SWITCHES = [
+        [0.17, 0.177, 129],
+        [0.177, 0.1875, 144],
+        [0.1875, 0.192, 169],
+        [0.192, 0.207, 180],
+        [0.207, 0.2187, 222],
+        [0.2187, 0.2253, 259],
+        [0.2253, 0.2343, 282],
+        [0.2343, 0.2437, 314],
+    ];
+
+    const wireAt = (weight) => make(mod, {
+        assembly: "Single", drum: "CANIMEX/TF 575-120", springId: '2 5/8"',
+        liftType: "Hi-Lift", liftin: "60", doorHeightFeet: 7, doorHeightInches: 0,
+        cycles: "10,000", springs: 4, radius: "15", weight: String(weight),
+    }).recommendedWire;
+
+    for (const [from, to, at] of SWITCHES) {
+        const below = wireAt(at - 1);
+        const above = wireAt(at);
+
+        if (below !== from) {
+            fails.push(`at ${at - 1} lb the reference is still on ${from}", we pick ${below}"`);
+        }
+
+        if (above !== to) {
+            fails.push(`at ${at} lb the reference moves to ${to}", we pick ${above}"`);
+        }
+    }
+
+    return fails;
+}
+
 export const INVARIANTS = [
     { name: "cycle life / wire choice is independent of door height", run: heightIndependence },
     { name: "cycle life / wire choice is independent of track radius", run: radiusIndependence },
@@ -750,4 +797,5 @@ export const INVARIANTS = [
     { name: "no Duplex output depends on the Wire Size dropdown", run: duplexIgnoresWireDropdown },
     { name: "the price column adds up and scales per spring", run: priceAddsUp },
     { name: "Single assembly length matches the reference's width brackets", run: singleAssemblyBrackets },
+    { name: "the Single wire steps where the reference steps", run: singleWireSwitches },
 ];

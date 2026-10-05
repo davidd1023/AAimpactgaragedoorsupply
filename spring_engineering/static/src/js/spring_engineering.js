@@ -830,9 +830,32 @@ function radiusTurnDrop(drumName, radius, heightFeet) {
 // the template - the auto-selection below walks this list and picks the first
 // entry that meets the cycle target, so a size present in one and not the
 // other would either be unreachable or offered and never chosen.
+// 0.2" IS NOT ON THIS LADDER, and its absence is measured rather than assumed.
+// Across 10,545 springs the reference has quoted, it has used 35 distinct wire
+// sizes and 0.2" is not one of them, while both of its neighbours are ordinary:
+//
+//     0.1875"  25 times      0.2"      0 times
+//     0.192"   19 times      0.207"   66 times
+//
+// A size that never appears between two that do is not a sampling gap. It is
+// also observed directly: on a 4-spring 575-120 door at 60" hi-lift, stepping
+// the weight a pound at a time, the reference goes straight from 0.192" to
+// 0.207" at 180 lb. We stopped at 0.2" on the way and so quoted a wire the
+// reference does not sell, with the spring length and now the price that go
+// with it.
+//
+// THE REST OF THE LADDER IS CONFIRMED BY THE SAME SWEEP. Seven of the eight
+// switch weights in it already matched to the pound - 129, 144, 169, 222, 259,
+// 282 and 314 - so the cycle model that chooses the wire was never the
+// problem. 0.2" was the only rung that did not belong.
+//
+// The six sizes below 0.17" have never been seen either, but they sit BELOW
+// the thinnest the reference has ever returned rather than inside the range,
+// so their absence is as easily explained by no door being that light. They
+// stay until something measures them.
 const WIRE_SIZES = [
     0.125, 0.135, 0.142, 0.1483, 0.1562, 0.162, 0.17, 0.177, 0.1875, 0.192,
-    0.2, 0.207, 0.2187, 0.2253, 0.2343, 0.2437, 0.25, 0.2625, 0.273, 0.283,
+    0.207, 0.2187, 0.2253, 0.2343, 0.2437, 0.25, 0.2625, 0.273, 0.283,
     0.289, 0.295, 0.3065, 0.3125, 0.3195, 0.331, 0.3437, 0.3625, 0.375,
     0.3938, 0.4062, 0.4218, 0.4305, 0.4375, 0.4531, 0.4615, 0.4687, 0.49,
     0.5, 0.5312, 0.5625, 0.625,
@@ -1983,11 +2006,14 @@ const STEEL_PRICE_PER_LB = 1.46;
 // 6" is not a size of its own here: it takes the 5 1/4" price. The three
 // Single diameters are the three that were quoted to us, and 6" appears only
 // as the outer half of a Duplex pair.
+//
+// UNINSTALLED prices, quoted 2026-10-05. They replace an earlier set (6.04,
+// 12.00, 20.00) which was a little higher at every size.
 const CONE_PRICES = {
-    2.625: 6.04,
-    3.75: 12.0,
-    5.25: 20.0,
-    6: 20.0,
+    2.625: 4.99,
+    3.75: 11.55,
+    5.25: 19.43,
+    6: 19.43,
 };
 
 // Shown once, as its own message, whenever any warning is raised.
