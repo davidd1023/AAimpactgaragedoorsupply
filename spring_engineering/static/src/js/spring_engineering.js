@@ -1975,7 +1975,28 @@ function duplexPairBuildable(pair, outerWire, innerWire, measured = false) {
 // assembly at 106.27" where 28.5 puts it at 110.88". A missing too-long
 // warning is the dangerous direction - it quotes a spring that will not fit
 // the opening, and now prices it too.
-const ASSEMBLY_HARDWARE = { 1: 16.25, 2: 28.5, 3: 28.5, 4: 32 };
+// REFINED AGAINST EVERY TOO-LONG OBSERVATION, 5,643 of them across both
+// assemblies, both lifts and all four counts. The reference warns iff the
+// assembly exceeds the width, so each reading is a one-sided bound on the
+// hardware, and the two-spring bounds close to (27.91, 28.14]:
+//
+//   springs   bounds from 5,643 readings   agreement at 28.5   at 28
+//      1          inconsistent              2174/2178          same
+//      2          (27.91, 28.14]            1533/1544          1544/1544
+//      3          (27.95, 28.58]             942/942            942/942
+//      4          (31.94, 32.07]             979/979            979/979
+//
+// 28.5 sat just outside the two-spring window, which is what the eleven
+// false too-long warnings were: every one of them overshot by between 0.12"
+// and 0.45", a boundary case rather than a wrong model. 28 is inside both the
+// two- and three-spring windows, so one value still serves both.
+//
+// ONE SPRING IS LEFT AT 16.25. Its bounds do not close - some reading wants
+// more than 15.71 and another no more than 13.80 - so a single constant
+// cannot satisfy them and the residue is a fault somewhere else in the
+// one-spring path. 16.25 already agrees on 2,174 of 2,178; the best possible
+// constant gets 2,176, which is not worth moving for.
+const ASSEMBLY_HARDWARE = { 1: 16.25, 2: 28, 3: 28, 4: 32 };
 
 // The ceiling on the cycle formula itself. Past this the reference stops
 // trusting its own answer rather than reporting a larger number, so this is a
@@ -2230,8 +2251,20 @@ get turnsExact() {
     );
 }
 
+// ONE DECIMAL, because that is what the reference prints and what the user
+// is comparing against. Across 4,712 readings it gives turns to a tenth -
+// 11.2, never 11.18 - and TIPPT the same. Showing two decimals made our
+// figures disagree with the website almost everywhere even when the
+// arithmetic underneath was identical: turns matched in 245 of 4,210 Duplex
+// readings at two decimals and 4,085 at one.
+//
+// DISPLAY ONLY, both of these. Nothing computes from them - cycles come from
+// turnsExact and tipptExact and reproduce the reference's own figure on all
+// 288 Single readings we hold, so rounding the inputs to a tenth before
+// computing would be a different change and a worse one: measured, it drops
+// that agreement from 288/288 to 145/288.
 get turns() {
-    return Math.round(this.turnsExact * 100) / 100;
+    return Math.round(this.turnsExact * 10) / 10;
 }
 
 // The Wire Size dropdown. Hidden on Duplex, where the outer and inner
@@ -2321,8 +2354,8 @@ get tipptExact() {
 }
 
 get tippt() {
-    // Display only. Nothing computes from this - see springLengthExact.
-    return Math.round(this.tipptExact * 100) / 100;
+    // Display only, to one decimal - see `turns` above.
+    return Math.round(this.tipptExact * 10) / 10;
 }
 
 get wireSizeNumber() {
