@@ -640,3 +640,59 @@ the thing it compensates for is fixed.
 
 The grid is also now stated rather than fitted: 1 spring whole, 3 and 4 whole
 plus a quarter, 2 springs whichever of the two is nearer.
+
+## Chasing the exact inch: everything tried
+
+`dev/variants.mjs` fits each candidate on the training pulls and scores it on
+the readings the reference answers WITHOUT a message - the ones that get
+ordered. Those are the only numbers below that mean anything; the in-sample
+column is there to show how misleading it is.
+
+| variant | in sample | CLEAN external |
+|---|---|---|
+| **A  sMult per rung** (shipped) | 90.7% | **84.6%** |
+| B  sMult per (rung, spring count) | 88.4% | 71.5% |
+| C  sMult + an integer shift per rung | 92.0% | 83.4% |
+| D  sMult + additive inches per rung | **94.0%** | 82.3% |
+| E  per-spring-count offsets as well | 90.5% | 84.7% |
+| F  one global sMult from the wire ratio | 80.9% | 59.8% |
+| G  per rung, geometry formula as fallback | 90.9% | 84.6% |
+| H  fitted on clean readings only | 69.4% | 83.2% |
+
+D fits best and generalises third-worst. Every attempt to add freedom lost, and
+so did every attempt to remove it.
+
+F is the interesting failure. `sMult` correlates strongly with the wire
+geometry - r = **-0.9256** against the outer/inner wire ratio, -0.9008 against
+the stress balance, +0.9175 against the inner spring's share of the stiffness -
+so the divider formula is wrong as a smooth function of the pair. But replacing
+43 fitted numbers with that one line drops the clean score from 84.6% to 59.8%,
+so the per-rung values carry real information the trend does not.
+
+### The two-spring grid, and where it stops
+
+At two springs the reference lands on .0 for 808 readings and .25 for 402.
+Sorting ONE rung by active length shows two parallel rules about an inch apart,
+interleaved:
+
+| active | ref length | offset |
+|---|---|---|
+| 14.18-14.45 | 15.25 | +1.0 |
+| 14.84-15.00 | 15 | +0.05 |
+| 15.14-15.55 | 16.25 | +1.0 |
+| 15.70-15.97 | 16 | +0.05 |
+
+Which rule applies is predicted by the **rung** at 87.2% and by nothing else:
+drum 69.7%, radius 66.9%, target 66.8%, lift 66.8%, turns 66.8%, height band
+66.8%, floor parity 66.8% - every one of those is just the .0 base rate, so
+they predict nothing at all. Weight band reaches 80.5% on 37 buckets, which is
+memorising.
+
+Two readings of it were tested and rejected: a per-rung crossover LENGTH scored
+91.0% in sample against 86.4% for a fixed offset, and 87.9% external against
+89.1% - overfitting again. And the one-inch gap is not an inner/outer mix-up:
+the reference's outer spring is exactly one inch longer than its inner on all
+402 readings of the high rule and all 808 of the low one.
+
+So roughly one two-spring reading in seven still varies within its rung with no
+explanation found.
