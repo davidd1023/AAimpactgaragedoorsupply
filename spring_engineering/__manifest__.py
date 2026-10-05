@@ -1,6 +1,9 @@
 {
     'name': 'Spring Engineering',
-    'version': '1.0',
+    # Odoo's convention is <series>.<major>.<minor>.<patch>. It was a bare
+    # '1.0', which tells a deployment nothing about which series it belongs to
+    # and never changes, so an upgrade had no version to compare against.
+    'version': '19.0.1.1.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
