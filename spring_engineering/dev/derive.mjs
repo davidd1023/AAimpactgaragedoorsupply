@@ -911,6 +911,18 @@ function fitSplit(ls) {
 // which genuinely does take four bonus values, so this was aimed straight at
 // it - does not move at all. Added freedom that does not improve the honest
 // score is not worth carrying.
+//
+// RE-MEASURED 2026-10-05, after the fitter stopped requiring the bands to run
+// in bonus order and gained a 3% error budget - both of which let far more
+// groups take a line, so the old measurement could no longer be assumed:
+//
+//                    clean    within 1"   flagged
+//       2 levels      94.7%     99.1%      83.1%
+//       3 levels      94.7%     99.1%      82.5%
+//
+// Identical on the readings that get ordered and half a point worse on the
+// flagged ones, with 68 bands against 71 - so the extra freedom buys three
+// bands' worth of tidiness and costs accuracy. Still 2.
 const LINE_LEVELS = Number(process.env.LINE_LEVELS || 2);
 
 function fitLine(ls) {
@@ -1062,7 +1074,22 @@ function fitLineAnyLevels(ls, maxLevels) {
         best = { bad, b, a: cuts.map(cutAt) };
     }
 
-    if (!best || best.bad !== 0) {
+    // A LINE THAT GETS 98 OF 100 RIGHT IS STILL A BETTER MODEL THAN 42 BANDS.
+    //
+    // This demanded a PERFECT fit, which is reasonable on a group of twelve
+    // readings and brittle on one of two hundred: a single anomalous reading
+    // was enough to reject the line and send the group to a band table that
+    // then memorised the anomaly along with everything else. Same failure as
+    // the straggler rule above, one level down.
+    //
+    // The budget is 3% of the group, so small groups still need to be exact
+    // (under 34 readings the allowance rounds to zero) and large ones are
+    // allowed a couple of misfits. The caller still cross-validates the line
+    // against the bands and keeps the bands unless the line predicts better
+    // out of sample, so this cannot trade accuracy for tidiness.
+    const budget = Math.floor(used.length * Number(process.env.LINE_SLACK || 0.03));
+
+    if (!best || best.bad > budget) {
         return null;
     }
 
