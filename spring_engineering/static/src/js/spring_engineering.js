@@ -3741,6 +3741,26 @@ get warnings() {
             // like the accept fraction for so long - it was the warning
             // threshold all along.
 
+            // THE 96" MESSAGE IS NOT MODELLED, deliberately. The reference
+            // also says "Only spring lengths between 0 and 96\" are
+            // recommended" - 231 times across the readings here, and 57
+            // readings carry it. It looks like a softer version of the
+            // warning below and it is tempting to add as a caution.
+            //
+            // It is not about the spring being quoted. One reading gets it
+            // twice while the assembly it returns is 84.25" - comfortably
+            // inside 96 - and the number of copies (2, 3, 4, 6) tracks
+            // neither the length nor the spring count. The warning below
+            // behaves the same way: one reading carries it six times.
+            //
+            // So these are per-CANDIDATE diagnostics from the reference's own
+            // walk up the wire ladder, one per size it considered and threw
+            // out, not a statement about the answer. Keying a warning on the
+            // final length would fire it on doors the reference is perfectly
+            // happy with. Reproducing them properly would mean reproducing
+            // its search order and echoing its internal rejections, which is
+            // not information the person quoting a door needs.
+            //
             // The outer spring is the longer of the two, so it is the one
             // that can run past what is supported.
             if (this.duplexOuterLength > DUPLEX_MAX_SPRING_LENGTH) {
