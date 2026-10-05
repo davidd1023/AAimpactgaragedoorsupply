@@ -268,6 +268,39 @@ for (const g of rungs.values()) {
 
         l.frac = l.active - whole;
         l.bonus = Number((l.length - whole).toFixed(2));
+
+        // ONLY READINGS THE BAND MODEL CAN REPRESENT. The stiffness fit above
+        // already drops the over-120" readings the reference refuses to build,
+        // but the band fitter was still shown every one of them, and it duly
+        // memorised them: the shipped table carried bonuses of -24.25, +7 and
+        // -8.75 inches. Those are not rounding corrections. They are single
+        // readings where the active length is wildly wrong, written into a
+        // frac band that then answers for every unseen door landing in the
+        // same sliver of frac.
+        //
+        // Two conditions, both from the reference's own behaviour:
+        //
+        //   ON THE LATTICE. Every length the reference quotes is a whole inch
+        //   or a whole inch plus a quarter - 1178 of 1178 springs across the
+        //   external samples, inner and outer alike, with .5 and .75 appearing
+        //   only in the runaway cases excluded here. The bonus is measured
+        //   from an integer floor, so its own fraction must be 0 or 0.25.
+        //
+        //   WITHIN REACH. A bonus is the gap between the reference's length
+        //   and our floor; one bigger than 1.25" is not a grid offset, it is
+        //   the model being wrong by inches.
+        //
+        // Pruning these lifted the external clean length from 90.3% to 91.2%
+        // and within-1" from 97.9% to 98.6%, with flagged readings up too, so
+        // this is not a trade.
+        const bonusFrac = ((l.bonus % 1) + 1) % 1;
+
+        l.ok =
+            l.rawActive > 0 &&
+            l.length > 0 &&
+            l.length <= 120 &&
+            Math.abs(l.bonus) <= 1.25 &&
+            (bonusFrac < 1e-9 || Math.abs(bonusFrac - 0.25) < 1e-9);
     }
 }
 
@@ -1108,7 +1141,7 @@ const out = [...rungs.values()]
         const byCount = {};
 
         for (const sp of [1, 2, 3, 4]) {
-            const ls = g.lens.filter((l) => l.springs === sp);
+            const ls = g.lens.filter((l) => l.springs === sp && l.ok);
 
             if (!ls.length) {
                 continue;
