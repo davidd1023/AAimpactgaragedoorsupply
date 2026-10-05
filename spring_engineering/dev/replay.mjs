@@ -161,12 +161,44 @@ function runCorpus(mod) {
     }
 
     let failedReadings = 0;
+    let outOfRange = 0;
+
+    // WHAT THE MODEL CLAIMS, AND NOTHING MORE. The reference will not build a
+    // spring outside 0-120" - it answers "Only spring lengths between 0 and
+    // 120\" are supported" and then prints a number anyway, which in this
+    // corpus runs to 2,177". dev/derive.mjs has always refused to FIT those
+    // readings, for the good reason that they are the furthest from any grid
+    // and outvote the real ones. Asserting them here anyway left 28 readings
+    // that could never pass, so the suite reported a failing section
+    // permanently - and a suite that is always red hides the regression it
+    // exists to catch.
+    //
+    // The WIRE is still asserted on these: picking the pairing is a separate
+    // claim from quoting its length, the reference's own choice is meaningful
+    // whatever length comes out, and those readings stay in the fit for
+    // exactly that reason. Only the length and the weight derived from it are
+    // let go.
+    const LENGTH_FIELDS = /Length$|Weight$/;
+    const buildable = (r) => {
+        const l = r.expect?.duplexInnerLength;
+
+        return l === undefined || (l > 0 && l <= 120);
+    };
 
     for (const reading of usable) {
         const component = make(mod, reading.state);
+        const inRange = buildable(reading);
         let ok = true;
 
+        if (!inRange) {
+            outOfRange++;
+        }
+
         for (const [key, want] of Object.entries(reading.expect)) {
+            if (!inRange && LENGTH_FIELDS.test(key)) {
+                continue;
+            }
+
             const got = component[key];
             const matches =
                 typeof want === "number"
@@ -193,6 +225,13 @@ function runCorpus(mod) {
         `  ${usable.length - failedReadings}/${usable.length} verified reading(s) reproduced` +
         (extra ? `  (plus ${extra} - not asserted)` : "")
     );
+
+    if (outOfRange) {
+        console.log(
+            `  ${outOfRange} of those are past the reference's own 120" limit, ` +
+            "so their length and weight are not asserted - only the wire"
+        );
+    }
 
     return failedReadings ? 1 : 0;
 }
