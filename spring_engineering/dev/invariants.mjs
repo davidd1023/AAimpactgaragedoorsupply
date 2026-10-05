@@ -395,6 +395,66 @@ function heightClamped(mod) {
 // If someone later makes the cycle count accurate enough to separate the two
 // groups, this invariant is the thing to delete - deliberately, with the
 // measurement redone.
+// Each warning's severity must match the one the REFERENCE gives it.
+//
+// Severity was set by how serious each message sounded, and four were wrong in
+// one direction and one in the other. The reference settles it: its JSON
+// carries a status per response, so the responses with exactly ONE message
+// give that message's own severity. Cone capacity (175 responses), both wire
+// bands (155 and 28) and both cycle-life messages (154 and 89) all come back
+// "warning"; assembly-too-long (316), spring-length-unsupported and
+// height-over-drum (22) come back "error".
+//
+// Getting this wrong is not cosmetic: red on a pairing the supplier will still
+// sell, and amber on a door too tall for the drum, both mislead a quote.
+const REFERENCE_SEVERITY = {
+    "duplex-mip-over-max": "yellow",
+    "duplex-inner-wire-unsold": "yellow",
+    "duplex-outer-wire-unsold": "yellow",
+    "duplex-cycles-over-max": "yellow",
+    "duplex-cycles-low": "yellow",
+    "weight-over-max": "yellow",
+    "assembly-too-long": "red",
+    "duplex-length-unsupported": "red",
+    "height-over-max": "red",
+};
+
+function severityMatchesReference(mod) {
+    const fails = [];
+    const seen = new Map();
+
+    for (const drum of Object.keys(mod.DRUM_LIMITS)) {
+        for (const springs of [1, 2, 3, 4]) {
+            for (const weight of [300, 700, 1200, 1600, 2200]) {
+                for (const doorHeightFeet of [7, 9, 14, 20]) {
+                    for (const cycles of ["10,000", "300,000"]) {
+                        const c = duplex(mod, {
+                            drum, springs, weight: String(weight),
+                            doorHeightFeet, cycles,
+                        });
+
+                        for (const w of c.warnings || []) {
+                            if (!seen.has(w.id)) {
+                                seen.set(w.id, w.severity);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (const [id, want] of Object.entries(REFERENCE_SEVERITY)) {
+        const got = seen.get(id);
+
+        if (got && got !== want) {
+            fails.push(`${id} is ${got}, but the reference calls it ${want}`);
+        }
+    }
+
+    return fails;
+}
+
 // A Duplex result value must carry the warning colour, as the Single ones do.
 //
 // The Duplex results block hardcoded class="se-value" while the Single block
@@ -407,16 +467,21 @@ function heightClamped(mod) {
 // always returned red would pass a one-sided test.
 function duplexValuesCarryWarningColour(mod) {
     const fails = [];
+    // These three moved when the severities were corrected against the
+    // reference, and the invariant caught it - which is the point of checking
+    // every level rather than one.
     const cases = [
         // nothing to report
         { want: "se-value", st: { weight: "400", springs: 2,
             drum: "CANIMEX/TF D525-216", doorHeightFeet: 8 } },
-        // yellow only: taller than the drum allows
-        { want: "se-value se-value-yellow", st: { weight: "280", springs: 2,
-            drum: "CANIMEX/TF D400-96", doorHeightFeet: 12 } },
-        // red: over cone capacity
-        { want: "se-value se-value-red", st: { weight: "1400", springs: 1,
+        // yellow: over cone capacity and past both wire bands, all of which
+        // the reference calls warnings - the springs are still sellable
+        { want: "se-value se-value-yellow", st: { weight: "1400", springs: 1,
             drum: "CANIMEX/TF D525-216", doorHeightFeet: 8 } },
+        // red: taller than the drum will take, which the reference calls an
+        // error because it has to clamp the height to answer at all
+        { want: "se-value se-value-red", st: { weight: "280", springs: 2,
+            drum: "CANIMEX/TF D400-96", doorHeightFeet: 12 } },
     ];
 
     for (const c of cases) {
@@ -543,6 +608,7 @@ export const INVARIANTS = [
     { name: "generated inner wire stays inside the spring ID's band", run: wireBand },
     { name: "the weight used never exceeds the drum's rating", run: weightClamped },
     { name: "the door height used never exceeds the drum's nameplate", run: heightClamped },
+    { name: "each warning's severity matches the reference", run: severityMatchesReference },
     { name: "Duplex result values carry the warning colour", run: duplexValuesCarryWarningColour },
     { name: "the cycles-low flag stays a caution, not a verdict", run: cyclesLowStaysCaution },
     { name: "Duplex raises no Wire-Size-dropdown warning", run: noStaleWireWarnings },

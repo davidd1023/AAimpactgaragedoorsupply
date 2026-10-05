@@ -358,7 +358,7 @@
    "springWeight": 13.03,
    "assemblyLengthExact": 102.617068922,
    "assemblyLength": 102.62,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -391,7 +391,7 @@
    "springWeight": 13.03,
    "assemblyLengthExact": 102.617068922,
    "assemblyLength": 102.62,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -457,7 +457,7 @@
    "springWeight": 13.47,
    "assemblyLengthExact": 105.1869100135,
    "assemblyLength": 105.19,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -490,7 +490,7 @@
    "springWeight": 13.47,
    "assemblyLengthExact": 105.1869100135,
    "assemblyLength": 105.19,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -556,7 +556,7 @@
    "springWeight": 12.33,
    "assemblyLengthExact": 98.688111818,
    "assemblyLength": 98.69,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -589,7 +589,7 @@
    "springWeight": 12.33,
    "assemblyLengthExact": 98.688111818,
    "assemblyLength": 98.69,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -1546,7 +1546,7 @@
    "springWeight": 13.2,
    "assemblyLengthExact": 80.7502023477,
    "assemblyLength": 80.75,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -1579,7 +1579,7 @@
    "springWeight": 13.2,
    "assemblyLengthExact": 80.7502023477,
    "assemblyLength": 80.75,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -1645,7 +1645,7 @@
    "springWeight": 13.58,
    "assemblyLengthExact": 82.5817810092,
    "assemblyLength": 82.58,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -1678,7 +1678,7 @@
    "springWeight": 13.58,
    "assemblyLengthExact": 82.5817810092,
    "assemblyLength": 82.58,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -1744,7 +1744,7 @@
    "springWeight": 12.57,
    "assemblyLengthExact": 77.9499537185,
    "assemblyLength": 77.95,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -1777,7 +1777,7 @@
    "springWeight": 12.57,
    "assemblyLengthExact": 77.9499537185,
    "assemblyLength": 77.95,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2437,7 +2437,7 @@
    "springWeight": 26.07,
    "assemblyLengthExact": 102.617068922,
    "assemblyLength": 102.62,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2470,7 +2470,7 @@
    "springWeight": 26.07,
    "assemblyLengthExact": 102.617068922,
    "assemblyLength": 102.62,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2536,7 +2536,7 @@
    "springWeight": 26.94,
    "assemblyLengthExact": 105.1869100135,
    "assemblyLength": 105.19,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2569,7 +2569,7 @@
    "springWeight": 26.94,
    "assemblyLengthExact": 105.1869100135,
    "assemblyLength": 105.19,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2635,7 +2635,7 @@
    "springWeight": 24.67,
    "assemblyLengthExact": 98.688111818,
    "assemblyLength": 98.69,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2668,7 +2668,7 @@
    "springWeight": 24.67,
    "assemblyLengthExact": 98.688111818,
    "assemblyLength": 98.69,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2734,7 +2734,7 @@
    "springWeight": 13.47,
    "assemblyLengthExact": 66.6929309785,
    "assemblyLength": 66.69,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2767,7 +2767,7 @@
    "springWeight": 13.47,
    "assemblyLengthExact": 66.6929309785,
    "assemblyLength": 66.69,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2833,7 +2833,7 @@
    "springWeight": 13.82,
    "assemblyLengthExact": 68.0499123636,
    "assemblyLength": 68.05,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2866,7 +2866,7 @@
    "springWeight": 13.82,
    "assemblyLengthExact": 68.0499123636,
    "assemblyLength": 68.05,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2932,7 +2932,7 @@
    "springWeight": 12.77,
    "assemblyLengthExact": 64.6182806545,
    "assemblyLength": 64.62,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -2965,7 +2965,7 @@
    "springWeight": 12.77,
    "assemblyLengthExact": 64.6182806545,
    "assemblyLength": 64.62,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -3625,7 +3625,7 @@
    "springWeight": 26.09,
    "assemblyLengthExact": 92.9078424508,
    "assemblyLength": 92.91,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -3658,7 +3658,7 @@
    "springWeight": 26.09,
    "assemblyLengthExact": 92.9078424508,
    "assemblyLength": 92.91,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -3724,7 +3724,7 @@
    "springWeight": 26.9,
    "assemblyLengthExact": 95.1498836216,
    "assemblyLength": 95.15,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -3757,7 +3757,7 @@
    "springWeight": 26.9,
    "assemblyLengthExact": 95.1498836216,
    "assemblyLength": 95.15,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -3823,7 +3823,7 @@
    "springWeight": 24.88,
    "assemblyLengthExact": 89.4800493414,
    "assemblyLength": 89.48,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -3856,7 +3856,7 @@
    "springWeight": 24.88,
    "assemblyLengthExact": 89.4800493414,
    "assemblyLength": 89.48,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -3922,7 +3922,7 @@
    "springWeight": 13.55,
    "assemblyLengthExact": 61.8383177429,
    "assemblyLength": 61.84,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -3955,7 +3955,7 @@
    "springWeight": 13.55,
    "assemblyLengthExact": 61.8383177429,
    "assemblyLength": 61.84,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -4021,7 +4021,7 @@
    "springWeight": 13.96,
    "assemblyLengthExact": 63.0313991677,
    "assemblyLength": 63.03,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -4054,7 +4054,7 @@
    "springWeight": 13.96,
    "assemblyLengthExact": 63.0313991677,
    "assemblyLength": 63.03,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -4120,7 +4120,7 @@
    "springWeight": 12.95,
    "assemblyLengthExact": 60.0142494162,
    "assemblyLength": 60.01,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -4153,7 +4153,7 @@
    "springWeight": 12.95,
    "assemblyLengthExact": 60.0142494162,
    "assemblyLength": 60.01,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6001,7 +6001,7 @@
    "springWeight": 25.97,
    "assemblyLengthExact": 75.7516896027,
    "assemblyLength": 75.75,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6034,7 +6034,7 @@
    "springWeight": 25.97,
    "assemblyLengthExact": 75.7516896027,
    "assemblyLength": 75.75,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6100,7 +6100,7 @@
    "springWeight": 26.79,
    "assemblyLengthExact": 77.4482717056,
    "assemblyLength": 77.45,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6133,7 +6133,7 @@
    "springWeight": 26.79,
    "assemblyLengthExact": 77.4482717056,
    "assemblyLength": 77.45,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6199,7 +6199,7 @@
    "springWeight": 24.6,
    "assemblyLengthExact": 73.1578333803,
    "assemblyLength": 73.16,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6232,7 +6232,7 @@
    "springWeight": 24.6,
    "assemblyLengthExact": 73.1578333803,
    "assemblyLength": 73.16,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6298,7 +6298,7 @@
    "springWeight": 13.39,
    "assemblyLengthExact": 52.7602413188,
    "assemblyLength": 52.76,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6331,7 +6331,7 @@
    "springWeight": 13.39,
    "assemblyLengthExact": 52.7602413188,
    "assemblyLength": 52.76,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6397,7 +6397,7 @@
    "springWeight": 13.94,
    "assemblyLengthExact": 53.6805932096,
    "assemblyLength": 53.68,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6430,7 +6430,7 @@
    "springWeight": 13.94,
    "assemblyLengthExact": 53.6805932096,
    "assemblyLength": 53.68,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6496,7 +6496,7 @@
    "springWeight": 12.85,
    "assemblyLengthExact": 51.3531414357,
    "assemblyLength": 51.35,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -6529,7 +6529,7 @@
    "springWeight": 12.85,
    "assemblyLengthExact": 51.3531414357,
    "assemblyLength": 51.35,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -8707,7 +8707,7 @@
    "springWeight": 18.36,
    "assemblyLengthExact": 102.8114227365,
    "assemblyLength": 102.81,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -8806,7 +8806,7 @@
    "springWeight": 18.61,
    "assemblyLengthExact": 104.4243466086,
    "assemblyLength": 104.42,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -8905,7 +8905,7 @@
    "springWeight": 17.73,
    "assemblyLengthExact": 100.2659586818,
    "assemblyLength": 100.27,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -9895,7 +9895,7 @@
    "springWeight": 18.54,
    "assemblyLengthExact": 83.0499677259,
    "assemblyLength": 83.05,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -9994,7 +9994,7 @@
    "springWeight": 18.89,
    "assemblyLengthExact": 84.2452120241,
    "assemblyLength": 84.25,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -10093,7 +10093,7 @@
    "springWeight": 18.02,
    "assemblyLengthExact": 81.1636720053,
    "assemblyLength": 81.16,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -11083,7 +11083,7 @@
    "springWeight": 18.61,
    "assemblyLengthExact": 76.2254412207,
    "assemblyLength": 76.23,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -11182,7 +11182,7 @@
    "springWeight": 19.01,
    "assemblyLengthExact": 77.2764418222,
    "assemblyLength": 77.28,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -11281,7 +11281,7 @@
    "springWeight": 18,
    "assemblyLengthExact": 74.5667862161,
    "assemblyLength": 74.57,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -13162,7 +13162,7 @@
    "springWeight": 36.08,
    "assemblyLengthExact": 96.1903866446,
    "assemblyLength": 96.19,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -13261,7 +13261,7 @@
    "springWeight": 36.9,
    "assemblyLengthExact": 97.6845038823,
    "assemblyLength": 97.68,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -13360,7 +13360,7 @@
    "springWeight": 34.99,
    "assemblyLengthExact": 93.8324193605,
    "assemblyLength": 93.83,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -13459,7 +13459,7 @@
    "springWeight": 18.59,
    "assemblyLengthExact": 63.8694291162,
    "assemblyLength": 63.87,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -13558,7 +13558,7 @@
    "springWeight": 18.86,
    "assemblyLengthExact": 64.6804082063,
    "assemblyLength": 64.68,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -13657,7 +13657,7 @@
    "springWeight": 17.77,
    "assemblyLengthExact": 62.5895682629,
    "assemblyLength": 62.59,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },
@@ -22995,7 +22995,7 @@
    "springWeight": 16.44,
    "assemblyLengthExact": 75.4773118936,
    "assemblyLength": 75.48,
-   "warningLevel": "yellow",
+   "warningLevel": "red",
    "wireSizeVisible": true
   }
  },

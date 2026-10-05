@@ -3427,7 +3427,8 @@ get warnings() {
             if (mip > DUPLEX_MAX_MIP) {
                 found.push({
                     id: "duplex-mip-over-max",
-                    severity: "red",
+                    // 175 single-message responses, all warning.
+                    severity: "yellow",
                     message:
                         "Assembly MIP (" +
                         mip.toFixed(4) +
@@ -3443,7 +3444,8 @@ get warnings() {
             if (innerMax && step.innerWire > innerMax + 1e-9) {
                 found.push({
                     id: "duplex-inner-wire-unsold",
-                    severity: "red",
+                    // 28 responses where every other message was a known warning, all warning.
+                    severity: "yellow",
                     message:
                         "Wire size exceeds " +
                         innerMax +
@@ -3456,7 +3458,8 @@ get warnings() {
             if (outerMax && step.outerWire > outerMax + 1e-9) {
                 found.push({
                     id: "duplex-outer-wire-unsold",
-                    severity: "red",
+                    // 155 single-message responses, all warning.
+                    severity: "yellow",
                     message:
                         "Wire size exceeds " +
                         outerMax +
@@ -3483,7 +3486,8 @@ get warnings() {
             if (cycles > CYCLE_MAX) {
                 found.push({
                     id: "duplex-cycles-over-max",
-                    severity: "red",
+                    // 154 single-message responses, all warning.
+                    severity: "yellow",
                     message:
                         "This combination computes to " +
                         Math.round(cycles).toLocaleString("en-US") +
@@ -3653,7 +3657,10 @@ get warnings() {
         if (heightInches > limits.maxHeight) {
             found.push({
                 id: "height-over-max",
-                severity: "yellow",
+                // 22 single-message responses, all error - the reference
+                // treats a door taller than the drum as a hard stop, not a
+                // caution, and it clamps the height to build anything at all.
+                severity: "red",
                 message:
                     "The current height entered is greater than this drum " +
                     "will allow! The maximum height of this drum is " +
