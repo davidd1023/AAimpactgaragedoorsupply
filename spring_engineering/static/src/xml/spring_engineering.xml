@@ -27,6 +27,7 @@
 
                 <select
                     t-model="state.assembly"
+                    t-on-change="selectAssembly"
                     class="se-select">
 
                     <option value="Single">Single</option>
@@ -148,7 +149,7 @@
                     <t t-if="state.assembly === 'Duplex'">
 
                     <option value='3 3/4" inside 6"'>3 3/4" inside 6"</option>
-                    <option value='2 5/8" inside 5/14"'>2 5/8" inside 5/14"</option>
+                    <option value='2 5/8" inside 5 1/4"'>2 5/8" inside 5 1/4"</option>
                     <option value='3 1/2" inside 5 1/2" (Raynor)'>3 1/2" inside 5 1/2" (Raynor)</option>
                     <option value='3 3/8" inside 5 7/8" (Overhead)'>3 3/8" inside 5 7/8" (Overhead)</option>
 
@@ -1218,9 +1219,10 @@
             </div>
 
             <!-- Wire Size: only meaningful once there is something to
-                 calculate, so it appears with the results. -->
+                 calculate, so it appears with the results - and not at all
+                 on Duplex, which carries a wire size per spring instead. -->
 
-            <t t-if="resultsVisible">
+            <t t-if="wireSizeVisible">
 
             <div class="se-row">
 
@@ -1297,6 +1299,85 @@
 
             <t t-if="resultsVisible">
 
+            <!-- DUPLEX RESULTS. Reverse-engineered from 17 reference
+                 readings - see DUPLEX_PAIRS in the JS for the length rule,
+                 the wire steps and what is measured against bracketed. -->
+
+            <t t-if="state.assembly === 'Duplex'">
+
+            <div class="se-rowR-header">Outer</div>
+
+            <div class="se-rowR">
+                    <span>Wire Size</span>
+                    <span t-att-class="valueClass" t-esc="duplexOuterWire"/>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Spring ID</span>
+                    <span t-att-class="valueClass" t-esc="duplexOuterId"/>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Spring Length</span>
+                    <span t-att-class="valueClass" t-esc="duplexOuterLength.toFixed(2) + '&quot;'"/>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Weight</span>
+                    <span t-att-class="valueClass" t-esc="duplexOuterWeight.toFixed(2) + ' lb'"/>
+            </div>
+
+            <div class="se-rowR-header">Inner</div>
+
+            <div class="se-rowR">
+                    <span>Wire Size</span>
+                    <span t-att-class="valueClass" t-esc="duplexInnerWire"/>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Spring ID</span>
+                    <span t-att-class="valueClass" t-esc="duplexInnerId"/>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Spring Length</span>
+                    <span t-att-class="valueClass" t-esc="duplexInnerLength.toFixed(2) + '&quot;'"/>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Weight</span>
+                    <span t-att-class="valueClass" t-esc="duplexInnerWeight.toFixed(2) + ' lb'"/>
+            </div>
+
+            <div class="se-rowR-header">Other</div>
+
+            <div class="se-rowR">
+                    <span>Cycles</span>
+                    <span t-att-class="valueClass" t-esc="duplexCycles"/>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Multiplier</span>
+                    <span t-att-class="valueClass" t-esc="multiplier"/>
+            </div>
+
+            <div class="se-rowR-split">
+                <div class="se-rowR">
+                    <span>Turns</span>
+                    <span t-att-class="valueClass" t-esc="turns"/>
+                </div>
+                <div class="se-rowR">
+                    <span>TIPPT</span>
+                    <span t-att-class="valueClass" t-esc="tippt"/>
+                </div>
+            </div>
+
+            </t>
+
+            <t t-else="">
+
+            <!-- Single and Triplex: unchanged. -->
+
             <!-- Results Spring ID -->
 
             <div class="se-rowR">
@@ -1344,6 +1425,39 @@
             <div class="se-rowR">
                 <span>TIPPT</span>
                 <span t-att-class="valueClass" t-esc="tippt"/>
+            </div>
+
+            </t>
+
+            <!-- PRICE. Inside the results gate, so it appears only once there
+                 is a spring to price - a quote built from a missing drum or a
+                 zero weight would read as labour plus cones and look like an
+                 answer. The values carry valueClass for the same reason the
+                 results above them do: a price computed from a spring the
+                 reference would refuse should not read as settled. -->
+
+            <div class="se-divider"/>
+
+            <div class="se-rowR-header">Price</div>
+
+            <div class="se-rowR">
+                    <span>Labor</span>
+                    <span t-att-class="valueClass" t-esc="money(priceLabor)"/>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Cones</span>
+                    <span t-att-class="valueClass" t-esc="money(priceCones)"/>
+            </div>
+
+            <div class="se-rowR">
+                    <span>Spring Steel</span>
+                    <span t-att-class="valueClass" t-esc="money(priceSteel)"/>
+            </div>
+
+            <div class="se-rowR se-rowR-total">
+                    <span>Total</span>
+                    <span t-att-class="valueClass" t-esc="money(priceTotal)"/>
             </div>
 
             </t>
@@ -1417,6 +1531,9 @@
             <div class="se-clear-row">
                 <button class="se-clear" t-on-click="clearAll">
                     Clear
+                </button>
+                <button class="se-add-cart" t-on-click="addToCart">
+                    Add to Cart
                 </button>
             </div>
 

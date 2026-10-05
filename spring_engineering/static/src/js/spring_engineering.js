@@ -119,6 +119,24 @@ const STEEL_DENSITY = 0.2836;   // lb/in^3
 // and the door height does not enter. So raising the door LOWERS the multiplier
 // and RAISES the turns, leaving peak torque, and therefore the CYCLE COUNT,
 // unchanged. Only TIPPT and spring length move with height.
+// rEff IS THE DRUM'S MOMENT ARM. These were fitted, and the reference's own
+// drum record confirms what they are:
+// GET /spring-engineering/drum?drumName=... returns highMomentArm, and it
+// agrees with every fitted value to the precision it publishes -
+//
+//   D400-96    fitted 2.2753521   record 2.275
+//   D400-144   fitted 2.2933549   record 2.293
+//   D525-216   fitted 2.9364545   record 2.936
+//
+// so these are geometry, not curve-fitting artefacts. The fitted figures are
+// kept because they carry four more digits than the record publishes.
+//
+// turnsCurve is NOT in the record and cannot be derived from it. The record's
+// `circumference` gives turns to about a tenth of a turn - turns is roughly
+// height/circumference plus one, the extra turn being the spiral first wrap -
+// and a tenth of a turn is a 1% multiplier error where this file holds 2e-5.
+// Good enough to offer an unmeasured drum with a warning; not good enough to
+// match the reference.
 const DRUMS = {
     "CANIMEX/TF D400-144": {
         rEff: 2.2933549,
@@ -216,6 +234,18 @@ const HILIFT_MIN = 12;
 // The spiral is the drum's own, recovered from its 100 lb cycle counts. Its
 // pitch of 0.313097" is the same constant the 525-54HL and D800-120 use, to
 // seven figures - the calculator applies one pitch across hi-lift drums.
+// The hi-lift spiral constants are the record's geometry too:
+// spiralA is flatMomentArm squared and spiralB is rateOfRise/pi.
+//
+//   575-120    A 8.8176917   record 2.969^2 = 8.814961
+//   525-54HL   A 7.3952515   record 2.719^2 = 7.392961
+//   D800-120   A 17.015618   record 4.125^2 = 17.015625  (seven figures)
+//   all        B ~0.09966    record 0.313/pi = 0.0996310
+//
+// HL800_A below is deliberately 17.0209238 rather than the record's 17.015625:
+// the record publishes the catalogue nominal and the calculator behaves like
+// r0 = 4.1256. HL800_NODE_A carries the catalogue value, which is why there are
+// two. Measuring the calculator beat reading the catalogue, and both are kept.
 const HL575_A = 8.8176917;         // r0^2, r0 = 2.96946"
 const HL575_B = 0.099661791;       // pitch/pi, pitch = 0.313097"
 const HL575_MIN = 12;
@@ -647,6 +677,12 @@ function hl800Multiplier(heightFeet, hiLiftInches) {
 const HILIFT_DRUMS = {
     "CANIMEX/TF D800-120": {
         maxHiLift: 120,
+        maxHeight: 384,
+        maxWeight: 2200,
+        // 2200 lb and 384 inches, from the reference's own drum record. The
+        // earlier note here said there was no weight cap because the reference
+        // tracked the entered weight exactly to 2000 lb - which it does, since
+        // 2000 is under 2200. Measuring inside a limit cannot find it.
         catalog: true,
         reff: hl800REff,
         multiplier: hl800Multiplier,
@@ -655,12 +691,16 @@ const HILIFT_DRUMS = {
     // reverse-engineered drums, and why.
     "CANIMEX/TF 575-120": {
         maxHiLift: 120,
+        maxWeight: 1000,
+        maxHeight: 264,
         catalog: true,
         reff: hl575REff,
         multiplier: hl575Multiplier,
     },
     "CANIMEX/TF 525-54HL": {
         maxHiLift: 54,
+        maxWeight: 1000,
+        maxHeight: 234,
         spiralA: 7.3952515,      // r0^2
         spiralB: 0.099661766,    // p/pi
         multCoeffs: [
@@ -790,9 +830,32 @@ function radiusTurnDrop(drumName, radius, heightFeet) {
 // the template - the auto-selection below walks this list and picks the first
 // entry that meets the cycle target, so a size present in one and not the
 // other would either be unreachable or offered and never chosen.
+// 0.2" IS NOT ON THIS LADDER, and its absence is measured rather than assumed.
+// Across 10,545 springs the reference has quoted, it has used 35 distinct wire
+// sizes and 0.2" is not one of them, while both of its neighbours are ordinary:
+//
+//     0.1875"  25 times      0.2"      0 times
+//     0.192"   19 times      0.207"   66 times
+//
+// A size that never appears between two that do is not a sampling gap. It is
+// also observed directly: on a 4-spring 575-120 door at 60" hi-lift, stepping
+// the weight a pound at a time, the reference goes straight from 0.192" to
+// 0.207" at 180 lb. We stopped at 0.2" on the way and so quoted a wire the
+// reference does not sell, with the spring length and now the price that go
+// with it.
+//
+// THE REST OF THE LADDER IS CONFIRMED BY THE SAME SWEEP. Seven of the eight
+// switch weights in it already matched to the pound - 129, 144, 169, 222, 259,
+// 282 and 314 - so the cycle model that chooses the wire was never the
+// problem. 0.2" was the only rung that did not belong.
+//
+// The six sizes below 0.17" have never been seen either, but they sit BELOW
+// the thinnest the reference has ever returned rather than inside the range,
+// so their absence is as easily explained by no door being that light. They
+// stay until something measures them.
 const WIRE_SIZES = [
     0.125, 0.135, 0.142, 0.1483, 0.1562, 0.162, 0.17, 0.177, 0.1875, 0.192,
-    0.2, 0.207, 0.2187, 0.2253, 0.2343, 0.2437, 0.25, 0.2625, 0.273, 0.283,
+    0.207, 0.2187, 0.2253, 0.2343, 0.2437, 0.25, 0.2625, 0.273, 0.283,
     0.289, 0.295, 0.3065, 0.3125, 0.3195, 0.331, 0.3437, 0.3625, 0.375,
     0.3938, 0.4062, 0.4218, 0.4305, 0.4375, 0.4531, 0.4615, 0.4687, 0.49,
     0.5, 0.5312, 0.5625, 0.625,
@@ -852,6 +915,768 @@ const DRUM_INFO = {
     ],
 };
 
+// --- DUPLEX -------------------------------------------------------------
+// A duplex set is two springs wound one inside the other. They are sized
+// together, and the reference calculator reports them separately.
+//
+// REVERSE-ENGINEERED FROM 17 REFERENCE READINGS. Everything here is measured,
+// not derived - see the notes on each piece for what is solid and what is a
+// bracket.
+//
+// THE LENGTH RULE, which took the longest to find:
+//
+//     x = C / TIPPT
+//     round x to the nearest whole inch, TIES GOING DOWN
+//     inner length = that whole inch, PLUS 0.25" if x rounded UP
+//     outer length = inner + 1
+//
+// The 0.25" is not a regime or a fudge: it appears exactly when the rounding
+// goes up and not when it goes down. Two readings a hair apart proved it -
+// at 460 lb x is 15.597 and rounds up to 16.25, at 470 lb x is 15.265 and
+// rounds down to 15.00. A 1.25" step for a 2% change in load, which no smooth
+// formula reproduces. It is also why 2 5/8" inside 5 1/4" never shows a
+// quarter: its x lands on 35.000, 26.250, 21.000 and 17.500, every one of
+// which rounds down or ties.
+//
+// WIRES. Both start at the minimum for their spring ID and step UP together
+// as the load grows: the reference takes the FIRST combination whose cycle
+// count reaches the target, which is what duplexStep below evaluates.
+//
+// This was originally a TIPPT threshold per step, fitted to the 7'0" readings,
+// and it was WRONG. Cycle life depends on torque, which is rate times TURNS,
+// and turns grows with door height - so at 11'2" a door needs a bigger wire
+// than the same TIPPT at 7'0" does. A 572 lb 11'2" door came back one wire
+// size light, at 9,000 cycles against a 10,000 target, with the app's own
+// cycle figure already showing it had missed. Evaluating the target directly
+// has no such blind spot and needs no thresholds at all.
+//
+// C and K are per WIRE COMBINATION, not per spring pair: changing either wire
+// changes both.
+//
+// THEY ARE ALSO PER SPRING COUNT, and every reading behind them was taken at
+// TWO springs. The catalog settles how they scale:
+//
+//     LENGTH OF ACTIVE COILS = SPRING QTY x DIVIDER / IPPT
+//
+// so the active length is PROPORTIONAL to the spring quantity, and C scales
+// with it. K is body length times TIPPT and the body scales the same way, so
+// K does too. Both are therefore multiplied by springs/2 at the point of use
+// - see duplexSpringScale. Before this they were used raw, which meant the
+// spring count changed nothing at all in Duplex. C sets the length, K sets the cycle count (K = body length x
+// TIPPT, recovered by inverting the reported cycles).
+//
+// C IS VERY SLIGHTLY HEIGHT-DEPENDENT, which three heights now expose. For
+// the 0.2625/0.2253 combination the 7'0" readings want C >= 2080.9 while a
+// 350 lb 9'0" door wants C < 2079.5 - a 0.07% disagreement. Tiny, but the
+// length rule rounds to the whole inch, so a reading whose x sits within
+// 0.001 of a rounding boundary can come out a quarter inch either way. One
+// of the 14 readings for that combination does. Every other reading is
+// reproduced exactly, and the chosen C is the value that reproduces the most.
+//
+// COVERAGE AND ACCURACY, measured by replaying all reference readings:
+//
+//   spring IDs, wire sizes, lengths, weights   EXACT on all 20
+//   cycle counts                               13 exact, worst case 3.6% out
+//
+// K IS CONSTANT ACROSS DOOR HEIGHTS. An earlier note here claimed it was not,
+// on the strength of the 7' readings giving 2017 against the 10' one's 2036.
+// That was wrong, and the way it was wrong is worth recording.
+//
+// Six responses straight from the reference's own API - one wire combination,
+// 300 lb, heights 84" to 144" - invert to K = 2020.4, 2021.2, 2024.6, 2022.5,
+// 2026.5, 2025.8. A 0.30% spread, which is constant.
+//
+// The apparent height dependence came from MY TURNS CURVE, not from K: at
+// those heights it runs -0.25% to +0.52% against the reference's own turns,
+// and cycle life goes as turns^-4.67, so half a percent of turns is well over
+// two percent of cycles. The cycle model was never the problem.
+//
+// What is left is bounded at roughly 2-3%, from that turns error plus the
+// reference rounding its own TIPPT and turns to one decimal before using
+// them. Lengths are unaffected and exact.
+//
+// Outside the wire combinations listed, the last step is used and the answer
+// will drift - duplexCalibrated reports which case you are in.
+// C AND tau ARE NO LONGER READ. The length now comes from the catalog formula
+// (see duplexActiveLength), which has no fitted constant, so every C, cSlope,
+// cIntercept and tau below is dead weight. They are KEPT, not deleted, for one
+// reason: if the 0.25" step turns out to be real after all - see the
+// superseded 460/470 lb entries in dev/corpus.json - this is the only record
+// of the fit that produced it. Delete them once that is settled.
+//
+// K IS STILL LIVE. It sets the cycle count, and the cycle model is the part
+// that is still wrong: inverting the reference's own counts needs 3-5% more
+// inner-spring torque than the physical active length gives, and no single
+// factor reconciles all six readings.
+const DUPLEX_PAIRS = {
+    // --- THE CATALOGUE -------------------------------------------------
+    // Seventeen wire pairings, every one of them OBSERVED in a reference
+    // response, with K derived by inverting the reference's own reported cycle
+    // count rather than fitted to a bracket midpoint.
+    //
+    // HOW K IS OBTAINED. For a reading with a reported cycle count,
+    //
+    //     torque = CYCLE_COEFFICIENT * wire^CYCLE_WIRE_EXPONENT
+    //                  / cycles^(1/CYCLE_EXPONENT)
+    //     body   = divider_inner * turns / torque
+    //     K      = body * TIPPT / (springs / 2)
+    //
+    // which is the cycle model run backwards. Where a pairing has several
+    // readings the median is taken and `n` records how many agreed; the spread
+    // column below is how far apart they were, and it is small enough that the
+    // cycle counts are rounded to the nearest thousand and little else:
+    //
+    //     0.2625/0.2253  n=10  spread 0.76%
+    //     0.273/0.2253   n= 9  spread 1.47%
+    //     0.289/0.2343   n= 9  spread 2.05%
+    //     0.375/0.3065   n= 2  spread 0.17%
+    //     0.283/0.2343   n= 2  spread 1.51%
+    //
+    // Pairings with n=1 are a single reading and so carry that reading's
+    // rounding, about 1% in K. They are still far better than what they
+    // replace: the old values were bracket midpoints or a line extrapolated
+    // past its data, and seven of these rungs had no entry at all.
+    //
+    // K/S runs 0.88 to 0.99, so K is close to the physical stiffness but not
+    // equal to it, and the deviation is per pairing - see duplexCyclesForStep.
+    //
+    // C AND tau ARE GONE. Both belonged to the old length rule, which is now
+    // the catalog formula in duplexActiveLength and has no fitted constant.
+    '3 3/4" inside 6"': {
+        innerId: 3.75,
+        outerId: 6,
+        calibration: [
+            { outerWire: 0.2625, innerWire: 0.2253, K: 2025.5, n: 582, sMult: 1.04625, twoOffset: 0.25, byCount: { 2: [{ upTo: 0.194, bonus: 0.25 }, { upTo: 0.2, bonus: 0 }, { upTo: 0.261, bonus: 0.25 }, { upTo: 0.276, bonus: 0 }, { upTo: 0.297, bonus: 0.25 }, { upTo: 0.303, bonus: 0 }, { upTo: 0.365, bonus: 0.25 }, { upTo: 0.367, bonus: 0 }, { upTo: 0.394, bonus: 0.25 }, { upTo: 0.399, bonus: 0 }, { upTo: 0.418, bonus: 0.25 }, { upTo: 0.424, bonus: 0 }, { upTo: 0.428, bonus: 0.25 }, { upTo: 0.435, bonus: 0 }, { upTo: 0.473, bonus: 0.25 }, { upTo: 0.481, bonus: 0 }, { upTo: 0.513, bonus: 0.25 }, { upTo: 0.518, bonus: 0 }, { upTo: 0.522, bonus: 0.25 }, { upTo: 0.533, bonus: 0 }, { upTo: 0.536, bonus: 0.25 }, { upTo: 0.553, bonus: 0 }, { upTo: 0.574, bonus: 0.25 }, { upTo: 0.6, bonus: 0 }, { upTo: 0.606, bonus: 0.25 }, { upTo: 0.616, bonus: 0 }, { upTo: 0.629, bonus: 0.25 }, { upTo: 0.689, bonus: 0 }, { upTo: 0.695, bonus: 0.25 }, { upTo: 0.696, bonus: 0 }, { upTo: 0.699, bonus: 0.25 }, { upTo: 0.705, bonus: 0 }, { upTo: 0.713, bonus: 0.25 }, { upTo: 0.729, bonus: 0 }, { upTo: 0.734, bonus: 1.25 }, { upTo: 0.736, bonus: 0.25 }, { upTo: 0.739, bonus: 0 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.68314, b: 0, lo: 0, hi: 1 }, 3: { a: 0.73419, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.7918, b: -0.0025, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.273, innerWire: 0.2253, K: 2255.4, n: 157, sMult: 1.00725, byCount: { 2: [{ upTo: 0.515, bonus: 0 }, { upTo: 0.606, bonus: 1.25 }, { upTo: 0.606, bonus: 0 }, { upTo: 0.609, bonus: 1.25 }, { upTo: 0.612, bonus: 0 }, { upTo: 0.765, bonus: 1.25 }, { upTo: 0.797, bonus: 1 }, { upTo: 0.835, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.56291, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.64225, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.283, innerWire: 0.2253, K: 2452.9, n: 136, sMult: 0.97925, lineByCount: { 3: { a: 0.47933, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.50575, b: -0.0025, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.283, innerWire: 0.2343, K: 2717.0, n: 50, sMult: 1.0155, byCount: { 2: [{ upTo: 0.522, bonus: 0 }, { upTo: 0.883, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.45676, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.57207, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.289, innerWire: 0.2343, K: 2879.1, n: 118, sMult: 0.99325, byCount: { 2: [{ upTo: 0.49, bonus: 0 }, { upTo: 0.516, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.48677, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.38576, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.295, innerWire: 0.2343, K: 2980.9, n: 113, sMult: 0.99075, lineByCount: { 1: { a: 0.61653, b: 0, lo: 0, hi: 1 }, 2: { a: 0.69482, b: 0, lo: 0, hi: 1 }, 3: { a: 0.7298, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.61769, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.295, innerWire: 0.2437, K: 3318.5, n: 101, sMult: 1.02, byCount: { 1: [{ upTo: 1, bonus: 0 }] }, lineByCount: { 3: { a: 0.68627, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.5779, b: 0, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 25, below: { a: 0.80799, b: 0, lo: 0, hi: 1 }, above: { a: 0.65747, b: 0, lo: 0, hi: 1.25 } } } },
+            { outerWire: 0.3065, innerWire: 0.2437, K: 3617.5, n: 188, sMult: 0.985, lineByCount: { 3: { a: 0.48214, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.54599, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3065, innerWire: 0.25, K: 3902.4, n: 37, sMult: 1.01325, twoOffset: 0.25, byCount: { 2: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 3: { a: 0.64086, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.78773, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3125, innerWire: 0.25, K: 4102.8, n: 47, sMult: 1.00325, byCount: { 3: [{ upTo: 0.579, bonus: 0.25 }, { upTo: 0.609, bonus: -0.75 }, { upTo: 0.72, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 4: { a: 0.75001, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3125, innerWire: 0.2625, K: 4562.2, n: 10, byCount: { 3: [{ upTo: 1, bonus: 1.25 }] } },
+            { outerWire: 0.3195, innerWire: 0.2625, K: 4863.2, n: 109, sMult: 1.012, byCount: { 2: [{ upTo: 0.474, bonus: 0 }, { upTo: 0.858, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 1: { a: 0.52006, b: 0, lo: 0, hi: 1 }, 3: { a: 0.4957, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.60504, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.331, innerWire: 0.2625, K: 5221.6, n: 177, sMult: 0.98675, lineByCount: { 3: { a: 0.51046, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.57245, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.331, innerWire: 0.273, K: 5842.8, n: 144, sMult: 1.01675, byCount: { 2: [{ upTo: 0.043, bonus: 0 }, { upTo: 0.065, bonus: 0.25 }, { upTo: 0.085, bonus: 0 }, { upTo: 0.216, bonus: 0.25 }, { upTo: 0.502, bonus: 0 }, { upTo: 0.756, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.50938, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.55211, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3437, innerWire: 0.273, K: 6333.9, n: 229, sMult: 0.99, lineByCount: { 3: { a: 0.41448, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.5102, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3437, innerWire: 0.283, K: 7005.7, n: 284, sMult: 1.01725, byCount: { 2: [{ upTo: 0.477, bonus: 0 }, { upTo: 0.734, bonus: 1.25 }, { upTo: 0.836, bonus: 1 }, { upTo: 0.862, bonus: 1.25 }, { upTo: 0.865, bonus: 1 }, { upTo: 0.875, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.48848, b: 0, lo: 0, hi: 1 }, 3: { a: 0.63092, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3625, innerWire: 0.283, K: 7561.9, n: 447, sMult: 0.98225, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.35999, b: 0.0075, lo: 0, hi: 1 }, 3: { a: 0.52896, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3625, innerWire: 0.289, K: 8386.5, n: 429, sMult: 0.99575, lineByCount: { 1: { a: 0.47555, b: 0.002, lo: 0, hi: 1 }, 2: { a: 0.47319, b: 0.0015, lo: 0, hi: 1 }, 3: { a: 0.66664, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.33145, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3625, innerWire: 0.295, K: 8881.9, n: 230, sMult: 1.009, lineByCount: { 1: { a: 0.4494, b: 0, lo: 0, hi: 1 }, 3: { a: 0.41628, b: 0.001, lo: 0.25, hi: 1.25 }, 4: { a: 0.51469, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.375, innerWire: 0.295, K: 9281.2, n: 394, sMult: 0.987, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.35902, b: 0.004, lo: 0, hi: 1 }, 2: { a: 0.39698, b: 0.0035, lo: 0, hi: 1 }, 3: { a: 0.44026, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.375, innerWire: 0.3065, K: 10594.4, n: 241, sMult: 1.017, byCount: { 2: [{ upTo: 0.039, bonus: 0.25 }, { upTo: 0.459, bonus: 0 }, { upTo: 0.547, bonus: 1.25 }, { upTo: 0.618, bonus: 0 }, { upTo: 0.777, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 1: { a: 0.32905, b: 0.006, lo: 0, hi: 1 }, 3: { a: 0.47598, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3938, innerWire: 0.3065, K: 11208.9, n: 235, sMult: 0.97925, byCount: { 2: [{ upTo: 0.211, bonus: 0 }, { upTo: 0.218, bonus: 1 }, { upTo: 0.383, bonus: 0 }, { upTo: 0.409, bonus: 1 }, { upTo: 0.469, bonus: 0 }, { upTo: 1, bonus: 1 }], 4: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.37665, b: 0, lo: 0, hi: 1 }, 3: { a: 0.40907, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3938, innerWire: 0.3125, K: 12334.2, n: 210, sMult: 0.99375, lineByCount: { 1: { a: 0.27352, b: 0.005, lo: 0, hi: 1 }, 3: { a: 0.48502, b: 0, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 31, below: { a: 0.36122, b: 0.0005, lo: 0, hi: 1 }, above: { a: -0.52066, b: 0.0195, lo: 0, hi: 1 } } } },
+            { outerWire: 0.3938, innerWire: 0.3195, K: 13265.8, n: 94, sMult: 1.01375, byCount: { 2: [{ upTo: 0.486, bonus: 0 }, { upTo: 0.548, bonus: 1.25 }, { upTo: 0.599, bonus: 0 }, { upTo: 0.659, bonus: 1 }, { upTo: 0.791, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 1: { a: 0.41088, b: 0.0015, lo: 0, hi: 1 }, 3: { a: 0.46317, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.75508, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4062, innerWire: 0.3195, K: 13744.5, n: 83, sMult: 0.988, lineByCount: { 1: { a: 0.31951, b: 0.003, lo: 0, hi: 1 }, 3: { a: 0.42372, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4062, innerWire: 0.331, K: 15603.4, n: 97, sMult: 1.01175, byCount: { 2: [{ upTo: 0.294, bonus: 0 }, { upTo: 0.339, bonus: 1.25 }, { upTo: 0.355, bonus: 0 }, { upTo: 0.41, bonus: 1.25 }, { upTo: 0.459, bonus: 0 }, { upTo: 0.54, bonus: 1.25 }, { upTo: 0.586, bonus: 1 }, { upTo: 0.604, bonus: 1.25 }, { upTo: 0.645, bonus: 1 }, { upTo: 0.685, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 4: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.24051, b: 0, lo: 0, hi: 1 }, 3: { a: 0.27162, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4218, innerWire: 0.331, K: 16369.3, n: 78, sMult: 0.99, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 2: { a: 0.69162, b: 0, lo: 0, hi: 1 }, 3: { a: 0.40534, b: 0.0035, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4218, innerWire: 0.3437, K: 18774.0, n: 127, sMult: 1.01775, byCount: { 2: [{ upTo: 0.116, bonus: 0 }, { upTo: 0.145, bonus: 0.25 }, { upTo: 0.269, bonus: 0 }, { upTo: 0.307, bonus: 0.25 }, { upTo: 0.387, bonus: 0 }, { upTo: 0.448, bonus: 0.25 }, { upTo: 0.498, bonus: 0 }, { upTo: 0.559, bonus: 1.25 }, { upTo: 0.614, bonus: 0 }, { upTo: 0.867, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.39012, b: 0.0035, lo: 0, hi: 1 }, 3: { a: 0.36132, b: 0.004, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4305, innerWire: 0.3437, K: 19691.7, n: 201, sMult: 1.00375, byCount: { 3: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.2122, b: 0.0085, lo: 0, hi: 1 }, 2: { a: 0.44942, b: 0, lo: 0, hi: 1 } } },
+            { outerWire: 0.4305, innerWire: 0.3625, K: 22248.9, n: 167, sMult: 1.04, twoOffset: 0.25, lineByCount: { 1: { a: 0.05407, b: 0.007, lo: 0, hi: 1 }, 2: { a: 0.23942, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4375, innerWire: 0.3625, K: 23276.7, n: 219, sMult: 1.03075, twoOffset: 0.25, byCount: { 2: [{ upTo: 0.203, bonus: 0.25 }, { upTo: 0.227, bonus: 0 }, { upTo: 0.256, bonus: 0.25 }, { upTo: 0.362, bonus: 0 }, { upTo: 0.437, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.07677, b: 0.009, lo: 0, hi: 1 } } },
+            { outerWire: 0.4531, innerWire: 0.3625, K: 25580.0, n: 175, sMult: 1.0065, byCount: { 1: [{ upTo: 0.138, bonus: 0 }, { upTo: 0.173, bonus: -1 }, { upTo: 0.503, bonus: 0 }, { upTo: 0.537, bonus: 1 }, { upTo: 0.548, bonus: 0 }, { upTo: 0.577, bonus: 1 }, { upTo: 0.587, bonus: 0 }, { upTo: 0.639, bonus: 1 }, { upTo: 0.649, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 2: { a: 0.67858, b: 0, lo: 0, hi: 1 } } },
+            { outerWire: 0.4531, innerWire: 0.375, K: 27589.4, n: 30, sMult: 1.03275, twoOffset: 0.25, lineByCount: { 2: { a: 0.53346, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4615, innerWire: 0.375, K: 29026.7, n: 226, sMult: 1.01675, twoOffset: 0.25, byCount: { 3: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.03912, b: 0.011, lo: 0, hi: 1 }, 2: { a: 0.45846, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4687, innerWire: 0.375, K: 30214.9, n: 98, sMult: 1.0055, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.1077, b: 0.0125, lo: 0, hi: 1 }, 3: { a: 0.05407, b: 0, lo: -0.75, hi: 0.25 } } },
+            { outerWire: 0.4687, innerWire: 0.3938, K: 33619.3, n: 18, sMult: 1.0435, lineByCount: { 1: { a: 0.34985, b: 0.0045, lo: 0, hi: 1 } } },
+            { outerWire: 0.49, innerWire: 0.3938, K: 38052.1, n: 317, sMult: 1.00775, lineByCount: { 1: { a: 0.0253, b: 0.007, lo: 0, hi: 1 }, 4: { a: 0.56111, b: 0, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 43, below: { a: 0.26579, b: 0, lo: 0, hi: 1.25 }, above: { a: 0.37942, b: 0, lo: 0, hi: 1 } } } },
+            { outerWire: 0.5, innerWire: 0.3938, K: 38403.3, n: 149, sMult: 0.99575, lineByCount: { 1: { a: -0.10094, b: 0.012, lo: 0, hi: 1 }, 2: { a: 0.39762, b: 0, lo: 0, hi: 1 } } },
+            { outerWire: 0.5, innerWire: 0.4062, K: 42982.9, n: 155, sMult: 1.02675, twoOffset: 0.25, byCount: { 2: [{ upTo: 0.131, bonus: 0.25 }, { upTo: 0.156, bonus: 0 }, { upTo: 0.17, bonus: -1 }, { upTo: 0.74, bonus: 0 }, { upTo: 0.755, bonus: 1.25 }, { upTo: 0.769, bonus: 0 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.22016, b: 0.012, lo: 0, hi: 1 } } },
+            { outerWire: 0.5312, innerWire: 0.4062, K: 44705.9, n: 57, sMult: 0.9745 },
+            { outerWire: 0.5312, innerWire: 0.4218, K: 53777.7, n: 58, sMult: 1.003, lineByCount: { 1: { a: 0.31087, b: 0.0075, lo: 0, hi: 1 }, 2: { a: -0.18413, b: 0.012, lo: 0, hi: 1 } } },
+            { outerWire: 0.5312, innerWire: 0.4305, K: 57529.5, n: 97, sMult: 1.01275, byCount: { 2: [{ upTo: 0.132, bonus: 0 }, { upTo: 0.494, bonus: 1.25 }, { upTo: 1, bonus: 1 }] } },
+            { outerWire: 0.5625, innerWire: 0.4305, K: 59019.8, n: 12, sMult: 0.97675, lineByCount: { 2: { a: 0.29659, b: 0.0035, lo: 0, hi: 1 } } },
+            { outerWire: 0.5625, innerWire: 0.4531, K: 75278.9, n: 28, sMult: 1.0105 },
+            { outerWire: 0.625, innerWire: 0.4531, K: 76631.4, n: 24 },
+            { outerWire: 0.625, innerWire: 0.4615, K: 83220.3, n: 4 },
+            { outerWire: 0.625, innerWire: 0.49, K: 111661.4, n: 5 },
+        ],
+    },
+    '2 5/8" inside 5 1/4"': {
+        innerId: 2.625,
+        outerId: 5.25,
+        cSlope: 1.15491, cIntercept: -362.27,
+        kSlope: 1.50247, kIntercept: -1221.56,
+        defaultTau: 40,
+        calibration: [
+            // C is pinned to a single value by the 150 and 300 lb readings.
+            { outerWire: 0.2625, innerWire: 0.1770, C: 1549.5, tau: 56.0, K: 1043.1 },
+            { outerWire: 0.2625, innerWire: 0.1875, C: 1680.4, tau: 43.0, K: 1379.4 },
+            { outerWire: 0.2625, innerWire: 0.2000, C: 2029.6, tau: 31.5, K: 1911.4 },
+            { outerWire: 0.2625, innerWire: 0.2070, C: 2109.6, tau: 39.5, K: 2249.1 },
+            { outerWire: 0.2730, innerWire: 0.2187, C: 2706.1, tau: 44.5, K: 2928.4 },
+            { outerWire: 0.2890, innerWire: 0.2343, C: 3768.3, tau: 36.5, K: 4031.1 },
+        ],
+    },
+};
+
+// Raynor and Overhead are offered by the dropdown but the reference returns
+// the 2 5/8" inside 5 1/4" numbers for both, spring IDs included. Aliased
+// rather than given entries of their own, so there is one place to correct
+// when real figures turn up.
+const DUPLEX_ALIASES = {
+    '3 1/2" inside 5 1/2" (Raynor)': '2 5/8" inside 5 1/4"',
+    '3 3/8" inside 5 7/8" (Overhead)': '2 5/8" inside 5 1/4"',
+};
+
+// How K scales with spring count.
+//
+// There is only ONE of these now. There used to be a single constant serving
+// both the length and the torque, then two; the length one is gone because
+// the length no longer has a fitted scale at all - the catalog formula has
+// spring count entering exactly linearly, and the 1- and 2-spring readings
+// confirm it to 0.04%. The 0.99 that used to sit there came from a 4-spring
+// length figure in a comment, and that comment's arithmetic no longer
+// reproduces.
+//
+// TORQUE is exact and not fitted either: the springs share the door between
+// them, so each carries weight * rEff / springs. Exponent 1, by definition.
+// It is written as a constant only so the one place it is applied is named.
+const DUPLEX_TORQUE_COUNT_EXPONENT = 1;
+
+// How far BELOW the cycle target the reference will still accept a pairing.
+//
+// NOW 1.0, PINNED BY THE CYCLE COUNT RATHER THAN BY WIRE CHOICE. This was
+// 0.95, chosen to offset an error in K. It cannot be pinned the way it was:
+// the fraction and K trade off almost exactly, because K is re-derived from
+// the same switch points the fraction appears in, so wire and length accuracy
+// barely move with it - 2665, 2662 and 2665 corpus readings at 0.95, 0.98 and
+// 1.00.
+//
+// The CYCLE COUNT does move, and it is an output the reference reports, so it
+// is what settles the question. Against 2800 readings where the wire agrees:
+//
+//   fraction   exact (same 1000)   within one step   median error
+//     0.90           17.8%              48.0%           -8.91%
+//     0.95           47.6%              65.2%           -3.23%
+//     0.98           55.6%              83.9%            0.00%
+//     1.00           47.0%              99.3%           +0.34%
+//
+// At 1.00 the fifth percentile is 0.00%: we never compute FEWER cycles than
+// the reference, and 99.3% of readings agree to within one rounding step. The
+// old 0.95 ran the count 3.2% low across the board, which is also what made
+// the new cycles-low warning fire on readings the reference passes.
+//
+// WHAT 1.0 DOES NOT EXPLAIN is why the reference prints "cycle life
+// calculation of 9,000.00 is less than the 10,000 cycle minimum" on 190
+// readings - it does sometimes keep a pairing that misses the target, and
+// warn. That is the known gap below, not a reason to move the fraction: the
+// fraction is what the SELECTION uses, and 0.90 was a reading of the warning
+// rather than of the selection.
+//
+// It does not require the target outright, which the source comments have
+// noted since the first commit without pinning. Two rejection boundaries pin
+// it: at 685 lb it keeps 0.283/0.2343 at 9,000 cycles with a warning and steps
+// up at 690, and at 725 lb it keeps 0.289/0.2343 at 9,000 and steps up at 730.
+// Both boundaries sit at 9,000 against a 10,000 target, so the reference's own
+// fraction is 0.90.
+//
+// Confirmed a third way without using any constant from this file: 620 lb
+// measures 14,000 cycles on 0.283/0.2253, and 14,000 / (680/620)^4.67 = 9,000,
+// so at 680 lb that rung reaches the boundary - which is exactly where the
+// reference steps off it.
+//
+// 0.95 IS USED HERE, NOT 0.90, and the gap is this model's own error rather
+// than a disagreement. Scored over 43 readings:
+//
+//     f = 1.00   35/43      f = 0.93   40/43
+//     f = 0.98   40/43      f = 0.90   36/43
+//     f = 0.95   42/43      f = 0.85   30/43
+//
+// K carries about 1% from the reference rounding its cycle counts to the
+// nearest thousand, and a 1% error in K is ~5% in the cycle count, which is
+// the whole distance between 0.90 and 0.95. So 0.95 against this model's
+// cycles is the same decision as 0.90 against the reference's.
+//
+// RE-SCANNED against the full 45-reading corpus, and 0.95 is a genuine peak
+// rather than an edge:
+//
+//     1.00  37/45      0.96  43/45      0.93  42/45
+//     0.98  42/45      0.95  44/45      0.90  38/45
+//     0.97  41/45
+//
+// ONE READING DISAGREES WITH THE FRACTION ITSELF, and it is the last wire miss
+// in the corpus. At 675 lb, 1 spring, 9'0" the reference uses 0.3625/0.295
+// where this model takes the softer 0.3625/0.289. That rung's K comes from a
+// 470 lb reading measuring 53,000 cycles, and scaling by the cycle law alone -
+// 53,000 / (675/470)^4.67 - gives 9,775 at 675 lb. So by the reference's own
+// arithmetic the softer rung clears 9,000, and the reference still stepped off
+// it. Two readings elsewhere show it ACCEPTING exactly 9,000.
+//
+// So the acceptance rule is not a pure fraction of the target. One reading is
+// not enough to say what it is instead, and a threshold tuned to catch this
+// case costs more elsewhere - 0.98 drops the corpus to 42/45.
+//
+// THIS ONLY WORKS BECAUSE K IS NOW MEASURED. With the old fitted K a looser
+// threshold made things worse, not better - 15/27 at f = 1.00 falling to 11/27
+// at f = 0.90 - because a lower bar lets more rungs qualify and so amplifies
+// every error in K. The strict threshold was compensating for bad K.
+const DUPLEX_ACCEPT_FRACTION = 1.0;
+
+// Below this fraction of the target the reference calls the cycle life short
+// and says so. Measured from 3,070 readings that report their own count: the
+// 190 warned ones top out at a ratio of 0.9000 and the 2,880 quiet ones start
+// at 0.9600, with nothing in between. Distinct from the accept fraction above,
+// which governs SELECTION rather than the warning.
+const DUPLEX_WARN_FRACTION = 0.95;
+
+// Bounds on the outer/inner stress ratio of a pairing - see
+// duplexPairBalanced. Measured range is 0.862 to 1.040 over thirteen
+// pairings; these carry a little margin beyond it.
+const DUPLEX_BALANCE_MIN = 0.84;
+const DUPLEX_BALANCE_MAX = 1.06;
+
+// The reference prints duplex cycle counts to the nearest thousand.
+const DUPLEX_CYCLE_ROUNDING = 1000;
+
+
+// --- THE CYCLE-RATING CAP: REMOVED ---------------------------------------
+// There used to be a DUPLEX_CATALOGUE here - a four-row table capping the
+// stiffest pairing on offer per cycle target, on the theory that torsion
+// springs are sold by cycle rating so the target picks which catalogue is
+// available.
+//
+// IT WAS WRONG, and measurement said so: a 470 lb 1-spring sweep has the
+// reference using 0.3625/0.289, S = 8723, at a 50,000 target, where the table
+// said 50,000 topped out at S = 5920. S depends only on the two wire sizes, so
+// a product catalogue cannot depend on spring count - yet the per-count
+// scaling was the only thing making that reading reachable at all, and at 2
+// springs the cap made the reference's own answer impossible.
+//
+// IT COULD NOT BE REMOVED UNTIL K WAS MEASURED. With the old fitted K,
+// deleting it made the wire choice WORSE - 8/11 against 9/11 - because it was
+// trimming the ladder to hide rungs that bad K values wrongly accepted. With K
+// derived from the reference's own cycle counts it makes no difference at all,
+// 26/27 either way, so the compensation is no longer needed and a construct
+// known to be wrong is gone.
+//
+// One of three errors that were fitted against each other. The other two - the
+// strict accept-the-target threshold and the pessimistic kSlope line - are gone
+// for the same reason: K was the one underneath.
+
+// THE LENGTH RULE. Six reference-API readings (2026-10-01) settle this, and
+// the answer is that there was never a rule to fit: the length is the
+// catalog's own formula, the same one the Single path already uses and that
+// path is known good.
+//
+//     activeLength = springs x (divider_outer + divider_inner) / TIPPT
+//     inner length = round(activeLength)
+//     outer length = inner + 1
+//
+// with divider = 30e6 * wire^5 / (TORSION_CONSTANT * (ID + wire)), exactly as
+// the `divider` getter computes it for one spring. The two springs are
+// coaxial and wound together, so they share ONE active length and their RATES
+// ADD - which is why the sum of the two dividers is the quantity that
+// appears, and why spring count enters exactly linearly.
+//
+// NO FITTED CONSTANTS AT ALL. Five of the six readings come out exact:
+//
+//     470 lb  7'0"  1 spring              18.005 -> 18   reference 18
+//     585 lb  7'0"  2 springs             13.398 -> 13   reference 13
+//     620 lb  7'0"  2 springs             14.182 -> 14   reference 14
+//     675 lb  9'0"  1 spring              28.167 -> 28   reference 28
+//     470 lb  7'0"  1 spring, t 25,000    24.359 -> 24   reference 24
+//
+// WHAT THIS REPLACES, and why all of it had to go:
+//
+//   C      a fitted constant per wire combination. It sits 2-6% above the
+//          physical divider sum, and not by a constant factor, so it could
+//          not be scaled away. It was fitted as the MIDPOINT of a bracket an
+//          inch wide, which is why it was never better than about 1% - and a
+//          1% error in C moved 22.7% of lengths by a whole inch.
+//
+//   tau    a regime threshold per combination, compared against C/TIPPT. That
+//          quantity moves with the DRUM: the D525-216's rEff is 28% above the
+//          D400s', so its x ran ~28% lower and landed in the floor regime 92%
+//          of the time against the D400s' 56%. tau was fitted where x
+//          happened to sit on the D400-144, which is exactly why no other
+//          drum ever came out right.
+//
+//   0.25"  a quarter inch added whenever x >= tau. Of the six readings, five
+//          return a whole inch and the sixth is the out-of-range case below.
+//          Its only evidence was a comment whose own arithmetic no longer
+//          reproduces.
+//
+// THE ONE READING THIS DOES NOT REPRODUCE is 200 lb at 7'0", returned as
+// 36.25" where this gives 34.875 -> 35. That reading is also the only one the
+// reference itself rejects ("cycle life calculation of 1,165,000.00 exceeds
+// the 350,000 cycle maximum"), the only one with a fractional length, and the
+// only one where the reference contradicts ITSELF: inverting its own reported
+// cycle count gives a body of 34.773, which agrees with this formula to 0.3%
+// while it prints 36.25. So it is a separate out-of-range path, and fitting
+// the main rule to it is what produced tau in the first place.
+//
+// STILL OPEN: round() against floor(). Every confirmed reading has a
+// fractional part below 0.5, so both reproduce all five. One reading whose
+// active length lands above x.5 settles it - see dev/worklist.mjs.
+//
+// THERE IS A LENGTH CEILING, found by a 470 lb 1-spring target sweep that ran
+// the same door from 10,000 to 200,000 cycles. The formula is exact at every
+// length up to 34" and then drifts:
+//
+//     target    pairing          active    reference
+//      10,000   0.3195/0.2625    18.007       18      ok
+//      25,000   0.3437/0.273     24.362       24      ok
+//      50,000   0.3625/0.289     31.886       32      ok
+//      75,000   0.375/0.3065     39.350       40      MISS  +0.65
+//     100,000   0.3938/0.3065    46.187       45      MISS  -1.19
+//     150,000   0.3938/0.3195    49.440       50      MISS  +0.56
+//     200,000   0.4062/0.331     58.052       59      MISS  +0.95
+//
+// THE "LONG SPRING" FRAMING WAS WRONG, and a later reading settled it. Ordered
+// by active length the remaining failures run 30.66, 34.87 and 46.19 while
+// 31.89 and 33.94 pass, so breakage is not a function of length. Three of the
+// four cases above were simply rungs that add a whole inch BELOW frac 0.5,
+// which round() floors; a ceil-side threshold fixes them and they now
+// reproduce. See the note on regimes further down.
+//
+// WHAT IS ACTUALLY LEFT is three readings needing a bonus the three regimes
+// cannot express:
+//
+//     +2.25   348 lb 3-spring LHR (active 30.659 -> 32.25)
+//     +2.25   200 lb 2-spring     (active 34.871 -> 36.25)
+//      -1     470 lb 1-spring t100,000 (active 46.182 -> 45)
+//
+// The two +2.25 cases are both on the softest rung and both over the
+// reference's own 350,000 cycle maximum, which it returns as an error. That
+// may be the pattern or may be coincidence - two readings cannot say. The -1
+// case has the reference ACCEPTING a 2.6% rate error, reporting 45" where the
+// required rate demands 46.19", and its own spring weights confirm the 45".
+//
+// A third over-maximum reading on a different rung would settle whether the
+// +2.25 belongs to that regime.
+//
+// --- THE QUARTER INCH: STRUCTURE FOUND, CALIBRATION MISSING ---------------
+//
+// Two dense 9-point weight sweeps, each holding one pairing and stepping 5 lb
+// at a time, settle what the quarter inch IS without yet making it usable.
+//
+// It is NOT pairing-specific, which was the standing hypothesis: 575 lb
+// returns 14.25" on 0.273/0.2253, not just on the softest rung.
+//
+// Both sweeps show the SAME three-regime structure as frac(active) falls:
+//
+//     frac >= tHi        ->  floor(active) + 1
+//     tLo <= frac < tHi  ->  floor(active) + 1.25
+//     frac <  tLo        ->  floor(active)
+//
+// With thresholds per pairing it reproduces all 18 sweep readings exactly:
+//
+//     0.2625/0.2253    tLo 0.002   tHi 0.530    9/9
+//     0.273/0.2253     tLo 0.514   tHi 0.634    9/9
+//
+// NO SINGLE THRESHOLD PAIR CAN SERVE BOTH, and that is a proof, not a failed
+// search: sweep 1 needs frac 0.158-0.529 to give +1.25 where sweep 2 needs
+// frac 0.169-0.513 to give +0.00. Overlapping ranges, opposite answers. So
+// the length rule really does carry a per-pairing parameter - TWO of them.
+//
+// Which means the original instinct behind C and tau was RIGHT: this rule
+// needs per-combination constants. What was wrong was having ONE threshold
+// instead of two, and applying it to a fitted C/TIPPT rather than to the
+// physical active length, which is what made it move with the drum.
+//
+// WHY round() IS STILL WHAT SHIPS. The best SHARED thresholds (0.286, 0.634)
+// give 15/18 on the sweeps but only 7/10 on the other readings under 40",
+// against round(active)'s 9/10. Shipping the structure without per-pairing
+// calibration makes every uncalibrated pairing worse, and only 2 of the 12+
+// known pairings have a dense sweep. Each one needs roughly 9 readings to pin
+// its two thresholds.
+//
+// So: round(active) is the general rule, exact on 9 of 10 readings under 40"
+// whose pairing was never swept. The three-regime form above is what a
+// calibrated version would use, and dev/corpus.json holds the readings it was
+// derived from.
+//
+// A THIRD SWEEP (0.289/0.2343, 690-730 lb) is consistent with the structure
+// but could not pin it - the +1.25 band sits at 677-688 lb and the sweep
+// started at 690. It does show that BOTH thresholds rise monotonically with
+// pairing stiffness:
+//
+//     0.2625/0.2253   S 2030   tLo (0.001,0.158]   tHi (0.529,0.673]
+//     0.273/0.2253    S 2281   tLo (0.513,0.634]   tHi (0.634,0.749]
+//     0.289/0.2343    S 2928   tLo (0.582,1.000]   tHi (0.000,0.877]
+//
+// which looks like a phase advancing with S rather than free constants per
+// pairing. If that holds, the whole family is two global parameters instead of
+// two per pairing - but three points, one of them barely constrained, cannot
+// settle it. 680 lb and 685 lb on this pairing are predicted to return 15.25"
+// and would both pin this pairing and test the phase idea.
+function duplexActiveLength(pair, step, springs, tippt) {
+    if (!pair || !step || !tippt || !springs) {
+        return 0;
+    }
+
+    const divider = (wire, id) =>
+        (30000000 * Math.pow(wire, 5)) / (TORSION_CONSTANT * (id + wire));
+
+    // sMult IS THE RUNG'S MEASURED STIFFNESS, against the computed one.
+    //
+    // The reference reports both its length and its TIPPT, and the formula is
+    // length = springs * S / TIPPT, so S can be solved from every reading:
+    // S = length * TIPPT / springs. Across a rung's readings the computed S is
+    // wrong by up to 4.6%, and differently per rung - 0.2625/0.2253 implies
+    // 1062 where the dividers give 1015, while 0.3625/0.283 implies 4124
+    // against 4217. On a 20" spring 4.6% is nearly an inch, which is precisely
+    // the error the length bands were absorbing.
+    //
+    // One number per rung, fitted from the readings. It is per RUNG and not per
+    // spring count because stiffness belongs to the wire pair - and the
+    // measurement agrees, per rung generalising better with fewer parameters.
+    const stiffness = step.sMult || 1;
+
+    // FROM THE DISPLAYED TIPPT, rounded to one decimal, which is the same rule
+    // the cycle count and the MIP warning already follow: the reference
+    // computes from the figures it shows. Using the exact value instead cost
+    // ten points on the external samples - 66.2% against 76.3% - because the
+    // length sits on a grid and a tiny TIPPT difference flips the snap.
+    const shown = Math.round(tippt * 10) / 10;
+
+    return (
+        (springs *
+            stiffness *
+            (divider(step.outerWire, pair.outerId) +
+                divider(step.innerWire, pair.innerId))) /
+        shown
+    );
+}
+
+// THE THREE-REGIME ROUNDING, where a rung has been swept densely enough to
+// know its two thresholds.
+//
+//     frac >= tHi        ->  floor(active) + 1
+//     tLo <= frac < tHi  ->  floor(active) + 1.25      (the quarter inch)
+//     frac <  tLo        ->  floor(active)
+//
+// Three 9-point weight sweeps, each holding one rung and stepping 5 lb, fit
+// this exactly - 9 of 9 on every one of them - where plain round(active) gets
+// 30 of 39 across all readings and this gets 37.
+//
+// THE THRESHOLDS ARE PER RUNG and that is measured, not assumed. Sweep 1 needs
+// frac 0.158-0.529 to give +1.25 while sweep 2 needs frac 0.169-0.513 to give
+// +0.00 - overlapping ranges, opposite answers - so no single pair of
+// thresholds can serve both. Both rise with rung stiffness, which hints they
+// are a phase rather than free constants, but three rungs cannot settle that.
+//
+// WITHOUT THRESHOLDS IT FALLS BACK TO round(active).
+//
+// WHICH RUNGS GET THEM, AND ON WHAT EVIDENCE. A rung is given thresholds only
+// where round(active) is PROVABLY wrong on a reading - that is, where a
+// reading floors at frac above 0.5 (round would have gone up), or shows the
+// quarter inch at all (round can never produce it). Everywhere else round is
+// left alone, and it is exact on every such reading under 40".
+//
+// Two kinds of evidence, and the second is weaker:
+//
+//   BRACKETED - readings on both sides, so tLo and tHi are both pinned. The
+//   three rungs with a 9-point sweep are here, each reproducing 9 of 9.
+//
+//   ONE-SIDED, FLOOR - only floor readings, so all that is known is that tLo
+//   lies above the highest frac seen flooring. tLo is set just above it and
+//   tHi equal to it, which asserts NO quarter band rather than inventing one.
+//
+//   ONE-SIDED, CEIL - the mirror case. Some rungs are seen adding a whole inch
+//   at a frac BELOW 0.5, which round() gets wrong by flooring. There tLo is set
+//   to 0.002, so everything ceils except an active length that is already a
+//   whole number. 0.375/0.3065 is the clearest: two readings, frac 0.350 and
+//   0.940, both +1, and round only gets the second.
+//
+// Either way the change is confined to the frac range the readings cover, and
+// the `n` on each entry says how many stand behind it - n=1 means exactly that.
+//
+// THE MODEL IS LOCALLY VALID, NOT CORRECT, and one reading proves it. On
+// 0.273/0.2253:
+//
+//     580 lb   active 13.513   frac 0.513   reference bonus +0.00
+//     286 lb   active 27.404   frac 0.404   reference bonus +1.25
+//
+// frac 0.513 requires tLo > 0.513 while frac 0.404 requires tLo <= 0.404, so
+// no threshold on frac(active) satisfies both. What separates them is the
+// INTEGER part of active, 13 against 27 - and this rung's thresholds were
+// fitted on a sweep that never left active 13.5.
+//
+// It does not always fail that way: the 0.2625/0.2253 thresholds were fitted
+// near active 15 and are correct at active 34.020. So frac(active) is a
+// coordinate that correlates locally with whatever the reference quantises,
+// and transfers sometimes.
+//
+// The thresholds are kept because they are right on 48 of 49 readings. Closing
+// this properly needs a dense sweep at a SECOND integer part of active on the
+// same rung, which is a different experiment from the three already done.
+//
+// RULED OUT, with a designed probe: being over the reference's 350,000 cycle
+// maximum does NOT cause the +2.25 bonus. A 205 lb door returns 1,042,000
+// cycles and still takes the ordinary +1.25.
+//
+// The thresholds are genuinely per rung - the fitted values run from 0.000 to
+// 0.740 - so one of them cannot be borrowed for another rung. See the proof in
+// duplexActiveLength's note that no shared pair can serve two of them.
+// THE QUARTER-INCH GRID IS SET BY THE SPRING COUNT, which 116 readings make
+// unambiguous:
+//
+//     1 spring    18 of 18 lengths are a whole inch, none a quarter
+//     2 springs   52 whole, 10 quarter - mixed, and the rung rules handle it
+//     3 springs   20 of 20 are a quarter, none whole
+//     4 springs   16 of 16 are a quarter, none whole
+//
+// At one spring that is p = 4^-18, so it is not chance. The rung rules below
+// were fitted mostly on 1- and 2-spring readings and happily return a whole
+// inch at 3 or 4 springs, which is provably the wrong GRID - and measured
+// against the reference the error was 0.25 LOW in 11 of the 16 cases where the
+// wire was right.
+//
+// So the grid is enforced: at 3 or more springs a whole-inch answer is lifted
+// to the quarter above it. This does not claim to know the full rule - it
+// claims to know which values are POSSIBLE, which is weaker and solid.
+function duplexSnapToGrid(length, springs) {
+    if (!(length > 0) || springs < 3) {
+        return length;
+    }
+
+    return Math.abs(length - Math.round(length)) < 1e-9 ? length + 0.25 : length;
+}
+
+function duplexLength(activeLength, regime, springs) {
+    if (!(activeLength > 0)) {
+        return 0;
+    }
+
+    const whole = Math.floor(activeLength);
+    const frac = activeLength - whole;
+
+    // A SECOND REGIME AT LONG ACTIVE LENGTHS on the softest rung, which the
+    // bands below cannot express because they are a function of frac alone and
+    // this one depends on the active length as well. The boundary is bracketed
+    // to (25.290, 25.807] by a 500/490 lb pair.
+    //
+    // THE SPLIT INSIDE IT IS PER SPRING COUNT, which 24 readings above active
+    // 25.5 on this rung make plain:
+    //
+    //     2 springs   n=11   +1.25 at frac 0.020-0.453, +2.25 at 0.786-0.928
+    //                        so the split is in (0.453, 0.786], midpoint 0.620
+    //     3 springs   n=13   +2.25 at every frac from 0.110 to 0.905,
+    //                        so the split is at or below 0.110
+    //
+    // A single split of 0.065 was used before this, fitted when the only
+    // long 2-spring readings were at frac 0.020 and 0.871. It put six 2-spring
+    // doors an inch long. 1 and 4 springs have no readings up here and fall
+    // through to the bands below rather than borrow a split.
+    const long = regime && regime.long;
+
+    if (long && activeLength >= long.from && long.byCount[springs] !== undefined) {
+        return frac < long.byCount[springs]
+            ? whole + 1.25
+            : whole + long.above;
+    }
+
+    // DERIVED BANDS, per rung AND per spring count - see dev/derive.mjs.
+    //
+    // One rule per rung is not enough: 1, 2, 3 and 4 springs sit on different
+    // quarter-inch grids and take different bonus values, so the bonus is a
+    // piecewise-constant function of frac for each (rung, count) pair. Bands
+    // exist only where readings cover them and only where plain rounding is
+    // already wrong; everything else falls through to round().
+    // A LINE IN THE INTEGER PART, where one fits. The bonus threshold is not
+    // constant in frac: on 0.3625/0.283 at one spring it flips at about 0.80
+    // at floor 17, 0.84 at floor 18, 0.91 at floor 24 and never by floor 25.
+    // Keying on frac alone cannot express that - frac 0.815 wants +1 at active
+    // 17.815 and 0 at active 25.816, same rung and same spring count - and the
+    // band fitter answered it by slicing frac into alternating slivers,
+    // eighteen of them on 0.375/0.295, which fit the readings and predicted
+    // nothing.
+    //
+    // t = a + b*floor is two parameters and covers 39 of the 41 two-bonus
+    // groups. Groups with three or more bonus values keep their bands.
+    // A REGIME BOUNDARY, where the group is really two rules rather than one
+    // with three levels. On 0.3625/0.283 at one spring the -1 bonus appears at
+    // floor 29 and above and never below, and one threshold line fits each
+    // side separately. Same shape as the `long` override the softest rung has
+    // always carried by hand.
+    //
+    // Each line owns a disjoint range of floor, so it is constrained locally.
+    // That is the difference from two thresholds over the same readings, which
+    // had one slope serving every length and cost 13 points of out-of-sample
+    // accuracy.
+    const split = regime && regime.splitByCount && regime.splitByCount[springs];
+    const line = split
+        ? (whole >= split.from ? split.above : split.below)
+        : regime && regime.lineByCount && regime.lineByCount[springs];
+
+    if (line) {
+        const first = line.a + line.b * whole;
+
+        // K PARALLEL THRESHOLDS. The bonus on a rung can take more than two
+        // values - four on 0.2625/0.2253 at three and four springs, which is
+        // 25% of everywhere a random door lands - and they are lo + k for
+        // integer k. One slope, K-1 intercepts, and the bonus is the level
+        // whose threshold the fraction has passed.
+        if (line.cuts) {
+            let level = 0;
+
+            if (frac > first) {
+                level = 1;
+
+                for (let i = 0; i < line.cuts.length; i++) {
+                    if (frac > line.cuts[i] + line.b * whole) {
+                        level = i + 2;
+                    }
+                }
+            }
+
+            return whole + line.levels[Math.min(level, line.levels.length - 1)];
+        }
+
+        // TWO PARALLEL THRESHOLDS where the bonus has three levels. They
+        // share the slope and differ only in intercept, so the third level
+        // costs one number rather than a second line. 0.3625/0.283 at one
+        // spring is the clearest case: its bonus runs -1, 0 and +1, and a
+        // single threshold cannot place all three.
+        if (line.mid !== undefined) {
+            const second = line.a2 + line.b * whole;
+
+            return whole + (
+                frac > second ? line.hi : frac > first ? line.mid : line.lo
+            );
+        }
+
+        return whole + (frac > first ? line.hi : line.lo);
+    }
+
+    const bands = regime && regime.byCount && regime.byCount[springs];
+
+    if (bands) {
+        for (const band of bands) {
+            if (frac < band.upTo) {
+                return whole + band.bonus;
+            }
+        }
+    }
+
+    // THE MEASURED GRID, not plain rounding. The reference's inner spring is a
+    // whole number of inches at 1 spring (1843 of 1843 readings), whole plus a
+    // quarter at 3 and 4 springs (594 and 413 of each), and at 2 springs it is
+    // one or the other - 793 at .0 and 274 at .25, and never .5 or .75. So two
+    // springs takes whichever of {N, N+0.25} is nearer, which is deterministic.
+    if (springs === 1) {
+        return Math.round(activeLength);
+    }
+
+    if (springs >= 3) {
+        return Math.round(activeLength - 0.25) + 0.25;
+    }
+
+    // TWO SPRINGS TAKES ITS OFFSET FROM THE RUNG. It lands on .0 for 799 of
+    // the readings and .25 for 276, never .5 or .75, and the rung alone
+    // predicts which on 86.4% of them. Snapping to whichever was nearer
+    // instead was the biggest single source of error on the doors the
+    // reference answers without complaint.
+    const off = (regime && regime.twoOffset) || 0;
+
+    return Math.round(activeLength - off) + off;
+}
+
 // --- Drum limits and warnings --------------------------------------------
 // The calculator still computes past these; it flags the result rather than
 // refusing. Yellow means the inputs exceed what the drum is rated for, red
@@ -868,9 +1693,18 @@ const DRUM_INFO = {
 // maxCable is carried for completeness and is NOT yet checked - the app has
 // no cable-size input to compare it against.
 const DRUM_LIMITS = {
+    // FROM THE REFERENCE'S OWN DRUM RECORD, not from the nameplate in the name.
+    // GET /spring-engineering/drum?drumName=... returns the drum, and the
+    // D525-216 carries maximumHeight 231 - fifteen inches more than its name
+    // suggests. Confirmed against the calculator: the multiplier still moves at
+    // 228 and 231 and freezes at 0.202291 from 234, where the over-height
+    // warning starts. Capping at 216 shortened the spring on any door between
+    // 217 and 231 inches, which the reference handles perfectly well.
+    //
+    // D400-96 and D400-144 do match their names, at 96 and 144.
     "CANIMEX/TF D400-96": { maxHeight: 96, maxWeight: 530, maxCable: '1/8"' },
     "CANIMEX/TF D400-144": { maxHeight: 144, maxWeight: 750, maxCable: '5/32"' },
-    "CANIMEX/TF D525-216": { maxHeight: 216, maxWeight: 1500, maxCable: '3/16"' },
+    "CANIMEX/TF D525-216": { maxHeight: 231, maxWeight: 1500, maxCable: '3/16"' },
 };
 
 // --- Wire size limits per spring ID ---------------------------------------
@@ -900,6 +1734,160 @@ const WIRE_LIMITS = {
     },
 };
 
+// WIRE_LIMITS again, keyed by NUMERIC inside diameter. The Duplex path knows
+// its pair's diameters as numbers, not as the dropdown's strings, so it
+// cannot look into the table above directly. Derived from it rather than
+// retyped, so the two can never disagree.
+// --- Duplex limits the reference enforces --------------------------------
+// All three read straight off the reference's own messages, which the pulled
+// batches carry. They are the Duplex half of the warning system, which had
+// none of this: Duplex raised five warnings where the reference raises eleven.
+//
+//   "Assembly MIP (2048.1900) is over max MIP (2000 - Exceeds cone capacity"
+//   "Wire size exceeds 0.4062 maximum for the inner spring inner diameter."
+//   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter."
+//   "Only spring lengths between 0 and 120" are supported"
+//
+// MIP is moment-inch-pounds carried by ONE spring at full wind, and the
+// formula is exact against 682 readings: (TIPPT / springs) * turns. At one
+// spring 305.7 * 6.7 = 2048.19 and at two 602.6 * 6.7 / 2 = 2018.71, both to
+// the last digit the reference prints.
+const DUPLEX_MAX_MIP = 2000;
+const DUPLEX_MAX_SPRING_LENGTH = 120;
+
+// The wire a Duplex spring ID can be wound with AND SOLD. The reference will
+// return a stiffer wire than this - it is how the stiff end of the ladder
+// works - but it attaches "Service Spring Corporation will not sell springs
+// and Canimex style cones" to the answer. Offering the pairing without that
+// sentence is how a quote gets built on a spring the supplier declines.
+const DUPLEX_WIRE_MAX = { 3.75: 0.4062, 6: 0.4375 };
+
+const WIRE_LIMITS_BY_ID = Object.fromEntries(
+    Object.entries(WIRE_LIMITS).map(([text, band]) => {
+        const value = text.replace('"', "").trim();
+
+        if (!value.includes(" ")) {
+            return [Number(value), band];
+        }
+
+        const [whole, fraction] = value.split(" ");
+        const [numerator, denominator] = fraction.split("/");
+
+        return [Number(whole) + Number(numerator) / Number(denominator), band];
+    })
+);
+
+// The published wire band for an inside diameter, or null where there is
+// none. NULL MEANS UNKNOWN, not unlimited - callers must not read a missing
+// band as permission.
+function wireBandForId(id) {
+    return WIRE_LIMITS_BY_ID[id] || null;
+}
+
+// Whether a duplex pair can actually be BUILT from these two wires. Two
+// independent questions, and both were being missed:
+//
+//   GEOMETRY   the inner spring plus two wire diameters has to fit inside the
+//              outer spring's ID. This was already checked, but only on
+//              generated combinations.
+//
+//   WINDING    each wire has to lie inside its own spring ID's band. This was
+//              not checked at all on the Duplex path, and it is why the
+//              2 5/8" inside 5 1/4" pair was offering an inner wire of
+//              0.3437" and up against a published 0.331" ceiling - 621
+//              candidate pairs reaching a 0.625" wire on a 2.625" spring.
+//              The 6" outer has no published band, so it constrains nothing
+//              and the pair is judged on its inner alone.
+//
+// Applied to MEASURED combinations too. A measured pair that failed either
+// test would mean the table and the reading disagree, which is worth seeing
+// rather than silently allowing - none currently does.
+// Peak stress in one spring of the pair, up to a factor the two share.
+//
+// Both springs have the same active length and turn through the same angle,
+// so each carries torque = (divider / L) * turns and the stress that follows
+// is torque / wire^3. Substituting the divider:
+//
+//     stress  ~  wire^5 / ((ID + wire) * wire^3)  =  wire^2 / (ID + wire)
+//
+// the (turns / L) and the elastic constants being common to both and so
+// irrelevant to their RATIO. That ratio is the whole point - see
+// duplexPairBalanced.
+function duplexSpringStress(wire, springId) {
+    return (wire * wire) / (springId + wire);
+}
+
+// Whether the two wires are a pairing the reference would actually offer.
+//
+// MEASURED, from all thirteen pairings the reference has been seen to use:
+// the outer spring is NEVER materially more stressed than the inner. The
+// stress ratio outer/inner runs 0.862 to 1.040 across every one of them, and
+// for six of the seven inner sizes the stiffest outer used is exactly the
+// stiffest the balance allows. The inner is the limiting spring - which is
+// also the one whose cycle life the reference reports.
+//
+// THIS IS WHAT MAKES THE LADDER ONE-DIMENSIONAL. Generating the free cross
+// product of the wire table instead was tried and was much worse: it buries
+// the real rungs under soft, badly-matched pairings that meet the cycle
+// target first, and the wire choice fell from 8 of 11 reference readings to
+// 2 of 11. The pairing is a curve through the two wire sizes, not a product
+// of them.
+//
+// The bounds are the measured range with a little margin, not a theory. A
+// pairing outside them has never been observed.
+function duplexPairBalanced(pair, outerWire, innerWire) {
+    const ratio =
+        duplexSpringStress(outerWire, pair.outerId) /
+        duplexSpringStress(innerWire, pair.innerId);
+
+    return ratio >= DUPLEX_BALANCE_MIN && ratio <= DUPLEX_BALANCE_MAX;
+}
+
+// `measured` marks a rung that came from the calibration table, which means
+// the reference was OBSERVED using it.
+//
+// THE PUBLISHED WIRE BAND IS A SINGLE-SPRING BAND AND DOES NOT BIND A DUPLEX
+// PAIR. WIRE_LIMITS caps 3 3/4" at 0.4062, and the reference demonstrably
+// winds 0.4218, 0.4305 and 0.4615 inner wires on that same 3 3/4" inner
+// spring - there are readings on all three. The note on WIRE_LIMITS says the
+// Duplex pairs have no published band and should not borrow a neighbour's;
+// this function was borrowing one anyway.
+//
+// The cost was the entire stiff end of the ladder. Four calibrated rungs -
+// 0.5312/0.4218, 0.5312/0.4305, 0.5625/0.4305 and 0.625/0.4615 - were built,
+// given a K from real readings, and then silently dropped here, so a door
+// past 1712 lb had nowhere to step: the softer pair was correctly REJECTED on
+// cycle life and then chosen anyway because the list held nothing stiffer.
+// Those four rungs were 78 of 108 corpus failures.
+//
+// The geometric check stays for everything: a pair that cannot physically be
+// wound is worse than no suggestion. The band check now applies only to
+// GENERATED rungs, where it is the only thing keeping extrapolation inside
+// sizes anyone has seen used.
+function duplexPairBuildable(pair, outerWire, innerWire, measured = false) {
+    if (pair.innerId + 2 * innerWire >= pair.outerId) {
+        return false;
+    }
+
+    if (measured) {
+        return true;
+    }
+
+    const inner = wireBandForId(pair.innerId);
+
+    if (inner && (innerWire < inner.min - 1e-9 || innerWire > inner.max + 1e-9)) {
+        return false;
+    }
+
+    const outer = wireBandForId(pair.outerId);
+
+    if (outer && (outerWire < outer.min - 1e-9 || outerWire > outer.max + 1e-9)) {
+        return false;
+    }
+
+    return true;
+}
+
 // --- Torsion assembly length ----------------------------------------------
 // What the assembly measures along the shaft, against the width it has to fit
 // inside. Reverse-engineered from two reference readings:
@@ -908,7 +1896,7 @@ const WIRE_LIMITS = {
 //   2        9'0" (108")  115.40103713850469"
 //   1        4'0" (48")    48.67261549495042"
 //
-//   assembly = springs * (springLength + turns * wire) + ASSEMBLY_HARDWARE
+//   assembly = springs * (springLength + turns * wire) + ASSEMBLY_HARDWARE[springs]
 //
 // Three pieces:
 //
@@ -937,16 +1925,136 @@ const WIRE_LIMITS = {
 // a different height is what would actually prove it. The two only diverge by
 // under 1% of the assembly length, so the warning fires in much the same
 // place either way.
-const ASSEMBLY_HARDWARE = 24;
+// Duplex assembly hardware, MEASURED per spring count.
+//
+// The reference never reports its assembly length, but it warns when that
+// length exceeds the door width - and the width is an input, so sweeping the
+// width one inch at a time brackets the length to the inch. Nine brackets
+// across 1 to 4 springs (dev/assembly-solve.mjs, dev/pulled-a1.json):
+//
+//   springs   hardware must lie in   taken
+//      1       (15.717, 16.717]      16.25
+//      2       (27.928, 28.723]      28.5
+//      3       (27.974, 28.974]      28.5
+//      4       (31.965, 32.094]      32
+//
+// It is not flat, which is what the Duplex path assumed by borrowing the
+// Single constant of 24. One spring needs no centre bearing bracket; two and
+// three share one, at +12.25"; four needs a second, at +3.5". That accounts
+// for all four values and for why two and three are identical.
+//
+// WHY THE OLD 24 SURVIVED SO LONG: it was derived from two SINGLE-path
+// readings, and the file already noted that one piece of it was not fully
+// pinned because both shared a door height. A Single assembly carries one
+// spring per position where Duplex nests two, so there was never a reason for
+// the hardware to match - it was simply never measured on Duplex.
+//
+// The rest of the formula is confirmed, not replaced: solving for the hardware
+// with the reference's own length and turns gives a spread of 0.2" across the
+// three 2-spring brackets, where dropping the winding term widens it to 1.5".
+// MEASURED THE SAME WAY FOR BOTH ASSEMBLIES, because it is the same hardware.
+// Single carried a flat 24" fitted from two readings whose inputs were never
+// recorded, so it could not be re-solved - and it was wrong at every spring
+// count. Sweeping the door width an inch at a time on a Single hi-lift door
+// (575-120, 7'0", 60" hi-lift, 2 5/8", 200 lb, dev/pulled-s2.json) brackets
+// the reference's own assembly length and solves for the hardware:
+//
+//   springs   width that warns / does not   hardware must lie in   flat 24 was
+//      1              -    /   80            (-inf, 17.29]          too big
+//      2             110   /  111            (27.62, 28.62]         too small
+//      3             117   /  118            (27.68, 28.68]         too small
+//      4             125   /   -             (19.73, +inf)          consistent
+//
+// Every bracket contains the value already measured for Duplex, so there is
+// one table, not two. That is what the physics says too: the hardware is
+// cones, the centre bearing bracket, the drums and the end bearing plates,
+// none of which care whether the springs on the shaft are nested.
+//
+// WHAT THE FLAT 24 COST. At 200 lb this door is a 38.25" spring on a 108"
+// opening; the reference calls it too long and we did not, because 24 put the
+// assembly at 106.27" where 28.5 puts it at 110.88". A missing too-long
+// warning is the dangerous direction - it quotes a spring that will not fit
+// the opening, and now prices it too.
+// REFINED AGAINST EVERY TOO-LONG OBSERVATION, 5,643 of them across both
+// assemblies, both lifts and all four counts. The reference warns iff the
+// assembly exceeds the width, so each reading is a one-sided bound on the
+// hardware, and the two-spring bounds close to (27.91, 28.14]:
+//
+//   springs   bounds from 5,643 readings   agreement at 28.5   at 28
+//      1          inconsistent              2174/2178          same
+//      2          (27.91, 28.14]            1533/1544          1544/1544
+//      3          (27.95, 28.58]             942/942            942/942
+//      4          (31.94, 32.07]             979/979            979/979
+//
+// 28.5 sat just outside the two-spring window, which is what the eleven
+// false too-long warnings were: every one of them overshot by between 0.12"
+// and 0.45", a boundary case rather than a wrong model. 28 is inside both the
+// two- and three-spring windows, so one value still serves both.
+//
+// ONE SPRING IS LEFT AT 16.25. Its bounds do not close - some reading wants
+// more than 15.71 and another no more than 13.80 - so a single constant
+// cannot satisfy them and the residue is a fault somewhere else in the
+// one-spring path. 16.25 already agrees on 2,174 of 2,178; the best possible
+// constant gets 2,176, which is not worth moving for.
+const ASSEMBLY_HARDWARE = { 1: 16.25, 2: 28, 3: 28, 4: 32 };
 
 // The ceiling on the cycle formula itself. Past this the reference stops
 // trusting its own answer rather than reporting a larger number, so this is a
 // bound on the CALCULATION, not on any spring.
 const CYCLE_MAX = 350000;
 
+// --- Pricing --------------------------------------------------------------
+// What the assembly is quoted at. Three parts, kept separate because they are
+// charged on different things:
+//
+//   LABOUR  a flat fee, once per quote however many springs the door takes.
+//
+//   CONES   per SPRING, chosen by inside diameter. A Duplex spring is two
+//           springs nested on one shaft position, so it carries a set for the
+//           inner diameter and a set for the outer - the two are added.
+//
+//   STEEL   per pound of FINISHED spring, counting every spring in the
+//           assembly. It is taken from the weights the results already show,
+//           which are themselves taken from the quarter-inch length that gets
+//           built, so the price always agrees with the figures above it.
+const LABOR_COST = 100;
+const STEEL_PRICE_PER_LB = 1.46;
+
+// Keyed by inside diameter as a NUMBER, so the Duplex path can look up its
+// pair's diameters directly - it knows them as numbers, not as the dropdown's
+// strings.
+//
+// 6" is not a size of its own here: it takes the 5 1/4" price. The three
+// Single diameters are the three that were quoted to us, and 6" appears only
+// as the outer half of a Duplex pair.
+//
+// UNINSTALLED prices, quoted 2026-10-05. They replace an earlier set (6.04,
+// 12.00, 20.00) which was a little higher at every size.
+const CONE_PRICES = {
+    2.625: 4.99,
+    3.75: 11.55,
+    5.25: 19.43,
+    6: 19.43,
+};
+
 // Shown once, as its own message, whenever any warning is raised.
 const WARNING_NOTE =
     "Use extreme caution when designing springs for use with this drum.";
+
+// The Spring ID each assembly opens on - the FIRST option its dropdown
+// offers, which matters because that is what a browser falls back to showing
+// when the stored value is not in the new list.
+//
+// The two lists share no strings: Single offers 3 3/4" where Duplex offers
+// 3 3/4" inside 6". So every assembly switch leaves the old value orphaned,
+// which is the whole reason the handler below exists.
+//
+// Triplex is absent on purpose - its Spring ID row is hidden entirely, so
+// there is nothing to pick and nothing to measure.
+const FIRST_SPRING_ID = {
+    Single: '2 5/8"',
+    Duplex: '3 3/4" inside 6"',
+};
 
 // The starting values, in one place so setup() and the Clear button cannot
 // drift apart. Returns a fresh object each time - handing the same one to
@@ -1026,6 +2134,52 @@ get springIdNumber() {
 }
 
 get doorHeightTotalFeet() {
+    const entered =
+        Number(this.state.doorHeightFeet || 0) +
+        Number(this.state.doorHeightInches || 0) / 12;
+
+    // The drum's nameplate height is a CAP, not just something to warn about.
+    // The reference freezes its answer at maxHeight: on D400-96 at 375 lb the
+    // multiplier, turns and TIPPT are identical at 96", 108", 120", 132" and
+    // 144" - 0.281015 / 8.1 / 105.4 throughout - so the length stops at 20.25
+    // instead of climbing. We were feeding the entered height straight in and
+    // growing the spring to 29.25.
+    //
+    // Same shape as the hi-lift weight clamp: the limit was already sitting in
+    // DRUM_LIMITS and the Duplex path simply never consulted it. maxHeight was
+    // only ever used for the Single warning below.
+    //
+    // NOW APPLIED TO SINGLE TOO. It was Duplex-only, on the standing
+    // instruction not to move the Single path. That instruction was given
+    // because Single was correct, and for every door at or under the drum's
+    // nameplate it still is - the readings match exactly. Past the nameplate
+    // it was not: the reference freezes, we kept climbing, and on a D400-96
+    // at 144" the multiplier was 0.182830 against the reference's 0.257806,
+    // 29% out. Twelve Single readings show the freeze directly, six on each
+    // of two drums.
+    //
+    // Standard lift only. The hi-lift drums are absent from DRUM_LIMITS,
+    // which is also correct: D800-120 tracks the entered height past its
+    // nameplate 120 all the way to 192".
+    // Hi-lift drums keep their caps in HILIFT_DRUMS, and they DO have height
+    // caps - 384, 264 and 234 inches - which this used to skip entirely on the
+    // grounds that the hi-lift drums were absent from DRUM_LIMITS. They were
+    // absent from the wrong table, not uncapped.
+    const limits = (this.state.liftType === "Hi-Lift"
+        ? HILIFT_DRUMS[this.state.drum]
+        : null) || DRUM_LIMITS[this.state.drum];
+
+    if (!limits || !limits.maxHeight) {
+        return entered;
+    }
+
+    return Math.min(entered, limits.maxHeight / 12);
+}
+
+// The height as TYPED, unclamped. The warning below has to compare against
+// this: doorHeightTotalFeet is now the effective height, so asking it whether
+// the door is too tall can only ever answer no.
+get doorHeightEnteredFeet() {
     return (
         Number(this.state.doorHeightFeet || 0) +
         Number(this.state.doorHeightInches || 0) / 12
@@ -1097,8 +2251,32 @@ get turnsExact() {
     );
 }
 
+// ONE DECIMAL, because that is what the reference prints and what the user
+// is comparing against. Across 4,712 readings it gives turns to a tenth -
+// 11.2, never 11.18 - and TIPPT the same. Showing two decimals made our
+// figures disagree with the website almost everywhere even when the
+// arithmetic underneath was identical: turns matched in 245 of 4,210 Duplex
+// readings at two decimals and 4,085 at one.
+//
+// DISPLAY ONLY, both of these. Nothing computes from them - cycles come from
+// turnsExact and tipptExact and reproduce the reference's own figure on all
+// 288 Single readings we hold, so rounding the inputs to a tenth before
+// computing would be a different change and a worse one: measured, it drops
+// that agreement from 288/288 to 145/288.
 get turns() {
-    return Math.round(this.turnsExact * 100) / 100;
+    return Math.round(this.turnsExact * 10) / 10;
+}
+
+// The Wire Size dropdown. Hidden on Duplex, where the outer and inner
+// springs each carry their own wire size in the results and one shared
+// selection above them would be meaningless.
+//
+// The auto-pick still runs underneath and still writes state.wireSize; it
+// is simply not on screen. Nothing reads it in Duplex, whose results are
+// placeholder zeros, so leaving it alone keeps Single unchanged when the
+// assembly is switched back.
+get wireSizeVisible() {
+    return this.resultsVisible && this.state.assembly !== "Duplex";
 }
 
 get multiplierExact() {
@@ -1176,8 +2354,8 @@ get tipptExact() {
 }
 
 get tippt() {
-    // Display only. Nothing computes from this - see springLengthExact.
-    return Math.round(this.tipptExact * 100) / 100;
+    // Display only, to one decimal - see `turns` above.
+    return Math.round(this.tipptExact * 10) / 10;
 }
 
 get wireSizeNumber() {
@@ -1294,8 +2472,28 @@ get springLengthExact() {
     return (this.state.springs * this.divider) / this.tipptExact + endAddition;
 }
 
+// QUARTER INCH, because that is what the reference quotes and what can be
+// bought. Springs are made to a quarter and the reference's own answers are
+// always a multiple of 0.25 - 30, 33.25, 51.5, 60, 85.75 - while this returned
+// two decimals of the raw computation: 33.20 where the reference says 33.25,
+// 51.45 where it says 51.5.
+//
+// Measured against 176 external readings, feeding the reference's own wire
+// choice back in so the comparison is like for like:
+//
+//   as it was returned, two decimals      4/176    2.3%
+//   rounded to the nearest 1/4"         123/176   69.9%
+//   rounded to the nearest 1/8"          60/176   34.1%
+//
+// The remaining 30% is not this rule: the length is right exactly where the
+// multiplier is (69.9% against 70.5%), so what is left is multiplier error.
+//
+// WHY THIS SURVIVED. dev/single-check.mjs only ever checked the MULTIPLIER,
+// and only on hand-picked readings, where it scored 12/12. The 725-case golden
+// snapshot proves nothing moved, never that it was right. Single's length had
+// never once been compared to the reference.
 get springLength() {
-    return Math.round(this.springLengthExact * 100) / 100;
+    return Math.round(this.springLengthExact * 4) / 4;
 }
 
 get springWeight() {
@@ -1306,18 +2504,869 @@ get springWeight() {
         return 0;
     }
 
+    // FROM THE QUARTER-INCH LENGTH, not the raw one, because that is the
+    // spring that gets built. Proved by inverting the reference's own reported
+    // weights: across 7,941 of them the length implied by the weight matches
+    // the length the reference REPORTS to within 0.005" in 99.9% of cases, so
+    // it weighs the spring it quotes rather than the unrounded computation.
     const volume =
         ((Math.PI ** 2) / 4) *
         this.wireSizeNumber *
         this.meanDiameter *
-        this.springLengthExact;
+        this.springLength;
 
     return Math.round(STEEL_DENSITY * volume * 100) / 100;
+}
+
+// --- Duplex results ------------------------------------------------------
+// All of this is gated on isDuplex, so the Single path is untouched.
+
+get isDuplex() {
+    return this.state.assembly === "Duplex";
+}
+
+get duplexSpringCount() {
+    return Number(this.state.springs) || 2;
+}
+
+// THE DOOR WEIGHT THE DRUM WILL ACTUALLY CARRY.
+//
+// The reference CAPS the weight at the drum's rating and recomputes, saying so
+// as it goes: "The current weight entered is heavier than this drum will
+// allow! The weight will be set to the drums maximum weight of 530". It is not
+// just a warning - the whole answer that comes back is for the capped weight.
+// A 620 lb door on the D400-96 returns TIPPT 151.9, which is 0.286584 x 530,
+// not x 620.
+//
+// Two readings confirm it: 620 lb on the D400-96 computed at 530, and 765 lb on
+// the D400-144 computed at 750.
+//
+// This app used to warn and then compute on the entered figure, which gave a
+// different wire AND a 1.25" different spring on that 620 lb door - a different
+// part ordered. The warning (see `warnings`) is unchanged and still fires;
+// what changes is that the arithmetic now honours it.
+//
+// CONFINED TO DUPLEX, which is why this exists instead of clamping inside
+// tipptExact. The cap is a property of the DRUM, so the Single path almost
+// certainly needs it too - but Single has no reference reading to confirm the
+// behaviour and is explicitly out of scope, so it is left alone and this is
+// recorded as a known inconsistency rather than a silent change. One Single
+// reading over a drum's rating would settle it.
+get duplexEffectiveWeight() {
+    const entered = Number(this.state.weight) || 0;
+    // Hi-lift drums carry their rating in HILIFT_DRUMS, not DRUM_LIMITS, and
+    // looking only in the latter meant hi-lift was never clamped at all. The
+    // reference clamps 575-120 and 525-54HL at 1000 lb - entering 1005 already
+    // comes back as 1000 - so above that we were computing TIPPT on a weight
+    // the reference had thrown away, and picking a stiffer pair than it did.
+    // Measured by backing the weight out of the reference's own TIPPT and
+    // multiplier: see the 575/525 w1200 readings.
+    const limits = (this.state.liftType === "Hi-Lift"
+        ? HILIFT_DRUMS[this.state.drum]
+        : null) || DRUM_LIMITS[this.state.drum];
+
+    if (!limits || !limits.maxWeight) {
+        return entered;
+    }
+
+    return Math.min(entered, limits.maxWeight);
+}
+
+// TIPPT on the effective weight. Everything in the Duplex path computes from
+// this rather than tipptExact, which stays on the entered weight for Single.
+get duplexTipptExact() {
+    return this.multiplierExact * this.duplexEffectiveWeight;
+}
+
+// Scales K, which sets the TORQUE one spring carries and hence the cycle
+// count. Every K in the table was fitted at 2 springs, so this is the factor
+// off that baseline. Exactly reciprocal in the spring count.
+get duplexTorqueScale() {
+    return Math.pow(this.duplexSpringCount / 2, DUPLEX_TORQUE_COUNT_EXPONENT);
+}
+
+get duplexPair() {
+    const key = DUPLEX_ALIASES[this.state.springId] || this.state.springId;
+
+    return DUPLEX_PAIRS[key] || null;
+}
+
+// Cycle life for one wire combination. K is the spring's body length times
+// TIPPT, so the body is K/TIPPT and the rate follows; the rest is the
+// standard cycle formula on the inner spring, which is the one the reference
+// reports.
+//
+// K IS NOT THE ACTIVE LENGTH, which is the surprise here. The LENGTH turned
+// out to need no fitted constant at all - it is springs x (d_out + d_in) /
+// TIPPT, the catalog formula - so the obvious next step was to use that same
+// active length as the cycle body, which is exactly equivalent to setting
+// K = S. It was tried and it is WORSE: the wire choice falls from 9 of 11
+// reference readings to 6 of 11. The fitted K is kept because it selects
+// better, not because it is understood.
+//
+// WHAT IS STILL WRONG HERE. Inverting the reference's own reported cycle
+// counts needs 3-5% more torque on the inner spring than the physical active
+// length produces, and the implied correction is not constant - it runs 1.003
+// to 1.117 across eleven readings, mean 1.0390. Neither the inner spring
+// alone nor the outer alone reproduces the counts. So the duplex cycle model
+// is the one piece still fitted rather than derived, and the two remaining
+// wire misses (both 1-spring, both one step too stiff) are its doing.
+//
+// THE WAHL LEAD, worth picking up when there are more readings.
+//
+// The standard torsion-spring curvature correction - the Wahl inner-fibre
+// factor Ki = (4C^2 - C - 1)/(4C(C - 1)), C = mean diameter / wire - averages
+// 1.0500 over these same eleven readings, against the 1.0390 they need. The
+// same size, which is suggestive: it would mean the reference corrects the
+// inner-fibre stress and this model does not.
+//
+// Implemented and measured, as body = active length x Ki, which drops K
+// ENTIRELY and makes the whole duplex model derived:
+//
+//     fitted K (what is here)      wire  9/11     length 7/11
+//     physical active length only  wire  6/11     length 4/11
+//     active length x Ki           wire  9/11     length 7/11
+//
+// A TIE, so it is not in yet - but it is a tie against 17 fitted constants
+// plus four slope/intercept terms, and K is demonstrably unsound where there
+// are no readings: on the 2 5/8" inside 5 1/4" pair, which has NO reference
+// readings at all, K/S spans 0.616 to 1.122 and trends monotonically with
+// wire size. That is a systematic error, not scatter. Ki spans 1.044 to 1.065
+// across both pairs.
+//
+// WHAT STOPPED IT. Ki runs ~8% low on the 470 lb 1-spring reading, which puts
+// 0.3195/0.2625 just under a 10,000 target and selects the softer
+// 0.3195/0.25 instead - a pairing the reference never uses. It also exposed a
+// REAL latent bug worth recording: cycle life is NOT monotonic along the
+// ladder, because a softer pair has a longer body (less torque) but a thinner
+// inner wire (less capacity), and those need not cancel. So "the first pair
+// over the target" is not "the softest pair over the target". With the fitted
+// K no reading or invariant currently separates them, but the ladder ordering
+// cannot be relied on once the cycle model moves.
+//
+// The correlation between the needed correction and Ki is only r = 0.435, so
+// Ki explains the SIZE of the gap and not its variation.
+//
+// THE TARGET SWEEP SETTLED WHAT THE CORRECTION IS NOT. With the reference's
+// own lengths used as the body, so the length model is out of the picture, the
+// needed correction over 14 readings is 1.0435 mean, sd 0.0295 - near enough
+// CONSTANT, not the systematically varying thing Ki would give. Scanning a
+// single constant correction (which is just a duplex-specific cycle
+// coefficient, since cycles = (COEFF x wire^2.79 / torque)^4.67 absorbs it):
+//
+//     no correction                       wire  4/14
+//     best constant, c in 1.0375-1.0575   wire  8/14
+//     Wahl Ki                             wire  8/14
+//     fitted K per combination (here)     wire  9/14
+//
+// A correction is unambiguously needed - 4/14 without one - and it is about
+// 4%. But the fitted K still edges out both derived forms, so it stays. The
+// honest reading is that one constant captures most of what K is doing and
+// the remainder is not yet explained.
+//
+// The readings that report EXACTLY the target are the least informative here:
+// four of them do, and it is not known whether that is a computed life that
+// happens to land on the target or the target echoed back. The ones reporting
+// a value above target are what the figures above lean on.
+//
+// WHAT K ACTUALLY IS - settled by a 19-reading analysis using the PHYSICAL
+// active length as the body, so K is out of the picture and the residual is
+// visible. The correction needed is not global and not Ki. It is PER WIRE
+// PAIRING, and within one pairing it is remarkably tight:
+//
+//     0.2625/0.2253   11 readings   mean 1.0074   sd 0.0025
+//     0.273/0.2253      1 reading        1.0261
+//     0.283/0.2253      1 reading        1.0512
+//     0.3065/0.2437     1 reading        1.0480
+//
+// Eleven readings on one pairing agreeing to a quarter of a percent is not
+// noise - it is a real per-pairing quantity. And K is exactly its reciprocal:
+// K/S for 0.2625/0.2253 is 0.9963, i.e. 1/1.0037, against a measured 1.0074;
+// for 0.283/0.2253 it is 0.9574, i.e. 1/1.0445, against a measured 1.0512.
+//
+// So K is sound in principle and only badly SAMPLED. That is why the derived
+// forms tie but never beat it, and it is the practical path forward: each
+// pairing's K can be pinned to a fraction of a percent by two or three
+// readings on that pairing, where the current values came from bracket
+// midpoints.
+//
+// It also explains the earlier spring-count confusion. Grouping the same
+// residuals by count gives 1 spring 1.0492 and 2 springs 1.0151, which looks
+// like a count effect - but the 2-spring set is dominated by eleven readings
+// on the softest pairing, whose correction is genuinely near 1. The split is
+// by pairing, not by count.
+//
+// TWO FLAVOURS, AND THE DIFFERENCE MATTERS.
+//
+// `rounded` (the default) reproduces the reference rounding TIPPT and turns
+// to ONE DECIMAL before computing: its API returns them at exactly that
+// precision and computes from them, and it shows in its own output - six
+// responses at a fixed load and rising height gave counts wandering 173,000
+// to 182,000 for a quantity that is physically constant. Matching it nearly
+// doubled the exact matches across 42 readings and halved the worst error,
+// 4.77% to 2.90%. Rounding to two decimals gives the unrounded figures back
+// exactly, so one decimal is the real rule and not a fudge that happens to
+// help. This is what the Cycle Life row DISPLAYS.
+//
+// UNROUNDED IS WHAT CHOOSES THE WIRE. Peak torque at full wind is weight
+// times drum radius, so turnsExact * tipptExact is identically rEff * weight
+// and the cycle count does not depend on door height or track radius at all.
+// The 1-decimal rounding breaks that identity and injects a ~5% wobble. Since
+// the wire is picked by comparing the count against the target, that wobble
+// was flipping a DISCRETE choice worth inches of spring: a 688 lb door went
+// 0.289 -> 0.283 -> 0.289 as it got TALLER. Measured on the D400-144, 85
+// weights changed wire with height alone and 105 weight/spring-count
+// combinations changed wire with track radius alone.
+//
+// So the decision is made on exact values and only the printout is rounded.
+// dev/replay.mjs enforces both independences.
+duplexCyclesForStep(step, { rounded = true } = {}) {
+    const pair = this.duplexPair;
+
+    if (!step || !pair || !this.duplexTipptExact || !this.turnsExact) {
+        return 0;
+    }
+
+    // TIPPT and turns are rounded to ONE DECIMAL first, because the reference
+    // does: its API returns them at exactly that precision and computes from
+    // them. It shows in its own output - six responses at a fixed load and
+    // rising height gave cycle counts wandering 173,000 to 182,000 for a
+    // quantity that is physically constant, which is the rounding, not the
+    // spring.
+    //
+    // Replicating it nearly doubled the exact matches across 42 readings and
+    // halved the worst error, 4.77% to 2.90%. Rounding to two decimals gives
+    // back the unrounded figures exactly, so one decimal is the real rule and
+    // not a fudge that happens to help.
+    //
+    // CONFINED TO DUPLEX. tipptExact and turnsExact are untouched, so nothing
+    // in the Single path moves.
+    // ROUNDED FOR DISPLAY ONLY - never for the wire decision. See the note
+    // below the formula.
+    const tippt = rounded
+        ? Math.round(this.duplexTipptExact * 10) / 10
+        : this.duplexTipptExact;
+    const turns = rounded
+        ? Math.round(this.turnsExact * 10) / 10
+        : this.turnsExact;
+
+    const body = (step.K * this.duplexTorqueScale) / tippt;
+    const divider =
+        (30000000 * Math.pow(step.innerWire, 5)) /
+        (TORSION_CONSTANT * (pair.innerId + step.innerWire));
+    const torque = (divider / body) * turns;
+
+    if (!torque) {
+        return 0;
+    }
+
+    return Math.pow(
+        (CYCLE_COEFFICIENT * Math.pow(step.innerWire, CYCLE_WIRE_EXPONENT)) /
+            torque,
+        CYCLE_EXPONENT
+    );
+}
+
+// Every wire combination the calculator may choose from, smallest first.
+//
+// The measured ones lead, in the order the reference was seen to use them.
+// After those the list CONTINUES, generated across the whole WIRE_SIZES
+// table, so a heavy or tall door can never run off the end - which is what
+// went wrong before: the table stopped at 0.2730/0.2253 and every door past
+// it silently got that combination and badly wrong numbers.
+//
+// Generated entries get C and K from a LINE through S = 2*(outer divider +
+// inner divider), the quantity the two springs' rates sum to.
+//
+// A fixed RATIO to S was tried first and was not good enough: C/S drifts from
+// 1.027 to 0.997 and K/S from 0.995 to 0.949 as the springs stiffen, and a
+// 749 lb door at 10'8" landed on an estimated C 2% high - which pushed x past
+// a rounding boundary and added a whole 1.25" to the length. On a rule that
+// rounds to the inch, a 2% error in C is not a 2% error in the answer.
+//
+// A line holds the measured points to about 1%. They are still ESTIMATES, and
+// duplexExtrapolated flags when one is in use.
+get duplexCandidates() {
+    const pair = this.duplexPair;
+
+    if (!pair) {
+        return [];
+    }
+
+    const divider = (wire, id) =>
+        (30000000 * Math.pow(wire, 5)) / (TORSION_CONSTANT * (id + wire));
+
+    const stiffness = (c) =>
+        2 *
+        (divider(c.outerWire, pair.outerId) +
+            divider(c.innerWire, pair.innerId));
+
+    const out = pair.calibration.map((c) => ({
+        ...c,
+        S: stiffness(c),
+        measured: true,
+    }));
+    const seen = new Set(out.map((c) => c.outerWire + "/" + c.innerWire));
+
+    // THE LIST IS CAPPED PER CYCLE TARGET.
+    //
+    // Torsion springs are sold BY CYCLE RATING - a 10,000-cycle line, a
+    // 25,000-cycle line - so the target picks which catalogue is on offer,
+    // not merely a threshold to clear. Two 750 lb doors at 8'0" and 12'0",
+    // both at a 10,000 target, both stop dead at 0.2950/0.2343 and say so:
+    // "cycle life calculation of 9,000.00 is less than the 10,000 cycle
+    // minimum". The same door at 25,000 uses 0.3195/0.2625 without trouble.
+    // The combination exists; it was not AVAILABLE at the lower target.
+    //
+    // (Those two doors landing on the same 9,000 is itself a good check: peak
+    // torque is weight times drum radius and does not depend on height, so
+    // one door weight gives one cycle life at every height. 196.4 x 8.8 and
+    // 139.2 x 12.4 are both 1727.)
+    //
+    // An earlier note blamed door width for the same behaviour. That was
+    // wrong - changing the width changes nothing in the reference's output.
+    // THE LADDER IS THE WHOLE CROSS PRODUCT, not a tail hung off the last
+    // measured entry.
+    //
+    // It used to start generating at the indices of the LAST calibration row
+    // (0.375/0.3065), so every combination softer than that and not explicitly
+    // measured was unreachable. Three reference readings land on exactly such
+    // combinations - 0.331/0.2625, 0.3437/0.273 and 0.3625/0.295, none of them
+    // in the table - and the app answered each with the next rung it did have,
+    // one step too stiff.
+    //
+    // Generating the full product is only safe now that the LENGTH needs no
+    // fitted constant: a generated rung's length is exact, because it comes
+    // from its own two wire sizes. Before duplexActiveLength it would have
+    // carried a C estimated to about 1%, and a 1% error in C moved 22.7% of
+    // lengths by a whole inch - which is why this was left alone until the
+    // length rule was settled.
+    //
+    // What a generated rung still estimates is K, and therefore its cycle
+    // count. duplexExtrapolated reports when one is in use.
+    const extra = [];
+
+    // GENERATION ONLY ABOVE THE CATALOGUE, never between its rungs.
+    //
+    // This is the change that made the ladder work. Generating rungs that
+    // interleave with the catalogue is what produced the phantoms: 0.289/0.2253
+    // has a stress balance of 1.0400 and is never used by the reference, while
+    // 0.3625/0.283 has a balance of 1.0400 and IS used, so no rule in this file
+    // can tell them apart. Inside the catalogue's range the catalogue is the
+    // authority; past its stiffest rung a heavy door still needs somewhere to
+    // go, and only there is a rung invented.
+    //
+    // A generated rung's K is estimated from the balance law just below.
+    // duplexExtrapolated still reports when one is in use.
+    //
+    // This replaced, in turn, a kSlope line that ran 8.5% low on the first
+    // rung past the table, and then the catalogue's median K/S - which was
+    // better than the line and is still 17% to 34% out at the stiff end,
+    // because K/S is not constant.
+    //
+    // K/S IS NOT CONSTANT ALONG THE LADDER - it tracks the stress balance.
+    //
+    // Across the 44 calibrated rungs K/S runs 0.72 to 0.99, and it falls as
+    // the outer spring becomes relatively more stressed: Pearson r = -0.906
+    // against the balance ratio. A single median ratio therefore misses by up
+    // to 25%, and it misses worst exactly where it is used - at the stiff end,
+    // past the catalogue, where the balance is furthest from the middle.
+    //
+    // Fitting K/S = a + b*balance on the 40 well-pinned rungs and testing it
+    // on the two whose K has no switch point behind it, so they were never in
+    // the fit:
+    //
+    //                    balance law   median ratio
+    //   0.5625/0.4305       6.4% off     17.3% off
+    //   0.625/0.4615       14.3% off     34.2% off
+    //
+    // Two to three times better where it matters. The law is NOT good enough
+    // to replace a measured K - its worst error on the rungs it was fitted to
+    // is 6.5%, against the 0.15% a switch point gives - so it is used only for
+    // GENERATED rungs, which had no measurement in the first place.
+    const fits = pair.calibration.map((c) => {
+        const stiffness =
+            2 *
+            (divider(c.outerWire, pair.outerId) +
+                divider(c.innerWire, pair.innerId));
+
+        return {
+            ratio: c.K / stiffness,
+            balance:
+                duplexSpringStress(c.outerWire, pair.outerId) /
+                duplexSpringStress(c.innerWire, pair.innerId),
+        };
+    });
+    const mean = (xs) => xs.reduce((t, v) => t + v, 0) / xs.length;
+    const mBal = mean(fits.map((f) => f.balance));
+    const mRatio = mean(fits.map((f) => f.ratio));
+    const varBal = mean(fits.map((f) => (f.balance - mBal) ** 2));
+    const slope = varBal
+        ? mean(fits.map((f) => (f.balance - mBal) * (f.ratio - mRatio))) / varBal
+        : 0;
+    const intercept = mRatio - slope * mBal;
+    const ratioFor = (outerWire, innerWire) =>
+        intercept +
+        slope *
+            (duplexSpringStress(outerWire, pair.outerId) /
+                duplexSpringStress(innerWire, pair.innerId));
+    const stiffest = Math.max(...out.map((c) => c.S));
+
+    for (let o = 0; o < WIRE_SIZES.length; o++) {
+        for (let i = 0; i < WIRE_SIZES.length; i++) {
+            const outerWire = WIRE_SIZES[o];
+            const innerWire = WIRE_SIZES[i];
+            const key = outerWire + "/" + innerWire;
+
+            if (seen.has(key)) {
+                continue;
+            }
+
+            if (!duplexPairBalanced(pair, outerWire, innerWire)) {
+                continue;
+            }
+
+            const S =
+                2 *
+                (divider(outerWire, pair.outerId) +
+                    divider(innerWire, pair.innerId));
+
+            if (S <= stiffest) {
+                continue;
+            }
+
+            seen.add(key);
+
+            extra.push({
+                outerWire,
+                innerWire,
+                K: S * ratioFor(outerWire, innerWire),
+                S,
+                measured: false,
+            });
+        }
+    }
+
+    // Sorted MEASURED AND GENERATED TOGETHER. Listing the measured ones first
+    // was a bug: 0.2830/0.2343 is in the table and 0.2830/0.2253 was not, so a
+    // 500 lb door on the D525-216 took the stiffer pair and came out an inch
+    // long where the reference had used the weaker inner. The two wires do not
+    // step in lockstep, so "the next combination up" has to be decided by
+    // total stiffness, not by which ones happen to have been measured.
+    //
+    // The catalogue limit applies to MEASURED entries too. A combination being
+    // in the table means it was seen once, not that it is on offer at every
+    // cycle target: 0.3195/0.2625 is measured, and at a 10,000 target the
+    // reference will not use it.
+    const all = out
+        .concat(extra)
+        .filter((c) =>
+            duplexPairBuildable(pair, c.outerWire, c.innerWire, c.measured)
+        )
+        .sort((a, b) => a.S - b.S);
+
+    // Never return nothing - if the cycle-rating limit excludes everything,
+    // fall back to the softest BUILDABLE combination rather than leaving the
+    // caller empty. The buildability gate is not negotiable here: a pair that
+    // cannot be wound is worse than no suggestion.
+    if (all.length) {
+        return all;
+    }
+
+    const buildable = out
+        .filter((c) =>
+            duplexPairBuildable(pair, c.outerWire, c.innerWire, c.measured)
+        )
+        .sort((a, b) => a.S - b.S);
+
+    return buildable.length ? [buildable[0]] : [];
+}
+
+// The wire combination the reference picks: the SMALLEST whose cycle life
+// reaches the target. Same rule the Single path uses.
+//
+// KNOWN GAP - THIS IS NOT THE WHOLE RULE. Raising the cycle target on one
+// 750 lb 12'0" door walks the reference up its sequence:
+//
+//   target  10,000 -> 0.2950/0.2343    9,000 cycles   BELOW target
+//   target  25,000 -> 0.3195/0.2625   31,000 cycles   above
+//   target  50,000 -> 0.3310/0.2730   49,000 cycles   BELOW target
+//   target 100,000 -> 0.3625/0.2830  115,000 cycles   above
+//
+// Twice it takes a combination that does not reach the target, so "smallest
+// meeting the target" is not what it does.
+//
+// CONFIRMED BY A REJECTION BOUNDARY. At 725 lb the reference returns 9,000
+// cycles with status 'warning' - "cycle life calculation of 9,000.00 is less
+// than the 10,000 cycle minimum" - and KEEPS 0.289/0.2343 rather than
+// stepping up. At 730 lb it does step up, to 0.295/0.2343. So it genuinely
+// tolerates undershooting the target, and the 725/730 pair brackets where the
+// step happens.
+//
+// "Closest to target" was then tested directly as the alternative, scored in
+// log space so an equal factor over and under weighs the same: 10 of 24
+// readings against the shipped rule's 18. So it is not that either.
+//
+// WHAT IT ACTUALLY IS: ~90% OF TARGET. Two rejection boundaries pin it. At
+// 685 lb the reference keeps 0.283/0.2343 at 9,000 cycles with a warning and
+// steps to 0.289 at 690; at 725 lb it keeps 0.289/0.2343 at 9,000 and steps
+// to 0.295 at 730. Both boundaries sit at 9,000 against a 10,000 target -
+// exactly 0.90.
+//
+// Confirmed a third way without using any K from this file: 620 lb measures
+// 14,000 cycles on 0.283/0.2253, and 14,000 / (680/620)^4.67 = 9,000, so at
+// 680 lb that rung falls to the boundary - which is exactly where the
+// reference steps off it.
+//
+// AND IT IS STILL NOT IMPLEMENTED, because it makes the result worse here:
+//
+//     f = 1.00   15/27       f = 0.92   12/27
+//     f = 0.98   15/27       f = 0.90   11/27
+//     f = 0.95   14/27       f = 0.85    9/27
+//
+// A looser threshold lets more rungs qualify and so amplifies every error in
+// K. At 680 lb this model still thinks 0.283/0.2253 clears the target where
+// the reference's own numbers put it at 9,000. The strict f = 1.00 in use is
+// compensating for optimistic K.
+//
+// THAT IS THE THIRD COMPENSATING ERROR FOUND - with DUPLEX_CATALOGUE's cap and
+// the pessimistic kSlope line. Each measures worse when corrected alone, which
+// is the signature of a stack of errors fitted against each other. K is the
+// one underneath: fix it per rung and the cap, the threshold and the ladder can
+// all then be corrected together.
+//
+// THE LADDER IS PARTLY A CATALOGUE, not purely a rule. 0.289/0.2253 has a
+// stress balance of 1.0400 and is NEVER used by the reference, while
+// 0.3625/0.283 has a balance of 1.0400 and IS used. Identical by every
+// criterion in this file, opposite verdicts. Seventeen pairings have now been
+// observed and they form a regular ladder in 7-13% stiffness steps; the
+// generated list offers 45 rungs up to the same stiffness, 28 of them never
+// seen.
+//
+// Restricting the ladder to the 17 observed rungs was measured: 16 of 23 with
+// the line-fitted K, 17 of 23 with K = S, against the generated ladder's 18.
+// Not an improvement YET, because the observed rungs that are not in
+// DUPLEX_PAIRS have no measured K - but it is the shape of the eventual fix,
+// and it needs a measured K per rung rather than a better guess.
+//
+// BOTH K ESTIMATES ARE COMPENSATING ERRORS, which is worth recording because
+// each looks like an obvious improvement on its own. The kSlope line runs
+// ~8.5% low on rungs past the table (6095 against S = 6665 for 0.3437/0.273),
+// which makes a generated rung look pessimistic, skips it, and lands one step
+// too stiff - every remaining wire miss has that shape. But replacing it with
+// K = S scores 9 of 24, far worse, because the line's pessimism is what
+// suppresses the 28 spurious generated rungs. Fixing either one alone makes
+// the result worse; the ladder and K have to be fixed together. The sequence is coarse - a wire
+// step is about a threefold jump in cycle life, since life goes as roughly
+// the thirteenth power of wire - so the reference is taking whichever
+// neighbour lands nearest, not the first one over.
+//
+// DOOR WIDTH IS NOT INVOLVED. An earlier note here blamed it, reasoning that
+// the 10,000 case fell back because 0.3195/0.2625 is 37" long and would not
+// fit a 108" opening. That was wrong: changing the door width changes nothing
+// in the reference's output. Width only ever drives the too-long message.
+//
+// "Closest to target" was tried as the unifying rule: it reproduces the sweep
+// above exactly and breaks SEVEN other readings. It may still be the right
+// rule with cycle counts this model cannot compute finely enough - near a
+// step the two neighbours can sit within a percent of each other, which is
+// inside this model's error.
+//
+// The cost is one reading: that 750 lb 12'0" door at 10,000, which picks
+// 0.3195/0.2625 here and comes out 14" long. Every other reading is right.
+get duplexStep() {
+    const pair = this.duplexPair;
+
+    if (!pair || !this.duplexTipptExact) {
+        return null;
+    }
+
+    const candidates = this.duplexCandidates;
+    const target = this.cycleTarget;
+
+    // NO TOLERANCE. There was one, growing from 0.1% to 3% as each boundary
+    // case arrived, and it was the wrong tool throughout - it was hiding K
+    // values that sat too low.
+    //
+    // What killed it: a 683 lb door computing 9,882 that the reference
+    // ACCEPTS, against a 727 lb door computing 9,967 that it REJECTS. The
+    // rejected case computes HIGHER than the accepted one, so no single
+    // threshold can separate them. They are different wire combinations, and
+    // the fault was K for 0.283/0.2343, not the comparison.
+    //
+    // Fixed at the cause instead. Each K is now bracketed by what its own
+    // readings prove: a reading that was SELECTED had cycles at or above the
+    // target, and its displayed count fixes them within 500. Those two
+    // together pin K to a few units, where a cycle count alone allowed
+    // dozens. The comparison can then be exact, as the reference's is.
+    // THE SOFTEST RUNG REACHING THE ACCEPTANCE FRACTION OF THE TARGET.
+    //
+    // Searched rather than taken first in order, because cycle life is not
+    // monotonic along the ladder: a softer rung has a longer body and so less
+    // torque per spring, but a thinner inner wire and so less capacity, and
+    // those need not cancel.
+    if (target) {
+        const reach = target * DUPLEX_ACCEPT_FRACTION;
+        let best = null;
+
+        for (const step of candidates) {
+            if (this.duplexCyclesForStep(step, { rounded: false }) < reach) {
+                continue;
+            }
+
+            if (!best || step.S < best.S) {
+                best = step;
+            }
+        }
+
+        if (best) {
+            return best;
+        }
+    }
+
+    return candidates[candidates.length - 1] || null;
+}
+
+// True when the chosen combination was never measured, so its length, weight
+// and cycle figures are estimates from the pair's ratios rather than readings.
+get duplexExtrapolated() {
+    const step = this.duplexStep;
+
+    return !!step && !step.measured;
+}
+
+// False once the load runs past the last measured wire combination, where
+// the numbers are an extrapolation rather than a reading.
+get duplexCalibrated() {
+    return !!this.duplexPair && !this.duplexExtrapolated;
+}
+
+get duplexInnerLength() {
+    return duplexSnapToGrid(
+        duplexLength(
+            this.duplexActiveLength,
+            this.duplexStep,
+            this.duplexSpringCount
+        ),
+        this.duplexSpringCount
+    );
+}
+
+// Active coil length of the pair, before rounding. Exposed because the
+// rounding is what is still uncertain, so the unrounded value is what a new
+// reading is compared against.
+get duplexActiveLength() {
+    return duplexActiveLength(
+        this.duplexPair,
+        this.duplexStep,
+        this.duplexSpringCount,
+        this.duplexTipptExact
+    );
+}
+
+// Always exactly an inch more than the inner - true in all 17 readings.
+get duplexOuterLength() {
+    const inner = this.duplexInnerLength;
+
+    return inner ? inner + 1 : 0;
+}
+
+// Steel weight, from the ROUNDED length. The reference does the same: at a
+// displayed 15.00" the outer comes back 17.25 lb to the cent, which only
+// works if the weight is taken after the length is rounded.
+duplexWeight(wire, springId, length) {
+    if (!wire || !length) {
+        return 0;
+    }
+
+    const volume =
+        ((Math.PI ** 2) / 4) * wire * (springId + wire) * length;
+
+    return Math.round(STEEL_DENSITY * volume * 100) / 100;
+}
+
+get duplexInnerWeight() {
+    const step = this.duplexStep;
+    const pair = this.duplexPair;
+
+    return step
+        ? this.duplexWeight(step.innerWire, pair.innerId, this.duplexInnerLength)
+        : 0;
+}
+
+get duplexOuterWeight() {
+    const step = this.duplexStep;
+    const pair = this.duplexPair;
+
+    return step
+        ? this.duplexWeight(step.outerWire, pair.outerId, this.duplexOuterLength)
+        : 0;
+}
+
+// --- Pricing ----------------------------------------------------------
+
+// Cones for ONE spring. Duplex nests two springs per shaft position and so
+// takes a set for each diameter; Single and Triplex take one.
+//
+// The Duplex diameters come from duplexPair, which has already resolved the
+// aliases - a Raynor 3 1/2" inside 5 1/2" is engineered as the 2 5/8" inside
+// 5 1/4" pair everywhere else in this file, so it is priced as one too.
+get coneUnitPrice() {
+    if (this.state.assembly === "Duplex") {
+        const pair = this.duplexPair;
+
+        if (!pair) {
+            return 0;
+        }
+
+        return (CONE_PRICES[pair.innerId] ?? 0) + (CONE_PRICES[pair.outerId] ?? 0);
+    }
+
+    return CONE_PRICES[this.springIdNumber] ?? 0;
+}
+
+// Finished steel in the whole assembly, in lb. Duplex counts both springs of
+// every pair.
+get assemblyWeight() {
+    const springs = Number(this.state.springs) || 0;
+
+    if (this.state.assembly === "Duplex") {
+        return springs * (this.duplexInnerWeight + this.duplexOuterWeight);
+    }
+
+    return springs * this.springWeight;
+}
+
+get priceLabor() {
+    return LABOR_COST;
+}
+
+get priceCones() {
+    const springs = Number(this.state.springs) || 0;
+
+    return Math.round(springs * this.coneUnitPrice * 100) / 100;
+}
+
+get priceSteel() {
+    return Math.round(this.assemblyWeight * STEEL_PRICE_PER_LB * 100) / 100;
+}
+
+// ROUNDED PARTS, SUMMED - not the rounding of an exact total. A quote whose
+// column does not add up invites someone to re-add it by hand, and labour is
+// a whole number while the other two are already at the cent, so the sum is
+// exact at the cent too.
+get priceTotal() {
+    return Math.round((this.priceLabor + this.priceCones + this.priceSteel) * 100) / 100;
+}
+
+money(value) {
+    return `$${value.toFixed(2)}`;
+}
+
+// Cycle life of the set. K is the spring's body length times TIPPT, so the
+// body is K/TIPPT and the rate follows; the rest is the standard cycle
+// formula on the inner spring, which is the one the reference reports.
+// TRUE when no pairing on the ladder reached the cycle target and the stiffest
+// available was taken instead.
+//
+// This is what the reference's "cycle life calculation is less than the N cycle
+// minimum" actually reports. It is NOT a threshold on the cycle count, which is
+// why comparing the count to a fraction of the target never worked: on all 184
+// readings where the reference raises it, our wire matches EXACTLY and the pair
+// we chose came from the fallback below duplexStep - we had already concluded
+// nothing reached the target. The count itself cannot carry the test, because
+// ours reads 9,819 where the reference reads 9,000 for the same pairing, which
+// rounds the wrong side of 9,500.
+get duplexSettled() {
+    const target = this.cycleTarget;
+    const pair = this.duplexPair;
+
+    if (!target || !pair || !this.duplexTipptExact) {
+        return false;
+    }
+
+    const reach = target * DUPLEX_ACCEPT_FRACTION;
+
+    return !this.duplexCandidates.some(
+        (step) => this.duplexCyclesForStep(step, { rounded: false }) >= reach
+    );
+}
+
+get duplexCyclesExact() {
+    return this.duplexCyclesForStep(this.duplexStep);
+}
+
+get duplexCycles() {
+    const cycles = this.duplexCyclesExact;
+
+    if (!cycles) {
+        return 0;
+    }
+
+    const rounded =
+        Math.round(cycles / DUPLEX_CYCLE_ROUNDING) * DUPLEX_CYCLE_ROUNDING;
+
+    return rounded.toLocaleString("en-US");
+}
+
+// Display strings for the two wire sizes and the two spring IDs.
+get duplexInnerWire() {
+    const step = this.duplexStep;
+
+    return step ? formatWire(step.innerWire) : "";
+}
+
+get duplexOuterWire() {
+    const step = this.duplexStep;
+
+    return step ? formatWire(step.outerWire) : "";
+}
+
+get duplexInnerId() {
+    const key = DUPLEX_ALIASES[this.state.springId] || this.state.springId;
+
+    return key ? key.split(" inside ")[0] : "";
+}
+
+get duplexOuterId() {
+    const key = DUPLEX_ALIASES[this.state.springId] || this.state.springId;
+
+    return key ? key.split(" inside ")[1] : "";
 }
 
 // How much shaft the finished assembly takes up, wound and with its hardware.
 // See ASSEMBLY_HARDWARE above for where the three terms come from.
 get assemblyLengthExact() {
+    // DUPLEX USES ITS OWN SPRING, which it has to: springLengthExact and
+    // wireSizeNumber below both come from the Single path and the Wire Size
+    // dropdown, and Duplex uses neither. Reading them gave 98.86" for a 348 lb
+    // 3-spring door whose assembly is really 126.33", so the too-long warning
+    // never fired - and the reference calls that door unbuildable, returning
+    // "Torsion assembly will be too long for a 108\" wide door!".
+    //
+    // That is the same leak as the stale wire warnings, except it fails the
+    // dangerous way round: a spurious warning is noise, a missing one lets an
+    // assembly through that will not fit the opening.
+    //
+    // THE OUTER SPRING GOVERNS. The pair is nested, so what the shaft sees is
+    // the outer spring - it is the longer of the two by exactly an inch, and
+    // its wire is the thicker, so it also grows more as it winds. Taking the
+    // inner would understate the assembly twice over.
+    if (this.isDuplex) {
+        const outer = this.duplexOuterLength;
+        const step = this.duplexStep;
+
+        if (!outer || !step) {
+            return 0;
+        }
+
+        const woundPerSpring = outer + this.turnsExact * step.outerWire;
+        const hardware =
+            ASSEMBLY_HARDWARE[this.duplexSpringCount] ?? ASSEMBLY_HARDWARE[2];
+
+        return this.duplexSpringCount * woundPerSpring + hardware;
+    }
+
     if (!this.springLengthExact) {
         return 0;
     }
@@ -1325,7 +3374,9 @@ get assemblyLengthExact() {
     const woundPerSpring =
         this.springLengthExact + this.turnsExact * this.wireSizeNumber;
 
-    return this.state.springs * woundPerSpring + ASSEMBLY_HARDWARE;
+    const springs = Number(this.state.springs) || 0;
+
+    return springs * woundPerSpring + (ASSEMBLY_HARDWARE[springs] ?? ASSEMBLY_HARDWARE[2]);
 }
 
 get assemblyLength() {
@@ -1345,6 +3396,27 @@ get assemblyLength() {
 
     togglePitch(event) {
         this.state.pitch = event.currentTarget.dataset.value === "yes";
+    }
+
+    selectAssembly() {
+        // t-model already stored the new assembly. The side effect is the
+        // Spring ID, which is almost certainly now a value the new dropdown
+        // does not offer.
+        //
+        // Left alone, the browser shows its first option while the hidden
+        // sizer still measures the OLD string - and since the select is
+        // stretched over exactly the sizer's width, a longer value is
+        // clipped. Switching to Duplex showed "3 3/4" in" because the
+        // wrapper was still sized for "2 5/8"". Picking any value fixed it
+        // for good, because that finally wrote the real string into state.
+        //
+        // Writing the new default keeps state and the DOM agreeing, which is
+        // what the sizer depends on.
+        const first = FIRST_SPRING_ID[this.state.assembly];
+
+        if (first) {
+            this.state.springId = first;
+        }
     }
 
     selectLiftType() {
@@ -1380,60 +3452,77 @@ get warnings() {
     }
 
     // --- Wire size against the spring ID ---------------------------------
+    // SKIPPED ENTIRELY ON DUPLEX. Everything from here to the end of the cycle
+    // block is derived from the Wire Size dropdown, and Duplex neither uses
+    // that control nor shows it (see wireSizeVisible) - it picks both wires
+    // itself. Computing warnings from a stale dropdown value meant a red
+    // "Low Cycle Life" fired on 7 of 8 Duplex doors, quoting a cycle count
+    // with no relation to the answer on screen: at 470 lb on 2 springs it
+    // claimed 1,545 cycles where the Duplex result is 21,000.
+    //
+    // The Duplex equivalents already exist and are reported properly - the
+    // cycle count in the results row, and duplex-extrapolated below.
+    //
+    // THE OTHER WARNINGS STILL APPLY TO DUPLEX, deliberately. The reference
+    // raises them on Duplex itself: a 348 lb 3-spring door came back with
+    // "Torsion assembly will be too long for a 108\" wide door!", and a 620 lb
+    // door on the D400-96 with the weight-over-max message. Suppressing those
+    // would be a divergence from the reference, not a fix.
+    if (!this.isDuplex) {
+        const wireLimits = this.wireLimits;
+        const wire = this.wireSizeNumber;
 
-    const wireLimits = this.wireLimits;
-    const wire = this.wireSizeNumber;
+        if (wireLimits && wire) {
+            if (wire > wireLimits.max) {
+                found.push({
+                    id: "wire-over-max",
+                    severity: "red",
+                    message:
+                        "Wire size exceeds " +
+                        wireLimits.maxText +
+                        " maximum for this I.D.",
+                });
+            }
 
-    if (wireLimits && wire) {
-        if (wire > wireLimits.max) {
-            found.push({
-                id: "wire-over-max",
-                severity: "red",
-                message:
-                    "Wire size exceeds " +
-                    wireLimits.maxText +
-                    " maximum for this I.D.",
-            });
+            if (wire < wireLimits.min) {
+                found.push({
+                    id: "wire-under-min",
+                    severity: "red",
+                    message:
+                        "Wire size is less than the minimum of " +
+                        wireLimits.minText +
+                        " for this I.D.",
+                });
+            }
         }
 
-        if (wire < wireLimits.min) {
+        // --- Cycle life --------------------------------------------------
+        // Exclusive by construction: a count over the ceiling cannot also be
+        // under the target unless the target itself is over the ceiling, and
+        // there the out-of-bounds message is the one worth showing.
+
+        const cycles = this.cyclesForWire(wire);
+
+        if (cycles > CYCLE_MAX) {
             found.push({
-                id: "wire-under-min",
+                id: "cycles-over-max",
                 severity: "red",
                 message:
-                    "Wire size is less than the minimum of " +
-                    wireLimits.minText +
-                    " for this I.D.",
+                    "Calculations for this wire size result in an out of bounds " +
+                    "cycle count, Cycle Calculation Maximum (" +
+                    CYCLE_MAX.toLocaleString("en-US") +
+                    ") Exceeded",
+            });
+        } else if (cycles && this.cycleTarget && cycles < this.cycleTarget) {
+            found.push({
+                id: "cycles-low",
+                severity: "red",
+                message:
+                    "This wire size computes to " +
+                    this.cycleLife +
+                    ". Low Cycle Life",
             });
         }
-    }
-
-    // --- Cycle life ------------------------------------------------------
-    // Exclusive by construction: a count over the ceiling cannot also be
-    // under the target unless the target itself is over the ceiling, and
-    // there the out-of-bounds message is the one worth showing.
-
-    const cycles = this.cyclesForWire(wire);
-
-    if (cycles > CYCLE_MAX) {
-        found.push({
-            id: "cycles-over-max",
-            severity: "red",
-            message:
-                "Calculations for this wire size result in an out of bounds " +
-                "cycle count, Cycle Calculation Maximum (" +
-                CYCLE_MAX.toLocaleString("en-US") +
-                ") Exceeded",
-        });
-    } else if (cycles && this.cycleTarget && cycles < this.cycleTarget) {
-        found.push({
-            id: "cycles-low",
-            severity: "red",
-            message:
-                "This wire size computes to " +
-                this.cycleLife +
-                ". Low Cycle Life",
-        });
     }
 
     // --- Hi-lift against the drum ----------------------------------------
@@ -1476,12 +3565,246 @@ get warnings() {
         }
     }
 
+    // --- Duplex outside its measured ground ------------------------------
+    // Yellow, not red: the numbers are the right shape and come from the
+    // pair's own stiffness ratios, they are simply not backed by a reading.
+    // Saying so beats printing an estimate that looks like a measurement.
+
+    // --- Duplex limits ---------------------------------------------------
+    // Everything here comes from the CHOSEN pair, never from the Wire Size
+    // dropdown, which Duplex does not show. The two invariants that forbid
+    // Duplex reading that control still hold.
+    if (this.isDuplex) {
+        const pair = this.duplexPair;
+        const step = this.duplexStep;
+
+        if (pair && step && this.turnsExact) {
+            // Cone capacity. Per spring, so a 4-spring assembly clears it
+            // where a 1-spring one does not.
+            // FROM THE DISPLAYED FIGURES, both rounded to one decimal, and
+            // the per-spring TIPPT rounded BEFORE the multiply. Same rule as
+            // duplexCyclesForStep: the reference computes from what it shows.
+            //
+            // Exact on every case checked. At 676 lb and one spring,
+            // round(327.9261, 1) * 6.1 = 2000.19 against the reference's
+            // 2000.1900; at 1355 lb and two, round(657.3075 / 2, 1) * 6.1 =
+            // 328.7 * 6.1 = 2005.07 against 2005.0700.
+            //
+            // Using the exact turns instead ran MIP 0.77% low - 6.0533 where
+            // the reference shows 6.1 - which is nothing anywhere except at
+            // the boundary, and the boundary is the entire purpose of the
+            // warning. It missed three readings sitting between 1985 and 2000.
+            const perSpring =
+                Math.round((this.duplexTipptExact / this.duplexSpringCount) * 10) / 10;
+            const shownTurns = Math.round(this.turnsExact * 10) / 10;
+            const mip = perSpring * shownTurns;
+
+            if (mip > DUPLEX_MAX_MIP) {
+                found.push({
+                    id: "duplex-mip-over-max",
+                    // 175 single-message responses, all warning.
+                    severity: "yellow",
+                    message:
+                        "Assembly MIP (" +
+                        mip.toFixed(4) +
+                        ") is over max MIP (" +
+                        DUPLEX_MAX_MIP +
+                        ") - exceeds cone capacity.",
+                });
+            }
+
+            const innerMax = DUPLEX_WIRE_MAX[pair.innerId];
+            const outerMax = DUPLEX_WIRE_MAX[pair.outerId];
+
+            if (innerMax && step.innerWire > innerMax + 1e-9) {
+                found.push({
+                    id: "duplex-inner-wire-unsold",
+                    // 28 responses where every other message was a known warning, all warning.
+                    severity: "yellow",
+                    message:
+                        "Wire size exceeds " +
+                        innerMax +
+                        " maximum for the inner spring inside diameter. " +
+                        "Service Spring Corporation will not sell springs and " +
+                        "Canimex style cones for this combination.",
+                });
+            }
+
+            if (outerMax && step.outerWire > outerMax + 1e-9) {
+                found.push({
+                    id: "duplex-outer-wire-unsold",
+                    // 155 single-message responses, all warning.
+                    severity: "yellow",
+                    message:
+                        "Wire size exceeds " +
+                        outerMax +
+                        " maximum for the outer spring inside diameter. " +
+                        "Service Spring Corporation will not sell springs and " +
+                        "Canimex style cones for this combination.",
+                });
+            }
+
+            // Cycle life. Exclusive, the same way the Single pair is: a count
+            // over the ceiling cannot also be under the target unless the
+            // target is itself over the ceiling, and then the ceiling is the
+            // message worth showing.
+            // ROUNDED, because the reference compares what it DISPLAYS. Its
+            // message quotes "cycle life calculation of 9,000.00", a figure
+            // already rounded to the nearest thousand, and judges that against
+            // the target. Comparing the exact value instead raised this
+            // warning on 1014 readings where the reference raised none - an
+            // exact 9,960 displays as 10,000 and is not low at all.
+            const cycles =
+                Math.round(this.duplexCyclesExact / DUPLEX_CYCLE_ROUNDING) *
+                DUPLEX_CYCLE_ROUNDING;
+
+            if (cycles > CYCLE_MAX) {
+                found.push({
+                    id: "duplex-cycles-over-max",
+                    // 154 single-message responses, all warning.
+                    severity: "yellow",
+                    message:
+                        "This combination computes to " +
+                        Math.round(cycles).toLocaleString("en-US") +
+                        " cycles, over the " +
+                        CYCLE_MAX.toLocaleString("en-US") +
+                        " calculation maximum.",
+                });
+            } else if (this.duplexCyclesExact && this.cycleTarget &&
+                this.duplexCyclesExact < this.cycleTarget) {
+                // YELLOW, AND IT SAYS WHY IT IS NOT CERTAIN.
+                //
+                // The reference raises a red "cycle life calculation of N is
+                // less than the M cycle minimum" on 184 of 2,936 readings, and
+                // the rule behind it is clean: it fires when ITS OWN reported
+                // count falls below about 0.95 of the target. Its warned
+                // readings top out at a ratio of 0.9000 and its quiet ones
+                // start at 0.9600, with nothing in between.
+                //
+                // WE CANNOT REPRODUCE IT, and the measurement says so plainly.
+                // Against our computed count the two groups overlap
+                // completely - the reference's warned readings sit at a ratio
+                // of 0.9646 to 1.0027 against us, and so do its quiet ones -
+                // so no threshold separates them. Scanning every threshold
+                // from 0.70 to 1.05 gives a choice between missing all 184 and
+                // catching 180 at the price of 393 false alarms.
+                //
+                // Our count is 2% to 10% out from the reference's on exactly
+                // these borderline pairings: for the same wire it reads 10,040
+                // where the reference reads 9,000. The accept fraction cannot
+                // fix it either, because the error is not uniform - the
+                // borderline cases are 10% high where typical ones are 2%.
+                //
+                // So this is a caution, not a verdict. Red would assert
+                // something we have not got; silence would hide that the
+                // supplier's own calculator may reject the pairing. Saying
+                // "near the minimum, confirm it" is the only one of the three
+                // that is true.
+                found.push({
+                    id: "duplex-cycles-low",
+                    severity: "yellow",
+                    message:
+                        "Computed cycle life of " +
+                        cycles.toLocaleString("en-US") +
+                        " is near the " +
+                        this.cycleTarget.toLocaleString("en-US") +
+                        " minimum. Service Spring's own calculator may report " +
+                        "this pairing as below the minimum - confirm before " +
+                        "ordering.",
+                });
+            }
+
+            // HOW THE THRESHOLD WAS FOUND, having first got this wrong.
+            //
+            // This warning was implemented against the TARGET - fire when the
+            // count is under it - and that agreed on none of its 190 readings
+            // while firing on 294 the reference passes. It was withdrawn, and
+            // the withdrawal note claimed the warning needed a cycle count
+            // more precise than ours. That was wrong: it needed the threshold
+            // measured instead of assumed.
+            //
+            // The reference reports its own cycle count in every response, so
+            // the rule can be read straight off 3,070 of them. Sorting by the
+            // ratio of reported count to target separates perfectly:
+            //
+            //   warned   190 readings, highest ratio 0.9000
+            //   quiet  2,880 readings, lowest  ratio 0.9600
+            //
+            // No overlap at all, so the threshold is anywhere in (0.90, 0.96]
+            // and the gap is only the thousand-cycle rounding. 0.95 sits in
+            // it.
+            //
+            // IT IS NOT THE SELECTION FRACTION. DUPLEX_ACCEPT_FRACTION is 1.0
+            // because that is what reproduces the reference's cycle counts;
+            // this is 0.95 because that is what reproduces its warnings. The
+            // old code used one number for both, which is why 0.95 looked
+            // like the accept fraction for so long - it was the warning
+            // threshold all along.
+
+            // THE 96" MESSAGE IS NOT MODELLED, deliberately. The reference
+            // also says "Only spring lengths between 0 and 96\" are
+            // recommended" - 231 times across the readings here, and 57
+            // readings carry it. It looks like a softer version of the
+            // warning below and it is tempting to add as a caution.
+            //
+            // It is not about the spring being quoted. One reading gets it
+            // twice while the assembly it returns is 84.25" - comfortably
+            // inside 96 - and the number of copies (2, 3, 4, 6) tracks
+            // neither the length nor the spring count. The warning below
+            // behaves the same way: one reading carries it six times.
+            //
+            // So these are per-CANDIDATE diagnostics from the reference's own
+            // walk up the wire ladder, one per size it considered and threw
+            // out, not a statement about the answer. Keying a warning on the
+            // final length would fire it on doors the reference is perfectly
+            // happy with. Reproducing them properly would mean reproducing
+            // its search order and echoing its internal rejections, which is
+            // not information the person quoting a door needs.
+            //
+            // The outer spring is the longer of the two, so it is the one
+            // that can run past what is supported.
+            if (this.duplexOuterLength > DUPLEX_MAX_SPRING_LENGTH) {
+                found.push({
+                    id: "duplex-length-unsupported",
+                    severity: "red",
+                    message:
+                        "Only spring lengths between 0 and " +
+                        DUPLEX_MAX_SPRING_LENGTH +
+                        '" are supported. This assembly needs ' +
+                        this.duplexOuterLength +
+                        '".',
+                });
+            }
+        }
+    }
+
+    if (this.isDuplex && this.duplexExtrapolated) {
+        found.push({
+            id: "duplex-extrapolated",
+            severity: "yellow",
+            message:
+                "This wire combination has not been checked against the " +
+                "reference calculator. Lengths, weights and cycles are " +
+                "estimated and may be off by a size.",
+        });
+    }
+
     // --- Assembly against the door width ---------------------------------
-    // The reference prints the ASSEMBLY LENGTH into a sentence that reads as
-    // though it were the door width, which is how both reverse-engineering
-    // readings were taken. Kept, so the two calculators say the same thing -
-    // but rounded to 2dp like every other length here, where the reference
-    // spills the raw float (48.67261549495042").
+    // THE MESSAGE NAMES THE DOOR WIDTH, not the assembly length.
+    //
+    // A note here used to claim the opposite - that the reference printed the
+    // assembly length into a sentence reading as though it were the width, and
+    // that this app matched it deliberately. A reading settled it: a 348 lb
+    // 3-spring door on a 9'0" opening came back with
+    //
+    //     "Torsion assembly will be too long for a 108 \" wide door!"
+    //
+    // and 108 is the door width. The assembly is 126.33". So the old claim was
+    // wrong, probably from misreading one of the two original readings, where
+    // the width was 108" and the assembly 115.40".
+    //
+    // The reference's own spacing is reproduced, odd as it is - "a 108 " wide
+    // door" with a space before the inch mark.
 
     const width = this.doorWidthTotalInches;
 
@@ -1490,9 +3813,9 @@ get warnings() {
             id: "assembly-too-long",
             severity: "red",
             message:
-                "Torsion assembly will be too long for " +
-                this.assemblyLength +
-                '" wide door!',
+                "Torsion assembly will be too long for a " +
+                width +
+                ' " wide door!',
         });
     }
 
@@ -1500,13 +3823,39 @@ get warnings() {
 
     const limits = this.drumLimits;
 
+    // Hi-lift drums keep their rating in HILIFT_DRUMS, so a weight over a
+    // hi-lift drum's limit raised nothing: 14 readings where the reference
+    // says "the weight will be set to the drums maximum weight" and we said
+    // nothing, even though duplexEffectiveWeight was already clamping it.
+    // Warning and clamping have to come from the same table or the quote
+    // silently uses a weight the user never agreed to.
+    const hiLimits =
+        this.state.liftType === "Hi-Lift" ? HILIFT_DRUMS[this.state.drum] : null;
+    const effectiveLimits = hiLimits || limits;
+
+    if (effectiveLimits && effectiveLimits.maxWeight &&
+        Number(this.state.weight) > effectiveLimits.maxWeight) {
+        found.push({
+            id: "weight-over-max",
+            severity: "yellow",
+            message:
+                "The current weight entered is heavier than this drum " +
+                "will allow! The maximum weight of this drum is " +
+                effectiveLimits.maxWeight +
+                " lb.",
+        });
+    }
+
     if (limits) {
-        const heightInches = this.doorHeightTotalFeet * 12;
+        const heightInches = this.doorHeightEnteredFeet * 12;
 
         if (heightInches > limits.maxHeight) {
             found.push({
                 id: "height-over-max",
-                severity: "yellow",
+                // 22 single-message responses, all error - the reference
+                // treats a door taller than the drum as a hard stop, not a
+                // caution, and it clamps the height to build anything at all.
+                severity: "red",
                 message:
                     "The current height entered is greater than this drum " +
                     "will allow! The maximum height of this drum is " +
@@ -1515,17 +3864,6 @@ get warnings() {
             });
         }
 
-        if (Number(this.state.weight) > limits.maxWeight) {
-            found.push({
-                id: "weight-over-max",
-                severity: "yellow",
-                message:
-                    "The current weight entered is heavier than this drum " +
-                    "will allow! The maximum weight of this drum is " +
-                    limits.maxWeight +
-                    " lb.",
-            });
-        }
     }
 
     // Worst first. Sort is stable, so within a severity the order above is
@@ -1608,8 +3946,30 @@ closeDrumInfo() {
         // useState proxy would detach the component from its reactivity.
         Object.assign(this.state, defaultState());
     }
+
+    // DELIBERATELY EMPTY. The button is wired to a named handler rather than
+    // left without one so that the place to add the order call is obvious, and
+    // so the button is already reachable by keyboard and screen reader when it
+    // starts doing something.
+    addToCart() {}
 }
 
+// TWO PLACES, ONE COMPONENT.
+//
+//   actions            the backend app, reached from the Spring Engineering
+//                      menu as an ir.actions.client.
+//   public_components  the public website page at /spring-calculator, mounted
+//                      by <owl-component name="spring_engineering.calculator"/>
+//                      in the page template.
+//
+// Registering the same class twice rather than wrapping or subclassing it
+// means the website and the backend cannot drift apart: a fix to the ladder,
+// a price or a warning lands in both at once. The component takes no props
+// and reads nothing from the action, so neither registry needs an adapter.
 registry
     .category("actions")
+    .add("spring_engineering.calculator", SpringEngineering);
+
+registry
+    .category("public_components")
     .add("spring_engineering.calculator", SpringEngineering);

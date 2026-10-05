@@ -1,2 +1,12 @@
 __pycache__/
 *.py[cod]
+
+# reference-calculator pulls - these carry the account's garageDoorLineId
+spring_engineering/dev/pulled*.json
+spring_engineering/dev/sweeps*.json
+
+# The eval-* sets ARE committed, because dev/honest.sh scores against them and
+# the headline numbers are not reproducible without them. They have had
+# garageDoorLineId stripped - 1130 of them - and the scorers never read that
+# field. If you add an eval set, strip it before committing:
+#   python3 -c "import json,sys;d=json.load(open(sys.argv[1]));[r['input'].pop('garageDoorLineId',None) for r in d if isinstance(r.get('input'),dict)];json.dump(d,open(sys.argv[1],'w'),indent=1)" dev/eval-NEW.json

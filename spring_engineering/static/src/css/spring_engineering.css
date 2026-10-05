@@ -109,6 +109,49 @@
 
 
 /* =========================================
+   RESULTS - DUPLEX
+   ========================================= */
+
+/* Section bar naming the block of rows under it: Outer, Inner, Other.
+   Shorter than a results row so it reads as a divider between them
+   rather than as another row. */
+.se-rowR-header {
+    height: 48px;
+
+    background: #000000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+    font-weight: bold;
+
+    color: #ffffff;
+}
+
+/* Turns and TIPPT side by side on one row. Each half is a plain .se-rowR,
+   so it keeps the height, background, border, padding and green value of
+   every other results row - only the splitting is new.
+
+   flex-basis 0 rather than auto, so the halves are equal regardless of how
+   wide their text is; otherwise a long value would steal room from the
+   other side. */
+.se-rowR-split {
+    display: flex;
+}
+
+.se-rowR-split > .se-rowR {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.se-rowR-split > .se-rowR + .se-rowR {
+    border-left: 1px solid #ddd;
+}
+
+
+/* =========================================
    SELECT BOXES
    ========================================= */
 
@@ -151,6 +194,10 @@
 }
 
 .se-select {
+    /* Not inherited: form controls use the UA default, which is
+       the system tint (blue) on iOS. */
+    color: #000;
+
     position: absolute;
     inset: 0;
 
@@ -182,6 +229,9 @@
 }
 
 .se-buttons button {
+    /* Not inherited - see .se-select. */
+    color: #000;
+
     min-width: 70px;
 
     border: none;
@@ -229,6 +279,9 @@
 }
 
 .se-input {
+    /* Not inherited - see .se-select. */
+    color: #000;
+
     width: 65px;
 
     border: none;
@@ -251,6 +304,9 @@
    ========================================= */
 
 .se-number-input {
+    /* Not inherited - see .se-select. */
+    color: #000;
+
     width: 180px;
 
     border: none;
@@ -304,6 +360,114 @@
 
 
 /* =========================================
+   NARROW SCREENS
+   ========================================= */
+
+/* THE ROWS DID NOT FIT A PHONE. Every row is one nowrap flex line with the
+   label at the left and the control at the right, and neither can shrink below
+   its text, so the widest of them overflowed:
+
+     "Door Height (in)"        ~176px at 22px
+     two 65px inputs + ft/in   ~200px
+     row padding               ~56px
+                               ~432px, against 360px of phone
+
+   `overflow-x: hidden` on the root was hiding that rather than solving it, so
+   on a phone the right-hand end of the Door Height and Door Width rows was
+   simply unreachable - and it mattered more the moment the calculator became a
+   public page people open in a garage.
+
+   Same arithmetic at these sizes comes to ~336px, which fits with room to
+   spare. Nothing above 480px is touched, so the desktop layout is unchanged.
+   The select and its hidden sizer MUST move together - the sizer is what gives
+   the select its width, so a mismatch would put the tap target back off the
+   text. */
+@media (max-width: 480px) {
+    .se-row,
+    .se-rowR {
+        padding: 0 14px;
+    }
+
+    .se-row > span,
+    .se-rowR > span,
+    .se-measurement span {
+        font-size: 18px;
+    }
+
+    .se-select,
+    .se-select-sizer {
+        font-size: 18px;
+    }
+
+    .se-input {
+        width: 52px;
+        font-size: 18px;
+    }
+
+    .se-number-input {
+        width: 130px;
+        font-size: 18px;
+    }
+
+    .se-buttons button {
+        min-width: 56px;
+        font-size: 18px;
+    }
+
+    .se-pitch button {
+        width: 100px;
+        height: 48px;
+        font-size: 17px;
+    }
+
+    .se-section-title {
+        font-size: 20px;
+    }
+
+    .se-rowR-header {
+        font-size: 18px;
+    }
+
+    /* The two halves of the Turns/TIPPT row have their own padding inside an
+       already narrow row, so they get the tighter gutter too. */
+    .se-rowR-split > .se-rowR {
+        padding: 0 10px;
+    }
+}
+
+
+/* =========================================
+   ON THE WEBSITE
+   ========================================= */
+
+/* Inside the web client the calculator is the whole action pane, so it claims
+   a viewport of height. On a website page it is one band between the site
+   header and the footer, and a guaranteed 100vh leaves a screen of empty grey
+   under the inputs before the footer can appear. So the height floor goes.
+
+   OVERFLOW IS DELIBERATELY NOT TOUCHED HERE, and the first version of this
+   rule got that wrong: it said `overflow: visible`, which also cleared the
+   base rule's `overflow-x: hidden`. That clipping is load-bearing. The rows
+   are `white-space: nowrap` flex lines whose items cannot shrink below their
+   text, so a long label beside a wide select can exceed a phone's viewport -
+   and with the clipping gone that becomes a horizontal scrollbar on the whole
+   PAGE, which is far worse on a public page than a clipped row.
+
+   There is no CSS that both clips sideways and defers vertical scrolling to
+   the page: per spec, `overflow-x: hidden` with `overflow-y: visible`
+   computes the visible value to auto, which is the nested scroller again. The
+   base rule's `overflow-y: auto` never actually engages anyway, because the
+   element has no constrained height - it grows with its content - so leaving
+   both alone is correct rather than merely convenient.
+
+   Keyed on #wrap, which the website layout provides and the backend does not,
+   so this cannot reach the app. */
+#wrap .spring-engineering {
+    min-height: 0;
+}
+
+
+/* =========================================
    ODOO PAGE FIX
    ========================================= */
 
@@ -334,27 +498,60 @@
 }
 
 /* =========================================
-   CLEAR
+   TOTAL ROW
    ========================================= */
 
-/* Sits below the results and resets every input to its starting value.
-   Full width so it cannot be confused with the inline choice buttons
-   above, which are toggles rather than actions. */
+/* The last row of the price block. A quote's total has to be findable
+   without reading the rows above it, so it takes a rule across the top
+   and bold on both sides. The 2px matches nothing else in the file, which
+   is the point - it reads as a sum, not as another row.
+
+   Both the label and the value are bolded. The value needs the doubled
+   class to outscore `.se-rowR .se-value`, which sets 600; a bare
+   descendant selector would lose to it and the total would be the only
+   bold label with a non-bold number. */
+.se-rowR-total {
+    border-top: 2px solid #000000;
+}
+
+.se-rowR-total > span {
+    font-weight: bold;
+}
+
+.se-rowR.se-rowR-total .se-value {
+    font-weight: bold;
+}
+
+
+/* =========================================
+   ACTIONS - CLEAR / ADD TO CART
+   ========================================= */
+
+/* Sit below the results. Full width between them so they cannot be
+   confused with the inline choice buttons above, which are toggles
+   rather than actions.
+
+   The two share every dimension and differ only in colour, so the shape
+   is written once. flex-basis 0 keeps them equal regardless of their
+   labels - "Add to Cart" is twice the text of "Clear" and would
+   otherwise take twice the room. */
 .se-clear-row {
     display: flex;
     justify-content: center;
+    gap: 16px;
 
     padding: 24px 28px 40px;
 
     box-sizing: border-box;
 }
 
-.se-clear {
-    width: 100%;
-    max-width: 420px;
+.se-clear,
+.se-add-cart {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 260px;
     min-height: 56px;
 
-    background: #000000;
     color: #ffffff;
 
     border: none;
@@ -367,6 +564,10 @@
     cursor: pointer;
 }
 
+.se-clear {
+    background: #000000;
+}
+
 .se-clear:hover {
     background: #222222;
 }
@@ -375,7 +576,22 @@
     background: #3a3a3a;
 }
 
-.se-clear:focus-visible {
+/* The app's red, the one already on the selected choice buttons and the
+   pitch control, rather than a second red. */
+.se-add-cart {
+    background: #ed1b35;
+}
+
+.se-add-cart:hover {
+    background: #d4162e;
+}
+
+.se-add-cart:active {
+    background: #b81228;
+}
+
+.se-clear:focus-visible,
+.se-add-cart:focus-visible {
     outline: 3px solid #666666;
     outline-offset: 2px;
 }
