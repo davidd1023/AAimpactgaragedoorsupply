@@ -395,6 +395,45 @@ function heightClamped(mod) {
 // If someone later makes the cycle count accurate enough to separate the two
 // groups, this invariant is the thing to delete - deliberately, with the
 // measurement redone.
+// A Duplex result value must carry the warning colour, as the Single ones do.
+//
+// The Duplex results block hardcoded class="se-value" while the Single block
+// used t-att-class="valueClass", so Duplex numbers stayed green no matter what
+// the Error Manager said. The panel and the colour came from the same
+// warningLevel and disagreed on screen.
+//
+// This checks the getter rather than the markup, because that is what the
+// template binds to - and it checks all three states, since a getter that
+// always returned red would pass a one-sided test.
+function duplexValuesCarryWarningColour(mod) {
+    const fails = [];
+    const cases = [
+        // nothing to report
+        { want: "se-value", st: { weight: "400", springs: 2,
+            drum: "CANIMEX/TF D525-216", doorHeightFeet: 8 } },
+        // yellow only: taller than the drum allows
+        { want: "se-value se-value-yellow", st: { weight: "280", springs: 2,
+            drum: "CANIMEX/TF D400-96", doorHeightFeet: 12 } },
+        // red: over cone capacity
+        { want: "se-value se-value-red", st: { weight: "1400", springs: 1,
+            drum: "CANIMEX/TF D525-216", doorHeightFeet: 8 } },
+    ];
+
+    for (const c of cases) {
+        const comp = duplex(mod, { cycles: "10,000", radius: "15",
+            doorWidthFeet: 16, ...c.st });
+
+        if (comp.valueClass !== c.want) {
+            fails.push(
+                `${c.st.drum} ${c.st.weight}lb ${c.st.springs}spr: valueClass is ` +
+                `"${comp.valueClass}", expected "${c.want}"`
+            );
+        }
+    }
+
+    return fails;
+}
+
 function cyclesLowStaysCaution(mod) {
     const fails = [];
 
@@ -504,6 +543,7 @@ export const INVARIANTS = [
     { name: "generated inner wire stays inside the spring ID's band", run: wireBand },
     { name: "the weight used never exceeds the drum's rating", run: weightClamped },
     { name: "the door height used never exceeds the drum's nameplate", run: heightClamped },
+    { name: "Duplex result values carry the warning colour", run: duplexValuesCarryWarningColour },
     { name: "the cycles-low flag stays a caution, not a verdict", run: cyclesLowStaysCaution },
     { name: "Duplex raises no Wire-Size-dropdown warning", run: noStaleWireWarnings },
     { name: "no Duplex output depends on the Wire Size dropdown", run: duplexIgnoresWireDropdown },

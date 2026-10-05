@@ -1309,66 +1309,66 @@
 
             <div class="se-rowR">
                     <span>Wire Size</span>
-                    <span class="se-value" t-esc="duplexOuterWire"/>
+                    <span t-att-class="valueClass" t-esc="duplexOuterWire"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring ID</span>
-                    <span class="se-value" t-esc="duplexOuterId"/>
+                    <span t-att-class="valueClass" t-esc="duplexOuterId"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring Length</span>
-                    <span class="se-value" t-esc="duplexOuterLength.toFixed(2) + '&quot;'"/>
+                    <span t-att-class="valueClass" t-esc="duplexOuterLength.toFixed(2) + '&quot;'"/>
             </div>
 
             <div class="se-rowR">
                     <span>Weight</span>
-                    <span class="se-value" t-esc="duplexOuterWeight.toFixed(2) + ' lb'"/>
+                    <span t-att-class="valueClass" t-esc="duplexOuterWeight.toFixed(2) + ' lb'"/>
             </div>
 
             <div class="se-rowR-header">Inner</div>
 
             <div class="se-rowR">
                     <span>Wire Size</span>
-                    <span class="se-value" t-esc="duplexInnerWire"/>
+                    <span t-att-class="valueClass" t-esc="duplexInnerWire"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring ID</span>
-                    <span class="se-value" t-esc="duplexInnerId"/>
+                    <span t-att-class="valueClass" t-esc="duplexInnerId"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring Length</span>
-                    <span class="se-value" t-esc="duplexInnerLength.toFixed(2) + '&quot;'"/>
+                    <span t-att-class="valueClass" t-esc="duplexInnerLength.toFixed(2) + '&quot;'"/>
             </div>
 
             <div class="se-rowR">
                     <span>Weight</span>
-                    <span class="se-value" t-esc="duplexInnerWeight.toFixed(2) + ' lb'"/>
+                    <span t-att-class="valueClass" t-esc="duplexInnerWeight.toFixed(2) + ' lb'"/>
             </div>
 
             <div class="se-rowR-header">Other</div>
 
             <div class="se-rowR">
                     <span>Cycles</span>
-                    <span class="se-value" t-esc="duplexCycles"/>
+                    <span t-att-class="valueClass" t-esc="duplexCycles"/>
             </div>
 
             <div class="se-rowR">
                     <span>Multiplier</span>
-                    <span class="se-value" t-esc="multiplier"/>
+                    <span t-att-class="valueClass" t-esc="multiplier"/>
             </div>
 
             <div class="se-rowR-split">
                 <div class="se-rowR">
                     <span>Turns</span>
-                    <span class="se-value" t-esc="turns"/>
+                    <span t-att-class="valueClass" t-esc="turns"/>
                 </div>
                 <div class="se-rowR">
                     <span>TIPPT</span>
-                    <span class="se-value" t-esc="tippt"/>
+                    <span t-att-class="valueClass" t-esc="tippt"/>
                 </div>
             </div>
 
