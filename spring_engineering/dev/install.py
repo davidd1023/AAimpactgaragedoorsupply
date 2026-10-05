@@ -8,13 +8,21 @@ import json
 import os
 import sys
 
-# The softest rung's long-active-length override is hand-held and predates all
-# of the fitting, so it was measured rather than trusted. LONG_OVERRIDE=0 drops
-# it; on the fresh random sample (seed 777001, never fitted) dropping it costs
-# 14 readings of 239 and takes that rung from 55.6% to 36.1%, and costs 48
-# corpus readings. It stays, and it is now the only hand-written number left in
-# the length rule.
-LONG_OVERRIDE = os.environ.get("LONG_OVERRIDE", "1") != "0"
+# The softest rung's long-active-length override is GONE by default. It was
+# hand-written long before any of the fitting, and it was compensating for the
+# per-rung stiffness error that sMult now measures directly - on
+# 0.2625/0.2253 at 3 springs it added +2.25 inches to an active length of
+# 29.358, giving 31.25 where the reference says 29.25.
+#
+# Measured on the external samples with sMult in place:
+#
+#                              seed 777001        soft2
+#   with the long override     73.8% / 92.4%   66.3% / 85.4%
+#   without it                 84.0% / 97.8%   87.4% / 98.0%
+#
+# LONG_OVERRIDE=1 puts it back, which is worth doing only to reproduce that
+# comparison.
+LONG_OVERRIDE = os.environ.get("LONG_OVERRIDE", "0") != "0"
 
 SRC = "static/src/js/spring_engineering.js"
 
@@ -71,8 +79,10 @@ def main():
             extra += (", long: { from: 25.5, byCount: { 2: 0.620, 3: 0.050 },"
                       " above: 2.25 }")
 
-        out.append("            { outerWire: %g, innerWire: %g, K: %.1f, n: %d%s },"
-                   % (row["outer"], row["inner"], row["K"], row["n"], extra))
+        sm = row.get("sMult", 1) or 1
+        stiff = "" if abs(sm - 1) < 1e-9 else ", sMult: %g" % sm
+        out.append("            { outerWire: %g, innerWire: %g, K: %.1f, n: %d%s%s },"
+                   % (row["outer"], row["inner"], row["K"], row["n"], stiff, extra))
 
     src = open(SRC).read()
     start = src.index("        calibration: [")

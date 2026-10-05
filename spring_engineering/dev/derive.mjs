@@ -220,14 +220,117 @@ for (const r of readings) {
         g.Ks.push(body * c.tipptExact / (springs / 2));
     }
 
-    const active =
-        springs * (divider(r.inner, 3.75) + divider(r.outer, 6)) / c.tipptExact;
-    const whole = Math.floor(active);
+    // rawActive is the formula's own value. The per-rung stiffness correction
+    // is fitted after every rung is gathered, and `active` is then rewritten,
+    // so the bands below fit whatever is LEFT rather than re-absorbing an
+    // error the stiffness already explains.
+    // The rounded TIPPT, matching duplexActiveLength: the reference computes
+    // from the figure it displays, as it does for cycles and MIP.
+    const shownTippt = Math.round(c.tipptExact * 10) / 10;
+    const rawActive =
+        springs * (divider(r.inner, 3.75) + divider(r.outer, 6)) / shownTippt;
 
     g.lens.push({
-        springs, active, frac: active - whole,
-        bonus: Number((r.length - whole).toFixed(2)),
+        springs, rawActive, length: r.length,
+        active: rawActive,
+        frac: rawActive - Math.floor(rawActive),
+        bonus: Number((r.length - Math.floor(rawActive)).toFixed(2)),
     });
+}
+
+// Fit the stiffness correction per rung, then restate every active length and
+// bonus through it.
+for (const g of rungs.values()) {
+    // ONLY SPRINGS THE REFERENCE WILL BUILD. Readings needing more than 120"
+    // are refused by the reference ("Only spring lengths between 0 and 120 are
+    // supported") and run to 420" in the corpus, so letting them into the
+    // stiffness fit drags it badly - they are the readings furthest from any
+    // grid and they outvote the real ones on the softest rungs.
+    const usable = g.lens.filter(
+        (l) => l.rawActive > 0 && l.length > 0 && l.length <= 120
+    );
+
+    g.sMult = 1;
+
+    if (usable.length >= 12) {
+        const fit = fitStiffness(usable);
+
+        if (fit && fit.ok > 0) {
+            g.sMult = Number(fit.m.toFixed(6));
+        }
+    }
+
+    for (const l of g.lens) {
+        l.active = l.rawActive * g.sMult;
+
+        const whole = Math.floor(l.active);
+
+        l.frac = l.active - whole;
+        l.bonus = Number((l.length - whole).toFixed(2));
+    }
+}
+
+// THE EFFECTIVE STIFFNESS OF A RUNG, MEASURED RATHER THAN COMPUTED.
+//
+// duplexActiveLength is springs * S / TIPPT with S the sum of the two
+// dividers. Because the reference reports BOTH its length and its TIPPT, S can
+// be solved from each reading: S = length * TIPPT / springs. Doing that across
+// every reading on a rung and taking the median shows the computed S is wrong
+// by up to 4.6%, and differently per rung:
+//
+//   0.2625/0.2253   computed 1015   implied 1062   +4.6%
+//   0.3625/0.283    computed 4217   implied 4124   -2.2%
+//   0.4375/0.3625   computed 11800  implied 12156  +3.0%
+//
+// On a 20" spring 4.6% is nearly an inch, which is exactly the error the bands
+// were absorbing. One number per rung fixes the cause instead.
+//
+// PER RUNG, NOT PER (RUNG, SPRING COUNT). Stiffness is a property of the wire
+// pair, so the spring count has no business in it - and the measurement agrees:
+// per rung scores 76.3% on the external samples against 79.0% in sample for
+// the per-count version but only 75.5% external, with eight times fewer unseen
+// groups. Fewer parameters, better generalisation, right physics.
+//
+// The multiplier is searched rather than taken from the median because what
+// matters is landing on the right side of the grid, not minimising residual.
+function fitStiffness(ls) {
+    let best = null;
+
+    for (let bi = -320; bi <= 320; bi += 1) {
+        const m = 1 + bi / 4000;             // +-8% in 0.025% steps
+        let ok = 0;
+
+        for (const l of ls) {
+            if (Math.abs(snapGrid(l.rawActive * m, l.springs) - l.length) < 1e-9) {
+                ok += 1;
+            }
+        }
+
+        if (!best || ok > best.ok) {
+            best = { ok, m };
+        }
+    }
+
+    return best;
+}
+
+// 1 spring is whole inches (1843 of 1843 readings), 3 and 4 springs are whole
+// plus a quarter (594 and 413 of each), and 2 springs uses both - 793 at .0 and
+// 274 at .25, never .5 or .75. So 2 springs snaps to whichever of {N, N+0.25}
+// is nearer, which is deterministic; there is no free choice to exploit.
+function snapGrid(x, springs) {
+    if (springs === 1) {
+        return Math.round(x);
+    }
+
+    if (springs >= 3) {
+        return Math.round(x - 0.25) + 0.25;
+    }
+
+    const whole = Math.round(x);
+    const quarter = Math.round(x - 0.25) + 0.25;
+
+    return Math.abs(x - whole) <= Math.abs(x - quarter) ? whole : quarter;
 }
 
 // K FROM THE REFERENCE'S OWN SWITCH POINTS, which is far tighter than
@@ -1037,6 +1140,12 @@ const out = [...rungs.values()]
                 }
             }
 
+            // NO_OVERRIDES measures the stiffness correction on its own, with
+            // no bands, lines or splits layered on top of it.
+            if (process.env.NO_OVERRIDES) {
+                continue;
+            }
+
             const split = line ? null : (needed ? fitSplit(ls) : null);
 
             if (line) {
@@ -1062,6 +1171,7 @@ const out = [...rungs.values()]
         return {
             outer: g.outer, inner: g.inner, S,
             K: pickK(g),
+            sMult: g.sMult ?? 1,
             n: g.Ks.length, nLen: g.lens.length, byCount,
         };
     })

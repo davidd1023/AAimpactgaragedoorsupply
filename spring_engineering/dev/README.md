@@ -578,3 +578,65 @@ be measured.
 
 And it does not touch the length. The length problem is not geometric - the
 multiplier is already exact to 2e-5 and the length is wrong anyway.
+
+## The breakthrough: stiffness was measured, not computed
+
+`duplexActiveLength` is `springs * S / TIPPT`, where S was the sum of the two
+dividers. Because the reference reports BOTH its length and its TIPPT, S can be
+solved from every single reading:
+
+```
+S = length * TIPPT / springs
+```
+
+Doing that across a rung's readings shows the computed S is wrong by up to
+**4.6%**, and differently per rung:
+
+| rung | computed S | implied S | error |
+|---|---|---|---|
+| 0.2625/0.2253 | 1015 | 1062 | +4.6% |
+| 0.3625/0.283 | 4217 | 4124 | −2.2% |
+| 0.4375/0.3625 | 11800 | 12156 | +3.0% |
+
+On a 20" spring 4.6% is nearly an inch - **exactly the error the bands had been
+absorbing for the whole project.** One fitted number per rung (`sMult`) fixes
+the cause rather than the symptom.
+
+Per RUNG, not per (rung, spring count): stiffness belongs to the wire pair, and
+the measurement agrees - per rung generalises better with a third of the
+parameters.
+
+### Two things had to go with it
+
+**The TIPPT must be the DISPLAYED one**, rounded to a decimal, the same rule
+the cycle count and the MIP warning already follow. Using the exact value cost
+ten points externally, because the length sits on a grid and a tiny TIPPT
+difference flips the snap.
+
+**The hand-written `long` override had to be deleted.** It predated all the
+fitting and was compensating for precisely this stiffness error: on
+0.2625/0.2253 at 3 springs it added +2.25" to an active length of 29.358,
+giving 31.25 where the reference says 29.25. With `sMult` in place it is pure
+damage:
+
+| | seed 777001 | soft2 |
+|---|---|---|
+| with the long override | 73.8% / 92.4% | 66.3% / 85.4% |
+| without it | **84.0% / 97.8%** | **87.4% / 98.0%** |
+
+Earlier in the project that override measured as clearly correct - removing it
+cost 48 corpus readings and took its rung from 55.6% to 36.1%. It was right
+*given the broken stiffness*. A compensating constant looks load-bearing until
+the thing it compensates for is fixed.
+
+### Result
+
+| | before | after |
+|---|---|---|
+| length exact | 67.4% | **86.4%** |
+| within one inch | 95.9% | **99.4%** |
+| off by more than an inch | 21 of 516 | **3 of 516** |
+| in sample | 3161/3189 | 3156/3189 |
+
+The grid is also now stated rather than fitted: 1 spring whole, 3 and 4 whole
+plus a quarter, 2 springs whichever of the two is nearer.
