@@ -826,6 +826,28 @@ function fitSplit(ls) {
         return null;
     }
 
+    // EACH SIDE GETS UP TO THREE LEVELS, two preferred.
+    //
+    // Both sides used to be capped at two, which meant a group whose regimes
+    // have DIFFERENT level counts could never produce a viable split - one
+    // side came back null and the candidate was dropped. 0.2625/0.2253 at two
+    // springs is exactly that, and it carries half of what the model still
+    // gets wrong. A fraction walk of it, laid out by the integer part, shows
+    // two regimes rather than one rule with three levels:
+    //
+    //   floors 15-23   three bands:  0.25 low frac, 0 middle, 1.25 high
+    //   floors 24+     two bands:    0.25 low and middle, 1.25 high
+    //
+    // The 0 level simply does not exist above floor 23. With both sides capped
+    // at two the lower regime was unfittable, no split was offered, and the
+    // group fell through to memorising 42 bands.
+    //
+    // Two is tried first so the simpler side wins when it can, and the whole
+    // split is still cross-validated against the bands below - a three-level
+    // side only survives if the split as a whole predicts better out of
+    // sample than the band table it would replace.
+    const sideLine = (rows) => fitLineAnyOrder(rows, 2) || fitLineAnyOrder(rows, 3);
+
     const floors = [...new Set(ls.map((l) => Math.floor(l.active)))]
         .sort((x, y) => x - y);
     const viable = [];
@@ -838,8 +860,8 @@ function fitSplit(ls) {
             continue;
         }
 
-        const b = fitLineAnyLevels(below, 2);
-        const a = fitLineAnyLevels(above, 2);
+        const b = sideLine(below);
+        const a = sideLine(above);
 
         if (b && a) {
             viable.push({ from, below: b, above: a, balance: Math.min(below.length, above.length) });
@@ -856,12 +878,8 @@ function fitSplit(ls) {
         const score = cvScore(
             ls,
             (train) => {
-                const b = fitLineAnyLevels(
-                    train.filter((l) => Math.floor(l.active) < cand.from), 2
-                );
-                const a = fitLineAnyLevels(
-                    train.filter((l) => Math.floor(l.active) >= cand.from), 2
-                );
+                const b = sideLine(train.filter((l) => Math.floor(l.active) < cand.from));
+                const a = sideLine(train.filter((l) => Math.floor(l.active) >= cand.from));
 
                 return b && a ? { from: cand.from, below: b, above: a } : null;
             },
@@ -896,7 +914,7 @@ function fitSplit(ls) {
 const LINE_LEVELS = Number(process.env.LINE_LEVELS || 2);
 
 function fitLine(ls) {
-    return fitLineAnyLevels(ls, LINE_LEVELS);
+    return fitLineAnyOrder(ls, LINE_LEVELS);
 }
 
 // K PARALLEL THRESHOLDS, all sharing one slope.
@@ -1061,6 +1079,80 @@ function fitLineAnyLevels(ls, maxLevels) {
     }
 
     return out;
+}
+
+// THE BANDS NEED NOT RUN IN BONUS ORDER.
+//
+// fitLineAnyLevels assigns class 0 to the smallest bonus, class 1 to the next
+// and so on, so it can only fit a group whose bonus RISES along the axis. That
+// is true of most groups and false of the one that matters most.
+//
+// 0.2625/0.2253 at two springs carries half of what the model still gets
+// wrong, and a fraction walk of it reads, at floors 15 to 23:
+//
+//   low frac     bonus 0.25
+//   middle frac  bonus 0
+//   high frac    bonus 1.25
+//
+// 0.25, then 0, then 1.25 - ordered in frac but not in bonus. The DP could not
+// express that, returned a non-zero error, and the group fell through to
+// memorising 42 bands. linePredict never cared: it reads lo, mid and hi
+// positionally, so the shape was always representable. Only the fitter was
+// insisting on an order the reference does not keep.
+//
+// So each ordering is tried, by relabelling the bonuses to their rank and
+// letting the existing fitter work unchanged. Identity goes first, so a group
+// that already fits in bonus order is fitted exactly as before. With at most
+// three levels there are at most six orderings.
+//
+// SAFE FOR THE SAME TWO REASONS AS EVER: a line is only returned on a PERFECT
+// fit (bad === 0), and the caller still cross-validates it against the bands
+// over all the readings and keeps the bands unless the line wins out of
+// sample. This widens what can be proposed, not what gets accepted.
+function orderings(vals) {
+    if (vals.length <= 1) {
+        return [vals];
+    }
+
+    const out = [];
+
+    for (let i = 0; i < vals.length; i++) {
+        const rest = vals.slice(0, i).concat(vals.slice(i + 1));
+
+        for (const tail of orderings(rest)) {
+            out.push([vals[i], ...tail]);
+        }
+    }
+
+    return out;
+}
+
+function fitLineAnyOrder(ls, maxLevels) {
+    const vals = [...new Set(ls.map((l) => l.bonus))].sort((x, y) => x - y);
+
+    if (vals.length < 2 || vals.length > Math.min(maxLevels, 3)) {
+        return fitLineAnyLevels(ls, maxLevels);
+    }
+
+    for (const order of orderings(vals)) {
+        const rank = new Map(order.map((v, i) => [v, i]));
+        const fit = fitLineAnyLevels(
+            ls.map((l) => ({ ...l, bonus: rank.get(l.bonus) })), maxLevels
+        );
+
+        if (fit) {
+            fit.lo = order[0];
+            fit.hi = order[order.length - 1];
+
+            if (fit.levels) {
+                fit.levels = order;
+            }
+
+            return fit;
+        }
+    }
+
+    return null;
 }
 
 const unbounded = [];
