@@ -1873,7 +1873,7 @@ function duplexPairBuildable(pair, outerWire, innerWire, measured = false) {
 //   2        9'0" (108")  115.40103713850469"
 //   1        4'0" (48")    48.67261549495042"
 //
-//   assembly = springs * (springLength + turns * wire) + ASSEMBLY_HARDWARE
+//   assembly = springs * (springLength + turns * wire) + ASSEMBLY_HARDWARE[springs]
 //
 // Three pieces:
 //
@@ -1929,9 +1929,30 @@ function duplexPairBuildable(pair, outerWire, innerWire, measured = false) {
 // The rest of the formula is confirmed, not replaced: solving for the hardware
 // with the reference's own length and turns gives a spread of 0.2" across the
 // three 2-spring brackets, where dropping the winding term widens it to 1.5".
-const DUPLEX_ASSEMBLY_HARDWARE = { 1: 16.25, 2: 28.5, 3: 28.5, 4: 32 };
-
-const ASSEMBLY_HARDWARE = 24;
+// MEASURED THE SAME WAY FOR BOTH ASSEMBLIES, because it is the same hardware.
+// Single carried a flat 24" fitted from two readings whose inputs were never
+// recorded, so it could not be re-solved - and it was wrong at every spring
+// count. Sweeping the door width an inch at a time on a Single hi-lift door
+// (575-120, 7'0", 60" hi-lift, 2 5/8", 200 lb, dev/pulled-s2.json) brackets
+// the reference's own assembly length and solves for the hardware:
+//
+//   springs   width that warns / does not   hardware must lie in   flat 24 was
+//      1              -    /   80            (-inf, 17.29]          too big
+//      2             110   /  111            (27.62, 28.62]         too small
+//      3             117   /  118            (27.68, 28.68]         too small
+//      4             125   /   -             (19.73, +inf)          consistent
+//
+// Every bracket contains the value already measured for Duplex, so there is
+// one table, not two. That is what the physics says too: the hardware is
+// cones, the centre bearing bracket, the drums and the end bearing plates,
+// none of which care whether the springs on the shaft are nested.
+//
+// WHAT THE FLAT 24 COST. At 200 lb this door is a 38.25" spring on a 108"
+// opening; the reference calls it too long and we did not, because 24 put the
+// assembly at 106.27" where 28.5 puts it at 110.88". A missing too-long
+// warning is the dangerous direction - it quotes a spring that will not fit
+// the opening, and now prices it too.
+const ASSEMBLY_HARDWARE = { 1: 16.25, 2: 28.5, 3: 28.5, 4: 32 };
 
 // The ceiling on the cycle formula itself. Past this the reference stops
 // trusting its own answer rather than reporting a larger number, so this is a
@@ -3282,7 +3303,7 @@ get assemblyLengthExact() {
 
         const woundPerSpring = outer + this.turnsExact * step.outerWire;
         const hardware =
-            DUPLEX_ASSEMBLY_HARDWARE[this.duplexSpringCount] ?? ASSEMBLY_HARDWARE;
+            ASSEMBLY_HARDWARE[this.duplexSpringCount] ?? ASSEMBLY_HARDWARE[2];
 
         return this.duplexSpringCount * woundPerSpring + hardware;
     }
@@ -3294,7 +3315,9 @@ get assemblyLengthExact() {
     const woundPerSpring =
         this.springLengthExact + this.turnsExact * this.wireSizeNumber;
 
-    return this.state.springs * woundPerSpring + ASSEMBLY_HARDWARE;
+    const springs = Number(this.state.springs) || 0;
+
+    return springs * woundPerSpring + (ASSEMBLY_HARDWARE[springs] ?? ASSEMBLY_HARDWARE[2]);
 }
 
 get assemblyLength() {

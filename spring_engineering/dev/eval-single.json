@@ -5890,5 +5890,268 @@
     "springWeight": 62.1712
    }
   }
+ },
+ {
+  "input": {
+   "label": "single hl60 200lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 60,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 108,
+   "heightInches": 84,
+   "weight": 200
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 108 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 68.8,
+   "multiplier": 0.344153,
+   "cycles": 14000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 2.625,
+    "springLength": 38.25,
+    "springWeight": 20.2878
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single hl60 250lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 60,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 108,
+   "heightInches": 84,
+   "weight": 250
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 108 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 86,
+   "multiplier": 0.344153,
+   "cycles": 13000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.283,
+    "innerDiameter": 2.625,
+    "springLength": 44,
+    "springWeight": 25.3387
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single hl60 300lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 60,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 108,
+   "heightInches": 84,
+   "weight": 300
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 108 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 103.2,
+   "multiplier": 0.344153,
+   "cycles": 16000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 2.625,
+    "springLength": 54,
+    "springWeight": 33.9522
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single hl60 350lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 60,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 108,
+   "heightInches": 84,
+   "weight": 350
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 108 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 120.5,
+   "multiplier": 0.344153,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 2.625,
+    "springLength": 51,
+    "springWeight": 32.7597
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single hl60 400lb",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 60,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "cycles": 10000,
+   "widthInches": 108,
+   "heightInches": 84,
+   "weight": 400
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 108 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 137.7,
+   "multiplier": 0.344153,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 2.625,
+    "springLength": 59,
+    "springWeight": 40.395
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "chk CANIMEX/TF D400-144 id4.375 h120",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 4.375,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 108,
+   "heightInches": 120,
+   "weight": 150,
+   "springs": 2
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 32.6,
+   "multiplier": 0.217449,
+   "cycles": 10000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.192,
+    "innerDiameter": 4.375,
+    "springLength": 11.25,
+    "springWeight": 6.9027
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "chk CANIMEX/TF D525-216 id1.75 h84",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 1.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 108,
+   "heightInches": 84,
+   "weight": 150,
+   "springs": 2
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 6.1,
+   "totalInchPoundPerTurn": 72.8,
+   "multiplier": 0.485098,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 1.75,
+    "springLength": 21.75,
+    "springWeight": 6.5528
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "chk CANIMEX/TF D525-216 id2.625 h120",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 108,
+   "heightInches": 120,
+   "weight": 150,
+   "springs": 2
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 8.1,
+   "totalInchPoundPerTurn": 54.5,
+   "multiplier": 0.363065,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2187,
+    "innerDiameter": 2.625,
+    "springLength": 20,
+    "springWeight": 8.7036
+   }
+  }
  }
 ]

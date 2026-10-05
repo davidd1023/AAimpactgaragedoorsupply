@@ -40,7 +40,15 @@ for (const file of process.argv.slice(2)) {
             continue;
         }
 
-        if (i.lift && i.lift !== "Standard") {
+        // HI-LIFT IS SCORED, not skipped. It was skipped because there was no
+        // hi-lift Single data to score - eval-single.json was 176 readings of
+        // pure standard lift, so the Single figures quoted from here said
+        // nothing at all about hi-lift. That is how a wrong assembly hardware
+        // constant survived in the Single path: the one number that would have
+        // caught it was never measured. The readings exist now, so they count.
+        const hi = i.lift === "HiLift" || i.lift === "Hi-Lift";
+
+        if (i.lift && !hi && i.lift !== "Standard") {
             continue;
         }
 
@@ -54,6 +62,7 @@ for (const file of process.argv.slice(2)) {
             assembly: "Single", drum: i.drum, springId: ID_TEXT[sp.innerDiameter],
             springs: i.springs ?? 2, radius: REF_RADIUS[Number(i.radius)] ?? String(i.radius),
             wireSize: `${sp.wireSize}"`,
+            ...(hi ? { liftType: "Hi-Lift", liftin: String(i.hiLift) } : {}),
             cycles: Number(i.cycles).toLocaleString("en-US"),
             weight: String(i.weight), doorWidthFeet: 9,
             doorHeightFeet: Math.floor(i.heightInches / 12),

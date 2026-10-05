@@ -671,6 +671,69 @@ function priceAddsUp(mod) {
     return fails;
 }
 
+// The Single assembly length must reproduce the reference's own width
+// brackets. The reference warns when the assembly exceeds the door width, and
+// the width is an input, so sweeping it an inch at a time brackets the length
+// to the inch without the reference ever reporting it.
+//
+// Measured on 575-120, 7'0", 60" hi-lift, 2 5/8", 200 lb (dev/pulled-s2.json,
+// 72 readings). These are what pin ASSEMBLY_HARDWARE, which was a flat 24"
+// fitted from two readings whose inputs were never written down - so it could
+// not be re-derived, and it was wrong at every spring count.
+//
+// FOUR SPRINGS IS LEFT OUT. The reference warns at every width up to 125,
+// so its assembly is over 125"; ours is 122.4" and would not warn at 123-125.
+// That gap is not the hardware - it is the wire: at four springs the reference
+// picks 0.207" where we pick 0.2", because our cycle life for 0.2" comes to
+// 10,374 against a 10,000 target and the reference puts it below. Its length
+// at 0.207" is 24", which is exactly ours, so only the cycle figure is out,
+// by about 4% right at the threshold. Asserting the bracket here would pin
+// the blame on the wrong constant.
+function singleAssemblyBrackets(mod) {
+    const fails = [];
+
+    // springs -> [widest width the reference WARNS at, narrowest it does NOT]
+    // null means that side was outside the swept window.
+    const BRACKETS = { 1: [null, 80], 2: [110, 111], 3: [117, 118] };
+
+    for (const [springs, [warnAt, fitsAt]] of Object.entries(BRACKETS)) {
+        for (const [width, shouldWarn] of [[warnAt, true], [fitsAt, false]]) {
+            if (width === null) {
+                continue;
+            }
+
+            const c = make(mod, {
+                assembly: "Single", drum: "CANIMEX/TF 575-120", springId: '2 5/8"',
+                liftType: "Hi-Lift", liftin: "60",
+                doorHeightFeet: 7, doorHeightInches: 0,
+                cycles: "10,000", springs: Number(springs), radius: "15",
+                weight: "200",
+                doorWidthFeet: Math.floor(width / 12), doorWidthInches: width % 12,
+            });
+
+            // The app picks the wire in a useEffect the harness stubs out, so
+            // drive it here or every case computes on the 0.25" default.
+            const wire = c.recommendedWire;
+
+            if (wire !== null && wire !== undefined) {
+                c.state.wireSize = `${wire}"`;
+            }
+
+            const warns = (c.warnings ?? []).some((w) => w.id === "assembly-too-long");
+
+            if (warns !== shouldWarn) {
+                fails.push(
+                    `${springs} spring(s) at ${width}" wide: reference ` +
+                    `${shouldWarn ? "warns" : "fits"}, we ` +
+                    `${warns ? "warn" : "fit"} (assembly ${c.assemblyLengthExact.toFixed(2)}")`
+                );
+            }
+        }
+    }
+
+    return fails;
+}
+
 export const INVARIANTS = [
     { name: "cycle life / wire choice is independent of door height", run: heightIndependence },
     { name: "cycle life / wire choice is independent of track radius", run: radiusIndependence },
@@ -686,4 +749,5 @@ export const INVARIANTS = [
     { name: "Duplex raises no Wire-Size-dropdown warning", run: noStaleWireWarnings },
     { name: "no Duplex output depends on the Wire Size dropdown", run: duplexIgnoresWireDropdown },
     { name: "the price column adds up and scales per spring", run: priceAddsUp },
+    { name: "Single assembly length matches the reference's width brackets", run: singleAssemblyBrackets },
 ];
