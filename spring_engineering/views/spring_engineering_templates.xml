@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <!-- The website page at /spring-calculator.
+         t-call="website.layout" is what keeps the visitor on the site: the
+         page comes back wrapped in the theme's header, footer and styling
+         rather than as a bare document.
+         <owl-component> is the frontend's hook for mounting an OWL component
+         from the public_components registry - see the bottom of
+         static/src/js/spring_engineering.js, where the same component is
+         registered for the backend action and for this page. One component,
+         two places; nothing is duplicated. -->
+    <template id="calculator_page" name="Spring Engineering Calculator">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <owl-component name="spring_engineering.calculator"/>
+            </div>
+        </t>
+    </template>
+
+</odoo>

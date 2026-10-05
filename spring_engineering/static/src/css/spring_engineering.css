@@ -360,6 +360,28 @@
 
 
 /* =========================================
+   ON THE WEBSITE
+   ========================================= */
+
+/* The backend rules below give the calculator its own scroll area and a full
+   viewport of height, which is right inside the web client: there the action
+   pane is the thing that scrolls.
+
+   On the public page at /spring-calculator the PAGE scrolls, and a calculator
+   that also scrolls puts a second scrollbar inside the first - you reach the
+   bottom of the calculator and the site's footer is still somewhere below,
+   behind a different wheel gesture. So on the frontend the component sizes to
+   its content and lets the page do the scrolling.
+
+   Keyed on #wrap, which the website layout provides and the backend does not,
+   so this cannot reach the app. */
+#wrap .spring-engineering {
+    min-height: 0;
+    overflow: visible;
+}
+
+
+/* =========================================
    ODOO PAGE FIX
    ========================================= */
 

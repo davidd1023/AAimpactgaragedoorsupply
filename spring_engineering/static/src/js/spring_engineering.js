@@ -3954,6 +3954,22 @@ closeDrumInfo() {
     addToCart() {}
 }
 
+// TWO PLACES, ONE COMPONENT.
+//
+//   actions            the backend app, reached from the Spring Engineering
+//                      menu as an ir.actions.client.
+//   public_components  the public website page at /spring-calculator, mounted
+//                      by <owl-component name="spring_engineering.calculator"/>
+//                      in the page template.
+//
+// Registering the same class twice rather than wrapping or subclassing it
+// means the website and the backend cannot drift apart: a fix to the ladder,
+// a price or a warning lands in both at once. The component takes no props
+// and reads nothing from the action, so neither registry needs an adapter.
 registry
     .category("actions")
+    .add("spring_engineering.calculator", SpringEngineering);
+
+registry
+    .category("public_components")
     .add("spring_engineering.calculator", SpringEngineering);
