@@ -696,3 +696,87 @@ the reference's outer spring is exactly one inch longer than its inner on all
 
 So roughly one two-spring reading in seven still varies within its rung with no
 explanation found.
+
+## The quarter inch, measured properly and still not solved (2026-10-05)
+
+Three pulls this round, 492 readings. One of them helped. The other two are
+written up here because each cost about four minutes of someone else's server
+and would otherwise be run again.
+
+### What the dense ladders actually showed
+
+A 5 lb weight ladder (batch q1) plus 232 one-pound brackets across every
+within-rung length step it found (batch q2) resolves the rule exactly on the
+one rung dense enough to see it. On 0.2625/0.2253 at two springs, with
+x = C/TIPPT and C = 2104, the boundaries in x fall at 15.62, 15.13, 14.62,
+14.11, 13.63 - spaced almost exactly half an inch - and the rule is three
+bands in frac(x):
+
+    f <= 0.12        ->  floor + 0.25
+    0.12 < f <= 0.62 ->  floor
+    f > 0.62         ->  floor + 1.25
+
+Both outer bands are "nearest integer plus a quarter"; the middle one is a
+plain floor. It explains every reading on that rung.
+
+It does not generalise. Fitted per rung and tested on held-out readings for
+that SAME rung, it scores 66.1% against the shipped band table's 87.0%. With
+the thresholds forced global it explains 76% of the dense data. They are
+properties of a slice, not of a rung, which is why the ugly per-rung band
+tables beat the clean rule.
+
+### Two traps, both mine
+
+A WEIGHT LADDER MOSTLY CANNOT SEE THE QUARTER AT ALL. Of 49 (rung, spring
+count) groups in the dense data, 42 contain only whole lengths - 544 whole
+against 43 quarters overall. Fitting three parameters to a group that has one
+frac value collapses to `floor` and reports 98.9%, which is what my first
+pass did. Only 7 groups could discriminate anything. A pull meant to settle
+the quarter has to walk the FRACTION of the active length, not the weight;
+batch 3 did that in 2026-10-02 and it is why those readings are worth more
+than these.
+
+"NO SINGLE CONSTANT CAN WORK" WAS MIS-PREMISED. The test asked whether
+|L - C/TIPPT| could stay under 0.375 for some C, 0.375 being half the widest
+gap in the {n, n+0.25} lattice. It cannot - the best is 0.48 to 0.61 - and I
+briefly wrote that the whole form was wrong. But that bound only applies to
+NEAREST-NEIGHBOUR snapping. Under a band rule a reading can sit 0.62 from the
+value it maps to, so the measurement rules out the snap I assumed, not the
+form that is shipped.
+
+### Dense is not diverse, the second time
+
+Folding the 232 one-pound brackets into the fit took clean length from 91.6%
+to 89.6%. They are one drum, one height, one cycle target, varying only
+weight - a line through the input space - and they outvote the diverse
+readings on the rungs they touch. This is the same failure as the 430-reading
+sweep noted above, which cost 29 points. The file is held out of dev/, not
+imported.
+
+### What did work: the long-spring region
+
+Breaking the remaining clean misses down by input found the weak one:
+
+    cycle target   50,000  97.5%        200,000  82.1%
+                   10,000  93.2%        300,000  80.0%
+                  100,000  90.6%
+
+and 19 of 36 clean misses were a full inch or more rather than a quarter.
+High targets mean long springs, 40 to 76 inches, where a small error in a
+rung's scale crosses an integer - and the scales were fitted almost entirely
+on short springs.
+
+So batch L1 sampled that region DIVERSELY: every axis independent from a
+seeded generator, six drums, three radii, 1-4 springs, heights 84-180,
+targets 100k/200k/300k. It scored 87.7% before import, against 91.6% on the
+mixed samples, confirming the region.
+
+ONLY THE 114 CLEAN READINGS WERE KEPT. Including the 146 flagged ones cost
+2.7 points of flagged accuracy and gained nothing: they are doors the
+reference is already complaining about, usually about length, so their
+lengths are the least trustworthy in the file. Clean-only took clean length
+from 91.6% to 91.9% and moved nothing else.
+
+That gain is one or two readings out of 431 and is inside the noise. It is
+kept for the principle - 114 diverse readings in a measured thin region - not
+for the number.
