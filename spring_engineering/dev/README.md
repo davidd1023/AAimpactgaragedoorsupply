@@ -780,3 +780,60 @@ from 91.6% to 91.9% and moved nothing else.
 That gain is one or two readings out of 431 and is inside the noise. It is
 kept for the principle - 114 diverse readings in a measured thin region - not
 for the number.
+
+## Walking the fraction (batch F2, 2026-10-05)
+
+The note above said a pull meant to settle the quarter inch has to walk the
+FRACTION, not the weight. This is that pull, and it is the first in several
+rounds to improve both numbers at once.
+
+340 readings, 339 clean. Weights chosen so frac(active length) is covered in
+twentieths across the six (rung, spring count) groups carrying 20 of the 32
+remaining clean misses - the soft end at two springs, which is also the most
+common configuration there is. Every sample comes from a DIFFERENT drum,
+radius, cycle target and height, so frac is covered without the batch becoming
+a line through the input space.
+
+    clean length 91.9% -> 92.1%        flagged 80.8% -> 81.7%
+
+### Orderable doors only, and why the first attempt was useless
+
+The generator first scanned weight upward and took the first match, which on a
+big drum means a very light door: springs so over-engineered the reference came
+back with 4.6 million cycles and a warning. Flagged readings have the least
+trustworthy lengths in the file, so those are no use for settling a rule. It
+now requires our own warning set to be EMPTY and picks among all the clean
+candidates a configuration offers rather than the first, so weight is not
+correlated with the bucket. 12,712 flagged candidates were rejected.
+
+### What it made visible
+
+On 0.2625/0.2253 at three springs the rule is one threshold: bonus 0.25 below
+frac 0.747 and 1.25 above, and it explains all 60 readings. The deriver found
+the same line unaided once the data was in. One, four and three springs on that
+rung all now carry two-parameter lines.
+
+Two springs on that rung still gets 42 bands, and the reason is worth writing
+down: its levels really are three. The fraction walk saw {0.25: 43, 1.25: 16,
+0: 1} and looked like a clean two-level group with one stray reading, but
+across all 217 readings the levels are {0: 37, 0.25: 131, 1.25: 49} - the third
+level has 17% support, and restricting to orderable doors does not remove it
+(35 of 182). So the band table is not purely overfitting there; the group is
+genuinely not two-level in frac alone.
+
+### A level supported by one reading in sixty is not a level
+
+That investigation did find a real fault. The level COUNT alone decided whether
+a group got a line or a band table, so a single stray reading could tip a clean
+two-level group into memorising dozens of bands. fitLineAnyLevels now ignores
+levels with less than 3% support when counting, and fits the line to the rest.
+
+It is safe by construction: the caller still cross-validates line against bands
+over ALL the readings, outlier included, and keeps the bands unless the line
+wins out of sample. Dropping a level only lets the line be considered.
+
+    bands 170 -> 156, lines 88 -> 91, every score unchanged
+
+Two groups moved from bands to lines - 0.3125/0.25 at three springs and
+0.4531/0.3625 at one. Fourteen fewer memorised parameters for identical
+accuracy, which is worth having even though today's samples cannot show it.

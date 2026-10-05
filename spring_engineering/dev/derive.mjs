@@ -921,7 +921,39 @@ function fitLine(ls) {
 // so readings sorted by u must come out in bonus order and fitting reduces to
 // choosing K-1 cut points. That is a dynamic program over (level, position).
 function fitLineAnyLevels(ls, maxLevels) {
-    const vals = [...new Set(ls.map((l) => l.bonus))].sort((x, y) => x - y);
+    // A LEVEL SUPPORTED BY ONE READING IN SIXTY IS NOT A LEVEL.
+    //
+    // The level count alone decided whether a group got a two-parameter line
+    // or a band table, and one stray reading was enough to tip it. On
+    // 0.2625/0.2253 at two springs, a fraction walk of 60 readings came back
+    // {0.25: 43, 1.25: 16, 0: 1} - a clean two-level line with a threshold
+    // near 0.74, plus a single reading at frac 0.728 that wanted 0. That one
+    // reading made the group "three-level", the line was refused, and the
+    // fitter memorised FORTY-TWO bands instead. The same rung's three-spring
+    // group, which happens to have no such outlier, got a line at 0.747 that
+    // explains all 60 of its readings.
+    //
+    // So levels are counted with the stragglers dropped, and the line is
+    // fitted to the rest. It will then get that one reading wrong, which is
+    // the right trade: one miss against 42 bands of memorised noise.
+    //
+    // THIS CANNOT QUIETLY MAKE THINGS WORSE. The caller cross-validates the
+    // line against the bands over ALL the readings, outlier included, and
+    // keeps the bands unless the line wins out of sample. Dropping a level
+    // here only lets the line be CONSIDERED; it still has to earn the place.
+    const support = new Map();
+
+    for (const l of ls) {
+        support.set(l.bonus, (support.get(l.bonus) || 0) + 1);
+    }
+
+    const floor = Math.max(2, Math.ceil(ls.length * 0.03));
+    const solid = new Set([...support].filter(([, n]) => n >= floor).map(([v]) => v));
+    const used = solid.size >= 2 && solid.size < support.size
+        ? ls.filter((l) => solid.has(l.bonus))
+        : ls;
+
+    const vals = [...new Set(used.map((l) => l.bonus))].sort((x, y) => x - y);
 
     if (vals.length < 2 || vals.length > maxLevels) {
         return null;
@@ -929,7 +961,7 @@ function fitLineAnyLevels(ls, maxLevels) {
 
     const K = vals.length;
     const cls = new Map(vals.map((v, i) => [v, i]));
-    const pts = ls.map((l) => ({
+    const pts = used.map((l) => ({
         F: Math.floor(l.active),
         t: l.active - Math.floor(l.active),
         c: cls.get(l.bonus),
