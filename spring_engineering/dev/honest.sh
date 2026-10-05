@@ -14,7 +14,7 @@ cd "$(dirname "$0")/.."
 
 echo "IN SAMPLE"
 node dev/replay.mjs 2>&1 | grep -E "byte-identical|verified reading|^  FAIL" | grep -v "^  FAIL" | sed 's/^/  /'
-printf "  invariants: %s/13\n" "$(node dev/replay.mjs 2>&1 | grep -c '^  PASS')"
+printf "  invariants: %s/14\n" "$(node dev/replay.mjs 2>&1 | grep -c '^  PASS')"
 
 echo ""
 echo "EXTERNAL - uniform draws from the allowed box, never fitted"

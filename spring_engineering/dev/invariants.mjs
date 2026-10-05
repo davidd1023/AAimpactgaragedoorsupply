@@ -599,6 +599,78 @@ function duplexIgnoresWireDropdown(mod) {
     return fails;
 }
 
+// The price column must add up, and it must scale the way it was quoted to
+// us: labour once, cones per spring, steel per pound of every spring.
+//
+// The total is the one number anybody reads, and it is the easiest to get
+// silently wrong - round each part and sum, or sum and round once, and the
+// column stops adding up by a cent. So the total is checked against its own
+// parts rather than against a figure computed here a second way.
+//
+// The scaling checks are what catch a wrong basis. Doubling the spring count
+// must double the cones and the steel and leave labour alone; if cones were
+// ever charged once per assembly, or steel on a single spring, these fail.
+function priceAddsUp(mod) {
+    const fails = [];
+    const states = [
+        { assembly: "Single", springId: '2 5/8"' },
+        { assembly: "Single", springId: '3 3/4"' },
+        { assembly: "Single", springId: '5 1/4"' },
+        { assembly: "Duplex", springId: '3 3/4" inside 6"' },
+        { assembly: "Duplex", springId: '2 5/8" inside 5 1/4"' },
+    ];
+
+    for (const st of states) {
+        for (const springs of [1, 2, 3, 4]) {
+            for (const weight of ["300", "600", "1000"]) {
+                const c = duplex(mod, { ...st, springs, weight });
+                const label = `${st.assembly} ${st.springId} x${springs} @${weight}lb`;
+                const parts = c.priceLabor + c.priceCones + c.priceSteel;
+
+                if (Math.abs(c.priceTotal - parts) > 1e-9) {
+                    fails.push(`${label}: total ${c.priceTotal} but parts sum to ${parts.toFixed(2)}`);
+                }
+
+                for (const [name, v] of [["labor", c.priceLabor], ["cones", c.priceCones],
+                                         ["steel", c.priceSteel], ["total", c.priceTotal]]) {
+                    if (!(v >= 0) || !isFinite(v)) {
+                        fails.push(`${label}: ${name} is ${v}`);
+                    }
+
+                    if (Math.abs(v * 100 - Math.round(v * 100)) > 1e-9) {
+                        fails.push(`${label}: ${name} ${v} is not a whole number of cents`);
+                    }
+                }
+            }
+        }
+
+        // Cones and steel are per spring; labour is not.
+        const one = duplex(mod, { ...st, springs: 1, weight: "600" });
+        const two = duplex(mod, { ...st, springs: 2, weight: "600" });
+
+        if (Math.abs(two.priceCones - 2 * one.priceCones) > 1e-9) {
+            fails.push(`${st.assembly} ${st.springId}: cones ${one.priceCones} at one spring but ${two.priceCones} at two - not per spring`);
+        }
+
+        if (two.priceLabor !== one.priceLabor) {
+            fails.push(`${st.assembly} ${st.springId}: labour changed with the spring count`);
+        }
+
+        // Steel follows the assembly weight, which doubles with the count at
+        // a fixed per-spring weight - so compare against the weight rather
+        // than assuming the per-spring figure is unchanged.
+        for (const c of [one, two]) {
+            const want = Math.round(c.assemblyWeight * 1.46 * 100) / 100;
+
+            if (Math.abs(c.priceSteel - want) > 1e-9) {
+                fails.push(`${st.assembly} ${st.springId} x${c.state.springs}: steel ${c.priceSteel} but ${c.assemblyWeight.toFixed(2)} lb at 1.46 is ${want}`);
+            }
+        }
+    }
+
+    return fails;
+}
+
 export const INVARIANTS = [
     { name: "cycle life / wire choice is independent of door height", run: heightIndependence },
     { name: "cycle life / wire choice is independent of track radius", run: radiusIndependence },
@@ -613,4 +685,5 @@ export const INVARIANTS = [
     { name: "the cycles-low flag stays a caution, not a verdict", run: cyclesLowStaysCaution },
     { name: "Duplex raises no Wire-Size-dropdown warning", run: noStaleWireWarnings },
     { name: "no Duplex output depends on the Wire Size dropdown", run: duplexIgnoresWireDropdown },
+    { name: "the price column adds up and scales per spring", run: priceAddsUp },
 ];

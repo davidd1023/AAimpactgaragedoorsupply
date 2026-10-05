@@ -1938,6 +1938,37 @@ const ASSEMBLY_HARDWARE = 24;
 // bound on the CALCULATION, not on any spring.
 const CYCLE_MAX = 350000;
 
+// --- Pricing --------------------------------------------------------------
+// What the assembly is quoted at. Three parts, kept separate because they are
+// charged on different things:
+//
+//   LABOUR  a flat fee, once per quote however many springs the door takes.
+//
+//   CONES   per SPRING, chosen by inside diameter. A Duplex spring is two
+//           springs nested on one shaft position, so it carries a set for the
+//           inner diameter and a set for the outer - the two are added.
+//
+//   STEEL   per pound of FINISHED spring, counting every spring in the
+//           assembly. It is taken from the weights the results already show,
+//           which are themselves taken from the quarter-inch length that gets
+//           built, so the price always agrees with the figures above it.
+const LABOR_COST = 100;
+const STEEL_PRICE_PER_LB = 1.46;
+
+// Keyed by inside diameter as a NUMBER, so the Duplex path can look up its
+// pair's diameters directly - it knows them as numbers, not as the dropdown's
+// strings.
+//
+// 6" is not a size of its own here: it takes the 5 1/4" price. The three
+// Single diameters are the three that were quoted to us, and 6" appears only
+// as the outer half of a Duplex pair.
+const CONE_PRICES = {
+    2.625: 6.04,
+    3.75: 12.0,
+    5.25: 20.0,
+    6: 20.0,
+};
+
 // Shown once, as its own message, whenever any warning is raised.
 const WARNING_NOTE =
     "Use extreme caution when designing springs for use with this drum.";
@@ -3092,6 +3123,66 @@ get duplexOuterWeight() {
         : 0;
 }
 
+// --- Pricing ----------------------------------------------------------
+
+// Cones for ONE spring. Duplex nests two springs per shaft position and so
+// takes a set for each diameter; Single and Triplex take one.
+//
+// The Duplex diameters come from duplexPair, which has already resolved the
+// aliases - a Raynor 3 1/2" inside 5 1/2" is engineered as the 2 5/8" inside
+// 5 1/4" pair everywhere else in this file, so it is priced as one too.
+get coneUnitPrice() {
+    if (this.state.assembly === "Duplex") {
+        const pair = this.duplexPair;
+
+        if (!pair) {
+            return 0;
+        }
+
+        return (CONE_PRICES[pair.innerId] ?? 0) + (CONE_PRICES[pair.outerId] ?? 0);
+    }
+
+    return CONE_PRICES[this.springIdNumber] ?? 0;
+}
+
+// Finished steel in the whole assembly, in lb. Duplex counts both springs of
+// every pair.
+get assemblyWeight() {
+    const springs = Number(this.state.springs) || 0;
+
+    if (this.state.assembly === "Duplex") {
+        return springs * (this.duplexInnerWeight + this.duplexOuterWeight);
+    }
+
+    return springs * this.springWeight;
+}
+
+get priceLabor() {
+    return LABOR_COST;
+}
+
+get priceCones() {
+    const springs = Number(this.state.springs) || 0;
+
+    return Math.round(springs * this.coneUnitPrice * 100) / 100;
+}
+
+get priceSteel() {
+    return Math.round(this.assemblyWeight * STEEL_PRICE_PER_LB * 100) / 100;
+}
+
+// ROUNDED PARTS, SUMMED - not the rounding of an exact total. A quote whose
+// column does not add up invites someone to re-add it by hand, and labour is
+// a whole number while the other two are already at the cent, so the sum is
+// exact at the cent too.
+get priceTotal() {
+    return Math.round((this.priceLabor + this.priceCones + this.priceSteel) * 100) / 100;
+}
+
+money(value) {
+    return `$${value.toFixed(2)}`;
+}
+
 // Cycle life of the set. K is the spring's body length times TIPPT, so the
 // body is K/TIPPT and the rate follows; the rest is the standard cycle
 // formula on the inner spring, which is the one the reference reports.
@@ -3753,6 +3844,12 @@ closeDrumInfo() {
         // useState proxy would detach the component from its reactivity.
         Object.assign(this.state, defaultState());
     }
+
+    // DELIBERATELY EMPTY. The button is wired to a named handler rather than
+    // left without one so that the place to add the order call is obvious, and
+    // so the button is already reachable by keyboard and screen reader when it
+    // starts doing something.
+    addToCart() {}
 }
 
 registry

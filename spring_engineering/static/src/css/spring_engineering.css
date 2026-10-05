@@ -390,27 +390,60 @@
 }
 
 /* =========================================
-   CLEAR
+   TOTAL ROW
    ========================================= */
 
-/* Sits below the results and resets every input to its starting value.
-   Full width so it cannot be confused with the inline choice buttons
-   above, which are toggles rather than actions. */
+/* The last row of the price block. A quote's total has to be findable
+   without reading the rows above it, so it takes a rule across the top
+   and bold on both sides. The 2px matches nothing else in the file, which
+   is the point - it reads as a sum, not as another row.
+
+   Both the label and the value are bolded. The value needs the doubled
+   class to outscore `.se-rowR .se-value`, which sets 600; a bare
+   descendant selector would lose to it and the total would be the only
+   bold label with a non-bold number. */
+.se-rowR-total {
+    border-top: 2px solid #000000;
+}
+
+.se-rowR-total > span {
+    font-weight: bold;
+}
+
+.se-rowR.se-rowR-total .se-value {
+    font-weight: bold;
+}
+
+
+/* =========================================
+   ACTIONS - CLEAR / ADD TO CART
+   ========================================= */
+
+/* Sit below the results. Full width between them so they cannot be
+   confused with the inline choice buttons above, which are toggles
+   rather than actions.
+
+   The two share every dimension and differ only in colour, so the shape
+   is written once. flex-basis 0 keeps them equal regardless of their
+   labels - "Add to Cart" is twice the text of "Clear" and would
+   otherwise take twice the room. */
 .se-clear-row {
     display: flex;
     justify-content: center;
+    gap: 16px;
 
     padding: 24px 28px 40px;
 
     box-sizing: border-box;
 }
 
-.se-clear {
-    width: 100%;
-    max-width: 420px;
+.se-clear,
+.se-add-cart {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 260px;
     min-height: 56px;
 
-    background: #000000;
     color: #ffffff;
 
     border: none;
@@ -423,6 +456,10 @@
     cursor: pointer;
 }
 
+.se-clear {
+    background: #000000;
+}
+
 .se-clear:hover {
     background: #222222;
 }
@@ -431,7 +468,22 @@
     background: #3a3a3a;
 }
 
-.se-clear:focus-visible {
+/* The app's red, the one already on the selected choice buttons and the
+   pitch control, rather than a second red. */
+.se-add-cart {
+    background: #ed1b35;
+}
+
+.se-add-cart:hover {
+    background: #d4162e;
+}
+
+.se-add-cart:active {
+    background: #b81228;
+}
+
+.se-clear:focus-visible,
+.se-add-cart:focus-visible {
     outline: 3px solid #666666;
     outline-offset: 2px;
 }
