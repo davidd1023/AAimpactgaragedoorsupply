@@ -360,24 +360,110 @@
 
 
 /* =========================================
+   NARROW SCREENS
+   ========================================= */
+
+/* THE ROWS DID NOT FIT A PHONE. Every row is one nowrap flex line with the
+   label at the left and the control at the right, and neither can shrink below
+   its text, so the widest of them overflowed:
+
+     "Door Height (in)"        ~176px at 22px
+     two 65px inputs + ft/in   ~200px
+     row padding               ~56px
+                               ~432px, against 360px of phone
+
+   `overflow-x: hidden` on the root was hiding that rather than solving it, so
+   on a phone the right-hand end of the Door Height and Door Width rows was
+   simply unreachable - and it mattered more the moment the calculator became a
+   public page people open in a garage.
+
+   Same arithmetic at these sizes comes to ~336px, which fits with room to
+   spare. Nothing above 480px is touched, so the desktop layout is unchanged.
+   The select and its hidden sizer MUST move together - the sizer is what gives
+   the select its width, so a mismatch would put the tap target back off the
+   text. */
+@media (max-width: 480px) {
+    .se-row,
+    .se-rowR {
+        padding: 0 14px;
+    }
+
+    .se-row > span,
+    .se-rowR > span,
+    .se-measurement span {
+        font-size: 18px;
+    }
+
+    .se-select,
+    .se-select-sizer {
+        font-size: 18px;
+    }
+
+    .se-input {
+        width: 52px;
+        font-size: 18px;
+    }
+
+    .se-number-input {
+        width: 130px;
+        font-size: 18px;
+    }
+
+    .se-buttons button {
+        min-width: 56px;
+        font-size: 18px;
+    }
+
+    .se-pitch button {
+        width: 100px;
+        height: 48px;
+        font-size: 17px;
+    }
+
+    .se-section-title {
+        font-size: 20px;
+    }
+
+    .se-rowR-header {
+        font-size: 18px;
+    }
+
+    /* The two halves of the Turns/TIPPT row have their own padding inside an
+       already narrow row, so they get the tighter gutter too. */
+    .se-rowR-split > .se-rowR {
+        padding: 0 10px;
+    }
+}
+
+
+/* =========================================
    ON THE WEBSITE
    ========================================= */
 
-/* The backend rules below give the calculator its own scroll area and a full
-   viewport of height, which is right inside the web client: there the action
-   pane is the thing that scrolls.
+/* Inside the web client the calculator is the whole action pane, so it claims
+   a viewport of height. On a website page it is one band between the site
+   header and the footer, and a guaranteed 100vh leaves a screen of empty grey
+   under the inputs before the footer can appear. So the height floor goes.
 
-   On the public page at /spring-calculator the PAGE scrolls, and a calculator
-   that also scrolls puts a second scrollbar inside the first - you reach the
-   bottom of the calculator and the site's footer is still somewhere below,
-   behind a different wheel gesture. So on the frontend the component sizes to
-   its content and lets the page do the scrolling.
+   OVERFLOW IS DELIBERATELY NOT TOUCHED HERE, and the first version of this
+   rule got that wrong: it said `overflow: visible`, which also cleared the
+   base rule's `overflow-x: hidden`. That clipping is load-bearing. The rows
+   are `white-space: nowrap` flex lines whose items cannot shrink below their
+   text, so a long label beside a wide select can exceed a phone's viewport -
+   and with the clipping gone that becomes a horizontal scrollbar on the whole
+   PAGE, which is far worse on a public page than a clipped row.
+
+   There is no CSS that both clips sideways and defers vertical scrolling to
+   the page: per spec, `overflow-x: hidden` with `overflow-y: visible`
+   computes the visible value to auto, which is the nested scroller again. The
+   base rule's `overflow-y: auto` never actually engages anyway, because the
+   element has no constrained height - it grows with its content - so leaving
+   both alone is correct rather than merely convenient.
 
    Keyed on #wrap, which the website layout provides and the backend does not,
    so this cannot reach the app. */
 #wrap .spring-engineering {
     min-height: 0;
-    overflow: visible;
 }
 
 

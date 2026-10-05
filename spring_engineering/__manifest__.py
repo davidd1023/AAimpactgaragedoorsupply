@@ -3,6 +3,8 @@
     'version': '1.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
+    # Odoo warns on every registry load without this.
+    'author': 'AA Impact Garage Door Supply',
     'depends': ['base', 'web', 'website'],
     'data': [
         'views/spring_engineering_views.xml',
