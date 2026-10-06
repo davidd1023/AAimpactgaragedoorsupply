@@ -944,9 +944,11 @@ function fitSplit(ls) {
         //        20            90    96.5%   84.4%
         //
         // Measured together with LEVEL_SUPPORT, since both decide whether a
-        // group gets a model or a band table. The five-fold holdout agrees on
-        // direction - 92.3% to 92.4% - which is the check that matters, as
-        // three knobs have now been moved against the external samples.
+        // group gets a model or a band table. The holdout moved 92.3% to
+        // 92.4%, which looked like confirmation at the time and was really the
+        // size of the effect: a fresh uniform sample shows no gain from any of
+        // these three knobs. See the note on LINE_SLACK. Kept because at equal
+        // honest accuracy it is the smaller model.
         const minSide = Number(process.env.SPLIT_MIN_SIDE || 8);
 
         if (below.length < minSide || above.length < minSide) {
@@ -1074,7 +1076,11 @@ function fitLineAnyLevels(ls, maxLevels) {
     // group that had just halved was too small a bar, so levels that are
     // really noise survived and kept pushing groups off the line fitter:
     //
-    //   LEVEL_SUPPORT   clean length
+    // THESE FIGURES DO NOT SURVIVE A FRESH SAMPLE - see the note on LINE_SLACK.
+    // 0.06 is kept for parsimony at equal honest accuracy, not because it
+    // scores better.
+    //
+    //   LEVEL_SUPPORT   clean length on the samples it was tuned against
     //       0.01           96.8%
     //       0.03           96.8%
     //       0.06           97.2%
@@ -1356,10 +1362,26 @@ function fitLineAnyOrder(ls, maxLevels) {
 //      0.16        38    97.0%     99.5%      85.3%          -
 //      0.20        21    97.4%     99.5%      85.3%          -
 //
-// 0.12 keeps the accuracy with less than half the bands and is better on the
-// holdout. The knob has now been re-measured twice, both times because the
-// data underneath it changed - which is the point: it is a fraction of what a
-// group holds, so it is not a constant of the problem.
+// AND THEN A FRESH SAMPLE SAID THE TUNING BOUGHT NOTHING.
+//
+// Every figure above comes from samples this knob had been tuned against,
+// which makes them partly in-sample for it. A uniform draw taken afterwards
+// (dev/eval-validation-seed61006.json, 380 readings, nothing tuned against it)
+// reads the same for every setting:
+//
+//   slack  support  minside   FRESH   tuned-against   bands
+//    0.03    0.03     12      90.3%       97.2%        130
+//    0.08    0.06      8      90.3%       98.6%         38
+//    0.12    0.06      8      90.3%       98.6%         38
+//    0.12    0.03     12      90.9%       98.1%         71
+//
+// So the 1.4 points these knobs appeared to gain were fitting to those
+// samples. 0.12 is kept for the only reason left standing: at the same honest
+// accuracy it is 38 bands rather than 130, and fewer memorised parameters is
+// the safer thing to carry forward.
+//
+// The five-fold holdout said 92% throughout while the samples said 98%. The
+// holdout was right, and dev/README.md says so at length.
 const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.12));
 
 function fitThreshold(rows, above) {
