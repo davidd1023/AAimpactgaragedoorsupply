@@ -1048,3 +1048,63 @@ should have been treated as the suspect figure.
 
   dev/eval-sample.mjs draws a new one in seconds, and the pull is six minutes.
   That is cheap next to reporting a number that is eight points optimistic.
+
+## The boundary-refinement batch was making things worse (2026-10-06)
+
+Found with the fresh sample, and it is my own tool doing the damage.
+
+dev/frac-refine.mjs picks readings that land within 0.03 of a threshold the
+model already uses, to place that threshold more precisely. Batch R1 is 380 of
+them. On the samples that had been tuned against it looked like a gain. On a
+uniform draw it is a loss:
+
+                       R1 in the fit   R1 out
+    clean wire             99.4%        100%
+    clean length           90.3%        91.4%
+    clean within 1"        97.7%        98.3%
+    five-fold holdout      92.19%       92.51%
+
+Concentrating that much data at the boundaries over-weights them: the
+thresholds move to fit the boundary readings and are worse for ordinary doors.
+It is the "dense is not diverse" lesson again, one level subtler - data chosen
+BY where the model's boundaries already sit is the densest kind there is, and
+the concentration is invisible in the input space, which is where I was
+checking for it.
+
+The readings are kept, marked `fit: false`, so dev/replay.mjs still asserts
+them and nothing is thrown away - they are perfectly good reference data, just
+not a fair sample to fit. derive.mjs skips them.
+
+### What else was tried and did not pay
+
+  CENTRING sMult IN ITS PLATEAU. fitStiffness scores a COUNT, so many
+  multipliers tie, and `ok > best.ok` with an ascending scan took the LOWEST of
+  them every time - no margin on one side. Taking the midpoint of the widest
+  tied run is better reasoning and bought two readings in 5157 on the holdout,
+  with nine more bands. Reverted.
+
+  REFITTING sMult AGAINST THE REAL OBJECTIVE. fitStiffness optimises against
+  snapGrid, a nearest-neighbour snap, while the shipped model decides length
+  with frac bands - so the multiplier is tuned for an objective the model does
+  not use. Scanning every rung for a better multiplier UNDER THE SHIPPED MODEL:
+  zero rungs would move, 5021/5064 either way. The bands are fitted after the
+  multiplier and absorb whatever it chose, so the pair is already at a local
+  optimum. Theoretically wrong, costs nothing.
+
+  POOLING THE THRESHOLDS. If the high threshold were really a shared constant
+  near 0.75, pooling it would cut variance. The 111 fitted first thresholds have
+  a standard deviation of 0.231 and run from -0.35 to 0.82. They genuinely
+  differ per group.
+
+### Where this leaves it
+
+In sample 99%, holdout 92.5%, fresh uniform 91.4%. The model reproduces what it
+is shown almost perfectly and loses eight points on new doors, and the residual
+errors are a whole inch, as often short as long, spread evenly across spring
+count, lift, cycle target and length with no concentration left to attack.
+
+The next real gain is probably not another fitting idea. It is a corpus drawn
+UNIFORMLY rather than targeted: 5157 readings is plenty, but they are mostly
+switch points, fraction walks and boundary refinements, which is exactly the
+data that makes per-group bands overfit. Fitting on uniform draws would close
+the gap from the other side.

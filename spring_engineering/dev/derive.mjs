@@ -177,6 +177,34 @@ for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).read
         continue;
     }
 
+    // DELIBERATELY NOT FITTED, but still a real reading and still asserted by
+    // dev/replay.mjs. Batch R1 is the case: 380 readings chosen to land within
+    // 0.03 of a fitted threshold, to place those thresholds more precisely.
+    //
+    // It backfired. Concentrating that much data at the boundaries
+    // over-weights them, and the thresholds move to fit the boundary readings
+    // at the expense of ordinary doors. On the samples it had been tuned
+    // against it looked like a gain; on a fresh uniform draw, dropping it from
+    // the fit is worth a point of length accuracy and a wire miss:
+    //
+    //                      with R1 fitted   without
+    //   clean wire             99.4%         100%
+    //   clean length           90.3%         91.4%
+    //   clean within 1"        97.7%         98.3%
+    //
+    // Same lesson as the 1 lb bracket batch, one level subtler: dense is not
+    // diverse, and data chosen BY where the model's boundaries already sit is
+    // the densest kind there is.
+    //
+    // ONLY THE CORPUS PATH CHECKS THIS. A pull file is read straight off disk
+    // with no corpus entry to consult, so dev/pulled-R1.json must stay out of
+    // dev/ or it would be fitted again. That is safe by default - pulls are
+    // gitignored and do not survive a rebuild, so the corpus is what a fresh
+    // build sees - but it is a real edge if the file is ever put back.
+    if (r.fit === false) {
+        continue;
+    }
+
     if ((r.state.springId || "").indexOf("3 3/4") !== 0) {
         continue;
     }
