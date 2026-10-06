@@ -1108,7 +1108,29 @@ function fitLineAnyLevels(ls, maxLevels) {
     // allowed a couple of misfits. The caller still cross-validates the line
     // against the bands and keeps the bands unless the line predicts better
     // out of sample, so this cannot trade accuracy for tidiness.
-    const budget = Math.floor(used.length * Number(process.env.LINE_SLACK || 0.03));
+    // 0.08, RE-MEASURED after the fits stopped seeing duplicates. It was 0.03,
+    // chosen when the fits read the raw 9452-entry ingestion; deduplicating
+    // roughly halved what each group holds, so the same fraction became a much
+    // smaller absolute allowance and groups that had been fitted as lines fell
+    // back to bands.
+    //
+    //   LINE_SLACK   bands   clean length   five-fold holdout
+    //      0.03       119       94.7%           92.1%
+    //      0.08        71       96.3%           92.3%
+    //      0.12        71       96.3%            -
+    //
+    // Flat from 0.08 to 0.12 rather than a knife edge, fewer bands, and better
+    // on both measures. A first sweep read 96.8% at 0.08 and that did not
+    // survive a clean re-derive; 96.3% is the figure that reproduces, and the
+    // sweep had been measuring tables left over from its previous iteration.
+    //
+    // The two measures disagree on the size of it - 1.6 points on the
+    // external samples against 0.2 on the holdout - because they measure
+    // different populations: the samples are uniform draws from the allowed
+    // box, which is what a quoted door looks like, while the corpus behind the
+    // holdout is mostly targeted batches. The samples are the better guide to
+    // real use; the holdout is there to confirm the direction, and it does.
+    const budget = Math.floor(used.length * Number(process.env.LINE_SLACK || 0.08));
 
     if (!best || best.bad > budget) {
         return null;

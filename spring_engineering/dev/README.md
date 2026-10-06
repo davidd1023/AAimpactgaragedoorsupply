@@ -869,6 +869,14 @@ disk, derive without them, compare the files.
 
     unreproducible, duplicates double-weighted   clean length 97.9%
     reproducible, every reading weighted once    clean length 94.7%
+    the same, with LINE_SLACK re-measured        clean length 96.3%
+
+The last line is the one to quote. LINE_SLACK was 0.03, picked when the fits
+read the raw 9452-entry ingestion; deduplicating halved what each group holds,
+so the same fraction became a much smaller allowance and groups that had been
+lines fell back to bands. At 0.08 - flat through 0.12, so not a knife edge -
+there are 71 bands rather than 119, the external samples read 96.3% and the
+five-fold holdout agrees on direction, 92.1% to 92.3%.
 
 The duplicates were up-weighting whatever was in both places, which is every
 recent batch - the fraction walks, which are the best-designed readings in the
