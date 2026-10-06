@@ -152,6 +152,10 @@ for (const r of JSON.parse(readFileSync(pullFile, "utf8"))) {
 
     usedIds.add(tag);
 
+    // "Please contact us" rides along with every answer and means nothing.
+    const flagged = (r.messages ?? [])
+        .filter((m) => !/contact us/i.test(m)).length > 0 || r.status !== "success";
+
     added.push({
         id: tag,
         status: "verified",
@@ -167,6 +171,15 @@ for (const r of JSON.parse(readFileSync(pullFile, "utf8"))) {
         },
         tolerance: { duplexInnerWeight: 0.02, duplexOuterWeight: 0.02 },
         referenceCycles: d.cycles,
+        // WHETHER THE REFERENCE COMPLAINED. Recorded because a flagged
+        // reading's LENGTH is the least trustworthy figure in the file - the
+        // complaint is usually about length - while its WIRE choice is as good
+        // as any. dev/derive.mjs uses this to take the pairing and the cycle
+        // count from such a reading and leave its length out of the fit.
+        //
+        // It was not recorded before, so earlier batches have no flag and are
+        // fitted whole; only readings imported from here carry it.
+        ...(flagged ? { flagged: true } : {}),
     });
 }
 

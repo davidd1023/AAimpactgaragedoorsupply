@@ -414,6 +414,22 @@ for (const r of readings) {
     // is fitted after every rung is gathered, and `active` is then rewritten,
     // so the bands below fit whatever is LEFT rather than re-absorbing an
     // error the stiffness already explains.
+    // A FLAGGED READING KEEPS ITS WIRE AND LOSES ITS LENGTH.
+    //
+    // The pairing above is as good as any - the reference picked it - and the
+    // cycle count behind K with it. The LENGTH is the least trustworthy figure
+    // in such a reading, because what the reference is usually complaining
+    // about IS the length: past 120", past what the cones take, past what fits
+    // the opening. Fitting the length model on those pulled it around for the
+    // doors that can actually be built, which is what cost 2.7 points of
+    // accuracy when batch L1's flagged half was included.
+    //
+    // Only readings imported after this flag existed carry it; the earlier
+    // corpus has no flag and is fitted whole.
+    if (r.flagged) {
+        continue;
+    }
+
     // The rounded TIPPT, matching duplexActiveLength: the reference computes
     // from the figure it displays, as it does for cycles and MIP.
     const shownTippt = Math.round(c.tipptExact * 10) / 10;
