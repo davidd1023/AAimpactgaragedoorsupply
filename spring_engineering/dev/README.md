@@ -838,44 +838,43 @@ Two groups moved from bands to lines - 0.3125/0.25 at three springs and
 0.4531/0.3625 at one. Fourteen fewer memorised parameters for identical
 accuracy, which is worth having even though today's samples cannot show it.
 
-## KNOWN ISSUE: the committed table is not reproducible from committed data
+## FIXED: the table is reproducible again
 
-Found 2026-10-06 and NOT fixed. Anyone re-deriving on a fresh build needs to
-know about it before trusting the result.
+Found and fixed 2026-10-06. Move every dev/pulled-*.json aside, re-run
+apply.sh, and the table is now byte-identical to the one in git.
 
-Move every dev/pulled-*.json aside and run apply.sh, and the table changes:
+### What it was
 
-    with the pulls on disk     clean length 97.9%
-    corpus.json alone          clean length 96.8%
+dev/derive.mjs collected its per-rung groups - every K, every length, every
+band and line fitted from them - at the TOP of the file, straight off the
+ingestion. The dedup and both holdouts sat two hundred lines further down.
 
-Pull files carry the account's garageDoorLineId, so they are gitignored and do
-NOT survive a rebuild. The table in git was derived with them present. So
-re-running apply.sh on a fresh build silently produces a different and slightly
-worse table than the one committed beside it.
+So the fits read the RAW ingestion: 9452 entries against 4350 distinct. A
+reading held in both a pull and the corpus was weighted TWICE, and only
+boundsFromSwitches, called after the dedup, ever saw the clean set. Pull files
+are gitignored and do not survive a rebuild, so on a fresh build the duplicates
+were simply absent, the weighting changed, and apply.sh produced a different
+table from the committed one - 96.8% against the 97.9% in git.
 
-### What it is not
+The holdouts had the mirror image of the same fault: they withheld readings
+from an array the fits had already finished reading. They withheld nothing that
+mattered, and any generalisation number taken through them was fiction. That is
+worth knowing for anyone who trusted dev/holdout.sh before today.
 
-Not missing readings. Every pull reading is now in the corpus - a backfill of
-34 added the last of them - and the deduplicated set is 4350 distinct either
-way. The input SET is identical; only the output differs.
+The fix is an ordering one - dedup and holdouts now run BEFORE the groups are
+built - and it is verified the only way that counts: derive with the pulls on
+disk, derive without them, compare the files.
 
-Not the dedup representative either. Pulls are read before the corpus so a
-reading held in both was represented by its pull copy, which looked like the
-obvious cause. Sorting the corpus first so it wins every tie changed nothing.
+### What it cost, and why that is the right trade
 
-### What was tried
+    unreproducible, duplicates double-weighted   clean length 97.9%
+    reproducible, every reading weighted once    clean length 94.7%
 
-  boundsFromSwitches(readings) reads the RAW array, 9452 entries against 4350
-  distinct, so the switch points that pin K are drawn from data the dedup
-  exists to collapse. That is a real fault and worth fixing on its own merits.
-  Pointing it at `unique` did not restore reproducibility and cost 0.3 points
-  (96.8% -> 96.5%), so it is reverted rather than carried half-done - but it
-  is the first place to look next.
+The duplicates were up-weighting whatever was in both places, which is every
+recent batch - the fraction walks, which are the best-designed readings in the
+file. Emphasising them helped, by accident, and unrepeatably.
 
-### Where to look
-
-Something else in the pipeline still reads the pull files or depends on the
-ingestion order. The holdout logic, which runs after the dedup, is the other
-candidate. The honest figure for the table as it will be re-derived is 96.8%,
-not 97.9%, and until this is closed the shipped table should be treated as
-carrying about a point of unearned accuracy.
+3.2 points is a real loss and it is the honest number. A figure that cannot be
+reproduced from what is committed is not an accuracy, it is a coincidence, and
+every measurement stacked on top of it inherits the problem. The numbers quoted
+from here are reproducible.

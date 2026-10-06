@@ -194,6 +194,151 @@ for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).read
     });
 }
 
+// THE FITS MUST SEE THE DEDUPLICATED, HELD-OUT SET - so this runs HERE,
+// before the per-rung groups below are built, and not after them.
+//
+// It used to sit further down, which meant the rungs - every K, every
+// length, every band and line fitted from them - were collected from the
+// RAW ingestion: 9452 entries against 4350 distinct. A reading held in both
+// a pull and the corpus was therefore weighted TWICE in the fits, and only
+// boundsFromSwitches, which is called after this block, ever saw the clean
+// set. The two holdouts had the same problem the other way round: they
+// withheld readings from an array the fits had already finished reading, so
+// they withheld nothing that mattered and any generalisation number taken
+// through them was fiction.
+//
+// This is what made the committed table unreproducible. Pull files are
+// gitignored, so on a fresh build the duplicates are simply absent, the
+// weighting changes, and apply.sh produces a different table from the one
+// in git - 96.8% on the clean external readings against the 97.9% that was
+// committed beside it.
+
+// DEDUPLICATE. This reads both dev/pulled*.json and dev/corpus.json, and
+// dev/import.mjs folds pulls INTO the corpus - so from the moment the import
+// workflow started, almost every reading has been ingested twice, once as a
+// pull row and once as a corpus row.
+//
+// Uniform double-counting cancels, which is why this hid for eight batches.
+// It stopped cancelling the moment one group was weighted differently from
+// the rest: hi-lift lived only in the pulls (1x) while standard lift was in
+// both (2x), so hi-lift lost every tie. Importing the hi-lift readings made
+// them 2x as well, they started winning those ties instead, and 38 standard
+// -lift readings broke. The band fitter was never at fault - the input was
+// silently weighted.
+//
+// So: collapse exact duplicates, and if the same inputs ever carry DIFFERENT
+// outputs, say so loudly instead of letting the fitter average two readings
+// that cannot both be true.
+const seenKey = new Map();
+const collisions = [];
+const unique = [];
+
+for (const r of readings) {
+    const st = r.state;
+    const key = [
+        st.drum, st.springs, st.radius, st.liftType ?? "Standard", st.liftin ?? "",
+        st.cycles, st.weight, st.doorHeightFeet, st.doorHeightInches,
+    ].join("|");
+    const out = `${r.outer}/${r.inner}/${r.length}`;
+    const prev = seenKey.get(key);
+
+    if (prev === undefined) {
+        seenKey.set(key, out);
+        unique.push(r);
+    } else if (prev !== out) {
+        collisions.push(`  ${key}  ->  ${prev}  vs  ${out}`);
+    }
+}
+
+console.error(`deduplicated: ${readings.length} ingested -> ${unique.length} distinct`);
+
+if (collisions.length) {
+    console.error(`SAME INPUTS, DIFFERENT OUTPUTS (${collisions.length}) - these cannot both be right:`);
+    console.error(collisions.slice(0, 20).join("\n"));
+}
+
+console.error("");
+readings.length = 0;
+readings.push(...unique);
+
+// HOLDOUT. Runs AFTER the dedup, for the same reason the hi-lift holdout
+// below does: a reading arrives twice, once from its pull and once from the
+// corpus, so withholding by index BEFORE dedup withholds one copy and leaves
+// the other in the fit - scoring the model on data it still trained on. Any
+// generalisation number taken that way is fiction.
+//
+// With HOLDOUT_MOD=n and HOLDOUT_REM=k every nth reading is withheld every nth reading is withheld from the fit, so
+// the model can be scored on readings it never saw. Without it nothing is
+// held back and the fit uses everything.
+const HOLDOUT_MOD = Number(process.env.HOLDOUT_MOD || 0);
+const HOLDOUT_REM = Number(process.env.HOLDOUT_REM || 0);
+
+if (HOLDOUT_MOD > 1) {
+    const kept = [];
+    const held = [];
+
+    readings.forEach((r, i) => {
+        if (i % HOLDOUT_MOD !== HOLDOUT_REM) {
+            kept.push(r);
+
+            return;
+        }
+
+        const st = r.state;
+
+        held.push([
+            st.drum, st.springs, st.radius, st.liftType ?? "Standard",
+            st.liftin ?? "", st.cycles, st.weight,
+            st.doorHeightFeet, st.doorHeightInches ?? 0,
+        ].join("|"));
+    });
+
+    console.error(`HELD ${held.length} of ${readings.length}`);
+
+    for (const h of held) {
+        console.error(`HELD\t${h}`);
+    }
+
+    readings.length = 0;
+    readings.push(...kept);
+}
+
+// HI-LIFT HOLDOUT. Runs AFTER the dedup above, and must: a reading arrives
+// twice (once from its pull, once from the corpus), so withholding by
+// ingestion index before dedup would withhold one copy and leave the other
+// in the fit - scoring the model on data it still trained on. Hi-lift is ~48 of ~3900 readings, so the global holdout
+// above barely touches it and an in-sample hi-lift score means nothing. With
+// HL_HOLDOUT_MOD=n and HL_HOLDOUT_REM=k, every hi-lift reading whose hi-lift
+// index is k mod n is withheld - standard lift untouched. Rotating k over
+// 0..n-1 scores every hi-lift reading exactly once, out of sample.
+const HL_MOD = Number(process.env.HL_HOLDOUT_MOD || 0);
+const HL_REM = Number(process.env.HL_HOLDOUT_REM || 0);
+
+if (HL_MOD >= 1) {
+    let seen = -1;
+    const withheld = [];
+    const kept = readings.filter((r) => {
+        if (!r.hiLift) {
+            return true;
+        }
+
+        seen += 1;
+
+        if (seen % HL_MOD !== HL_REM) {
+            return true;
+        }
+
+        withheld.push(`${r.state.weight}|${r.state.doorHeightFeet}|${r.hiLift}|${r.state.springs}|${r.state.cycles}`);
+
+        return false;
+    });
+
+    console.error(`hi-lift holdout: withheld ${withheld.length} of ${seen + 1}`);
+    console.error(withheld.map((w) => `  ${w}`).join("\n") + "\n");
+    readings.length = 0;
+    readings.push(...kept);
+}
+
 // --- per rung: K from the cycle counts, thresholds from the lengths ---------
 const rungs = new Map();
 
@@ -474,131 +619,6 @@ function boundsFromSwitches(readings) {
     return out;
 }
 
-// DEDUPLICATE. This reads both dev/pulled*.json and dev/corpus.json, and
-// dev/import.mjs folds pulls INTO the corpus - so from the moment the import
-// workflow started, almost every reading has been ingested twice, once as a
-// pull row and once as a corpus row.
-//
-// Uniform double-counting cancels, which is why this hid for eight batches.
-// It stopped cancelling the moment one group was weighted differently from
-// the rest: hi-lift lived only in the pulls (1x) while standard lift was in
-// both (2x), so hi-lift lost every tie. Importing the hi-lift readings made
-// them 2x as well, they started winning those ties instead, and 38 standard
-// -lift readings broke. The band fitter was never at fault - the input was
-// silently weighted.
-//
-// So: collapse exact duplicates, and if the same inputs ever carry DIFFERENT
-// outputs, say so loudly instead of letting the fitter average two readings
-// that cannot both be true.
-const seenKey = new Map();
-const collisions = [];
-const unique = [];
-
-for (const r of readings) {
-    const st = r.state;
-    const key = [
-        st.drum, st.springs, st.radius, st.liftType ?? "Standard", st.liftin ?? "",
-        st.cycles, st.weight, st.doorHeightFeet, st.doorHeightInches,
-    ].join("|");
-    const out = `${r.outer}/${r.inner}/${r.length}`;
-    const prev = seenKey.get(key);
-
-    if (prev === undefined) {
-        seenKey.set(key, out);
-        unique.push(r);
-    } else if (prev !== out) {
-        collisions.push(`  ${key}  ->  ${prev}  vs  ${out}`);
-    }
-}
-
-console.error(`deduplicated: ${readings.length} ingested -> ${unique.length} distinct`);
-
-if (collisions.length) {
-    console.error(`SAME INPUTS, DIFFERENT OUTPUTS (${collisions.length}) - these cannot both be right:`);
-    console.error(collisions.slice(0, 20).join("\n"));
-}
-
-console.error("");
-readings.length = 0;
-readings.push(...unique);
-
-// HOLDOUT. Runs AFTER the dedup, for the same reason the hi-lift holdout
-// below does: a reading arrives twice, once from its pull and once from the
-// corpus, so withholding by index BEFORE dedup withholds one copy and leaves
-// the other in the fit - scoring the model on data it still trained on. Any
-// generalisation number taken that way is fiction.
-//
-// With HOLDOUT_MOD=n and HOLDOUT_REM=k every nth reading is withheld every nth reading is withheld from the fit, so
-// the model can be scored on readings it never saw. Without it nothing is
-// held back and the fit uses everything.
-const HOLDOUT_MOD = Number(process.env.HOLDOUT_MOD || 0);
-const HOLDOUT_REM = Number(process.env.HOLDOUT_REM || 0);
-
-if (HOLDOUT_MOD > 1) {
-    const kept = [];
-    const held = [];
-
-    readings.forEach((r, i) => {
-        if (i % HOLDOUT_MOD !== HOLDOUT_REM) {
-            kept.push(r);
-
-            return;
-        }
-
-        const st = r.state;
-
-        held.push([
-            st.drum, st.springs, st.radius, st.liftType ?? "Standard",
-            st.liftin ?? "", st.cycles, st.weight,
-            st.doorHeightFeet, st.doorHeightInches ?? 0,
-        ].join("|"));
-    });
-
-    console.error(`HELD ${held.length} of ${readings.length}`);
-
-    for (const h of held) {
-        console.error(`HELD\t${h}`);
-    }
-
-    readings.length = 0;
-    readings.push(...kept);
-}
-
-// HI-LIFT HOLDOUT. Runs AFTER the dedup above, and must: a reading arrives
-// twice (once from its pull, once from the corpus), so withholding by
-// ingestion index before dedup would withhold one copy and leave the other
-// in the fit - scoring the model on data it still trained on. Hi-lift is ~48 of ~3900 readings, so the global holdout
-// above barely touches it and an in-sample hi-lift score means nothing. With
-// HL_HOLDOUT_MOD=n and HL_HOLDOUT_REM=k, every hi-lift reading whose hi-lift
-// index is k mod n is withheld - standard lift untouched. Rotating k over
-// 0..n-1 scores every hi-lift reading exactly once, out of sample.
-const HL_MOD = Number(process.env.HL_HOLDOUT_MOD || 0);
-const HL_REM = Number(process.env.HL_HOLDOUT_REM || 0);
-
-if (HL_MOD >= 1) {
-    let seen = -1;
-    const withheld = [];
-    const kept = readings.filter((r) => {
-        if (!r.hiLift) {
-            return true;
-        }
-
-        seen += 1;
-
-        if (seen % HL_MOD !== HL_REM) {
-            return true;
-        }
-
-        withheld.push(`${r.state.weight}|${r.state.doorHeightFeet}|${r.hiLift}|${r.state.springs}|${r.state.cycles}`);
-
-        return false;
-    });
-
-    console.error(`hi-lift holdout: withheld ${withheld.length} of ${seen + 1}`);
-    console.error(withheld.map((w) => `  ${w}`).join("\n") + "\n");
-    readings.length = 0;
-    readings.push(...kept);
-}
 
 const switchBounds = boundsFromSwitches(readings);
 
