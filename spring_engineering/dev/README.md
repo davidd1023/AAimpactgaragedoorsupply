@@ -869,14 +869,37 @@ disk, derive without them, compare the files.
 
     unreproducible, duplicates double-weighted   clean length 97.9%
     reproducible, every reading weighted once    clean length 94.7%
-    the same, with LINE_SLACK re-measured        clean length 96.3%
+    the same, with LINE_SLACK re-measured        clean length 96.8%
 
 The last line is the one to quote. LINE_SLACK was 0.03, picked when the fits
 read the raw 9452-entry ingestion; deduplicating halved what each group holds,
 so the same fraction became a much smaller allowance and groups that had been
 lines fell back to bands. At 0.08 - flat through 0.12, so not a knife edge -
-there are 71 bands rather than 119, the external samples read 96.3% and the
+there are 71 bands rather than 119, the external samples read 96.8% and the
 five-fold holdout agrees on direction, 92.1% to 92.3%.
+
+Both line fitters have to share that constant. fitLineOwnSlopes kept a second
+copy of the default and stayed on 0.03 when this was re-measured, which held
+the fitter handling the hardest groups to less than half the other's budget -
+worth 0.5 points on its own.
+
+Two more thresholds were set under the duplicated regime and wanted the same
+treatment, for the same reason: both decide whether a group gets a MODEL or a
+band table, and both are fractions of a group that has just halved.
+
+    LEVEL_SUPPORT  0.03 -> 0.06   a level below this share is treated as noise
+    SPLIT_MIN_SIDE   12 -> 8      readings needed either side of a regime break
+
+Together, and with the shared slack:
+
+    clean length 96.3% -> 97.7%      flagged 84.4% -> 85.3%
+    bands 119 -> 38                  lines 99 -> 110
+
+Three knobs have now been moved against the external samples, so the five-fold
+holdout is the check that matters rather than a formality. It agrees on
+direction each time, 92.1% -> 92.3% -> 92.4%, and it is much the smaller
+movement because the corpus behind it is mostly targeted batches while the
+samples are uniform draws from the allowed box.
 
 The duplicates were up-weighting whatever was in both places, which is every
 recent batch - the fraction walks, which are the best-designed readings in the

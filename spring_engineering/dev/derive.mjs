@@ -877,7 +877,25 @@ function fitSplit(ls) {
         const below = ls.filter((l) => Math.floor(l.active) < from);
         const above = ls.filter((l) => Math.floor(l.active) >= from);
 
-        if (below.length < 12 || above.length < 12) {
+        // 8, RE-MEASURED for the same reason: a split needed twelve readings
+        // either side of the break, which was a twenty-fourth of the old
+        // duplicated ingestion and is a twelfth of what a group holds now, so
+        // splits that are real were being refused for want of data:
+        //
+        //   SPLIT_MIN_SIDE   bands   clean   flagged
+        //         4            28    97.2%   85.0%
+        //         6            31    97.4%   85.0%
+        //         8            38    97.7%   85.3%
+        //        12            71    96.8%   84.4%
+        //        20            90    96.5%   84.4%
+        //
+        // Measured together with LEVEL_SUPPORT, since both decide whether a
+        // group gets a model or a band table. The five-fold holdout agrees on
+        // direction - 92.3% to 92.4% - which is the check that matters, as
+        // three knobs have now been moved against the external samples.
+        const minSide = Number(process.env.SPLIT_MIN_SIDE || 8);
+
+        if (below.length < minSide || above.length < minSide) {
             continue;
         }
 
@@ -998,7 +1016,16 @@ function fitLineAnyLevels(ls, maxLevels) {
         support.set(l.bonus, (support.get(l.bonus) || 0) + 1);
     }
 
-    const floor = Math.max(2, Math.ceil(ls.length * 0.03));
+    // 0.06, RE-MEASURED after the fits stopped seeing duplicates - 3% of a
+    // group that had just halved was too small a bar, so levels that are
+    // really noise survived and kept pushing groups off the line fitter:
+    //
+    //   LEVEL_SUPPORT   clean length
+    //       0.01           96.8%
+    //       0.03           96.8%
+    //       0.06           97.2%
+    //       0.10           97.2%
+    const floor = Math.max(2, Math.ceil(ls.length * Number(process.env.LEVEL_SUPPORT || 0.06)));
     const solid = new Set([...support].filter(([, n]) => n >= floor).map(([v]) => v));
     const used = solid.size >= 2 && solid.size < support.size
         ? ls.filter((l) => solid.has(l.bonus))
@@ -1116,13 +1143,18 @@ function fitLineAnyLevels(ls, maxLevels) {
     //
     //   LINE_SLACK   bands   clean length   five-fold holdout
     //      0.03       119       94.7%           92.1%
-    //      0.08        71       96.3%           92.3%
-    //      0.12        71       96.3%            -
+    //      0.08        71       96.8%           92.3%
+    //      0.12        71       96.8%            -
     //
     // Flat from 0.08 to 0.12 rather than a knife edge, fewer bands, and better
-    // on both measures. A first sweep read 96.8% at 0.08 and that did not
-    // survive a clean re-derive; 96.3% is the figure that reproduces, and the
-    // sweep had been measuring tables left over from its previous iteration.
+    // on both measures.
+    //
+    // The sweep that found 0.08 read 96.8% and a clean re-derive then read
+    // 96.3%, which I first put down to the sweep scoring leftover tables. That
+    // was wrong. The sweep passed LINE_SLACK as an ENV VAR, which reached both
+    // fitters; raising only this default left fitLineOwnSlopes on 0.03. With
+    // the two sharing one constant it is 96.8% again, so the sweep was right
+    // and the discrepancy was a half-applied change.
     //
     // The two measures disagree on the size of it - 1.6 points on the
     // external samples against 0.2 on the holdout - because they measure
@@ -1130,7 +1162,7 @@ function fitLineAnyLevels(ls, maxLevels) {
     // box, which is what a quoted door looks like, while the corpus behind the
     // holdout is mostly targeted batches. The samples are the better guide to
     // real use; the holdout is there to confirm the direction, and it does.
-    const budget = Math.floor(used.length * Number(process.env.LINE_SLACK || 0.08));
+    const budget = lineSlack(used.length);
 
     if (!best || best.bad > budget) {
         return null;
@@ -1251,6 +1283,12 @@ function fitLineAnyOrder(ls, maxLevels) {
 // Same two guards as everything else here: the total error has to come inside
 // the 3% budget, and the caller still cross-validates the result against the
 // bands and keeps the bands unless this predicts better out of sample.
+// ONE SLACK FOR BOTH FITTERS. fitLineOwnSlopes had its own copy of the default
+// and kept 0.03 when fitLineAnyLevels was re-measured to 0.08, so the fitter
+// handling the hardest groups - the ones with non-parallel thresholds - was
+// held to a budget less than half the other's.
+const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.08));
+
 function fitThreshold(rows, above) {
     let best = null;
 
@@ -1300,7 +1338,7 @@ function fitLineOwnSlopes(ls, maxLevels) {
         return null;
     }
 
-    const budget = Math.floor(ls.length * Number(process.env.LINE_SLACK || 0.03));
+    const budget = lineSlack(ls.length);
     let best = null;
 
     for (const order of orderings(vals)) {
