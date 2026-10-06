@@ -79,13 +79,20 @@ const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed
 const pick = (a) => a[Math.floor(rnd() * a.length)];
 
 const mod = await load();
-const got = new Map(), usedCfg = new Map(), cases = [];
-const counts = [...TARGETS].map((g) => Number(g.split("|")[1]));
-let tries = 0, clean = 0, flagged = 0;
+const counts = [...new Set([...TARGETS].map((g) => Number(g.split("|")[1])))];
 
-while (cases.length < BUDGET && tries < 4000) {
-    tries++;
+// ONE PASS, THEN SELECT. The first version drew a configuration, scanned every
+// weight for it, kept one reading and threw the rest away - so it re-did the
+// same work thousands of times and took over ten minutes on the soft rungs,
+// where most configurations never select a target rung at all.
+//
+// Now each configuration is scanned once and every orderable candidate it
+// offers goes into a pool, which is then drawn from under the diversity rule.
+// Same guarantees, a fraction of the work.
+const pool = [];
+let clean = 0, flagged = 0;
 
+for (let draw = 0; draw < 900 && pool.length < 20000; draw++) {
     const [drum, maxH, maxW, isHi] = pick(DRUMS);
     const radius = isHi ? "15" : pick(RADII);
     const cycles = pick(CYCLES);
@@ -93,11 +100,9 @@ while (cases.length < BUDGET && tries < 4000) {
     const springs = pick(counts);
     const liftIn = isHi ? String(12 + Math.floor(rnd() * 84)) : "";
     const cfg = `${drum}|${radius}|${cycles}|${hIn}|${springs}|${liftIn}`;
-    const cand = [];
+    let seenTarget = false, sinceTarget = 0;
 
-    for (let w = 150; w <= Math.floor(maxW * 0.85); w += 6) {
-        if (cand.length >= 6) break;
-
+    for (let w = 150; w <= Math.floor(maxW * 0.85); w += 4) {
         const c = make(mod, {
             assembly: "Duplex", drum, springId: '3 3/4" inside 6"', springs, radius, cycles,
             weight: String(w), doorWidthFeet: 18,
@@ -106,62 +111,64 @@ while (cases.length < BUDGET && tries < 4000) {
         });
         const s = c.duplexStep;
 
-        if (!s) {
-            continue;
-        }
+        if (!s) continue;
 
         const key = `${s.outerWire}/${s.innerWire}|${springs}`;
 
         if (!TARGETS.has(key)) {
+            // Rungs stiffen as the door gets heavier, so once the targets are
+            // behind us there is nothing left to find on this configuration.
+            if (seenTarget && ++sinceTarget > 12) break;
             continue;
         }
 
-        if ((c.warnings ?? []).length) {
-            flagged++;
-            continue;
-        }
+        seenTarget = true;
+        sinceTarget = 0;
+
+        if ((c.warnings ?? []).length) { flagged++; continue; }
 
         const x = c.duplexActiveLength;
 
-        if (!(x > 0) || x > 110) {
-            continue;
-        }
+        if (!(x > 0) || x > 110) continue;
 
         clean++;
-        const b = Math.min(BUCKETS - 1, Math.floor((x - Math.floor(x)) * BUCKETS));
-        const bk = `${key}|${b}`;
-
-        if ((got.get(bk) || 0) >= PER_BUCKET) {
-            continue;
-        }
-
-        if ((usedCfg.get(bk) || new Set()).has(cfg)) {
-            continue;
-        }
-
-        cand.push({ bk, key, b, w });
+        pool.push({
+            key, cfg, w, drum, radius, cycles, hIn, springs, isHi, liftIn,
+            b: Math.min(BUCKETS - 1, Math.floor((x - Math.floor(x)) * BUCKETS)),
+        });
     }
+}
 
-    if (!cand.length) {
-        continue;
-    }
+// Shuffle so selection is not biased by drum order, then take under the rule:
+// at most PER_BUCKET per (group, bucket) and never the same configuration twice
+// for the same bucket.
+for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+}
 
-    const chosen = cand[Math.floor(rnd() * cand.length)];
+const got = new Map(), usedCfg = new Map(), cases = [];
 
-    got.set(chosen.bk, (got.get(chosen.bk) || 0) + 1);
+for (const p of pool) {
+    if (cases.length >= BUDGET) break;
 
-    if (!usedCfg.has(chosen.bk)) {
-        usedCfg.set(chosen.bk, new Set());
-    }
+    const bk = `${p.key}|${p.b}`;
 
-    usedCfg.get(chosen.bk).add(cfg);
+    if ((got.get(bk) || 0) >= PER_BUCKET) continue;
+    if ((usedCfg.get(bk) || new Set()).has(p.cfg)) continue;
+
+    got.set(bk, (got.get(bk) || 0) + 1);
+
+    if (!usedCfg.has(bk)) usedCfg.set(bk, new Set());
+
+    usedCfg.get(bk).add(p.cfg);
     cases.push({
-        label: `frac ${chosen.key} b${chosen.b}`, garageDoorLineId: lineId,
-        assembly: "Duplex", lift: isHi ? "HiLift" : "Standard",
-        ...(isHi ? { hiLift: Number(liftIn) } : {}),
-        radius: radius === "LHR" ? 10 : Number(radius), springs,
-        innerId: 3.75, outerId: 6, drum, cycles: Number(cycles.replace(/,/g, "")),
-        widthInches: 216, heightInches: hIn, weight: chosen.w,
+        label: `frac ${p.key} b${p.b}`, garageDoorLineId: lineId,
+        assembly: "Duplex", lift: p.isHi ? "HiLift" : "Standard",
+        ...(p.isHi ? { hiLift: Number(p.liftIn) } : {}),
+        radius: p.radius === "LHR" ? 10 : Number(p.radius), springs: p.springs,
+        innerId: 3.75, outerId: 6, drum: p.drum, cycles: Number(p.cycles.replace(/,/g, "")),
+        widthInches: 216, heightInches: p.hIn, weight: p.w,
     });
 }
 

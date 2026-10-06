@@ -837,3 +837,45 @@ wins out of sample. Dropping a level only lets the line be considered.
 Two groups moved from bands to lines - 0.3125/0.25 at three springs and
 0.4531/0.3625 at one. Fourteen fewer memorised parameters for identical
 accuracy, which is worth having even though today's samples cannot show it.
+
+## KNOWN ISSUE: the committed table is not reproducible from committed data
+
+Found 2026-10-06 and NOT fixed. Anyone re-deriving on a fresh build needs to
+know about it before trusting the result.
+
+Move every dev/pulled-*.json aside and run apply.sh, and the table changes:
+
+    with the pulls on disk     clean length 97.9%
+    corpus.json alone          clean length 96.8%
+
+Pull files carry the account's garageDoorLineId, so they are gitignored and do
+NOT survive a rebuild. The table in git was derived with them present. So
+re-running apply.sh on a fresh build silently produces a different and slightly
+worse table than the one committed beside it.
+
+### What it is not
+
+Not missing readings. Every pull reading is now in the corpus - a backfill of
+34 added the last of them - and the deduplicated set is 4350 distinct either
+way. The input SET is identical; only the output differs.
+
+Not the dedup representative either. Pulls are read before the corpus so a
+reading held in both was represented by its pull copy, which looked like the
+obvious cause. Sorting the corpus first so it wins every tie changed nothing.
+
+### What was tried
+
+  boundsFromSwitches(readings) reads the RAW array, 9452 entries against 4350
+  distinct, so the switch points that pin K are drawn from data the dedup
+  exists to collapse. That is a real fault and worth fixing on its own merits.
+  Pointing it at `unique` did not restore reproducibility and cost 0.3 points
+  (96.8% -> 96.5%), so it is reverted rather than carried half-done - but it
+  is the first place to look next.
+
+### Where to look
+
+Something else in the pipeline still reads the pull files or depends on the
+ingestion order. The holdout logic, which runs after the dedup, is the other
+candidate. The honest figure for the table as it will be re-derived is 96.8%,
+not 97.9%, and until this is closed the shipped table should be treated as
+carrying about a point of unearned accuracy.
