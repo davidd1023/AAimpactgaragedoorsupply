@@ -2,6 +2,7 @@
 
 import { Component, useEffect, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
+import { rpc } from "@web/core/network/rpc";
 
 // --- Spring length constants ---------------------------------------------
 // Verified exactly (to the cent) against 11 reference results from the
@@ -2070,6 +2071,9 @@ function defaultState() {
         springs: 2,
         springId: '2 5/8"',
         cycles: "10,000",
+        // Add to Cart: in flight, and the last thing the server said about it.
+        cartBusy: false,
+        cartError: "",
         liftType: "Standard",
         liftin: "",
         radius: "15",
@@ -3952,11 +3956,82 @@ closeDrumInfo() {
         Object.assign(this.state, defaultState());
     }
 
-    // DELIBERATELY EMPTY. The button is wired to a named handler rather than
-    // left without one so that the place to add the order call is obvious, and
-    // so the button is already reachable by keyboard and screen reader when it
-    // starts doing something.
-    addToCart() {}
+    // WHAT GOES TO THE SERVER: the SPECIFICATION, never the price.
+    //
+    // /spring-calculator is public, so anything this page posts is whatever its
+    // sender chose. The controller recomputes every chargeable figure from the
+    // geometry below using its own constants, which it reads out of this file
+    // so the two cannot drift. A sender can therefore ask for a spring the
+    // calculator would not have recommended, but not for one at a price it did
+    // not earn.
+    //
+    // Duplex diameters come from duplexPair, which has already resolved the
+    // aliases, so a Raynor pair is priced as the 2 5/8" inside 5 1/4" it is
+    // engineered as - the same resolution the price rows use.
+    get cartSpec() {
+        const springs = [];
+
+        if (this.isDuplex) {
+            const step = this.duplexStep;
+            const pair = this.duplexPair;
+
+            if (step && pair) {
+                springs.push({
+                    role: "Outer", wire: step.outerWire,
+                    id: pair.outerId, length: this.duplexOuterLength,
+                });
+                springs.push({
+                    role: "Inner", wire: step.innerWire,
+                    id: pair.innerId, length: this.duplexInnerLength,
+                });
+            }
+        } else {
+            springs.push({
+                role: "Spring", wire: this.wireSizeNumber,
+                id: this.springIdNumber, length: this.springLength,
+            });
+        }
+
+        return {
+            assembly: this.state.assembly,
+            springs: Number(this.state.springs) || 0,
+            drum: this.state.drum,
+            cycles: this.state.cycles,
+            doorWeight: this.state.weight,
+            doorHeight: `${this.state.doorHeightFeet}' ${this.state.doorHeightInches || 0}"`,
+            springsSpec: springs,
+        };
+    }
+
+    async addToCart() {
+        if (!this.resultsVisible || this.state.cartBusy) {
+            return;
+        }
+
+        this.state.cartBusy = true;
+        this.state.cartError = "";
+
+        try {
+            const result = await rpc("/spring-calculator/add-to-cart", {
+                spec: this.cartSpec,
+            });
+
+            // The controller answers with a message rather than an exception
+            // for anything it will not build, so it can be shown as it is.
+            if (result && result.error) {
+                this.state.cartError = result.error;
+
+                return;
+            }
+
+            window.location = "/shop/cart";
+        } catch {
+            this.state.cartError =
+                "Could not reach the cart just now. Please try again, or call us to order.";
+        } finally {
+            this.state.cartBusy = false;
+        }
+    }
 }
 
 // TWO PLACES, ONE COMPONENT.

@@ -5,8 +5,84 @@
 # That is reachable only at /odoo/action-..., which IS the backend, so a link
 # to it from the website dropped the visitor out of the site and into Odoo.
 # There was no frontend route to land on.
+import json
+import logging
+import math
+import os
+import re
+
 from odoo import http
 from odoo.http import request
+
+_logger = logging.getLogger(__name__)
+
+# --- Pricing, read from the calculator rather than copied ------------------
+# THE BROWSER'S PRICE IS NEVER TRUSTED. /spring-calculator is public, so the
+# figure a page posts back is whatever its sender chose. The price charged is
+# computed here, from the specification, using these constants.
+#
+# They are PARSED out of the calculator's own source instead of being restated,
+# because a copy would drift the day someone edits one and not the other - and
+# the failure would be a customer quoted one price and charged another, which
+# is the worst kind of silent bug. Parsed lazily and loudly: if the shapes ever
+# change, adding to the cart fails with a message instead of quietly using a
+# stale number, and the storefront stays up either way.
+_CALC_JS = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "static", "src", "js", "spring_engineering.js",
+)
+_prices = None
+
+
+def _calculator_constants():
+    global _prices
+
+    if _prices is not None:
+        return _prices
+
+    with open(_CALC_JS, encoding="utf-8") as fh:
+        src = fh.read()
+
+    def one(pattern, name):
+        found = re.search(pattern, src)
+
+        if not found:
+            raise ValueError(f"cannot find {name} in spring_engineering.js")
+
+        return float(found.group(1))
+
+    cones_block = re.search(r"const CONE_PRICES = \{(.*?)\};", src, re.S)
+
+    if not cones_block:
+        raise ValueError("cannot find CONE_PRICES in spring_engineering.js")
+
+    cones = {
+        float(d): float(p)
+        for d, p in re.findall(r"([\d.]+):\s*([\d.]+)", cones_block.group(1))
+    }
+
+    if not cones:
+        raise ValueError("CONE_PRICES parsed empty")
+
+    _prices = {
+        "labor": one(r"const LABOR_COST = ([\d.]+);", "LABOR_COST"),
+        "per_lb": one(r"const STEEL_PRICE_PER_LB = ([\d.]+);", "STEEL_PRICE_PER_LB"),
+        "density": one(r"const STEEL_DENSITY = ([\d.]+);", "STEEL_DENSITY"),
+        "cones": cones,
+    }
+
+    return _prices
+
+
+def _spec_weight(wire, diameter, length, density):
+    """The weight the calculator would compute for one spring.
+
+    Same closed form it uses - density * (pi^2 / 4) * wire * (ID + wire) *
+    length, to the cent - which is what lets a submitted weight be CHECKED
+    rather than believed.
+    """
+    volume = (math.pi ** 2) / 4 * wire * (diameter + wire) * length
+    return round(density * volume, 2)
 
 
 # The one real URL. Everything else redirects here, so links, search engines
@@ -46,3 +122,125 @@ class SpringEngineeringWebsite(http.Controller):
     @http.route(ALIASES, type="http", auth="public", website=True, sitemap=False)
     def spring_calculator_aliases(self, **kwargs):
         return request.redirect(CANONICAL, code=301)
+
+    # --- Add a configured assembly to the cart ---------------------------
+    @http.route(
+        "/spring-calculator/add-to-cart",
+        type="jsonrpc",
+        auth="public",
+        website=True,
+        methods=["POST"],
+    )
+    def spring_calculator_add_to_cart(self, spec=None, **kwargs):
+        """Create a cart line for one configured assembly.
+
+        The page sends the SPECIFICATION - spring count, and each spring's
+        wire, inside diameter and length. Everything chargeable is derived
+        here. A sender can therefore ask for a spring the calculator would not
+        have recommended, but cannot ask for one at a price it did not earn,
+        which is the distinction that matters on a public page.
+        """
+        spec = spec or {}
+
+        try:
+            prices = _calculator_constants()
+        except ValueError:
+            _logger.exception("spring_engineering: cannot read pricing constants")
+
+            return {"error": "Pricing is misconfigured - please call us to order."}
+
+        springs = spec.get("springs")
+
+        if not isinstance(springs, int) or not 1 <= springs <= 4:
+            return {"error": "That spring count is not one we build."}
+
+        items = spec.get("springsSpec") or []
+
+        if not 1 <= len(items) <= 2:
+            return {"error": "An assembly is one spring or a nested pair."}
+
+        cone_total = 0.0
+        steel_weight = 0.0
+        lines = []
+
+        for item in items:
+            try:
+                wire = float(item["wire"])
+                diameter = float(item["id"])
+                length = float(item["length"])
+            except (KeyError, TypeError, ValueError):
+                return {"error": "That specification is incomplete."}
+
+            # Lengths come off a quarter-inch grid and the reference refuses
+            # anything past 120", so neither is a judgement call.
+            if not 0 < length <= 120 or round(length * 4) != length * 4:
+                return {"error": f'{length}" is not a length we can wind.'}
+
+            if diameter not in prices["cones"]:
+                return {"error": f'{diameter}" is not an inside diameter we carry.'}
+
+            if not 0.1 < wire < 0.7:
+                return {"error": f'{wire}" is not a wire size we carry.'}
+
+            cone_total += prices["cones"][diameter]
+            steel_weight += _spec_weight(wire, diameter, length, prices["density"])
+            lines.append(
+                f'{item.get("role", "Spring")}: {wire}" wire, {diameter}" ID, {length}" long'
+            )
+
+        cones = round(springs * cone_total, 2)
+        steel = round(springs * steel_weight * prices["per_lb"], 2)
+        total = round(prices["labor"] + cones + steel, 2)
+
+        product = request.env.ref(
+            "spring_engineering.product_custom_spring", raise_if_not_found=False
+        )
+
+        if not product:
+            return {"error": "The spring product is missing - please call us to order."}
+
+        # sudo because the product is deliberately unpublished: it is not
+        # something to browse to, only something the calculator configures.
+        variant = product.sudo().product_variant_id
+
+        # THE CART, OR A NEW ONE. _get_and_cache_current_cart returns an empty
+        # recordset when the session has none - it does not create - so the
+        # creation is explicit. (website.sale_get_order, which did both, is
+        # gone in 19.)
+        website = request.website
+        order = website._get_and_cache_current_cart() or website._create_cart()
+
+        # A LINE PER ASSEMBLY, created directly rather than through _cart_add.
+        # _cart_add looks for an existing line with the same product and adds
+        # to its quantity, which is right for a catalogue item and wrong here:
+        # every assembly is the same product and a different specification, so
+        # two quotes would merge into one line of quantity two and the second
+        # specification would be lost.
+
+        description = "\n".join([
+            "Custom Torsion Spring Assembly",
+            f'{spec.get("assembly", "Single")}, {springs} spring'
+            f'{"s" if springs != 1 else ""}',
+            *lines,
+            f'Door: {spec.get("doorWeight", "?")} lb, {spec.get("doorHeight", "?")}'
+            f', {spec.get("drum", "?")}, {spec.get("cycles", "?")} cycles',
+            f"Labor ${prices['labor']:.2f} + cones ${cones:.2f} + steel ${steel:.2f}",
+        ])
+
+        line = request.env["sale.order.line"].sudo().create({
+            "order_id": order.id,
+            "product_id": variant.id,
+            "name": description,
+            "product_uom_qty": 1,
+        })
+        # Written after creation: price_unit is computed from the product and
+        # the pricelist on create, and the product deliberately lists at zero.
+        line.write({"price_unit": total})
+
+        return {
+            "total": total,
+            "cones": cones,
+            "steel": steel,
+            "labor": prices["labor"],
+            "cart_quantity": order.cart_quantity,
+        }

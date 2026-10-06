@@ -1540,10 +1540,15 @@
                 <button class="se-clear" t-on-click="clearAll">
                     Clear
                 </button>
-                <button class="se-add-cart" t-on-click="addToCart">
-                    Add to Cart
+                <button class="se-add-cart" t-on-click="addToCart"
+                        t-att-disabled="state.cartBusy or undefined">
+                    <t t-if="state.cartBusy">Adding...</t>
+                    <t t-else="">Add to Cart</t>
                 </button>
             </div>
+
+            <!-- Whatever the server would not build, in its own words. -->
+            <div class="se-cart-error" t-if="state.cartError" t-esc="state.cartError"/>
 
             </t>
 

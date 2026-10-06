@@ -828,3 +828,23 @@
     line-height: 1.45;
     color: #000000;
 }
+
+
+/* =========================================
+   CART ERROR
+   ========================================= */
+
+/* Sits under the action buttons and says why nothing was added. Red for the
+   same reason the red warnings are - it is a refusal, not a caution - and at
+   the same contrast as those: #c62828 reads 5.4:1 on white. */
+.se-cart-error {
+    padding: 0 28px 32px;
+
+    font-size: 19px;
+    line-height: 1.45;
+    color: #c62828;
+
+    text-align: center;
+
+    box-sizing: border-box;
+}
