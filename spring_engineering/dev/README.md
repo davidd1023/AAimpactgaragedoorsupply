@@ -984,3 +984,67 @@ needed:
 What is left is six misses, one apiece in six groups, three of which have four
 or fewer external readings between them - at that point the samples cannot
 distinguish a model fault from a single awkward door.
+
+## THE HONEST NUMBER IS ABOUT 90%, NOT 98.6% (2026-10-06)
+
+Read this before quoting any accuracy from this file.
+
+Three knobs were tuned against dev/eval-clean.json, eval-soft2-spread.json and
+eval-rand-seed777001.json - LINE_SLACK twice, LEVEL_SUPPORT, SPLIT_MIN_SIDE -
+and dev/miss-profile.mjs was run against those same files to choose which
+groups to collect readings for. That is a lot of selection pressure on about
+800 readings, and it compromised them as a measuring stick.
+
+So a fresh uniform sample was drawn afterwards with dev/eval-sample.mjs, 380
+readings over the whole allowed box, and nothing has been tuned against it:
+
+                        FRESH SAMPLE    the tuned-against samples
+    clean, wire             99.4%              100%
+    clean, length           90.3%             98.6%
+    clean, within 1"        97.7%             99.5%
+    flagged, length         66.8%             84.7%
+
+### It is not the population
+
+The obvious excuse is that the fresh sample is harder - it is 52% hi-lift
+across all six drums, while the old sets are 100% standard lift on three. Split
+out, that excuse fails:
+
+    standard lift   89.4%
+    hi-lift         91.4%
+
+Standard lift alone reads 89.4% on fresh data against about 98% on the old
+sets, for the same drums. The gap is overfitting, not population.
+
+### The tuning bought nothing
+
+    slack  support  minside   FRESH   tuned-against   bands
+     0.03    0.03     12      90.3%       97.2%        130
+     0.08    0.06      8      90.3%       98.6%         38
+     0.12    0.06      8      90.3%       98.6%         38
+     0.12    0.03     12      90.9%       98.1%         71
+
+Identical on fresh data. The 1.4 points were fitting. The settings are kept
+only because at equal honest accuracy they are 38 bands instead of 130.
+
+### The holdout was right all along
+
+dev/holdout.sh reported 92.1% to 92.4% through all of this while the samples
+reported 96% to 98.6%. The note under LINE_SLACK in derive.mjs argued the
+samples were "the better guide to real use" because they are uniform draws and
+the corpus behind the holdout is targeted. That reasoning was wrong: once a
+sample has been tuned against, it stops being a guide to anything. 90.3% fresh
+and 92.2% holdout are consistent with each other; 98.6% was the outlier and
+should have been treated as the suspect figure.
+
+### Rules from here
+
+  dev/eval-validation-seed61006.json is for MEASURING, never for tuning or for
+  choosing what to collect. The moment a knob is moved against it, it is spent
+  and another draw is needed.
+
+  Quote the fresh figure and the holdout. If they disagree with a sample that
+  has been tuned against, the sample is wrong.
+
+  dev/eval-sample.mjs draws a new one in seconds, and the pull is six minutes.
+  That is cheap next to reporting a number that is eight points optimistic.
