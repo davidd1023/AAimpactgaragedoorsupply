@@ -771,7 +771,8 @@ function linePredict(line, active) {
     const first = line.a + line.b * whole;
 
     if (line.mid !== undefined) {
-        const second = line.a2 + line.b * whole;
+        // b2 only where the thresholds were fitted on their own slopes.
+        const second = line.a2 + (line.b2 ?? line.b) * whole;
 
         return frac > second ? line.hi : frac > first ? line.mid : line.lo;
     }
@@ -1182,6 +1183,128 @@ function fitLineAnyOrder(ls, maxLevels) {
     return null;
 }
 
+// THRESHOLDS THAT DO NOT MOVE TOGETHER.
+//
+// fitLineAnyLevels searches ONE slope and shares it across every threshold in
+// the group - "two parallel thresholds", as the note above it says. That is
+// the right default and it is wrong for the group that carries half of what
+// the model still gets wrong.
+//
+// 0.2625/0.2253 at two springs, laid out by the integer part, puts its two
+// thresholds on visibly different slopes:
+//
+//   floor   0.25 -> 0 boundary     0 -> 1.25 boundary
+//     15      0.21 .. 0.38            0.71 .. 0.78
+//     20      0.45 .. 0.61            0.73 .. 0.79
+//     23      0.53 .. 0.72            0.72 .. 0.77
+//
+// The first climbs about 0.04 per inch of floor; the second sits flat near
+// 0.75. Forced parallel, neither can be placed, the fit fails, and the group
+// falls through to memorising 42 bands - which is exactly what it was doing.
+//
+// So each boundary is fitted on its own: K-1 independent binary separations,
+// each with its own intercept and slope, and the combined rule is then scored
+// as a whole so that boundaries which cross cannot be counted as a fit.
+//
+// Same two guards as everything else here: the total error has to come inside
+// the 3% budget, and the caller still cross-validates the result against the
+// bands and keeps the bands unless this predicts better out of sample.
+function fitThreshold(rows, above) {
+    let best = null;
+
+    for (let bi = Number(process.env.BLO || -500); bi <= Number(process.env.BHI || 500); bi += 1) {
+        const b = bi / 2000;
+        const pts = rows
+            .map((r) => ({ u: (r.active - Math.floor(r.active)) - b * Math.floor(r.active), hi: above(r) }))
+            .sort((x, y) => x.u - y.u);
+        const n = pts.length;
+
+        // A reading is predicted HIGH when u is past the cut. So with the cut
+        // below everything, every reading is predicted high and the errors are
+        // the LOWS - not the highs, which is what this counted first time and
+        // why it fitted nothing: the optimum came out at a slope that drove
+        // the threshold negative, predicting one class everywhere.
+        //
+        //   errors(cut after i) = highs at or before i + lows after i
+        let hiBefore = 0;
+        let loAfter = pts.filter((p) => !p.hi).length;
+        let bad = hiBefore + loAfter;
+        let at = -1;
+
+        for (let i = 0; i < n; i++) {
+            if (pts[i].hi) hiBefore++; else loAfter--;
+
+            const err = hiBefore + loAfter;
+
+            if (err < bad) { bad = err; at = i; }
+        }
+
+        const cut = at < 0 ? pts[0].u - 1e-6
+            : at >= n - 1 ? pts[n - 1].u + 1e-6
+                : (pts[at].u + pts[at + 1].u) / 2;
+
+        if (!best || bad < best.bad || (bad === best.bad && Math.abs(b) < Math.abs(best.b))) {
+            best = { bad, b, a: cut };
+        }
+    }
+
+    return best;
+}
+
+function fitLineOwnSlopes(ls, maxLevels) {
+    const vals = [...new Set(ls.map((l) => l.bonus))].sort((x, y) => x - y);
+
+    if (vals.length !== 3 || maxLevels < 2) {
+        return null;
+    }
+
+    const budget = Math.floor(ls.length * Number(process.env.LINE_SLACK || 0.03));
+    let best = null;
+
+    for (const order of orderings(vals)) {
+        const rank = new Map(order.map((v, i) => [v, i]));
+        const t1 = fitThreshold(ls, (r) => rank.get(r.bonus) >= 1);
+        const t2 = fitThreshold(ls, (r) => rank.get(r.bonus) >= 2);
+
+        if (!t1 || !t2) {
+            continue;
+        }
+
+        // Score the COMBINED rule, so a pair of boundaries that cross over the
+        // range of floors in the data cannot be mistaken for a good fit.
+        let bad = 0;
+
+        for (const l of ls) {
+            const whole = Math.floor(l.active);
+            const frac = l.active - whole;
+            const first = t1.a + t1.b * whole;
+            const second = t2.a + t2.b * whole;
+            const got = frac > second ? order[2] : frac > first ? order[1] : order[0];
+
+            if (Math.abs(got - l.bonus) > 1e-9) {
+                bad++;
+            }
+        }
+
+        if (!best || bad < best.bad) {
+            best = {
+                bad,
+                a: Number(t1.a.toFixed(5)), b: Number(t1.b.toFixed(5)),
+                a2: Number(t2.a.toFixed(5)), b2: Number(t2.b.toFixed(5)),
+                lo: order[0], mid: order[1], hi: order[2],
+            };
+        }
+    }
+
+    if (!best || best.bad > budget) {
+        return null;
+    }
+
+    delete best.bad;
+
+    return best;
+}
+
 const unbounded = [];
 const crossValidated = [];
 
@@ -1322,8 +1445,27 @@ const out = [...rungs.values()]
             // and has to beat the bands on readings neither has seen.
             let line = needed ? fitLine(ls) : null;
 
+            // The family that produced the line has to be the family the
+            // cross-validation refits with. It was always fitLine, so a line
+            // from fitLineOwnSlopes was scored by refitting with the
+            // shared-slope fitter - which fails on every fold, scores zero,
+            // and hands the group back to the bands however good the line
+            // was. That is why 0.2625/0.2253 at two springs kept its 42
+            // bands after the independent-slope fitter went in.
+            let lineFitter = fitLine;
+
+            // The shared-slope line could not be placed. Before falling back
+            // to a band table, try letting the thresholds move independently.
+            if (!line && needed) {
+                line = fitLineOwnSlopes(ls, LINE_LEVELS);
+
+                if (line) {
+                    lineFitter = (train) => fitLineOwnSlopes(train, LINE_LEVELS);
+                }
+            }
+
             if (line && line.mid !== undefined) {
-                const lineCv = cvScore(ls, fitLine, linePredict);
+                const lineCv = cvScore(ls, lineFitter, linePredict);
                 const bandCv = cvScore(ls, (t) => bands(t).bands, bandPredict);
 
                 if (!(lineCv > bandCv)) {
