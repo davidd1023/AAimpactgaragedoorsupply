@@ -35,6 +35,12 @@ def line_src(line):
         return ("{ a: %g, b: %g, cuts: [%s], levels: [%s] }"
                 % (line["a"], line["b"], cuts, levels))
     if "mid" in line:
+        # b2 only appears when the two thresholds were fitted on their own
+        # slopes; without it the second shares the first's, as it always did.
+        if "b2" in line:
+            return ("{ a: %g, b: %g, a2: %g, b2: %g, lo: %g, mid: %g, hi: %g }"
+                    % (line["a"], line["b"], line["a2"], line["b2"],
+                       line["lo"], line["mid"], line["hi"]))
         return ("{ a: %g, b: %g, a2: %g, lo: %g, mid: %g, hi: %g }"
                 % (line["a"], line["b"], line["a2"],
                    line["lo"], line["mid"], line["hi"]))

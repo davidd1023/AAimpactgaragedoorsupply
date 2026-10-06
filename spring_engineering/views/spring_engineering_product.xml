@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <!-- THE ONE PRODUCT every configured assembly is sold through.
+         A new product per quote would turn every abandoned cart on a public
+         page into a permanent SKU, so instead each order line carries its own
+         price and its own description holding the full specification. The
+         catalogue stays one row however many doors get quoted.
+
+         NOT PUBLISHED. It is not something to browse to - it only ever reaches
+         a cart through the calculator, which fills in the specification. The
+         controller adds it with sudo for that reason.
+
+         Consumable rather than storable: these are wound to order, so there is
+         no stock to count and no reordering rule that would make sense. -->
+    <record id="product_custom_spring" model="product.template">
+        <field name="name">Custom Torsion Spring Assembly</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="False"/>
+        <field name="sale_ok" eval="True"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="is_published" eval="False"/>
+        <!-- Priced per line from the calculator, never from the product. -->
+        <field name="list_price">0.0</field>
+        <field name="description_sale">Wound to the specification on the order line.</field>
+    </record>
+
+</odoo>

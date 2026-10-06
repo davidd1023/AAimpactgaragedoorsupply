@@ -780,3 +780,207 @@ from 91.6% to 91.9% and moved nothing else.
 That gain is one or two readings out of 431 and is inside the noise. It is
 kept for the principle - 114 diverse readings in a measured thin region - not
 for the number.
+
+## Walking the fraction (batch F2, 2026-10-05)
+
+The note above said a pull meant to settle the quarter inch has to walk the
+FRACTION, not the weight. This is that pull, and it is the first in several
+rounds to improve both numbers at once.
+
+340 readings, 339 clean. Weights chosen so frac(active length) is covered in
+twentieths across the six (rung, spring count) groups carrying 20 of the 32
+remaining clean misses - the soft end at two springs, which is also the most
+common configuration there is. Every sample comes from a DIFFERENT drum,
+radius, cycle target and height, so frac is covered without the batch becoming
+a line through the input space.
+
+    clean length 91.9% -> 92.1%        flagged 80.8% -> 81.7%
+
+### Orderable doors only, and why the first attempt was useless
+
+The generator first scanned weight upward and took the first match, which on a
+big drum means a very light door: springs so over-engineered the reference came
+back with 4.6 million cycles and a warning. Flagged readings have the least
+trustworthy lengths in the file, so those are no use for settling a rule. It
+now requires our own warning set to be EMPTY and picks among all the clean
+candidates a configuration offers rather than the first, so weight is not
+correlated with the bucket. 12,712 flagged candidates were rejected.
+
+### What it made visible
+
+On 0.2625/0.2253 at three springs the rule is one threshold: bonus 0.25 below
+frac 0.747 and 1.25 above, and it explains all 60 readings. The deriver found
+the same line unaided once the data was in. One, four and three springs on that
+rung all now carry two-parameter lines.
+
+Two springs on that rung still gets 42 bands, and the reason is worth writing
+down: its levels really are three. The fraction walk saw {0.25: 43, 1.25: 16,
+0: 1} and looked like a clean two-level group with one stray reading, but
+across all 217 readings the levels are {0: 37, 0.25: 131, 1.25: 49} - the third
+level has 17% support, and restricting to orderable doors does not remove it
+(35 of 182). So the band table is not purely overfitting there; the group is
+genuinely not two-level in frac alone.
+
+### A level supported by one reading in sixty is not a level
+
+That investigation did find a real fault. The level COUNT alone decided whether
+a group got a line or a band table, so a single stray reading could tip a clean
+two-level group into memorising dozens of bands. fitLineAnyLevels now ignores
+levels with less than 3% support when counting, and fits the line to the rest.
+
+It is safe by construction: the caller still cross-validates line against bands
+over ALL the readings, outlier included, and keeps the bands unless the line
+wins out of sample. Dropping a level only lets the line be considered.
+
+    bands 170 -> 156, lines 88 -> 91, every score unchanged
+
+Two groups moved from bands to lines - 0.3125/0.25 at three springs and
+0.4531/0.3625 at one. Fourteen fewer memorised parameters for identical
+accuracy, which is worth having even though today's samples cannot show it.
+
+## FIXED: the table is reproducible again
+
+Found and fixed 2026-10-06. Move every dev/pulled-*.json aside, re-run
+apply.sh, and the table is now byte-identical to the one in git.
+
+### What it was
+
+dev/derive.mjs collected its per-rung groups - every K, every length, every
+band and line fitted from them - at the TOP of the file, straight off the
+ingestion. The dedup and both holdouts sat two hundred lines further down.
+
+So the fits read the RAW ingestion: 9452 entries against 4350 distinct. A
+reading held in both a pull and the corpus was weighted TWICE, and only
+boundsFromSwitches, called after the dedup, ever saw the clean set. Pull files
+are gitignored and do not survive a rebuild, so on a fresh build the duplicates
+were simply absent, the weighting changed, and apply.sh produced a different
+table from the committed one - 96.8% against the 97.9% in git.
+
+The holdouts had the mirror image of the same fault: they withheld readings
+from an array the fits had already finished reading. They withheld nothing that
+mattered, and any generalisation number taken through them was fiction. That is
+worth knowing for anyone who trusted dev/holdout.sh before today.
+
+The fix is an ordering one - dedup and holdouts now run BEFORE the groups are
+built - and it is verified the only way that counts: derive with the pulls on
+disk, derive without them, compare the files.
+
+### What it cost, and why that is the right trade
+
+    unreproducible, duplicates double-weighted   clean length 97.9%
+    reproducible, every reading weighted once    clean length 94.7%
+    the same, with LINE_SLACK re-measured        clean length 96.8%
+
+The last line is the one to quote. LINE_SLACK was 0.03, picked when the fits
+read the raw 9452-entry ingestion; deduplicating halved what each group holds,
+so the same fraction became a much smaller allowance and groups that had been
+lines fell back to bands. At 0.08 - flat through 0.12, so not a knife edge -
+there are 71 bands rather than 119, the external samples read 96.8% and the
+five-fold holdout agrees on direction, 92.1% to 92.3%.
+
+Both line fitters have to share that constant. fitLineOwnSlopes kept a second
+copy of the default and stayed on 0.03 when this was re-measured, which held
+the fitter handling the hardest groups to less than half the other's budget -
+worth 0.5 points on its own.
+
+Two more thresholds were set under the duplicated regime and wanted the same
+treatment, for the same reason: both decide whether a group gets a MODEL or a
+band table, and both are fractions of a group that has just halved.
+
+    LEVEL_SUPPORT  0.03 -> 0.06   a level below this share is treated as noise
+    SPLIT_MIN_SIDE   12 -> 8      readings needed either side of a regime break
+
+Together, and with the shared slack:
+
+    clean length 96.3% -> 97.7%      flagged 84.4% -> 85.3%
+    bands 119 -> 38                  lines 99 -> 110
+
+Three knobs have now been moved against the external samples, so the five-fold
+holdout is the check that matters rather than a formality. It agrees on
+direction each time, 92.1% -> 92.3% -> 92.4%, and it is much the smaller
+movement because the corpus behind it is mostly targeted batches while the
+samples are uniform draws from the allowed box.
+
+The duplicates were up-weighting whatever was in both places, which is every
+recent batch - the fraction walks, which are the best-designed readings in the
+file. Emphasising them helped, by accident, and unrepeatably.
+
+3.2 points is a real loss and it is the honest number. A figure that cannot be
+reproduced from what is committed is not an accuracy, it is a coincidence, and
+every measurement stacked on top of it inherits the problem. The numbers quoted
+from here are reproducible.
+
+## Refining the boundaries, not the shape (batch R1, 2026-10-06)
+
+A fraction walk covers frac in twentieths, which finds the SHAPE of a group's
+rule. What was left wrong after four of them was not shape but PLACEMENT. Of
+the ten remaining clean misses, measured against the thresholds their own
+groups use:
+
+    8 of 10 sat within 0.025 of a threshold
+    6 of 10 sat within 0.007
+
+A reading that close is decided by where the boundary lies to three decimals,
+and a bucket 0.05 wide cannot say. So dev/frac-refine.mjs reads the thresholds
+out of the shipped table, works out where each falls for the integer part a
+candidate lands on - they move with it - and keeps only candidates within 0.03
+of one, bucketed at 0.0025. 1659 such candidates found, 19171 discarded as too
+far.
+
+These are the hardest readings in the file by construction: they scored 75.2%
+before import, against 97.7% overall.
+
+    clean length 97.7% -> 97.9%     within 1" 99.1% -> 99.3%
+    clean misses 10 -> 9, and the largest failing group cleared outright
+    (0.2625/0.2253 at two springs, 3 misses -> 0)
+
+LINE_SLACK needed re-measuring a second time, to 0.12. Boundary readings are
+the noisiest for a line to absorb, so at 0.08 they pushed groups off the line
+fitter and doubled the band count, 38 to 91. At 0.12 the accuracy holds with 38
+bands and the holdout prefers it, 91.9% to 92.1%. The knob is a fraction of
+what a group holds, so it is not a constant of the problem - it wants
+re-measuring whenever the data underneath it changes.
+
+### And the corpus has to win the dedup
+
+Importing R1 broke reproducibility again, for the reason the corpus-first sort
+was written to prevent: pulls are read first, so a reading held in both places
+is represented by its PULL copy, and once that pull is lost to a rebuild the
+corpus copy takes over and the fit differs. The sort was tried earlier and
+appeared to do nothing, because at that time the fits were reading the raw
+ingestion from above the dedup entirely. With that fixed, the sort is what
+keeps the result stable - and it is verified the same way: derive with the
+pulls, derive without, compare the files.
+
+## Best fit wins, not first fit (2026-10-06)
+
+The last three misses in one group turned on a detail of how the split fitter
+chose between forms. 0.273/0.2253 at two springs is two regimes of three levels
+each, split near floor 20:
+
+    floors 10-19   0 low and middle, 1.25 at 0.76-0.95, 1 above 0.91
+    floors 20+     0.25 below ~0.08, 0 in the middle, 1.25 above ~0.76
+
+On the upper side the low threshold CLIMBS with the integer part - 0.01 at
+floor 20, 0.11 by 26 - while the high one sits flat near 0.76. Two changes were
+needed:
+
+  A SPLIT'S SIDES MAY USE INDEPENDENT SLOPES. fitSplit could only hand its
+  sides the shared-slope fitter, so a regime whose thresholds move apart could
+  not be placed at all.
+
+  AND THE BEST-FITTING FORM HAS TO WIN. Adding that was not enough, because the
+  sides were taking the FIRST form that came inside the slack - so a shared
+  slope still won, producing `b: 0.014` shared between both thresholds, which
+  drags the high one from 0.65 at floor 20 to 0.73 by 26 against readings that
+  put it flat near 0.76 throughout. The forms are now listed simplest first and
+  a later one must be STRICTLY better to displace an earlier one, so nothing
+  gains freedom it has not paid for.
+
+    clean length 97.9% -> 98.6%     within 1" 99.3% -> 99.5%
+    clean misses 9 -> 6, and that group 3 -> 0
+    five-fold holdout 92.1% -> 92.2%, on a population 380 readings harder
+
+What is left is six misses, one apiece in six groups, three of which have four
+or fewer external readings between them - at that point the samples cannot
+distinguish a model fault from a single awkward door.

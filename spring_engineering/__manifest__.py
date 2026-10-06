@@ -8,10 +8,11 @@
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
     'author': 'AA Impact Garage Door Supply',
-    'depends': ['base', 'web', 'website'],
+    'depends': ['base', 'web', 'website', 'website_sale'],
     'data': [
         'views/spring_engineering_views.xml',
         'views/spring_engineering_templates.xml',
+        'views/spring_engineering_product.xml',
     ],
     # The SAME three files in both bundles. The backend app and the public
     # website page run one component from one source; there is no second copy

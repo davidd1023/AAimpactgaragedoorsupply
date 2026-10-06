@@ -2,6 +2,7 @@
 
 import { Component, useEffect, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
+import { rpc } from "@web/core/network/rpc";
 
 // --- Spring length constants ---------------------------------------------
 // Verified exactly (to the cent) against 11 reference results from the
@@ -1046,52 +1047,52 @@ const DUPLEX_PAIRS = {
         innerId: 3.75,
         outerId: 6,
         calibration: [
-            { outerWire: 0.2625, innerWire: 0.2253, K: 2025.5, n: 582, sMult: 1.04625, twoOffset: 0.25, byCount: { 2: [{ upTo: 0.194, bonus: 0.25 }, { upTo: 0.2, bonus: 0 }, { upTo: 0.261, bonus: 0.25 }, { upTo: 0.276, bonus: 0 }, { upTo: 0.297, bonus: 0.25 }, { upTo: 0.303, bonus: 0 }, { upTo: 0.365, bonus: 0.25 }, { upTo: 0.367, bonus: 0 }, { upTo: 0.394, bonus: 0.25 }, { upTo: 0.399, bonus: 0 }, { upTo: 0.418, bonus: 0.25 }, { upTo: 0.424, bonus: 0 }, { upTo: 0.428, bonus: 0.25 }, { upTo: 0.435, bonus: 0 }, { upTo: 0.473, bonus: 0.25 }, { upTo: 0.481, bonus: 0 }, { upTo: 0.513, bonus: 0.25 }, { upTo: 0.518, bonus: 0 }, { upTo: 0.522, bonus: 0.25 }, { upTo: 0.533, bonus: 0 }, { upTo: 0.536, bonus: 0.25 }, { upTo: 0.553, bonus: 0 }, { upTo: 0.574, bonus: 0.25 }, { upTo: 0.6, bonus: 0 }, { upTo: 0.606, bonus: 0.25 }, { upTo: 0.616, bonus: 0 }, { upTo: 0.629, bonus: 0.25 }, { upTo: 0.689, bonus: 0 }, { upTo: 0.695, bonus: 0.25 }, { upTo: 0.696, bonus: 0 }, { upTo: 0.699, bonus: 0.25 }, { upTo: 0.705, bonus: 0 }, { upTo: 0.713, bonus: 0.25 }, { upTo: 0.729, bonus: 0 }, { upTo: 0.734, bonus: 1.25 }, { upTo: 0.736, bonus: 0.25 }, { upTo: 0.739, bonus: 0 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.68314, b: 0, lo: 0, hi: 1 }, 3: { a: 0.73419, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.7918, b: -0.0025, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.273, innerWire: 0.2253, K: 2255.4, n: 157, sMult: 1.00725, byCount: { 2: [{ upTo: 0.515, bonus: 0 }, { upTo: 0.606, bonus: 1.25 }, { upTo: 0.606, bonus: 0 }, { upTo: 0.609, bonus: 1.25 }, { upTo: 0.612, bonus: 0 }, { upTo: 0.765, bonus: 1.25 }, { upTo: 0.797, bonus: 1 }, { upTo: 0.835, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.56291, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.64225, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.283, innerWire: 0.2253, K: 2452.9, n: 136, sMult: 0.97925, lineByCount: { 3: { a: 0.47933, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.50575, b: -0.0025, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.283, innerWire: 0.2343, K: 2717.0, n: 50, sMult: 1.0155, byCount: { 2: [{ upTo: 0.522, bonus: 0 }, { upTo: 0.883, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.45676, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.57207, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.289, innerWire: 0.2343, K: 2879.1, n: 118, sMult: 0.99325, byCount: { 2: [{ upTo: 0.49, bonus: 0 }, { upTo: 0.516, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.48677, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.38576, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.295, innerWire: 0.2343, K: 2980.9, n: 113, sMult: 0.99075, lineByCount: { 1: { a: 0.61653, b: 0, lo: 0, hi: 1 }, 2: { a: 0.69482, b: 0, lo: 0, hi: 1 }, 3: { a: 0.7298, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.61769, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.295, innerWire: 0.2437, K: 3318.5, n: 101, sMult: 1.02, byCount: { 1: [{ upTo: 1, bonus: 0 }] }, lineByCount: { 3: { a: 0.68627, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.5779, b: 0, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 25, below: { a: 0.80799, b: 0, lo: 0, hi: 1 }, above: { a: 0.65747, b: 0, lo: 0, hi: 1.25 } } } },
-            { outerWire: 0.3065, innerWire: 0.2437, K: 3617.5, n: 188, sMult: 0.985, lineByCount: { 3: { a: 0.48214, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.54599, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3065, innerWire: 0.25, K: 3902.4, n: 37, sMult: 1.01325, twoOffset: 0.25, byCount: { 2: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 3: { a: 0.64086, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.78773, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3125, innerWire: 0.25, K: 4102.8, n: 47, sMult: 1.00325, byCount: { 3: [{ upTo: 0.579, bonus: 0.25 }, { upTo: 0.609, bonus: -0.75 }, { upTo: 0.72, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 4: { a: 0.75001, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3125, innerWire: 0.2625, K: 4562.2, n: 10, byCount: { 3: [{ upTo: 1, bonus: 1.25 }] } },
-            { outerWire: 0.3195, innerWire: 0.2625, K: 4863.2, n: 109, sMult: 1.012, byCount: { 2: [{ upTo: 0.474, bonus: 0 }, { upTo: 0.858, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 1: { a: 0.52006, b: 0, lo: 0, hi: 1 }, 3: { a: 0.4957, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.60504, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.331, innerWire: 0.2625, K: 5221.6, n: 177, sMult: 0.98675, lineByCount: { 3: { a: 0.51046, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.57245, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.331, innerWire: 0.273, K: 5842.8, n: 144, sMult: 1.01675, byCount: { 2: [{ upTo: 0.043, bonus: 0 }, { upTo: 0.065, bonus: 0.25 }, { upTo: 0.085, bonus: 0 }, { upTo: 0.216, bonus: 0.25 }, { upTo: 0.502, bonus: 0 }, { upTo: 0.756, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.50938, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.55211, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3437, innerWire: 0.273, K: 6333.9, n: 229, sMult: 0.99, lineByCount: { 3: { a: 0.41448, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.5102, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3437, innerWire: 0.283, K: 7005.7, n: 284, sMult: 1.01725, byCount: { 2: [{ upTo: 0.477, bonus: 0 }, { upTo: 0.734, bonus: 1.25 }, { upTo: 0.836, bonus: 1 }, { upTo: 0.862, bonus: 1.25 }, { upTo: 0.865, bonus: 1 }, { upTo: 0.875, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.48848, b: 0, lo: 0, hi: 1 }, 3: { a: 0.63092, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3625, innerWire: 0.283, K: 7561.9, n: 447, sMult: 0.98225, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.35999, b: 0.0075, lo: 0, hi: 1 }, 3: { a: 0.52896, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3625, innerWire: 0.289, K: 8386.5, n: 429, sMult: 0.99575, lineByCount: { 1: { a: 0.47555, b: 0.002, lo: 0, hi: 1 }, 2: { a: 0.47319, b: 0.0015, lo: 0, hi: 1 }, 3: { a: 0.66664, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.33145, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3625, innerWire: 0.295, K: 8881.9, n: 230, sMult: 1.009, lineByCount: { 1: { a: 0.4494, b: 0, lo: 0, hi: 1 }, 3: { a: 0.41628, b: 0.001, lo: 0.25, hi: 1.25 }, 4: { a: 0.51469, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.375, innerWire: 0.295, K: 9281.2, n: 394, sMult: 0.987, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.35902, b: 0.004, lo: 0, hi: 1 }, 2: { a: 0.39698, b: 0.0035, lo: 0, hi: 1 }, 3: { a: 0.44026, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.375, innerWire: 0.3065, K: 10594.4, n: 241, sMult: 1.017, byCount: { 2: [{ upTo: 0.039, bonus: 0.25 }, { upTo: 0.459, bonus: 0 }, { upTo: 0.547, bonus: 1.25 }, { upTo: 0.618, bonus: 0 }, { upTo: 0.777, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 1: { a: 0.32905, b: 0.006, lo: 0, hi: 1 }, 3: { a: 0.47598, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3938, innerWire: 0.3065, K: 11208.9, n: 235, sMult: 0.97925, byCount: { 2: [{ upTo: 0.211, bonus: 0 }, { upTo: 0.218, bonus: 1 }, { upTo: 0.383, bonus: 0 }, { upTo: 0.409, bonus: 1 }, { upTo: 0.469, bonus: 0 }, { upTo: 1, bonus: 1 }], 4: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.37665, b: 0, lo: 0, hi: 1 }, 3: { a: 0.40907, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3938, innerWire: 0.3125, K: 12334.2, n: 210, sMult: 0.99375, lineByCount: { 1: { a: 0.27352, b: 0.005, lo: 0, hi: 1 }, 3: { a: 0.48502, b: 0, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 31, below: { a: 0.36122, b: 0.0005, lo: 0, hi: 1 }, above: { a: -0.52066, b: 0.0195, lo: 0, hi: 1 } } } },
-            { outerWire: 0.3938, innerWire: 0.3195, K: 13265.8, n: 94, sMult: 1.01375, byCount: { 2: [{ upTo: 0.486, bonus: 0 }, { upTo: 0.548, bonus: 1.25 }, { upTo: 0.599, bonus: 0 }, { upTo: 0.659, bonus: 1 }, { upTo: 0.791, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 1: { a: 0.41088, b: 0.0015, lo: 0, hi: 1 }, 3: { a: 0.46317, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.75508, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.4062, innerWire: 0.3195, K: 13744.5, n: 83, sMult: 0.988, lineByCount: { 1: { a: 0.31951, b: 0.003, lo: 0, hi: 1 }, 3: { a: 0.42372, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.4062, innerWire: 0.331, K: 15603.4, n: 97, sMult: 1.01175, byCount: { 2: [{ upTo: 0.294, bonus: 0 }, { upTo: 0.339, bonus: 1.25 }, { upTo: 0.355, bonus: 0 }, { upTo: 0.41, bonus: 1.25 }, { upTo: 0.459, bonus: 0 }, { upTo: 0.54, bonus: 1.25 }, { upTo: 0.586, bonus: 1 }, { upTo: 0.604, bonus: 1.25 }, { upTo: 0.645, bonus: 1 }, { upTo: 0.685, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 4: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.24051, b: 0, lo: 0, hi: 1 }, 3: { a: 0.27162, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.4218, innerWire: 0.331, K: 16369.3, n: 78, sMult: 0.99, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 2: { a: 0.69162, b: 0, lo: 0, hi: 1 }, 3: { a: 0.40534, b: 0.0035, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.4218, innerWire: 0.3437, K: 18774.0, n: 127, sMult: 1.01775, byCount: { 2: [{ upTo: 0.116, bonus: 0 }, { upTo: 0.145, bonus: 0.25 }, { upTo: 0.269, bonus: 0 }, { upTo: 0.307, bonus: 0.25 }, { upTo: 0.387, bonus: 0 }, { upTo: 0.448, bonus: 0.25 }, { upTo: 0.498, bonus: 0 }, { upTo: 0.559, bonus: 1.25 }, { upTo: 0.614, bonus: 0 }, { upTo: 0.867, bonus: 1.25 }, { upTo: 1, bonus: 1 }], 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.39012, b: 0.0035, lo: 0, hi: 1 }, 3: { a: 0.36132, b: 0.004, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.4305, innerWire: 0.3437, K: 19691.7, n: 201, sMult: 1.00375, byCount: { 3: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.2122, b: 0.0085, lo: 0, hi: 1 }, 2: { a: 0.44942, b: 0, lo: 0, hi: 1 } } },
-            { outerWire: 0.4305, innerWire: 0.3625, K: 22248.9, n: 167, sMult: 1.04, twoOffset: 0.25, lineByCount: { 1: { a: 0.05407, b: 0.007, lo: 0, hi: 1 }, 2: { a: 0.23942, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.4375, innerWire: 0.3625, K: 23276.7, n: 219, sMult: 1.03075, twoOffset: 0.25, byCount: { 2: [{ upTo: 0.203, bonus: 0.25 }, { upTo: 0.227, bonus: 0 }, { upTo: 0.256, bonus: 0.25 }, { upTo: 0.362, bonus: 0 }, { upTo: 0.437, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.07677, b: 0.009, lo: 0, hi: 1 } } },
-            { outerWire: 0.4531, innerWire: 0.3625, K: 25580.0, n: 175, sMult: 1.0065, byCount: { 1: [{ upTo: 0.138, bonus: 0 }, { upTo: 0.173, bonus: -1 }, { upTo: 0.503, bonus: 0 }, { upTo: 0.537, bonus: 1 }, { upTo: 0.548, bonus: 0 }, { upTo: 0.577, bonus: 1 }, { upTo: 0.587, bonus: 0 }, { upTo: 0.639, bonus: 1 }, { upTo: 0.649, bonus: 0 }, { upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 2: { a: 0.67858, b: 0, lo: 0, hi: 1 } } },
-            { outerWire: 0.4531, innerWire: 0.375, K: 27589.4, n: 30, sMult: 1.03275, twoOffset: 0.25, lineByCount: { 2: { a: 0.53346, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.4615, innerWire: 0.375, K: 29026.7, n: 226, sMult: 1.01675, twoOffset: 0.25, byCount: { 3: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.03912, b: 0.011, lo: 0, hi: 1 }, 2: { a: 0.45846, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.4687, innerWire: 0.375, K: 30214.9, n: 98, sMult: 1.0055, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.1077, b: 0.0125, lo: 0, hi: 1 }, 3: { a: 0.05407, b: 0, lo: -0.75, hi: 0.25 } } },
-            { outerWire: 0.4687, innerWire: 0.3938, K: 33619.3, n: 18, sMult: 1.0435, lineByCount: { 1: { a: 0.34985, b: 0.0045, lo: 0, hi: 1 } } },
-            { outerWire: 0.49, innerWire: 0.3938, K: 38052.1, n: 317, sMult: 1.00775, lineByCount: { 1: { a: 0.0253, b: 0.007, lo: 0, hi: 1 }, 4: { a: 0.56111, b: 0, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 43, below: { a: 0.26579, b: 0, lo: 0, hi: 1.25 }, above: { a: 0.37942, b: 0, lo: 0, hi: 1 } } } },
-            { outerWire: 0.5, innerWire: 0.3938, K: 38403.3, n: 149, sMult: 0.99575, lineByCount: { 1: { a: -0.10094, b: 0.012, lo: 0, hi: 1 }, 2: { a: 0.39762, b: 0, lo: 0, hi: 1 } } },
-            { outerWire: 0.5, innerWire: 0.4062, K: 42982.9, n: 155, sMult: 1.02675, twoOffset: 0.25, byCount: { 2: [{ upTo: 0.131, bonus: 0.25 }, { upTo: 0.156, bonus: 0 }, { upTo: 0.17, bonus: -1 }, { upTo: 0.74, bonus: 0 }, { upTo: 0.755, bonus: 1.25 }, { upTo: 0.769, bonus: 0 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.22016, b: 0.012, lo: 0, hi: 1 } } },
-            { outerWire: 0.5312, innerWire: 0.4062, K: 44705.9, n: 57, sMult: 0.9745 },
-            { outerWire: 0.5312, innerWire: 0.4218, K: 53777.7, n: 58, sMult: 1.003, lineByCount: { 1: { a: 0.31087, b: 0.0075, lo: 0, hi: 1 }, 2: { a: -0.18413, b: 0.012, lo: 0, hi: 1 } } },
-            { outerWire: 0.5312, innerWire: 0.4305, K: 57529.5, n: 97, sMult: 1.01275, byCount: { 2: [{ upTo: 0.132, bonus: 0 }, { upTo: 0.494, bonus: 1.25 }, { upTo: 1, bonus: 1 }] } },
-            { outerWire: 0.5625, innerWire: 0.4305, K: 59019.8, n: 12, sMult: 0.97675, lineByCount: { 2: { a: 0.29659, b: 0.0035, lo: 0, hi: 1 } } },
-            { outerWire: 0.5625, innerWire: 0.4531, K: 75278.9, n: 28, sMult: 1.0105 },
-            { outerWire: 0.625, innerWire: 0.4531, K: 76631.4, n: 24 },
-            { outerWire: 0.625, innerWire: 0.4615, K: 83220.3, n: 4 },
+            { outerWire: 0.2625, innerWire: 0.2253, K: 2021.8, n: 773, sMult: 1.047, twoOffset: 0.25, lineByCount: { 1: { a: 0.69945, b: 0, lo: 0, hi: 1 }, 2: { a: -0.34735, b: 0.0435, a2: 0.76639, b2: -0.0005, lo: 0.25, mid: 0, hi: 1.25 }, 3: { a: 0.76083, b: -0.0005, lo: 0.25, hi: 1.25 }, 4: { a: 0.76694, b: -0.0005, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.273, innerWire: 0.2253, K: 2255.4, n: 297, sMult: 1.01775, twoOffset: 0.25, lineByCount: { 3: { a: 0.82357, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.74596, b: 0, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 20, below: { a: 0.76574, b: -0.0005, a2: 0.68206, b2: 0.0175, lo: 0, mid: 1.25, hi: 1 }, above: { a: -0.25069, b: 0.014, a2: 0.7521, b2: 0, lo: 0.25, mid: 0, hi: 1.25 } } } },
+            { outerWire: 0.283, innerWire: 0.2253, K: 2452.9, n: 192, sMult: 0.98625, lineByCount: { 2: { a: 0.68713, b: -0.002, lo: 0, hi: 1 }, 3: { a: 0.64506, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.61124, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.283, innerWire: 0.2343, K: 2717.0, n: 27, sMult: 1.0155, byCount: { 2: [{ upTo: 0.522, bonus: 0 }, { upTo: 0.883, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.45676, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.57207, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.289, innerWire: 0.2343, K: 2879.1, n: 251, sMult: 0.99375, lineByCount: { 1: { a: 0.60636, b: -0.006, lo: 0, hi: 1 }, 2: { a: 0.56374, b: -0.003, lo: 0, hi: 1 }, 3: { a: 0.52182, b: -0.002, lo: 0.25, hi: 1.25 }, 4: { a: 0.39779, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.295, innerWire: 0.2343, K: 2980.9, n: 49, sMult: 0.98725, lineByCount: { 2: { a: 0.64291, b: 0, lo: 0, hi: 1 }, 3: { a: 0.61775, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.55192, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.295, innerWire: 0.2437, K: 3318.5, n: 150, sMult: 1.0085, byCount: { 2: [{ upTo: 0.361, bonus: 0 }, { upTo: 0.378, bonus: 1.25 }, { upTo: 0.443, bonus: 0 }, { upTo: 0.475, bonus: 1.25 }, { upTo: 0.484, bonus: 0 }, { upTo: 0.736, bonus: 1.25 }, { upTo: 0.748, bonus: 1 }, { upTo: 0.777, bonus: 1.25 }, { upTo: 0.795, bonus: 1 }, { upTo: 0.801, bonus: 1.25 }, { upTo: 0.856, bonus: 1 }, { upTo: 0.86, bonus: 1.25 }, { upTo: 0.867, bonus: 1 }, { upTo: 0.874, bonus: 1.25 }, { upTo: 0.909, bonus: 1 }, { upTo: 0.923, bonus: -1 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.50654, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.37972, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3065, innerWire: 0.2437, K: 3617.5, n: 101, sMult: 0.985, lineByCount: { 3: { a: 0.48214, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.54599, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3065, innerWire: 0.25, K: 3902.4, n: 18, sMult: 1.01325, twoOffset: 0.25, byCount: { 2: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 3: { a: 0.64086, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.78773, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3125, innerWire: 0.25, K: 4102.8, n: 88, sMult: 1.0015, lineByCount: { 3: { a: 0.68071, b: 0.004, lo: 0.25, hi: 1.25 }, 4: { a: 0.76225, b: 0.003, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3125, innerWire: 0.2625, K: 4570.8, n: 11, byCount: { 3: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 2: { a: 0.55479, b: 0, lo: 1.25, hi: 1 } } },
+            { outerWire: 0.3195, innerWire: 0.2625, K: 4863.2, n: 59, sMult: 1.0105, lineByCount: { 3: { a: 0.44531, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.56931, b: 0, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 21, below: { a: 0.44251, b: 0, cuts: [0.76368], levels: [0, 1.25, 1] }, above: { a: 0.44572, b: 0, lo: 0, hi: 1.25 } } } },
+            { outerWire: 0.331, innerWire: 0.2625, K: 5221.6, n: 93, sMult: 0.98675, lineByCount: { 3: { a: 0.51046, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.57245, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.331, innerWire: 0.273, K: 5842.8, n: 111, sMult: 1.01675, lineByCount: { 3: { a: 0.50938, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.55211, b: 0, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 31, below: { a: 0.50762, b: 0, a2: 0.55298, b2: 0.014, lo: 0, mid: 1.25, hi: 1 }, above: { a: 0.09712, b: 0.0025, cuts: [0.34689], levels: [0.25, 0, 1.25] } } } },
+            { outerWire: 0.3437, innerWire: 0.273, K: 6333.9, n: 174, sMult: 0.99575, lineByCount: { 1: { a: 0.58802, b: 0.002, lo: 0, hi: 1 }, 2: { a: 0.53117, b: 0.0045, lo: 0, hi: 1 }, 3: { a: 0.50362, b: 0.005, lo: 0.25, hi: 1.25 }, 4: { a: 0.74549, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3437, innerWire: 0.283, K: 7005.7, n: 130, sMult: 1.01725, lineByCount: { 1: { a: 0.48848, b: 0, lo: 0, hi: 1 }, 2: { a: 0.47665, b: 0, a2: 0.53679, b2: 0.0125, lo: 0, mid: 1.25, hi: 1 }, 3: { a: 0.63092, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.47381, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3625, innerWire: 0.283, K: 7561.9, n: 267, sMult: 0.97875, byCount: { 4: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.39855, b: 0.002, lo: 0, hi: 1 }, 2: { a: 0.39714, b: 0.0025, lo: 0, hi: 1 }, 3: { a: 0.45937, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3625, innerWire: 0.289, K: 8386.5, n: 222, sMult: 0.99475, lineByCount: { 1: { a: 0.47489, b: 0.001, lo: 0, hi: 1 }, 2: { a: 0.46055, b: 0.001, lo: 0, hi: 1 }, 3: { a: 0.62529, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.2789, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3625, innerWire: 0.295, K: 8881.9, n: 69, sMult: 1.009, lineByCount: { 1: { a: 0.4494, b: 0, lo: 0, hi: 1 }, 3: { a: 0.41628, b: 0.001, lo: 0.25, hi: 1.25 }, 4: { a: 0.51469, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.375, innerWire: 0.295, K: 9281.2, n: 157, sMult: 0.987, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.35902, b: 0.004, lo: 0, hi: 1 }, 2: { a: 0.39698, b: 0.0035, lo: 0, hi: 1 }, 3: { a: 0.44026, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.375, innerWire: 0.3065, K: 10594.4, n: 153, sMult: 1.01775, lineByCount: { 1: { a: 0.32284, b: 0.007, lo: 0, hi: 1 }, 3: { a: 0.40122, b: 0.0055, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 32, below: { a: 0.4604, b: 0, cuts: [0.76174], levels: [0, 1.25, 1] }, above: { a: 0.06559, b: 0, cuts: [0.68254], levels: [0.25, 0, 1.25] } } } },
+            { outerWire: 0.3938, innerWire: 0.3065, K: 11208.9, n: 110, sMult: 0.983, lineByCount: { 1: { a: 0.43149, b: 0.0025, lo: 0, hi: 1 }, 2: { a: 0.50013, b: 0.003, lo: 0, hi: 1 }, 3: { a: 0.51595, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.32285, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3938, innerWire: 0.3125, K: 12334.2, n: 108, sMult: 0.99375, lineByCount: { 1: { a: 0.27352, b: 0.005, lo: 0, hi: 1 }, 2: { a: 0.2399, b: 0.006, lo: 0, hi: 1 }, 3: { a: 0.48502, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3938, innerWire: 0.3195, K: 13265.8, n: 50, sMult: 1.01375, lineByCount: { 1: { a: 0.41088, b: 0.0015, lo: 0, hi: 1 }, 2: { a: 0.50915, b: 0.001, a2: 0.54828, b2: 0.0045, lo: 0, mid: 1.25, hi: 1 }, 3: { a: 0.46317, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.75508, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4062, innerWire: 0.3195, K: 13744.5, n: 44, sMult: 0.988, lineByCount: { 1: { a: 0.31951, b: 0.003, lo: 0, hi: 1 }, 3: { a: 0.42372, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4062, innerWire: 0.331, K: 15603.4, n: 51, sMult: 1.01175, byCount: { 4: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.24051, b: 0, lo: 0, hi: 1 }, 2: { a: 0.26681, b: 0.002, a2: 0.50133, b2: 0.003, lo: 0, mid: 1.25, hi: 1 }, 3: { a: 0.27162, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4218, innerWire: 0.331, K: 16369.3, n: 71, sMult: 0.986, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.28285, b: 0.004, lo: 0, hi: 1 }, 3: { a: 0.36896, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4218, innerWire: 0.3437, K: 18774.0, n: 67, sMult: 1.01775, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.39012, b: 0.0035, lo: 0, hi: 1 }, 3: { a: 0.36132, b: 0.004, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 41, below: { a: 0.42267, b: 0, cuts: [0.75879], levels: [0, 1.25, 1] }, above: { a: -0.08765, b: 0.007, lo: 0.25, hi: 1.25 } } } },
+            { outerWire: 0.4305, innerWire: 0.3437, K: 19691.7, n: 84, sMult: 1.00375, byCount: { 3: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.2122, b: 0.0085, lo: 0, hi: 1 }, 2: { a: 0.44942, b: 0, lo: 0, hi: 1 } } },
+            { outerWire: 0.4305, innerWire: 0.3625, K: 22248.9, n: 42, sMult: 1.04, twoOffset: 0.25, lineByCount: { 1: { a: 0.05407, b: 0.007, lo: 0, hi: 1 }, 2: { a: 0.23942, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4375, innerWire: 0.3625, K: 23276.7, n: 85, sMult: 1.03075, twoOffset: 0.25, lineByCount: { 1: { a: 0.07677, b: 0.009, lo: 0, hi: 1 } }, splitByCount: { 2: { from: 37, below: { a: 0.1695, b: 0, cuts: [0.39003], levels: [0.25, 0, 1.25] }, above: { a: 0.4969, b: 0, lo: 0.25, hi: 1.25 } } } },
+            { outerWire: 0.4531, innerWire: 0.3625, K: 25580.0, n: 73, sMult: 1.0065, byCount: { 3: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.32583, b: 0.0045, lo: 0, hi: 1 }, 2: { a: 0.67858, b: 0, lo: 0, hi: 1 } } },
+            { outerWire: 0.4531, innerWire: 0.375, K: 27589.4, n: 15, sMult: 1.03275, twoOffset: 0.25, lineByCount: { 2: { a: 0.53346, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4615, innerWire: 0.375, K: 29026.7, n: 92, sMult: 1.01825, twoOffset: 0.25, byCount: { 3: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.03958, b: 0.0125, lo: 0, hi: 1 }, 2: { a: 0.54397, b: 0, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4687, innerWire: 0.375, K: 30214.9, n: 45, sMult: 1.0055, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.1077, b: 0.0125, lo: 0, hi: 1 }, 3: { a: 0.05407, b: 0, lo: -0.75, hi: 0.25 } } },
+            { outerWire: 0.4687, innerWire: 0.3938, K: 33619.3, n: 9 },
+            { outerWire: 0.49, innerWire: 0.3938, K: 38052.1, n: 131, sMult: 1.009, lineByCount: { 1: { a: 0.01204, b: 0.0085, lo: 0, hi: 1 }, 4: { a: 0.6629, b: 0, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 44, below: { a: 0.31821, b: 0, lo: 0, hi: 1.25 }, above: { a: 0.464, b: 0, lo: 0, hi: 1 } } } },
+            { outerWire: 0.5, innerWire: 0.3938, K: 38403.3, n: 58, sMult: 0.99575, lineByCount: { 1: { a: -0.10094, b: 0.012, lo: 0, hi: 1 }, 2: { a: 0.39762, b: 0, lo: 0, hi: 1 } } },
+            { outerWire: 0.5, innerWire: 0.4062, K: 42982.9, n: 72, sMult: 1.02675, twoOffset: 0.25, byCount: { 2: [{ upTo: 0.131, bonus: 0.25 }, { upTo: 0.156, bonus: 0 }, { upTo: 0.17, bonus: -1 }, { upTo: 0.74, bonus: 0 }, { upTo: 0.755, bonus: 1.25 }, { upTo: 0.769, bonus: 0 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.22016, b: 0.012, lo: 0, hi: 1 } } },
+            { outerWire: 0.5312, innerWire: 0.4062, K: 44705.9, n: 28, sMult: 0.9745 },
+            { outerWire: 0.5312, innerWire: 0.4218, K: 53777.7, n: 32, sMult: 1.003, lineByCount: { 1: { a: 0.31087, b: 0.0075, lo: 0, hi: 1 }, 2: { a: -0.18413, b: 0.012, lo: 0, hi: 1 } } },
+            { outerWire: 0.5312, innerWire: 0.4305, K: 57529.5, n: 48, sMult: 1.01275, lineByCount: { 2: { a: 0.13213, b: 0, a2: 0.49366, b2: 0, lo: 0, mid: 1.25, hi: 1 } } },
+            { outerWire: 0.5625, innerWire: 0.4305, K: 59019.8, n: 5, lineByCount: { 2: { a: 0.65908, b: 0, lo: -1, hi: 0 } } },
+            { outerWire: 0.5625, innerWire: 0.4531, K: 75278.9, n: 6 },
+            { outerWire: 0.625, innerWire: 0.4531, K: 76631.4, n: 2 },
+            { outerWire: 0.625, innerWire: 0.4615, K: 83220.3, n: 3 },
             { outerWire: 0.625, innerWire: 0.49, K: 111661.4, n: 5 },
         ],
     },
@@ -1634,7 +1635,12 @@ function duplexLength(activeLength, regime, springs) {
         // spring is the clearest case: its bonus runs -1, 0 and +1, and a
         // single threshold cannot place all three.
         if (line.mid !== undefined) {
-            const second = line.a2 + line.b * whole;
+            // b2 ONLY WHERE IT WAS MEASURED. Thresholds normally share a
+            // slope; on 0.2625/0.2253 at two springs they visibly do not -
+            // the lower boundary climbs about 0.04 per inch of floor while
+            // the upper one sits flat near 0.75 - so that group carries its
+            // own second slope and every other group falls back to the first.
+            const second = line.a2 + (line.b2 ?? line.b) * whole;
 
             return whole + (
                 frac > second ? line.hi : frac > first ? line.mid : line.lo
@@ -2065,6 +2071,9 @@ function defaultState() {
         springs: 2,
         springId: '2 5/8"',
         cycles: "10,000",
+        // Add to Cart: in flight, and the last thing the server said about it.
+        cartBusy: false,
+        cartError: "",
         liftType: "Standard",
         liftin: "",
         radius: "15",
@@ -3947,11 +3956,82 @@ closeDrumInfo() {
         Object.assign(this.state, defaultState());
     }
 
-    // DELIBERATELY EMPTY. The button is wired to a named handler rather than
-    // left without one so that the place to add the order call is obvious, and
-    // so the button is already reachable by keyboard and screen reader when it
-    // starts doing something.
-    addToCart() {}
+    // WHAT GOES TO THE SERVER: the SPECIFICATION, never the price.
+    //
+    // /spring-calculator is public, so anything this page posts is whatever its
+    // sender chose. The controller recomputes every chargeable figure from the
+    // geometry below using its own constants, which it reads out of this file
+    // so the two cannot drift. A sender can therefore ask for a spring the
+    // calculator would not have recommended, but not for one at a price it did
+    // not earn.
+    //
+    // Duplex diameters come from duplexPair, which has already resolved the
+    // aliases, so a Raynor pair is priced as the 2 5/8" inside 5 1/4" it is
+    // engineered as - the same resolution the price rows use.
+    get cartSpec() {
+        const springs = [];
+
+        if (this.isDuplex) {
+            const step = this.duplexStep;
+            const pair = this.duplexPair;
+
+            if (step && pair) {
+                springs.push({
+                    role: "Outer", wire: step.outerWire,
+                    id: pair.outerId, length: this.duplexOuterLength,
+                });
+                springs.push({
+                    role: "Inner", wire: step.innerWire,
+                    id: pair.innerId, length: this.duplexInnerLength,
+                });
+            }
+        } else {
+            springs.push({
+                role: "Spring", wire: this.wireSizeNumber,
+                id: this.springIdNumber, length: this.springLength,
+            });
+        }
+
+        return {
+            assembly: this.state.assembly,
+            springs: Number(this.state.springs) || 0,
+            drum: this.state.drum,
+            cycles: this.state.cycles,
+            doorWeight: this.state.weight,
+            doorHeight: `${this.state.doorHeightFeet}' ${this.state.doorHeightInches || 0}"`,
+            springsSpec: springs,
+        };
+    }
+
+    async addToCart() {
+        if (!this.resultsVisible || this.state.cartBusy) {
+            return;
+        }
+
+        this.state.cartBusy = true;
+        this.state.cartError = "";
+
+        try {
+            const result = await rpc("/spring-calculator/add-to-cart", {
+                spec: this.cartSpec,
+            });
+
+            // The controller answers with a message rather than an exception
+            // for anything it will not build, so it can be shown as it is.
+            if (result && result.error) {
+                this.state.cartError = result.error;
+
+                return;
+            }
+
+            window.location = "/shop/cart";
+        } catch {
+            this.state.cartError =
+                "Could not reach the cart just now. Please try again, or call us to order.";
+        } finally {
+            this.state.cartBusy = false;
+        }
+    }
 }
 
 // TWO PLACES, ONE COMPONENT.
