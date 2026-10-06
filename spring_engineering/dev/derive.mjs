@@ -136,6 +136,7 @@ for (const f of readdirSync(HERE)
         }
 
         readings.push({
+            fromCorpus: false,
             state: {
                 assembly: "Duplex", drum: i.drum, springId: PAIR,
                 springs: i.springs, radius: ourRadius(i.radius),
@@ -181,6 +182,7 @@ for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).read
     }
 
     readings.push({
+        fromCorpus: true,
         state: r.state,
         // Same hiLift marker the pull path sets. Without it the hi-lift
         // holdout below silently withholds nothing from this half of the
@@ -229,9 +231,24 @@ for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).read
 // So: collapse exact duplicates, and if the same inputs ever carry DIFFERENT
 // outputs, say so loudly instead of letting the fitter average two readings
 // that cannot both be true.
+// THE CORPUS WINS EVERY TIE, so the table cannot depend on which gitignored
+// pull files happen to be on disk.
+//
+// Pull files are read first and the dedup keeps whichever copy it meets, so a
+// reading held in both places was represented by its PULL copy - and once that
+// pull is imported and then lost to a rebuild, the corpus copy takes over and
+// the fit comes out different. The two are the same reading by every key the
+// pipeline uses, which is why the distinct count does not move; they are not
+// the same object.
+//
+// This was tried once before and appeared to do nothing, because at the time
+// the fits were reading the raw ingestion from above the dedup entirely. With
+// that fixed, this is what keeps the result stable.
 const seenKey = new Map();
 const collisions = [];
 const unique = [];
+
+readings.sort((a, b) => (b.fromCorpus ? 1 : 0) - (a.fromCorpus ? 1 : 0));
 
 for (const r of readings) {
     const st = r.state;
@@ -1287,7 +1304,23 @@ function fitLineAnyOrder(ls, maxLevels) {
 // and kept 0.03 when fitLineAnyLevels was re-measured to 0.08, so the fitter
 // handling the hardest groups - the ones with non-parallel thresholds - was
 // held to a budget less than half the other's.
-const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.08));
+// 0.12, RE-MEASURED AGAIN after batch R1 added 380 readings sampled within
+// 0.03 of a fitted threshold. Those are the hardest readings in the file by
+// construction - a reading that close is decided by where the boundary sits to
+// three decimals - so they are also the noisiest for a line to absorb, and at
+// 0.08 they pushed groups off the line fitter and the band count from 38 to 91.
+//
+//   LINE_SLACK   bands   clean   within 1"   flagged   five-fold holdout
+//      0.08        91    97.9%     99.5%      84.7%        91.9%
+//      0.12        38    97.9%     99.3%      85.0%        92.1%
+//      0.16        38    97.0%     99.5%      85.3%          -
+//      0.20        21    97.4%     99.5%      85.3%          -
+//
+// 0.12 keeps the accuracy with less than half the bands and is better on the
+// holdout. The knob has now been re-measured twice, both times because the
+// data underneath it changed - which is the point: it is a fraction of what a
+// group holds, so it is not a constant of the problem.
+const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.12));
 
 function fitThreshold(rows, above) {
     let best = null;

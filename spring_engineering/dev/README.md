@@ -909,3 +909,45 @@ file. Emphasising them helped, by accident, and unrepeatably.
 reproduced from what is committed is not an accuracy, it is a coincidence, and
 every measurement stacked on top of it inherits the problem. The numbers quoted
 from here are reproducible.
+
+## Refining the boundaries, not the shape (batch R1, 2026-10-06)
+
+A fraction walk covers frac in twentieths, which finds the SHAPE of a group's
+rule. What was left wrong after four of them was not shape but PLACEMENT. Of
+the ten remaining clean misses, measured against the thresholds their own
+groups use:
+
+    8 of 10 sat within 0.025 of a threshold
+    6 of 10 sat within 0.007
+
+A reading that close is decided by where the boundary lies to three decimals,
+and a bucket 0.05 wide cannot say. So dev/frac-refine.mjs reads the thresholds
+out of the shipped table, works out where each falls for the integer part a
+candidate lands on - they move with it - and keeps only candidates within 0.03
+of one, bucketed at 0.0025. 1659 such candidates found, 19171 discarded as too
+far.
+
+These are the hardest readings in the file by construction: they scored 75.2%
+before import, against 97.7% overall.
+
+    clean length 97.7% -> 97.9%     within 1" 99.1% -> 99.3%
+    clean misses 10 -> 9, and the largest failing group cleared outright
+    (0.2625/0.2253 at two springs, 3 misses -> 0)
+
+LINE_SLACK needed re-measuring a second time, to 0.12. Boundary readings are
+the noisiest for a line to absorb, so at 0.08 they pushed groups off the line
+fitter and doubled the band count, 38 to 91. At 0.12 the accuracy holds with 38
+bands and the holdout prefers it, 91.9% to 92.1%. The knob is a fraction of
+what a group holds, so it is not a constant of the problem - it wants
+re-measuring whenever the data underneath it changes.
+
+### And the corpus has to win the dedup
+
+Importing R1 broke reproducibility again, for the reason the corpus-first sort
+was written to prevent: pulls are read first, so a reading held in both places
+is represented by its PULL copy, and once that pull is lost to a rebuild the
+corpus copy takes over and the fit differs. The sort was tried earlier and
+appeared to do nothing, because at that time the fits were reading the raw
+ingestion from above the dedup entirely. With that fixed, the sort is what
+keeps the result stable - and it is verified the same way: derive with the
+pulls, derive without, compare the files.
