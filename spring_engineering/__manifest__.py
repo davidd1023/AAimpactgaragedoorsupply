@@ -3,7 +3,13 @@
     # Odoo's convention is <series>.<major>.<minor>.<patch>. It was a bare
     # '1.0', which tells a deployment nothing about which series it belongs to
     # and never changes, so an upgrade had no version to compare against.
-    'version': '19.0.1.1.0',
+    # BUMPED WHENEVER A DATA FILE CHANGES, which is what this number is for.
+    # Code on disk - controllers, routes, assets - is live as soon as the
+    # workers restart. Records in 'data' only load when the module is UPDATED
+    # in that database. Adding product_custom_spring without moving the version
+    # left branches where /spring-calculator/add-to-cart answered "the spring
+    # product is missing", because the route was there and the record was not.
+    'version': '19.0.1.2.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
