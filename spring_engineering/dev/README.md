@@ -951,3 +951,36 @@ appeared to do nothing, because at that time the fits were reading the raw
 ingestion from above the dedup entirely. With that fixed, the sort is what
 keeps the result stable - and it is verified the same way: derive with the
 pulls, derive without, compare the files.
+
+## Best fit wins, not first fit (2026-10-06)
+
+The last three misses in one group turned on a detail of how the split fitter
+chose between forms. 0.273/0.2253 at two springs is two regimes of three levels
+each, split near floor 20:
+
+    floors 10-19   0 low and middle, 1.25 at 0.76-0.95, 1 above 0.91
+    floors 20+     0.25 below ~0.08, 0 in the middle, 1.25 above ~0.76
+
+On the upper side the low threshold CLIMBS with the integer part - 0.01 at
+floor 20, 0.11 by 26 - while the high one sits flat near 0.76. Two changes were
+needed:
+
+  A SPLIT'S SIDES MAY USE INDEPENDENT SLOPES. fitSplit could only hand its
+  sides the shared-slope fitter, so a regime whose thresholds move apart could
+  not be placed at all.
+
+  AND THE BEST-FITTING FORM HAS TO WIN. Adding that was not enough, because the
+  sides were taking the FIRST form that came inside the slack - so a shared
+  slope still won, producing `b: 0.014` shared between both thresholds, which
+  drags the high one from 0.65 at floor 20 to 0.73 by 26 against readings that
+  put it flat near 0.76 throughout. The forms are now listed simplest first and
+  a later one must be STRICTLY better to displace an earlier one, so nothing
+  gains freedom it has not paid for.
+
+    clean length 97.9% -> 98.6%     within 1" 99.3% -> 99.5%
+    clean misses 9 -> 6, and that group 3 -> 0
+    five-fold holdout 92.1% -> 92.2%, on a population 380 readings harder
+
+What is left is six misses, one apiece in six groups, three of which have four
+or fewer external readings between them - at that point the samples cannot
+distinguish a model fault from a single awkward door.

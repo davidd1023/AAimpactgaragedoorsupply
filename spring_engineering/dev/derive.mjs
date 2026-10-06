@@ -884,7 +884,44 @@ function fitSplit(ls) {
     // split is still cross-validated against the bands below - a three-level
     // side only survives if the split as a whole predicts better out of
     // sample than the band table it would replace.
-    const sideLine = (rows) => fitLineAnyOrder(rows, 2) || fitLineAnyOrder(rows, 3);
+    // A SIDE MAY ALSO NEED ITS THRESHOLDS ON SEPARATE SLOPES. Two preferred,
+    // then three sharing a slope, then three on their own.
+    //
+    // 0.273/0.2253 at two springs is the case that wanted the last option. It
+    // is two regimes of three levels each, split near floor 20:
+    //
+    //   floors 10-19   0 low and middle, 1.25 at 0.76-0.95, 1 above 0.91
+    //   floors 20+     0.25 below ~0.08, 0 in the middle, 1.25 above ~0.76
+    //
+    // On the upper side the low threshold CLIMBS with the integer part - 0.01
+    // at floor 20, 0.11 by 26 - while the high one sits flat near 0.76. Forced
+    // to share a slope neither can be placed, no split was viable, and the
+    // group kept a band table while its misses piled up at floors 16 to 23,
+    // right where the regimes meet.
+    // BEST FIT WINS, SIMPLEST ON A TIE - not whichever was tried first.
+    //
+    // Taking the first form that fitted meant a shared slope beat independent
+    // ones whenever it merely came inside the slack, even where the data says
+    // the thresholds move apart. On the upper regime of 0.273/0.2253 at two
+    // springs that produced `b: 0.014` shared between both thresholds, which
+    // drags the high one from 0.65 at floor 20 to 0.73 by floor 26 when the
+    // readings put it flat near 0.76 throughout.
+    //
+    // The forms are listed simplest first and a later one has to be STRICTLY
+    // better to displace an earlier one, so nothing gains freedom it does not
+    // pay for.
+    const sideLine = (rows) => {
+        let best = null;
+
+        for (const cand of [fitLineAnyOrder(rows, 2), fitLineAnyOrder(rows, 3),
+                            fitLineOwnSlopes(rows, 3)]) {
+            if (cand && (!best || cand.bad < best.bad)) {
+                best = cand;
+            }
+        }
+
+        return best;
+    };
 
     const floors = [...new Set(ls.map((l) => Math.floor(l.active)))]
         .sort((x, y) => x - y);
@@ -1186,6 +1223,9 @@ function fitLineAnyLevels(ls, maxLevels) {
     }
 
     const out = {
+        // Carried so callers can compare competing forms on fit rather than on
+        // which was tried first. install.py's line_src never reads it.
+        bad: best.bad,
         a: Number(best.a[0].toFixed(5)),
         b: Number(best.b.toFixed(5)),
         lo: vals[0],
@@ -1412,8 +1452,6 @@ function fitLineOwnSlopes(ls, maxLevels) {
     if (!best || best.bad > budget) {
         return null;
     }
-
-    delete best.bad;
 
     return best;
 }
