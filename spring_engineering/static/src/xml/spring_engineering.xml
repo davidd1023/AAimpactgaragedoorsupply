@@ -148,10 +148,16 @@
                     <!-- DUPLEX / TRIPLEX -->
                     <t t-if="state.assembly === 'Duplex'">
 
+                    <!-- ONE PAIR, because one pair is calibrated. Every reference
+                         reading behind this model is 3 3/4" inside 6", and the three
+                         sizes that used to be listed here were all wrong: the
+                         reference puts 2 5/8" inside 5 1/4" at 15"/16" where we said
+                         17"/18", and gives the Raynor pair a different wire size
+                         altogether (0.25/0.207 against our 0.2625/0.1875), so the
+                         alias that mapped Raynor and Overhead onto it was wrong too.
+                         The owner confirms only this pair is sold. Do not add one
+                         back without calibrating it - see dev/README.md. -->
                     <option value='3 3/4" inside 6"'>3 3/4" inside 6"</option>
-                    <option value='2 5/8" inside 5 1/4"'>2 5/8" inside 5 1/4"</option>
-                    <option value='3 1/2" inside 5 1/2" (Raynor)'>3 1/2" inside 5 1/2" (Raynor)</option>
-                    <option value='3 3/8" inside 5 7/8" (Overhead)'>3 3/8" inside 5 7/8" (Overhead)</option>
 
                     </t>
 

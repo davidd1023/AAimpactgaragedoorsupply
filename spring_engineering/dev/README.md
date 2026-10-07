@@ -2255,3 +2255,59 @@ data in a group changes nothing, and the per-group model class has been pushed a
 far as its own cross-validation allows. **Finding the term sMult stands in for is
 the only route left that could move accuracy by more than noise**, and it needs an
 idea about the mechanism rather than more readings.
+
+## The end-coil term, and why it is kept despite the draws (2026-10-07)
+
+**The single-spring formula was missing its end coils, and the Duplex path still
+was.** A torsion spring's rate uses its ACTIVE coils; the coils seated in the cone
+at each end do not flex, so the wound length is the active length plus `e*d`, with
+`e = 5` for an ID at or under 4.5" and `3` above. Those constants were already in
+the file, used by the Single path only.
+
+Verified against the reference's own figures on 477 single-spring readings:
+
+| predicting a single spring's length | mean error | sd | worst |
+|---|---|---|---|
+| `divider/IPPT` alone | **+1.235"** | 0.354" | 2.447" |
+| `+ e*d`, with the 5/3 rule by ID | **-0.001"** | **0.073"** | 0.141" |
+
+A flat `e` is worse at every value tried (3, 4, 5, 6), so the split by ID is the
+reference's rule and not a parameter chosen here.
+
+For a nested pair the two springs share the shaft and turn together, so their RATES
+add - but each rate is over its own active length, and the two differ by more than
+the inch their wound lengths do, because they lose different amounts to their ends:
+
+    A/a_outer + B/a_inner = TIPPT / springs
+    a_outer = a_inner + 1 + e_inner*d_inner - e_outer*d_outer
+
+a quadratic in `a_inner`. Summing the dividers over one shared length - what this
+model did - is that equation with every end coil zeroed. On 6,454 readings the
+omission biases predicted TIPPT by **-3.39%**; with the end coils it is +0.69%.
+That is most of what the comment beside `sMult` meant by "the computed stiffness is
+wrong by up to 4.6%" - 4.6% is what `e*d` comes to.
+
+### The measurements disagree, and that is reported rather than resolved
+
+| | |
+|---|---|
+| five-fold holdout, fixed population | 90.554% -> **90.890%** (+26 readings) |
+| sMult spread across rungs | 1.512% -> 1.473%, rungs within 0.1% of 1.000: 9 -> 12 |
+| never-tuned draws, PAIRED | 5 fixed, 7 broken, **net -2**, p = 0.774 |
+| seed 61006 clean length | 95.4% -> 92.6% |
+| seed 20261007 clean length | 93.7% -> **95.4%** |
+
+The holdout gains 26 readings on 7,728 and is the better-powered measure; the two
+draws move 2.8 points in opposite directions and their paired difference is noise.
+**The never-tuned draws do not confirm this change.**
+
+It is kept, and the reasons are not statistical. It adds **no parameters** - `e` and
+the 4.5" threshold were already in the file. It is verified to 0.073" on 477
+readings elsewhere in the same model. And a term that is physically present cannot
+be "fitting" anything, which is the risk that made the sMult margin change wrong
+even though it sounded more principled. A correct base formula asks less of a fitted
+constant, and that matters most for the sparse rungs where `sMult` is least
+determined.
+
+What it does not do is close the gap. sMult still spreads 1.47% across rungs, so end
+coils are part of what it absorbs and not all of it.
