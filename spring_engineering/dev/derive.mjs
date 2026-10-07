@@ -214,6 +214,23 @@ for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).read
     // the pull file is on disk or not, which is the point of it.
     const noFit = r.fit === false;
 
+    // BOUNDARY-DENSE READINGS ARE FOR THE THRESHOLDS, NOT FOR THE STIFFNESS.
+    //
+    // A batch sampled deliberately NEXT to a fitted threshold is the right data
+    // for placing that threshold and the wrong data for fitting the rung's
+    // sMult, which every spring count of the rung shares. fitStiffness scores a
+    // COUNT of readings whose snapped length comes out right, and a reading
+    // sitting on a boundary is exactly the ambiguous kind - so a few hundred of
+    // them outvote the ordinary doors and drag the multiplier.
+    //
+    // Measured: adding 353 such readings moved sMult on their three rungs by up
+    // to 0.0073, which on a 30" active length is 0.22" - a fifth of an inch of
+    // fraction, applied to every door on the rung including spring counts the
+    // batch never touched. The holdout on a FIXED population went from 90.306%
+    // to 90.207% as a result. That is the whole mechanism by which R1 and P1
+    // "poisoned" the fit, and it is not about density being bad in itself.
+    const dense = r.dense === true;
+
     if ((r.state.springId || "").indexOf("3 3/4") !== 0) {
         continue;
     }
@@ -221,6 +238,7 @@ for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).read
     readings.push({
         fromCorpus: true,
         noFit,
+        dense,
         state: r.state,
         // Same hiLift marker the pull path sets. Without it the hi-lift
         // holdout below silently withholds nothing from this half of the
@@ -453,7 +471,7 @@ for (const r of readings) {
         springs * (divider(r.inner, 3.75) + divider(r.outer, 6)) / shownTippt;
 
     g.lens.push({
-        springs, rawActive, length: r.length,
+        springs, rawActive, length: r.length, dense: r.dense === true,
         active: rawActive,
         frac: rawActive - Math.floor(rawActive),
         bonus: Number((r.length - Math.floor(rawActive)).toFixed(2)),
@@ -472,10 +490,15 @@ for (const g of rungs.values()) {
         (l) => l.rawActive > 0 && l.length > 0 && l.length <= 120
     );
 
+    // The stiffness is fitted from ORDINARY doors only - see `dense` above. The
+    // boundary-dense readings stay in `g.lens` and so still reach the band and
+    // threshold fitters further down, which is the only place they belong.
+    const forStiffness = usable.filter((l) => !l.dense);
+
     g.sMult = 1;
 
-    if (usable.length >= 12) {
-        const fit = fitStiffness(usable);
+    if (forStiffness.length >= 12) {
+        const fit = fitStiffness(forStiffness);
 
         if (fit && fit.ok > 0) {
             g.sMult = Number(fit.m.toFixed(6));

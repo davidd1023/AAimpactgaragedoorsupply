@@ -1892,3 +1892,172 @@ A 175-reading subset cannot resolve a one-point change. Anything smaller than
 about three points on a single draw has to be checked paired, on the same
 readings, before it is believed - and ideally on two draws. Cheap to do, and it
 would have caught this a lot earlier.
+
+## Upstream error costs the length nothing, measured properly this time
+
+With two never-tuned draws there are 350 clean readings to ask this of, and the
+answer is unambiguous:
+
+| across both draws | |
+|---|---|
+| length misses with the rung right | 16 |
+| of those, with an EXACT TIPPT | **16** |
+| readings whose TIPPT is WRONG | 8 |
+| of those, length still right | **8** |
+
+So a wrong TIPPT costs the length **0% of the time**, and no length miss coincides
+with one. The D800-120 multiplier surface - 4.8% exact, worst error 1.7e-03, about
+twenty times what it takes to move a rounded TIPPT - **cannot be what is wrong
+with the lengths.** That lead is closed, now on twice the data that first
+suggested it.
+
+There is a reason, and it is a property of the margin objective worth naming.
+A threshold placed midway between the two readings that straddle it is as far from
+both as the data allows, so a small error in the active length moves a reading
+within its own slack rather than across a boundary. **Maximising the margin bought
+tolerance to upstream error**, not just better placement - which is why eight
+readings with the wrong TIPPT all still land on the right inch.
+
+## Where the thresholds are least pinned
+
+The margin is the uncertainty: the cut sits midway between the nearest reading
+either side, the true boundary is somewhere in that gap, and a new door landing
+inside it is a coin flip. So the expected number of new doors a group gets wrong
+is about `traffic x gap`, and both halves come from training data only - the
+corpus for the gap, the U1-U4 uniform batches for traffic. Nothing in this ranking
+touches either validation draw, which matters: the misses are KNOWN from those
+draws, and picking where to pull by looking at them would quietly spend the
+independence they are kept for.
+
+The ranking says something I did not expect. The worst groups are not the
+heavily-sampled ones:
+
+| group | corpus readings | gap |
+|---|---|---|
+| 0.49/0.3938 at 3 springs | 6 | 1.00 (unpinned) |
+| 0.4687/0.375 at 2 springs | 4 | 1.01 (unpinned) |
+| 0.283/0.2343 at 4 springs | 7 | 1.00 (unpinned) |
+| 0.3065/0.2437 at 4 springs | 38 | 0.16 |
+| 0.3065/0.2437 at 3 springs | 31 | 0.18 |
+
+A gap at the cap means no reading constrains that threshold at all within the
+range a fraction can occupy. **The model's weak spots are groups of two to seven
+readings**, not the ones with hundreds.
+
+### But a rare group is rare for both of us
+
+Generating candidates in the twelve worst groups returned **nothing for eight of
+them**: a random orderable door essentially never lands there. That is the same
+reason they have four readings in the corpus - and it also caps what pinning them
+is worth, because a door that never arrives cannot be got wrong. The
+`traffic x gap` ranking overstated them, since a traffic estimate built on two or
+three uniform readings is mostly noise and the gap had hit its cap.
+
+Re-aimed at the groups that do get traffic, five of them yielded 353 candidates
+within 0.06 of a threshold. Those five carry about 13 expected wrong doors per
+1,164 uniform readings - roughly 1% - which is the honest ceiling on this
+particular pull.
+
+## The three corpus flags, in one place
+
+A reading in `dev/corpus.json` can carry three flags, and they mean different
+things. They have each been explained where they arose, which is not where anyone
+looks for them.
+
+| flag | what it means | who ignores the reading |
+|---|---|---|
+| `flagged: true` | the reference answered with a message of its own | the LENGTH fit keeps the wire, drops the length |
+| `fit: false` | measured to make the model worse | every fitter; `dev/replay.mjs` still asserts it |
+| `dense: true` | sampled deliberately next to a fitted threshold | `fitStiffness` only |
+
+**All three keep the reading.** Nothing is deleted - `dev/replay.mjs` asserts every
+verified reading regardless, so a batch that is useless for fitting is still a
+regression test. That is deliberate: a reading is an hour of somebody's polling and
+a fact about the reference, whatever a fit currently makes of it.
+
+`dense` is the newest and the most specific. It is **not a judgement about
+quality** but about which fitter should see the data:
+
+- Right for placing a threshold. That is what the reading was sampled for.
+- Wrong for fitting `sMult`, which is per RUNG and shared by all four spring
+  counts, and which `fitStiffness` fits by maximising a COUNT of readings whose
+  snapped length comes out right. A boundary reading is the ambiguous kind, so a
+  few hundred of them outvote the ordinary doors.
+
+The numbers behind that: adding 353 boundary readings moved `sMult` on their three
+rungs by up to 0.0073, which is **0.22" of active length on a 30" spring** - a
+fifth of an inch of fraction, applied to every door on the rung including spring
+counts the batch never touched. On a population held fixed with `SCORE_EXCLUDE`,
+the holdout fell from 90.306% to 90.207% as a result.
+
+`dev/import.mjs --dense` sets it at import time. Pass it for anything
+`dev/frac-refine.mjs` generated.
+
+## Why boundary-dense data poisoned the fit, and what fixing it bought
+
+Two batches - R1 (380 readings, 2026-10-06) and P1 (353 readings, today) - were
+both sampled deliberately next to a fitted threshold, and both made the model
+worse. The second one was aimed much better than the first: at the CURRENT
+thresholds, in the five groups with the widest gaps and real traffic, tripling
+their density. On a population held fixed with `SCORE_EXCLUDE` it still cost 8
+readings, 90.306% to 90.207%.
+
+### The mechanism
+
+Not the thresholds. **The rung's shared stiffness.**
+
+`sMult` is fitted per RUNG and used by all four of its spring counts, and
+`fitStiffness` picks it by maximising a COUNT of readings whose snapped length
+comes out right. A reading sitting on a snap boundary is exactly the ambiguous
+kind, so a few hundred of them outvote the ordinary doors:
+
+| rung | sMult without P1 | with P1 |
+|---|---|---|
+| 0.3065/0.2437 | 0.98650 | **0.99375** |
+| 0.4218/0.3437 | 1.01350 | **1.02100** |
+| 0.283/0.2343 | 1.01550 | 1.01725 |
+
+0.0073 on a 30" active length is **0.22"** - a fifth of an inch of fraction,
+applied to every door on the rung including spring counts the batch never
+touched. Only the three targeted rungs moved; the other 47 were untouched. That
+is the whole transmission path.
+
+### The fix, and what it is worth
+
+Boundary-dense readings now carry `dense: true` and reach the band and threshold
+fitters but not `fitStiffness`. After it, none of the three P1 rungs' stiffness
+moves at all.
+
+| same 7,728 scored readings | |
+|---|---|
+| dense in the fit, thresholds only | **90.554%** |
+| dense out of the fit entirely | 90.515% |
+| dense in the fit, unprotected (measured earlier) | 90.207% |
+
+So protecting `sMult` turns -8 readings into +3, an eleven-reading swing that
+confirms the mechanism. **But +3 of 7,728 is nothing**, and on the two
+never-tuned draws clean length does not move at all (95.4% and 93.7%, both
+unchanged) while flagged goes -0.6 on one draw and +1.6 on the other. The honest
+summary is that boundary data is now **harmless rather than helpful**.
+
+It is kept anyway, for reasons that are not about today's points: 733 real
+readings re-enter the fit instead of being discarded, a sampling pattern that
+will recur is no longer a trap, and the direction is positive rather than
+negative. The ceiling was known before the pull - those five groups carry about 13
+expected wrong doors per 1,164 uniform readings, so even a perfect fix was worth
+about 1% - which is why this was measured on the holdout rather than on the draws
+that cannot resolve it.
+
+### What it says about the residual
+
+Threshold placement in one group does not limit accuracy on doors in other
+groups, and pinning a boundary does not transfer. 13 of 16 clean misses are
+placement errors, spread about one apiece across many groups, each wanting its
+own data. That is why the margin objective helped and more data does not:
+**margin extracts more from the readings a group already has**, while new readings
+only help the group they land in.
+
+Which also makes `fitStiffness` the obvious next target. It is still scoring a
+count, with plateaus, taking the lowest of a tie - the same three weaknesses the
+threshold fitters had before today, and the only remaining parameter that reaches
+every door on a rung rather than one group.
