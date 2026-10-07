@@ -98,6 +98,11 @@ for (let k = 0; k < COUNT; k++) {
         row.hiLift = between(12, maxHiLift);
     }
 
+    // STAMPED AS AN EVALUATION DRAW. dev/derive.mjs skips a pull whose
+    // FILENAME says eval, and a filename is easy to get wrong - this marker
+    // travels with the data instead, and dev/pull.mjs refuses to write such a
+    // draw to an output name the fitter would ingest.
+    row.eval = true;
     cases.push(row);
 }
 

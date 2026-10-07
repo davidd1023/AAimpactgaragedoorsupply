@@ -1815,3 +1815,80 @@ cap, the line budget - the corpus was fixed and the holdout was sound. The momen
 a change moves readings in or out of the fit, the holdout needs its population
 pinned with `SCORE_EXCLUDE`, or it will congratulate the change for fitting the
 data you just gave it.
+
+## A second yardstick, and what it says about this session (2026-10-07)
+
+`dev/eval-validation2-seed20261007.json` is a second 380-reading uniform draw
+from the allowed box, pulled after every change below was already made, so
+nothing has been tuned against it. 360 of the 380 returned an answer; 20 were
+lost to non-JSON responses, spread evenly through the pull rather than clustered,
+so not a session expiry.
+
+The two draws are closely matched - both 175 clean readings, 187 against 185
+flagged, same width spread - which makes them directly comparable:
+
+| | seed 61006 | seed 20261007 |
+|---|---|---|
+| clean length | 95.4% | **93.7%** |
+| clean within 1" | 98.9% | 98.3% |
+| flagged length | 76.5% | **80.0%** |
+
+**The first thing it bought was a correction.** A 1.7-point gap between two draws
+of the same model, on 175 readings each, is 0.7 standard errors of the difference
+- the draws agree. But it means the sampling error on a figure like this is about
+**±1.7 points**, which is the same size as everything claimed this session. The
+95.4% that has been quoted all day is the luckier of two draws; the honest central
+estimate is **94.5%**.
+
+### So the session's gain was measured properly, paired
+
+Across-sample comparison is the wrong instrument. The right one is the same
+readings scored by both models, which removes the sampling error entirely:
+
+| 350 clean readings, both draws | |
+|---|---|
+| fixed by this session's changes | 10 |
+| broken by them | 6 |
+| net | **+4** |
+| before / after | 93.43% / 94.57% |
+| 16 discordant pairs, two-sided exact | **p = 0.454** |
+
+And on the flagged half:
+
+| 372 flagged readings, both draws | |
+|---|---|
+| fixed | 14 |
+| broken | 8 |
+| net | **+6** |
+| before / after | 76.61% / 78.23% |
+| 22 discordant pairs, two-sided exact | **p = 0.286** |
+
+Pooled: 24 fixed, 14 broken, 38 discordant, **p = 0.143**.
+
+**The accuracy gain from this session is not statistically demonstrated.** Ten
+fixed against six broken is what noise looks like. The direction is consistent
+across clean and flagged and across both draws, and pooling gets p to 0.14, which
+is suggestive and no more. "93.7% to 95.4%, everything moved together" was a
+single draw being read far too confidently, and the honest statement is **+10
+readings in 722 at p = 0.14**.
+
+### What does survive
+
+- **The five-fold holdout**, 89.63% to 90.31%, is about +55 readings on ~8,100 at
+  a fixed corpus. Far better powered than any of the above. It measures a
+  different population - the corpus is mostly targeted batches rather than
+  uniform draws - so it does not transfer directly to a quoted door, but it is
+  real.
+- **The model is smaller**: 48 bands to 31. That is structural and needs no
+  statistics.
+- **The degeneracy fix.** 16 of 136 lines sitting on the scan bound was a defect
+  whether or not removing it moved a score.
+- **The instruments.** Three measurement bugs found and fixed, two of which had
+  been silently wrong for a while.
+
+### The rule
+
+A 175-reading subset cannot resolve a one-point change. Anything smaller than
+about three points on a single draw has to be checked paired, on the same
+readings, before it is believed - and ideally on two draws. Cheap to do, and it
+would have caught this a lot earlier.
