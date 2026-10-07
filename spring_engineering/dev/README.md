@@ -1670,3 +1670,90 @@ validation figure is the one quoted.
 Better out of sample on every measure, and a smaller model. Nothing here changed
 the physics: it was all in how a threshold is placed and when a group is allowed
 to memorise instead.
+
+## The bonus is not inch + quarter (refuted 2026-10-07)
+
+The length bonus takes values in {0, 0.25, 1, 1.25} plus a few negatives, and 134
+of 142 fitted level sets are expressible as `inch (0 or 1) + quarter (0 or 0.25)`.
+The model treats them as an ORDERED STACK and fits one threshold per boundary. If
+they were instead two INDEPENDENT decisions, each with its own threshold, the
+model could predict a combination it had never observed - which is exactly the
+failure in 3 of the 16 remaining clean misses, where the rule cannot produce the
+level the reference used.
+
+Tested by five-fold cross-validation within each group, on corpus readings only,
+so neither the holdout nor the validation sample paid for the answer.
+
+| | ordered levels | inch + quarter |
+|---|---|---|
+| all groups, 4495 readings | **93.73%** | 91.72% |
+| 1 spring | **98.00%** | 96.59% |
+| 2 springs | **86.97%** | 84.98% |
+| 3 springs | **94.55%** | 91.48% |
+| 4 springs | **95.78%** | 92.47% |
+
+Worse everywhere, by 2 points. **The diagnosis is the useful part.** 103 of 142
+groups have a CONSTANT quarter - one spring is always whole inches, three and four
+always whole plus a quarter - so for those the sum form fits a second threshold
+against a classification with only one class in it. That cut lands at an arbitrary
+end of the data and then fires on a reading it never saw, inventing a quarter inch
+from nothing. A free parameter that cannot help can only hurt.
+
+Rescoped to the 38 groups whose quarter actually varies, all of them at two
+springs, it is still worse: **77.95% against 76.65%**, ten readings over 771. So
+the decomposition is refuted rather than merely mis-applied: the inch and the
+quarter are not independent decisions.
+
+Worth keeping from the attempt: those quarter-varying two-spring groups score
+**78%** in within-group cross-validation against 94% for everything else. They are
+the hardest part of the model by a wide margin, and they are hard because two
+springs is the only count that has to choose a quarter at all.
+
+## The slope grid is fine enough, and R1 comes back in (2026-10-07)
+
+Two follow-ups to the margin objective, one negative and one that reverses an
+earlier decision.
+
+### A finer slope grid buys nothing
+
+The threshold slope is scanned in steps of 0.0005. With margin as the objective
+a finer grid could in principle find a slope with more room, so the step was
+halved over the same range: **90.28% against 90.31%** on the five-fold holdout.
+No gain, so the grid stays at 2000 steps. It is now a single named constant
+shared by both fitters rather than a literal written twice, because a slope one
+fitter can express and the other cannot would make the choice between their forms
+depend on the grid rather than on the fit.
+
+### R1 was excluded because of the fitter, not because of the data
+
+Batch R1 is 380 readings chosen BECAUSE they land within 0.03 of a threshold the
+model already used - the densest possible concentration at the boundaries. It was
+held out on 2026-10-06 after costing a point of clean accuracy, under the heading
+"dense is not diverse".
+
+**That reasoning was about an objective that no longer exists.** The fitter then
+minimised a COUNT of misclassified readings, and over-weighting one region really
+does drag such a fit toward it. It now maximises the MARGIN of the threshold,
+which depends only on the two readings either side of the cut - and readings
+placed deliberately at a boundary are precisely what pins that down. So the
+exclusion was re-measured rather than inherited:
+
+| | R1 held out | R1 fitted |
+|---|---|---|
+| five-fold holdout | 90.31% | **90.49%** |
+| validation clean length | 95.4% | 95.4% |
+| validation clean within 1" | 98.9% | 98.9% |
+| validation flagged length | **76.5%** | 75.9% |
+| tuned-sample clean length | 97.9% | **98.6%** |
+| bands / lines | 31 / 128 | 31 / 128 |
+
+Including it now costs **nothing** on the figure that matters, where before it
+cost a point. The holdout prefers it by 15 readings, the tuned samples by 0.7,
+the never-tuned clean figure does not move, and never-tuned flagged loses a
+single reading. The model is the same size either way. It is fitted again.
+
+The result worth keeping is not the 0.18 points. It is that **"dense is not
+diverse" was a statement about the fitter's objective and not about the data** -
+the same readings that were poison to a count-minimising fit are neutral-to-useful
+to a margin-maximising one. A batch held out for a measured reason deserves
+re-measuring whenever the reason changes.

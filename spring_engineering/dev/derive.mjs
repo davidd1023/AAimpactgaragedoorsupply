@@ -709,6 +709,15 @@ const contradictions = [];
 const overfit = [];
 const MAX_BANDS = Number(process.env.MAX_BANDS || 64);
 
+// HOW FINELY THE THRESHOLD SLOPE IS SCANNED. b runs over +-BLO/B_STEPS in steps
+// of 1/B_STEPS, so 2000 is a step of 0.0005 over a range of +-0.25.
+//
+// It is a shared constant rather than two copies of a literal because the two
+// fitters have to agree: a slope one of them can express and the other cannot
+// would make the choice between their forms depend on the grid rather than on
+// the fit.
+const B_STEPS = Number(process.env.B_STEPS || 2000);
+
 
 // For each rung AND spring count, derive the bonus as a piecewise-constant
 // function of frac(active).
@@ -1173,7 +1182,7 @@ function fitLineAnyLevels(ls, maxLevels) {
     // 0.173 and 0.281 at floor 11, between 0.056 and 0.204 at 13, and below
     // 0.048 by 19: a slope near -0.045.
     for (let bi = Number(process.env.BLO || -500); bi <= Number(process.env.BHI || 500); bi += 1) {
-        const b = bi / 2000;
+        const b = bi / B_STEPS;
         const sorted = pts
             .map((p) => ({ u: p.t - b * p.F, c: p.c }))
             .sort((x, y) => x.u - y.u);
@@ -1510,7 +1519,7 @@ function fitThreshold(rows, above) {
     let best = null;
 
     for (let bi = Number(process.env.BLO || -500); bi <= Number(process.env.BHI || 500); bi += 1) {
-        const b = bi / 2000;
+        const b = bi / B_STEPS;
         const pts = rows
             .map((r) => ({ u: (r.active - Math.floor(r.active)) - b * Math.floor(r.active), hi: above(r) }))
             .sort((x, y) => x.u - y.u);
