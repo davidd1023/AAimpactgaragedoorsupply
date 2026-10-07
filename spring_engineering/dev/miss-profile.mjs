@@ -12,12 +12,12 @@
 // reference quotes without complaint, which are the ones that get ordered.
 import { load, make } from "./harness.mjs";
 import { readFileSync, readdirSync } from "node:fs";
+import { stateFromReading } from "./ref-state.mjs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const mod = await load();
-const REF_RADIUS = { 10: "LHR", 12: "12", 15: "15" };
 const wantTargets = process.argv.includes("--targets");
 const nTargets = Number(process.argv[process.argv.indexOf("--targets") + 1]) || 11;
 const g = new Map();
@@ -42,14 +42,7 @@ for (const f of readdirSync(HERE).filter((x) => /^eval.*\.json$/.test(x))) {
         if (msgs.length || r.status !== "success") continue;
 
         const hi = i.lift === "HiLift" || i.lift === "Hi-Lift";
-        const c = make(mod, {
-            assembly: "Duplex", drum: i.drum, springId: '3 3/4" inside 6"',
-            springs: i.springs, radius: REF_RADIUS[Number(i.radius)] ?? String(i.radius),
-            ...(hi ? { liftType: "Hi-Lift", liftin: String(i.hiLift) } : {}),
-            cycles: Number(i.cycles).toLocaleString("en-US"), weight: String(i.weight),
-            doorWidthFeet: 18, doorHeightFeet: Math.floor(i.heightInches / 12),
-            doorHeightInches: i.heightInches % 12,
-        });
+        const c = make(mod, stateFromReading(i));
         const s = c.duplexStep;
 
         if (!s) continue;

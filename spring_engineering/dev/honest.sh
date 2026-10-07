@@ -4,32 +4,52 @@
 #
 #   sh dev/honest.sh
 #
-# IN SAMPLE is what the fitter reproduces of what it was shown. EXTERNAL is two
-# independent uniform draws from the allowed box that have never entered the
-# fit - that is the figure that predicts a door nobody has quoted yet. The gap
-# between them is the overfitting, and it is large: do not quote the first
-# number alone.
+# THE ORDER OF THIS OUTPUT IS THE POINT. It runs from the figure that predicts
+# a door nobody has quoted yet to the figure that only says the fitter
+# remembers what it was shown:
+#
+#   1. VALIDATION - a uniform draw taken after the last knob was tuned. No
+#      choice in this repository has been made against it. This is the number
+#      to quote, and it is the lowest.
+#   2. TUNED SAMPLES - uniform draws too, but LINE_SLACK (twice), LEVEL_SUPPORT
+#      and SPLIT_MIN_SIDE were all set against them, which makes them partly
+#      in-sample for those knobs. They read several points high for that
+#      reason, not because the model is better than section 1 says.
+#   3. IN SAMPLE - what the fitter reproduces of its own training data. It
+#      says nothing about a new door; it is here to catch a regression.
+#
+# This script used to lead with section 3 and leave section 1 out, which is
+# how 98.6% got quoted for a model that was really at 90%.
 set -e
 cd "$(dirname "$0")/.."
 
-echo "IN SAMPLE"
-node dev/replay.mjs 2>&1 | grep -E "byte-identical|verified reading|^  FAIL" | grep -v "^  FAIL" | sed 's/^/  /'
-printf "  invariants: %s/16\n" "$(node dev/replay.mjs 2>&1 | grep -c '^  PASS')"
+VALIDATION=dev/eval-validation-seed61006.json
+
+echo "VALIDATION - never tuned against, this is the figure to quote"
+if [ -f "$VALIDATION" ]; then
+    node dev/clean-cases.mjs "$VALIDATION" 2>&1 | head -2 | sed 's/^/  /'
+else
+    echo "  $VALIDATION is missing - there is no honest figure without it" >&2
+    exit 1
+fi
 
 echo ""
-echo "EXTERNAL - uniform draws from the allowed box, never fitted"
-printf "  %-30s %s\n" "sample" "n     wire     length   within 1\""
-for f in dev/eval-rand-seed777001.json dev/eval-soft2-spread.json dev/eval-clean.json; do
-    [ -f "$f" ] || continue
-    printf "  %-30s %s\n" "$(basename "$f" .json)" \
-        "$(node dev/realistic.mjs "$f" 2>&1 | tail -1 | sed 's/everything in the allowed box *//')"
-done
-
-echo ""
-echo "CLEAN vs FLAGGED - the readings the reference answers without a message"
-echo "are the ones that get ordered, so they are scored on their own"
+echo "TUNED SAMPLES - knobs were set against these, so they read high"
 node dev/clean-cases.mjs dev/eval-rand-seed777001.json dev/eval-soft2-spread.json \
     dev/eval-clean.json 2>&1 | head -2 | sed 's/^/  /'
+
+echo ""
+echo "IN SAMPLE - the fitter's own training data, for regressions only"
+# One run, reused: dev/replay.mjs walks 8000 readings and is the slow part.
+REPLAY=$(node dev/replay.mjs 2>&1 || true)
+printf '%s\n' "$REPLAY" | grep -E "byte-identical|verified reading|not asserted" | sed 's/^/  /'
+# The invariant total is READ FROM THE SUITE, not written down here. It was
+# hardcoded as /16 and silently stopped matching the moment a seventeenth was
+# added. Counting FAIL lines instead does not work either - the corpus section
+# prints its own, and they outnumber these by a hundred to one.
+printf "  invariants: %s/%s\n" \
+    "$(printf '%s\n' "$REPLAY" | grep -c '^  PASS')" \
+    "$(node --input-type=module -e 'import { INVARIANTS } from "./dev/invariants.mjs"; console.log(INVARIANTS.length);')"
 
 echo ""
 echo "SINGLE - external random draw, the reference's own wire fed back"

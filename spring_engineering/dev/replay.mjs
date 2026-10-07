@@ -185,7 +185,29 @@ function runCorpus(mod) {
         return l === undefined || (l > 0 && l <= 120);
     };
 
+    // A DRUM THE MODULE DOES NOT OFFER CANNOT BE REPRODUCED, AND SAYING SO IS
+    // NOT THE SAME AS PASSING.
+    //
+    // The reference's drum-list carries 79 standard and 70 hi-lift drums; this
+    // module offers six, because those are the six that get sold. A reading
+    // taken on one of the others is still useful data - it is how the drum
+    // record's limits were confirmed - but asserting it is asserting that we
+    // model a drum we have deliberately not modelled, and it fails forever.
+    // That is the same reasoning as the 120" limit above: a section that is
+    // always red hides the regression it exists to catch. These are counted
+    // and named instead, so the choice stays visible rather than becoming a
+    // silent exclusion.
+    const OFFERED = new Set([...Object.keys(mod.DRUMS), ...Object.keys(mod.HILIFT_DRUMS)]);
+    const unmodelledDrums = new Map();
+
     for (const reading of usable) {
+        const drum = reading.state?.drum;
+
+        if (drum && !OFFERED.has(drum)) {
+            unmodelledDrums.set(drum, (unmodelledDrums.get(drum) ?? 0) + 1);
+            continue;
+        }
+
         const component = make(mod, reading.state);
         const inRange = buildable(reading);
         let ok = true;
@@ -221,10 +243,20 @@ function runCorpus(mod) {
         .map(([status, n]) => `${n} ${status}`)
         .join(", ");
 
+    const skipped = [...unmodelledDrums.values()].reduce((a, b) => a + b, 0);
+    const asserted = usable.length - skipped;
+
     console.log(
-        `  ${usable.length - failedReadings}/${usable.length} verified reading(s) reproduced` +
+        `  ${asserted - failedReadings}/${asserted} verified reading(s) reproduced` +
         (extra ? `  (plus ${extra} - not asserted)` : "")
     );
+
+    if (skipped) {
+        console.log(
+            `  ${skipped} not asserted at all: taken on a drum this module does not ` +
+            `offer (${[...unmodelledDrums].map(([d, n]) => `${d} x${n}`).join(", ")})`
+        );
+    }
 
     if (outOfRange) {
         console.log(

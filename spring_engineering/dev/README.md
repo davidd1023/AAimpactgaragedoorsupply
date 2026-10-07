@@ -1149,3 +1149,120 @@ disk or absent, which is what the flag was for. The warning in the previous
 commit - that the pulls had to stay out of dev/ - was right about the symptom
 and wrong about the cause: it was not that the pull path ignores the flag, it
 was that the corpus path was removing its own ability to win.
+
+## Four measurement fixes, and two leads that measured out (2026-10-07)
+
+No accuracy change this round. Validation clean length is still 93.7%, and
+everything below is either a tool that was lying or a lead that was followed
+until the data said to stop.
+
+### A diagnostic that invented its own inputs read 60% where the truth was 94%
+
+A new tool to compare our multiplier, turns and TIPPT against the reference's
+reported values put clean length at 60.3%, with standard lift at 34% and
+hi-lift at 91%. That shape is exactly what a real bug localised to the standard
+path would look like, and chasing it would have been hours.
+
+The tool was wrong. It carried its own copy of the reading-to-state mapping,
+written from memory, and mapped a track radius of 12 to `'12"'` where the
+component wants `"12"`. An unrecognised radius falls back to a default instead
+of failing, and the radius only matters on standard lift - so a typo in the
+harness produced a perfectly plausible, perfectly localised fake defect.
+
+It was caught by comparing against `dev/clean-cases.mjs`, which already
+reported 93.7% on the same file. **A new tool that measures a number an
+existing tool already reports gets checked against it before anything it says
+is believed.** Four copies of that mapping existed, and they disagreed about
+the door width too, so the mapping now lives once in `dev/ref-state.mjs` and
+the three scorers import it. Their output is byte-identical after the move,
+which is the point: the refactor was verified to change no measurement.
+
+### The multiplier surface is genuinely poor on one drum, and it costs nothing
+
+`dev/mult-survey.mjs` scores the drum multiplier against every reading that
+reports one - including flagged ones, since a flag is about the spring chosen
+and not the drum arithmetic, which roughly doubles the data:
+
+| drum | n | exact | over 1e-5 | worst |
+|---|---|---|---|---|
+| D800-120 hi-lift | 375 | **4.8%** | 178 | **-1.66e-03** |
+| 525-54HL hi-lift | 264 | 31.1% | 80 | 2.65e-04 |
+| 575-120 hi-lift | 350 | 69.1% | 8 | -2.50e-05 |
+| D525-216 standard | 325 | 68.9% | 6 | 1.00e-05 |
+| D400-144 standard | 182 | 59.3% | 0 | 1.00e-06 |
+| D400-96 standard | 49 | 79.6% | 0 | -1.00e-06 |
+
+A 1.7e-03 error is about twenty times what it takes to flip a TIPPT rounding
+and with it a whole inch of spring, so the D800-120 looks like the obvious
+next fix. **It is not.** On the validation sample all ten clean length misses
+with the right rung have an exactly correct multiplier, turns and TIPPT; the
+six that differ upstream do so only in turns, which the length does not use.
+Repairing the surface would move nothing measurable. It is a real inaccuracy
+with no present consequence - recorded, not fitted.
+
+Two of that table's original rows were artefacts of the tool rather than the
+model: a 20" track radius and a drum we do not offer contributed an apparent
+8.6e-02 error, and reading a 54" drum at 90" of hi-lift contributed 6.7e-03.
+The survey now excludes what the module does not offer and anything past a
+drum's own rating, because scoring a deliberate refusal measures the refusal.
+
+### The reference tolerates a cycle shortfall - and that still does not fix it
+
+We raise `duplex-cycles-low` on 390 readings the reference passes and agree on
+173: crying wolf two to one. The note beside that warning says no threshold
+separates the reference's warned readings from its quiet ones, which is true
+of **our** computed count. Measured against the count the reference itself
+reports, the rule is almost exact (`dev/cycle-rule.mjs`):
+
+| rule | false alarms | missed |
+|---|---|---|
+| reported < target | 327 | 0 |
+| reported <= 0.95 x target | 2 | 0 |
+| **reported <= 0.90 x target** | **0** | **0** |
+| reported <= 0.85 x target | 0 | 177 |
+
+So it is not "below target" - it accepts roughly a 10% shortfall. But the rule
+is far less pinned than that table suggests, and the tool now says so: all 177
+warned readings are the **same target at the same ratio**, 10,000 at 0.9000.
+The lowest ratio it stays quiet at is 0.9333. The tolerance is therefore
+bracketed to (0.9000, 0.9333] and no tighter, and one warned reading at any
+other target would settle it.
+
+Knowing the rule does not let us apply it, which is the real finding. The rule
+takes the reference's own cycle count, and ours is 2.6% out at a 10,000 target
+against 0.17% at 300,000 - an error that shrinks with the target, which is the
+signature of the reference's 1000-cycle quantisation and not of our model. The
+warning stays a caution.
+
+### Floor or round: 86% of residuals land in [0, 1000) and that proves nothing
+
+`ours - reported` falls in [0, 1000) for 86% of readings, which is what
+flooring to 1000 looks like. It is equally what rounding to 1000 looks like if
+our own count runs about 500 high, and the two cannot be told apart from
+pulled data: a multiplicative bias in our cycle law shifts every step point
+together. A weight sweep over one fixed spring was tried for this and could
+not resolve it either - the step points are only located to within a pound,
+about 160 cycles here, which is the same size as the thing being measured.
+Settling it needs a configuration whose exact cycle life is known independently
+of our cycle law. Our displayed figure still rounds, unchanged, because
+changing it on this evidence would be a guess.
+
+### Two things the suite was reporting wrongly
+
+**`dev/honest.sh` led with the wrong number.** It printed in-sample first and
+left the never-tuned validation sample out entirely - which is how 98.6% came
+to be quoted for a model that was really at 90%. It now runs validation first,
+labels the older samples as tuned-against, and reads the invariant total from
+the suite instead of the hardcoded `/16` that stopped matching when a
+seventeenth invariant was added.
+
+**The corpus asserted a drum we deliberately do not model.** One D800-312
+reading could never pass, so the accuracy section was permanently red for a
+reason that was not a regression - the same trap the 120" limit already had a
+rule for. It is now named and not asserted.
+
+**`dev/eval-sample.mjs` could destroy the yardstick.** It is a generator, and
+run with one argument it silently overwrote its target with a fresh seedless
+draw of inputs. It did exactly that to the 380-reading validation sample -
+an hour of polling at one request a second - and only a committed copy got it
+back. It now requires a seed and refuses to overwrite an existing file.

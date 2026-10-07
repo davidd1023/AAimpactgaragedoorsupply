@@ -17,15 +17,34 @@
 // radius, 1-4 springs, every cycle target, and height and weight uniform
 // inside each drum's own rating rather than a shared range that would be out
 // of bounds on the small drums and never reach the top of the large ones.
-import { writeFileSync, readFileSync, readdirSync } from "node:fs";
+import { writeFileSync, readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const [out, seedArg, countArg] = process.argv.slice(2);
 
-if (!out) {
+if (!out || !seedArg) {
     console.error("usage: node dev/eval-sample.mjs <out.json> <seed> <count>");
+    console.error("");
+    console.error("THE SEED IS REQUIRED. Without it the draw cannot be redrawn,");
+    console.error("and a sample nobody can regenerate is not a yardstick.");
+    process.exit(1);
+}
+
+// THIS SCRIPT WRITES INPUTS, AND A SAMPLE FILE HOLDS ANSWERS.
+//
+// Once a draw has been pulled, the file at this path is 380 readings off the
+// reference that took an hour of polling at one request a second, and it is
+// the only never-tuned yardstick this project has. Running the generator at it
+// again replaces all of that with a fresh list of questions. Ask before it
+// happens rather than after: it has happened once, and only a committed copy
+// got it back.
+if (existsSync(out) && !process.env.OVERWRITE) {
+    console.error(`${out} already exists - refusing to overwrite it.`);
+    console.error("");
+    console.error("If it holds pulled readings, writing here destroys them. Pick a");
+    console.error("new path, or set OVERWRITE=1 if you are certain it is only inputs.");
     process.exit(1);
 }
 

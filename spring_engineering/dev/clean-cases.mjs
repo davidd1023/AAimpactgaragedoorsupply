@@ -5,9 +5,9 @@
 // samples into clean and flagged, and scores them separately.
 import { load, make } from "./harness.mjs";
 import { readFileSync } from "node:fs";
+import { stateFromReading, isHiLift, isClean, isModelledDuplex } from "./ref-state.mjs";
 
 const mod = await load();
-const REF_RADIUS = { 10: "LHR", 12: "12", 15: "15" };
 const bucket = { clean: { n: 0, wire: 0, len: 0, in1: 0 },
                  flagged: { n: 0, wire: 0, len: 0, in1: 0 } };
 const misses = [];
@@ -30,18 +30,7 @@ for (const file of process.argv.slice(2)) {
         const msgs = (r.messages ?? []).filter((m) => !/contact us/i.test(m));
         const which = msgs.length === 0 && r.status === "success" ? "clean" : "flagged";
         const hi = i.lift === "HiLift" || i.lift === "Hi-Lift";
-        const c = make(mod, {
-            assembly: "Duplex", drum: i.drum, springId: '3 3/4" inside 6"',
-            springs: i.springs,
-            radius: REF_RADIUS[Number(i.radius)] ?? String(i.radius),
-            ...(hi ? { liftType: "Hi-Lift", liftin: String(i.hiLift) } : {}),
-            cycles: Number(i.cycles).toLocaleString("en-US"),
-            weight: String(i.weight),
-            doorWidthFeet: Math.floor((i.widthInches ?? 108) / 12),
-            doorWidthInches: (i.widthInches ?? 108) % 12,
-            doorHeightFeet: Math.floor(i.heightInches / 12),
-            doorHeightInches: i.heightInches % 12,
-        });
+        const c = make(mod, stateFromReading(i));
         const s = c.duplexStep;
 
         if (!s) continue;
