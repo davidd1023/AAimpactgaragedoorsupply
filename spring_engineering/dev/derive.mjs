@@ -1251,7 +1251,26 @@ function fitLineAnyLevels(ls, maxLevels) {
         // A cut below or above everything scores zero room on purpose: it
         // predicts one class for the whole group and has unbounded space on one
         // side, so it must never win a tie on margin.
-        const gapAt = (i) => (i <= 0 || i >= n ? 0 : sorted[i].u - sorted[i - 1].u);
+        // CAPPED AT THE WIDTH OF THE RANGE A FRACTION CAN OCCUPY.
+        //
+        // The margin is a distance in frac, and frac lives in [0, 1). A gap
+        // wider than that means the threshold line has left the band the data
+        // occupies altogether: it is no longer separating readings by their
+        // fraction, it is separating them by their floor, with the fraction
+        // playing no part. There is no more information in being three units
+        // outside the range than in being one, so there is no more credit.
+        //
+        // Without the cap the reward grows with the slope and the scan runs to
+        // whatever bound it is given - 16 of 136 lines came back sitting exactly
+        // on it, at a slope 250 times the median, where before this objective
+        // there were none at all. A group that really does switch on the floor
+        // has `splitByCount` for it, fitted as a floor boundary rather than
+        // smuggled in as a near-vertical threshold.
+        //
+        // At the cap, ties fall through to the flatness preference below, which
+        // picks the gentlest line that separates the readings completely.
+        const gapAt = (i) =>
+            i <= 0 || i >= n ? 0 : Math.min(sorted[i].u - sorted[i - 1].u, 1);
         const margin = cuts.length ? Math.min(...cuts.map(gapAt)) : 0;
 
         const better = !best || bad < best.bad
@@ -1519,7 +1538,13 @@ function fitThreshold(rows, above) {
         //
         // Flatness is kept as the second tie-break, so a slope only wins on
         // margin if it genuinely has more of it.
-        const gap = at < 0 || at >= n - 1 ? 0 : pts[at + 1].u - pts[at].u;
+        // Capped at 1, the width of the range a fraction can occupy - see the
+        // longer note in the multi-cut fitter. Past that the line has left the
+        // band the readings live in and is separating them by floor instead,
+        // which is what splitByCount is for.
+        const gap = at < 0 || at >= n - 1
+            ? 0
+            : Math.min(pts[at + 1].u - pts[at].u, 1);
 
         const better = !best || bad < best.bad
             || (bad === best.bad && gap > best.gap + 1e-12)
