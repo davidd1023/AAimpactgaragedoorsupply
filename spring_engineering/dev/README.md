@@ -1385,3 +1385,89 @@ The end-to-end check that would have caught it takes one command, and is now
 the habit: fetch the page, find the frontend bundle, and read our module as
 served. It shows the import directly -
 `const{Component,onWillStart,useEffect,useState}=require("@odoo/owl")`.
+
+## Margin, not flatness: 93.7% to 94.9% on the never-tuned sample (2026-10-07)
+
+| | before | after |
+|---|---|---|
+| validation clean length | 93.7% | **94.9%** |
+| validation clean within 1" | 97.7% | **98.9%** |
+| validation flagged length | 74.9% | 75.9% |
+| tuned-sample clean length | 97.9% | 98.1% |
+| five-fold holdout | 89.63% | 90.16% |
+
+Same model size. In sample, held out, and on both external samples, clean and
+flagged, all moved the same way - which is what a generalisation gain looks
+like, as opposed to the trades that fifteen earlier recalibrations made.
+
+### Where the misses actually were
+
+Eight of ten landed within 0.025 of their own group's threshold and six within
+0.007, with an exactly correct multiplier, turns and TIPPT upstream. So the rule
+was right and the boundary was a hair from the reading that crossed it.
+
+For a FIXED slope the fitter already placed the line as well as it can - midway
+between the two readings that straddle it, which is the most room the data
+allows. But the slope was chosen by **preferring the flattest among equal error
+counts**, which takes no account of how much room that slope leaves. A slightly
+steeper line can hold the same readings apart with twice the gap, and it was
+being passed over. Margin is now the first tie-break and flatness the second, in
+both threshold fitters - and for the multi-cut fitter the margin of a rule is
+its TIGHTEST cut, because that is the one a new reading flips first.
+
+### Two things that looked right and measured out
+
+**Max-margin tie-breaking on the cut position**, for a fixed slope. The error
+count steps by one at every reading, so ties between non-adjacent cuts are
+possible and the scan took the leftmost. The derived table came out
+**byte-identical**: with a unique optimum the centred cut already IS the
+max-margin point. Reverted rather than shipped as a no-op with a long comment
+explaining a benefit it did not have.
+
+**Regularising by group support.** The in-sample/holdout gap looks exactly like
+small groups overfitting, so accuracy was measured against the support behind
+each rung. It does not track it at all - a miss at n=944, and 100% at n=20-50.
+Shrinking low-support groups toward a pooled threshold would be fitting a
+pattern that is not there.
+
+### What the apparatus is worth, finally measured
+
+The 48 bands and 126 lines sit on top of a one-line default - round the active
+length onto the grid for that spring count - and the two had never been scored
+against each other out of sample:
+
+| | exact | within 1" |
+|---|---|---|
+| the fitted apparatus | **94.3%** | 98.3% |
+| plain grid rounding | 81.0% | **99.4%** |
+
+It earns its keep by 25 readings to 2. Note the one place rounding wins: when
+the apparatus is wrong it is occasionally wrong by MORE than an inch, where
+rounding never is.
+
+### What is left, and what will not fix it
+
+`dev/miss-kind.mjs` splits every miss into the only two kinds there are. Over
+the four external samples: **13 placement, 3 missing level.** The length rule is
+limited by where its boundaries sit, not by what they choose between - which is
+why maximising margin bought 1.2 points and why adding levels can buy at most
+0.5.
+
+All three missing-level cases want a bonus the same rung already uses at another
+spring count, so the level is real and only its use at that count is unobserved.
+That is the one place where borrowing structure across spring counts has any
+evidence behind it, and it is worth at most three readings in 605.
+
+Accuracy by spring count says the same thing from another angle: 4 springs is
+100% of 90 readings, 3 springs 98.5%, 1 spring 96.9%, and **2 springs 96.1%** -
+the only count whose grid is mixed, so the only one that has to choose the
+quarter as well as the inch, and it loses about equally on each (quarter 97.5%,
+inch 97.2%). Within two springs the two-level rules are the weak spot at 94.4%
+against 97.6% for three-level ones.
+
+### One suggestion that was not acted on
+
+Of the 16 clean misses, 12 are short and 4 long. That looks like a bias worth
+correcting and it is not established: two-sided p is 0.077 for a fair coin. The
+last time a bias was claimed here it came off a truncated histogram and had to
+be withdrawn, so this one is recorded with its p-value and left alone.
