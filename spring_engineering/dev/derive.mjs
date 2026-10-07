@@ -1311,6 +1311,26 @@ function fitLineAnyLevels(ls, maxLevels) {
     // Flat from 0.08 to 0.12 rather than a knife edge, fewer bands, and better
     // on both measures.
     //
+    // 0.18, RE-MEASURED AGAIN 2026-10-07 after the threshold fitters started
+    // choosing their slope for margin. This knob says how wrong a line may be
+    // before its group falls back to a band table, so improving the line fitter
+    // moves it - and it had been set twice against a fitter that no longer
+    // exists.
+    //
+    //   LINE_SLACK   bands   five-fold holdout
+    //      0.12        48         90.21%
+    //      0.15         -         90.22%
+    //      0.18        31         90.31%
+    //      0.20         -         90.26%
+    //      0.25         -         90.18%
+    //
+    // A gentle plateau at 0.18-0.20 rather than a spike, and the whole range
+    // spans 0.13 points - so this knob matters much less than it did, which is
+    // itself worth knowing. 0.18 is taken because the holdout prefers it AND it
+    // carries 17 fewer memorised bands: on the external samples a band table
+    // scores 83-94% where a line scores 96-97%, so moving groups off bands is
+    // the same direction the accuracy moved.
+    //
     // The sweep that found 0.08 read 96.8% and a clean re-derive then read
     // 96.3%, which I first put down to the sweep scoring leftover tables. That
     // was wrong. The sweep passed LINE_SLACK as an ENV VAR, which reached both
@@ -1484,7 +1504,7 @@ function fitLineAnyOrder(ls, maxLevels) {
 //
 // The five-fold holdout said 92% throughout while the samples said 98%. The
 // holdout was right, and dev/README.md says so at length.
-const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.12));
+const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.18));
 
 function fitThreshold(rows, above) {
     let best = null;

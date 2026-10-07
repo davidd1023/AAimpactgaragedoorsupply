@@ -1569,3 +1569,104 @@ probes absent.
 A naive substring search over a shared bundle produces false positives in
 proportion to its size, which is the third time this session that a measurement
 needed checking before its answer was believed.
+
+## The margin objective had a degeneracy, capped (2026-10-07)
+
+Choosing the slope for margin was right and incomplete. The margin is a distance
+in frac, frac lives in [0, 1), and nothing stopped a line from earning credit for
+sitting three units outside that band - at which point it is not separating
+readings by their fraction at all, it is separating them by their floor with the
+fraction playing no part. The reward grows with the slope, so the scan ran to
+whatever bound it was given.
+
+Measured rather than suspected:
+
+| | before margin | margin, uncapped | margin, capped |
+|---|---|---|---|
+| lines with abs(b) > 0.1 | 0 | 16 | 3 |
+| max abs(b) | 0.0385 | 0.2500 | 0.2500 |
+| median abs(b) | 0.0010 | 0.0070 | 0.0070 |
+
+**16 of 136 lines sat exactly on the scan bound**, at a slope 250 times the
+median, and moving the bound from 0.25 to 1.0 moved all 16 with it - so they had
+no interior optimum at all. Capping the margin at 1 leaves 3, and ties at the cap
+fall through to the existing preference for the flattest line.
+
+| | uncapped | capped |
+|---|---|---|
+| five-fold holdout | 90.16% | **90.21%** |
+| in sample | 7863/8107 | **7865/8107** |
+| validation clean length | 94.9% | 94.9% |
+| validation flagged length | 75.9% | **76.5%** |
+
+Clean accuracy unchanged, flagged up half a point, no holdout fold worse. The
+accuracy is the smaller half of why it is worth having: **a fitter that walks to
+the edge of its own search space is telling you the objective is wrong**, and it
+was. A group that really does switch on its floor has `splitByCount` for exactly
+that, fitted as a floor boundary rather than smuggled in as a near-vertical
+threshold - and the 3 that remain are two-level rules at 3 and 4 springs, which
+is what a genuine floor step looks like.
+
+### Why two springs is the weak count, structurally
+
+Surveying the level sets in the shipped table answers a question the accuracy
+table only hinted at:
+
+| spring count | groups | with three or more levels |
+|---|---|---|
+| 1 | 31 | 0 |
+| 2 | 38 | **17** |
+| 3 | 38 | 1 |
+| 4 | 35 | 0 |
+
+**Two springs is the only count whose rules have to choose among more than two
+levels**, because it is the only count whose grid is mixed - 1 spring is whole
+inches, 3 and 4 are whole plus a quarter, and 2 is either. More levels means more
+boundaries, and every boundary is somewhere a new door can fall on the wrong
+side. That is the structural reason behind 96.1% at two springs against 100% at
+four, and it is not something a better threshold can fix.
+
+Also from that survey: 134 of 142 level sets are expressible as
+`inch (0 or 1) + quarter (0 or 0.25)`. The eight that are not involve negative
+bonuses. That is the next thing worth testing - whether those are two independent
+decisions rather than one ordered stack.
+
+### And the line budget, re-measured against the new fitter
+
+`LINE_SLACK` says how wrong a line may be before its group falls back to a band
+table. It had been set twice against a fitter that no longer exists, so it was
+swept again:
+
+| LINE_SLACK | bands | five-fold holdout |
+|---|---|---|
+| 0.12 | 48 | 90.21% |
+| 0.15 | - | 90.22% |
+| **0.18** | **31** | **90.31%** |
+| 0.20 | - | 90.26% |
+| 0.25 | - | 90.18% |
+
+A gentle plateau at 0.18-0.20 rather than a spike, and the whole range spans
+0.13 points - **so this knob matters much less than it used to**, which is worth
+knowing in itself. 0.18 is taken because the holdout prefers it and it carries 17
+fewer memorised bands: on the external samples a band table scores 83-94% where a
+line scores 96-97%, so moving groups off bands is the same direction the accuracy
+moved.
+
+Validation clean length 94.9% to **95.4%**, flagged unchanged at 76.5%. The tuned
+samples slipped 98.1% to 97.9%, which is what less memorisation looks like on
+samples that are partly in-sample for these knobs - and is the reason the
+validation figure is the one quoted.
+
+## Where the session ended up
+
+| | start of session | now |
+|---|---|---|
+| validation clean length | 93.7% | **95.4%** |
+| validation clean within 1" | 97.7% | **98.9%** |
+| validation flagged length | 74.9% | **76.5%** |
+| five-fold holdout | 89.63% | **90.31%** |
+| bands / lines | 48 / 126 | **31 / 128** |
+
+Better out of sample on every measure, and a smaller model. Nothing here changed
+the physics: it was all in how a threshold is placed and when a group is allowed
+to memorise instead.
