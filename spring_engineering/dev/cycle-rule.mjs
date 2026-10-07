@@ -10,9 +10,18 @@
 // the rule separates almost perfectly, and it is not "below target" at all.
 // The reference tolerates a shortfall.
 //
-// So the warning is not a threshold problem. It is a cycle-scale problem: we
-// cannot apply the reference's rule because we cannot reproduce the quantity
-// the rule is applied to. That is what this tool measures, in both halves.
+// THE ANSWER IS AN ABSOLUTE FLOOR AT 10,000, not a fraction of the target,
+// and the module now uses it: false alarms went from 335 to 4 with the same
+// 173 agreements and the same 5 misses. The rule was hard to see because every
+// warned reading in the corpus has a target of 10,000, so a fraction of the
+// target fits the data exactly as well - and because the earlier search for it
+// scanned thresholds from 0.70 to 1.05 OF THE TARGET, a family that cannot
+// contain a constant. A search over the wrong family reports "no threshold
+// works" however much data it is given.
+//
+// What gives it away, below: every warned reading reports exactly 9,000 cycles
+// across weights from 459 lb to 1,949 lb and eleven rungs, and a door that
+// misses a HIGH target is passed in silence.
 import { load, make } from "./harness.mjs";
 import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -71,6 +80,7 @@ const RULES = {
     "reported <= 0.95 * target":    (r) => r.ref <= 0.95 * r.target,
     "reported <= 0.90 * target":    (r) => r.ref <= 0.90 * r.target,
     "reported <= 0.85 * target":    (r) => r.ref <= 0.85 * r.target,
+    "reported < 10,000 (absolute)": (r) => r.ref < 10000,
 };
 
 console.log("THE REFERENCE'S OWN RULE, against the count it reports itself:");
@@ -96,9 +106,23 @@ const quietBelow = rows.filter((r) => !r.low && r.ref / r.target < 0.98)
 
 if (quietBelow.length) {
     console.log(`  the lowest ratio it stays QUIET at is ${quietBelow[0].toFixed(4)}.`);
-    console.log(`  so the tolerance is bracketed to (${ratios[ratios.length - 1]}, `
-        + `${quietBelow[0].toFixed(4)}] and no tighter - one more warned target would`);
-    console.log("  pin it, and the corpus has none.");
+    console.log("");
+    console.log("  Read as a tolerance that brackets it to (0.9000, 0.9333] and no");
+    console.log("  tighter. Read as a floor there is nothing to bracket: one target and");
+    console.log("  one ratio is exactly what a constant 10,000 produces, because 9,000 is");
+    console.log("  the only bucket beneath it and only a 10,000 target can reach it.");
+}
+
+// The reported value on every warned reading, which is the tell.
+const vals = [...new Set(warned.map((r) => r.ref))].sort((a, b) => a - b);
+const weights = warned.map((r) => r.input.weight).filter((w) => typeof w === "number");
+
+console.log(`\n  reported cycle counts across all ${warned.length} warned readings: `
+    + `${vals.join(", ")}`);
+
+if (weights.length) {
+    console.log(`  at door weights from ${Math.min(...weights)} lb to ${Math.max(...weights)} lb.`);
+    console.log("  One reported value over that spread is a floor, not a tolerance.");
 }
 
 // THE HALF THAT ACTUALLY BLOCKS THE FIX.

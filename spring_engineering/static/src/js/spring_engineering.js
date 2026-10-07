@@ -2012,6 +2012,16 @@ const ASSEMBLY_HARDWARE = { 1: 16.25, 2: 28, 3: 28, 4: 32 };
 // bound on the CALCULATION, not on any spring.
 const CYCLE_MAX = 350000;
 
+// The FLOOR on the cycle formula, and it is a constant - not a fraction of
+// whatever cycle life was asked for.
+//
+// This is the "cycle life calculation of N is less than the 10,000 cycle
+// minimum" message, and the message means what it says: 10,000 is the lowest
+// life the reference will quote at all, and also the lowest target it offers.
+// It is not a tolerance on the target. See the warning that uses it for how
+// long that took to see.
+const CYCLE_MIN = 10000;
+
 // --- Pricing --------------------------------------------------------------
 // What the assembly is quoted at. Three parts, kept separate because they are
 // charged on different things:
@@ -3594,6 +3604,23 @@ get warnings() {
                     ") Exceeded",
             });
         } else if (cycles && this.cycleTarget && cycles < this.cycleTarget) {
+            // LEFT ON THE TARGET, DELIBERATELY, unlike the Duplex warning.
+            //
+            // The Duplex version of this was changed to a constant 10,000
+            // floor on 6,354 readings of evidence. The same change was made
+            // here and then reverted, because the five "false alarms" that
+            // justified it were produced by the measuring tool and not by this
+            // code: the Single readings in dev/eval-single.json carry no
+            // spring count, the reference defaults that to 2, and the tool
+            // defaulted it to 1 - which puts the whole door on one spring and
+            // computes 553 cycles where the reference reports 14,000.
+            //
+            // With the default corrected this warning fires on NONE of the 523
+            // readings, and the reference raises no cycle message on any of
+            // them either. So there is nothing here to fix and nothing to
+            // measure a rule against: the Single path has never been observed
+            // near the boundary from either side. It keeps the rule it has
+            // until a reading exists that can tell the two apart.
             found.push({
                 id: "cycles-low",
                 severity: "red",
@@ -3750,46 +3777,62 @@ get warnings() {
                         CYCLE_MAX.toLocaleString("en-US") +
                         " calculation maximum.",
                 });
-            } else if (this.duplexCyclesExact && this.cycleTarget &&
-                this.duplexCyclesExact < this.cycleTarget) {
-                // YELLOW, AND IT SAYS WHY IT IS NOT CERTAIN.
+            } else if (this.duplexCyclesExact && this.duplexCyclesExact < CYCLE_MIN) {
+                // A CONSTANT FLOOR, NOT A FRACTION OF THE TARGET - and the
+                // long way round to that is worth recording, because the
+                // mistake was in the shape of the search and not in the data.
                 //
-                // The reference raises a red "cycle life calculation of N is
-                // less than the M cycle minimum" on 184 of 2,936 readings, and
-                // the rule behind it is clean: it fires when ITS OWN reported
-                // count falls below about 0.95 of the target. Its warned
-                // readings top out at a ratio of 0.9000 and its quiet ones
-                // start at 0.9600, with nothing in between.
+                // This fired when our count came in under THE TARGET, which
+                // cost 335 false alarms against 173 agreements: two cries of
+                // wolf for every real one. The note that used to be here said
+                // the reference's rule was "its own count below about 0.95 of
+                // the target", that our count was too coarse to apply it, and
+                // that scanning every threshold from 0.70 to 1.05 offered only
+                // a choice between missing all of them and 393 false alarms.
                 //
-                // WE CANNOT REPRODUCE IT, and the measurement says so plainly.
-                // Against our computed count the two groups overlap
-                // completely - the reference's warned readings sit at a ratio
-                // of 0.9646 to 1.0027 against us, and so do its quiet ones -
-                // so no threshold separates them. Scanning every threshold
-                // from 0.70 to 1.05 gives a choice between missing all 184 and
-                // catching 180 at the price of 393 false alarms.
+                // Every one of those statements was true. The conclusion was
+                // still wrong, because 0.70 to 1.05 OF THE TARGET is a family
+                // of rules that does not contain the answer, and a search over
+                // the wrong family reports "no threshold works" no matter how
+                // much data it is given.
                 //
-                // Our count is 2% to 10% out from the reference's on exactly
-                // these borderline pairings: for the same wire it reads 10,040
-                // where the reference reads 9,000. The accept fraction cannot
-                // fix it either, because the error is not uniform - the
-                // borderline cases are 10% high where typical ones are 2%.
+                // What the reference actually does, over 6,815 distinct
+                // readings, with no exceptions in either direction: it warns
+                // when the life it computes falls below 10,000, whatever was
+                // asked for. The giveaway was sitting in its own message all
+                // along - "less than the 10,000 cycle minimum" names a
+                // constant, and it says 10,000 on a 300,000-cycle door too.
+                // Three things stop fitting the moment it is read that way:
                 //
-                // So this is a caution, not a verdict. Red would assert
-                // something we have not got; silence would hide that the
-                // supplier's own calculator may reject the pairing. Saying
-                // "near the minimum, confirm it" is the only one of the three
-                // that is true.
+                //   - every warned reading reports exactly 9,000 cycles, at
+                //     door weights from 459 lb to 1,949 lb and across eleven
+                //     different rungs. A tolerance on the target cannot
+                //     produce one value; a floor at 10,000 can only produce
+                //     the one bucket beneath it.
+                //   - all 177 of them have a target of 10,000, which is why a
+                //     fraction of the target fitted equally well and why the
+                //     two rules looked indistinguishable.
+                //   - readings that miss a HIGH target are quiet. The same
+                //     459 lb door that is warned at a target of 10,000 is
+                //     passed without comment at 25,000, 100,000 and 300,000.
+                //
+                // Measured against this rule our agreement is unchanged at 173
+                // and the false alarms go from 335 to 4.
+                //
+                // STILL YELLOW. The five readings we miss are ones where we
+                // compute 10,005 to 10,032 against a reference that reports
+                // 9,000, so the boundary is inside our own cycle error and a
+                // red verdict would overstate what we know.
                 found.push({
                     id: "duplex-cycles-low",
                     severity: "yellow",
                     message:
                         "Computed cycle life of " +
                         cycles.toLocaleString("en-US") +
-                        " is near the " +
-                        this.cycleTarget.toLocaleString("en-US") +
-                        " minimum. Service Spring's own calculator may report " +
-                        "this pairing as below the minimum - confirm before " +
+                        " is below the " +
+                        CYCLE_MIN.toLocaleString("en-US") +
+                        " cycle minimum. Service Spring's own calculator is " +
+                        "likely to reject this pairing - confirm before " +
                         "ordering.",
                 });
             }

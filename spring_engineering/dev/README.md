@@ -1266,3 +1266,73 @@ run with one argument it silently overwrote its target with a fresh seedless
 draw of inputs. It did exactly that to the 380-reading validation sample -
 an hour of polling at one request a second - and only a committed copy got it
 back. It now requires a seed and refuses to overwrite an existing file.
+
+## The cycles-low warning was crying wolf, and the rule is a constant (2026-10-07)
+
+`duplex-cycles-low` fired on 335 readings the reference passes against 173 it
+agrees with - two false alarms for every real one, on the one warning a
+customer is most likely to act on. It now fires on **4**, with the same 173
+agreements and the same 5 misses. Validation accuracy is untouched at 93.7%:
+this is the warning, not the model.
+
+### The rule is an absolute floor at 10,000, not a fraction of the target
+
+The note that used to sit beside this warning said the reference fires "when
+its own reported count falls below about 0.95 of the target", that our count
+was too coarse to apply that, and that scanning every threshold from 0.70 to
+1.05 offered only a choice between missing all 184 and 393 false alarms.
+
+Every one of those statements was true, and the conclusion was still wrong.
+**0.70 to 1.05 of the target is a family of rules that does not contain the
+answer**, and a search over the wrong family reports "no threshold works" no
+matter how much data it is given. The answer is not in that family at all: the
+reference warns when the life it computes falls below 10,000, whatever was
+asked for. Over 6,355 distinct readings that rule has no exceptions in either
+direction.
+
+The giveaway was in the reference's own message the whole time - "cycle life
+calculation of 9,000.00 is less than the **10,000 cycle minimum**" names a
+constant, and it says 10,000 on a 300,000-cycle door too. Three things stop
+fitting once it is read that way:
+
+- **Every warned reading reports exactly 9,000 cycles**, at door weights from
+  300 lb to 1,949 lb and across eleven rungs. A tolerance on the target cannot
+  produce a single value over that spread; a floor at 10,000 can only produce
+  the one bucket beneath it.
+- **All of them have a target of 10,000**, which is why a fraction of the
+  target fitted equally well and why the two readings looked identical.
+- **Missing a high target is silent.** The same 459 lb door that is warned at a
+  target of 10,000 is passed without comment at 25,000, 100,000 and 300,000.
+
+### The pull that failed to discriminate, and why that was still the answer
+
+A 48-reading sweep was taken to separate the two readings of the rule: a door
+that cannot reach a 300,000 target but still beats 10,000 would be warned by a
+tolerance and passed by a floor. **No such reading exists.** The reference's
+own selection lands within 4% of the target on every one of them - lowest ratio
+0.960 - and a further 24 Single readings never land below the target at all.
+
+So the two rules cannot disagree on anything the reference will actually
+produce, and the floor is the one that explains the single warned family
+without a free parameter. The sweep was not wasted: "the window is empty by
+construction" is why the corpus could never have settled this, and it is what
+makes the floor safe to ship.
+
+### The same trap twice in one session, in the measuring tools
+
+The Single path got the same change and then had it reverted, because the five
+false alarms that justified it were produced by the tool and not by the module.
+`dev/eval-single.json` carries no spring count on some readings; the reference
+defaults that to 2, and the tool defaulted it to 1 - putting a whole door on
+one spring and computing 553 cycles where the reference reports 14,000. With
+the default corrected the Single warning fires on none of 523 readings, and the
+reference raises no cycle message on any of them either, so there is nothing
+there to fix and nothing to measure a rule against. It keeps the rule it has.
+
+That is the second time in this session that a defaulting difference in a
+scoring tool produced a confident, plausible, perfectly localised fake defect -
+the first was a track radius of 12 written as `'12"'`. Both were caught only by
+checking a new number against one an existing tool already reported. The
+mapping now lives once, in `dev/ref-state.mjs`, and **the rule is that a tool
+measuring something another tool already measures gets reconciled with it
+before anything it says is believed.**
