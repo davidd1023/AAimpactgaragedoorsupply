@@ -572,6 +572,27 @@ for (const g of rungs.values()) {
 //
 // The multiplier is searched rather than taken from the median because what
 // matters is landing on the right side of the grid, not minimising residual.
+// MAX MARGIN IS FOR A DECISION BOUNDARY, NOT FOR A SCALE. Measured, reverted.
+//
+// Every threshold fitter in this file was changed today to choose for margin
+// instead of for a count, and it was the clearest gain of the session. The same
+// change here - break the plateau in `ok` by preferring the multiplier whose
+// correct readings sit furthest from snapping somewhere else - moved sMult on 15
+// of 50 rungs and cost 7 readings on the five-fold holdout at a fixed population,
+// 90.554% to 90.463%. It also agrees with an earlier, weaker attempt to centre
+// sMult in its plateau, which bought 2 readings in 5,157 and nine extra bands.
+//
+// THE ANALOGY FAILS, AND IT IS WORTH KNOWING WHY. A threshold's position is
+// unknown and the data only brackets it, so sitting in the middle of the bracket
+// is the minimax guess and robustness is the whole game. A stiffness is not a
+// boundary: it is a physical scale, and where a reading falls inside its grid
+// cell is determined by the spring, not by noise. Pushing readings toward the
+// centres of their cells therefore biases the scale to make the data look tidy -
+// it is fitting a property the reference does not have.
+//
+// So the plateau stays broken by taking the lowest multiplier that achieves it.
+// That is arbitrary, and measurably better than the principled-sounding
+// alternative.
 function fitStiffness(ls) {
     let best = null;
 
@@ -1646,6 +1667,15 @@ function fitLineOwnSlopes(ls, maxLevels) {
             }
         }
 
+        // ORDERING IS NOT CHOSEN FOR MARGIN, measured and reverted.
+        //
+        // The two thresholds here come from fitThreshold, which maximises its own
+        // margin, so the only thing still decided by first-wins is WHICH order of
+        // the three bonus values to fit. Preferring the ordering whose tighter cut
+        // has more room changed 13 rungs' tables and not one scored reading:
+        // 6998/7728 either way on the fixed-population holdout. Rewriting a
+        // quarter of the table for no measured effect is churn, so the tie stays
+        // with the first ordering listed.
         if (!best || bad < best.bad) {
             best = {
                 bad,

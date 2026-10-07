@@ -71,18 +71,69 @@ than merely self-consistent.
 - `status: "partial"` — recovered from a comment but missing inputs. Not
   asserted; this is the re-measurement worklist.
 
-## Where the model stands
+## Where the model stands (2026-10-07)
 
-Against 39 reference-API readings on the D400-144, all assertable:
+**This section is the current state. Everything below it is a dated log of how it
+got here, and the older entries describe a model that no longer exists** - the
+section that used to sit here still quoted 39 readings on one drum, 44/45, and
+`tLo`/`tHi` thresholds that were replaced months of work ago. Figures in a log
+entry are true as of that entry; figures here are maintained.
 
-| | before this work | now |
+### The number to quote
+
+Two uniform draws from the allowed box, neither of which any choice in this
+repository has been made against:
+
+| | seed 61006 | seed 20261007 |
 |---|---|---|
-| wire choice | 8/11 | **44/45** |
-| corpus reproduced exactly | — | **44/45** |
-| Single assembly | — | **725/725 byte-identical** |
+| clean length | 95.4% | 93.7% |
+| clean within 1" | 98.9% | 98.3% |
+| clean wire | 99.4% | 98.9% |
+| flagged length | 75.9% | 81.6% |
 
-Readings now span all three standard drums, 1-2 springs, door heights 6'4" to
-10'4", weights 200-750 lb and cycle targets 10,000-200,000.
+**Quote about 94.5% for a door the reference answers cleanly**, and treat
+anything finer than about three points on a single draw as unmeasured: 175 clean
+readings carry roughly +-1.7 points of sampling error, which is why there are two
+draws and why changes are tested PAIRED on the same readings.
+
+Clean and flagged are kept apart because a clean reading is one the reference
+quotes without complaint, and those are the ones that get ordered.
+
+### The supporting measures
+
+- **Five-fold holdout**, about 90.5% on ~7,700 readings at a fixed corpus. Better
+  powered than the draws and on a different population - the corpus is mostly
+  targeted batches - so it decides direction and the draws confirm size. Only
+  comparable between models fitted on the SAME corpus; use `SCORE_EXCLUDE` when a
+  change moves readings in or out.
+- **In sample**, which says only that the fitter reproduces what it was shown.
+- **725 Single cases byte-identical** to their snapshot, and the Single
+  multiplier exact on 288 of 288 external readings.
+- **19 invariants**, which hold without reference data at all.
+
+### What the model is
+
+- **50 rungs**, each an outer and inner wire pairing, with a per-rung stiffness
+  `sMult` and torsion constant `K`.
+- **Per (rung, spring count) length rules** - a threshold line in the integer
+  part, a regime split where a group is really two rules, or a band table where
+  neither fits. Groups with nothing fitted fall back to the measured grid.
+- `DUPLEX_ACCEPT_FRACTION` is **1.0**: the selected pairing must MEET the target.
+  The 0.95 that used to be documented here was the cycles-low WARNING threshold,
+  which is a different number and is now known to be an absolute 10,000 floor
+  rather than a fraction of anything.
+
+### What limits it
+
+13 of 16 clean misses across both draws are **threshold placement** - the rule can
+produce the bonus the reference used and puts its boundary on the wrong side of
+that one reading. Upstream error is not the cause: all 16 misses have an exactly
+correct TIPPT, and the 8 readings whose TIPPT is wrong all still land on the right
+inch.
+
+Placement does not transfer between groups, which is why the margin objective
+helped and more boundary data does not - margin extracts more from the readings a
+group already has, new readings only help where they land.
 
 ### Drum independence: verified
 
@@ -2061,3 +2112,146 @@ Which also makes `fitStiffness` the obvious next target. It is still scoring a
 count, with plateaus, taking the lowest of a tie - the same three weaknesses the
 threshold fitters had before today, and the only remaining parameter that reaches
 every door on a rung rather than one group.
+
+## Where "choose for margin" pays, and where it does not (2026-10-07)
+
+Four selections in `dev/derive.mjs` picked the first of a tie. All four were
+changed to prefer the candidate with the most room, and the results are not
+uniform - which is more useful than if they had been:
+
+| what is being chosen | effect on the fixed-population holdout |
+|---|---|
+| single-threshold **slope** | **+0.3 points** |
+| multi-cut DP **slope** | **+0.2 points** |
+| cut **position**, for a fixed slope | no-op - derived table byte-identical |
+| bonus **ordering** in fitLineOwnSlopes | no-op - 13 rungs changed, accuracy identical |
+| **`sMult`**, the rung's stiffness | **-7 readings**, reverted |
+
+**The rule is not "maximise margin". It is "maximise margin when choosing a
+boundary whose position the data only brackets".**
+
+- The two slopes qualify: the data admits a range of lines, nothing distinguishes
+  them on the readings seen, and the middle of that range is the minimax guess.
+  Both paid.
+- The cut position was already the midpoint between the two straddling readings,
+  so there was nothing left to win. The honest outcome of that experiment was a
+  byte-identical table, and it was reverted rather than shipped as a no-op with a
+  comment claiming a benefit it did not have.
+- The bonus ordering changed 13 rungs' tables and not one scored reading. Also
+  reverted: rewriting a third of the table for no measured effect is churn.
+- **`sMult` is not a boundary.** It is a physical scale, and where a reading falls
+  inside its grid cell is determined by the spring, not by noise. Preferring the
+  multiplier that centres readings in their cells fits a property the reference
+  does not have, and it cost 7 readings. The plateau is still broken by taking the
+  lowest multiplier that achieves it - arbitrary, and measurably better than the
+  principled-sounding alternative.
+
+With this done, **every selection in the fitter either has a measured tie-break or
+is deliberately simplest-first.** The fitter-side ideas are exhausted; what is left
+is data.
+
+## sMult is absorbing something real, and it is not the divider formula
+
+`sMult` is a per-rung multiplier on the active length. If the formula were exactly
+the reference's it would be 1.000 everywhere. It is not: it runs 0.9745 to 1.0470,
+**averages 1.18% away from 1.000, and only 9 of 50 rungs are within 0.1%**. Fifty
+fitted constants hiding one missing term would explain placement errors everywhere
+at once, so it is worth knowing whether that is what they are.
+
+**They are not random.** sMult correlates with the outer spring's share of the
+divider sum at **r = -0.66** across the 50 rungs, and with the wire ratio at -0.63.
+Within each inner-wire family the needed correction falls monotonically as the
+outer wire grows:
+
+| inner wire | outer wire -> correction the formula still needs |
+|---|---|
+| 0.2253 | 0.2625 -> 1.046, 0.273 -> 1.012, 0.283 -> 0.985 |
+| 0.283 | 0.3437 -> 1.019, 0.3625 -> 0.981 |
+| 0.3938 | 0.4687 -> 1.046, 0.49 -> 1.009, 0.5 -> 0.997 |
+
+So the model's dependence on the OUTER wire is slightly too strong. That is a
+specific, checkable claim, and none of the obvious corrections is the answer.
+
+### What was tried, on 6,454 readings with a reported TIPPT
+
+Measured as the SPREAD of the still-needed correction across rungs - lower means
+one formula fits every rung, which is what a right formula looks like:
+
+| | spread |
+|---|---|
+| **shipped: `d^5 / (ID + d)`** | **1.824%** |
+| `d^4.95`, `d^5.05`, `d^4.9`, `d^5.1` | 1.97%, 2.25%, 2.46%, 3.13% |
+| `d^5 / (ID + 2d)` | 2.354% |
+| `d^5 / ID` | 2.091% |
+| `d^5 / (ID - d)` | 2.953% |
+| `d^4 / (ID + d)` | 7.517% |
+| unequal lengths: `A/(L+1) + B/L = TIPPT/springs` | 1.974% |
+
+**The shipped formula beats every variant**, and the exponent 5 with `(ID + d)` is
+a local optimum in both directions. The unequal-length quadratic is worth singling
+out because it looked compelling - the outer spring is one inch longer than the
+inner on all 6,454 readings, and our formula assumes they are equal - and it is
+worse.
+
+Two-parameter searches do reduce the spread, and should not be believed:
+independent exponents reach 1.43% at `p_o=5.1, p_i=4.9`, a 22% reduction bought
+with two more constants. And the outer ID "improves" monotonically as it rises -
+6.5" fits better than 6.0" - which is the signature of a parameter absorbing error
+rather than correcting a mistake, since nothing stops it going further.
+
+### Where that leaves it
+
+The per-rung correction is systematic, it depends on how the two springs split the
+load, and it is not an exponent or a diameter convention. The remaining candidates
+need information this data cannot supply: a coupling between the two nested springs
+that our parallel-sum ignores, or a catalogue lookup rather than a closed form.
+
+**Do not re-run the exponent search.** It has been done over a 6-by-5 grid plus
+five diameter conventions, and the shipped values win.
+
+## Boundary data: the third and last refutation
+
+Batch P1's transfer test said +3 readings of 7,728 - nothing. But that test used
+`SCORE_EXCLUDE` to score only readings OUTSIDE the batch, which answers "does this
+help OTHER doors" and **deliberately excludes the population most likely to have
+improved.** Real doors land in those groups too. So the question was re-asked
+properly, on the two never-tuned draws, which are independent of P1 and contain
+readings in its groups:
+
+| clean readings from both draws | n | before | after | fixed | broken |
+|---|---|---|---|---|---|
+| IN a group P1 pinned | 14 | 12/14 | 12/14 | **0** | **0** |
+| outside those groups | 336 | 319/336 | 319/336 | **0** | **0** |
+
+Not one reading changed, anywhere.
+
+**The in-group test is underpowered and that should be said plainly.** Only 14 of
+350 clean readings land in those five groups, with 2 misses among them, so it could
+only have registered an effect by flipping one of those 2 or breaking one of the 12.
+A null there is consistent with no effect and could not have detected a small one.
+
+What makes it conclusive is the agreement of three independent measurements, one of
+which is well powered:
+
+- transfer, 7,728 readings at a fixed population: **+3**
+- the whole holdout: **unchanged**
+- in-group, 350 never-tuned readings: **0 of 14**
+
+So: boundary-dense data does not help the groups it lands in, does not help other
+groups, and before the `dense` flag it actively hurt by dragging the rung's shared
+stiffness. Three batches and two pulls have now tested this from every angle
+available. **It is finished as an idea.**
+
+### Which leaves exactly one lead worth having
+
+`sMult` is absorbing something real - 1.18% of active length on average, which is
+about 0.35" on a 30" spring, the same order as the placement errors being chased.
+It is systematic (r = -0.66 against the outer spring's share of the divider sum)
+and it is not an exponent, a diameter convention, or the unequal-length coupling.
+
+Everything else is exhausted: every fitter selection now has a measured tie-break
+or is deliberately simplest-first, upstream error costs the length nothing, more
+data in a group changes nothing, and the per-group model class has been pushed as
+far as its own cross-validation allows. **Finding the term sMult stands in for is
+the only route left that could move accuracy by more than noise**, and it needs an
+idea about the mechanism rather than more readings.
