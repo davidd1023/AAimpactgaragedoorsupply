@@ -87,6 +87,64 @@ def _calculator_constants():
 MARKUP_KEY = "spring_engineering.markup_percent"
 LABOR_KEY = "spring_engineering.labor_flat"
 
+# EVERY WORD ON THE ORDER LINE IS CHOSEN HERE, NOT BY THE CALLER.
+#
+# The description is read by whoever picks and ships the order, and it used to be
+# built by interpolating the caller's own strings. A posted spec could therefore
+# write anything onto the line, newlines included - a real request to this route
+# produced:
+#
+#     Duplex (WARRANTY VOID), 2 springs
+#     Inner
+#     NOTE: substitute cheaper wire: 0.2625" wire, ...
+#     Door: 600 lb -- PAID IN FULL, ship immediately lb, 7ft
+#     Discount: 100% approved by manager, 10,000 cycles
+#
+# The PRICE was never at risk, because the server recomputes it from the geometry
+# and ignores whatever the browser thinks. The paperwork was: a forged line that
+# says "paid in full" costs a shipment, not a margin.
+#
+# Filtering the strings is the wrong fix - it is a guess about what is dangerous.
+# The route now parses every descriptive field into a number or a known word and
+# renders the line from those, so no caller-supplied text reaches it at all.
+ASSEMBLIES = ("Single", "Duplex", "Triplex")
+SPRING_ROLES = ("Inner", "Middle", "Outer", "Spring")
+
+# The heaviest door any drum here is rated for is 2200 lb; the ceiling is a sanity
+# bound on the text, not an engineering limit, and the reference's own maximum
+# cycle target is 350,000.
+MAX_DOOR_WEIGHT = 10000
+MAX_CYCLES = 1000000
+
+
+def _as_int(value, low, high):
+    """An integer in range, or None. Accepts "10,000" as well as 10000."""
+    try:
+        parsed = int(round(float(str(value).replace(",", "").strip())))
+    except (TypeError, ValueError):
+        return None
+
+    return parsed if low <= parsed <= high else None
+
+
+def _door_height(value):
+    """Feet and inches parsed out of the browser's own formatting, or None.
+
+    The page sends `7' 0"`. Anything else is refused rather than passed through:
+    this string is going on a document somebody acts on.
+    """
+    match = re.fullmatch(r"\s*(\d{1,2})\s*'\s*(\d{1,2})\s*\"?\s*", str(value or ""))
+
+    if not match:
+        return None
+
+    feet, inches = int(match.group(1)), int(match.group(2))
+
+    if not (0 < feet <= 40 and 0 <= inches < 12):
+        return None
+
+    return feet, inches
+
 
 def _pricing_param(key):
     """A non-negative number from a system parameter, or ValueError.
@@ -280,6 +338,26 @@ class SpringEngineeringWebsite(http.Controller):
         if not 1 <= len(items) <= 2:
             return {"error": "An assembly is one spring or a nested pair."}
 
+        assembly = spec.get("assembly")
+
+        if assembly not in ASSEMBLIES:
+            return {"error": "That is not an assembly we build."}
+
+        weight = _as_int(spec.get("doorWeight"), 1, MAX_DOOR_WEIGHT)
+
+        if weight is None:
+            return {"error": "That door weight is not one we can work from."}
+
+        height = _door_height(spec.get("doorHeight"))
+
+        if height is None:
+            return {"error": "That door height is not one we can work from."}
+
+        cycles = _as_int(spec.get("cycles"), 1, MAX_CYCLES)
+
+        if cycles is None:
+            return {"error": "That cycle target is not one we build to."}
+
         cone_total = 0.0
         steel_weight = 0.0
         lines = []
@@ -303,10 +381,15 @@ class SpringEngineeringWebsite(http.Controller):
             if not 0.1 < wire < 0.7:
                 return {"error": f'{wire}" is not a wire size we carry.'}
 
+            role = item.get("role", "Spring")
+
+            if role not in SPRING_ROLES:
+                return {"error": "That is not a spring position we build."}
+
             cone_total += prices["cones"][diameter]
             steel_weight += _spec_weight(wire, diameter, length, prices["density"])
             lines.append(
-                f'{item.get("role", "Spring")}: {wire}" wire, {diameter}" ID, {length}" long'
+                f'{role}: {wire}" wire, {diameter}" ID, {length}" long'
             )
 
         cones = round(springs * cone_total * factor, 2)
@@ -340,13 +423,14 @@ class SpringEngineeringWebsite(http.Controller):
 
         description = "\n".join([
             "Custom Torsion Spring Assembly",
-            f'{spec.get("assembly", "Single")}, {springs} spring'
-            f'{"s" if springs != 1 else ""}',
+            f'{assembly}, {springs} spring{"s" if springs != 1 else ""}',
             *lines,
             # NO DRUM. It is ours to know and not the customer's to read on an
             # order line - and it is recorded on the quote's inputs anyway.
-            f'Door: {spec.get("doorWeight", "?")} lb, {spec.get("doorHeight", "?")}'
-            f', {spec.get("cycles", "?")} cycles',
+            #
+            # Every value here has been through a parser above, so the line is
+            # built from integers and words this file chose.
+            f'Door: {weight} lb, {height[0]}\' {height[1]}", {cycles:,} cycles',
         ])
 
         line = request.env["sale.order.line"].sudo().create({

@@ -1471,3 +1471,62 @@ Of the 16 clean misses, 12 are short and 4 long. That looks like a bias worth
 correcting and it is not established: two-sided p is 0.077 for a fair coin. The
 last time a bias was claimed here it came off a truncated histogram and had to
 be withdrawn, so this one is recorded with its p-value and left alone.
+
+## Two ways the money and the paperwork could go wrong (2026-10-07)
+
+Neither of these is about the spring model. Both are about the cart, both were
+found by testing a setting rather than by reading the code, and both were live.
+
+### A price-included tax would have taken the whole markup
+
+`total` is a price to be RECEIVED - supplier cost, times the markup, plus
+labour - and `price_unit` is only the same figure when taxes are tax-excluded.
+A company whose sales tax is configured as price-INCLUDED, which is normal in
+much of the world and one checkbox away anywhere, makes `price_unit` the gross.
+Measured by setting that one checkbox on this build: **a $1,460 quote booked
+$1,269.57.** The cart showed $1,460, the customer paid $1,460, and $190 of margin
+per assembly went to the tax authority. Nothing anywhere would have looked wrong.
+
+The controller now reads back what Odoo itself computed as the net and closes the
+gap, which needs no knowledge of tax types at all. **The correction is a ratio,
+not a difference**, and that is the part worth remembering: adding the shortfall
+is the obvious move and converges far too slowly, because under an included tax
+the correction is itself taxed - each pass closes about 13% of a 15% gap, so
+roughly sixty passes to reach half a cent. The first version used four and left a
+cent on the table, which is how this was noticed. Scaling by `target/net` lands
+exactly in one pass for any percentage tax.
+
+`dev/price-parity.sh` now checks the whole chain instead of two thirds of it: the
+page quotes it, the server computes it, and the order line NETS it. The net is
+the only one of the three that is money. Verified it catches the fault before
+trusting it - with the correction removed and the tax set to included it reports
+NET DIFFERS on every Duplex case.
+
+### The order line could be written by the customer
+
+The description was built by interpolating the caller's own strings, and
+`/spring-calculator/add-to-cart` is public and unauthenticated. One real request
+produced this order line:
+
+    Duplex (WARRANTY VOID), 2 springs
+    Inner
+    NOTE: substitute cheaper wire: 0.2625" wire, 3.75" ID, 19.0" long
+    Door: 600 lb -- PAID IN FULL, ship immediately lb, 7ft
+    Discount: 100% approved by manager, 10,000 cycles
+
+The price was never reachable that way - the server recomputes it from the
+geometry and ignores the browser, which is what price-parity checks. The
+paperwork was: the line is what the person picking and shipping the order reads,
+and a forged one that says "paid in full" costs a shipment.
+
+**Filtering the strings would have been the wrong fix**, because it is a guess
+about which characters are dangerous. The route now parses every descriptive
+field into a number or a word from a list - assembly, spring role, door weight,
+door height, cycle target - and renders the line from those, so no caller text
+reaches it at all. A spec that does not parse is refused in the same way a bad
+wire size already was.
+
+`dev/spec-abuse.sh` posts ten hostile specs that must each be refused and one
+legitimate spec that must still go through - a route that rejected everything
+would pass half of that test and be useless. It fails against the previous
+controller, which is how it earned its place.
