@@ -1757,3 +1757,61 @@ diverse" was a statement about the fitter's objective and not about the data** -
 the same readings that were poison to a count-minimising fit are neutral-to-useful
 to a margin-maximising one. A batch held out for a measured reason deserves
 re-measuring whenever the reason changes.
+
+## The holdout lies when the corpus changes (and R1 goes back out)
+
+**This retracts the commit before it.** Re-fitting batch R1 was justified on a
+five-fold holdout that rose from 90.31% to 90.49%. That measurement was
+confounded, and the confound is worth more than the result.
+
+### What goes wrong
+
+A reading marked `fit: false` is still SCORED by the holdout - that is the point
+of keeping it. So moving a batch into the fit changes what the holdout fits AND
+what it scores. A fitted batch gets same-batch neighbours in all four training
+folds, so its own readings predict better, and the overall figure rises even if
+every other door got worse.
+
+Not a subtle effect. Re-fitting U5-U8 (1,522 readings) raised the holdout by
+**0.88 points while the never-tuned validation sample fell by 2.3**:
+
+| | U5-U8 out | U5-U8 fitted |
+|---|---|---|
+| five-fold holdout | 90.49% | **91.37%** |
+| validation clean length | **95.4%** | 93.1% |
+| validation clean within 1" | **98.9%** | 97.7% |
+| validation flagged length | 75.9% | **80.2%** |
+| tuned-sample clean length | **98.6%** | 95.1% |
+
+The clean-for-flagged trade those batches were held out for is still there, and
+the margin fitter did not absorb it - unlike R1, where it looked as though it had.
+
+### Which forced a check of R1 itself
+
+`dev/holdout-score.mjs` now takes `SCORE_EXCLUDE=R1`, which scores only readings
+OUTSIDE the toggled batch and so holds the population fixed. That is the only
+version of this number that answers "does that data help OTHER doors":
+
+| scoring the same 7,728 non-R1 readings | |
+|---|---|
+| R1 held out | **90.515%** |
+| R1 fitted | 90.463% |
+
+**R1 in the fit makes other doors slightly worse**, by four readings. The entire
++0.18 was R1 predicting itself. On the validation sample its inclusion left clean
+flat and cost a reading of flagged. So it has no measured benefit and a small
+cost, and it is held out again - the table and corpus are byte-identical to the
+state before that commit.
+
+The original 2026-10-06 reasoning for excluding R1 was wrong about the mechanism:
+it was the fitter's objective, not the density of the data. The conclusion
+happened to be right anyway, which is the least satisfying way to be correct.
+
+### The rule this leaves
+
+**The five-fold holdout is only comparable between two models fitted on the same
+corpus.** For every other change this session - the margin objective, the margin
+cap, the line budget - the corpus was fixed and the holdout was sound. The moment
+a change moves readings in or out of the fit, the holdout needs its population
+pinned with `SCORE_EXCLUDE`, or it will congratulate the change for fitting the
+data you just gave it.

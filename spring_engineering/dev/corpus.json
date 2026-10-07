@@ -160138,7 +160138,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 116000
+   "referenceCycles": 116000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-418lb-120in-4spr-r15-hl76-t10000",
@@ -160171,7 +160172,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 26000
+   "referenceCycles": 26000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-466lb-179in-4spr-r15-hl33-t100000",
@@ -160204,7 +160206,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 111000
+   "referenceCycles": 111000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-430lb-159in-4spr-r15-hl33-t100000",
@@ -160237,7 +160240,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 122000
+   "referenceCycles": 122000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-238lb-158in-2spr-r15-hl14-t15000",
@@ -160270,7 +160274,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 27000
+   "referenceCycles": 27000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-422lb-95in-2spr-r12-t10000",
@@ -160301,7 +160306,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 36000
+   "referenceCycles": 36000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-290lb-121in-2spr-r10-t100000",
@@ -160332,7 +160338,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 109000
+   "referenceCycles": 109000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-454lb-120in-4spr-r15-hl31-t10000",
@@ -160365,7 +160372,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 28000
+   "referenceCycles": 28000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-246lb-134in-2spr-r10-t10000",
@@ -160396,7 +160404,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 138000
+   "referenceCycles": 138000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-242lb-146in-3spr-r15-hl74-t10000",
@@ -160429,7 +160438,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 227000
+   "referenceCycles": 227000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-462lb-98in-2spr-r10-t10000",
@@ -160460,7 +160470,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 12000
+   "referenceCycles": 12000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-422lb-124in-3spr-r15-t10000",
@@ -160491,7 +160502,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 245000
+   "referenceCycles": 245000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-378lb-112in-2spr-r15-t25000",
@@ -160522,7 +160534,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 32000
+   "referenceCycles": 32000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-354lb-139in-3spr-r15-hl34-t10000",
@@ -160555,7 +160568,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 22000
+   "referenceCycles": 22000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-246lb-164in-2spr-r10-t10000",
@@ -160586,7 +160600,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 142000
+   "referenceCycles": 142000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-430lb-120in-2spr-r15-t25000",
@@ -160617,7 +160632,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 33000
+   "referenceCycles": 33000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-438lb-94in-3spr-r15-t100000",
@@ -160648,7 +160664,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 205000
+   "referenceCycles": 205000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-318lb-98in-2spr-r10-t10000",
@@ -160679,7 +160696,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 41000
+   "referenceCycles": 41000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-162lb-88in-2spr-r15-hl59-t15000",
@@ -160712,7 +160730,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 291000
+   "referenceCycles": 291000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-274lb-152in-3spr-r15-hl25-t200000",
@@ -160745,7 +160764,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 292000
+   "referenceCycles": 292000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-289-2343-326lb-89in-2spr-r15-hl46-t50000",
@@ -160778,7 +160798,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 61000
+   "referenceCycles": 61000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-390lb-149in-4spr-r15-hl23-t50000",
@@ -160811,7 +160832,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 62000
+   "referenceCycles": 62000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-458lb-88in-4spr-r15-hl59-t10000",
@@ -160844,7 +160866,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 19000
+   "referenceCycles": 19000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-310lb-92in-3spr-r10-t50000",
@@ -160875,7 +160898,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 325000
+   "referenceCycles": 325000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-402lb-128in-2spr-r10-t15000",
@@ -160906,7 +160930,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 24000
+   "referenceCycles": 24000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-226lb-103in-3spr-r15-hl39-t25000",
@@ -160939,7 +160964,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 179000
+   "referenceCycles": 179000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-798lb-92in-4spr-r15-t10000",
@@ -160970,7 +160996,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 14000
+   "referenceCycles": 14000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-314lb-124in-3spr-r15-hl14-t10000",
@@ -161003,7 +161030,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 51000
+   "referenceCycles": 51000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-394lb-101in-3spr-r10-t25000",
@@ -161034,7 +161062,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 107000
+   "referenceCycles": 107000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-330lb-86in-2spr-r10-t50000",
@@ -161065,7 +161094,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 120000
+   "referenceCycles": 120000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-350lb-98in-2spr-r15-t15000",
@@ -161096,7 +161126,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 86000
+   "referenceCycles": 86000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-298lb-128in-2spr-r10-t15000",
@@ -161127,7 +161158,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 58000
+   "referenceCycles": 58000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-446lb-95in-2spr-r12-t10000",
@@ -161158,7 +161190,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 28000
+   "referenceCycles": 28000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-242lb-143in-3spr-r15-hl71-t10000",
@@ -161191,7 +161224,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 90000
+   "referenceCycles": 90000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-566lb-133in-4spr-r15-t25000",
@@ -161222,7 +161256,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 233000
+   "referenceCycles": 233000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-382lb-141in-2spr-r12-t15000",
@@ -161253,7 +161288,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 56000
+   "referenceCycles": 56000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-374lb-144in-4spr-r15-hl31-t50000",
@@ -161286,7 +161322,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 70000
+   "referenceCycles": 70000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-242lb-88in-2spr-r15-hl59-t15000",
@@ -161319,7 +161356,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 45000
+   "referenceCycles": 45000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-350lb-112in-2spr-r15-t100000",
@@ -161350,7 +161388,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 147000
+   "referenceCycles": 147000,
+   "fit": false
   },
   {
    "id": "R1-D400144-289-2343-382lb-123in-2spr-r10-t200000",
@@ -161381,7 +161420,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 200000
+   "referenceCycles": 200000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-390lb-166in-2spr-r10-t25000",
@@ -161412,7 +161452,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 27000
+   "referenceCycles": 27000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-490lb-124in-3spr-r15-t10000",
@@ -161443,7 +161484,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 122000
+   "referenceCycles": 122000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-350lb-92in-2spr-r15-t50000",
@@ -161474,7 +161516,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 90000
+   "referenceCycles": 90000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-230lb-98in-2spr-r10-t10000",
@@ -161505,7 +161548,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 190000
+   "referenceCycles": 190000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-570lb-94in-4spr-r15-t25000",
@@ -161536,7 +161580,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 71000
+   "referenceCycles": 71000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-518lb-133in-4spr-r15-hl15-t50000",
@@ -161569,7 +161614,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 74000
+   "referenceCycles": 74000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-614lb-117in-4spr-r15-hl47-t10000",
@@ -161602,7 +161648,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 23000
+   "referenceCycles": 23000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-510lb-128in-2spr-r12-t10000",
@@ -161633,7 +161680,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 14000
+   "referenceCycles": 14000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-458lb-113in-3spr-r12-t15000",
@@ -161664,7 +161712,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 50000
+   "referenceCycles": 50000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-326lb-119in-4spr-r15-hl53-t200000",
@@ -161697,7 +161746,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 306000
+   "referenceCycles": 306000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-250lb-127in-3spr-r15-hl62-t25000",
@@ -161730,7 +161780,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 245000
+   "referenceCycles": 245000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-322lb-104in-2spr-r15-hl12-t10000",
@@ -161763,7 +161814,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 27000
+   "referenceCycles": 27000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-566lb-123in-4spr-r10-t10000",
@@ -161794,7 +161846,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 74000
+   "referenceCycles": 74000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-654lb-154in-4spr-r15-hl31-t10000",
@@ -161827,7 +161880,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 17000
+   "referenceCycles": 17000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-150lb-111in-2spr-r15-hl74-t25000",
@@ -161860,7 +161914,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 127000
+   "referenceCycles": 127000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-502lb-114in-2spr-r10-t10000",
@@ -161891,7 +161946,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 16000
+   "referenceCycles": 16000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-286lb-137in-4spr-r15-hl46-t10000",
@@ -161924,7 +161980,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 214000
+   "referenceCycles": 214000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-362lb-88in-2spr-r15-hl39-t10000",
@@ -161957,7 +162014,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 15000
+   "referenceCycles": 15000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-546lb-135in-4spr-r12-t15000",
@@ -161988,7 +162046,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 278000
+   "referenceCycles": 278000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-362lb-85in-2spr-r12-t100000",
@@ -162019,7 +162078,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 128000
+   "referenceCycles": 128000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-426lb-90in-2spr-r10-t25000",
@@ -162050,7 +162110,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 36000
+   "referenceCycles": 36000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-254lb-93in-4spr-r15-hl47-t15000",
@@ -162083,7 +162144,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 348000
+   "referenceCycles": 348000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-186lb-89in-2spr-r15-hl53-t50000",
@@ -162116,7 +162178,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 217000
+   "referenceCycles": 217000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-554lb-111in-4spr-r10-t25000",
@@ -162147,7 +162210,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 254000
+   "referenceCycles": 254000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-306lb-95in-2spr-r15-t15000",
@@ -162178,7 +162242,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 49000
+   "referenceCycles": 49000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-150lb-140in-2spr-r15-hl91-t25000",
@@ -162211,7 +162276,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 261000
+   "referenceCycles": 261000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-346lb-133in-2spr-r15-t50000",
@@ -162242,7 +162308,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 92000
+   "referenceCycles": 92000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-374lb-86in-2spr-r12-t10000",
@@ -162273,7 +162340,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 65000
+   "referenceCycles": 65000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-446lb-141in-2spr-r12-t15000",
@@ -162304,7 +162372,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 27000
+   "referenceCycles": 27000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-326lb-93in-2spr-r15-t50000",
@@ -162335,7 +162404,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 125000
+   "referenceCycles": 125000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-326lb-141in-2spr-r12-t15000",
@@ -162366,7 +162436,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 118000
+   "referenceCycles": 118000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-250lb-104in-2spr-r15-hl12-t10000",
@@ -162399,7 +162470,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 89000
+   "referenceCycles": 89000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-342lb-117in-3spr-r15-hl83-t10000",
@@ -162432,7 +162504,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 41000
+   "referenceCycles": 41000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-226lb-132in-2spr-r15-hl31-t15000",
@@ -162465,7 +162538,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 98000
+   "referenceCycles": 98000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-294lb-132in-3spr-r15-hl34-t100000",
@@ -162498,7 +162572,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 180000
+   "referenceCycles": 180000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-270lb-87in-2spr-r12-t15000",
@@ -162529,7 +162604,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 289000
+   "referenceCycles": 289000,
+   "fit": false
   },
   {
    "id": "R1-D525216-289-2343-462lb-133in-2spr-r12-t25000",
@@ -162560,7 +162636,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 26000
+   "referenceCycles": 26000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-210lb-108in-2spr-r10-t200000",
@@ -162591,7 +162668,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 286000
+   "referenceCycles": 286000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-294lb-127in-2spr-r10-t10000",
@@ -162622,7 +162700,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 195000
+   "referenceCycles": 195000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-254lb-114in-2spr-r15-hl92-t25000",
@@ -162655,7 +162734,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 36000
+   "referenceCycles": 36000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-314lb-133in-3spr-r15-hl94-t15000",
@@ -162688,7 +162768,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 22000
+   "referenceCycles": 22000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-414lb-92in-2spr-r15-t50000",
@@ -162719,7 +162800,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 69000
+   "referenceCycles": 69000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-258lb-124in-3spr-r15-hl14-t10000",
@@ -162752,7 +162834,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 128000
+   "referenceCycles": 128000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-234lb-112in-2spr-r15-t25000",
@@ -162783,7 +162866,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 182000
+   "referenceCycles": 182000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-474lb-101in-3spr-r10-t25000",
@@ -162814,7 +162898,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 45000
+   "referenceCycles": 45000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-670lb-171in-4spr-r10-t25000",
@@ -162845,7 +162930,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 33000
+   "referenceCycles": 33000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-242lb-147in-2spr-r15-hl34-t15000",
@@ -162878,7 +162964,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 90000
+   "referenceCycles": 90000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-218lb-138in-2spr-r15-hl49-t25000",
@@ -162911,7 +162998,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 107000
+   "referenceCycles": 107000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-346lb-152in-3spr-r15-hl33-t25000",
@@ -162944,7 +163032,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 85000
+   "referenceCycles": 85000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-730lb-118in-4spr-r10-t10000",
@@ -162975,7 +163064,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 22000
+   "referenceCycles": 22000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-370lb-94in-3spr-r10-t25000",
@@ -163006,7 +163096,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 143000
+   "referenceCycles": 143000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-422lb-100in-2spr-r10-t50000",
@@ -163037,7 +163128,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 61000
+   "referenceCycles": 61000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-426lb-84in-2spr-r10-t25000",
@@ -163068,7 +163160,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 35000
+   "referenceCycles": 35000,
+   "fit": false
   },
   {
    "id": "R1-575120-289-2343-450lb-100in-2spr-r15-hl25-t15000",
@@ -163101,7 +163194,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 16000
+   "referenceCycles": 16000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-430lb-160in-3spr-r12-t10000",
@@ -163132,7 +163226,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 68000
+   "referenceCycles": 68000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-578lb-86in-4spr-r15-t15000",
@@ -163163,7 +163258,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 214000
+   "referenceCycles": 214000,
+   "fit": false
   },
   {
    "id": "R1-D400144-289-2343-382lb-114in-2spr-r15-t200000",
@@ -163194,7 +163290,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 200000
+   "referenceCycles": 200000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-330lb-86in-2spr-r15-t15000",
@@ -163225,7 +163322,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 115000
+   "referenceCycles": 115000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-338lb-112in-3spr-r10-t15000",
@@ -163256,7 +163354,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 210000
+   "referenceCycles": 210000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-214lb-115in-2spr-r12-t50000",
@@ -163287,7 +163386,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 269000
+   "referenceCycles": 269000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-238lb-114in-2spr-r15-hl18-t100000",
@@ -163320,7 +163420,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 142000
+   "referenceCycles": 142000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-150lb-99in-2spr-r15-hl51-t10000",
@@ -163353,7 +163454,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 156000
+   "referenceCycles": 156000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-278lb-85in-2spr-r12-t10000",
@@ -163384,7 +163486,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 78000
+   "referenceCycles": 78000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-286lb-88in-2spr-r15-hl39-t25000",
@@ -163417,7 +163520,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 37000
+   "referenceCycles": 37000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-258lb-103in-2spr-r10-t10000",
@@ -163448,7 +163552,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 110000
+   "referenceCycles": 110000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-258lb-147in-3spr-r15-hl62-t10000",
@@ -163481,7 +163586,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 207000
+   "referenceCycles": 207000,
+   "fit": false
   },
   {
    "id": "R1-D525216-289-2343-510lb-172in-2spr-r15-t15000",
@@ -163512,7 +163618,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 16000
+   "referenceCycles": 16000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-342lb-155in-3spr-r15-hl37-t100000",
@@ -163545,7 +163652,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 111000
+   "referenceCycles": 111000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-326lb-168in-3spr-r15-hl37-t100000",
@@ -163578,7 +163686,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 104000
+   "referenceCycles": 104000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-158lb-85in-2spr-r15-hl67-t25000",
@@ -163611,7 +163720,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 103000
+   "referenceCycles": 103000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-234lb-85in-2spr-r15-hl67-t25000",
@@ -163644,7 +163754,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 27000
+   "referenceCycles": 27000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-250lb-123in-2spr-r15-hl25-t10000",
@@ -163677,7 +163788,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 18000
+   "referenceCycles": 18000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-210lb-113in-2spr-r15-hl53-t25000",
@@ -163710,7 +163822,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 32000
+   "referenceCycles": 32000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-262lb-125in-2spr-r12-t50000",
@@ -163741,7 +163854,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 103000
+   "referenceCycles": 103000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-342lb-159in-4spr-r15-hl35-t50000",
@@ -163774,7 +163888,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 343000
+   "referenceCycles": 343000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-290lb-133in-2spr-r12-t25000",
@@ -163805,7 +163920,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 66000
+   "referenceCycles": 66000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-318lb-91in-2spr-r15-t200000",
@@ -163836,7 +163952,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 227000
+   "referenceCycles": 227000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-198lb-150in-2spr-r15-hl69-t50000",
@@ -163869,7 +163986,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 60000
+   "referenceCycles": 60000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-426lb-103in-2spr-r10-t10000",
@@ -163900,7 +164018,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 10000
+   "referenceCycles": 10000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-258lb-142in-3spr-r15-hl46-t50000",
@@ -163933,7 +164052,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 87000
+   "referenceCycles": 87000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-270lb-159in-4spr-r15-hl64-t200000",
@@ -163966,7 +164086,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 223000
+   "referenceCycles": 223000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-270lb-93in-2spr-r15-t15000",
@@ -163997,7 +164118,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 301000
+   "referenceCycles": 301000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-438lb-93in-2spr-r12-t15000",
@@ -164028,7 +164150,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 31000
+   "referenceCycles": 31000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-294lb-123in-2spr-r10-t200000",
@@ -164059,7 +164182,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 323000
+   "referenceCycles": 323000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-402lb-88in-2spr-r10-t50000",
@@ -164090,7 +164214,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 77000
+   "referenceCycles": 77000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-630lb-146in-4spr-r15-hl46-t10000",
@@ -164123,7 +164248,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 20000
+   "referenceCycles": 20000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-258lb-99in-2spr-r15-hl59-t10000",
@@ -164156,7 +164282,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 32000
+   "referenceCycles": 32000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-378lb-117in-4spr-r15-hl47-t10000",
@@ -164189,7 +164316,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 222000
+   "referenceCycles": 222000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-434lb-123in-4spr-r10-t10000",
@@ -164220,7 +164348,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 258000
+   "referenceCycles": 258000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-230lb-109in-2spr-r10-t25000",
@@ -164251,7 +164380,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 194000
+   "referenceCycles": 194000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-618lb-125in-4spr-r10-t15000",
@@ -164282,7 +164412,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 157000
+   "referenceCycles": 157000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-398lb-107in-4spr-r15-hl92-t25000",
@@ -164315,7 +164446,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 28000
+   "referenceCycles": 28000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-262lb-110in-2spr-r15-hl79-t25000",
@@ -164348,7 +164480,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 37000
+   "referenceCycles": 37000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-642lb-118in-4spr-r10-t10000",
@@ -164379,7 +164512,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 41000
+   "referenceCycles": 41000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-338lb-94in-2spr-r12-t50000",
@@ -164410,7 +164544,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 52000
+   "referenceCycles": 52000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-214lb-104in-2spr-r15-hl12-t10000",
@@ -164443,7 +164578,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 185000
+   "referenceCycles": 185000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-258lb-164in-2spr-r15-t25000",
@@ -164474,7 +164610,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 113000
+   "referenceCycles": 113000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-422lb-121in-3spr-r10-t100000",
@@ -164505,7 +164642,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 242000
+   "referenceCycles": 242000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-622lb-138in-4spr-r12-t25000",
@@ -164536,7 +164674,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 47000
+   "referenceCycles": 47000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-214lb-158in-2spr-r15-hl14-t15000",
@@ -164569,7 +164708,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 45000
+   "referenceCycles": 45000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-362lb-88in-4spr-r15-hl59-t10000",
@@ -164602,7 +164742,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 59000
+   "referenceCycles": 59000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-454lb-146in-3spr-r15-hl74-t10000",
@@ -164635,7 +164776,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 12000
+   "referenceCycles": 12000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-273-2253-422lb-160in-2spr-r15-hl34-t10000",
@@ -164668,7 +164810,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 11000
+   "referenceCycles": 11000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-242lb-135in-2spr-r15-hl59-t15000",
@@ -164701,7 +164844,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 15000
+   "referenceCycles": 15000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-282lb-146in-3spr-r15-hl89-t15000",
@@ -164734,7 +164878,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 93000
+   "referenceCycles": 93000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-490lb-120in-2spr-r15-t25000",
@@ -164765,7 +164910,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 30000
+   "referenceCycles": 30000,
+   "fit": false
   },
   {
    "id": "R1-575120-289-2343-214lb-106in-2spr-r15-hl77-t200000",
@@ -164798,7 +164944,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 207000
+   "referenceCycles": 207000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-322lb-103in-2spr-r10-t10000",
@@ -164829,7 +164976,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 39000
+   "referenceCycles": 39000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-506lb-87in-2spr-r12-t15000",
@@ -164860,7 +165008,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 15000
+   "referenceCycles": 15000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-226lb-128in-2spr-r10-t15000",
@@ -164891,7 +165040,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 211000
+   "referenceCycles": 211000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-366lb-88in-2spr-r15-hl39-t10000",
@@ -164924,7 +165074,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 14000
+   "referenceCycles": 14000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-290lb-122in-2spr-r15-t25000",
@@ -164955,7 +165106,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 65000
+   "referenceCycles": 65000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-534lb-167in-4spr-r15-hl23-t10000",
@@ -164988,7 +165140,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 74000
+   "referenceCycles": 74000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-318lb-86in-2spr-r10-t50000",
@@ -165019,7 +165172,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 143000
+   "referenceCycles": 143000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-274lb-172in-2spr-r12-t25000",
@@ -165050,7 +165204,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 85000
+   "referenceCycles": 85000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-678lb-93in-4spr-r10-t25000",
@@ -165081,7 +165236,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 31000
+   "referenceCycles": 31000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-230lb-125in-2spr-r15-hl65-t50000",
@@ -165114,7 +165270,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 50000
+   "referenceCycles": 50000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-474lb-134in-2spr-r10-t10000",
@@ -165145,7 +165302,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 10000
+   "referenceCycles": 10000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-342lb-95in-2spr-r15-t100000",
@@ -165176,7 +165334,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 161000
+   "referenceCycles": 161000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-342lb-86in-2spr-r15-t15000",
@@ -165207,7 +165366,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 97000
+   "referenceCycles": 97000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-594lb-157in-4spr-r15-hl14-t15000",
@@ -165240,7 +165400,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 39000
+   "referenceCycles": 39000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-438lb-87in-2spr-r12-t15000",
@@ -165271,7 +165432,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 30000
+   "referenceCycles": 30000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-270lb-89in-3spr-r15-hl52-t100000",
@@ -165304,7 +165466,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 255000
+   "referenceCycles": 255000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-602lb-167in-4spr-r10-t15000",
@@ -165335,7 +165498,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 55000
+   "referenceCycles": 55000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-298lb-132in-2spr-r15-hl31-t15000",
@@ -165368,7 +165532,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 27000
+   "referenceCycles": 27000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-594lb-138in-4spr-r12-t25000",
@@ -165399,7 +165564,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 59000
+   "referenceCycles": 59000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-826lb-96in-4spr-r15-t10000",
@@ -165430,7 +165596,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 12000
+   "referenceCycles": 12000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-226lb-109in-2spr-r15-hl32-t15000",
@@ -165463,7 +165630,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 29000
+   "referenceCycles": 29000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-289-2343-486lb-160in-2spr-r15-hl34-t10000",
@@ -165496,7 +165664,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 12000
+   "referenceCycles": 12000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-382lb-86in-2spr-r15-t15000",
@@ -165527,7 +165696,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 58000
+   "referenceCycles": 58000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-442lb-144in-3spr-r12-t50000",
@@ -165558,7 +165728,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 59000
+   "referenceCycles": 59000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-354lb-148in-2spr-r10-t10000",
@@ -165589,7 +165760,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 25000
+   "referenceCycles": 25000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-442lb-85in-4spr-r15-hl25-t100000",
@@ -165622,7 +165794,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 173000
+   "referenceCycles": 173000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-214lb-159in-2spr-r15-hl19-t25000",
@@ -165655,7 +165828,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 44000
+   "referenceCycles": 44000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-534lb-84in-4spr-r15-hl12-t50000",
@@ -165688,7 +165862,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 65000
+   "referenceCycles": 65000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-510lb-109in-3spr-r12-t15000",
@@ -165719,7 +165894,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 100000
+   "referenceCycles": 100000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-178lb-113in-2spr-r15-hl53-t25000",
@@ -165752,7 +165928,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 70000
+   "referenceCycles": 70000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-574lb-84in-4spr-r15-hl28-t25000",
@@ -165785,7 +165962,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 45000
+   "referenceCycles": 45000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-526lb-139in-2spr-r15-t15000",
@@ -165816,7 +165994,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 21000
+   "referenceCycles": 21000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-422lb-84in-4spr-r15-t200000",
@@ -165847,7 +166026,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 278000
+   "referenceCycles": 278000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-274lb-124in-3spr-r15-hl14-t10000",
@@ -165880,7 +166060,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 96000
+   "referenceCycles": 96000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-486lb-86in-2spr-r12-t10000",
@@ -165911,7 +166092,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 18000
+   "referenceCycles": 18000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-378lb-172in-2spr-r12-t25000",
@@ -165942,7 +166124,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 31000
+   "referenceCycles": 31000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-246lb-108in-2spr-r10-t200000",
@@ -165973,7 +166156,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 228000
+   "referenceCycles": 228000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-378lb-104in-2spr-r15-hl12-t10000",
@@ -166006,7 +166190,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 13000
+   "referenceCycles": 13000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-322lb-86in-2spr-r12-t50000",
@@ -166037,7 +166222,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 131000
+   "referenceCycles": 131000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-298lb-124in-2spr-r15-hl68-t10000",
@@ -166070,7 +166256,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 14000
+   "referenceCycles": 14000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-386lb-107in-4spr-r15-hl92-t25000",
@@ -166103,7 +166290,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 32000
+   "referenceCycles": 32000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-466lb-177in-4spr-r12-t100000",
@@ -166134,7 +166322,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 180000
+   "referenceCycles": 180000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-202lb-166in-2spr-r15-hl44-t100000",
@@ -166167,7 +166356,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 132000
+   "referenceCycles": 132000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-442lb-123in-2spr-r15-t15000",
@@ -166198,7 +166388,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 28000
+   "referenceCycles": 28000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-454lb-86in-2spr-r12-t10000",
@@ -166229,7 +166420,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 25000
+   "referenceCycles": 25000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-386lb-123in-3spr-r10-t50000",
@@ -166260,7 +166452,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 116000
+   "referenceCycles": 116000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-422lb-113in-2spr-r10-t10000",
@@ -166291,7 +166484,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 36000
+   "referenceCycles": 36000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-518lb-128in-2spr-r12-t10000",
@@ -166322,7 +166516,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 13000
+   "referenceCycles": 13000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-266lb-94in-2spr-r12-t50000",
@@ -166353,7 +166548,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 96000
+   "referenceCycles": 96000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-590lb-133in-2spr-r15-t10000",
@@ -166384,7 +166580,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 12000
+   "referenceCycles": 12000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-414lb-93in-2spr-r12-t15000",
@@ -166415,7 +166612,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 41000
+   "referenceCycles": 41000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-310lb-151in-3spr-r10-t15000",
@@ -166446,7 +166644,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 313000
+   "referenceCycles": 313000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-262lb-124in-2spr-r15-hl53-t25000",
@@ -166479,7 +166678,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 34000
+   "referenceCycles": 34000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-358lb-131in-2spr-r15-t100000",
@@ -166510,7 +166710,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 128000
+   "referenceCycles": 128000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-438lb-93in-4spr-r10-t25000",
@@ -166541,7 +166742,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 238000
+   "referenceCycles": 238000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-242lb-84in-2spr-r12-t200000",
@@ -166572,7 +166774,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 257000
+   "referenceCycles": 257000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-378lb-84in-2spr-r10-t50000",
@@ -166603,7 +166806,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 61000
+   "referenceCycles": 61000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-246lb-125in-2spr-r15-hl50-t50000",
@@ -166636,7 +166840,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 78000
+   "referenceCycles": 78000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-222lb-118in-3spr-r15-hl88-t50000",
@@ -166669,7 +166874,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 119000
+   "referenceCycles": 119000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-406lb-112in-4spr-r15-hl30-t25000",
@@ -166702,7 +166908,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 48000
+   "referenceCycles": 48000,
+   "fit": false
   },
   {
    "id": "R1-575120-289-2343-394lb-152in-2spr-r15-hl46-t15000",
@@ -166735,7 +166942,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 19000
+   "referenceCycles": 19000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-462lb-107in-3spr-r12-t25000",
@@ -166766,7 +166974,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 50000
+   "referenceCycles": 50000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-334lb-86in-2spr-r10-t50000",
@@ -166797,7 +167006,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 114000
+   "referenceCycles": 114000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-298lb-178in-3spr-r15-hl33-t50000",
@@ -166830,7 +167040,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 235000
+   "referenceCycles": 235000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-430lb-149in-4spr-r15-hl44-t25000",
@@ -166863,7 +167074,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 99000
+   "referenceCycles": 99000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-706lb-96in-4spr-r15-t10000",
@@ -166894,7 +167106,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 26000
+   "referenceCycles": 26000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-466lb-157in-4spr-r15-hl14-t15000",
@@ -166927,7 +167140,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 123000
+   "referenceCycles": 123000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-238lb-113in-2spr-r15-hl53-t25000",
@@ -166960,7 +167174,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 30000
+   "referenceCycles": 30000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-434lb-154in-4spr-r15-hl31-t10000",
@@ -166993,7 +167208,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 118000
+   "referenceCycles": 118000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-430lb-122in-3spr-r12-t100000",
@@ -167024,7 +167240,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 222000
+   "referenceCycles": 222000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-274lb-164in-2spr-r10-t10000",
@@ -167055,7 +167272,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 85000
+   "referenceCycles": 85000,
+   "fit": false
   },
   {
    "id": "R1-D800120-289-2343-266lb-143in-2spr-r15-hl92-t25000",
@@ -167088,7 +167306,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 25000
+   "referenceCycles": 25000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-314lb-105in-2spr-r10-t200000",
@@ -167119,7 +167338,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 241000
+   "referenceCycles": 241000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-206lb-172in-2spr-r15-hl25-t15000",
@@ -167152,7 +167372,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 169000
+   "referenceCycles": 169000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-266lb-177in-4spr-r15-hl88-t10000",
@@ -167185,7 +167406,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 192000
+   "referenceCycles": 192000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-314lb-176in-2spr-r15-hl68-t10000",
@@ -167218,7 +167440,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 11000
+   "referenceCycles": 11000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-642lb-171in-4spr-r10-t25000",
@@ -167249,7 +167472,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 41000
+   "referenceCycles": 41000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-230lb-88in-2spr-r15-hl39-t10000",
@@ -167282,7 +167506,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 78000
+   "referenceCycles": 78000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-538lb-130in-3spr-r15-hl50-t10000",
@@ -167315,7 +167540,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 10000
+   "referenceCycles": 10000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-654lb-158in-4spr-r15-t10000",
@@ -167346,7 +167572,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 37000
+   "referenceCycles": 37000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-214lb-115in-2spr-r15-hl16-t200000",
@@ -167379,7 +167606,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 285000
+   "referenceCycles": 285000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-510lb-108in-2spr-r10-t15000",
@@ -167410,7 +167638,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 25000
+   "referenceCycles": 25000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-354lb-140in-2spr-r10-t15000",
@@ -167441,7 +167670,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 81000
+   "referenceCycles": 81000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-522lb-87in-4spr-r15-t10000",
@@ -167472,7 +167702,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 337000
+   "referenceCycles": 337000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-202lb-148in-2spr-r15-hl43-t50000",
@@ -167505,7 +167736,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 176000
+   "referenceCycles": 176000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-438lb-86in-2spr-r12-t10000",
@@ -167536,7 +167768,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 30000
+   "referenceCycles": 30000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-254lb-135in-2spr-r15-hl20-t100000",
@@ -167569,7 +167802,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 121000
+   "referenceCycles": 121000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-498lb-113in-2spr-r10-t10000",
@@ -167600,7 +167834,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 16000
+   "referenceCycles": 16000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-406lb-148in-2spr-r10-t10000",
@@ -167631,7 +167866,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 13000
+   "referenceCycles": 13000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-214lb-147in-2spr-r10-t50000",
@@ -167662,7 +167898,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 275000
+   "referenceCycles": 275000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-302lb-86in-2spr-r15-hl12-t15000",
@@ -167695,7 +167932,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 37000
+   "referenceCycles": 37000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-274lb-107in-3spr-r15-hl64-t25000",
@@ -167728,7 +167966,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 150000
+   "referenceCycles": 150000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-210lb-110in-3spr-r15-hl93-t200000",
@@ -167761,7 +168000,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 353000
+   "referenceCycles": 353000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-289-2343-458lb-147in-2spr-r15-hl34-t15000",
@@ -167794,7 +168034,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 16000
+   "referenceCycles": 16000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-554lb-127in-2spr-r10-t10000",
@@ -167825,7 +168066,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 10000
+   "referenceCycles": 10000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-302lb-88in-2spr-r15-hl39-t25000",
@@ -167858,7 +168100,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 28000
+   "referenceCycles": 28000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-338lb-112in-2spr-r15-t25000",
@@ -167889,7 +168132,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 32000
+   "referenceCycles": 32000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-350lb-109in-2spr-r10-t25000",
@@ -167920,7 +168164,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 27000
+   "referenceCycles": 27000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-330lb-94in-3spr-r15-t200000",
@@ -167951,7 +168196,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 238000
+   "referenceCycles": 238000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-198lb-113in-2spr-r15-hl53-t25000",
@@ -167984,7 +168230,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 42000
+   "referenceCycles": 42000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-430lb-133in-2spr-r15-t50000",
@@ -168015,7 +168262,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 55000
+   "referenceCycles": 55000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-226lb-150in-2spr-r15-hl94-t25000",
@@ -168048,7 +168296,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 25000
+   "referenceCycles": 25000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-374lb-85in-2spr-r12-t100000",
@@ -168079,7 +168328,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 110000
+   "referenceCycles": 110000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-258lb-170in-2spr-r15-t50000",
@@ -168110,7 +168360,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 112000
+   "referenceCycles": 112000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-534lb-118in-4spr-r10-t50000",
@@ -168141,7 +168392,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 308000
+   "referenceCycles": 308000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-418lb-86in-2spr-r15-t50000",
@@ -168172,7 +168424,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 64000
+   "referenceCycles": 64000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-326lb-88in-2spr-r15-t10000",
@@ -168203,7 +168456,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 127000
+   "referenceCycles": 127000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-354lb-98in-2spr-r15-hl45-t10000",
@@ -168236,7 +168490,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 12000
+   "referenceCycles": 12000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-430lb-169in-4spr-r15-t200000",
@@ -168267,7 +168522,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 267000
+   "referenceCycles": 267000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-273-2253-334lb-114in-2spr-r15-hl29-t25000",
@@ -168300,7 +168556,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 37000
+   "referenceCycles": 37000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-306lb-99in-2spr-r12-t200000",
@@ -168331,7 +168588,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 270000
+   "referenceCycles": 270000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-482lb-117in-4spr-r15-t25000",
@@ -168362,7 +168620,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 156000
+   "referenceCycles": 156000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-470lb-140in-2spr-r15-t10000",
@@ -168393,7 +168652,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 22000
+   "referenceCycles": 22000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-470lb-85in-2spr-r12-t10000",
@@ -168424,7 +168684,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 11000
+   "referenceCycles": 11000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-273-2253-258lb-143in-2spr-r15-hl27-t100000",
@@ -168457,7 +168718,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 132000
+   "referenceCycles": 132000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-358lb-87in-2spr-r12-t15000",
@@ -168488,7 +168750,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 78000
+   "referenceCycles": 78000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-234lb-152in-2spr-r15-hl46-t15000",
@@ -168521,7 +168784,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 63000
+   "referenceCycles": 63000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-290lb-116in-2spr-r12-t50000",
@@ -168552,7 +168816,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 206000
+   "referenceCycles": 206000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-182lb-156in-2spr-r15-hl66-t200000",
@@ -168585,7 +168850,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 248000
+   "referenceCycles": 248000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-342lb-154in-2spr-r10-t50000",
@@ -168616,7 +168882,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 51000
+   "referenceCycles": 51000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-338lb-115in-2spr-r12-t50000",
@@ -168647,7 +168914,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 53000
+   "referenceCycles": 53000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-286lb-153in-2spr-r15-hl54-t25000",
@@ -168680,7 +168948,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 36000
+   "referenceCycles": 36000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-190lb-150in-2spr-r15-hl69-t50000",
@@ -168713,7 +168982,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 73000
+   "referenceCycles": 73000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-338lb-124in-2spr-r15-hl68-t10000",
@@ -168746,7 +169016,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 13000
+   "referenceCycles": 13000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-530lb-98in-2spr-r15-t15000",
@@ -168777,7 +169048,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 20000
+   "referenceCycles": 20000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-414lb-117in-4spr-r15-hl47-t10000",
@@ -168810,7 +169082,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 145000
+   "referenceCycles": 145000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-370lb-134in-2spr-r10-t10000",
@@ -168841,7 +169114,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 20000
+   "referenceCycles": 20000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-290lb-93in-2spr-r15-t200000",
@@ -168872,7 +169146,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 217000
+   "referenceCycles": 217000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-410lb-95in-2spr-r15-t50000",
@@ -168903,7 +169178,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 69000
+   "referenceCycles": 69000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-386lb-95in-2spr-r12-t25000",
@@ -168934,7 +169210,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 55000
+   "referenceCycles": 55000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-194lb-101in-2spr-r15-hl43-t25000",
@@ -168967,7 +169244,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 53000
+   "referenceCycles": 53000,
+   "fit": false
   },
   {
    "id": "R1-D400144-289-2343-382lb-122in-2spr-r15-t200000",
@@ -168998,7 +169276,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 199000
+   "referenceCycles": 199000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-410lb-90in-2spr-r10-t25000",
@@ -169029,7 +169308,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 43000
+   "referenceCycles": 43000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-238lb-176in-2spr-r10-t15000",
@@ -169060,7 +169340,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 166000
+   "referenceCycles": 166000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-402lb-86in-2spr-r12-t50000",
@@ -169091,7 +169372,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 77000
+   "referenceCycles": 77000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-418lb-86in-2spr-r12-t10000",
@@ -169122,7 +169404,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 38000
+   "referenceCycles": 38000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-582lb-133in-4spr-r15-t25000",
@@ -169153,7 +169436,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 205000
+   "referenceCycles": 205000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-182lb-170in-2spr-r15-hl79-t200000",
@@ -169186,7 +169470,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 207000
+   "referenceCycles": 207000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-242lb-175in-2spr-r10-t200000",
@@ -169217,7 +169502,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 250000
+   "referenceCycles": 250000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-182lb-166in-2spr-r15-hl16-t100000",
@@ -169250,7 +169536,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 155000
+   "referenceCycles": 155000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-278lb-174in-3spr-r15-hl47-t50000",
@@ -169283,7 +169570,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 62000
+   "referenceCycles": 62000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-414lb-175in-4spr-r12-t50000",
@@ -169314,7 +169602,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 309000
+   "referenceCycles": 309000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-406lb-167in-4spr-r10-t15000",
@@ -169345,7 +169634,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 343000
+   "referenceCycles": 343000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-518lb-123in-2spr-r15-t15000",
@@ -169376,7 +169666,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 22000
+   "referenceCycles": 22000,
+   "fit": false
   },
   {
    "id": "R1-D525216-289-2343-458lb-112in-2spr-r15-t25000",
@@ -169407,7 +169698,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 27000
+   "referenceCycles": 27000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-238lb-108in-2spr-r10-t200000",
@@ -169438,7 +169730,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 265000
+   "referenceCycles": 265000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-262lb-172in-2spr-r15-hl25-t15000",
@@ -169471,7 +169764,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 55000
+   "referenceCycles": 55000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-518lb-126in-4spr-r15-hl32-t10000",
@@ -169504,7 +169798,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 51000
+   "referenceCycles": 51000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-378lb-128in-2spr-r12-t10000",
@@ -169535,7 +169830,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 60000
+   "referenceCycles": 60000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-342lb-148in-2spr-r10-t10000",
@@ -169566,7 +169862,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 30000
+   "referenceCycles": 30000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-262lb-86in-2spr-r12-t50000",
@@ -169597,7 +169894,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 342000
+   "referenceCycles": 342000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-214lb-125in-2spr-r15-hl85-t25000",
@@ -169630,7 +169928,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 35000
+   "referenceCycles": 35000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-310lb-88in-2spr-r15-hl59-t15000",
@@ -169663,7 +169962,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 23000
+   "referenceCycles": 23000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-262lb-135in-2spr-r15-hl20-t100000",
@@ -169696,7 +169996,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 104000
+   "referenceCycles": 104000,
+   "fit": false
   },
   {
    "id": "R1-D525216-289-2343-450lb-166in-2spr-r10-t25000",
@@ -169727,7 +170028,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 29000
+   "referenceCycles": 29000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-438lb-84in-2spr-r10-t25000",
@@ -169758,7 +170060,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 31000
+   "referenceCycles": 31000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-278lb-153in-2spr-r15-hl54-t25000",
@@ -169791,7 +170094,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 42000
+   "referenceCycles": 42000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-478lb-94in-2spr-r10-t15000",
@@ -169822,7 +170126,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 19000
+   "referenceCycles": 19000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-414lb-137in-4spr-r15-hl46-t10000",
@@ -169855,7 +170160,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 38000
+   "referenceCycles": 38000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-358lb-99in-2spr-r15-hl59-t10000",
@@ -169888,7 +170194,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 11000
+   "referenceCycles": 11000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-334lb-99in-2spr-r15-hl59-t10000",
@@ -169921,7 +170228,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 16000
+   "referenceCycles": 16000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-273-2253-378lb-147in-2spr-r15-hl34-t15000",
@@ -169954,7 +170262,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 18000
+   "referenceCycles": 18000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-282lb-104in-2spr-r15-hl12-t10000",
@@ -169987,7 +170296,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 51000
+   "referenceCycles": 51000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-178lb-143in-2spr-r15-hl43-t100000",
@@ -170020,7 +170330,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 240000
+   "referenceCycles": 240000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-310lb-123in-2spr-r15-hl25-t10000",
@@ -170053,7 +170364,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 11000
+   "referenceCycles": 11000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-358lb-86in-2spr-r15-hl12-t15000",
@@ -170086,7 +170398,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 16000
+   "referenceCycles": 16000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-234lb-113in-2spr-r15-hl95-t15000",
@@ -170119,7 +170432,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 21000
+   "referenceCycles": 21000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-450lb-157in-4spr-r15-hl14-t15000",
@@ -170152,7 +170466,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 145000
+   "referenceCycles": 145000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-390lb-103in-2spr-r10-t10000",
@@ -170183,7 +170498,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 15000
+   "referenceCycles": 15000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-338lb-99in-2spr-r15-hl59-t10000",
@@ -170216,7 +170532,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 15000
+   "referenceCycles": 15000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-322lb-91in-2spr-r15-t200000",
@@ -170247,7 +170564,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 215000
+   "referenceCycles": 215000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-174lb-143in-2spr-r15-hl43-t100000",
@@ -170280,7 +170598,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 268000
+   "referenceCycles": 268000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-222lb-143in-2spr-r15-hl54-t100000",
@@ -170313,7 +170632,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 119000
+   "referenceCycles": 119000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-430lb-95in-2spr-r15-t50000",
@@ -170344,7 +170664,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 55000
+   "referenceCycles": 55000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-438lb-101in-4spr-r15-hl58-t10000",
@@ -170377,7 +170698,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 25000
+   "referenceCycles": 25000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-570lb-86in-2spr-r12-t10000",
@@ -170408,7 +170730,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 14000
+   "referenceCycles": 14000,
+   "fit": false
   },
   {
    "id": "R1-D400144-289-2343-422lb-127in-2spr-r12-t100000",
@@ -170439,7 +170762,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 126000
+   "referenceCycles": 126000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-230lb-84in-2spr-r12-t200000",
@@ -170470,7 +170794,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 325000
+   "referenceCycles": 325000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-390lb-166in-2spr-r15-hl15-t15000",
@@ -170503,7 +170828,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 18000
+   "referenceCycles": 18000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-606lb-86in-2spr-r12-t10000",
@@ -170534,7 +170860,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 11000
+   "referenceCycles": 11000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-370lb-131in-2spr-r15-t100000",
@@ -170565,7 +170892,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 109000
+   "referenceCycles": 109000,
+   "fit": false
   },
   {
    "id": "R1-D525216-289-2343-330lb-125in-2spr-r12-t100000",
@@ -170596,7 +170924,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 123000
+   "referenceCycles": 123000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-250lb-99in-2spr-r15-hl51-t10000",
@@ -170629,7 +170958,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 14000
+   "referenceCycles": 14000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-410lb-92in-2spr-r15-t10000",
@@ -170660,7 +170990,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 43000
+   "referenceCycles": 43000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-194lb-155in-2spr-r15-hl74-t50000",
@@ -170693,7 +171024,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 61000
+   "referenceCycles": 61000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-194lb-150in-2spr-r15-hl94-t25000",
@@ -170726,7 +171058,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 31000
+   "referenceCycles": 31000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-289-2343-306lb-143in-2spr-r15-hl27-t100000",
@@ -170759,7 +171092,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 124000
+   "referenceCycles": 124000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-254lb-115in-2spr-r15-hl63-t50000",
@@ -170792,7 +171126,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 54000
+   "referenceCycles": 54000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-446lb-93in-2spr-r12-t15000",
@@ -170823,7 +171158,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 29000
+   "referenceCycles": 29000,
+   "fit": false
   },
   {
    "id": "R1-D800120-289-2343-230lb-155in-2spr-r15-hl74-t50000",
@@ -170856,7 +171192,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 58000
+   "referenceCycles": 58000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-310lb-93in-2spr-r15-hl66-t15000",
@@ -170889,7 +171226,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 21000
+   "referenceCycles": 21000,
+   "fit": false
   },
   {
    "id": "R1-D40096-273-2253-346lb-85in-2spr-r12-t100000",
@@ -170920,7 +171258,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 159000
+   "referenceCycles": 159000,
+   "fit": false
   },
   {
    "id": "R1-D800120-289-2343-286lb-101in-2spr-r15-hl43-t25000",
@@ -170953,7 +171292,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 30000
+   "referenceCycles": 30000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-374lb-100in-2spr-r15-hl25-t15000",
@@ -170986,7 +171326,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 18000
+   "referenceCycles": 18000,
+   "fit": false
   },
   {
    "id": "R1-D400144-289-2343-362lb-99in-2spr-r12-t200000",
@@ -171017,7 +171358,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 258000
+   "referenceCycles": 258000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-346lb-112in-2spr-r15-t100000",
@@ -171048,7 +171390,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 155000
+   "referenceCycles": 155000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-562lb-133in-2spr-r15-t10000",
@@ -171079,7 +171422,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 15000
+   "referenceCycles": 15000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-322lb-129in-2spr-r10-t200000",
@@ -171110,7 +171454,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 217000
+   "referenceCycles": 217000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-406lb-86in-2spr-r15-hl12-t15000",
@@ -171143,7 +171488,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 15000
+   "referenceCycles": 15000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-542lb-86in-2spr-r12-t10000",
@@ -171174,7 +171520,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 11000
+   "referenceCycles": 11000,
+   "fit": false
   },
   {
    "id": "R1-D40096-289-2343-422lb-95in-2spr-r15-t100000",
@@ -171205,7 +171552,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 127000
+   "referenceCycles": 127000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-2625-2253-398lb-145in-3spr-r15-hl19-t10000",
@@ -171238,7 +171586,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 82000
+   "referenceCycles": 82000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-302lb-94in-2spr-r12-t50000",
@@ -171269,7 +171618,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 53000
+   "referenceCycles": 53000,
+   "fit": false
   },
   {
    "id": "R1-D40096-2625-2253-418lb-88in-2spr-r15-t10000",
@@ -171300,7 +171650,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 39000
+   "referenceCycles": 39000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-430lb-85in-2spr-r10-t50000",
@@ -171331,7 +171682,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 54000
+   "referenceCycles": 54000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-534lb-114in-2spr-r10-t10000",
@@ -171362,7 +171714,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 12000
+   "referenceCycles": 12000,
+   "fit": false
   },
   {
    "id": "R1-D800120-2625-2253-362lb-93in-4spr-r15-hl47-t15000",
@@ -171395,7 +171748,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 66000
+   "referenceCycles": 66000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-514lb-94in-3spr-r10-t25000",
@@ -171426,7 +171780,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 30000
+   "referenceCycles": 30000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-334lb-100in-2spr-r15-hl25-t15000",
@@ -171459,7 +171814,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 18000
+   "referenceCycles": 18000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-338lb-95in-2spr-r15-t15000",
@@ -171490,7 +171846,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 31000
+   "referenceCycles": 31000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-318lb-105in-2spr-r10-t200000",
@@ -171521,7 +171878,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 228000
+   "referenceCycles": 228000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-358lb-172in-2spr-r12-t25000",
@@ -171552,7 +171910,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 40000
+   "referenceCycles": 40000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-366lb-109in-2spr-r10-t25000",
@@ -171583,7 +171942,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 37000
+   "referenceCycles": 37000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-558lb-104in-2spr-r15-t10000",
@@ -171614,7 +171974,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 15000
+   "referenceCycles": 15000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-289-2343-390lb-88in-2spr-r15-hl39-t25000",
@@ -171647,7 +172008,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 30000
+   "referenceCycles": 30000,
+   "fit": false
   },
   {
    "id": "R1-D525216-289-2343-386lb-115in-2spr-r12-t50000",
@@ -171678,7 +172040,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 59000
+   "referenceCycles": 59000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-246lb-152in-2spr-r15-hl25-t25000",
@@ -171711,7 +172074,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 34000
+   "referenceCycles": 34000,
+   "fit": false
   },
   {
    "id": "R1-575120-289-2343-322lb-140in-2spr-r15-hl91-t25000",
@@ -171744,7 +172108,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 26000
+   "referenceCycles": 26000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-273-2253-342lb-88in-2spr-r15-hl39-t25000",
@@ -171777,7 +172142,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 26000
+   "referenceCycles": 26000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-378lb-100in-2spr-r15-hl25-t15000",
@@ -171810,7 +172176,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 17000
+   "referenceCycles": 17000,
+   "fit": false
   },
   {
    "id": "R1-D525216-2625-2253-298lb-85in-2spr-r12-t10000",
@@ -171841,7 +172208,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 56000
+   "referenceCycles": 56000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-294lb-114in-2spr-r15-t200000",
@@ -171872,7 +172240,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 323000
+   "referenceCycles": 323000,
+   "fit": false
   },
   {
    "id": "R1-D400144-2625-2253-502lb-86in-2spr-r12-t10000",
@@ -171903,7 +172272,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 16000
+   "referenceCycles": 16000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-534lb-87in-2spr-r12-t15000",
@@ -171934,7 +172304,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 20000
+   "referenceCycles": 20000,
+   "fit": false
   },
   {
    "id": "R1-D400144-273-2253-566lb-87in-2spr-r12-t15000",
@@ -171965,7 +172336,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 15000
+   "referenceCycles": 15000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-442lb-103in-2spr-r10-t10000",
@@ -171996,7 +172368,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 14000
+   "referenceCycles": 14000,
+   "fit": false
   },
   {
    "id": "R1-D400144-289-2343-494lb-85in-2spr-r10-t50000",
@@ -172027,7 +172400,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 60000
+   "referenceCycles": 60000,
+   "fit": false
   },
   {
    "id": "R1-D525216-273-2253-430lb-128in-2spr-r10-t15000",
@@ -172058,7 +172432,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 17000
+   "referenceCycles": 17000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-346lb-151in-4spr-r15-hl55-t100000",
@@ -172091,7 +172466,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 224000
+   "referenceCycles": 224000,
+   "fit": false
   },
   {
    "id": "R1-575120-273-2253-302lb-153in-2spr-r15-hl54-t25000",
@@ -172124,7 +172500,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 28000
+   "referenceCycles": 28000,
+   "fit": false
   },
   {
    "id": "R1-575120-2625-2253-414lb-150in-4spr-r15-hl89-t15000",
@@ -172157,7 +172534,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 58000
+   "referenceCycles": 58000,
+   "fit": false
   },
   {
    "id": "R1-52554HL-273-2253-410lb-98in-2spr-r15-hl45-t10000",
@@ -172190,7 +172568,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 10000
+   "referenceCycles": 10000,
+   "fit": false
   },
   {
    "id": "R1-D800120-273-2253-274lb-158in-2spr-r15-hl14-t15000",
@@ -172223,7 +172602,8 @@
     "duplexInnerWeight": 0.02,
     "duplexOuterWeight": 0.02
    },
-   "referenceCycles": 23000
+   "referenceCycles": 23000,
+   "fit": false
   },
   {
    "id": "U1-D400144-295-2343-337lb-105in-1spr-r10-t15000",

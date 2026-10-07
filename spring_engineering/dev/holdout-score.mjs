@@ -7,10 +7,24 @@ const want = new Set(
         .filter((l) => l.startsWith("HELD\t"))
         .map((l) => l.slice(5))
 );
+// SCORE_EXCLUDE=R1,U5 scores only readings OUTSIDE those batches.
+//
+// WHY THIS IS NEEDED. Moving a batch into or out of the fit changes what the
+// holdout SCORES as well as what it fits, because a `fit: false` reading is
+// still scored. A batch that is fitted gets same-batch neighbours in every
+// fold, so it predicts better - and the overall figure rises even if nothing
+// else got better. That is not a subtle effect: re-fitting U5-U8 raised this
+// number by 0.88 points while the never-tuned validation sample FELL by 2.3.
+//
+// Excluding the toggled batch from the SCORING leaves a fixed population, which
+// is the only way this number answers "does that data help other doors".
+const exclude = (process.env.SCORE_EXCLUDE || "")
+    .split(",").map((x) => x.trim()).filter(Boolean);
 const c = JSON.parse(readFileSync("./dev/corpus.json", "utf8"));
 let n = 0, wire = 0, len = 0, all = 0;
 for (const r of c.readings) {
     if (r.status !== "verified" || !r.expect || r.expect.duplexInnerLength === undefined) continue;
+    if (exclude.some((p) => (r.id ?? "").startsWith(p + "-"))) continue;
     const st = r.state;
     const key = [st.drum, st.springs, st.radius, st.liftType ?? "Standard",
         st.liftin ?? "", st.cycles, st.weight, st.doorHeightFeet,
