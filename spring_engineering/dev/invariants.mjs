@@ -4,7 +4,8 @@
 // statements the code's own comments already make, now enforced. They catch
 // the whole class of bug where a continuous rounding wobble flips a discrete
 // wire choice and moves the answer by inches.
-import { make } from "./harness.mjs";
+import { make, mount, SOURCE } from "./harness.mjs";
+import { readFileSync } from "node:fs";
 import { DUPLEX_IDS, TARGETS } from "./cases.mjs";
 
 const DRUM = "CANIMEX/TF D400-144";
@@ -876,6 +877,129 @@ function singleWireSwitches(mod) {
     return fails;
 }
 
+// EVERY HOOK THE SOURCE CALLS HAS TO BE IMPORTED OR DEFINED IN IT.
+//
+// The invariant below runs setup() and so catches a missing import on that
+// path. This one is static and catches the rest: a hook called in a branch no
+// test reaches is still a ReferenceError the first time a visitor reaches it,
+// and it would ship looking exactly as healthy as the rest of the file.
+//
+// Scope is deliberately the OWL naming convention - useThing() and onThing() -
+// because that is the class of name this file takes from a framework import
+// rather than defining itself, and it is where the mistake happened.
+function hooksAreImported(mod) {
+    void mod;
+
+    const fails = [];
+    const src = readFileSync(SOURCE, "utf8");
+    const imported = new Set();
+
+    for (const m of src.matchAll(/^import\s*\{([^}]*)\}\s*from\s*"[^"]+"\s*;/gm)) {
+        for (const name of m[1].split(",")) {
+            imported.add(name.trim());
+        }
+    }
+
+    // Anything the file declares itself is equally fine.
+    const declared = new Set();
+
+    for (const m of src.matchAll(/^(?:export\s+)?(?:function|const|let|class)\s+([A-Za-z_$][\w$]*)/gm)) {
+        declared.add(m[1]);
+    }
+
+    for (const m of src.matchAll(/(?<![.\w$])((?:use|on)[A-Z][\w$]*)\s*\(/g)) {
+        const name = m[1];
+
+        if (imported.has(name) || declared.has(name)) {
+            continue;
+        }
+
+        const line = src.slice(0, m.index).split("\n").length;
+
+        fails.push(`${name}() is called at line ${line} but is neither imported nor defined`);
+    }
+
+    return [...new Set(fails)];
+}
+
+// THE COMPONENT HAS TO SURVIVE ITS OWN setup().
+//
+// This is the invariant that was missing when `onWillStart` was called in
+// setup() without being added to the owl import. The page threw
+// "onWillStart is not defined" on first mount in production, and nothing in
+// this repository could have caught it: `make` assigns state directly and
+// never calls setup(), so the one function the browser always runs was the one
+// function the suite never ran.
+//
+// Two halves, because the fix has two halves. `mount` runs setup() for real,
+// and dev/harness.mjs now builds its stubs from the source's own import
+// statements - so a name that is used but not imported is undefined in the
+// harness exactly as it is in the browser. A hardcoded stub list would have
+// supplied the missing name and passed.
+//
+// It also checks what setup() is FOR: the rates fetch has to reach the price,
+// and a failed fetch has to withhold it rather than quote at cost.
+async function setupSurvivesAndFetchesRates(mod) {
+    const fails = [];
+    const RATES = {
+        cones: { "2.625": 8.982, "3.75": 20.79, "5.25": 34.974, "6.0": 34.974 },
+        perLb: 2.628,
+    };
+
+    let served = 0;
+
+    try {
+        const c = await mount(mod, { assembly: "Duplex", springId: '3 3/4" inside 6"',
+                                     drum: DRUM, weight: "600", springs: 2,
+                                     doorHeightFeet: 7 },
+            { rpc: async (route) => {
+                served += 1;
+
+                if (route !== "/spring-calculator/rates") {
+                    fails.push(`setup fetched ${route}, not /spring-calculator/rates`);
+                }
+
+                return RATES;
+            } });
+
+        if (!served) {
+            fails.push("setup never asked the server for its rates");
+        }
+
+        if (!c.state || !c.state.drum) {
+            fails.push("setup did not initialise state");
+        }
+
+        if (!c.priceAvailable) {
+            fails.push("rates were served and the price is still unavailable");
+        }
+
+        if (!(c.priceTotal > 0)) {
+            fails.push(`rates were served and the total is ${c.priceTotal}`);
+        }
+    } catch (e) {
+        fails.push(`setup() threw: ${e.constructor.name}: ${e.message}`);
+
+        return fails;
+    }
+
+    // A SERVER THAT DOES NOT ANSWER MUST COST THE QUOTE, NOT THE MARGIN.
+    try {
+        const c = await mount(mod, { assembly: "Duplex", springId: '3 3/4" inside 6"',
+                                     drum: DRUM, weight: "600", springs: 2,
+                                     doorHeightFeet: 7 },
+            { rpc: async () => { throw new Error("offline"); } });
+
+        if (c.priceAvailable || c.priceTotal !== 0) {
+            fails.push(`with the rates fetch failing the page still quotes ${c.priceTotal}`);
+        }
+    } catch (e) {
+        fails.push(`a failed rates fetch broke the component: ${e.message}`);
+    }
+
+    return fails;
+}
+
 export const INVARIANTS = [
     { name: "cycle life / wire choice is independent of door height", run: heightIndependence },
     { name: "cycle life / wire choice is independent of track radius", run: radiusIndependence },
@@ -894,4 +1018,6 @@ export const INVARIANTS = [
     { name: "a rate the server did not send withholds the quote", run: missingRateRefusesToQuote },
     { name: "Single assembly length matches the reference's width brackets", run: singleAssemblyBrackets },
     { name: "the Single wire steps where the reference steps", run: singleWireSwitches },
+    { name: "every hook the source calls is imported", run: hooksAreImported },
+    { name: "the component survives setup() and fetches its rates", run: setupSurvivesAndFetchesRates },
 ];

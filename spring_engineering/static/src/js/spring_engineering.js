@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, useEffect, useState } from "@odoo/owl";
+import { Component, onWillStart, useEffect, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 

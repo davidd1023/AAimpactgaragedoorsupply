@@ -119,11 +119,14 @@ function runSingle(mod) {
     return diffs ? 1 : 0;
 }
 
-function runInvariants(mod) {
+// Async, because one invariant has to run the component's own lifecycle and
+// await the fetch it makes. A sync-only runner would have quietly received a
+// Promise and read `.length` off it as undefined.
+async function runInvariants(mod) {
     let bad = 0;
 
     for (const { name, run } of INVARIANTS) {
-        const fails = run(mod);
+        const fails = await run(mod);
 
         if (!fails.length) {
             console.log(`  PASS  ${name}`);
@@ -278,7 +281,7 @@ if (!only || only === "single") {
 
 if (!only || only === "invariants") {
     console.log("\nDUPLEX INVARIANTS (no reference data needed)");
-    failed += runInvariants(mod);
+    failed += await runInvariants(mod);
 }
 
 if (!only || only === "corpus") {
