@@ -85,41 +85,68 @@ def _calculator_constants():
 # Read fresh on every request rather than cached, so changing the parameter
 # takes effect immediately instead of on the next restart.
 MARKUP_KEY = "spring_engineering.markup_percent"
+LABOR_KEY = "spring_engineering.labor_flat"
 
 
-def _markup_factor():
-    """What the supplier cost is multiplied by to reach the selling price.
+def _pricing_param(key):
+    """A non-negative number from a system parameter, or ValueError.
 
-    RAISES RATHER THAN FALLING BACK. There is no safe default here: assuming
-    zero sells every assembly at cost, and nothing about the page or the cart
-    would look wrong while it happened. The module ships the parameter, so a
-    missing or unreadable one means it was deleted or edited by hand, and the
-    callers turn that into "call us" instead of a price - a lost phone call
-    costs less than a month of selling at cost.
+    RAISES RATHER THAN FALLING BACK. There is no safe default for either of the
+    parameters that use this: a missing markup sells every assembly at cost, and
+    a missing labour charge gives the work away, and in both cases nothing about
+    the page or the cart would look wrong while it happened. The module ships
+    both records, so a missing or unreadable one means it was deleted or edited
+    by hand, and the callers turn that into "call us" instead of a price. A lost
+    phone call costs less than a month of selling at cost.
+
+    ONE READER FOR BOTH PARAMETERS, deliberately. The markup had its own copy of
+    this and the labour charge would have had a second - including a second copy
+    of the subtle part below, which is the kind of duplication that has already
+    cost this project real bugs twice.
     """
-    raw = request.env["ir.config_parameter"].sudo().get_param(MARKUP_KEY)
+    raw = request.env["ir.config_parameter"].sudo().get_param(key)
 
     # MISSING IS CHECKED BEFORE float(), not by letting float() complain.
     # get_param returns False when there is no row, and float(False) is 0.0 -
     # a perfectly valid number - so a deleted parameter sailed through the
-    # conversion and sold at cost, which is the exact failure this function is
-    # written to prevent.
+    # conversion and sold at cost, which is the exact failure this guard exists
+    # to prevent. Zero is a legitimate value for either parameter and cannot be
+    # told apart from a deleted row after the conversion, which is why the
+    # distinction has to be made here.
     if raw is None or raw is False or not str(raw).strip():
-        raise ValueError(f"{MARKUP_KEY} is not set - cannot price an assembly")
+        raise ValueError(f"{key} is not set - cannot price an assembly")
 
     try:
-        percent = float(raw)
+        value = float(raw)
     except (TypeError, ValueError):
-        raise ValueError(
-            f"{MARKUP_KEY} is {raw!r}, not a number - cannot price an assembly"
-        )
+        raise ValueError(f"{key} is {raw!r}, not a number - cannot price an assembly")
 
-    # A negative markup would quote below cost. That is a typo, not an
-    # instruction; refuse it the same way.
-    if percent < 0:
-        raise ValueError(f"{MARKUP_KEY} is {percent}, below cost")
+    # A negative markup quotes below cost and negative labour pays the customer
+    # to take it. Either is a typo, not an instruction.
+    if value < 0:
+        raise ValueError(f"{key} is {value}, which is below zero")
 
-    return 1.0 + percent / 100.0
+    return value
+
+
+def _markup_factor():
+    """What the supplier cost is multiplied by to reach the selling price."""
+    return 1.0 + _pricing_param(MARKUP_KEY) / 100.0
+
+
+def _labor_flat():
+    """The labour charge on one assembly, in currency, already a selling price.
+
+    FLAT PER ASSEMBLY, NOT PER SPRING. Fitting a set of springs is one job
+    whether it holds one spring or four, which is what "flat" means here and
+    what the figure it replaces always did.
+
+    ADDED AFTER THE MARKUP, not multiplied by it. The markup turns a supplier
+    cost into a price; this is already a price - what the labour is sold for -
+    so marking it up would be marking up a margin. If the intent is ever the
+    other way round, this is the one line that has to change.
+    """
+    return round(_pricing_param(LABOR_KEY), 2)
 
 
 def _spec_weight(wire, diameter, length, density):
@@ -190,14 +217,29 @@ class SpringEngineeringWebsite(http.Controller):
         try:
             prices = _calculator_constants()
             factor = _markup_factor()
+            labor = _labor_flat()
         except ValueError:
             _logger.exception("spring_engineering: cannot read pricing constants")
 
             return {"error": "Pricing is misconfigured."}
 
+        # THE LABOUR CHARGE IS SENT; THE MARKUP IS NOT. The difference is not
+        # inconsistency, it is what each one is. The page has to show a total
+        # that matches what the cart charges, so it needs every number that goes
+        # into that total - and the labour charge is one of them. The markup is
+        # not a number in the total; it is the policy that produced the rates,
+        # and the rates arrive with it already applied.
+        #
+        # So the labour figure IS inferable from two quotes, because it is the
+        # part that does not change with the spring. That is unavoidable for any
+        # fee included in a price shown to the person paying it. It is not shown
+        # as a line of its own, which is what "not displayed" can mean while the
+        # total is still correct; wanting the amount itself unknowable means not
+        # quoting a price at all.
         return {
             "cones": {str(d): round(p * factor, 4) for d, p in prices["cones"].items()},
             "perLb": round(prices["per_lb"] * factor, 6),
+            "labor": labor,
         }
 
     # --- Add a configured assembly to the cart ---------------------------
@@ -222,6 +264,7 @@ class SpringEngineeringWebsite(http.Controller):
         try:
             prices = _calculator_constants()
             factor = _markup_factor()
+            labor = _labor_flat()
         except ValueError:
             _logger.exception("spring_engineering: cannot read pricing constants")
 
@@ -268,7 +311,7 @@ class SpringEngineeringWebsite(http.Controller):
 
         cones = round(springs * cone_total * factor, 2)
         steel = round(springs * steel_weight * prices["per_lb"] * factor, 2)
-        total = round(cones + steel, 2)
+        total = round(cones + steel + labor, 2)
 
         product = request.env.ref(
             "spring_engineering.product_custom_spring", raise_if_not_found=False

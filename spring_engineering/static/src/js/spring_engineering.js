@@ -2078,7 +2078,30 @@ function normaliseRates(rates) {
         }
     }
 
-    return { cones, perLb: Number(rates.perLb) };
+    return { cones, perLb: Number(rates.perLb), labor: asNumber(rates.labor) };
+}
+
+// A number, or NaN if there is not one there - THE SAME TRAP AS THE SERVER'S,
+// in the other language.
+//
+// The labour charge is flat and already a selling price, so it is used exactly
+// as sent, and zero is a legitimate value for it. That rules out testing whether
+// it is truthy, which leaves testing whether it is a number - and JavaScript is
+// generous about what it will turn into one. `Number(undefined)` is NaN as you
+// would hope, but `Number(null)` and `Number("")` are both 0, so a field the
+// server left out as null, or blanked, would arrive as a labour charge of
+// nothing and the page would quote the work for free against a cart that
+// charges for it.
+//
+// This is the same shape as `float(False) === 0.0` in controllers/main.py, which
+// cost a silent sell-at-cost there. Caught here by the invariant that asks for
+// it rather than in production, which is the only difference.
+function asNumber(value) {
+    if (value === null || value === undefined || String(value).trim() === "") {
+        return NaN;
+    }
+
+    return Number(value);
 }
 
 // Shown once, as its own message, whenever any warning is raised.
@@ -3312,7 +3335,7 @@ get assemblyWeight() {
 // string key, and the server writes 6 the way Python does, as "6.0", so the 6"
 // cone really was quoted free until the keys became numbers.
 get priceAvailable() {
-    if (!this.rates || !this.rates.perLb) {
+    if (!this.rates || !this.rates.perLb || !Number.isFinite(this.rates.labor)) {
         return false;
     }
 
@@ -3345,8 +3368,22 @@ get priceSteel() {
 // ROUNDED PARTS, SUMMED - not the rounding of an exact total. A quote whose
 // column does not add up invites someone to re-add it by hand, and both parts
 // are already at the cent, so the sum is exact at the cent too.
+//
+// THE LABOUR CHARGE IS IN HERE AND NOWHERE ELSE ON THE PAGE. It is flat per
+// assembly, so it does not scale with the spring count, and it is added after
+// the marked-up materials rather than being marked up itself - the server
+// decides both of those and sends the finished figure. The page shows one total
+// and the cart charges the same total; there is no labour row, which is the
+// whole point of it being a setting rather than a line item.
 get priceTotal() {
-    return Math.round((this.priceCones + this.priceSteel) * 100) / 100;
+    // Guarded like the two parts above, and not only for tidiness: this reads
+    // the labour charge straight off the rates, so without the guard a page
+    // whose fetch failed would throw here rather than show "call us".
+    if (!this.priceAvailable) {
+        return 0;
+    }
+
+    return Math.round((this.priceCones + this.priceSteel + this.rates.labor) * 100) / 100;
 }
 
 money(value) {

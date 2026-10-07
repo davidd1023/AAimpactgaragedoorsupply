@@ -623,6 +623,7 @@ function duplexIgnoresWireDropdown(mod) {
 const SERVER_RATES = {
     cones: { "2.625": 8.982, "3.75": 20.79, "5.25": 34.974, "6.0": 34.974 },
     perLb: 2.628,
+    labor: 100,
 };
 
 // A component with the server's rates in hand. The page fetches these in
@@ -660,7 +661,7 @@ function priceAddsUp(mod) {
                     continue;
                 }
 
-                const parts = c.priceCones + c.priceSteel;
+                const parts = c.priceCones + c.priceSteel + SERVER_RATES.labor;
 
                 if (Math.abs(c.priceTotal - parts) > 1e-9) {
                     fails.push(`${label}: total ${c.priceTotal} but parts sum to ${parts.toFixed(2)}`);
@@ -679,8 +680,10 @@ function priceAddsUp(mod) {
             }
         }
 
-        // Cones and steel are both per spring - there is no fixed component in
-        // the price any more, so the whole total doubles with the count.
+        // Cones and steel are per spring; the labour charge is not. So the
+        // materials double with the count and the total does not - which is the
+        // whole point of the labour charge being flat, and the one thing a
+        // careless change to it would break.
         //
         // TO THE CENT, NOT EXACTLY. A marked-up cone rate is not a whole number
         // of cents ($19.43 at 1.8 is $34.974), and the rounding is applied once
@@ -692,6 +695,20 @@ function priceAddsUp(mod) {
 
         if (Math.abs(two.priceCones - 2 * one.priceCones) > 0.01 + 1e-9) {
             fails.push(`${st.assembly} ${st.springId}: cones ${one.priceCones} at one spring but ${two.priceCones} at two - not per spring`);
+        }
+
+        // THE FLAT PART MUST BE FLAT. Whatever the total is beyond the
+        // materials has to be the same at one spring and at two, and has to be
+        // the figure the server sent. Fitting a set of springs is one job.
+        const flatOne = one.priceTotal - one.priceCones - one.priceSteel;
+        const flatTwo = two.priceTotal - two.priceCones - two.priceSteel;
+
+        if (Math.abs(flatOne - flatTwo) > 0.01 + 1e-9) {
+            fails.push(`${st.assembly} ${st.springId}: the flat charge is ${flatOne.toFixed(2)} at one spring and ${flatTwo.toFixed(2)} at two`);
+        }
+
+        if (Math.abs(flatOne - SERVER_RATES.labor) > 0.01 + 1e-9) {
+            fails.push(`${st.assembly} ${st.springId}: flat charge ${flatOne.toFixed(2)}, expected the server's ${SERVER_RATES.labor}`);
         }
 
         // Steel follows the assembly weight, which doubles with the count at
@@ -753,6 +770,31 @@ function missingRateRefusesToQuote(mod) {
         if (c.priceTotal !== 0) {
             fails.push(`with no rate for ${diameter}" the total is ${c.priceTotal}, not withheld`);
         }
+    }
+
+    // A MISSING LABOUR FIGURE MUST WITHHOLD THE QUOTE TOO, and this is the
+    // trap: zero is a legitimate labour charge, so the test cannot be whether
+    // the figure is truthy. An absent one arrives as NaN and has to be caught as
+    // "not a finite number", or the page gives the work away and shows a total
+    // that the cart will not honour.
+    for (const bad of [undefined, null, "", "abc"]) {
+        const c = duplex(mod, st);
+        const rates = mod.normaliseRates({ ...SERVER_RATES, labor: bad });
+
+        c.rates = rates;
+
+        if (c.priceAvailable || c.priceTotal !== 0) {
+            fails.push(`with labor ${JSON.stringify(bad)} the page still quotes ${c.priceTotal}`);
+        }
+    }
+
+    // Zero labour, on the other hand, is a setting and not a failure.
+    const free = duplex(mod, st);
+
+    free.rates = mod.normaliseRates({ ...SERVER_RATES, labor: 0 });
+
+    if (!free.priceAvailable) {
+        fails.push("a labour charge of zero was treated as a missing one");
     }
 
     // No rates at all - the fetch failed - must behave the same way.
@@ -944,6 +986,7 @@ async function setupSurvivesAndFetchesRates(mod) {
     const RATES = {
         cones: { "2.625": 8.982, "3.75": 20.79, "5.25": 34.974, "6.0": 34.974 },
         perLb: 2.628,
+        labor: 100,
     };
 
     let served = 0;
