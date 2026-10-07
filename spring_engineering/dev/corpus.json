@@ -268711,6 +268711,1140 @@
    },
    "referenceCycles": 231000,
    "fit": false
+  },
+  {
+   "id": "cycfloor-D525216-3437-273-420lb-84in-1spr-r15-t10000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "420",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 16,
+    "duplexOuterLength": 17,
+    "duplexInnerWeight": 12.3,
+    "duplexOuterWeight": 25.94
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 13000
+  },
+  {
+   "id": "cycfloor-D525216-3437-273-440lb-84in-1spr-r15-t10000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "440",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 15,
+    "duplexOuterLength": 16,
+    "duplexInnerWeight": 11.53,
+    "duplexOuterWeight": 24.41
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "cycfloor-D525216-3625-283-480lb-84in-1spr-r15-t10000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "480",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 18,
+    "duplexOuterLength": 19,
+    "duplexInnerWeight": 14.38,
+    "duplexOuterWeight": 30.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "cycfloor-D525216-3625-289-520lb-84in-1spr-r15-t10000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "520",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.289\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 17,
+    "duplexOuterLength": 18,
+    "duplexInnerWeight": 13.89,
+    "duplexOuterWeight": 29.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "cycfloor-D525216-375-3065-560lb-84in-1spr-r15-t10000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "560",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.375\"",
+    "duplexInnerLength": 20,
+    "duplexOuterLength": 21,
+    "duplexInnerWeight": 17.4,
+    "duplexOuterWeight": 35.13
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "cycfloor-D525216-3938-3065-600lb-84in-1spr-r15-t10000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "600",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 18.27,
+    "duplexOuterWeight": 38.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "cycfloor-D525216-3938-3125-650lb-84in-1spr-r15-t10000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "650",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 21,
+    "duplexOuterLength": 22,
+    "duplexInnerWeight": 18.66,
+    "duplexOuterWeight": 38.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "cycfloor-D525216-4062-331-700lb-84in-1spr-r15-t10000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "700",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 24,
+    "duplexOuterLength": 25,
+    "duplexInnerWeight": 22.69,
+    "duplexOuterWeight": 45.52
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-4218-3437-800lb-84in-1spr-r15-t10000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "10,000",
+    "weight": "800",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 24.61,
+    "duplexOuterWeight": 49.28
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-3938-3065-500lb-84in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "500",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 22.62,
+    "duplexOuterWeight": 47.57
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 26000
+  },
+  {
+   "id": "cycfloor-D525216-3938-3125-520lb-84in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "520",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 26,
+    "duplexOuterLength": 27,
+    "duplexInnerWeight": 23.1,
+    "duplexOuterWeight": 47.57
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 28000
+  },
+  {
+   "id": "cycfloor-D525216-4062-3195-560lb-84in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "560",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 27,
+    "duplexOuterLength": 28,
+    "duplexInnerWeight": 24.57,
+    "duplexOuterWeight": 50.99
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 26000
+  },
+  {
+   "id": "cycfloor-D525216-4062-331-600lb-84in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "600",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 28,
+    "duplexOuterLength": 29,
+    "duplexInnerWeight": 26.47,
+    "duplexOuterWeight": 52.81
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 24000
+  },
+  {
+   "id": "cycfloor-D525216-4218-3437-650lb-84in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "650",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 30.52,
+    "duplexOuterWeight": 60.65
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 27000
+  },
+  {
+   "id": "cycfloor-D525216-4531-3625-800lb-84in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "800",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3625\"",
+    "duplexOuterWire": "0.4531\"",
+    "duplexInnerLength": 34,
+    "duplexOuterLength": 35,
+    "duplexInnerWeight": 35.47,
+    "duplexOuterWeight": 71.61
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 26000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-4062-3195-420lb-84in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "420",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 36,
+    "duplexOuterLength": 37,
+    "duplexInnerWeight": 32.75,
+    "duplexOuterWeight": 67.37
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 102000
+  },
+  {
+   "id": "cycfloor-D525216-4062-331-440lb-84in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "440",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 38,
+    "duplexOuterLength": 39,
+    "duplexInnerWeight": 35.92,
+    "duplexOuterWeight": 71.02
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 104000
+  },
+  {
+   "id": "cycfloor-D525216-4218-331-459lb-84in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "459",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 40,
+    "duplexOuterLength": 41,
+    "duplexInnerWeight": 37.81,
+    "duplexOuterWeight": 77.71
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 107000
+  },
+  {
+   "id": "cycfloor-D525216-4218-3437-480lb-84in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "480",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 42,
+    "duplexOuterLength": 43,
+    "duplexInnerWeight": 41.35,
+    "duplexOuterWeight": 81.5
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 114000
+  },
+  {
+   "id": "cycfloor-D525216-4305-3437-500lb-84in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "500",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4305\"",
+    "duplexInnerLength": 42,
+    "duplexOuterLength": 43,
+    "duplexInnerWeight": 41.35,
+    "duplexOuterWeight": 83.3
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 117000
+  },
+  {
+   "id": "cycfloor-D525216-4375-3625-540lb-84in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "540",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3625\"",
+    "duplexOuterWire": "0.4375\"",
+    "duplexInnerLength": 46,
+    "duplexOuterLength": 47,
+    "duplexInnerWeight": 47.99,
+    "duplexOuterWeight": 92.63
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 105000
+  },
+  {
+   "id": "cycfloor-D525216-4531-3625-560lb-84in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "560",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3625\"",
+    "duplexOuterWire": "0.4531\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 51.12,
+    "duplexOuterWeight": 102.3
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 138000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-4687-375-650lb-84in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "650",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.375\"",
+    "duplexOuterWire": "0.4687\"",
+    "duplexInnerLength": 50,
+    "duplexOuterLength": 51,
+    "duplexInnerWeight": 54.12,
+    "duplexOuterWeight": 108.2
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 107000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-49-3938-700lb-84in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "700",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3938\"",
+    "duplexOuterWire": "0.49\"",
+    "duplexInnerLength": 58,
+    "duplexOuterLength": 59,
+    "duplexInnerWeight": 66.23,
+    "duplexOuterWeight": 131.29
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 137000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-5312-4062-800lb-84in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "800",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.4062\"",
+    "duplexOuterWire": "0.5312\"",
+    "duplexInnerLength": 67,
+    "duplexOuterLength": 68,
+    "duplexInnerWeight": 79.15,
+    "duplexOuterWeight": 165.08
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 115000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-4531-3625-440lb-84in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "440",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3625\"",
+    "duplexOuterWire": "0.4531\"",
+    "duplexInnerLength": 62,
+    "duplexOuterLength": 63,
+    "duplexInnerWeight": 64.68,
+    "duplexOuterWeight": 128.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 428000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-4531-3625-459lb-84in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "459",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3625\"",
+    "duplexOuterWire": "0.4531\"",
+    "duplexInnerLength": 59,
+    "duplexOuterLength": 60,
+    "duplexInnerWeight": 61.55,
+    "duplexOuterWeight": 122.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 350000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-4531-375-480lb-84in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "480",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.375\"",
+    "duplexOuterWire": "0.4531\"",
+    "duplexInnerLength": 62,
+    "duplexOuterLength": 63,
+    "duplexInnerWeight": 67.11,
+    "duplexOuterWeight": 128.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 289000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-4615-375-500lb-84in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "500",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.375\"",
+    "duplexOuterWire": "0.4615\"",
+    "duplexInnerLength": 62,
+    "duplexOuterLength": 63,
+    "duplexInnerWeight": 67.11,
+    "duplexOuterWeight": 131.46
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 304000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-4687-375-520lb-84in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "520",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.375\"",
+    "duplexOuterWire": "0.4687\"",
+    "duplexInnerLength": 62,
+    "duplexOuterLength": 63,
+    "duplexInnerWeight": 67.11,
+    "duplexOuterWeight": 133.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 304000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-49-3938-540lb-84in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "540",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3938\"",
+    "duplexOuterWire": "0.49\"",
+    "duplexInnerLength": 75,
+    "duplexOuterLength": 76,
+    "duplexInnerWeight": 85.64,
+    "duplexOuterWeight": 169.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 462000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-49-3938-560lb-84in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "560",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3938\"",
+    "duplexOuterWire": "0.49\"",
+    "duplexInnerLength": 72,
+    "duplexOuterLength": 73,
+    "duplexInnerWeight": 82.21,
+    "duplexOuterWeight": 162.45
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 390000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-5-3938-600lb-84in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "600",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3938\"",
+    "duplexOuterWire": "0.5\"",
+    "duplexInnerLength": 71,
+    "duplexOuterLength": 72,
+    "duplexInnerWeight": 81.07,
+    "duplexOuterWeight": 163.74
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 295000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-5312-4062-650lb-84in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "650",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.4062\"",
+    "duplexOuterWire": "0.5312\"",
+    "duplexInnerLength": 83,
+    "duplexOuterLength": 84,
+    "duplexInnerWeight": 98.05,
+    "duplexOuterWeight": 203.93
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 304000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-5312-4218-700lb-84in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "700",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.4218\"",
+    "duplexOuterWire": "0.5312\"",
+    "duplexInnerLength": 84,
+    "duplexOuterLength": 85,
+    "duplexInnerWeight": 103.43,
+    "duplexOuterWeight": 206.35
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 352000,
+   "flagged": true
+  },
+  {
+   "id": "cycfloor-D525216-5625-4375-800lb-84in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Weight sweep on the D525-216 at one spring across four cycle targets, taken to test whether the reference's cycle-shortfall warning is a tolerance on the target or a constant 10,000 floor (2026-10-07).",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "800",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 9,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.4375\"",
+    "duplexOuterWire": "0.5625\"",
+    "duplexInnerLength": 92,
+    "duplexOuterLength": 93,
+    "duplexInnerWeight": 117.94,
+    "duplexOuterWeight": 240.23
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 303000,
+   "flagged": true
   }
  ]
 }

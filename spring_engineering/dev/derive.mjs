@@ -1478,8 +1478,33 @@ function fitThreshold(rows, above) {
             : at >= n - 1 ? pts[n - 1].u + 1e-6
                 : (pts[at].u + pts[at + 1].u) / 2;
 
-        if (!best || bad < best.bad || (bad === best.bad && Math.abs(b) < Math.abs(best.b))) {
-            best = { bad, b, a: cut };
+        // THE SLOPE IS CHOSEN FOR MARGIN, NOT FLATNESS.
+        //
+        // For a FIXED slope the cut above is already the best place to put the
+        // line: midway between the two readings that straddle it, which is the
+        // most room the data allows. But the slope itself was picked by
+        // preferring the flattest among equal error counts, which takes no
+        // account of how much room that slope leaves. A steeper line can
+        // separate the same readings with the gap twice as wide, and it was
+        // being passed over.
+        //
+        // That matters because of where the misses are. Eight of ten land
+        // within 0.025 of their own group's threshold and six within 0.007:
+        // the rule is right and the boundary is a hair away from the reading
+        // that crossed it. Widening the gap the line sits in is the only thing
+        // that helps a reading we have never seen, and it costs no parameters.
+        //
+        // Flatness is kept as the second tie-break, so a slope only wins on
+        // margin if it genuinely has more of it.
+        const gap = at < 0 || at >= n - 1 ? 0 : pts[at + 1].u - pts[at].u;
+
+        const better = !best || bad < best.bad
+            || (bad === best.bad && gap > best.gap + 1e-12)
+            || (bad === best.bad && Math.abs(gap - best.gap) <= 1e-12
+                && Math.abs(b) < Math.abs(best.b));
+
+        if (better) {
+            best = { bad, b, a: cut, gap };
         }
     }
 
