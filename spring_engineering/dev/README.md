@@ -1336,3 +1336,52 @@ checking a new number against one an existing tool already reported. The
 mapping now lives once, in `dev/ref-state.mjs`, and **the rule is that a tool
 measuring something another tool already measures gets reconciled with it
 before anything it says is believed.**
+
+## A missing import shipped, and why nothing here could see it (2026-10-07)
+
+`onWillStart` was called in `setup()` and never added to the `@odoo/owl` import
+line. The page threw `ReferenceError: onWillStart is not defined` on the first
+mount, in production, on the branch it had been merged into. Every test in this
+repository passed, before and after.
+
+**Two independent reasons it was invisible, and both were in the harness.**
+
+`dev/harness.mjs` built its component with `make`, which assigns state directly
+and never calls `setup()`. The one function the browser runs on every single
+mount was the one function nothing here ran. Eight thousand readings go through
+`make`, and none of them touch a lifecycle hook.
+
+Worse, the harness declared its own stub block - four `const`s for the names
+the component happened to use. **A stub list written independently of the
+import list cannot test the import list.** Had the suite called `setup()`, the
+hardcoded block would have supplied the very name the module was missing and
+the test would have passed anyway. The harness was not just failing to check
+this; it was constructed so that it could not.
+
+Both are fixed:
+
+- the stubs are now **derived from the source's own import statements**, from a
+  table keyed by module, and a name imported with no stub is a hard error
+  rather than a silent undefined. Remove the import again and the harness
+  reproduces the production error exactly: `onWillStart is not defined`.
+- `mount()` runs `setup()` for real and awaits the lifecycle callbacks, with an
+  injectable `rpc` whose default **throws**, so a test that forgets to install
+  one fails instead of quietly scoring a component that received no rates.
+- two invariants, because they fail in different circumstances. One mounts the
+  component and checks that the rates fetch reaches the price and that a failed
+  fetch withholds it. The other is static: every `useThing()` and `onThing()`
+  the source calls must be imported or defined in it, which also covers hooks
+  in branches no test reaches.
+
+### What this says about how it was verified
+
+The pricing work was checked by curling `/spring-calculator/rates` and
+`/spring-calculator/add-to-cart`, by `dev/price-parity.sh`, and by the
+invariants. All of those exercise the server and the arithmetic. **None of them
+loads the page.** The rates fetch lives in `setup()`, so the one change whose
+whole purpose was to run on mount was verified by every route except mounting.
+
+The end-to-end check that would have caught it takes one command, and is now
+the habit: fetch the page, find the frontend bundle, and read our module as
+served. It shows the import directly -
+`const{Component,onWillStart,useEffect,useState}=require("@odoo/owl")`.
