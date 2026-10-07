@@ -201,9 +201,18 @@ for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).read
     // dev/ or it would be fitted again. That is safe by default - pulls are
     // gitignored and do not survive a rebuild, so the corpus is what a fresh
     // build sees - but it is a real edge if the file is ever put back.
-    if (r.fit === false) {
-        continue;
-    }
+    // INGESTED, THEN EXCLUDED - not skipped here.
+    //
+    // Skipping at ingestion looked equivalent and was not: a reading that never
+    // enters `readings` cannot take part in the dedup, so it cannot block the
+    // copy of itself sitting in a pull file, and the pull copy - which carries
+    // no flag - gets fitted. Putting dev/pulled-U5..U8.json back raised the
+    // distinct count by exactly the 1522 readings meant to be held out.
+    //
+    // So they are ingested, win the dedup as corpus readings always do, and
+    // are dropped where the fit is actually built. The flag now holds whether
+    // the pull file is on disk or not, which is the point of it.
+    const noFit = r.fit === false;
 
     if ((r.state.springId || "").indexOf("3 3/4") !== 0) {
         continue;
@@ -211,6 +220,7 @@ for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).read
 
     readings.push({
         fromCorpus: true,
+        noFit,
         state: r.state,
         // Same hiLift marker the pull path sets. Without it the hi-lift
         // holdout below silently withholds nothing from this half of the
@@ -402,6 +412,12 @@ for (const r of readings) {
     }
 
     const g = rungs.get(key);
+
+    // Held out of the fit by corpus flag - see noFit above. It has already
+    // served its purpose by winning the dedup against its own pull copy.
+    if (r.noFit) {
+        continue;
+    }
 
     if (r.cycles > 0) {
         const torque = (COEFF * Math.pow(r.inner, WEXP)) / Math.pow(r.cycles, 1 / CEXP);

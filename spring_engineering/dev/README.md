@@ -1108,3 +1108,44 @@ UNIFORMLY rather than targeted: 5157 readings is plenty, but they are mostly
 switch points, fraction walks and boundary refinements, which is exactly the
 data that makes per-group bands overfit. Fitting on uniform draws would close
 the gap from the other side.
+
+## More uniform data is not monotonically better (batches U5-U8, 2026-10-07)
+
+Four more uniform batches, 1600 readings, drawn exactly like U1-U4. They do not
+help the number that matters, and the effect is consistent across two
+independent sample sets rather than being noise:
+
+                       validation clean   older clean   validation flagged   older flagged
+    U1-U4 fitted            93.7%            97.9%           74.9%              87.8%
+    U1-U8 fitted            91.4%            97.2%           76.5%              89.7%
+    U1-U8, flagged out      92.6%            97.9%           67.4%              84.7%
+
+So the second four batches TRADE clean accuracy for flagged accuracy. About
+half of a uniform draw is flagged, so doubling the draw doubles the flagged
+readings, and although their lengths are already excluded their pairing and
+cycle count move K - which changes rung selection for ordinary doors too.
+
+Clean readings are the ones that get ordered, so U5-U8 are held out of the fit
+with `fit: false` and kept in the corpus as data. Nothing is thrown away: if
+flagged accuracy ever matters more, the flag comes off and the numbers above
+say what that costs.
+
+The useful general point is that "fit the distribution you are scored on" is
+right about the SHAPE of a draw and silent about its size. U1-U4 was worth 2.3
+points of clean accuracy; U5-U8 was worth -2.3.
+
+### And a correctness bug the test exposed
+
+`fit: false` was implemented as a `continue` at ingestion, which looked
+equivalent to excluding the reading and was not. A reading that never enters
+`readings` cannot take part in the dedup, so it cannot block the copy of itself
+sitting in a pull file - and the pull copy carries no flag, so it gets fitted.
+Putting dev/pulled-U5..U8.json back raised the distinct count by exactly the
+1522 readings meant to be held out, and changed the table.
+
+They are now ingested, win the dedup the way corpus readings always do, and are
+dropped where the fit is built. The table is byte-identical with those pulls on
+disk or absent, which is what the flag was for. The warning in the previous
+commit - that the pulls had to stay out of dev/ - was right about the symptom
+and wrong about the cause: it was not that the pull path ignores the flag, it
+was that the corpus path was removing its own ability to win.
