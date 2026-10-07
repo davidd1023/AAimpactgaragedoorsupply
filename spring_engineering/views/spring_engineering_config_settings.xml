@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- The markup lives in Website's settings because the calculator is a
+         website page. Anchored after the Website app's own General block,
+         which is where someone looking for a setting about the site would
+         already be. -->
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.spring.engineering</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='website_info_settings']" position="after">
+                <block title="Spring Calculator" id="spring_engineering_settings">
+                    <setting string="Assembly markup"
+                             help="Added to the supplier cost of a custom spring assembly to reach the price quoted on the calculator and charged in the cart. The visitor is never shown this figure.">
+                        <div class="content-group">
+                            <div class="mt16">
+                                <field name="spring_markup_percent" class="oe_inline"/>
+                                <span class="ms-1">%</span>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

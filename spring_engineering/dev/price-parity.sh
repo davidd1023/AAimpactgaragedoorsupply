@@ -23,8 +23,21 @@ if [ -z "$BASE" ]; then
     exit 1
 fi
 
+# THE RATES COME FROM THE SERVER NOW, so the harness has to be handed them -
+# it has no browser and no session, and without them priceAvailable is false
+# and the page would quote nothing. Fetching them here is also part of the
+# check: if the endpoint and the cart ever disagree about the markup, the
+# totals below stop matching.
+curl -s -X POST "$BASE/spring-calculator/rates" \
+    -H "Content-Type: application/json" \
+    -d '{"jsonrpc":"2.0","method":"call","params":{}}' \
+    | python3 -c "import sys,json;print(json.dumps(json.load(sys.stdin)['result']))" \
+    > /tmp/parity-rates.json
+
 node --input-type=module - <<'JS' > /tmp/parity-specs.jsonl
 import { load, make } from "./dev/harness.mjs";
+import { readFileSync } from "node:fs";
+const rates = JSON.parse(readFileSync("/tmp/parity-rates.json", "utf8"));
 const mod = await load();
 // One of each shape that can reach the cart: Single at each priced diameter,
 // both real Duplex pairs, and an alias - which must price as the pair it is
@@ -39,6 +52,9 @@ const cases = [
 ];
 for (const st of cases) {
     const c = make(mod, st);
+    // Through the app's own normaliser, so this exercises the same key
+    // handling the browser does rather than a second reading of the JSON.
+    c.rates = mod.normaliseRates(rates);
     if (st.assembly === "Single") {
         const w = c.recommendedWire;
         if (w !== null && w !== undefined) c.state.wireSize = `${w}"`;
@@ -64,7 +80,9 @@ while read -r row; do
         -d "{\"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"spec\":$spec}}" \
         | python3 -c "import sys,json;d=json.load(sys.stdin).get('result',{});print(d.get('total', d.get('error','no answer')))")
 
-    if [ "$page" = "$server" ]; then
+    # NUMERICALLY, not as text: the page prints 1360 where the server prints
+    # 1360.0, and a string compare called that a disagreement.
+    if python3 -c "import sys;sys.exit(0 if abs(float('$page')-float('$server'))<5e-3 else 1)" 2>/dev/null; then
         printf "  %-42s page %-10s server %-10s ok\n" "$label" "$page" "$server"
     else
         printf "  %-42s page %-10s server %-10s DIFFER\n" "$label" "$page" "$server"

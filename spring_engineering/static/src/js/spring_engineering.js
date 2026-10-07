@@ -2026,7 +2026,11 @@ const CYCLE_MAX = 350000;
 //           assembly. It is taken from the weights the results already show,
 //           which are themselves taken from the quarter-inch length that gets
 //           built, so the price always agrees with the figures above it.
-const LABOR_COST = 100;
+// SUPPLIER COST, not the price. The markup lives in a system parameter the
+// server owns and the page is never told - what it receives from
+// /spring-calculator/rates is these same figures with the markup already in
+// them. So this file remains the one place the COSTS are written down (the
+// controller parses them from here), and nothing here knows the margin.
 const STEEL_PRICE_PER_LB = 1.46;
 
 // Keyed by inside diameter as a NUMBER, so the Duplex path can look up its
@@ -2045,6 +2049,27 @@ const CONE_PRICES = {
     5.25: 19.43,
     6: 19.43,
 };
+
+// The rates as the server sends them, with the cone keys turned into NUMBERS.
+//
+// JSON object keys are strings, and the two sides do not spell a number the
+// same way: this file writes the 6" cone as `6`, which JavaScript keys as "6",
+// while the server formats the same float the way Python does, as "6.0". A
+// string lookup therefore missed it and the cone was quoted free. Comparing
+// numbers cannot drift apart that way, whatever either side does to the text.
+function normaliseRates(rates) {
+    const cones = new Map();
+
+    for (const [key, price] of Object.entries(rates.cones ?? {})) {
+        const diameter = Number(key);
+
+        if (Number.isFinite(diameter)) {
+            cones.set(diameter, Number(price));
+        }
+    }
+
+    return { cones, perLb: Number(rates.perLb) };
+}
 
 // Shown once, as its own message, whenever any warning is raised.
 const WARNING_NOTE =
@@ -2100,6 +2125,25 @@ export class SpringEngineering extends Component {
 
     setup() {
         this.state = useState(defaultState());
+
+        // THE RATES COME FROM THE SERVER, BEFORE THE FIRST RENDER. They are the
+        // costs below with the markup already applied, so nothing here has to
+        // know the markup to show a figure that matches what the cart charges.
+        //
+        // onWillStart, so a price is never shown at cost by mistake while a
+        // fetch is in flight. If it fails the price block says so rather than
+        // quoting the wrong number - see priceAvailable.
+        onWillStart(async () => {
+            try {
+                const rates = await rpc("/spring-calculator/rates", {});
+
+                if (rates && !rates.error) {
+                    this.rates = normaliseRates(rates);
+                }
+            } catch {
+                this.rates = null;
+            }
+        });
 
         // Re-pick the wire whenever anything that feeds torque changes, or
         // the cycle target does. A size chosen by hand therefore survives
@@ -3217,24 +3261,21 @@ get duplexOuterWeight() {
 
 // --- Pricing ----------------------------------------------------------
 
-// Cones for ONE spring. Duplex nests two springs per shaft position and so
-// takes a set for each diameter; Single and Triplex take one.
+// The diameters THIS configuration needs a set of cones for. Duplex nests two
+// springs per shaft position and so takes a set for each diameter; Single and
+// Triplex take one. Empty means the configuration cannot be priced.
 //
 // The Duplex diameters come from duplexPair, which has already resolved the
 // aliases - a Raynor 3 1/2" inside 5 1/2" is engineered as the 2 5/8" inside
 // 5 1/4" pair everywhere else in this file, so it is priced as one too.
-get coneUnitPrice() {
+get coneDiameters() {
     if (this.state.assembly === "Duplex") {
         const pair = this.duplexPair;
 
-        if (!pair) {
-            return 0;
-        }
-
-        return (CONE_PRICES[pair.innerId] ?? 0) + (CONE_PRICES[pair.outerId] ?? 0);
+        return pair ? [pair.innerId, pair.outerId] : [];
     }
 
-    return CONE_PRICES[this.springIdNumber] ?? 0;
+    return [this.springIdNumber];
 }
 
 // Finished steel in the whole assembly, in lb. Duplex counts both springs of
@@ -3249,26 +3290,53 @@ get assemblyWeight() {
     return springs * this.springWeight;
 }
 
-get priceLabor() {
-    return LABOR_COST;
+// TRUE once the server's rates are in hand AND they cover every diameter this
+// configuration needs. Without them there is no price to show: quoting the
+// costs below would be quoting without the markup, which is worse than showing
+// nothing.
+//
+// A DIAMETER WITH NO RATE IS A MISCONFIGURATION, NOT A FREE CONE. Treating a
+// missing rate as zero undercharges by a whole set of cones - a 6" pair is
+// about $70 at two springs - and nothing on the page would look wrong, so the
+// quote is refused instead. That is not hypothetical: this read the rates by
+// string key, and the server writes 6 the way Python does, as "6.0", so the 6"
+// cone really was quoted free until the keys became numbers.
+get priceAvailable() {
+    if (!this.rates || !this.rates.perLb) {
+        return false;
+    }
+
+    const needed = this.coneDiameters;
+
+    return needed.length > 0 && needed.every((d) => this.rates.cones.has(Number(d)));
 }
 
 get priceCones() {
-    const springs = Number(this.state.springs) || 0;
+    if (!this.priceAvailable) {
+        return 0;
+    }
 
-    return Math.round(springs * this.coneUnitPrice * 100) / 100;
+    const springs = Number(this.state.springs) || 0;
+    const unit = this.coneDiameters.reduce(
+        (sum, d) => sum + this.rates.cones.get(Number(d)), 0
+    );
+
+    return Math.round(springs * unit * 100) / 100;
 }
 
 get priceSteel() {
-    return Math.round(this.assemblyWeight * STEEL_PRICE_PER_LB * 100) / 100;
+    if (!this.priceAvailable) {
+        return 0;
+    }
+
+    return Math.round(this.assemblyWeight * this.rates.perLb * 100) / 100;
 }
 
 // ROUNDED PARTS, SUMMED - not the rounding of an exact total. A quote whose
-// column does not add up invites someone to re-add it by hand, and labour is
-// a whole number while the other two are already at the cent, so the sum is
-// exact at the cent too.
+// column does not add up invites someone to re-add it by hand, and both parts
+// are already at the cent, so the sum is exact at the cent too.
 get priceTotal() {
-    return Math.round((this.priceLabor + this.priceCones + this.priceSteel) * 100) / 100;
+    return Math.round((this.priceCones + this.priceSteel) * 100) / 100;
 }
 
 money(value) {
