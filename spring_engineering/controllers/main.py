@@ -65,13 +65,61 @@ def _calculator_constants():
         raise ValueError("CONE_PRICES parsed empty")
 
     _prices = {
-        "labor": one(r"const LABOR_COST = ([\d.]+);", "LABOR_COST"),
         "per_lb": one(r"const STEEL_PRICE_PER_LB = ([\d.]+);", "STEEL_PRICE_PER_LB"),
         "density": one(r"const STEEL_DENSITY = ([\d.]+);", "STEEL_DENSITY"),
         "cones": cones,
     }
 
     return _prices
+
+
+# --- Markup ----------------------------------------------------------------
+# THE MARKUP NEVER REACHES THE BROWSER.
+#
+# What the page is sent is RATES that already include it - a cone price, a price
+# per pound - so the figures it shows add up to the figure it charges without
+# the percentage itself ever being served. That matters on a public page: an 80%
+# markup beside a cost breakdown tells a customer, or a competitor, exactly what
+# the springs cost us.
+#
+# Read fresh on every request rather than cached, so changing the parameter
+# takes effect immediately instead of on the next restart.
+MARKUP_KEY = "spring_engineering.markup_percent"
+
+
+def _markup_factor():
+    """What the supplier cost is multiplied by to reach the selling price.
+
+    RAISES RATHER THAN FALLING BACK. There is no safe default here: assuming
+    zero sells every assembly at cost, and nothing about the page or the cart
+    would look wrong while it happened. The module ships the parameter, so a
+    missing or unreadable one means it was deleted or edited by hand, and the
+    callers turn that into "call us" instead of a price - a lost phone call
+    costs less than a month of selling at cost.
+    """
+    raw = request.env["ir.config_parameter"].sudo().get_param(MARKUP_KEY)
+
+    # MISSING IS CHECKED BEFORE float(), not by letting float() complain.
+    # get_param returns False when there is no row, and float(False) is 0.0 -
+    # a perfectly valid number - so a deleted parameter sailed through the
+    # conversion and sold at cost, which is the exact failure this function is
+    # written to prevent.
+    if raw is None or raw is False or not str(raw).strip():
+        raise ValueError(f"{MARKUP_KEY} is not set - cannot price an assembly")
+
+    try:
+        percent = float(raw)
+    except (TypeError, ValueError):
+        raise ValueError(
+            f"{MARKUP_KEY} is {raw!r}, not a number - cannot price an assembly"
+        )
+
+    # A negative markup would quote below cost. That is a typo, not an
+    # instruction; refuse it the same way.
+    if percent < 0:
+        raise ValueError(f"{MARKUP_KEY} is {percent}, below cost")
+
+    return 1.0 + percent / 100.0
 
 
 def _spec_weight(wire, diameter, length, density):
@@ -123,6 +171,35 @@ class SpringEngineeringWebsite(http.Controller):
     def spring_calculator_aliases(self, **kwargs):
         return request.redirect(CANONICAL, code=301)
 
+    # --- The rates the page prices with --------------------------------------
+    @http.route(
+        "/spring-calculator/rates",
+        type="jsonrpc",
+        auth="public",
+        website=True,
+        methods=["POST"],
+    )
+    def spring_calculator_rates(self, **kwargs):
+        """Cone prices and price per pound, markup already applied.
+
+        The calculator prices as the inputs change, so it needs the rates
+        locally - but it does not need, and is not told, the markup. These come
+        back marked up, which is all it needs to show a figure that matches
+        what the cart will charge.
+        """
+        try:
+            prices = _calculator_constants()
+            factor = _markup_factor()
+        except ValueError:
+            _logger.exception("spring_engineering: cannot read pricing constants")
+
+            return {"error": "Pricing is misconfigured."}
+
+        return {
+            "cones": {str(d): round(p * factor, 4) for d, p in prices["cones"].items()},
+            "perLb": round(prices["per_lb"] * factor, 6),
+        }
+
     # --- Add a configured assembly to the cart ---------------------------
     @http.route(
         "/spring-calculator/add-to-cart",
@@ -144,6 +221,7 @@ class SpringEngineeringWebsite(http.Controller):
 
         try:
             prices = _calculator_constants()
+            factor = _markup_factor()
         except ValueError:
             _logger.exception("spring_engineering: cannot read pricing constants")
 
@@ -188,9 +266,9 @@ class SpringEngineeringWebsite(http.Controller):
                 f'{item.get("role", "Spring")}: {wire}" wire, {diameter}" ID, {length}" long'
             )
 
-        cones = round(springs * cone_total, 2)
-        steel = round(springs * steel_weight * prices["per_lb"], 2)
-        total = round(prices["labor"] + cones + steel, 2)
+        cones = round(springs * cone_total * factor, 2)
+        steel = round(springs * steel_weight * prices["per_lb"] * factor, 2)
+        total = round(cones + steel, 2)
 
         product = request.env.ref(
             "spring_engineering.product_custom_spring", raise_if_not_found=False
@@ -222,9 +300,10 @@ class SpringEngineeringWebsite(http.Controller):
             f'{spec.get("assembly", "Single")}, {springs} spring'
             f'{"s" if springs != 1 else ""}',
             *lines,
+            # NO DRUM. It is ours to know and not the customer's to read on an
+            # order line - and it is recorded on the quote's inputs anyway.
             f'Door: {spec.get("doorWeight", "?")} lb, {spec.get("doorHeight", "?")}'
-            f', {spec.get("drum", "?")}, {spec.get("cycles", "?")} cycles',
-            f"Labor ${prices['labor']:.2f} + cones ${cones:.2f} + steel ${steel:.2f}",
+            f', {spec.get("cycles", "?")} cycles',
         ])
 
         line = request.env["sale.order.line"].sudo().create({
@@ -241,6 +320,5 @@ class SpringEngineeringWebsite(http.Controller):
             "total": total,
             "cones": cones,
             "steel": steel,
-            "labor": prices["labor"],
             "cart_quantity": order.cart_quantity,
         }

@@ -12,8 +12,8 @@
 // figure.
 import { load, make } from "./harness.mjs";
 import { readFileSync } from "node:fs";
+import { stateFromReading } from "./ref-state.mjs";
 const mod = await load();
-const REF_RADIUS = { 10: "LHR", 12: "12", 15: "15" };
 const BANDS = {
     "residential   (<=300 lb, <=8ft, <=25k)": (i) => i.weight <= 300 && i.heightInches <= 96 && i.cycles <= 25000,
     "light comml   (<=600 lb, <=12ft, <=50k)": (i) => i.weight <= 600 && i.heightInches <= 144 && i.cycles <= 50000,
@@ -29,12 +29,7 @@ for (const f of process.argv.slice(2)) {
         if (r.error || !r.data?.innerSpring) continue;
         if (r.data.innerSpring.springLength > 120) continue;   // unbuildable anyway
         const hi = i.lift === "HiLift" || i.lift === "Hi-Lift";
-        const c = make(mod, { assembly:"Duplex", drum:i.drum, springId:'3 3/4" inside 6"',
-            springs:i.springs, radius:REF_RADIUS[Number(i.radius)] ?? String(i.radius),
-            ...(hi?{liftType:"Hi-Lift",liftin:String(i.hiLift)}:{}),
-            cycles:Number(i.cycles).toLocaleString("en-US"), weight:String(i.weight),
-            doorWidthFeet:9, doorHeightFeet:Math.floor(i.heightInches/12),
-            doorHeightInches:i.heightInches%12 });
+        const c = make(mod, stateFromReading(i));
         const s = c.duplexStep; if (!s) continue;
         const wok = `${s.outerWire}/${s.innerWire}` ===
             `${r.data.outerSpring.wireSize}/${r.data.innerSpring.wireSize}`;

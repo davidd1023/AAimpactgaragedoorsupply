@@ -1441,11 +1441,6 @@
             <div class="se-rowR-header">Price</div>
 
             <div class="se-rowR">
-                    <span>Labor</span>
-                    <span t-att-class="valueClass" t-esc="money(priceLabor)"/>
-            </div>
-
-            <div class="se-rowR">
                     <span>Cones</span>
                     <span t-att-class="valueClass" t-esc="money(priceCones)"/>
             </div>
@@ -1457,7 +1452,8 @@
 
             <div class="se-rowR se-rowR-total">
                     <span>Total</span>
-                    <span t-att-class="valueClass" t-esc="money(priceTotal)"/>
+                    <span t-att-class="valueClass"
+                          t-esc="priceAvailable ? money(priceTotal) : 'call us'"/>
             </div>
 
             </t>

@@ -34,9 +34,10 @@ const EXPORTS = `
 export {
     SpringEngineering, defaultState,
     DUPLEX_PAIRS, DUPLEX_ALIASES, duplexLength,
-    WIRE_SIZES, WIRE_LIMITS, DRUMS, DRUM_LIMITS, drumTurns,
+    WIRE_SIZES, WIRE_LIMITS, DRUMS, DRUM_LIMITS, HILIFT_DRUMS, drumTurns,
     TORSION_CONSTANT, CYCLE_COEFFICIENT, CYCLE_WIRE_EXPONENT, CYCLE_EXPONENT,
     DUPLEX_ACCEPT_FRACTION, duplexActiveLength, duplexPairBalanced,
+    CONE_PRICES, STEEL_PRICE_PER_LB, normaliseRates,
 };
 `;
 

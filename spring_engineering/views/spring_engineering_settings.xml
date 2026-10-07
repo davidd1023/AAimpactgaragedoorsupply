@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <!-- THE MARKUP, AND THE ONE PLACE IT LIVES.
+         Settings > Technical > System Parameters, which only the Settings group
+         can open - so it is ours and not a customer's.
+
+         It is a PERCENTAGE added to the supplier cost: 80 means a cost of
+         $100 is quoted at $180.
+
+         noupdate so that editing the figure sticks. Without it every module
+         upgrade would quietly put it back to 80, which is the kind of thing
+         nobody notices until a month of quotes has gone out at the wrong
+         price. -->
+    <data noupdate="1">
+        <record id="markup_percent" model="ir.config_parameter">
+            <field name="key">spring_engineering.markup_percent</field>
+            <field name="value">80</field>
+        </record>
+    </data>
+
+</odoo>

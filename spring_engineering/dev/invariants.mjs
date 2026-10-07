@@ -610,6 +610,31 @@ function duplexIgnoresWireDropdown(mod) {
 // The scaling checks are what catch a wrong basis. Doubling the spring count
 // must double the cones and the steel and leave labour alone; if cones were
 // ever charged once per assembly, or steel on a single spring, these fail.
+// The rates EXACTLY AS THE SERVER SENDS THEM, markup included: a JSON object
+// whose keys are strings, formatted the way Python formats a float - note the
+// "6.0". The browser gets this shape and nothing else, so a fixture that
+// tidied the keys up would test a wire format that does not exist. This one
+// does not: it is the shape that quoted the 6" cone free.
+//
+// The figures are the costs in the app times a 1.8 markup. They are written
+// out rather than computed so that a change to either the costs or the markup
+// shows up here as a deliberate edit.
+const SERVER_RATES = {
+    cones: { "2.625": 8.982, "3.75": 20.79, "5.25": 34.974, "6.0": 34.974 },
+    perLb: 2.628,
+};
+
+// A component with the server's rates in hand. The page fetches these in
+// onWillStart, which the harness does not run, so every price would otherwise
+// read as unavailable.
+function priced(mod, o) {
+    const c = duplex(mod, o);
+
+    c.rates = mod.normaliseRates(SERVER_RATES);
+
+    return c;
+}
+
 function priceAddsUp(mod) {
     const fails = [];
     const states = [
@@ -623,17 +648,26 @@ function priceAddsUp(mod) {
     for (const st of states) {
         for (const springs of [1, 2, 3, 4]) {
             for (const weight of ["300", "600", "1000"]) {
-                const c = duplex(mod, { ...st, springs, weight });
+                const c = priced(mod, { ...st, springs, weight });
                 const label = `${st.assembly} ${st.springId} x${springs} @${weight}lb`;
-                const parts = c.priceLabor + c.priceCones + c.priceSteel;
+
+                // EVERY CONFIGURATION IN THIS LIST MUST BE PRICEABLE. These are
+                // the diameters the dropdowns offer, so a missing rate here is
+                // a hole in the cone table, not a quirk of the case.
+                if (!c.priceAvailable) {
+                    fails.push(`${label}: no price available, but every offered diameter is priced`);
+                    continue;
+                }
+
+                const parts = c.priceCones + c.priceSteel;
 
                 if (Math.abs(c.priceTotal - parts) > 1e-9) {
                     fails.push(`${label}: total ${c.priceTotal} but parts sum to ${parts.toFixed(2)}`);
                 }
 
-                for (const [name, v] of [["labor", c.priceLabor], ["cones", c.priceCones],
-                                         ["steel", c.priceSteel], ["total", c.priceTotal]]) {
-                    if (!(v >= 0) || !isFinite(v)) {
+                for (const [name, v] of [["cones", c.priceCones], ["steel", c.priceSteel],
+                                         ["total", c.priceTotal]]) {
+                    if (!(v > 0) || !isFinite(v)) {
                         fails.push(`${label}: ${name} is ${v}`);
                     }
 
@@ -644,28 +678,89 @@ function priceAddsUp(mod) {
             }
         }
 
-        // Cones and steel are per spring; labour is not.
-        const one = duplex(mod, { ...st, springs: 1, weight: "600" });
-        const two = duplex(mod, { ...st, springs: 2, weight: "600" });
+        // Cones and steel are both per spring - there is no fixed component in
+        // the price any more, so the whole total doubles with the count.
+        //
+        // TO THE CENT, NOT EXACTLY. A marked-up cone rate is not a whole number
+        // of cents ($19.43 at 1.8 is $34.974), and the rounding is applied once
+        // to the assembly rather than to each spring - which is the right place,
+        // because the assembly is what is sold. So two springs can come to a
+        // cent more than twice one, and that cent is the correct figure.
+        const one = priced(mod, { ...st, springs: 1, weight: "600" });
+        const two = priced(mod, { ...st, springs: 2, weight: "600" });
 
-        if (Math.abs(two.priceCones - 2 * one.priceCones) > 1e-9) {
+        if (Math.abs(two.priceCones - 2 * one.priceCones) > 0.01 + 1e-9) {
             fails.push(`${st.assembly} ${st.springId}: cones ${one.priceCones} at one spring but ${two.priceCones} at two - not per spring`);
-        }
-
-        if (two.priceLabor !== one.priceLabor) {
-            fails.push(`${st.assembly} ${st.springId}: labour changed with the spring count`);
         }
 
         // Steel follows the assembly weight, which doubles with the count at
         // a fixed per-spring weight - so compare against the weight rather
         // than assuming the per-spring figure is unchanged.
         for (const c of [one, two]) {
-            const want = Math.round(c.assemblyWeight * 1.46 * 100) / 100;
+            const want = Math.round(c.assemblyWeight * SERVER_RATES.perLb * 100) / 100;
 
             if (Math.abs(c.priceSteel - want) > 1e-9) {
-                fails.push(`${st.assembly} ${st.springId} x${c.state.springs}: steel ${c.priceSteel} but ${c.assemblyWeight.toFixed(2)} lb at 1.46 is ${want}`);
+                fails.push(`${st.assembly} ${st.springId} x${c.state.springs}: steel ${c.priceSteel} but ${c.assemblyWeight.toFixed(2)} lb at ${SERVER_RATES.perLb} is ${want}`);
             }
         }
+    }
+
+    return fails;
+}
+
+// A RATE THE SERVER DID NOT SEND MUST COST THE QUOTE, NOT THE MARGIN.
+//
+// This is the invariant the 6" cone needed. The page looked its rates up by
+// string key and fell back to zero, the server spelled the key "6.0" where the
+// page spelled it "6", and the result was a quote $70 light at two springs with
+// nothing on the page to show it. Both halves are checked here: the rates must
+// survive the trip whatever either side calls the key, and a genuinely absent
+// rate must take the whole price down rather than price that cone at nothing.
+function missingRateRefusesToQuote(mod) {
+    const fails = [];
+
+    // A 6" Duplex, which is the pair the "6.0" key belongs to.
+    const st = { assembly: "Duplex", springId: '3 3/4" inside 6"', springs: 2, weight: "600" };
+    const full = priced(mod, st);
+
+    if (!full.priceAvailable) {
+        fails.push("the server's own rates do not price a 6\" Duplex");
+
+        return fails;
+    }
+
+    // Both cones must actually be in the figure. Half of 3 3/4 + 6 would still
+    // look like a plausible price, so check against the stated rates.
+    const want = Math.round(2 * (20.79 + 34.974) * 100) / 100;
+
+    if (Math.abs(full.priceCones - want) > 1e-9) {
+        fails.push(`6" Duplex cones ${full.priceCones}, expected ${want} - a cone is priced at zero`);
+    }
+
+    // Now drop each needed rate in turn: the quote must disappear.
+    for (const diameter of full.coneDiameters) {
+        const c = duplex(mod, st);
+        const cones = new Map(mod.normaliseRates(SERVER_RATES).cones);
+
+        cones.delete(Number(diameter));
+        c.rates = { cones, perLb: SERVER_RATES.perLb };
+
+        if (c.priceAvailable) {
+            fails.push(`with no rate for ${diameter}" the page still quotes ${c.priceTotal}`);
+        }
+
+        if (c.priceTotal !== 0) {
+            fails.push(`with no rate for ${diameter}" the total is ${c.priceTotal}, not withheld`);
+        }
+    }
+
+    // No rates at all - the fetch failed - must behave the same way.
+    const none = duplex(mod, st);
+
+    none.rates = null;
+
+    if (none.priceAvailable || none.priceTotal !== 0) {
+        fails.push(`with no rates at all the page quotes ${none.priceTotal}`);
     }
 
     return fails;
@@ -796,6 +891,7 @@ export const INVARIANTS = [
     { name: "Duplex raises no Wire-Size-dropdown warning", run: noStaleWireWarnings },
     { name: "no Duplex output depends on the Wire Size dropdown", run: duplexIgnoresWireDropdown },
     { name: "the price column adds up and scales per spring", run: priceAddsUp },
+    { name: "a rate the server did not send withholds the quote", run: missingRateRefusesToQuote },
     { name: "Single assembly length matches the reference's width brackets", run: singleAssemblyBrackets },
     { name: "the Single wire steps where the reference steps", run: singleWireSwitches },
 ];

@@ -984,3 +984,355 @@ needed:
 What is left is six misses, one apiece in six groups, three of which have four
 or fewer external readings between them - at that point the samples cannot
 distinguish a model fault from a single awkward door.
+
+## THE HONEST NUMBER IS ABOUT 90%, NOT 98.6% (2026-10-06)
+
+Read this before quoting any accuracy from this file.
+
+Three knobs were tuned against dev/eval-clean.json, eval-soft2-spread.json and
+eval-rand-seed777001.json - LINE_SLACK twice, LEVEL_SUPPORT, SPLIT_MIN_SIDE -
+and dev/miss-profile.mjs was run against those same files to choose which
+groups to collect readings for. That is a lot of selection pressure on about
+800 readings, and it compromised them as a measuring stick.
+
+So a fresh uniform sample was drawn afterwards with dev/eval-sample.mjs, 380
+readings over the whole allowed box, and nothing has been tuned against it:
+
+                        FRESH SAMPLE    the tuned-against samples
+    clean, wire             99.4%              100%
+    clean, length           90.3%             98.6%
+    clean, within 1"        97.7%             99.5%
+    flagged, length         66.8%             84.7%
+
+### It is not the population
+
+The obvious excuse is that the fresh sample is harder - it is 52% hi-lift
+across all six drums, while the old sets are 100% standard lift on three. Split
+out, that excuse fails:
+
+    standard lift   89.4%
+    hi-lift         91.4%
+
+Standard lift alone reads 89.4% on fresh data against about 98% on the old
+sets, for the same drums. The gap is overfitting, not population.
+
+### The tuning bought nothing
+
+    slack  support  minside   FRESH   tuned-against   bands
+     0.03    0.03     12      90.3%       97.2%        130
+     0.08    0.06      8      90.3%       98.6%         38
+     0.12    0.06      8      90.3%       98.6%         38
+     0.12    0.03     12      90.9%       98.1%         71
+
+Identical on fresh data. The 1.4 points were fitting. The settings are kept
+only because at equal honest accuracy they are 38 bands instead of 130.
+
+### The holdout was right all along
+
+dev/holdout.sh reported 92.1% to 92.4% through all of this while the samples
+reported 96% to 98.6%. The note under LINE_SLACK in derive.mjs argued the
+samples were "the better guide to real use" because they are uniform draws and
+the corpus behind the holdout is targeted. That reasoning was wrong: once a
+sample has been tuned against, it stops being a guide to anything. 90.3% fresh
+and 92.2% holdout are consistent with each other; 98.6% was the outlier and
+should have been treated as the suspect figure.
+
+### Rules from here
+
+  dev/eval-validation-seed61006.json is for MEASURING, never for tuning or for
+  choosing what to collect. The moment a knob is moved against it, it is spent
+  and another draw is needed.
+
+  Quote the fresh figure and the holdout. If they disagree with a sample that
+  has been tuned against, the sample is wrong.
+
+  dev/eval-sample.mjs draws a new one in seconds, and the pull is six minutes.
+  That is cheap next to reporting a number that is eight points optimistic.
+
+## The boundary-refinement batch was making things worse (2026-10-06)
+
+Found with the fresh sample, and it is my own tool doing the damage.
+
+dev/frac-refine.mjs picks readings that land within 0.03 of a threshold the
+model already uses, to place that threshold more precisely. Batch R1 is 380 of
+them. On the samples that had been tuned against it looked like a gain. On a
+uniform draw it is a loss:
+
+                       R1 in the fit   R1 out
+    clean wire             99.4%        100%
+    clean length           90.3%        91.4%
+    clean within 1"        97.7%        98.3%
+    five-fold holdout      92.19%       92.51%
+
+Concentrating that much data at the boundaries over-weights them: the
+thresholds move to fit the boundary readings and are worse for ordinary doors.
+It is the "dense is not diverse" lesson again, one level subtler - data chosen
+BY where the model's boundaries already sit is the densest kind there is, and
+the concentration is invisible in the input space, which is where I was
+checking for it.
+
+The readings are kept, marked `fit: false`, so dev/replay.mjs still asserts
+them and nothing is thrown away - they are perfectly good reference data, just
+not a fair sample to fit. derive.mjs skips them.
+
+### What else was tried and did not pay
+
+  CENTRING sMult IN ITS PLATEAU. fitStiffness scores a COUNT, so many
+  multipliers tie, and `ok > best.ok` with an ascending scan took the LOWEST of
+  them every time - no margin on one side. Taking the midpoint of the widest
+  tied run is better reasoning and bought two readings in 5157 on the holdout,
+  with nine more bands. Reverted.
+
+  REFITTING sMult AGAINST THE REAL OBJECTIVE. fitStiffness optimises against
+  snapGrid, a nearest-neighbour snap, while the shipped model decides length
+  with frac bands - so the multiplier is tuned for an objective the model does
+  not use. Scanning every rung for a better multiplier UNDER THE SHIPPED MODEL:
+  zero rungs would move, 5021/5064 either way. The bands are fitted after the
+  multiplier and absorb whatever it chose, so the pair is already at a local
+  optimum. Theoretically wrong, costs nothing.
+
+  POOLING THE THRESHOLDS. If the high threshold were really a shared constant
+  near 0.75, pooling it would cut variance. The 111 fitted first thresholds have
+  a standard deviation of 0.231 and run from -0.35 to 0.82. They genuinely
+  differ per group.
+
+### Where this leaves it
+
+In sample 99%, holdout 92.5%, fresh uniform 91.4%. The model reproduces what it
+is shown almost perfectly and loses eight points on new doors, and the residual
+errors are a whole inch, as often short as long, spread evenly across spring
+count, lift, cycle target and length with no concentration left to attack.
+
+The next real gain is probably not another fitting idea. It is a corpus drawn
+UNIFORMLY rather than targeted: 5157 readings is plenty, but they are mostly
+switch points, fraction walks and boundary refinements, which is exactly the
+data that makes per-group bands overfit. Fitting on uniform draws would close
+the gap from the other side.
+
+## More uniform data is not monotonically better (batches U5-U8, 2026-10-07)
+
+Four more uniform batches, 1600 readings, drawn exactly like U1-U4. They do not
+help the number that matters, and the effect is consistent across two
+independent sample sets rather than being noise:
+
+                       validation clean   older clean   validation flagged   older flagged
+    U1-U4 fitted            93.7%            97.9%           74.9%              87.8%
+    U1-U8 fitted            91.4%            97.2%           76.5%              89.7%
+    U1-U8, flagged out      92.6%            97.9%           67.4%              84.7%
+
+So the second four batches TRADE clean accuracy for flagged accuracy. About
+half of a uniform draw is flagged, so doubling the draw doubles the flagged
+readings, and although their lengths are already excluded their pairing and
+cycle count move K - which changes rung selection for ordinary doors too.
+
+Clean readings are the ones that get ordered, so U5-U8 are held out of the fit
+with `fit: false` and kept in the corpus as data. Nothing is thrown away: if
+flagged accuracy ever matters more, the flag comes off and the numbers above
+say what that costs.
+
+The useful general point is that "fit the distribution you are scored on" is
+right about the SHAPE of a draw and silent about its size. U1-U4 was worth 2.3
+points of clean accuracy; U5-U8 was worth -2.3.
+
+### And a correctness bug the test exposed
+
+`fit: false` was implemented as a `continue` at ingestion, which looked
+equivalent to excluding the reading and was not. A reading that never enters
+`readings` cannot take part in the dedup, so it cannot block the copy of itself
+sitting in a pull file - and the pull copy carries no flag, so it gets fitted.
+Putting dev/pulled-U5..U8.json back raised the distinct count by exactly the
+1522 readings meant to be held out, and changed the table.
+
+They are now ingested, win the dedup the way corpus readings always do, and are
+dropped where the fit is built. The table is byte-identical with those pulls on
+disk or absent, which is what the flag was for. The warning in the previous
+commit - that the pulls had to stay out of dev/ - was right about the symptom
+and wrong about the cause: it was not that the pull path ignores the flag, it
+was that the corpus path was removing its own ability to win.
+
+## Four measurement fixes, and two leads that measured out (2026-10-07)
+
+No accuracy change this round. Validation clean length is still 93.7%, and
+everything below is either a tool that was lying or a lead that was followed
+until the data said to stop.
+
+### A diagnostic that invented its own inputs read 60% where the truth was 94%
+
+A new tool to compare our multiplier, turns and TIPPT against the reference's
+reported values put clean length at 60.3%, with standard lift at 34% and
+hi-lift at 91%. That shape is exactly what a real bug localised to the standard
+path would look like, and chasing it would have been hours.
+
+The tool was wrong. It carried its own copy of the reading-to-state mapping,
+written from memory, and mapped a track radius of 12 to `'12"'` where the
+component wants `"12"`. An unrecognised radius falls back to a default instead
+of failing, and the radius only matters on standard lift - so a typo in the
+harness produced a perfectly plausible, perfectly localised fake defect.
+
+It was caught by comparing against `dev/clean-cases.mjs`, which already
+reported 93.7% on the same file. **A new tool that measures a number an
+existing tool already reports gets checked against it before anything it says
+is believed.** Four copies of that mapping existed, and they disagreed about
+the door width too, so the mapping now lives once in `dev/ref-state.mjs` and
+the three scorers import it. Their output is byte-identical after the move,
+which is the point: the refactor was verified to change no measurement.
+
+### The multiplier surface is genuinely poor on one drum, and it costs nothing
+
+`dev/mult-survey.mjs` scores the drum multiplier against every reading that
+reports one - including flagged ones, since a flag is about the spring chosen
+and not the drum arithmetic, which roughly doubles the data:
+
+| drum | n | exact | over 1e-5 | worst |
+|---|---|---|---|---|
+| D800-120 hi-lift | 375 | **4.8%** | 178 | **-1.66e-03** |
+| 525-54HL hi-lift | 264 | 31.1% | 80 | 2.65e-04 |
+| 575-120 hi-lift | 350 | 69.1% | 8 | -2.50e-05 |
+| D525-216 standard | 325 | 68.9% | 6 | 1.00e-05 |
+| D400-144 standard | 182 | 59.3% | 0 | 1.00e-06 |
+| D400-96 standard | 49 | 79.6% | 0 | -1.00e-06 |
+
+A 1.7e-03 error is about twenty times what it takes to flip a TIPPT rounding
+and with it a whole inch of spring, so the D800-120 looks like the obvious
+next fix. **It is not.** On the validation sample all ten clean length misses
+with the right rung have an exactly correct multiplier, turns and TIPPT; the
+six that differ upstream do so only in turns, which the length does not use.
+Repairing the surface would move nothing measurable. It is a real inaccuracy
+with no present consequence - recorded, not fitted.
+
+Two of that table's original rows were artefacts of the tool rather than the
+model: a 20" track radius and a drum we do not offer contributed an apparent
+8.6e-02 error, and reading a 54" drum at 90" of hi-lift contributed 6.7e-03.
+The survey now excludes what the module does not offer and anything past a
+drum's own rating, because scoring a deliberate refusal measures the refusal.
+
+### The reference tolerates a cycle shortfall - and that still does not fix it
+
+We raise `duplex-cycles-low` on 390 readings the reference passes and agree on
+173: crying wolf two to one. The note beside that warning says no threshold
+separates the reference's warned readings from its quiet ones, which is true
+of **our** computed count. Measured against the count the reference itself
+reports, the rule is almost exact (`dev/cycle-rule.mjs`):
+
+| rule | false alarms | missed |
+|---|---|---|
+| reported < target | 327 | 0 |
+| reported <= 0.95 x target | 2 | 0 |
+| **reported <= 0.90 x target** | **0** | **0** |
+| reported <= 0.85 x target | 0 | 177 |
+
+So it is not "below target" - it accepts roughly a 10% shortfall. But the rule
+is far less pinned than that table suggests, and the tool now says so: all 177
+warned readings are the **same target at the same ratio**, 10,000 at 0.9000.
+The lowest ratio it stays quiet at is 0.9333. The tolerance is therefore
+bracketed to (0.9000, 0.9333] and no tighter, and one warned reading at any
+other target would settle it.
+
+Knowing the rule does not let us apply it, which is the real finding. The rule
+takes the reference's own cycle count, and ours is 2.6% out at a 10,000 target
+against 0.17% at 300,000 - an error that shrinks with the target, which is the
+signature of the reference's 1000-cycle quantisation and not of our model. The
+warning stays a caution.
+
+### Floor or round: 86% of residuals land in [0, 1000) and that proves nothing
+
+`ours - reported` falls in [0, 1000) for 86% of readings, which is what
+flooring to 1000 looks like. It is equally what rounding to 1000 looks like if
+our own count runs about 500 high, and the two cannot be told apart from
+pulled data: a multiplicative bias in our cycle law shifts every step point
+together. A weight sweep over one fixed spring was tried for this and could
+not resolve it either - the step points are only located to within a pound,
+about 160 cycles here, which is the same size as the thing being measured.
+Settling it needs a configuration whose exact cycle life is known independently
+of our cycle law. Our displayed figure still rounds, unchanged, because
+changing it on this evidence would be a guess.
+
+### Two things the suite was reporting wrongly
+
+**`dev/honest.sh` led with the wrong number.** It printed in-sample first and
+left the never-tuned validation sample out entirely - which is how 98.6% came
+to be quoted for a model that was really at 90%. It now runs validation first,
+labels the older samples as tuned-against, and reads the invariant total from
+the suite instead of the hardcoded `/16` that stopped matching when a
+seventeenth invariant was added.
+
+**The corpus asserted a drum we deliberately do not model.** One D800-312
+reading could never pass, so the accuracy section was permanently red for a
+reason that was not a regression - the same trap the 120" limit already had a
+rule for. It is now named and not asserted.
+
+**`dev/eval-sample.mjs` could destroy the yardstick.** It is a generator, and
+run with one argument it silently overwrote its target with a fresh seedless
+draw of inputs. It did exactly that to the 380-reading validation sample -
+an hour of polling at one request a second - and only a committed copy got it
+back. It now requires a seed and refuses to overwrite an existing file.
+
+## The cycles-low warning was crying wolf, and the rule is a constant (2026-10-07)
+
+`duplex-cycles-low` fired on 335 readings the reference passes against 173 it
+agrees with - two false alarms for every real one, on the one warning a
+customer is most likely to act on. It now fires on **4**, with the same 173
+agreements and the same 5 misses. Validation accuracy is untouched at 93.7%:
+this is the warning, not the model.
+
+### The rule is an absolute floor at 10,000, not a fraction of the target
+
+The note that used to sit beside this warning said the reference fires "when
+its own reported count falls below about 0.95 of the target", that our count
+was too coarse to apply that, and that scanning every threshold from 0.70 to
+1.05 offered only a choice between missing all 184 and 393 false alarms.
+
+Every one of those statements was true, and the conclusion was still wrong.
+**0.70 to 1.05 of the target is a family of rules that does not contain the
+answer**, and a search over the wrong family reports "no threshold works" no
+matter how much data it is given. The answer is not in that family at all: the
+reference warns when the life it computes falls below 10,000, whatever was
+asked for. Over 6,355 distinct readings that rule has no exceptions in either
+direction.
+
+The giveaway was in the reference's own message the whole time - "cycle life
+calculation of 9,000.00 is less than the **10,000 cycle minimum**" names a
+constant, and it says 10,000 on a 300,000-cycle door too. Three things stop
+fitting once it is read that way:
+
+- **Every warned reading reports exactly 9,000 cycles**, at door weights from
+  300 lb to 1,949 lb and across eleven rungs. A tolerance on the target cannot
+  produce a single value over that spread; a floor at 10,000 can only produce
+  the one bucket beneath it.
+- **All of them have a target of 10,000**, which is why a fraction of the
+  target fitted equally well and why the two readings looked identical.
+- **Missing a high target is silent.** The same 459 lb door that is warned at a
+  target of 10,000 is passed without comment at 25,000, 100,000 and 300,000.
+
+### The pull that failed to discriminate, and why that was still the answer
+
+A 48-reading sweep was taken to separate the two readings of the rule: a door
+that cannot reach a 300,000 target but still beats 10,000 would be warned by a
+tolerance and passed by a floor. **No such reading exists.** The reference's
+own selection lands within 4% of the target on every one of them - lowest ratio
+0.960 - and a further 24 Single readings never land below the target at all.
+
+So the two rules cannot disagree on anything the reference will actually
+produce, and the floor is the one that explains the single warned family
+without a free parameter. The sweep was not wasted: "the window is empty by
+construction" is why the corpus could never have settled this, and it is what
+makes the floor safe to ship.
+
+### The same trap twice in one session, in the measuring tools
+
+The Single path got the same change and then had it reverted, because the five
+false alarms that justified it were produced by the tool and not by the module.
+`dev/eval-single.json` carries no spring count on some readings; the reference
+defaults that to 2, and the tool defaulted it to 1 - putting a whole door on
+one spring and computing 553 cycles where the reference reports 14,000. With
+the default corrected the Single warning fires on none of 523 readings, and the
+reference raises no cycle message on any of them either, so there is nothing
+there to fix and nothing to measure a rule against. It keeps the rule it has.
+
+That is the second time in this session that a defaulting difference in a
+scoring tool produced a confident, plausible, perfectly localised fake defect -
+the first was a track radius of 12 written as `'12"'`. Both were caught only by
+checking a new number against one an existing tool already reported. The
+mapping now lives once, in `dev/ref-state.mjs`, and **the rule is that a tool
+measuring something another tool already measures gets reconciled with it
+before anything it says is believed.**
