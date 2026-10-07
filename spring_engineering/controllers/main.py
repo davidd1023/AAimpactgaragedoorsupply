@@ -359,9 +359,70 @@ class SpringEngineeringWebsite(http.Controller):
         # the pricelist on create, and the product deliberately lists at zero.
         line.write({"price_unit": total})
 
+        # WHAT WE RECEIVE HAS TO BE THE PRICE WE COMPUTED, WHATEVER THE TAXES
+        # ARE SET TO.
+        #
+        # `total` is a price to be received: supplier cost, times the markup,
+        # plus labour. price_unit is not that figure under every tax
+        # configuration. With ordinary tax-excluded taxes the two coincide and
+        # the customer pays tax on top. But a company whose sales tax is set up
+        # as PRICE-INCLUDED - which is normal in much of the world and is one
+        # checkbox away anywhere - makes price_unit the gross, so a 15%
+        # included tax would have us book 297.88 on a 342.56 quote and hand the
+        # whole margin to the tax authority. Nothing would look wrong: the cart
+        # would show exactly the quoted number.
+        #
+        # Rather than reason about tax types, read back what Odoo itself
+        # computed as the net and close the gap.
+        #
+        # THE CORRECTION IS A RATIO, NOT A DIFFERENCE, and that is the whole
+        # trick. Adding the shortfall looks like the obvious move and converges
+        # far too slowly, because under an included tax the correction is itself
+        # taxed: each pass closes only about 13% of a 15% gap, so reaching half a
+        # cent from a 56-dollar shortfall takes about sixty passes. Measured, not
+        # reasoned about - four passes left a cent on the table. Scaling by
+        # target/net lands exactly in ONE pass for any percentage tax.
+        #
+        # The additive fallback is kept for the case the ratio cannot handle, a
+        # net of zero, and the loop stays for fixed-amount taxes and for two
+        # taxes in a chain. The cent nudge stops it spinning when rounding to the
+        # currency's precision means no new price_unit can get closer.
+        for _ in range(6):
+            net = line.price_subtotal
+            shortfall = total - net
+
+            if abs(shortfall) < 0.005:
+                break
+
+            if net > 0.01:
+                candidate = round(line.price_unit * total / net, 2)
+            else:
+                candidate = round(line.price_unit + shortfall, 2)
+
+            if candidate == line.price_unit:
+                candidate = round(line.price_unit + (0.01 if shortfall > 0 else -0.01), 2)
+
+            line.write({"price_unit": candidate})
+
+        # If it still does not reconcile, the line is left as close as it got and
+        # the mismatch is logged rather than hidden: a quote that books the wrong
+        # amount is worth an entry in the log even though the customer sees the
+        # right figure.
+        if abs(total - line.price_subtotal) >= 0.005:
+            _logger.warning(
+                "spring_engineering: quoted %s but the line nets %s after tax "
+                "- check the taxes on product_custom_spring",
+                total, line.price_subtotal,
+            )
+
         return {
             "total": total,
             "cones": cones,
             "steel": steel,
+            # WHAT THE LINE ACTUALLY BOOKS, net of tax. Equal to `total` when
+            # everything is right, and reported so that dev/price-parity.sh can
+            # check the whole chain - the page quotes it, the server computes it,
+            # and the order line nets it - rather than only the first two.
+            "net": line.price_subtotal,
             "cart_quantity": order.cart_quantity,
         }

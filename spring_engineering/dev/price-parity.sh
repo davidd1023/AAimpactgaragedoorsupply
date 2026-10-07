@@ -75,15 +75,28 @@ while read -r row; do
     fi
 
     page=$(printf '%s' "$row" | python3 -c "import sys,json;print(json.load(sys.stdin)['page'])")
-    server=$(curl -s -X POST "$BASE/spring-calculator/add-to-cart" \
+    answer=$(curl -s -X POST "$BASE/spring-calculator/add-to-cart" \
         -H "Content-Type: application/json" \
-        -d "{\"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"spec\":$spec}}" \
+        -d "{\"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"spec\":$spec}}")
+    server=$(printf '%s' "$answer" \
         | python3 -c "import sys,json;d=json.load(sys.stdin).get('result',{});print(d.get('total', d.get('error','no answer')))")
+    # AND WHAT THE ORDER LINE NETS, which is the end of the chain and the only
+    # figure that is actually money. It differs from the quote when the product's
+    # taxes are price-INCLUDED, because then price_unit is a gross - a config
+    # away from handing the whole margin to the tax authority with the cart still
+    # showing the quoted number.
+    net=$(printf '%s' "$answer" \
+        | python3 -c "import sys,json;d=json.load(sys.stdin).get('result',{});print(d.get('net','-'))")
 
     # NUMERICALLY, not as text: the page prints 1360 where the server prints
     # 1360.0, and a string compare called that a disagreement.
     if python3 -c "import sys;sys.exit(0 if abs(float('$page')-float('$server'))<5e-3 else 1)" 2>/dev/null; then
-        printf "  %-42s page %-10s server %-10s ok\n" "$label" "$page" "$server"
+        if python3 -c "import sys;sys.exit(0 if abs(float('$server')-float('$net'))<5e-3 else 1)" 2>/dev/null; then
+            printf "  %-42s page %-10s server %-10s net %-10s ok\n" "$label" "$page" "$server" "$net"
+        else
+            printf "  %-42s page %-10s server %-10s net %-10s NET DIFFERS\n" "$label" "$page" "$server" "$net"
+            fail=1
+        fi
     else
         printf "  %-42s page %-10s server %-10s DIFFER\n" "$label" "$page" "$server"
         fail=1
