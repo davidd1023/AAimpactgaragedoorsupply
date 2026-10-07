@@ -12,6 +12,8 @@ import os
 import re
 
 from odoo import http
+
+from ..pricing import CONE_PRICES, STEEL_PRICE_PER_LB
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
@@ -35,6 +37,19 @@ _prices = None
 
 
 def _calculator_constants():
+    """The supplier costs, plus the steel density read from the component.
+
+    THE COSTS COME FROM pricing.py, not from the JavaScript. They used to be
+    parsed out of the component source so that one file held them; that file is
+    served to every visitor, so the costs were public and the markup was a
+    division away from any quote. See pricing.py.
+
+    THE DENSITY IS STILL READ FROM THE COMPONENT, because the page genuinely uses
+    it to show spring weights and the two must not drift: the server charges for
+    the same pounds of steel the page displayed. A density is physics and worth
+    nothing to a competitor, so there is no reason to hide it and every reason to
+    keep one copy.
+    """
     global _prices
 
     if _prices is not None:
@@ -43,34 +58,22 @@ def _calculator_constants():
     with open(_CALC_JS, encoding="utf-8") as fh:
         src = fh.read()
 
-    def one(pattern, name):
-        found = re.search(pattern, src)
+    found = re.search(r"const STEEL_DENSITY = ([\d.]+);", src)
 
-        if not found:
-            raise ValueError(f"cannot find {name} in spring_engineering.js")
+    if not found:
+        raise ValueError("cannot find STEEL_DENSITY in spring_engineering.js")
 
-        return float(found.group(1))
-
-    cones_block = re.search(r"const CONE_PRICES = \{(.*?)\};", src, re.S)
-
-    if not cones_block:
-        raise ValueError("cannot find CONE_PRICES in spring_engineering.js")
-
-    cones = {
-        float(d): float(p)
-        for d, p in re.findall(r"([\d.]+):\s*([\d.]+)", cones_block.group(1))
-    }
-
-    if not cones:
-        raise ValueError("CONE_PRICES parsed empty")
-
+    # Read once per worker, as before. The density changes about never, and a
+    # file read on every add-to-cart is a strange thing to pay for.
     _prices = {
-        "per_lb": one(r"const STEEL_PRICE_PER_LB = ([\d.]+);", "STEEL_PRICE_PER_LB"),
-        "density": one(r"const STEEL_DENSITY = ([\d.]+);", "STEEL_DENSITY"),
-        "cones": cones,
+        "cones": dict(CONE_PRICES),
+        "per_lb": STEEL_PRICE_PER_LB,
+        "density": float(found.group(1)),
     }
 
     return _prices
+
+
 
 
 # --- Markup ----------------------------------------------------------------

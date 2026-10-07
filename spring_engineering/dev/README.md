@@ -1530,3 +1530,42 @@ wire size already was.
 legitimate spec that must still go through - a route that rejected everything
 would pass half of that test and be useless. It fails against the previous
 controller, which is how it earned its place.
+
+## The supplier costs were in the public bundle (2026-10-07)
+
+`STEEL_PRICE_PER_LB` and `CONE_PRICES` lived in
+`static/src/js/spring_engineering.js`, where the controller parsed them out of
+the source. The reasoning was that one file should be the single place the costs
+are written down - right about the principle, wrong about the file, because
+everything under `static/` is served to anybody who opens the page. A visitor
+could read this out of the frontend bundle:
+
+    STEEL_PRICE_PER_LB=1.46
+    CONE_PRICES={2.625:4.99,3.75:11.55,5.25:19.43,6:19.43,}
+
+**That is worse than it first looks.** The markup percentage is kept off the wire
+deliberately - `/spring-calculator/rates` sends the rates with it already applied
+and never the figure itself - but publishing the costs makes the markup one
+division away from any quote on the page. All the care taken over the percentage
+was worth nothing while these were public.
+
+The page never used them. Both constants were dead code in the browser: prices
+come from the rates endpoint, already marked up. They are in `pricing.py` now,
+server side, and the controller imports them instead of parsing its own source.
+
+`STEEL_DENSITY` stays in the JavaScript, because the page genuinely uses it to
+show spring weights and the server must charge for the same pounds of steel the
+page displayed - so there is one copy and the controller still reads it from
+there. A density is physics and tells a competitor nothing.
+
+### The first check was the wrong check
+
+Grepping the served bundle for "4.99" reported it still present after the move.
+It was not: the bundle is 2 MB of every frontend module, and those digits were
+SVG path coordinates in somebody else's icon. Scoping the search to our module's
+own 49,601 bytes - between its `odoo.define` and the next one - showed all six
+probes absent.
+
+A naive substring search over a shared bundle produces false positives in
+proportion to its size, which is the third time this session that a measurement
+needed checking before its answer was believed.

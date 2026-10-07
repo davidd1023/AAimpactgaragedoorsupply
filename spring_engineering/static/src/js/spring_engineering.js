@@ -2036,29 +2036,17 @@ const CYCLE_MIN = 10000;
 //           assembly. It is taken from the weights the results already show,
 //           which are themselves taken from the quarter-inch length that gets
 //           built, so the price always agrees with the figures above it.
-// SUPPLIER COST, not the price. The markup lives in a system parameter the
-// server owns and the page is never told - what it receives from
-// /spring-calculator/rates is these same figures with the markup already in
-// them. So this file remains the one place the COSTS are written down (the
-// controller parses them from here), and nothing here knows the margin.
-const STEEL_PRICE_PER_LB = 1.46;
-
-// Keyed by inside diameter as a NUMBER, so the Duplex path can look up its
-// pair's diameters directly - it knows them as numbers, not as the dropdown's
-// strings.
+// THE COSTS ARE NOT IN THIS FILE, AND THAT IS THE POINT.
 //
-// 6" is not a size of its own here: it takes the 5 1/4" price. The three
-// Single diameters are the three that were quoted to us, and 6" appears only
-// as the outer half of a Duplex pair.
+// `const STEEL_PRICE_PER_LB = 1.46` and the cone price table used to sit here,
+// read by the controller out of this source so that one file held the figures.
+// Everything under static/ is served to anybody who opens the page, so they were
+// in the public bundle - and publishing the costs puts the markup one division
+// away from any quote, which undoes the whole reason the percentage is kept off
+// the wire.
 //
-// UNINSTALLED prices, quoted 2026-10-05. They replace an earlier set (6.04,
-// 12.00, 20.00) which was a little higher at every size.
-const CONE_PRICES = {
-    2.625: 4.99,
-    3.75: 11.55,
-    5.25: 19.43,
-    6: 19.43,
-};
+// They are in pricing.py now. This file never used them: prices come from
+// /spring-calculator/rates, already marked up. See normaliseRates below.
 
 // The rates as the server sends them, with the cone keys turned into NUMBERS.
 //
