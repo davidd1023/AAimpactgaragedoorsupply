@@ -154,6 +154,7 @@ class AADealerOrder(http.Controller):
                 qty = int(line.get('qty') or 0)
                 if qty < 1 or qty > MAX_QTY:
                     raise ValidationError(_("Line %s: quantity must be between 1 and %s.", idx, MAX_QTY))
+                self._check_series(template, line, idx)
                 variant, no_variant = self._resolve_combination(template, line.get('ptav_ids'))
                 if self._unit_price(partner, variant, no_variant, qty) <= 0:
                     raise ValidationError(_(
@@ -196,6 +197,21 @@ class AADealerOrder(http.Controller):
         order.message_post(body=_("Placed from the dealer Quick Order page by %s (charged to account).",
                                   request.env.user.name))
         return {'redirect': order.get_portal_url()}
+
+    def _check_series(self, template, line, idx):
+        """The kit comes from the door width (AA Calculator): <=144" 1200, <=194" 1600, <=220" 1800."""
+        try:
+            width = float(line.get('width_in') or 0)
+        except (TypeError, ValueError):
+            width = 0.0
+        if width <= 0:
+            raise ValidationError(_("Line %s: enter the door width.", idx))
+        if width > 220:
+            raise ValidationError(_("Line %s: doors wider than 18' 4\" need a special order. Please call AA Impact.", idx))
+        series = 'AA-1200' if width <= 144 else 'AA-1600' if width <= 194 else 'AA-1800'
+        if not template.name.startswith(series):
+            raise ValidationError(_("Line %(idx)s: a %(w)s\" wide door takes the %(s)s kit.",
+                                    idx=idx, w=int(width) if width == int(width) else width, s=series))
 
     def _track_values(self, line, idx, variant):
         """Track type / lift type / high lift, validated with the AA Calculator rules."""
