@@ -1,0 +1,6 @@
+#aa_dealer_order .aa-line { border-left: 4px solid var(--bs-primary, #0d6efd); }
+#aa_dealer_order .aa-line .aa-line-num { font-weight: 700; }
+#aa_dealer_order .aa-opts label { margin-right: 1rem; white-space: nowrap; }
+#aa_dealer_order .aa-price { font-weight: 600; min-width: 7rem; text-align: right; }
+#aa_dealer_order .aa-summary { position: sticky; bottom: 0; z-index: 5; box-shadow: 0 -2px 8px rgba(0,0,0,.08); }
+#aa_dealer_order .aa-dim input { max-width: 5.5rem; }
