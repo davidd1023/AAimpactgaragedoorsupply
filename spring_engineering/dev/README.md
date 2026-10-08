@@ -2840,3 +2840,49 @@ than all at once.
 A 400-request pilot cannot be validated on its own: +0.7 points is under 3
 readings of 347, which no paired test can resolve. The evidence for going ahead
 is the starvation experiment, not a pilot.
+
+## Per-spring-count stiffness: cross-validation said yes, the model said no (2026-10-08)
+
+The campaign took the busy rungs from about 230 length readings past 320, and
+more data can afford more parameters - so the per-rung sMult decision, made at
+the smaller size, was worth re-opening. `STIFFNESS_REPORT=1 node
+dev/derive.mjs` measures it. Over the 35 rungs with 40+ readings:
+
+| | in sample | five-fold CV |
+|---|---|---|
+| one multiplier per rung | 6673 | 6551 |
+| one multiplier per spring count | 6948 | **6831** |
+
+An out-of-fold gain (+280) **larger** than the in-sample one (+275) is normally
+the end of the argument: extra parameters that generalise are not overfitting.
+The per-count multipliers also differ by real amounts - 0.273/0.2253 wants
+1.00725, 0.99525, 1.014, 1.01725 across one to four springs, a 2.2% spread, and
+2% of a 50" spring is an inch.
+
+**Built properly it lost a reading.** Per-count multipliers in the table, the
+component selecting by spring count, the bands refitted against the same
+multiplier so nothing was scored under a value it was not fitted under: the
+never-tuned draws went 340/347 to 339/347.
+
+### Why the cross-validation was wrong
+
+It scored ONE STAGE in isolation, and the stage below it already does that job.
+`lineByCount` and `byCount` are keyed by spring count, so the thresholds were
+already absorbing the per-count variation. The CV counted a gain the pipeline
+already had, and paid for it with parameters.
+
+The lesson generalises past stiffness: **a fitter stage cannot be scored on its
+own when a later stage can compensate for it.** Only the whole pipeline,
+against data nothing was tuned on, settles anything. That is the same mistake
+shape as the five-fold holdout rising while the never-tuned draws fell during
+the U5-U8 question - a number that improves because the fit suits the corpus,
+not the door.
+
+### One more near miss worth recording
+
+Getting this wrong the first time cost 97.98% -> 83.00%, because `sMultByCount`
+was fitted in `derive.mjs` but left out of the object the installer reads. The
+bands were built on `rawActive * mFor(springs)` and the component still applied
+the rung-wide `sMult`. That returned object is the ONLY channel between the
+fitter and the model: a quantity that is not in it does not exist downstream,
+and the failure is silent and total rather than loud and local.
