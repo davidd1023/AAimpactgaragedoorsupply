@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tile on /my for dealers -->
+    <template id="portal_my_home_dealer" inherit_id="portal.portal_my_home" name="Dealer Quick Order tile">
+        <div id="portal_client_category" position="inside">
+            <t t-if="aa_is_dealer">
+                <t t-call="portal.portal_docs_entry">
+                    <t t-set="icon" t-value="'/sale/static/src/img/bag.svg'"/>
+                    <t t-set="title">Dealer Quick Order</t>
+                    <t t-set="url" t-value="'/dealer/order'"/>
+                    <t t-set="text">Order hardware kits on account - no payment at checkout</t>
+                    <t t-set="config_card" t-value="True"/>
+                </t>
+            </t>
+        </div>
+    </template>
+
+    <template id="dealer_order_denied" name="Dealer Quick Order - not available">
+        <t t-call="website.layout">
+            <div class="container py-5 text-center">
+                <h2>Dealer Quick Order</h2>
+                <p class="lead">This page is only available to AA Impact preferred dealers.</p>
+                <p>Please contact us at <a href="mailto:info@aaigd.com">info@aaigd.com</a> or 786-238-7640.</p>
+                <a href="/shop" class="btn btn-primary">Go to the shop</a>
+            </div>
+        </t>
+    </template>
+
+    <template id="dealer_order_page" name="Dealer Quick Order">
+        <t t-call="website.layout">
+            <t t-set="no_footer_info" t-value="True"/>
+            <div id="aa_dealer_order" class="container py-4"
+                 t-att-data-products="products_json"
+                 t-att-data-currency-symbol="currency.symbol">
+
+                <div class="d-flex flex-wrap justify-content-between align-items-end mb-3 gap-2">
+                    <div>
+                        <h1 class="h3 mb-1">Dealer Quick Order</h1>
+                        <div class="text-muted">
+                            <t t-esc="dealer.name"/> &#8212; charged to your account, no payment now
+                        </div>
+                    </div>
+                    <a href="/my/orders" class="btn btn-outline-secondary btn-sm">My orders</a>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold" for="aa_po">Your PO number *</label>
+                            <input id="aa_po" type="text" class="form-control" maxlength="100" required="required"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold" for="aa_pickup">Pickup date</label>
+                            <input id="aa_pickup" type="date" class="form-control"/>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold" for="aa_notes">Notes</label>
+                            <input id="aa_notes" type="text" class="form-control" maxlength="2000"
+                                   placeholder="Anything we should know"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="aa_lines"></div>
+
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <button type="button" id="aa_add_line" class="btn btn-outline-primary">
+                        <i class="fa fa-plus"/> Add another door
+                    </button>
+                </div>
+
+                <div class="card aa-summary">
+                    <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <div class="text-muted small">Order total (before tax)</div>
+                            <div class="h4 mb-0" id="aa_total">-</div>
+                        </div>
+                        <div class="text-end">
+                            <div id="aa_error" class="text-danger small mb-1"></div>
+                            <button type="button" id="aa_submit" class="btn btn-primary btn-lg">
+                                Place order &#8212; charge to account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <t t-if="recent_orders">
+                    <h2 class="h5 mt-5">Recent orders</h2>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead><tr><th>Order</th><th>PO</th><th>Date</th><th class="text-end">Total</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="recent_orders" t-as="o">
+                                    <td><a t-att-href="o.get_portal_url()" t-esc="o.name"/></td>
+                                    <td t-esc="o.client_order_ref or ''"/>
+                                    <td t-esc="o.date_order" t-options="{'widget': 'date'}"/>
+                                    <td class="text-end" t-esc="o.amount_total" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+</odoo>
