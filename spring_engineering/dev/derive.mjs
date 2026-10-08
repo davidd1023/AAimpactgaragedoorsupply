@@ -135,8 +135,27 @@ for (const f of readdirSync(HERE)
             continue;
         }
 
+        // WHETHER THE REFERENCE COMPLAINED, same rule as dev/import.mjs.
+        //
+        // This path did not set it, and only the corpus path did - so a flag
+        // reached the fit only after a pull had been imported. A freshly
+        // pulled batch read straight off disk had every flagged reading's
+        // LENGTH fitted, which is the exact mistake that cost 2.7 points when
+        // batch L1's flagged half was included, and about half of a uniform
+        // draw is flagged.
+        //
+        // It was harmless while it lasted, because a pull that has been
+        // imported loses the dedup to its own corpus entry, which does carry
+        // the flag. It stops being harmless the moment a batch is pulled and
+        // derived before it is imported - which is every batch of a pull
+        // campaign.
+        const flagged = (r.messages ?? [])
+            .filter((m) => !/contact us/i.test(String(m))).length > 0
+            || r.status !== "success";
+
         readings.push({
             fromCorpus: false,
+            flagged,
             state: {
                 assembly: "Duplex", drum: i.drum, springId: PAIR,
                 springs: i.springs, radius: ourRadius(i.radius),
