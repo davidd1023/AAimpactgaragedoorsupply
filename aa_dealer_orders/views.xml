@@ -8,6 +8,8 @@
             <group name="container_row_2" position="inside">
                 <group name="aa_dealer" string="Preferred Dealer" invisible="not is_company and parent_id">
                     <field name="aa_order_on_account"/>
+                    <field name="aa_dealer_margin" invisible="not aa_order_on_account"/>
+                    <field name="aa_dealer_pricelist_id" invisible="not aa_dealer_pricelist_id"/>
                 </group>
             </group>
         </field>

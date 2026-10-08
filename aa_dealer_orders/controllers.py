@@ -150,6 +150,9 @@ class AADealerOrder(http.Controller):
                 if qty < 1 or qty > MAX_QTY:
                     raise ValidationError(_("Line %s: quantity must be between 1 and %s.", idx, MAX_QTY))
                 variant, no_variant = self._resolve_combination(template, line.get('ptav_ids'))
+                if self._unit_price(partner, variant, no_variant, qty) <= 0:
+                    raise ValidationError(_(
+                        "Line %s: no price is set for this kit yet. Please call AA Impact.", idx))
                 order_lines.append((variant, no_variant, qty, self._line_note(line)))
         except (ValidationError, ValueError, TypeError) as e:
             return {'error': str(e.args[0]) if e.args else _("Invalid order.")}
