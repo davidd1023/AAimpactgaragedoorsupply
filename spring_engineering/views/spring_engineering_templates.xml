@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <!-- The website page at /spring-calculator.
+         t-call="website.layout" is what keeps the visitor on the site: the
+         page comes back wrapped in the theme's header, footer and styling
+         rather than as a bare document.
+         <owl-component> is the frontend's hook for mounting an OWL component
+         from the public_components registry - see the bottom of
+         static/src/js/spring_engineering.js, where the same component is
+         registered for the backend action and for this page. One component,
+         two places; nothing is duplicated. -->
+    <template id="calculator_page" name="Spring Engineering Calculator">
+        <t t-call="website.layout">
+            <!-- Names the browser tab and the search result. Without it the
+                 page inherits the bare site name, which for an indexed public
+                 page is a wasted title. -->
+            <t t-set="additional_title">Spring Calculator</t>
+
+            <div id="wrap">
+                <!-- THE COMPONENT IS NOT INSIDE AN EDITABLE ZONE, on purpose.
+                     oe_structure is what lets someone drag snippets into a
+                     region in the website builder, and the builder saves
+                     whatever HTML it finds there. An owl-component's children
+                     are written by OWL at runtime, not by the editor, and
+                     Odoo's own public_component_interaction has to defend
+                     against this - it calls replaceChildren() on mount with
+                     the comment that there may be "leftover html from a
+                     previous page edit, where owl-components were not properly
+                     cleaned up while saving".
+                     So the calculator sits outside any editable region, and the
+                     editable regions sit above and below it. Copy, headings and
+                     images can still be added around it from the editor
+                     without the builder ever holding the calculator itself. -->
+                <div class="oe_structure" id="oe_structure_spring_before"/>
+
+                <owl-component name="spring_engineering.calculator"/>
+
+                <div class="oe_structure" id="oe_structure_spring_after"/>
+            </div>
+        </t>
+    </template>
+
+</odoo>

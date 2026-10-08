@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <!-- THE TWO PRICING PARAMETERS, SHIPPED AS A CALL RATHER THAN AS RECORDS.
+         The markup is a percentage added to the supplier cost (80 means a cost
+         of $100 is quoted at $180). The labour charge is a flat amount in
+         currency, per assembly, added after the markup.
+
+         WHY NOT <record noupdate="1">, WHICH IS WHAT THIS USED TO BE. A
+         config parameter written through Settings goes via set_param, and
+         set_param given a falsy value DELETES the row - which is what Odoo
+         hands it for a Float of zero. That deletion takes the record's xmlid
+         with it, and the next write recreates the row WITHOUT one. The module
+         then believes its own record is missing and tries to INSERT it, which
+         collides with the existing row on the unique key for `key` and the
+         whole registry fails to load. Not a theoretical risk: it happened on
+         this build, from nothing more exotic than setting a value to zero and
+         then upgrading the module.
+
+         A function cannot collide, because it addresses the parameter by key -
+         which is its real identity - rather than by an xmlid that the ORM is
+         free to drop. It runs on install and on every update, creates only what
+         is absent, and so leaves an edited figure alone exactly as noupdate
+         was meant to. -->
+    <function model="ir.config_parameter" name="_spring_engineering_ensure_defaults"/>
+
+</odoo>

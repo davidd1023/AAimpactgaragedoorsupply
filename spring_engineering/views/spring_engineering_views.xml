@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <record id="action_spring_engineering" model="ir.actions.client">
+        <field name="name">Spring Engineering</field>
+        <field name="tag">spring_engineering.calculator</field>
+    </record>
+
+    <!-- web_icon is "<font-awesome class>,<foreground>,<background>". Set in
+         Studio, it only ever lands in the database, and a dev-branch database
+         is rebuilt from scratch - so it has to be declared here to survive.
+         To use a real image instead, drop a 140x140 PNG at
+         static/description/icon.png and write:
+             web_icon="spring_engineering,static/description/icon.png" -->
+    <menuitem
+        id="menu_spring_engineering"
+        name="Spring Engineering"
+        action="action_spring_engineering"
+        web_icon="fa fa-align-justify,#FFFFFF,#BC4242"
+        sequence="10"
+    />
+
+</odoo>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <!-- THE ONE PRODUCT every configured assembly is sold through.
+         A new product per quote would turn every abandoned cart on a public
+         page into a permanent SKU, so instead each order line carries its own
+         price and its own description holding the full specification. The
+         catalogue stays one row however many doors get quoted.
+
+         NOT PUBLISHED. It is not something to browse to - it only ever reaches
+         a cart through the calculator, which fills in the specification. The
+         controller adds it with sudo for that reason.
+
+         Consumable rather than storable: these are wound to order, so there is
+         no stock to count and no reordering rule that would make sense. -->
+    <record id="product_custom_spring" model="product.template">
+        <field name="name">Custom Torsion Spring Assembly</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="False"/>
+        <field name="sale_ok" eval="True"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="is_published" eval="False"/>
+        <!-- Priced per line from the calculator, never from the product. -->
+        <field name="list_price">0.0</field>
+        <field name="description_sale">Wound to the specification on the order line.</field>
+    </record>
+
+    <!-- THE PLASTIC FILLER, which only a 5 1/4" spring takes.
+         NOT PUBLISHED, and for a stronger reason than the spring: it is not a
+         thing to sell on its own. It reaches a cart only when the calculator
+         adds a 5 1/4" spring, which is what the owner asked for - "it should
+         not be purchasable otherwise".
+
+         ONE PRODUCT, PRICED BY THE FOOT, rather than one for each stock length.
+         It is cut to the spring's own length - a 4 ft spring takes 4 ft of
+         filler - so a fixed 6 ft or 7 ft product could not describe what is
+         actually supplied. The two prices quoted to us, $19.44 for 6 ft and
+         $22.68 for 7 ft, are both exactly $3.24 a foot, so one rate says
+         everything both of them did. The order line records the cut length.
+
+         Sold by the foot, so the unit of measure matters here in a way it does
+         not for the spring: the quantity on the line is FEET, not springs. -->
+    <record id="product_custom_filler" model="product.template">
+        <field name="name">Plastic Filler, cut to length (5 1/4" spring)</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="False"/>
+        <field name="sale_ok" eval="True"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="is_published" eval="False"/>
+        <!-- Priced per line from the calculator, never from the product. -->
+        <field name="list_price">0.0</field>
+        <field name="description_sale">Cut to the length of the spring it ships with.</field>
+    </record>
+
+</odoo>
