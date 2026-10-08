@@ -71,9 +71,26 @@ printf "  invariants: %s/%s\n" \
     "$(node --input-type=module -e 'import { INVARIANTS } from "./dev/invariants.mjs"; console.log(INVARIANTS.length);')"
 
 echo ""
-echo "SINGLE - external random draw, the reference's own wire fed back"
-if [ -f dev/eval-single.json ]; then
-    node dev/single-external.mjs dev/eval-single.json | sed 's/^/  /'
+echo "SINGLE - external random draws, the reference's own wire fed back"
+# ALL THREE DRAWS, because the first one alone was lopsided. eval-single.json
+# is 181 clean readings and only SIX of them are hi-lift, on one drum and one
+# spring ID - so "Single is 100%" rested on nothing at all for hi-lift, and on
+# nothing for the 525-54HL and D800-120 drums, which it never drew. The two
+# seeded draws beside it were taken to fill exactly those holes.
+SINGLE_SETS=""
+for f in dev/eval-single.json \
+         dev/eval-single-hilift-seed20261008.json \
+         dev/eval-single-tall-seed20261008001.json; do
+    [ -f "$f" ] && SINGLE_SETS="$SINGLE_SETS $f"
+done
+
+if [ -n "$SINGLE_SETS" ]; then
+    # shellcheck disable=SC2086
+    node dev/single-external.mjs $SINGLE_SETS | sed 's/^/  /'
+    echo ""
+    echo "SINGLE BY SLICE - read the n column before the percentages"
+    # shellcheck disable=SC2086
+    node dev/single-breakdown.mjs $SINGLE_SETS | sed 's/^/  /'
 fi
 
 echo ""

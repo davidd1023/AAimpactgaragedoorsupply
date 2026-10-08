@@ -135,8 +135,27 @@ for (const f of readdirSync(HERE)
             continue;
         }
 
+        // WHETHER THE REFERENCE COMPLAINED, same rule as dev/import.mjs.
+        //
+        // This path did not set it, and only the corpus path did - so a flag
+        // reached the fit only after a pull had been imported. A freshly
+        // pulled batch read straight off disk had every flagged reading's
+        // LENGTH fitted, which is the exact mistake that cost 2.7 points when
+        // batch L1's flagged half was included, and about half of a uniform
+        // draw is flagged.
+        //
+        // It was harmless while it lasted, because a pull that has been
+        // imported loses the dedup to its own corpus entry, which does carry
+        // the flag. It stops being harmless the moment a batch is pulled and
+        // derived before it is imported - which is every batch of a pull
+        // campaign.
+        const flagged = (r.messages ?? [])
+            .filter((m) => !/contact us/i.test(String(m))).length > 0
+            || r.status !== "success";
+
         readings.push({
             fromCorpus: false,
+            flagged,
             state: {
                 assembly: "Duplex", drum: i.drum, springId: PAIR,
                 springs: i.springs, radius: ourRadius(i.radius),
@@ -414,6 +433,32 @@ if (HL_MOD >= 1) {
 
 // --- per rung: K from the cycle counts, thresholds from the lengths ---------
 const rungs = new Map();
+// See the CAP_RUNGS note below. Reproducible because `readings` is assembled in
+// a fixed order from a fixed set of files, so "the first N" is the same N every
+// run; this is an experiment knob, not a shipped feature, and defaults to off.
+const CAP_RUNGS = new Set((process.env.CAP_RUNGS || "").split(",").map((x) => x.trim()).filter(Boolean));
+// LENS_REPORT=1 prints how many LENGTH readings each rung has, which is the
+// quantity the down-sampling experiment showed drives length accuracy - not
+// the `n` in the table, which counts K readings and is much larger.
+const LENS_REPORT = process.env.LENS_REPORT === "1";
+const UNFIT_RUNGS = new Set((process.env.ENABLE_UNFIT_RUNGS || "")
+    .split(",").map((x) => x.trim()).filter(Boolean));
+const CAP_N = Number(process.env.CAP_N) || 0;
+const capSeen = new Map();
+const CAP_SEED = Number(process.env.CAP_SEED) || 0;
+// How many length readings each rung has in total, needed before the random
+// subsample can know what fraction to keep. Filled by a first pass below.
+const capTotal = new Map();
+
+if (CAP_SEED) {
+    for (const r of readings) {
+        if (r.noFit || r.flagged) continue;
+
+        const k = r.outer + "/" + r.inner;
+
+        capTotal.set(k, (capTotal.get(k) || 0) + 1);
+    }
+}
 
 for (const r of readings) {
     const c = make(mod, r.state);
@@ -433,11 +478,26 @@ for (const r of readings) {
 
     // Held out of the fit by corpus flag - see noFit above. It has already
     // served its purpose by winning the dedup against its own pull copy.
-    if (r.noFit) {
+    //
+    // ENABLE_UNFIT_RUNGS="a/b,c/d" admits those readings' LENGTHS back, on the
+    // named rungs only. The experiment behind it: re-enabling U5-U8 wholesale
+    // was measured at net -3 on the never-tuned draws (p = 0.607) and dropped,
+    // but uniform data lands on rungs in proportion to how often a door hits
+    // them - so it piles onto the four rungs already at 100% and barely touches
+    // the thin ones. Down-sampling showed per-rung LENGTH volume is causal
+    // (121/121 -> 107/121 by starving four rungs to 120 readings), so the
+    // allocation, not the data, may have been what failed.
+    //
+    // K is left held out deliberately. Admitting it would move rung selection
+    // and with it which readings have the wire right, and then the before/after
+    // populations would not be the same readings.
+    const unfitLenOk = r.noFit && UNFIT_RUNGS.has(key);
+
+    if (r.noFit && !unfitLenOk) {
         continue;
     }
 
-    if (r.cycles > 0) {
+    if (r.cycles > 0 && !unfitLenOk) {
         const torque = (COEFF * Math.pow(r.inner, WEXP)) / Math.pow(r.cycles, 1 / CEXP);
         const body = divider(r.inner, 3.75) * c.turnsExact / torque;
 
@@ -473,12 +533,70 @@ for (const r of readings) {
     const rawActive =
         springs * (divider(r.inner, 3.75) + divider(r.outer, 6)) / shownTippt;
 
+    // DOWN-SAMPLING EXPERIMENT, off unless asked for.
+    //
+    //   CAP_RUNGS="0.2625/0.2253,0.283/0.2343" CAP_N=120 sh dev/apply.sh
+    //
+    // Caps how many LENGTH readings a named rung may contribute, leaving its K
+    // readings alone. The question it answers is causal: the never-tuned draws
+    // show rungs with 300+ corpus readings at 100% and thinner rungs at 92.9%,
+    // which either means data volume drives length accuracy - in which case a
+    // rung-targeted pull is worth the rate limit - or means the well-covered
+    // rungs are simply the easy ones a random door lands on. Starving a rich
+    // rung down to a thin rung's volume separates the two for free.
+    //
+    // K is deliberately NOT capped. Capping it too would move rung selection,
+    // and a drop caused by picking a different wire would look exactly like a
+    // drop caused by worse thresholds.
+    if (CAP_N && CAP_RUNGS.has(key)) {
+        if (CAP_SEED) {
+            // RANDOM subsample, not the first N. THIS MATTERS: the corpus is in
+            // batch order and the early batches are deliberately
+            // boundary-dense, so "the first N" keeps the most informative
+            // readings and would misstate what losing data costs. A seeded
+            // hash per reading gives a reproducible random subsample instead.
+            // Both modes give the same dose-response, which is why the finding
+            // is believed.
+            let h = CAP_SEED;
+            const id = key + "|" + r.id + "|" + JSON.stringify(r.state ?? {});
+
+            for (let n = 0; n < id.length; n++) {
+                h = (h * 31 + id.charCodeAt(n)) % 2147483647;
+            }
+
+            const total = (capTotal.get(key) || 0);
+
+            if (total > CAP_N && (h % total) >= CAP_N) {
+                continue;
+            }
+        } else {
+            capSeen.set(key, (capSeen.get(key) || 0) + 1);
+
+            if (capSeen.get(key) > CAP_N) {
+                continue;
+            }
+        }
+    }
+
     g.lens.push({
         springs, rawActive, length: r.length, dense: r.dense === true,
         active: rawActive,
         frac: rawActive - Math.floor(rawActive),
         bonus: Number((r.length - Math.floor(rawActive)).toFixed(2)),
     });
+}
+
+if (LENS_REPORT) {
+    const rows = [...rungs].map(([key, g]) => [key, g.lens.length, g.Ks.length])
+        .sort((a, b) => b[1] - a[1]);
+
+    process.stderr.write("rung             lens     Ks\n");
+
+    for (const [key, lens, ks] of rows) {
+        process.stderr.write(`${key.padEnd(15)}${String(lens).padStart(5)}  ${String(ks).padStart(5)}\n`);
+    }
+
+    process.stderr.write(`total lens ${rows.reduce((a, b) => a + b[1], 0)} over ${rows.length} rungs\n`);
 }
 
 // Fit the stiffness correction per rung, then restate every active length and
