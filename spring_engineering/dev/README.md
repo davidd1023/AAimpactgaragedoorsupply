@@ -2451,3 +2451,108 @@ catalogue confirms G, the torsion constant, and the coil rule; the dead-coil cou
 is pinned per ID from 479 readings; TIPPT's origin is now known - but none of it
 moves the length accuracy, and the residual there remains what it was: per-group
 threshold placement, one miss apiece across many groups.
+
+## The published wire chart validates the ladder, and the IDs we dropped
+
+`SSC_SpringWireChart.pdf` from servicespring.com/resources is an image, so it has
+to be read rather than parsed. Two things on it are worth having.
+
+### The wire ladder is exactly right
+
+All 41 sizes match `WIRE_SIZES` exactly, in both directions - nothing we offer is
+missing from the chart and nothing on the chart is missing from us:
+
+    .125 .135 .142 .1483 .1562 .162 .170 .177 .1875 .192 .207 .2187 .2253 .2343
+    .2437 .250 .2625 .273 .283 .289 .295 .3065 .3125 .3195 .331 .3437 .3625 .375
+    .3938 .4062 .4218 .4305 .4375 .4531 .4615 .4687 .490 .500 .5312 .5625 .625
+
+Including the gap that matters: the chart goes **.192 to .207 with nothing
+between**, which is the absence that cost a day's confusion when this model
+offered a .200 the reference would never return. The ladder is now confirmed
+against the manufacturer's own document rather than against inference from
+switch points.
+
+### And the IDs that are not sold
+
+The chart's second table lists spring IDs with an "AVAILABLE FROM SSC" column:
+
+| | |
+|---|---|
+| **stocked** | 1 3/4", 2", **2 5/8"**, 3 3/8", **3 3/4"**, 4 3/8", **5 1/4"**, **6"**, 7 5/8" |
+| not stocked | 1 19/32", 1 13/16", 2 1/4", 2 7/16", 2 1/2", 2 3/4", 2 25/32", 3", **3 1/2"**, 3 25/32", 4", 4 1/2", 4 7/8", **5 1/2"**, 5 3/4", **5 7/8"** |
+
+Every ID this module offers is stocked - the three Single sizes and both halves of
+the one Duplex pair. **And every Duplex pair that was removed needed an ID that is
+not:** the Raynor pair wants 3 1/2" AND 5 1/2", neither of them stocked, and the
+Overhead pair wants 5 7/8". So those options were asking for springs the
+manufacturer does not make, which is a better reason to have dropped them than the
+one they were dropped for - that the model had never been calibrated for them.
+
+### The drum limits are confirmed too, and they are PAIR figures
+
+The catalogue's drum pages state a capacity **per drum**, and drums are "SOLD IN
+PAIRS" - one each side of the door. So the door's limit is twice the printed
+figure, and every limit this model carries matches on that reading:
+
+| drum | catalogue, per drum | x2 | `DRUM_LIMITS` | max height |
+|---|---|---|---|---|
+| D400-96 | 265 | 530 | **530** | 8' = 96" ✓ |
+| D400-144 | 375 | 750 | **750** | 12' = 144" ✓ |
+| D525-216 | 750 | 1500 | **1500** | **19'-3" = 231"** ✓ |
+| D800-120 | 1,100 | 2200 | **2200** | - |
+| D575-120 | 500 | 1000 | **1000** | - |
+| D525-54 | 500 | 1000 | **1000** | - |
+
+All six exact. The D525-216's **231"** is the one worth pointing at: this model
+carried 216" - the number in the drum's NAME - until the reference's own drum
+record said otherwise, and every door between 217" and 231" was getting a
+shortened spring until that was fixed. The catalogue confirms 19'-3"
+independently, which is the second source that correction never had.
+
+Worth keeping in mind for any future limit: a capacity printed on a drum page is
+per drum, and the calculator's weight is the whole door.
+
+## More uniform data does not help either, even filtered (2026-10-08)
+
+U1-U4 bought 2.3 points of clean accuracy. U5-U8 cost 2.3 and was held out, with
+the diagnosis that **half of a uniform draw is flagged**, and although flagged
+readings already lose their lengths, their pairing and cycle count still move `K`
+and so change rung selection for ordinary doors.
+
+That diagnosis is testable without pulling anything: re-enable only the **clean**
+794 of those 1,522 readings and leave the flagged 728 out entirely.
+
+| | clean-only U5-U8 |
+|---|---|
+| five-fold holdout, 6,206 readings at a fixed population | 91.653% -> **91.814%** (+10) |
+| never-tuned draws, CLEAN, paired | 6 fixed, 9 broken, **net -3**, p = 0.607 |
+| never-tuned draws, FLAGGED, paired | 1 fixed, 5 broken, **net -4**, p = 0.219 |
+
+**The diagnosis was right and the conclusion does not follow.** Filtering the
+flagged half does turn a 2.3-point loss into roughly nothing - so the flagged
+readings really were the damage - but what is left over does not help. The holdout
+gains 10 readings on the corpus population while both halves of the never-tuned
+draws lose, which is the same shape as the R1 refit: a change that suits the
+corpus and not a door someone would actually quote.
+
+### So the pull campaign is not worth running
+
+This WAS the pull, in every sense that matters. U5-U8 is 1,522 readings drawn
+uniformly from the allowed box, already paid for, and 794 of them clean. If those
+do not move the figure, another 400 drawn the same way will not either, and the
+rate limit is someone else's server.
+
+With that, every avenue tried in two days of this is closed:
+
+| | |
+|---|---|
+| boundary-dense data | refuted three ways - transfer, whole holdout, in-group |
+| more uniform data | no gain, clean-only or not |
+| fitter selections | every one has a measured tie-break or is deliberately simplest-first |
+| the sMult term | per-spring physics confirmed by the manufacturer; the pair coupling resists every closed form |
+| upstream error | costs the length nothing - all 16 misses have an exact TIPPT |
+
+**~94.5% clean length is where this lands.** The residual is per-group threshold
+placement, about one miss apiece across many groups, each needing data from a
+group a random door rarely visits. That is a property of reverse-engineering a
+black box from the outside, not a bug waiting to be found.
