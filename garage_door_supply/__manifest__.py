@@ -34,6 +34,11 @@
         'views/website_brand.xml',
         'views/website_homepage.xml',
     ],
+    'assets': {
+        'web.assets_frontend': [
+            'garage_door_supply/static/src/js/trim_colour_choice.js',
+        ],
+    },
     'installable': True,
     'application': True,
     'license': 'LGPL-3',
