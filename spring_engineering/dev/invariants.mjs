@@ -624,6 +624,10 @@ const SERVER_RATES = {
     cones: { "2.625": 8.982, "3.75": 20.79, "5.25": 34.974, "6.0": 34.974 },
     perLb: 2.628,
     labor: 100,
+    // Plastic filler, per foot, and the one spring ID that takes one. Marked up
+    // like the cones: 3.24 at cost.
+    fillerPerFoot: 5.832,
+    fillerSpringId: 5.25,
 };
 
 // A component with the server's rates in hand. The page fetches these in
@@ -661,7 +665,8 @@ function priceAddsUp(mod) {
                     continue;
                 }
 
-                const parts = c.priceCones + c.priceSteel + SERVER_RATES.labor;
+                const parts = c.priceCones + c.priceSteel + c.priceFiller
+                    + SERVER_RATES.labor;
 
                 if (Math.abs(c.priceTotal - parts) > 1e-9) {
                     fails.push(`${label}: total ${c.priceTotal} but parts sum to ${parts.toFixed(2)}`);
@@ -700,8 +705,10 @@ function priceAddsUp(mod) {
         // THE FLAT PART MUST BE FLAT. Whatever the total is beyond the
         // materials has to be the same at one spring and at two, and has to be
         // the figure the server sent. Fitting a set of springs is one job.
-        const flatOne = one.priceTotal - one.priceCones - one.priceSteel;
-        const flatTwo = two.priceTotal - two.priceCones - two.priceSteel;
+        // The filler comes off too: it is per spring like the cones and the
+        // steel, so what is left over must be the flat labour charge alone.
+        const flatOne = one.priceTotal - one.priceCones - one.priceSteel - one.priceFiller;
+        const flatTwo = two.priceTotal - two.priceCones - two.priceSteel - two.priceFiller;
 
         if (Math.abs(flatOne - flatTwo) > 0.01 + 1e-9) {
             fails.push(`${st.assembly} ${st.springId}: the flat charge is ${flatOne.toFixed(2)} at one spring and ${flatTwo.toFixed(2)} at two`);
@@ -778,23 +785,29 @@ function missingRateRefusesToQuote(mod) {
     // "not a finite number", or the page gives the work away and shows a total
     // that the cart will not honour.
     for (const bad of [undefined, null, "", "abc"]) {
-        const c = duplex(mod, st);
-        const rates = mod.normaliseRates({ ...SERVER_RATES, labor: bad });
+        for (const field of ["labor", "fillerPerFoot", "perLb"]) {
+            const c = duplex(mod, st);
 
-        c.rates = rates;
+            c.rates = mod.normaliseRates({ ...SERVER_RATES, [field]: bad });
 
-        if (c.priceAvailable || c.priceTotal !== 0) {
-            fails.push(`with labor ${JSON.stringify(bad)} the page still quotes ${c.priceTotal}`);
+            if (c.priceAvailable || c.priceTotal !== 0) {
+                fails.push(`with ${field} ${JSON.stringify(bad)} the page still quotes ${c.priceTotal}`);
+            }
         }
     }
 
-    // Zero labour, on the other hand, is a setting and not a failure.
-    const free = duplex(mod, st);
+    // Zero, on the other hand, is a setting and not a failure - for every one of
+    // them. All three are editable, and `!0` is true, so a truthiness test turns
+    // a deliberate zero into "call us". That happened to the steel rate the day
+    // it became a setting.
+    for (const field of ["labor", "fillerPerFoot", "perLb"]) {
+        const free = duplex(mod, st);
 
-    free.rates = mod.normaliseRates({ ...SERVER_RATES, labor: 0 });
+        free.rates = mod.normaliseRates({ ...SERVER_RATES, [field]: 0 });
 
-    if (!free.priceAvailable) {
-        fails.push("a labour charge of zero was treated as a missing one");
+        if (!free.priceAvailable) {
+            fails.push(`a ${field} of zero was treated as a missing one`);
+        }
     }
 
     // No rates at all - the fetch failed - must behave the same way.
@@ -987,6 +1000,8 @@ async function setupSurvivesAndFetchesRates(mod) {
         cones: { "2.625": 8.982, "3.75": 20.79, "5.25": 34.974, "6.0": 34.974 },
         perLb: 2.628,
         labor: 100,
+        fillerPerFoot: 5.832,
+        fillerSpringId: 5.25,
     };
 
     let served = 0;
@@ -1043,6 +1058,64 @@ async function setupSurvivesAndFetchesRates(mod) {
     return fails;
 }
 
+// THE FILLER FOLLOWS THE SPRING ID, AND ITS FOOTAGE IS THE SPRING'S LENGTH.
+//
+// Only a 5 1/4" spring takes one, one per spring, cut to that spring's own
+// length - so a 4 ft spring takes 4 ft. The page and the server have to agree
+// about all three of those or the quote and the cart disagree, which is what
+// dev/price-parity.sh checks end to end; this checks the arithmetic here.
+function fillerFollowsTheSpringId(mod) {
+    const fails = [];
+    const rates = mod.normaliseRates(SERVER_RATES);
+
+    // A 5 1/4" Single takes one.
+    for (const springs of [1, 2, 4]) {
+        const c = make(mod, { assembly: "Single", springId: '5 1/4"', drum: DRUM,
+                              weight: "500", springs, doorHeightFeet: 8 });
+
+        c.rates = rates;
+
+        // Rounded the same way the getter rounds, to four decimals - otherwise
+        // this compares a rounded figure against an unrounded one and fails on
+        // a difference far smaller than a hundredth of an inch.
+        const feet = Math.round(springs * (c.springLength / 12) * 10000) / 10000;
+
+        if (Math.abs(c.priceFillerFeet - feet) > 1e-9) {
+            fails.push(`5 1/4" x${springs}: ${c.priceFillerFeet} ft of filler, expected ${feet.toFixed(4)}`);
+        }
+
+        const want = Math.round(feet * SERVER_RATES.fillerPerFoot * 100) / 100;
+
+        if (Math.abs(c.priceFiller - want) > 1e-9) {
+            fails.push(`5 1/4" x${springs}: filler ${c.priceFiller}, expected ${want}`);
+        }
+    }
+
+    // No other Single ID does.
+    for (const id of ['2 5/8"', '3 3/4"']) {
+        const c = make(mod, { assembly: "Single", springId: id, drum: DRUM,
+                              weight: "500", springs: 2, doorHeightFeet: 8 });
+
+        c.rates = rates;
+
+        if (c.priceFiller !== 0) {
+            fails.push(`${id} is charged ${c.priceFiller} of filler and should be charged none`);
+        }
+    }
+
+    // Nor does the one Duplex pair that is sold - 3 3/4" inside 6", neither of
+    // which is a 5 1/4".
+    const d = duplex(mod, { springs: 2, weight: "600" });
+
+    d.rates = rates;
+
+    if (d.priceFiller !== 0) {
+        fails.push(`the 3 3/4" inside 6" pair is charged ${d.priceFiller} of filler`);
+    }
+
+    return fails;
+}
+
 export const INVARIANTS = [
     { name: "cycle life / wire choice is independent of door height", run: heightIndependence },
     { name: "cycle life / wire choice is independent of track radius", run: radiusIndependence },
@@ -1059,6 +1132,7 @@ export const INVARIANTS = [
     { name: "no Duplex output depends on the Wire Size dropdown", run: duplexIgnoresWireDropdown },
     { name: "the price column adds up and scales per spring", run: priceAddsUp },
     { name: "a rate the server did not send withholds the quote", run: missingRateRefusesToQuote },
+    { name: "the filler follows the spring ID and the spring's length", run: fillerFollowsTheSpringId },
     { name: "Single assembly length matches the reference's width brackets", run: singleAssemblyBrackets },
     { name: "the Single wire steps where the reference steps", run: singleWireSwitches },
     { name: "every hook the source calls is imported", run: hooksAreImported },

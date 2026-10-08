@@ -1456,6 +1456,14 @@
                     <span t-att-class="valueClass" t-esc="money(priceSteel)"/>
             </div>
 
+            <!-- Only the 5 1/4" spring takes a filler, so the row appears only
+                 when there is one to charge for. It shows the footage because
+                 that is what is bought - it is cut to the spring's length. -->
+            <div class="se-rowR" t-if="priceFiller > 0">
+                    <span>Plastic Filler<t t-esc="' (' + priceFillerFeet + ' ft)'"/></span>
+                    <span t-att-class="valueClass" t-esc="money(priceFiller)"/>
+            </div>
+
             <div class="se-rowR se-rowR-total">
                     <span>Total</span>
                     <span t-att-class="valueClass"

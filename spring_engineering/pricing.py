@@ -24,7 +24,27 @@ of it. A density is physics and tells a competitor nothing.
 """
 
 # Per pound of FINISHED spring, counting every spring in the assembly.
+#
+# THIS IS THE DEFAULT, NOT THE LIVE FIGURE. Steel moves, so the rate is an
+# ir.config_parameter editable in Website > Configuration > Settings, the same
+# way the markup and the labour charge are. This value is what a fresh database
+# starts with and what the setting is restored to if the parameter is deleted.
 STEEL_PRICE_PER_LB = 1.46
+
+# Plastic filler, per FOOT, for a 5 1/4" spring.
+#
+# One filler per spring, cut to that spring's own length - a 4 ft spring takes
+# 4 ft of filler. Quoted to us as two stock lengths: $19.44 for 6 ft and $22.68
+# for 7 ft, which are both exactly $3.24 a foot, so the rate is the figure to
+# hold and the two quotes are the same price twice.
+#
+# It is a supplier cost like the cones and the steel, so the markup applies to
+# it. If it were meant as a finished price it would belong beside the labour
+# charge instead, which is added after the markup.
+FILLER_PRICE_PER_FOOT = 3.24
+
+# The spring ID that takes a filler. Only this one does.
+FILLER_SPRING_ID = 5.25
 
 # Per SPRING, chosen by inside diameter. A Duplex spring is two springs nested on
 # one shaft position, so it carries a set for the inner diameter and a set for the

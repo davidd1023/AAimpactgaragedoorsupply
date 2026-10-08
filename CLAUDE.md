@@ -40,6 +40,28 @@ Stated by the owner: *"6\" is the same as 5 1/4\""* for cone pricing.
 
 ## Pricing
 
+### A 5 1/4" spring takes a plastic filler
+
+Stated by the owner, 2026-10-08: one filler **per spring**, cut to that spring's
+own length - *"a 4 foot spring would need 4 feet of filler"*. Quoted as $19.44 for
+6 ft and $22.68 for 7 ft, which are both exactly **$3.24 a foot**, so the rate is
+what is stored and the two quotes are the same price twice.
+
+It is a separate product (`product_custom_filler`), **not published**, so it cannot
+be bought on its own - it reaches a cart only when the calculator adds a spring
+whose ID calls for one. The order line's quantity is FEET.
+
+Treated as a supplier cost, so the markup applies to it, the same as the cones and
+the steel. Say so if it was meant as a finished price instead - that would put it
+beside the labour charge, which is added after the markup.
+
+### The steel rate is an ordinary setting
+
+Editable in Website > Configuration > Settings like the markup and the labour
+charge, but not secret - it is a commodity price. Default $1.46/lb, in
+`spring_engineering/pricing.py`.
+
+
 - Cone and steel COSTS live in `spring_engineering/pricing.py`, server side. They
   were in the JavaScript and therefore in the public bundle, which also made the
   markup a division away from any quote.

@@ -2125,7 +2125,13 @@ function normaliseRates(rates) {
         }
     }
 
-    return { cones, perLb: Number(rates.perLb), labor: asNumber(rates.labor) };
+    return {
+        cones,
+        perLb: asNumber(rates.perLb),
+        labor: asNumber(rates.labor),
+        fillerPerFoot: asNumber(rates.fillerPerFoot),
+        fillerSpringId: Number(rates.fillerSpringId),
+    };
 }
 
 // A number, or NaN if there is not one there - THE SAME TRAP AS THE SERVER'S,
@@ -3382,7 +3388,17 @@ get assemblyWeight() {
 // string key, and the server writes 6 the way Python does, as "6.0", so the 6"
 // cone really was quoted free until the keys became numbers.
 get priceAvailable() {
-    if (!this.rates || !this.rates.perLb || !Number.isFinite(this.rates.labor)) {
+    // EVERY RATE IS TESTED FOR BEING A NUMBER, not for being truthy.
+    //
+    // Zero is a legitimate setting for all three of these - no labour charge, no
+    // filler charge, and steel given away - and `!0` is true, so a truthiness
+    // test turns a deliberate zero into "call us". That was already fixed for
+    // the labour charge and then reintroduced for the steel rate when it became
+    // a setting; setting it to 0 made the page refuse to quote at all.
+    if (!this.rates
+        || !Number.isFinite(this.rates.perLb)
+        || !Number.isFinite(this.rates.labor)
+        || !Number.isFinite(this.rates.fillerPerFoot)) {
         return false;
     }
 
@@ -3422,6 +3438,54 @@ get priceSteel() {
 // decides both of those and sends the finished figure. The page shows one total
 // and the cart charges the same total; there is no labour row, which is the
 // whole point of it being a setting rather than a line item.
+// PLASTIC FILLER, which only the 5 1/4" spring takes.
+//
+// One per spring, cut to that spring's own length - a 4 ft spring takes 4 ft of
+// filler - so what is bought is FEET of material and the rate is per foot. The
+// two prices quoted, $19.44 for 6 ft and $22.68 for 7 ft, are both exactly
+// $3.24 a foot, so one rate covers them.
+//
+// Which ID takes one is the server's to say, not this file's: it arrives with
+// the rates. That keeps the rule in the same place as the prices it applies to.
+get priceFillerFeet() {
+    if (!this.priceAvailable) {
+        return 0;
+    }
+
+    const springs = Number(this.state.springs) || 0;
+    const takesOne = (id) => Number(id) === this.rates.fillerSpringId;
+
+    // EVERY SPRING THAT TAKES ONE, which for Duplex means checking both halves
+    // of the pair rather than the assembly. The server prices the filler per
+    // spring whose ID calls for it, so this has to agree exactly - when it only
+    // looked at Single, dev/price-parity.sh caught the page quoting 469.34
+    // against a cart charging 497.41 on a pair with a 5 1/4" outer.
+    let inches = 0;
+
+    if (this.isDuplex) {
+        const pair = this.duplexPair;
+
+        if (!pair) {
+            return 0;
+        }
+
+        if (takesOne(pair.outerId)) inches += this.duplexOuterLength;
+        if (takesOne(pair.innerId)) inches += this.duplexInnerLength;
+    } else if (takesOne(this.springIdNumber)) {
+        inches = this.springLength;
+    }
+
+    return Math.round(springs * (inches / 12) * 10000) / 10000;
+}
+
+get priceFiller() {
+    if (!this.priceAvailable) {
+        return 0;
+    }
+
+    return Math.round(this.priceFillerFeet * this.rates.fillerPerFoot * 100) / 100;
+}
+
 get priceTotal() {
     // Guarded like the two parts above, and not only for tidiness: this reads
     // the labour charge straight off the rates, so without the guard a page
@@ -3430,7 +3494,9 @@ get priceTotal() {
         return 0;
     }
 
-    return Math.round((this.priceCones + this.priceSteel + this.rates.labor) * 100) / 100;
+    return Math.round(
+        (this.priceCones + this.priceSteel + this.priceFiller + this.rates.labor) * 100
+    ) / 100;
 }
 
 money(value) {

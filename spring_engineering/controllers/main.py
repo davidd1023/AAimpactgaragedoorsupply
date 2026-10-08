@@ -13,7 +13,9 @@ import re
 
 from odoo import http
 
-from ..pricing import CONE_PRICES, STEEL_PRICE_PER_LB
+from ..pricing import (
+    CONE_PRICES, FILLER_PRICE_PER_FOOT, FILLER_SPRING_ID, STEEL_PRICE_PER_LB,
+)
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
@@ -65,9 +67,13 @@ def _calculator_constants():
 
     # Read once per worker, as before. The density changes about never, and a
     # file read on every add-to-cart is a strange thing to pay for.
+    #
+    # THE STEEL RATE IS NOT IN HERE. It became a setting, so caching it would
+    # serve the old price until the worker restarted - which is exactly the
+    # failure the markup's note warns about. It is read per request by
+    # _steel_per_lb().
     _prices = {
         "cones": dict(CONE_PRICES),
-        "per_lb": STEEL_PRICE_PER_LB,
         "density": float(found.group(1)),
     }
 
@@ -195,6 +201,20 @@ def _markup_factor():
     return 1.0 + _pricing_param(MARKUP_KEY) / 100.0
 
 
+STEEL_KEY = "spring_engineering.steel_per_lb"
+
+
+def _steel_per_lb():
+    """What a pound of finished spring costs, before the markup.
+
+    A SETTING RATHER THAN A CONSTANT, because steel moves. pricing.py holds the
+    default a fresh database starts with; this is the live figure, and like the
+    markup it is read fresh on every request so a change takes effect without a
+    restart.
+    """
+    return _pricing_param(STEEL_KEY)
+
+
 def _labor_flat():
     """The labour charge on one assembly, in currency, already a selling price.
 
@@ -279,6 +299,7 @@ class SpringEngineeringWebsite(http.Controller):
             prices = _calculator_constants()
             factor = _markup_factor()
             labor = _labor_flat()
+            per_lb = _steel_per_lb()
         except ValueError:
             _logger.exception("spring_engineering: cannot read pricing constants")
 
@@ -299,8 +320,13 @@ class SpringEngineeringWebsite(http.Controller):
         # quoting a price at all.
         return {
             "cones": {str(d): round(p * factor, 4) for d, p in prices["cones"].items()},
-            "perLb": round(prices["per_lb"] * factor, 6),
+            "perLb": round(per_lb * factor, 6),
             "labor": labor,
+            # Plastic filler, per foot, for the one spring ID that takes it. The
+            # page needs it to quote a total the cart will honour; see the note
+            # above about why the labour charge is sent and the markup is not.
+            "fillerPerFoot": round(FILLER_PRICE_PER_FOOT * factor, 6),
+            "fillerSpringId": FILLER_SPRING_ID,
         }
 
     # --- Add a configured assembly to the cart ---------------------------
@@ -326,6 +352,7 @@ class SpringEngineeringWebsite(http.Controller):
             prices = _calculator_constants()
             factor = _markup_factor()
             labor = _labor_flat()
+            per_lb = _steel_per_lb()
         except ValueError:
             _logger.exception("spring_engineering: cannot read pricing constants")
 
@@ -363,6 +390,7 @@ class SpringEngineeringWebsite(http.Controller):
 
         cone_total = 0.0
         steel_weight = 0.0
+        filler_inches = 0.0
         lines = []
 
         for item in items:
@@ -389,6 +417,10 @@ class SpringEngineeringWebsite(http.Controller):
             if role not in SPRING_ROLES:
                 return {"error": "That is not a spring position we build."}
 
+            # Only one ID takes a filler, and it is cut to that spring's length.
+            if diameter == FILLER_SPRING_ID:
+                filler_inches += length
+
             cone_total += prices["cones"][diameter]
             steel_weight += _spec_weight(wire, diameter, length, prices["density"])
             lines.append(
@@ -396,8 +428,30 @@ class SpringEngineeringWebsite(http.Controller):
             )
 
         cones = round(springs * cone_total * factor, 2)
-        steel = round(springs * steel_weight * prices["per_lb"] * factor, 2)
-        total = round(cones + steel + labor, 2)
+        steel = round(springs * steel_weight * per_lb * factor, 2)
+
+        # PLASTIC FILLER, for the one spring ID that takes it.
+        #
+        # One per spring, cut to that spring's own length - a 4 ft spring takes
+        # 4 ft of filler - so the quantity is feet of material and the price is
+        # per foot. Quoted as $19.44 for a 6 ft stock length and $22.68 for 7 ft,
+        # which are both exactly $3.24 a foot.
+        #
+        # It is a supplier cost, so the markup applies, the same as the cones and
+        # the steel.
+        filler_feet = round(springs * filler_inches / 12.0, 4)
+        filler = round(filler_feet * FILLER_PRICE_PER_FOOT * factor, 2)
+
+        # TWO LINES, TWO SUBTOTALS. The filler is its own product on its own
+        # line, so the spring line must carry the assembly WITHOUT it - pricing
+        # the whole order there and then adding a filler line bills the filler
+        # twice. `total` is what the customer pays and what the page quotes;
+        # `assembly_total` is what the spring line books - NOT `assembly`, which
+        # is the validated assembly name from the spec and was shadowed by an
+        # earlier draft of this, putting a dollar figure on the order line where
+        # the word Duplex belongs.
+        assembly_total = round(cones + steel + labor, 2)
+        total = round(assembly_total + filler, 2)
 
         product = request.env.ref(
             "spring_engineering.product_custom_spring", raise_if_not_found=False
@@ -444,7 +498,7 @@ class SpringEngineeringWebsite(http.Controller):
         })
         # Written after creation: price_unit is computed from the product and
         # the pricelist on create, and the product deliberately lists at zero.
-        line.write({"price_unit": total})
+        line.write({"price_unit": assembly_total})
 
         # WHAT WE RECEIVE HAS TO BE THE PRICE WE COMPUTED, WHATEVER THE TAXES
         # ARE SET TO.
@@ -476,13 +530,13 @@ class SpringEngineeringWebsite(http.Controller):
         # currency's precision means no new price_unit can get closer.
         for _ in range(6):
             net = line.price_subtotal
-            shortfall = total - net
+            shortfall = assembly_total - net
 
             if abs(shortfall) < 0.005:
                 break
 
             if net > 0.01:
-                candidate = round(line.price_unit * total / net, 2)
+                candidate = round(line.price_unit * assembly_total / net, 2)
             else:
                 candidate = round(line.price_unit + shortfall, 2)
 
@@ -495,21 +549,70 @@ class SpringEngineeringWebsite(http.Controller):
         # the mismatch is logged rather than hidden: a quote that books the wrong
         # amount is worth an entry in the log even though the customer sees the
         # right figure.
-        if abs(total - line.price_subtotal) >= 0.005:
+        if abs(assembly_total - line.price_subtotal) >= 0.005:
             _logger.warning(
                 "spring_engineering: quoted %s but the line nets %s after tax "
                 "- check the taxes on product_custom_spring",
-                total, line.price_subtotal,
+                assembly_total, line.price_subtotal,
             )
+
+        # THE FILLER AS ITS OWN LINE, because it is its own product - the owner
+        # buys it separately and it ships alongside. Quantity is FEET, so the
+        # line reads as what is actually supplied rather than as a mystery
+        # surcharge on the spring.
+        filler_net = 0.0
+
+        if filler_feet > 0:
+            filler_product = request.env.ref(
+                "spring_engineering.product_custom_filler", raise_if_not_found=False
+            )
+
+            if not filler_product:
+                return {"error": "The filler product is missing - please call us to order."}
+
+            filler_line = request.env["sale.order.line"].sudo().create({
+                "order_id": order.id,
+                "product_id": filler_product.sudo().product_variant_id.id,
+                "name": (
+                    f'Plastic Filler for {FILLER_SPRING_ID}" spring\n'
+                    f'{springs} length{"s" if springs != 1 else ""} of '
+                    f'{round(filler_inches, 2)}", cut to the spring'
+                ),
+                "product_uom_qty": filler_feet,
+            })
+            filler_line.write({"price_unit": round(FILLER_PRICE_PER_FOOT * factor, 4)})
+
+            # Same tax correction as the spring line - see the note there. What
+            # we book has to be the price we quoted whatever the taxes are set
+            # to, and a per-foot quantity makes the rounding worth checking.
+            for _ in range(6):
+                net = filler_line.price_subtotal
+                shortfall = filler - net
+
+                if abs(shortfall) < 0.005:
+                    break
+
+                if net > 0.01:
+                    candidate = round(filler_line.price_unit * filler / net, 4)
+                else:
+                    candidate = round(filler_line.price_unit + shortfall / filler_feet, 4)
+
+                if candidate == filler_line.price_unit:
+                    break
+
+                filler_line.write({"price_unit": candidate})
+
+            filler_net = filler_line.price_subtotal
 
         return {
             "total": total,
             "cones": cones,
             "steel": steel,
+            "filler": filler,
             # WHAT THE LINE ACTUALLY BOOKS, net of tax. Equal to `total` when
             # everything is right, and reported so that dev/price-parity.sh can
             # check the whole chain - the page quotes it, the server computes it,
             # and the order line nets it - rather than only the first two.
-            "net": line.price_subtotal,
+            "net": round(line.price_subtotal + filler_net, 2),
             "cart_quantity": order.cart_quantity,
         }
