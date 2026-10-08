@@ -2747,3 +2747,96 @@ What would actually move it is not another fit. It is the reference's own rule
 for S - a published duplex rate table, or a reading where the two springs'
 coupling can be observed directly rather than inferred through a rounded
 length.
+
+## Per-rung data volume IS causal, and that reopens the pull (2026-10-08)
+
+Every previous lead was about the SHAPE of the length model. This one is about
+how much data each rung has, and it is the first thing in many sessions that
+measures as a real, causal effect on never-tuned data.
+
+### The observation
+
+On the never-tuned draws, split the 347 clean readings by how many length
+readings their rung has in the corpus:
+
+| rung's corpus length readings | never-tuned readings | exact |
+|---|---|---|
+| 300+ (four rungs) | 121 | **100.00%** |
+| under 300 (the rest) | 226 | 92.9% |
+
+Zero misses in 121 if the true rate were 7.1% is p = 0.0001. But that could
+just mean the well-covered rungs are the ones a random door lands on, and
+therefore the easy ones.
+
+### The experiment that settles it
+
+`sh dev/rung-volume.sh`. Cap how many LENGTH readings those four rungs may
+contribute, leave K alone so rung selection cannot move, and re-score **the
+same 121 readings**. Random subsample, two seeds, mean:
+
+| length readings per rung | exact |
+|---|---|
+| 40 | 87.60% |
+| 80 | 90.50% |
+| 160 | 92.56% |
+| 240 | 97.52% |
+| 320 | 98.35% |
+| full (309-1199) | **100.00%** |
+
+Monotone, still climbing at 320, on a fixed population, with nothing changed
+but how much data the rung got. **Data volume per rung causes length
+accuracy.** And the thin rungs show the same slope - starving the 42 rungs
+under 200 readings gives 83.44% at 50, 88.96% at 90, 92.64% at 140 against
+93.87% as they stand - so the curve is a property of the fit, not of those four
+rungs.
+
+### THE SEED MATTERS - the first version of this overstated the effect
+
+Capping by corpus ORDER keeps the first N readings, and the corpus is in batch
+order with the early batches deliberately boundary-dense. File-order capping at
+120 reported 88.43%; a random subsample of the same size reports 92.56%. The
+effect is real either way but a third smaller than first measured. Quote the
+seeded numbers, and never subsample a batch-ordered corpus by slicing it.
+
+### Why the U5-U8 result does not contradict this
+
+a3002a7 re-enabled 794 clean uniform readings and measured net -3 on the
+never-tuned draws, concluding more data does not help. Re-tested here, admitted
+for the 42 thin rungs only, it moves 153/163 to 154/163 - one reading.
+
+That is not a refutation, it is the dose-response being honest. Uniform data
+lands on rungs in proportion to how often a door hits them, so it piles onto
+the four rungs already at 100% and adds a **median of 14** readings to a thin
+rung. All 42 are still under 300 afterwards. The previous conclusion was right
+about the data it had and wrong to generalise: the allocation failed, not the
+idea.
+
+### Aiming at a rung is possible
+
+The rung is an OUTPUT - the reference picks the wire pair - so a pull cannot
+request one directly. But our own wire choice is right 99.1% of the time, so the
+model is an adequate targeting system: sample geometries locally for nothing,
+keep those it says land on the wanted rung and raise no warning, and pull only
+those. 15,000 free local samples reach **every one of the 25 visited thin
+rungs**, none unreachable, 55 to 411 candidates each.
+
+### What it would cost
+
+Bringing every rung a real door visits up to 320 length readings:
+
+| budget | projected gain | time at 1 req/sec |
+|---|---|---|
+| 400 | +0.7 pts | 7 min |
+| 800 | +1.2 pts | 13 min |
+| 1600 | +1.9 pts | 27 min |
+| 3200 | +3.0 pts | 53 min |
+| 4624 (all of it) | **+3.5 pts** | 77 min |
+
+which would put clean length near 98.9%. The projection interpolates the curve
+above and assumes new readings inform a rung as much as the ones removed did -
+the honest caveat, and the reason to run it in batches and re-measure rather
+than all at once.
+
+A 400-request pilot cannot be validated on its own: +0.7 points is under 3
+readings of 347, which no paired test can resolve. The evidence for going ahead
+is the starvation experiment, not a pilot.
