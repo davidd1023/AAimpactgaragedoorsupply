@@ -52,8 +52,10 @@ class Catalog:
         self.horizontal = []  # (size, length, color, product)
         self.vertical = []
         self.cables = {}      # (size, feet, radius) -> product
-        for p in products:
-            name = (p.name or '').strip()
+        for p in products.with_context(display_default_code=False):
+            # Display name = template name + variant values, e.g.
+            # 'Lift Cable 5/32" Pair - Prepared (8' Door, 3" Track (15R))'
+            name = (p.display_name or '').strip()
             if 'RAW' in name:
                 continue
             m = _H_RE.match(name)
