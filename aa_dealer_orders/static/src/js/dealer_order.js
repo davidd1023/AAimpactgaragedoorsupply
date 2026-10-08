@@ -69,6 +69,15 @@
         return "D525-216";
     }
 
+    // Door width in inches -> kit series (AA Calculator hwSeries).
+    function seriesFor(w) {
+        if (!w) return null;
+        if (w <= 144) return "AA-1200";
+        if (w <= 194) return "AA-1600";
+        if (w <= 220) return "AA-1800";
+        return "too-wide";
+    }
+
     function init(root) {
         const products = JSON.parse(root.dataset.products || "[]");
         const symbol = root.dataset.currencySymbol || "$";
@@ -118,6 +127,7 @@
             const drumSel = el("select", { class: "form-select form-select-sm" });
             const drumHint = el("div", { class: "small text-muted mt-1" });
             const priceEl = el("div", { class: "aa-price", text: "-" });
+            const kitLabel = el("div", { class: "form-control-plaintext fw-bold py-1", text: "Enter the door width" });
             line.numEl = el("span", { class: "aa-line-num" });
 
             const dup = el("button", { type: "button", class: "btn btn-sm btn-outline-secondary", text: "Duplicate", onclick: () => addLine(line) });
@@ -146,7 +156,8 @@
                         line.numEl, el("div", { class: "d-flex gap-2" }, [dup, del]),
                     ]),
                     el("div", { class: "row g-2 mb-2" }, [
-                        field("Kit", kitSel, "col-12 col-md-4"),
+                        el("div", { class: "d-none" }, [kitSel]),
+                        field("Kit (from width)", kitLabel, "col-12 col-md-4"),
                         field("Door / job tag", tag, "col-12 col-md-4"),
                         field("Quantity", qty, "col-6 col-md-2"),
                         el("div", { class: "col-6 col-md-2 d-flex flex-column justify-content-end align-items-end" }, [
@@ -167,6 +178,26 @@
 
             function product() {
                 return products.find((p) => p.id === Number(kitSel.value));
+            }
+
+            function widthIn() {
+                return (Number(wFt.value) || 0) * 12 + (Number(wIn.value) || 0);
+            }
+
+            // Pick the kit from the width. Returns true when the kit changed.
+            function autoKit() {
+                const s = seriesFor(widthIn());
+                line.kitOk = false;
+                if (!s) { kitLabel.textContent = "Enter the door width"; kitLabel.className = "form-control-plaintext text-muted py-1"; return false; }
+                if (s === "too-wide") { kitLabel.textContent = "Wider than 18' 4\" - call AA Impact"; kitLabel.className = "form-control-plaintext text-danger fw-bold py-1"; return false; }
+                const p = products.find((x) => x.name.startsWith(s));
+                if (!p) { kitLabel.textContent = s + " kit not available"; kitLabel.className = "form-control-plaintext text-danger fw-bold py-1"; return false; }
+                line.kitOk = true;
+                kitLabel.textContent = p.name;
+                kitLabel.className = "form-control-plaintext fw-bold py-1";
+                if (Number(kitSel.value) === p.id) return false;
+                kitSel.value = p.id;
+                return true;
             }
 
             // Kit attributes. Roller Size follows the track size and the kit's Drum
@@ -303,6 +334,7 @@
             function price() {
                 const my = ++seq;
                 line.subtotal = null;
+                if (!line.kitOk) { priceEl.textContent = "-"; refreshTotal(); return; }
                 priceEl.textContent = "...";
                 rpc("/dealer/order/price", { template_id: product().id, ptav_ids: ptavIds(), qty: Number(qty.value) || 1 })
                     .then((r) => {
@@ -322,12 +354,15 @@
                 width: wFt.value || wIn.value ? (wFt.value || 0) + "' " + (wIn.value || 0) + '"' : "",
                 height: hFt.value || hIn.value ? (hFt.value || 0) + "' " + (hIn.value || 0) + '"' : "",
                 weight: weight.value,
+                width_in: widthIn(),
                 track_type: trackSel.value,
                 lift_type: liftSel.value,
                 high_lift: liftSel.value === "highlift" ? hlInput.value : "",
                 drum: drumSel.value,
             });
             line.copyInto = (other) => {
+                Object.entries(line.inputs).forEach(([k, i]) => (other.inputs[k].value = i.value));
+                other.autoKit();
                 other.kitSel.value = kitSel.value;
                 other.buildAttrs();
                 Object.entries(line.selects).forEach(([k, s]) => other.selects[k] && (other.selects[k].sel.value = s.sel.value));
@@ -340,6 +375,7 @@
                 other.price();
             };
             line.kitSel = kitSel;
+            line.autoKit = autoKit;
             line.buildAttrs = buildAttrs;
             line.price = price;
             line.syncLift = syncLift;
@@ -350,6 +386,10 @@
 
             kitSel.addEventListener("change", () => { buildAttrs(); syncRoller(); autoPanels(); refreshDrum(); price(); });
             [hFt, hIn].forEach((i) => i.addEventListener("change", () => { autoPanels(); price(); }));
+            [wFt, wIn].forEach((i) => i.addEventListener("change", () => {
+                if (autoKit()) { buildAttrs(); syncRoller(); autoPanels(); refreshDrum(); }
+                price();
+            }));
             [weight, hlInput].forEach((i) => i.addEventListener("change", () => { autoDrum(); syncKitDrum(); price(); }));
             trackSel.addEventListener("change", () => {
                 if (liftSel.value === "lhr" && !trackSel.value.includes("LHR")) liftSel.value = "standard";
@@ -373,6 +413,8 @@
             errorEl.textContent = "";
             const po = root.querySelector("#aa_po").value.trim();
             if (!po) { errorEl.textContent = "Please enter your PO number."; root.querySelector("#aa_po").focus(); return; }
+            const noKit = lines.findIndex((l) => !l.kitOk);
+            if (noKit >= 0) { errorEl.textContent = "Door " + (noKit + 1) + ": enter a door width up to 18' 4\"."; return; }
             const missing = lines.findIndex((l) => !l.payload().track_type);
             if (missing >= 0) { errorEl.textContent = "Door " + (missing + 1) + ": choose the track type."; return; }
             const noHl = lines.findIndex((l) => l.payload().lift_type === "highlift" && !(Number(l.payload().high_lift) > 0));
