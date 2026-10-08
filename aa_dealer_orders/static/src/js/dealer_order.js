@@ -36,6 +36,7 @@
     // ── AA Calculator rules ────────────────────────────────────────────────
     const TRACK_TYPES = [
         ["3-15R", '3" 15R'],
+        ["2-15R", '2" 15R'],
         ["2-12R", '2" 12R'],
         ["3-LHR", '3" LHR'],
         ["2-LHR", '2" LHR'],
@@ -43,7 +44,6 @@
     const LIFT_TYPES = [
         ["standard", "Standard"],
         ["highlift", "High Lift"],
-        ["lhr", "Low Headroom"],
     ];
     const STD_DRUMS = ["D400-96", "D400-144", "D525-216"];
     const HL_DRUMS = ["D525-54", "D575-120", "D800-120"];
@@ -257,10 +257,13 @@
             }
 
             // Drums offered for this lift type (standard ones only if the kit has them).
+            // High-lift drums only show for High Lift; standard ones only otherwise.
             function drumChoices() {
-                if (liftSel.value === "highlift") return HL_DRUMS.slice();
                 const kd = kitDrums();
-                return STD_DRUMS.filter((d) => !kd.length || kd.some((n) => n.startsWith(d)));
+                const list = liftSel.value === "highlift" ? HL_DRUMS : STD_DRUMS;
+                const inKit = list.filter((d) => kd.some((n) => n.startsWith(d)));
+                // A kit without high-lift drums set up yet still gets the list (AA swaps the drum).
+                return inKit.length ? inKit : list.slice();
             }
 
             function fillDrums(keep) {
@@ -292,7 +295,7 @@
                     const s = line.selects["Drum"];
                     s.sel.value = s.values[s.values.length - 1].id;
                 }
-                drumHint.textContent = HL_DRUMS.includes(d) ? "High-lift drum: AA swaps it in the kit." : "";
+                drumHint.textContent = ok ? "" : "This kit has no " + d + " yet: AA swaps the drum.";
             }
 
             function syncRoller() {
@@ -301,12 +304,7 @@
             }
 
             function syncLift() {
-                const lift = liftSel.value;
-                hlCol.classList.toggle("d-none", lift !== "highlift");
-                if (lift === "lhr" && trackSel.value && !trackSel.value.includes("LHR")) {
-                    trackSel.value = trackSel.value.charAt(0) + "-LHR";
-                    syncRoller();
-                }
+                hlCol.classList.toggle("d-none", liftSel.value !== "highlift");
             }
 
             function heightIn() {
@@ -391,10 +389,7 @@
                 price();
             }));
             [weight, hlInput].forEach((i) => i.addEventListener("change", () => { autoDrum(); syncKitDrum(); price(); }));
-            trackSel.addEventListener("change", () => {
-                if (liftSel.value === "lhr" && !trackSel.value.includes("LHR")) liftSel.value = "standard";
-                syncLift(); syncRoller(); refreshDrum(); price();
-            });
+            trackSel.addEventListener("change", () => { syncRoller(); price(); });
             liftSel.addEventListener("change", () => { syncLift(); refreshDrum(); price(); });
             drumSel.addEventListener("change", () => { syncKitDrum(); price(); });
             qty.addEventListener("change", price);
