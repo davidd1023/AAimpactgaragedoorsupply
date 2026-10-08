@@ -61,7 +61,22 @@ def _add_high_lift_drums(kit):
     for variant in kit.product_variant_ids:
         vdrum = variant.product_template_attribute_value_ids.filtered(lambda v: v.attribute_id == attr)
         code = next((c for c, _l in HL_DRUM_VALUES if vdrum and vdrum.name.startswith(c)), None)
-        if not code or Bom.search_count([('product_id', '=', variant.id)]):
+        if not code:
+            continue
+        hl_products = env['product.product'].with_context(active_test=True).search(
+            [('name', 'ilike', code), ('active', '=', True)])
+        bom = Bom.search([('product_id', '=', variant.id)], limit=1)
+        if bom:
+            # Repair: a drum line pointing to an archived product gets the active one.
+            changed = False
+            for bline in bom.bom_line_ids.filtered(
+                    lambda l: code in (l.product_id.name or '') and not l.product_id.active):
+                pick = _pick_drum(hl_products, bline.product_id)
+                if pick:
+                    bline.product_id = pick
+                    changed = True
+            if changed and hasattr(variant, 'button_bom_cost'):
+                variant.button_bom_cost()
             continue
         sibling = kit._get_variant_for_combination(
             (variant.product_template_attribute_value_ids - vdrum) | base_ptav)
@@ -69,11 +84,15 @@ def _add_high_lift_drums(kit):
         if not sib_bom:
             continue
         new_bom = sib_bom.copy({'product_id': variant.id})
-        hl_products = env['product.product'].search([('name', 'ilike', code)])
         for bline in new_bom.bom_line_ids.filtered(lambda l: BASE_DRUM in (l.product_id.name or '')):
-            color = 'Black' if 'Black' in bline.product_id.display_name else 'White'
-            pick = hl_products.filtered(lambda p: color in p.display_name)[:1] or hl_products[:1]
+            pick = _pick_drum(hl_products, bline.product_id)
             if pick:
                 bline.product_id = pick
         if hasattr(variant, 'button_bom_cost'):
             variant.button_bom_cost()
+
+
+def _pick_drum(hl_products, old_product):
+    """Same color as the drum it replaces when the high-lift drum comes in colors."""
+    color = 'Black' if 'Black' in (old_product.display_name or '') else 'White'
+    return hl_products.filtered(lambda p: color in p.display_name)[:1] or hl_products[:1]
