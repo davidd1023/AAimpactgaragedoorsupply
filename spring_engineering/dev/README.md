@@ -2385,3 +2385,69 @@ absorbs" in the abstract: the per-spring term is known, confirmed by the
 manufacturer, and already correct in the Single path. What is missing is **how two
 nested springs share a shaft**, and the 2.5% spread in the forward test is the
 measurement of that ignorance.
+
+## TIPPT is the door's REQUIREMENT, not the springs' output
+
+The catalogue states it: *"REQUIRED IPPT equals Door Weight x Hi Moment Arm
+divided by Number of Turns"*, and its worked example divides a total IPPT by the
+drum multiplier to recover the door weight. Tested on 7,029 readings of every
+assembly and drum:
+
+| reported TIPPT / (door weight x drum multiplier) | |
+|---|---|
+| mean | **0.999537** |
+| within 0.1% | **99.2%** |
+| within 0.5% | 99.5% |
+
+**So the reference's TIPPT is computed from the door, before any spring is
+chosen.** That matters twice over.
+
+### It explains a red herring
+
+The "forward test" of the nested-pair coupling - predict TIPPT from the two
+reported lengths and compare - carries a 2.5% spread that no parameterisation
+would reduce. It cannot: it compares the rate the chosen springs DELIVER against
+the rate the door REQUIRES, and the two differ by however far the length had to be
+snapped onto the quarter-inch grid. On a 15" spring the ~1" effective grid is
+worth 3%. The spread was measuring the grid, not the model, which is why dead
+coils had no leverage on it at all (2.474% against 2.476%).
+
+### And it reframes what sMult can be
+
+The reference solves the same inversion we do: a required rate in, a length out.
+If its Duplex path omits the end coils, then matching its OMISSION beats being
+physically right - we are reproducing a calculator, not a spring. That is the best
+explanation of why the end-coil term is exact for a Single spring, confirmed by the
+manufacturer's own table, and measurably worse for a pair.
+
+### The closed forms are exhausted
+
+Every one of these was fitted against 6,454 readings and scored by the SPREAD of
+the still-needed per-rung correction, because a right formula needs one correction
+for every rung:
+
+| | spread |
+|---|---|
+| **shipped: `(A+B)/TIPPT`** | **1.824%** |
+| `+ 3*d_inner` | 1.768% |
+| `+ 5*d_inner` | 1.817% |
+| `+ 3*d_outer` / `+ 5*d_outer` | 1.841% / 1.954% |
+| `+ 1"` / `+ 2"` | 2.087% / 2.721% |
+| unequal lengths with dead coils | 1.632% |
+| independent wire exponents | 1.426% (two free parameters, drifting) |
+| wire exponents 4.6-5.3, four diameter conventions | all worse |
+
+Nothing collapses it. The best figures come from parameters that drift to the edge
+of whatever range they are given - an outer ID that keeps improving past 8", dead
+coils that want to be 14 - which is a parameter absorbing error, not a mechanism.
+
+**The remaining hypothesis is that their software carries a per-rung value**, which
+is unfalsifiable from this data and is precisely what `sMult` already implements.
+It would also match how `K` had to be handled: measured per rung by inverting the
+reference's own cycle counts, not derived.
+
+**So the sMult hunt is closed.** What came out of it is worth having - the
+catalogue confirms G, the torsion constant, and the coil rule; the dead-coil count
+is pinned per ID from 479 readings; TIPPT's origin is now known - but none of it
+moves the length accuracy, and the residual there remains what it was: per-group
+threshold placement, one miss apiece across many groups.
