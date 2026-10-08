@@ -127,6 +127,7 @@
             const drumSel = el("select", { class: "form-select form-select-sm" });
             const drumHint = el("div", { class: "small text-muted mt-1" });
             const priceEl = el("div", { class: "aa-price", text: "-" });
+            const breakdown = el("div", { class: "small text-muted mt-2 aa-breakdown" });
             const kitLabel = el("div", { class: "form-control-plaintext fw-bold py-1", text: "Enter the door width" });
             line.numEl = el("span", { class: "aa-line-num" });
 
@@ -173,6 +174,7 @@
                     ]),
                     attrsBox,
                     el("div", { class: "mt-2" }, [el("div", { class: "form-label small mb-1 fw-bold", text: "Add to your order" }), optsBox]),
+                    breakdown,
                 ]),
             ]);
 
@@ -334,11 +336,21 @@
                 line.subtotal = null;
                 if (!line.kitOk) { priceEl.textContent = "-"; refreshTotal(); return; }
                 priceEl.textContent = "...";
-                rpc("/dealer/order/price", { template_id: product().id, ptav_ids: ptavIds(), qty: Number(qty.value) || 1 })
+                rpc("/dealer/order/price", { template_id: product().id, ptav_ids: ptavIds(), qty: Number(qty.value) || 1, line: line.payload() })
                     .then((r) => {
                         if (my !== seq) return;
+                        breakdown.innerHTML = "";
                         if (r.error) { priceEl.textContent = "-"; priceEl.title = r.error; }
-                        else { line.subtotal = r.subtotal; priceEl.textContent = money(r.subtotal); }
+                        else {
+                            line.subtotal = r.subtotal;
+                            priceEl.textContent = money(r.subtotal);
+                            if ((r.extras || []).length || (r.notes || []).length) {
+                                breakdown.appendChild(el("div", { text: "Kit: " + money(r.kit_price) + " each" }));
+                                (r.extras || []).forEach((x) => breakdown.appendChild(
+                                    el("div", { text: x.label + ": " + x.name + (x.qty > 1 ? " x" + x.qty : "") + " - " + money(x.unit_price) })));
+                                (r.notes || []).forEach((n) => breakdown.appendChild(el("div", { class: "text-warning-emphasis", text: n })));
+                            }
+                        }
                         refreshTotal();
                     })
                     .catch(() => { if (my === seq) priceEl.textContent = "-"; });
@@ -353,6 +365,7 @@
                 height: hFt.value || hIn.value ? (hFt.value || 0) + "' " + (hIn.value || 0) + '"' : "",
                 weight: weight.value,
                 width_in: widthIn(),
+                height_in: heightIn(),
                 track_type: trackSel.value,
                 lift_type: liftSel.value,
                 high_lift: liftSel.value === "highlift" ? hlInput.value : "",
