@@ -2886,3 +2886,67 @@ bands were built on `rawActive * mFor(springs)` and the component still applied
 the rung-wide `sMult`. That returned object is the ONLY channel between the
 fitter and the model: a quantity that is not in it does not exist downstream,
 and the failure is silent and total rather than loud and local.
+
+## The CANIMEX rate chart: three formulas confirmed, the coupling closed (2026-10-08)
+
+The owner found `idcspring.com/.../RCI3_75.pdf` - a **CANIMEX SPRING CHART**,
+the same manufacturer as the drums, covering 29 wire sizes at 3.750" inside
+diameter. Single springs only; no duplex, nested or concentric content anywhere
+in its 1,899 lines. Four other links sent with it were compression-spring pages
+or inaccessible (one 403 to both WebFetch and curl, one Scribd error page, two
+covering compression springs only). One of them, Tokaibane, does state the
+nested rule: concentric springs in parallel are **K = k1 + k2 + k3** with no
+correction factor published anywhere.
+
+### What it confirms, independently of the reference
+
+| our formula | against the chart | agreement |
+|---|---|---|
+| `divider = 30e6*d^5/(10.2*(ID+d))` | published Rate x wire, 29 sizes | **1.7 parts in 10,000** |
+| `cycles = (124205*d^2.79/torque)^4.67` | 145 published MIP values | mean ratio **0.9952**, sd 0.58% |
+| `weight = density*(pi^2/4)*d*(ID+d)*L` | published weight per inch, 29 sizes | implied density constant to **0.01%** |
+
+G = 30e6 and K = 10.2 were taken from the SSC catalogue; a second manufacturer
+publishing the same thing settles them. The MIP agreement matters most, because
+the cycle model is what produced the single Single wire miss, and it is now
+checked against 145 values nobody fitted it to.
+
+### Where SSC and CANIMEX actually differ, so this chart cannot correct us
+
+Two constants, both differing in the same direction:
+
+| | CANIMEX chart | SSC, as the model reproduces it |
+|---|---|---|
+| dead coils at 3.75" ID | **3** | **5** |
+| steel density | 0.28320 lb/in^3 | 0.2836 |
+
+The dead-coil one is not arguable: our Single path uses 5 and reproduces 275
+never-tuned readings exactly, 65 of them at 3.75". At 3 every one would be
+2 x 0.2253 = 0.45" short, far outside the quarter-inch grid. These are two
+different houses' conventions and SSC's is the one being modelled.
+
+### And the coupling question is now closed, not open
+
+The withdrawn end-coil term assumed 5 inner / 3 outer. With dead coils FITTED
+instead - two global parameters, which would replace fifty per-rung sMults -
+over 6,748 clean duplex readings:
+
+| dead coils, inner / outer | bias | spread |
+|---|---|---|
+| 0 / 0, what ships | -2.85% | 2.48% |
+| 5 / 3, the withdrawn attempt | +1.25% | 2.48% |
+| 3 / 3, CANIMEX published | +0.48% | 2.46% |
+| **7 / 0, best of the whole grid** | -0.19% | **2.18%** |
+
+Freeing both parameters buys 2.48% to 2.18%, and the optimum is physically
+meaningless - seven dead coils on the inner spring and NONE on the outer. More
+to the point, 2.2% of a 50" spring is 1.1 inches, larger than the 1" grid step
+the model has to land on. **No choice of dead coils lets rate-addition reach the
+grid.**
+
+So rates do not add for these pairs, confirmed now with two free parameters and
+6,748 readings rather than one fixed guess. The literature route is finished:
+the published nested rule is the one that does not work here, and nothing in
+these sources suggests another. What would still help is a duplex rate chart -
+IPPT for a NESTED pair - and this document shows such charts exist in this
+exact format, just not for pairs.
