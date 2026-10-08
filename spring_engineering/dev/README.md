@@ -2311,3 +2311,77 @@ determined.
 
 What it does not do is close the gap. sMult still spreads 1.47% across rungs, so end
 coils are part of what it absorbs and not all of it.
+
+## The manufacturer's catalogue confirms the physics (2026-10-08)
+
+The owner found https://resources.sscorp.com/door/catalog/SSC_Catalog.pdf, 140
+pages. It does not give the Duplex rule, but it settles the single-spring formula
+from the manufacturer's own documents rather than from our fit.
+
+### Its own worked example
+
+> "1PR .250 x 2 x 32" installed on a 7' door with a 15" radius, 400-8 drums.
+> **IPPT is 41.5 per spring**, multiplier is .2866. Total IPPT of 83 divided by
+> .2866 = 289 lbs door weight."
+
+And its own rule for coils: **"COIL NUMBER x WIRE SIZE = SPRING LENGTH"**, so a
+32" spring of .250 wire has 128 coils. Working backwards from IPPT 41.5:
+
+| | |
+|---|---|
+| our formula with every coil active | 39.89 (**-3.9%**) |
+| active coils implied by IPPT 41.5 | 123.04 |
+| dead coils, 128 - 123.04 | **4.96** |
+| our formula with 5 dead coils | **41.51 (+0.03%)** |
+
+Five dead coils, from the manufacturer's arithmetic. That also confirms
+`G = 30,000,000` and `TORSION_CONSTANT = 10.2`, neither of which had an
+independent check before.
+
+### And its published rate table
+
+Six rows of the 2" ID stock table, against our formula with 5 dead coils:
+
+| wire | length | catalogue IPPT | ours | error |
+|---|---|---|---|---|
+| 0.2070 | 22.00 | 24.2 | 24.16 | -0.17% |
+| 0.2070 | 22.50 | 23.6 | 23.60 | -0.02% |
+| 0.2187 | 23.50 | 29.6 | 29.60 | +0.00% |
+| 0.2187 | 24.75 | 28.0 | 28.04 | +0.13% |
+| 0.2187 | 26.00 | 26.6 | 26.63 | +0.11% |
+| 0.2253 | 24.50 | 32.8 | 32.83 | +0.08% |
+
+The catalogue only stocks 1 3/4" and 2" IDs - anything larger is made to order -
+so it cannot settle the dead-coil count for a 6" spring. The reference's own
+readings can, fitted per ID over 479 single-spring readings:
+
+| spring ID | readings | dead coils | error at that count |
+|---|---|---|---|
+| 1.75, 2.625, 3.75, 4.375 | 387 | **5** | 0.07" |
+| 5.25, 6 | 92 | **3** | 0.07" |
+
+Which is exactly `LARGE_ID_THRESHOLD = 4.5` with `END_COILS_SMALL_ID = 5` and
+`END_COILS_LARGE_ID = 3`. **The Single path is correct and now independently
+confirmed from two directions.**
+
+### Why the Duplex path still does not use it
+
+Two nested springs turn together, so their rates should add, each over its own
+active length, with their wound lengths an inch apart - which the data confirms on
+all 6,454 readings. Written that way the predicted TIPPT is unbiased, +0.69%
+against -3.39% without the end coils, **but its spread does not improve**: 2.78%
+against 2.52%. An unbiased estimate with undiminished spread says the rates are
+not simply adding.
+
+It was shipped on the holdout (+26 readings) and withdrawn a day later: in sample
+it cost **121 readings**, 82 fixed against 203 broken, concentrated on the
+highest-traffic rung, and the two never-tuned draws moved 2.8 points in opposite
+directions for a paired net of -2 at p = 0.774. Sweeping LINE_SLACK afterwards
+(0.12, 0.18, 0.25, 0.32) recovers at most 16 of those readings, so the band knobs
+were not the confound.
+
+**So the lead is narrower and sharper than before.** It is not "find the term sMult
+absorbs" in the abstract: the per-spring term is known, confirmed by the
+manufacturer, and already correct in the Single path. What is missing is **how two
+nested springs share a shaft**, and the 2.5% spread in the forward test is the
+measurement of that ignorance.

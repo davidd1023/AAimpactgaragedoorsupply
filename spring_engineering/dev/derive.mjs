@@ -467,20 +467,11 @@ for (const r of readings) {
     // The rounded TIPPT, matching duplexActiveLength: the reference computes
     // from the figure it displays, as it does for cycles and MIP.
     const shownTippt = Math.round(c.tipptExact * 10) / 10;
-    // END COILS, matching duplexActiveLength - see the long note there. The
-    // fitter and the model must compute the same quantity or the bands fit one
-    // formula and the page uses another.
-    const eOuter = 6 > 4.5 ? 3 : 5;
-    const eInner = 3.75 > 4.5 ? 3 : 5;
-    const A = divider(r.outer, 6);
-    const B = divider(r.inner, 3.75);
-    const C = shownTippt / springs;
-    const gap = 1 + eInner * r.inner - eOuter * r.outer;
-    const qb = C * gap - A - B;
-    const disc = qb * qb + 4 * C * B * gap;
-    const rawActive = disc < 0
-        ? 0
-        : (-qb + Math.sqrt(disc)) / (2 * C) + eInner * r.inner;
+    // NO END COILS, matching duplexActiveLength - see the long note there. The
+    // physics is confirmed and the coupling between the two nested springs is
+    // not, so the term is left out of both rather than out of one.
+    const rawActive =
+        springs * (divider(r.inner, 3.75) + divider(r.outer, 6)) / shownTippt;
 
     g.lens.push({
         springs, rawActive, length: r.length, dense: r.dense === true,
