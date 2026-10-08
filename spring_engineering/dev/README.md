@@ -2638,3 +2638,112 @@ someone else's server.
 
 `dev/single-gap-sample.mjs` now draws standard lift only from drums that have
 it, so the combination cannot be generated again.
+
+## Five more Duplex hypotheses, all refuted (2026-10-08)
+
+The open lead was the note in `duplexActiveLength`: sMult averages 1.18% off
+1.000 and correlates with the outer spring's share of the divider sum, so
+"whatever the real coupling is, finding it is the one lead left that could move
+accuracy by more than noise". Five attempts on it. **Nothing shipped, accuracy
+unchanged.** Each one is written down because each is a query someone will
+otherwise run again.
+
+### 1. The error is NOT upstream - proved from the reference's own numbers
+
+The reference reports `totalInchPoundPerTurn`, `turnsOnSprings` and
+`multiplier` on every reading, so our chain can be checked link by link
+instead of only at the end. On the two never-tuned draws, 347 clean modelled
+readings with the wire agreeing:
+
+| | on the 331 exact | on the 16 misses |
+|---|---|---|
+| TIPPT matches | 97.6% | **100%** |
+| turns matches | 99.1% | **100%** |
+| multiplier matches | 93.4% | **100%** |
+
+Upstream is *perfect* on every miss and imperfect on the readings we get right.
+That is the opposite of a confound and it settles the question: the whole error
+is in S, and the S the reference implies is 0.957-1.038 times ours.
+
+This also re-confirms `dev/mult-survey.mjs`: the D800-120 hi-lift multiplier
+surface really is inaccurate, and really does cost the length nothing.
+
+### 2. sMult is NOT an additive dead-coil term in multiplicative clothing
+
+The tempting story: dead coils add `dead * wire` to a length, the model
+multiplies instead, so one constant per rung cannot fit both short and long
+springs. It predicts an intercept.
+
+Per rung, regressing the reference's length on `x = springs/TIPPT` over 4,486
+deduped readings, 31 rungs:
+
+- intercepts land between **-0.54 and +0.82**, scattered around zero, against a
+  predicted `5*dIn` of **1.13 to 1.81**
+- a free intercept improves pooled RMS from 0.3243 to 0.3177 - **2%**
+- free slopes straddle the computed A both ways, ratio 0.977 to 1.053
+
+So sMult is a genuine multiplicative per-rung scale. The additive story is dead,
+which is consistent with the end-coil term having been withdrawn once already.
+
+### 3. The residual has no structure left in it
+
+Pooled residual around the per-rung line, 4,486 readings, RMS 0.3177":
+
+| against | r |
+|---|---|
+| turns | -0.005 |
+| turns * inner wire | -0.004 |
+| predicted length | 0.000 |
+| door height | 0.050 |
+| hi-lift | 0.054 |
+| spring count | 0.159 |
+
+and the RMS is flat - 0.29 to 0.33 in every spring-count band and every turns
+band. **0.3177 is what rounding to the inch produces** (1/sqrt(12) = 0.289), so
+the line already explains the physics and the residual is the snap. There is no
+missing term to find by regression, which is why four sessions of looking for
+one came back empty.
+
+### 4. The grid is {k, k+0.25}, and the quarter inch is a spring-count rule
+
+Over the same 4,486, the fractional part of the inner length is **only ever .00
+(52.6%) or .25 (47.4%)** - never .5, never .75. And it is nearly deterministic:
+
+| springs | n | share with .25 |
+|---|---|---|
+| 1 | 1208 | **0.0%** |
+| 2 | 1649 | 30.3% |
+| 3 | 1032 | **100.0%** |
+| 4 | 597 | **100.0%** |
+
+Inner and outer always agree on the fraction (100%) and the pair is always
+exactly 1.00" apart (100%).
+
+This looked like a free fix for ten minutes. **The model already reproduces it
+exactly** - 100%, 99.0%, 100%, 100% agreement by spring count, disagreeing on
+17 of 4,472 readings and on none that it otherwise gets right. The three-regime
+rounding is already carrying this rule; checking before "fixing" saved a
+regression.
+
+### 5. One slope per rung cannot even reach where the model already is
+
+With a single slope per rung and a nearest-grid snap, sweeping every slope that
+any reading admits, the best achievable in sample is **4100/4486 = 91.40%** -
+and three rungs reach 100% only because they have 12 to 19 readings. The model
+is at 92-95% on never-tuned data with the fitted per-rung thresholds, so the
+threshold machinery is extracting *more* than the clean closed form can. A
+tidier model here would be a downgrade.
+
+### Where that leaves it
+
+Every link is now measured rather than assumed: upstream is exact on the
+misses, the shape is multiplicative not additive, the residual is structureless
+at the grid scale, the grid and its quarter-inch rule are known and already
+reproduced, and the simple closed form is worse than what ships. The
+`~94.5% clean length` conclusion stands, and now stands on five refutations
+instead of an absence of ideas.
+
+What would actually move it is not another fit. It is the reference's own rule
+for S - a published duplex rate table, or a reading where the two springs'
+coupling can be observed directly rather than inferred through a rounded
+length.
