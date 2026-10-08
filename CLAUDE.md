@@ -61,6 +61,7 @@ Editable in Website > Configuration > Settings like the markup and the labour
 charge, but not secret - it is a commodity price. Default $1.46/lb, in
 `spring_engineering/pricing.py`.
 
+### How the pieces fit together
 
 - Cone and steel COSTS live in `spring_engineering/pricing.py`, server side. They
   were in the JavaScript and therefore in the public bundle, which also made the
