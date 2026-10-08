@@ -21,6 +21,15 @@
                             </div>
                         </div>
                     </setting>
+                    <setting string="Steel cost per pound"
+                             help="What a pound of finished spring costs us, before the markup. Charged on every spring in the assembly, from the weights the calculator shows.">
+                        <div class="content-group">
+                            <div class="mt16">
+                                <field name="spring_steel_per_lb" class="oe_inline"/>
+                                <span class="ms-1">per lb</span>
+                            </div>
+                        </div>
+                    </setting>
                     <setting string="Assembly labour"
                              help="Flat charge added to every assembly for building it, on top of the marked-up materials. Per assembly, not per spring, and added after the markup. It is not shown to the visitor as a line of its own.">
                         <div class="content-group">

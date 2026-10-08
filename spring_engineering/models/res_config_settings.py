@@ -70,3 +70,18 @@ class ResConfigSettings(models.TransientModel):
         params.set_param(
             "spring_engineering.labor_flat", str(self.spring_labor_flat or 0.0)
         )
+        params.set_param(
+            "spring_engineering.steel_per_lb", str(self.spring_steel_per_lb or 0.0)
+        )
+
+    # THE STEEL RATE, which unlike the markup and the labour charge is not a
+    # secret - it is a published commodity price, and the owner asked for it to
+    # be an ordinary setting. It is still a COST: the browser receives it with
+    # the markup already applied, as it does the cone prices.
+    spring_steel_per_lb = fields.Float(
+        string="Steel cost per pound",
+        config_parameter="spring_engineering.steel_per_lb",
+        help="What a pound of finished spring costs us, before the markup. "
+             "Charged on every spring in the assembly, using the weights the "
+             "calculator shows.",
+    )

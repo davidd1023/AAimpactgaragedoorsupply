@@ -23,14 +23,33 @@
 set -e
 cd "$(dirname "$0")/.."
 
+# TWO never-tuned draws, scored SEPARATELY and never pooled.
+#
+# One clean yardstick is enough to measure with and not enough to decide with.
+# Every time a choice is checked against the only clean sample, a little of its
+# independence is spent - and this session spent some, on whether two held-out
+# batches belonged in the fit. The second draw exists so that kind of question
+# has somewhere to go that is not the figure being quoted.
+#
+# They stay separate because the interesting case is DISAGREEMENT. Two draws from
+# the same box that read a point apart say the sampling error is about a point,
+# which is a thing worth knowing before celebrating half of one. Pooling them
+# hides exactly that.
 VALIDATION=dev/eval-validation-seed61006.json
+VALIDATION2=dev/eval-validation2-seed20261007.json
 
-echo "VALIDATION - never tuned against, this is the figure to quote"
+echo "VALIDATION - never tuned against, these are the figures to quote"
 if [ -f "$VALIDATION" ]; then
-    node dev/clean-cases.mjs "$VALIDATION" 2>&1 | head -2 | sed 's/^/  /'
+    printf '  seed 61006:\n'
+    node dev/clean-cases.mjs "$VALIDATION" 2>&1 | head -2 | sed 's/^/    /'
 else
     echo "  $VALIDATION is missing - there is no honest figure without it" >&2
     exit 1
+fi
+
+if [ -f "$VALIDATION2" ]; then
+    printf '  seed 20261007:\n'
+    node dev/clean-cases.mjs "$VALIDATION2" 2>&1 | head -2 | sed 's/^/    /'
 fi
 
 echo ""

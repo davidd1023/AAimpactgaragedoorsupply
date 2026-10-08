@@ -214,6 +214,23 @@ for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).read
     // the pull file is on disk or not, which is the point of it.
     const noFit = r.fit === false;
 
+    // BOUNDARY-DENSE READINGS ARE FOR THE THRESHOLDS, NOT FOR THE STIFFNESS.
+    //
+    // A batch sampled deliberately NEXT to a fitted threshold is the right data
+    // for placing that threshold and the wrong data for fitting the rung's
+    // sMult, which every spring count of the rung shares. fitStiffness scores a
+    // COUNT of readings whose snapped length comes out right, and a reading
+    // sitting on a boundary is exactly the ambiguous kind - so a few hundred of
+    // them outvote the ordinary doors and drag the multiplier.
+    //
+    // Measured: adding 353 such readings moved sMult on their three rungs by up
+    // to 0.0073, which on a 30" active length is 0.22" - a fifth of an inch of
+    // fraction, applied to every door on the rung including spring counts the
+    // batch never touched. The holdout on a FIXED population went from 90.306%
+    // to 90.207% as a result. That is the whole mechanism by which R1 and P1
+    // "poisoned" the fit, and it is not about density being bad in itself.
+    const dense = r.dense === true;
+
     if ((r.state.springId || "").indexOf("3 3/4") !== 0) {
         continue;
     }
@@ -221,6 +238,7 @@ for (const r of JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8")).read
     readings.push({
         fromCorpus: true,
         noFit,
+        dense,
         state: r.state,
         // Same hiLift marker the pull path sets. Without it the hi-lift
         // holdout below silently withholds nothing from this half of the
@@ -449,11 +467,14 @@ for (const r of readings) {
     // The rounded TIPPT, matching duplexActiveLength: the reference computes
     // from the figure it displays, as it does for cycles and MIP.
     const shownTippt = Math.round(c.tipptExact * 10) / 10;
+    // NO END COILS, matching duplexActiveLength - see the long note there. The
+    // physics is confirmed and the coupling between the two nested springs is
+    // not, so the term is left out of both rather than out of one.
     const rawActive =
         springs * (divider(r.inner, 3.75) + divider(r.outer, 6)) / shownTippt;
 
     g.lens.push({
-        springs, rawActive, length: r.length,
+        springs, rawActive, length: r.length, dense: r.dense === true,
         active: rawActive,
         frac: rawActive - Math.floor(rawActive),
         bonus: Number((r.length - Math.floor(rawActive)).toFixed(2)),
@@ -472,10 +493,15 @@ for (const g of rungs.values()) {
         (l) => l.rawActive > 0 && l.length > 0 && l.length <= 120
     );
 
+    // The stiffness is fitted from ORDINARY doors only - see `dense` above. The
+    // boundary-dense readings stay in `g.lens` and so still reach the band and
+    // threshold fitters further down, which is the only place they belong.
+    const forStiffness = usable.filter((l) => !l.dense);
+
     g.sMult = 1;
 
-    if (usable.length >= 12) {
-        const fit = fitStiffness(usable);
+    if (forStiffness.length >= 12) {
+        const fit = fitStiffness(forStiffness);
 
         if (fit && fit.ok > 0) {
             g.sMult = Number(fit.m.toFixed(6));
@@ -549,6 +575,27 @@ for (const g of rungs.values()) {
 //
 // The multiplier is searched rather than taken from the median because what
 // matters is landing on the right side of the grid, not minimising residual.
+// MAX MARGIN IS FOR A DECISION BOUNDARY, NOT FOR A SCALE. Measured, reverted.
+//
+// Every threshold fitter in this file was changed today to choose for margin
+// instead of for a count, and it was the clearest gain of the session. The same
+// change here - break the plateau in `ok` by preferring the multiplier whose
+// correct readings sit furthest from snapping somewhere else - moved sMult on 15
+// of 50 rungs and cost 7 readings on the five-fold holdout at a fixed population,
+// 90.554% to 90.463%. It also agrees with an earlier, weaker attempt to centre
+// sMult in its plateau, which bought 2 readings in 5,157 and nine extra bands.
+//
+// THE ANALOGY FAILS, AND IT IS WORTH KNOWING WHY. A threshold's position is
+// unknown and the data only brackets it, so sitting in the middle of the bracket
+// is the minimax guess and robustness is the whole game. A stiffness is not a
+// boundary: it is a physical scale, and where a reading falls inside its grid
+// cell is determined by the spring, not by noise. Pushing readings toward the
+// centres of their cells therefore biases the scale to make the data look tidy -
+// it is fitting a property the reference does not have.
+//
+// So the plateau stays broken by taking the lowest multiplier that achieves it.
+// That is arbitrary, and measurably better than the principled-sounding
+// alternative.
 function fitStiffness(ls) {
     let best = null;
 
@@ -708,6 +755,15 @@ const median = (xs) => {
 const contradictions = [];
 const overfit = [];
 const MAX_BANDS = Number(process.env.MAX_BANDS || 64);
+
+// HOW FINELY THE THRESHOLD SLOPE IS SCANNED. b runs over +-BLO/B_STEPS in steps
+// of 1/B_STEPS, so 2000 is a step of 0.0005 over a range of +-0.25.
+//
+// It is a shared constant rather than two copies of a literal because the two
+// fitters have to agree: a slope one of them can express and the other cannot
+// would make the choice between their forms depend on the grid rather than on
+// the fit.
+const B_STEPS = Number(process.env.B_STEPS || 2000);
 
 
 // For each rung AND spring count, derive the bonus as a piecewise-constant
@@ -1173,7 +1229,7 @@ function fitLineAnyLevels(ls, maxLevels) {
     // 0.173 and 0.281 at floor 11, between 0.056 and 0.204 at 13, and below
     // 0.048 by 19: a slope near -0.045.
     for (let bi = Number(process.env.BLO || -500); bi <= Number(process.env.BHI || 500); bi += 1) {
-        const b = bi / 2000;
+        const b = bi / B_STEPS;
         const sorted = pts
             .map((p) => ({ u: p.t - b * p.F, c: p.c }))
             .sort((x, y) => x.u - y.u);
@@ -1251,7 +1307,26 @@ function fitLineAnyLevels(ls, maxLevels) {
         // A cut below or above everything scores zero room on purpose: it
         // predicts one class for the whole group and has unbounded space on one
         // side, so it must never win a tie on margin.
-        const gapAt = (i) => (i <= 0 || i >= n ? 0 : sorted[i].u - sorted[i - 1].u);
+        // CAPPED AT THE WIDTH OF THE RANGE A FRACTION CAN OCCUPY.
+        //
+        // The margin is a distance in frac, and frac lives in [0, 1). A gap
+        // wider than that means the threshold line has left the band the data
+        // occupies altogether: it is no longer separating readings by their
+        // fraction, it is separating them by their floor, with the fraction
+        // playing no part. There is no more information in being three units
+        // outside the range than in being one, so there is no more credit.
+        //
+        // Without the cap the reward grows with the slope and the scan runs to
+        // whatever bound it is given - 16 of 136 lines came back sitting exactly
+        // on it, at a slope 250 times the median, where before this objective
+        // there were none at all. A group that really does switch on the floor
+        // has `splitByCount` for it, fitted as a floor boundary rather than
+        // smuggled in as a near-vertical threshold.
+        //
+        // At the cap, ties fall through to the flatness preference below, which
+        // picks the gentlest line that separates the readings completely.
+        const gapAt = (i) =>
+            i <= 0 || i >= n ? 0 : Math.min(sorted[i].u - sorted[i - 1].u, 1);
         const margin = cuts.length ? Math.min(...cuts.map(gapAt)) : 0;
 
         const better = !best || bad < best.bad
@@ -1291,6 +1366,26 @@ function fitLineAnyLevels(ls, maxLevels) {
     //
     // Flat from 0.08 to 0.12 rather than a knife edge, fewer bands, and better
     // on both measures.
+    //
+    // 0.18, RE-MEASURED AGAIN 2026-10-07 after the threshold fitters started
+    // choosing their slope for margin. This knob says how wrong a line may be
+    // before its group falls back to a band table, so improving the line fitter
+    // moves it - and it had been set twice against a fitter that no longer
+    // exists.
+    //
+    //   LINE_SLACK   bands   five-fold holdout
+    //      0.12        48         90.21%
+    //      0.15         -         90.22%
+    //      0.18        31         90.31%
+    //      0.20         -         90.26%
+    //      0.25         -         90.18%
+    //
+    // A gentle plateau at 0.18-0.20 rather than a spike, and the whole range
+    // spans 0.13 points - so this knob matters much less than it did, which is
+    // itself worth knowing. 0.18 is taken because the holdout prefers it AND it
+    // carries 17 fewer memorised bands: on the external samples a band table
+    // scores 83-94% where a line scores 96-97%, so moving groups off bands is
+    // the same direction the accuracy moved.
     //
     // The sweep that found 0.08 read 96.8% and a clean re-derive then read
     // 96.3%, which I first put down to the sweep scoring leftover tables. That
@@ -1465,13 +1560,13 @@ function fitLineAnyOrder(ls, maxLevels) {
 //
 // The five-fold holdout said 92% throughout while the samples said 98%. The
 // holdout was right, and dev/README.md says so at length.
-const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.12));
+const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.18));
 
 function fitThreshold(rows, above) {
     let best = null;
 
     for (let bi = Number(process.env.BLO || -500); bi <= Number(process.env.BHI || 500); bi += 1) {
-        const b = bi / 2000;
+        const b = bi / B_STEPS;
         const pts = rows
             .map((r) => ({ u: (r.active - Math.floor(r.active)) - b * Math.floor(r.active), hi: above(r) }))
             .sort((x, y) => x.u - y.u);
@@ -1519,7 +1614,13 @@ function fitThreshold(rows, above) {
         //
         // Flatness is kept as the second tie-break, so a slope only wins on
         // margin if it genuinely has more of it.
-        const gap = at < 0 || at >= n - 1 ? 0 : pts[at + 1].u - pts[at].u;
+        // Capped at 1, the width of the range a fraction can occupy - see the
+        // longer note in the multi-cut fitter. Past that the line has left the
+        // band the readings live in and is separating them by floor instead,
+        // which is what splitByCount is for.
+        const gap = at < 0 || at >= n - 1
+            ? 0
+            : Math.min(pts[at + 1].u - pts[at].u, 1);
 
         const better = !best || bad < best.bad
             || (bad === best.bad && gap > best.gap + 1e-12)
@@ -1569,6 +1670,15 @@ function fitLineOwnSlopes(ls, maxLevels) {
             }
         }
 
+        // ORDERING IS NOT CHOSEN FOR MARGIN, measured and reverted.
+        //
+        // The two thresholds here come from fitThreshold, which maximises its own
+        // margin, so the only thing still decided by first-wins is WHICH order of
+        // the three bonus values to fit. Preferring the ordering whose tighter cut
+        // has more room changed 13 rungs' tables and not one scored reading:
+        // 6998/7728 either way on the fixed-population holdout. Rewriting a
+        // quarter of the table for no measured effect is churn, so the tie stays
+        // with the first ordering listed.
         if (!best || bad < best.bad) {
             best = {
                 bad,

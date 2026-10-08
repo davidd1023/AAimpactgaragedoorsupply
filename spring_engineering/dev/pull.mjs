@@ -149,6 +149,31 @@ if (!sweepFile) {
 
 const cases = JSON.parse(readFileSync(sweepFile, "utf8"));
 
+// AN EVALUATION DRAW MUST NOT LAND ON A NAME THE FITTER WILL INGEST.
+//
+// dev/derive.mjs reads every dev/pulled*.json and skips only those whose NAME
+// matches /(^|-)(eval|rand|biased)/. That has gone wrong before - a uniform
+// sample drawn to SCORE the model was folded into the fit by every apply.sh,
+// and the score climbed from 57.5% to 91.9% while the gain was attributed to a
+// fitter change. The model was being measured on rows it had just trained on.
+//
+// A filename is a weak place to carry something that matters this much, so
+// dev/eval-sample.mjs stamps `eval: true` on every case it generates and this
+// refuses to write those cases anywhere the fitter would read them. The check is
+// on the DATA, which cannot be mistyped.
+const isEvalDraw = cases.some((c) => c.eval === true);
+
+if (isEvalDraw && !/(^|-)(eval|rand|biased)/.test(outFile.split("/").pop())) {
+    console.error(
+        `${sweepFile} is an evaluation draw - its cases carry eval: true - and\n`
+        + `${outFile} is a name dev/derive.mjs would FIT rather than skip.\n\n`
+        + "Evaluation readings folded into the fit make the model look good on\n"
+        + "rows it was just trained on, which has already happened here once.\n\n"
+        + "Use a name containing eval, for example dev/pulled-eval-<what>.json."
+    );
+    process.exit(1);
+}
+
 if (cases.length > MAX_REQUESTS) {
     console.error(`${cases.length} cases exceeds the ${MAX_REQUESTS} cap. Split it.`);
     process.exit(1);

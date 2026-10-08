@@ -1,5 +1,7 @@
 from odoo import api, models
 
+from ..pricing import STEEL_PRICE_PER_LB
+
 # The figures the module ships with. The markup is a percentage; the labour
 # charge is currency, flat per assembly. Both are read by controllers/main.py,
 # which refuses to quote a price if either is missing - so these exist to make
@@ -7,6 +9,9 @@ from odoo import api, models
 DEFAULTS = {
     "spring_engineering.markup_percent": "80",
     "spring_engineering.labor_flat": "100",
+    # The steel rate's default comes from pricing.py so there is one place it is
+    # written down, rather than a second copy here that could drift from it.
+    "spring_engineering.steel_per_lb": str(STEEL_PRICE_PER_LB),
 }
 
 

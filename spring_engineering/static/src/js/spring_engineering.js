@@ -1047,48 +1047,48 @@ const DUPLEX_PAIRS = {
         innerId: 3.75,
         outerId: 6,
         calibration: [
-            { outerWire: 0.2625, innerWire: 0.2253, K: 2022.7, n: 944, sMult: 1.047, twoOffset: 0.25, lineByCount: { 1: { a: 1.00237, b: -0.0105, lo: 0, hi: 1 }, 2: { a: -0.26864, b: 0.0385, a2: 0.74888, b2: 0, lo: 0.25, mid: 0, hi: 1.25 }, 3: { a: 0.76688, b: -0.001, lo: 0.25, hi: 1.25 }, 4: { a: 0.80732, b: -0.002, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.273, innerWire: 0.2253, K: 2255.4, n: 269, sMult: 1.0085, lineByCount: { 2: { a: 0.76121, b: -0.0095, a2: 0.64995, b2: 0.0095, lo: 0, mid: 1.25, hi: 1 }, 3: { a: 0.8286, b: -0.0105, lo: 0.25, hi: 1.25 }, 4: { a: 0.74678, b: -0.0095, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.2625, innerWire: 0.2253, K: 2022.2, n: 1199, sMult: 1.047, twoOffset: 0.25, lineByCount: { 1: { a: 1.00237, b: -0.0105, lo: 0, hi: 1 }, 2: { a: -0.34735, b: 0.0435, a2: 0.76639, b2: -0.0005, lo: 0.25, mid: 0, hi: 1.25 }, 3: { a: 0.76853, b: -0.001, lo: 0.25, hi: 1.25 }, 4: { a: 0.77469, b: -0.001, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.273, innerWire: 0.2253, K: 2255.4, n: 369, sMult: 1.0085, lineByCount: { 2: { a: 0.75739, b: -0.0095, a2: 0.6804, b2: 0.008, lo: 0, mid: 1.25, hi: 1 }, 3: { a: 0.8286, b: -0.0105, lo: 0.25, hi: 1.25 }, 4: { a: 0.74678, b: -0.0095, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.283, innerWire: 0.2253, K: 2452.9, n: 242, sMult: 0.98625, lineByCount: { 1: { a: 0.59381, b: 0.0015, lo: 0, hi: 1 }, 2: { a: 0.73377, b: -0.005, lo: 0, hi: 1 }, 3: { a: 0.72501, b: -0.0045, lo: 0.25, hi: 1.25 }, 4: { a: 0.78506, b: -0.0065, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.283, innerWire: 0.2343, K: 2717.0, n: 36, sMult: 1.0155, byCount: { 2: [{ upTo: 0.58, bonus: 0 }, { upTo: 0.883, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.47926, b: -0.0015, lo: 0.25, hi: 1.25 }, 4: { a: 7.26861, b: -0.25, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.289, innerWire: 0.2343, K: 2879.1, n: 266, sMult: 0.994, lineByCount: { 1: { a: 0.7498, b: -0.0135, lo: 0, hi: 1 }, 2: { a: 0.59472, b: -0.0045, lo: 0, hi: 1 }, 3: { a: 0.60356, b: -0.007, lo: 0.25, hi: 1.25 }, 4: { a: 0.63542, b: -0.0105, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.295, innerWire: 0.2343, K: 2980.9, n: 73, sMult: 0.988, lineByCount: { 2: { a: 0.7009, b: -0.002, lo: 0, hi: 1 }, 3: { a: 0.62879, b: 0.0015, lo: 0.25, hi: 1.25 }, 4: { a: 0.97101, b: -0.0225, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.295, innerWire: 0.2437, K: 3318.5, n: 160, sMult: 1.0085, byCount: { 2: [{ upTo: 0.361, bonus: 0 }, { upTo: 0.378, bonus: 1.25 }, { upTo: 0.443, bonus: 0 }, { upTo: 0.475, bonus: 1.25 }, { upTo: 0.484, bonus: 0 }, { upTo: 0.736, bonus: 1.25 }, { upTo: 0.748, bonus: 1 }, { upTo: 0.777, bonus: 1.25 }, { upTo: 0.795, bonus: 1 }, { upTo: 0.801, bonus: 1.25 }, { upTo: 0.856, bonus: 1 }, { upTo: 0.86, bonus: 1.25 }, { upTo: 0.867, bonus: 1 }, { upTo: 0.874, bonus: 1.25 }, { upTo: 0.909, bonus: 1 }, { upTo: 0.923, bonus: -1 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.68688, b: -0.012, lo: 0.25, hi: 1.25 }, 4: { a: 0.67491, b: -0.01, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3065, innerWire: 0.2437, K: 3617.5, n: 144, sMult: 0.9865, lineByCount: { 2: { a: 0.4994, b: 0.0025, lo: 0, hi: 1 }, 3: { a: 0.51043, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.41307, b: 0.0065, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.283, innerWire: 0.2343, K: 2717.0, n: 47, sMult: 1.0155, byCount: { 2: [{ upTo: 0.58, bonus: 0 }, { upTo: 0.883, bonus: 1.25 }, { upTo: 1, bonus: 1 }] }, lineByCount: { 3: { a: 0.47926, b: -0.0015, lo: 0.25, hi: 1.25 }, 4: { a: 0.89295, b: -0.011, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.289, innerWire: 0.2343, K: 2879.1, n: 292, sMult: 0.994, lineByCount: { 1: { a: 0.7498, b: -0.0135, lo: 0, hi: 1 }, 2: { a: 0.67966, b: -0.0085, lo: 0, hi: 1 }, 3: { a: 0.60356, b: -0.007, lo: 0.25, hi: 1.25 }, 4: { a: 0.63542, b: -0.0105, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.295, innerWire: 0.2343, K: 2980.9, n: 121, sMult: 0.988, lineByCount: { 2: { a: 0.7009, b: -0.002, lo: 0, hi: 1 }, 3: { a: 0.62879, b: 0.0015, lo: 0.25, hi: 1.25 }, 4: { a: 0.65695, b: 0.0005, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.295, innerWire: 0.2437, K: 3318.5, n: 160, sMult: 1.0085, lineByCount: { 3: { a: 0.68688, b: -0.012, lo: 0.25, hi: 1.25 }, 4: { a: 0.67491, b: -0.01, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 14, below: { a: 0.08414, b: 0, cuts: [0.64691], levels: [-1, 0, 1] }, above: { a: 0.64695, b: -0.0095, a2: 0.58354, b2: 0.0095, lo: 0, mid: 1.25, hi: 1 } } } },
+            { outerWire: 0.3065, innerWire: 0.2437, K: 3617.5, n: 322, sMult: 0.9865, lineByCount: { 2: { a: 0.4994, b: 0.0025, lo: 0, hi: 1 }, 3: { a: 0.64832, b: -0.004, lo: 0.25, hi: 1.25 }, 4: { a: 0.59911, b: -0.002, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.3065, innerWire: 0.25, K: 3902.4, n: 22, sMult: 1.01375, twoOffset: 0.25, byCount: { 2: [{ upTo: 1, bonus: 1.25 }], 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 3: { a: 0.72235, b: -0.006, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.3125, innerWire: 0.25, K: 4102.8, n: 99, sMult: 1.0015, lineByCount: { 3: { a: 0.61674, b: 0.0065, lo: 0.25, hi: 1.25 }, 4: { a: -2.77572, b: 0.25, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3125, innerWire: 0.2625, K: 4562.2, n: 14, sMult: 1.02875, twoOffset: 0.25, byCount: { 2: [{ upTo: 0.058, bonus: 0 }, { upTo: 0.203, bonus: 0.25 }, { upTo: 0.64, bonus: 0 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 3: { a: -2.85594, b: 0.25, lo: 0.25, hi: 1.25 }, 4: { a: 13.2959, b: -0.25, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3125, innerWire: 0.2625, K: 4562.2, n: 14, sMult: 1.02875, twoOffset: 0.25, byCount: { 2: [{ upTo: 0.058, bonus: 0 }, { upTo: 0.203, bonus: 0.25 }, { upTo: 0.64, bonus: 0 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 3: { a: -2.85594, b: 0.25, lo: 0.25, hi: 1.25 }, 4: { a: 1.32214, b: -0.0175, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.3195, innerWire: 0.2625, K: 4863.2, n: 96, sMult: 1.0105, lineByCount: { 2: { a: 0.47923, b: 0, a2: 0.60456, b2: 0.007, lo: 0, mid: 1.25, hi: 1 }, 3: { a: 0.52892, b: -0.0025, lo: 0.25, hi: 1.25 }, 4: { a: 0.58606, b: -0.006, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.331, innerWire: 0.2625, K: 5221.6, n: 128, sMult: 0.98675, lineByCount: { 3: { a: 0.51046, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.50814, b: 0, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.331, innerWire: 0.273, K: 5842.8, n: 124, sMult: 1.01675, lineByCount: { 3: { a: 0.52457, b: -0.001, lo: 0.25, hi: 1.25 }, 4: { a: 0.47126, b: -0.0005, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 31, below: { a: 0.4989, b: 0.0005, a2: 0.51947, b2: 0.0155, lo: 0, mid: 1.25, hi: 1 }, above: { a: -0.26926, b: 0.011, cuts: [0.01964], levels: [0.25, 0, 1.25] } } } },
+            { outerWire: 0.331, innerWire: 0.273, K: 5842.8, n: 124, sMult: 1.01675, lineByCount: { 3: { a: 0.52457, b: -0.001, lo: 0.25, hi: 1.25 }, 4: { a: 0.47126, b: -0.0005, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 31, below: { a: 0.4989, b: 0.0005, a2: 0.51947, b2: 0.0155, lo: 0, mid: 1.25, hi: 1 }, above: { a: -0.26926, b: 0.011, a2: 0.46181, b2: -0.0005, lo: 0.25, mid: 0, hi: 1.25 } } } },
             { outerWire: 0.3437, innerWire: 0.273, K: 6333.9, n: 228, sMult: 0.99525, lineByCount: { 1: { a: 0.55128, b: 0.0025, lo: 0, hi: 1 }, 2: { a: 0.44272, b: 0.0075, lo: 0, hi: 1 }, 3: { a: 0.46176, b: 0.0065, lo: 0.25, hi: 1.25 }, 4: { a: 0.06724, b: 0.0165, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3437, innerWire: 0.283, K: 7005.7, n: 143, sMult: 1.01725, lineByCount: { 1: { a: 0.46366, b: 0.001, lo: 0, hi: 1 }, 3: { a: 0.63092, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.46263, b: 0.0005, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 24, below: { a: -0.09092, b: 0.027, cuts: [0.26148], levels: [0, 1.25, 1] }, above: { a: 0.46063, b: 0.0005, lo: 0, hi: 1.25 } } } },
+            { outerWire: 0.3437, innerWire: 0.283, K: 7005.7, n: 143, sMult: 1.01725, lineByCount: { 1: { a: 0.46366, b: 0.001, lo: 0, hi: 1 }, 3: { a: 0.63092, b: 0, lo: 0.25, hi: 1.25 }, 4: { a: 0.46263, b: 0.0005, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 24, below: { a: 0.26336, b: 0.009, a2: 0.23507, b2: 0.0285, lo: 0, mid: 1.25, hi: 1 }, above: { a: 0.46063, b: 0.0005, lo: 0, hi: 1.25 } } } },
             { outerWire: 0.3625, innerWire: 0.283, K: 7561.9, n: 309, sMult: 0.981, lineByCount: { 1: { a: 0.38015, b: 0.005, lo: 0, hi: 1 }, 2: { a: 0.39063, b: 0.005, lo: 0, hi: 1 }, 3: { a: 0.40911, b: 0.005, lo: 0.25, hi: 1.25 }, 4: { a: 0.15376, b: 0.008, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.3625, innerWire: 0.289, K: 8386.5, n: 247, sMult: 0.99475, lineByCount: { 1: { a: 0.37143, b: 0.004, lo: 0, hi: 1 }, 2: { a: 0.37617, b: 0.0035, lo: 0, hi: 1 }, 3: { a: 0.31434, b: 0.0045, lo: 0.25, hi: 1.25 }, 4: { a: 0.18567, b: 0.007, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3625, innerWire: 0.295, K: 8881.9, n: 77, sMult: 1.009, lineByCount: { 1: { a: 0.30118, b: 0.0055, lo: 0, hi: 1 }, 3: { a: 0.38513, b: 0.002, lo: 0.25, hi: 1.25 }, 4: { a: -8.59929, b: 0.25, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3625, innerWire: 0.295, K: 8881.9, n: 77, sMult: 1.009, lineByCount: { 1: { a: 0.30118, b: 0.0055, lo: 0, hi: 1 }, 3: { a: 0.38513, b: 0.002, lo: 0.25, hi: 1.25 }, 4: { a: -0.82479, b: 0.037, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.375, innerWire: 0.295, K: 9281.2, n: 187, sMult: 0.987, lineByCount: { 1: { a: 0.3246, b: 0.0055, lo: 0, hi: 1 }, 2: { a: 0.348, b: 0.005, lo: 0, hi: 1 }, 3: { a: 0.28402, b: 0.007, lo: 0.25, hi: 1.25 }, 4: { a: 0.23502, b: 0.005, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.375, innerWire: 0.3065, K: 10594.4, n: 175, sMult: 1.017, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.30405, b: 0.007, lo: 0, hi: 1 }, 3: { a: 0.37019, b: 0.0055, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 34, below: { a: 0.44385, b: 0, cuts: [0.74202], levels: [0, 1.25, 1] }, above: { a: -0.08666, b: 0.004, a2: 0.71141, b2: -0.0015, lo: 0.25, mid: 0, hi: 1.25 } } } },
-            { outerWire: 0.3938, innerWire: 0.3065, K: 11208.9, n: 143, sMult: 0.98025, lineByCount: { 1: { a: 0.20905, b: 0.0075, lo: 0, hi: 1 }, 2: { a: 0.14171, b: 0.011, lo: 0, hi: 1 }, 3: { a: 0.25882, b: 0.0065, lo: 0.25, hi: 1.25 }, 4: { a: -11.2305, b: 0.25, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3938, innerWire: 0.3125, K: 12334.2, n: 137, sMult: 0.99375, lineByCount: { 1: { a: 0.20398, b: 0.007, lo: 0, hi: 1 }, 2: { a: 0.04922, b: 0.0135, lo: 0, hi: 1 }, 3: { a: 0.40627, b: 0.0025, lo: 0.25, hi: 1.25 }, 4: { a: -15.3608, b: 0.25, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.3938, innerWire: 0.3195, K: 13265.8, n: 61, sMult: 1.01025, lineByCount: { 1: { a: 0.20586, b: 0.007, lo: 0, hi: 1 }, 2: { a: 0.35811, b: 0.0015, a2: 0.32667, b2: 0.01, lo: 0, mid: 1.25, hi: 1 }, 3: { a: 0.18076, b: 0.005, lo: 0.25, hi: 1.25 }, 4: { a: -10.1894, b: 0.25, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.375, innerWire: 0.3065, K: 10594.4, n: 175, sMult: 1.017, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: 0.30405, b: 0.007, lo: 0, hi: 1 }, 3: { a: 0.37019, b: 0.0055, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 30, below: { a: 0.44385, b: 0, cuts: [0.74202], levels: [0, 1.25, 1] }, above: { a: -0.21298, b: 0.007, a2: 0.28861, b2: 0.0075, lo: 0.25, mid: 0, hi: 1.25 } } } },
+            { outerWire: 0.3938, innerWire: 0.3065, K: 11208.9, n: 143, sMult: 0.98025, lineByCount: { 1: { a: 0.20905, b: 0.0075, lo: 0, hi: 1 }, 2: { a: 0.14171, b: 0.011, lo: 0, hi: 1 }, 3: { a: 0.25882, b: 0.0065, lo: 0.25, hi: 1.25 }, 4: { a: -0.57095, b: 0.0215, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3938, innerWire: 0.3125, K: 12334.2, n: 137, sMult: 0.99375, lineByCount: { 1: { a: 0.20398, b: 0.007, lo: 0, hi: 1 }, 2: { a: 0.04922, b: 0.0135, lo: 0, hi: 1 }, 3: { a: 0.40627, b: 0.0025, lo: 0.25, hi: 1.25 }, 4: { a: -0.57685, b: 0.019, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.3938, innerWire: 0.3195, K: 13265.8, n: 61, sMult: 1.01025, lineByCount: { 1: { a: 0.20586, b: 0.007, lo: 0, hi: 1 }, 2: { a: 0.35811, b: 0.0015, a2: 0.32667, b2: 0.01, lo: 0, mid: 1.25, hi: 1 }, 3: { a: 0.18076, b: 0.005, lo: 0.25, hi: 1.25 }, 4: { a: -3.81438, b: 0.1, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.4062, innerWire: 0.3195, K: 13744.5, n: 61, sMult: 0.988, lineByCount: { 1: { a: 0.22905, b: 0.0055, lo: 0, hi: 1 }, 2: { a: 0.27591, b: 0.0065, lo: 0, hi: 1 }, 3: { a: 0.07626, b: 0.0105, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.4062, innerWire: 0.331, K: 15603.4, n: 84, sMult: 1.01175, lineByCount: { 1: { a: 0.12885, b: 0.0055, lo: 0, hi: 1 }, 3: { a: 0.05712, b: 0.0065, lo: 0.25, hi: 1.25 }, 4: { a: -0.11176, b: 0.0085, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 37, below: { a: 0.32363, b: -0.0025, cuts: [0.54883], levels: [0, 1.25, 1] }, above: { a: 0.23053, b: 0.0045, lo: 0, hi: 1.25 } } } },
+            { outerWire: 0.4062, innerWire: 0.331, K: 15603.4, n: 84, sMult: 1.01175, lineByCount: { 1: { a: 0.12885, b: 0.0055, lo: 0, hi: 1 }, 3: { a: 0.05712, b: 0.0065, lo: 0.25, hi: 1.25 }, 4: { a: -0.11176, b: 0.0085, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 26, below: { a: -0.19204, b: 0.019, a2: 0.49133, b2: 0, lo: 0, mid: 1.25, hi: 1 }, above: { a: -0.00797, b: 0.009, cuts: [-0.00797], levels: [0, 1, 1.25] } } } },
             { outerWire: 0.4218, innerWire: 0.331, K: 16369.3, n: 94, sMult: 0.98625, lineByCount: { 1: { a: 0.13285, b: 0.0075, lo: 0, hi: 1 }, 3: { a: -0.00322, b: 0.0085, lo: 0.25, hi: 1.25 }, 4: { a: -0.67402, b: 0.015, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.4218, innerWire: 0.3437, K: 18774.0, n: 93, sMult: 1.0135, lineByCount: { 1: { a: 0.13473, b: 0.006, lo: 0, hi: 1 }, 3: { a: 0.12643, b: 0.0055, lo: 0.25, hi: 1.25 }, 4: { a: 11.5817, b: -0.25, lo: 0.25, hi: 1.25 } }, splitByCount: { 2: { from: 64, below: { a: 0.04144, b: 0.0075, cuts: [0.3741], levels: [0, 1.25, 1] }, above: { a: -0.38859, b: 0.013, lo: 0, hi: 1.25 } } } },
+            { outerWire: 0.4218, innerWire: 0.3437, K: 18774.0, n: 208, sMult: 1.0135, lineByCount: { 1: { a: 0.13473, b: 0.006, lo: 0, hi: 1 }, 2: { a: 0.08804, b: 0.0065, lo: 0, hi: 1.25 }, 3: { a: 0.12643, b: 0.0055, lo: 0.25, hi: 1.25 }, 4: { a: 1.37367, b: -0.018, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.4305, innerWire: 0.3437, K: 19691.7, n: 103, sMult: 1.00375, byCount: { 4: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.0087, b: 0.014, lo: 0, hi: 1 }, 2: { a: 0.36692, b: 0.0025, lo: 0, hi: 1 }, 3: { a: -0.92718, b: 0.012, lo: -0.75, hi: 0.25 } } },
-            { outerWire: 0.4305, innerWire: 0.3625, K: 22248.9, n: 47, sMult: 1.0405, twoOffset: 0.25, byCount: { 4: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: -0.13123, b: 0.013, lo: 0, hi: 1 }, 2: { a: 0.25588, b: 0, lo: 0.25, hi: 1.25 }, 3: { a: -18.5813, b: 0.25, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4305, innerWire: 0.3625, K: 22248.9, n: 47, sMult: 1.0405, twoOffset: 0.25, byCount: { 4: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: -0.13123, b: 0.013, lo: 0, hi: 1 }, 2: { a: 0.25588, b: 0, lo: 0.25, hi: 1.25 }, 3: { a: -4.31401, b: 0.0635, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.4375, innerWire: 0.3625, K: 23276.7, n: 108, sMult: 1.029, twoOffset: 0.25, byCount: { 3: [{ upTo: 1, bonus: 0.25 }], 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.0302, b: 0.0105, lo: 0, hi: 1 }, 2: { a: -0.29777, b: 0.0125, a2: -0.03146, b2: 0.0105, lo: 0.25, mid: 0, hi: 1.25 } } },
             { outerWire: 0.4531, innerWire: 0.3625, K: 25580.0, n: 114, sMult: 1.004, byCount: { 4: [{ upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: 0.01223, b: 0.0095, lo: 0, hi: 1 }, 2: { a: -0.04558, b: 0.011, lo: 0, hi: 1 }, 3: { a: -0.22162, b: 0.013, lo: 0.25, hi: 1.25 } } },
-            { outerWire: 0.4531, innerWire: 0.375, K: 27589.4, n: 17, sMult: 1.03275, twoOffset: 0.25, lineByCount: { 2: { a: -11.0915, b: 0.25, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.4531, innerWire: 0.375, K: 27589.4, n: 17, sMult: 1.03275, twoOffset: 0.25, lineByCount: { 2: { a: -2.67504, b: 0.069, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.4615, innerWire: 0.375, K: 29026.7, n: 102, sMult: 1.01825, twoOffset: 0.25, byCount: { 2: [{ upTo: 0.544, bonus: 0.25 }, { upTo: 0.802, bonus: 1.25 }, { upTo: 1, bonus: 0 }], 3: [{ upTo: 0.217, bonus: 0.25 }, { upTo: 0.48, bonus: -0.75 }, { upTo: 0.78, bonus: 0.25 }, { upTo: 1, bonus: 1.25 }] }, lineByCount: { 1: { a: -0.13448, b: 0.0145, lo: 0, hi: 1 } } },
-            { outerWire: 0.4687, innerWire: 0.375, K: 30214.9, n: 61, sMult: 1.0055, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.1827, b: 0.014, lo: 0, hi: 1 }, 2: { a: -24.1592, b: 0.25, lo: -1, hi: 0 }, 3: { a: -22.4459, b: 0.25, lo: -0.75, hi: 0.25 } } },
+            { outerWire: 0.4687, innerWire: 0.375, K: 30214.9, n: 61, sMult: 1.0055, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.1827, b: 0.014, lo: 0, hi: 1 }, 2: { a: -2.81915, b: 0.03, lo: -1, hi: 0 }, 3: { a: -1.97093, b: 0.0225, lo: -0.75, hi: 0.25 } } },
             { outerWire: 0.4687, innerWire: 0.3938, K: 33619.3, n: 10 },
-            { outerWire: 0.49, innerWire: 0.3938, K: 38052.1, n: 168, sMult: 1.00875, lineByCount: { 1: { a: -0.20822, b: 0.0125, lo: 0, hi: 1 }, 2: { a: -0.15427, b: 0.011, a2: -0.04196, b2: 0.01, lo: 0, mid: 1.25, hi: 1 }, 3: { a: -19.2413, b: 0.25, lo: 0.25, hi: 1.25 }, 4: { a: -0.74553, b: 0.019, lo: 0.25, hi: 1.25 } } },
+            { outerWire: 0.49, innerWire: 0.3938, K: 38052.1, n: 168, sMult: 1.00875, lineByCount: { 1: { a: -0.20822, b: 0.0125, lo: 0, hi: 1 }, 2: { a: -0.15427, b: 0.011, a2: -0.04196, b2: 0.01, lo: 0, mid: 1.25, hi: 1 }, 3: { a: -5.01084, b: 0.071, lo: 0.25, hi: 1.25 }, 4: { a: -0.74553, b: 0.019, lo: 0.25, hi: 1.25 } } },
             { outerWire: 0.5, innerWire: 0.3938, K: 38403.3, n: 62, sMult: 0.99575, byCount: { 3: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.19169, b: 0.0135, lo: 0, hi: 1 }, 2: { a: 0.39762, b: 0, lo: 0, hi: 1 } } },
-            { outerWire: 0.5, innerWire: 0.4062, K: 42982.9, n: 89, sMult: 1.01925, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.47962, b: 0.019, lo: 0, hi: 1 } }, splitByCount: { 2: { from: 46, below: { a: 0.40425, b: 0, cuts: [0.79431], levels: [0, 1.25, 1] }, above: { a: -20.3744, b: 0.25, a2: 0.04793, b2: 0.008, lo: 0.25, mid: 0, hi: 1.25 } } } },
+            { outerWire: 0.5, innerWire: 0.4062, K: 42982.9, n: 89, sMult: 1.01925, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.47962, b: 0.019, lo: 0, hi: 1 } }, splitByCount: { 2: { from: 47, below: { a: 0.40425, b: 0, cuts: [0.79431], levels: [0, 1.25, 1] }, above: { a: -2.8812, b: 0.0405, a2: 0.04793, b2: 0.008, lo: 0.25, mid: 0, hi: 1.25 } } } },
             { outerWire: 0.5312, innerWire: 0.4062, K: 44705.9, n: 38, sMult: 0.9745, byCount: { 4: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -0.68208, b: 0.0205, lo: 0, hi: 1 } } },
             { outerWire: 0.5312, innerWire: 0.4218, K: 53777.7, n: 56, sMult: 0.99725, lineByCount: { 1: { a: -0.77046, b: 0.0145, lo: 0, hi: 1 }, 2: { a: -0.43756, b: 0.011, lo: 0, hi: 1 } } },
-            { outerWire: 0.5312, innerWire: 0.4305, K: 57529.5, n: 54, sMult: 1.01275, byCount: { 3: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -21.1723, b: 0.25, lo: 0, hi: 1 }, 2: { a: -0.82055, b: 0.0185, a2: 0.49366, b2: 0, lo: 0, mid: 1.25, hi: 1 } } },
+            { outerWire: 0.5312, innerWire: 0.4305, K: 57529.5, n: 54, sMult: 1.01275, byCount: { 3: [{ upTo: 1, bonus: 0.25 }] }, lineByCount: { 1: { a: -1.02733, b: 0.013, lo: 0, hi: 1 }, 2: { a: -0.82055, b: 0.0185, a2: 0.49366, b2: 0, lo: 0, mid: 1.25, hi: 1 } } },
             { outerWire: 0.5625, innerWire: 0.4305, K: 59149.7, n: 11, byCount: { 1: [{ upTo: 1, bonus: -1 }] }, lineByCount: { 2: { a: 4.08033, b: -0.0575, lo: -1, hi: 0 } } },
             { outerWire: 0.5625, innerWire: 0.4375, K: 64260.8, n: 6, byCount: { 2: [{ upTo: 1, bonus: -1 }] } },
             { outerWire: 0.5625, innerWire: 0.4531, K: 75203.6, n: 24, byCount: { 1: [{ upTo: 1, bonus: 1 }], 3: [{ upTo: 1, bonus: 1.25 }] } },
@@ -1121,6 +1121,19 @@ const DUPLEX_PAIRS = {
 // the 2 5/8" inside 5 1/4" numbers for both, spring IDs included. Aliased
 // rather than given entries of their own, so there is one place to correct
 // when real figures turn up.
+// NOT REACHABLE, AND KNOWN TO BE WRONG. Kept only because the regression suite
+// and dev/price-parity.sh still drive these code paths by setting state directly.
+//
+// The dropdown offers `3 3/4" inside 6"` alone - see the note in
+// static/src/xml/spring_engineering.xml and CLAUDE.md. These two aliases asserted
+// that a Raynor 3 1/2" inside 5 1/2" is engineered as a 2 5/8" inside 5 1/4", and
+// the reference says otherwise: on the same door it returns 0.25/0.207 for the
+// Raynor pair against 0.2625/0.1875 for the pair it was aliased to, at 15" rather
+// than the 17" this model produced. Every one of the 8,464 readings behind the
+// calibration is the one pair, so nothing here was ever fitted for the others.
+//
+// DO NOT RE-OFFER A PAIR BY DELETING THIS COMMENT. Calibrating one took thousands
+// of reference readings.
 const DUPLEX_ALIASES = {
     '3 1/2" inside 5 1/2" (Raynor)': '2 5/8" inside 5 1/4"',
     '3 3/8" inside 5 7/8" (Overhead)': '2 5/8" inside 5 1/4"',
@@ -1438,6 +1451,37 @@ function duplexActiveLength(pair, step, springs, tippt) {
     // length sits on a grid and a tiny TIPPT difference flips the snap.
     const shown = Math.round(tippt * 10) / 10;
 
+    // END COILS BELONG HERE AND THE COUPLING IS NOT SOLVED, so they are left
+    // out. Measured, reverted, and worth the note because the physics is not in
+    // doubt - only how the two springs share the shaft.
+    //
+    // A spring's rate uses its ACTIVE coils; the coils seated in the cone do not
+    // flex. The catalogue states the rest itself: "COIL NUMBER x WIRE SIZE =
+    // SPRING LENGTH", and its worked example - a .250 wire, 2" ID, 32" spring at
+    // "IPPT is 41.5 per spring" - implies 4.96 dead coils, i.e. 5. Our formula
+    // with 5 reproduces that at 41.51, and reproduces six rows of the published
+    // 2" ID rate table to better than 0.17%.
+    //
+    // The dead-coil count by ID is settled too, fitted from 479 single-spring
+    // readings: 5 at 1.75", 2.625", 3.75" and 4.375"; 3 at 5.25" and 6". Which is
+    // exactly LARGE_ID_THRESHOLD and the two END_COILS constants, and the Single
+    // path has always applied them - it predicts length to 0.073".
+    //
+    // SO WHY NOT HERE. Two nested springs turn together, so their rates should
+    // add, each over its own active length, with the wound lengths an inch apart.
+    // Written that way the predicted TIPPT is unbiased - +0.69% against -3.39%
+    // without the end coils - but its SPREAD does not improve, 2.78% against
+    // 2.52%, which says the rates do not simply add. Shipped on the strength of
+    // the holdout (+26 readings) and then withdrawn: in sample it cost 121
+    // readings, 82 fixed against 203 broken, concentrated on the highest-traffic
+    // rung, and the never-tuned draws moved 2.8 points in opposite directions for
+    // a paired net of -2 at p = 0.774. Re-tuning LINE_SLACK does not recover it,
+    // so the band knobs were not the confound.
+    //
+    // sMult absorbs the difference instead, which is why it is 1.18% off 1.000 on
+    // average and correlates with the outer spring's share of the divider sum.
+    // Whatever the real coupling is, finding it is the one lead left that could
+    // move accuracy by more than noise - see dev/README.md.
     return (
         (springs *
             stiffness *
@@ -2036,29 +2080,17 @@ const CYCLE_MIN = 10000;
 //           assembly. It is taken from the weights the results already show,
 //           which are themselves taken from the quarter-inch length that gets
 //           built, so the price always agrees with the figures above it.
-// SUPPLIER COST, not the price. The markup lives in a system parameter the
-// server owns and the page is never told - what it receives from
-// /spring-calculator/rates is these same figures with the markup already in
-// them. So this file remains the one place the COSTS are written down (the
-// controller parses them from here), and nothing here knows the margin.
-const STEEL_PRICE_PER_LB = 1.46;
-
-// Keyed by inside diameter as a NUMBER, so the Duplex path can look up its
-// pair's diameters directly - it knows them as numbers, not as the dropdown's
-// strings.
+// THE COSTS ARE NOT IN THIS FILE, AND THAT IS THE POINT.
 //
-// 6" is not a size of its own here: it takes the 5 1/4" price. The three
-// Single diameters are the three that were quoted to us, and 6" appears only
-// as the outer half of a Duplex pair.
+// `const STEEL_PRICE_PER_LB = 1.46` and the cone price table used to sit here,
+// read by the controller out of this source so that one file held the figures.
+// Everything under static/ is served to anybody who opens the page, so they were
+// in the public bundle - and publishing the costs puts the markup one division
+// away from any quote, which undoes the whole reason the percentage is kept off
+// the wire.
 //
-// UNINSTALLED prices, quoted 2026-10-05. They replace an earlier set (6.04,
-// 12.00, 20.00) which was a little higher at every size.
-const CONE_PRICES = {
-    2.625: 4.99,
-    3.75: 11.55,
-    5.25: 19.43,
-    6: 19.43,
-};
+// They are in pricing.py now. This file never used them: prices come from
+// /spring-calculator/rates, already marked up. See normaliseRates below.
 
 // The rates as the server sends them, with the cone keys turned into NUMBERS.
 //
@@ -2078,7 +2110,13 @@ function normaliseRates(rates) {
         }
     }
 
-    return { cones, perLb: Number(rates.perLb), labor: asNumber(rates.labor) };
+    return {
+        cones,
+        perLb: asNumber(rates.perLb),
+        labor: asNumber(rates.labor),
+        fillerPerFoot: asNumber(rates.fillerPerFoot),
+        fillerSpringId: Number(rates.fillerSpringId),
+    };
 }
 
 // A number, or NaN if there is not one there - THE SAME TRAP AS THE SERVER'S,
@@ -3335,7 +3373,17 @@ get assemblyWeight() {
 // string key, and the server writes 6 the way Python does, as "6.0", so the 6"
 // cone really was quoted free until the keys became numbers.
 get priceAvailable() {
-    if (!this.rates || !this.rates.perLb || !Number.isFinite(this.rates.labor)) {
+    // EVERY RATE IS TESTED FOR BEING A NUMBER, not for being truthy.
+    //
+    // Zero is a legitimate setting for all three of these - no labour charge, no
+    // filler charge, and steel given away - and `!0` is true, so a truthiness
+    // test turns a deliberate zero into "call us". That was already fixed for
+    // the labour charge and then reintroduced for the steel rate when it became
+    // a setting; setting it to 0 made the page refuse to quote at all.
+    if (!this.rates
+        || !Number.isFinite(this.rates.perLb)
+        || !Number.isFinite(this.rates.labor)
+        || !Number.isFinite(this.rates.fillerPerFoot)) {
         return false;
     }
 
@@ -3375,6 +3423,54 @@ get priceSteel() {
 // decides both of those and sends the finished figure. The page shows one total
 // and the cart charges the same total; there is no labour row, which is the
 // whole point of it being a setting rather than a line item.
+// PLASTIC FILLER, which only the 5 1/4" spring takes.
+//
+// One per spring, cut to that spring's own length - a 4 ft spring takes 4 ft of
+// filler - so what is bought is FEET of material and the rate is per foot. The
+// two prices quoted, $19.44 for 6 ft and $22.68 for 7 ft, are both exactly
+// $3.24 a foot, so one rate covers them.
+//
+// Which ID takes one is the server's to say, not this file's: it arrives with
+// the rates. That keeps the rule in the same place as the prices it applies to.
+get priceFillerFeet() {
+    if (!this.priceAvailable) {
+        return 0;
+    }
+
+    const springs = Number(this.state.springs) || 0;
+    const takesOne = (id) => Number(id) === this.rates.fillerSpringId;
+
+    // EVERY SPRING THAT TAKES ONE, which for Duplex means checking both halves
+    // of the pair rather than the assembly. The server prices the filler per
+    // spring whose ID calls for it, so this has to agree exactly - when it only
+    // looked at Single, dev/price-parity.sh caught the page quoting 469.34
+    // against a cart charging 497.41 on a pair with a 5 1/4" outer.
+    let inches = 0;
+
+    if (this.isDuplex) {
+        const pair = this.duplexPair;
+
+        if (!pair) {
+            return 0;
+        }
+
+        if (takesOne(pair.outerId)) inches += this.duplexOuterLength;
+        if (takesOne(pair.innerId)) inches += this.duplexInnerLength;
+    } else if (takesOne(this.springIdNumber)) {
+        inches = this.springLength;
+    }
+
+    return Math.round(springs * (inches / 12) * 10000) / 10000;
+}
+
+get priceFiller() {
+    if (!this.priceAvailable) {
+        return 0;
+    }
+
+    return Math.round(this.priceFillerFeet * this.rates.fillerPerFoot * 100) / 100;
+}
+
 get priceTotal() {
     // Guarded like the two parts above, and not only for tidiness: this reads
     // the labour charge straight off the rates, so without the guard a page
@@ -3383,7 +3479,9 @@ get priceTotal() {
         return 0;
     }
 
-    return Math.round((this.priceCones + this.priceSteel + this.rates.labor) * 100) / 100;
+    return Math.round(
+        (this.priceCones + this.priceSteel + this.priceFiller + this.rates.labor) * 100
+    ) / 100;
 }
 
 money(value) {
