@@ -1,5 +1,6 @@
 /** @odoo-module ignore **/
-/* AA Dealer Quick Order - plain JS, no framework. Runs only on /dealer/order. */
+/* AA Dealer Quick Order - plain JS, no framework. Runs only on /dealer/order.
+ * Track / lift / drum / panel rules follow the AA Calculator. */
 (function () {
     "use strict";
 
@@ -32,21 +33,40 @@
         return node;
     }
 
-    // Door height (inches) -> "N Panels" value; weight + height -> drum.
-    function panelsFor(heightIn) {
-        if (!heightIn) return null;
-        if (heightIn <= 99) return 4; // 8'3"
-        if (heightIn <= 123) return 5; // 10'3"
-        if (heightIn <= 147) return 6; // 12'3"
-        if (heightIn <= 171) return 7; // 14'3"
+    // ── AA Calculator rules ────────────────────────────────────────────────
+    const TRACK_TYPES = [
+        ["3-15R", '3" 15R'],
+        ["2-12R", '2" 12R'],
+        ["3-LHR", '3" LHR'],
+        ["2-LHR", '2" LHR'],
+    ];
+    const LIFT_TYPES = [
+        ["standard", "Standard"],
+        ["highlift", "High Lift"],
+        ["lhr", "Low Headroom"],
+    ];
+    const STD_DRUMS = ["D400-96", "D400-144", "D525-216"];
+    const HL_DRUMS = ["D525-54", "D575-120", "D800-120"];
+
+    // Door height in inches -> number of sections (AA Calculator getPanels).
+    function panelsFor(h) {
+        if (!h) return null;
+        if (h <= 99.625) return 4;
+        if (h <= 123.625) return 5;
+        if (h <= 147.625) return 6;
+        if (h <= 171.625) return 7;
         return 8;
     }
-    const DRUMS = ["D400-96", "D400-144", "D525-216"];
-    function drumFor(weight, heightIn) {
-        if (!weight && !heightIn) return null;
-        if ((weight || 0) <= 530 && (heightIn || 0) <= 96) return 0;
-        if ((weight || 0) <= 750 && (heightIn || 0) <= 144) return 1;
-        return 2;
+    // Drum the AA Calculator picks for this weight / lift.
+    function drumFor(lift, weight, highLift) {
+        if (lift === "highlift") {
+            if (highLift <= 54 && weight <= 1000) return "D525-54";
+            if (weight <= 1000) return "D575-120";
+            return "D800-120";
+        }
+        if (weight <= 530) return "D400-96";
+        if (weight <= 750) return "D400-144";
+        return "D525-216";
     }
 
     function init(root) {
@@ -82,11 +102,21 @@
             const optsBox = el("div", { class: "aa-opts" });
             const tag = el("input", { type: "text", class: "form-control", maxlength: "80", placeholder: "e.g. Smith - 16x8" });
             const wFt = el("input", { type: "number", min: "0", class: "form-control", placeholder: "ft" });
-            const wIn = el("input", { type: "number", min: "0", max: "11", class: "form-control", placeholder: "in" });
+            const wIn = el("input", { type: "number", min: "0", max: "11", step: "any", class: "form-control", placeholder: "in" });
             const hFt = el("input", { type: "number", min: "0", class: "form-control", placeholder: "ft" });
-            const hIn = el("input", { type: "number", min: "0", max: "11", class: "form-control", placeholder: "in" });
+            const hIn = el("input", { type: "number", min: "0", max: "11", step: "any", class: "form-control", placeholder: "in" });
             const weight = el("input", { type: "number", min: "0", class: "form-control", placeholder: "lb" });
             const qty = el("input", { type: "number", min: "1", value: "1", class: "form-control" });
+            const trackSel = el("select", { class: "form-select form-select-sm" },
+                [el("option", { value: "", text: "Select..." })].concat(TRACK_TYPES.map(([v, t]) => el("option", { value: v, text: t }))));
+            const liftSel = el("select", { class: "form-select form-select-sm" },
+                LIFT_TYPES.map(([v, t]) => el("option", { value: v, text: t })));
+            const hlInput = el("input", { type: "number", min: "1", step: "any", class: "form-control form-control-sm", placeholder: "e.g. 24" });
+            const hlCol = el("div", { class: "col-6 col-md-3 d-none" }, [
+                el("label", { class: "form-label small mb-1", text: "High lift (in)" }), hlInput,
+            ]);
+            const drumSel = el("select", { class: "form-select form-select-sm" });
+            const drumHint = el("div", { class: "small text-muted mt-1" });
             const priceEl = el("div", { class: "aa-price", text: "-" });
             line.numEl = el("span", { class: "aa-line-num" });
 
@@ -125,7 +155,10 @@
                     ]),
                     el("div", { class: "row g-2 mb-2" }, [
                         dim("Width", wFt, wIn), dim("Height", hFt, hIn), field("Door weight", weight, "col-6 col-md-2"),
-                        el("div", { class: "col-12 col-md-6 small text-muted d-flex align-items-end", text: "Height and weight pick Panels and Drum for you (you can still change them)." }),
+                        el("div", { class: "col-12 col-md-6 small text-muted d-flex align-items-end", text: "Height picks the panels; weight and lift pick the drum. You can still change both." }),
+                    ]),
+                    el("div", { class: "row g-2 mb-2" }, [
+                        field("Track type", trackSel), field("Lift type", liftSel), hlCol,
                     ]),
                     attrsBox,
                     el("div", { class: "mt-2" }, [el("div", { class: "form-label small mb-1 fw-bold", text: "Add to your order" }), optsBox]),
@@ -136,6 +169,9 @@
                 return products.find((p) => p.id === Number(kitSel.value));
             }
 
+            // Kit attributes. Roller Size follows the track size and the kit's Drum
+            // follows our drum dropdown, so both stay hidden.
+            const HIDDEN = ["Roller Size", "Drum"];
             function buildAttrs() {
                 attrsBox.innerHTML = "";
                 optsBox.innerHTML = "";
@@ -157,29 +193,104 @@
                         a.values.map((v) => el("option", { value: v.id, text: v.name + (v.price_extra ? " (+" + money(v.price_extra) + ")" : "") })));
                     line.selects[a.name] = { sel, values: a.values };
                     const col = el("div", { class: "col-6 col-md-3" }, [el("label", { class: "form-label small mb-1", text: a.name }), sel]);
-                    if (a.values.length === 1) col.classList.add("d-none"); // e.g. "Kit Contents: Included"
+                    if (a.values.length === 1 || HIDDEN.includes(a.name)) col.classList.add("d-none");
                     attrsBox.appendChild(col);
+                    if (a.name === "Panels") {
+                        // Our Drum dropdown sits right after Panels.
+                        attrsBox.appendChild(el("div", { class: "col-6 col-md-3" }, [
+                            el("label", { class: "form-label small mb-1", text: "Drum" }), drumSel, drumHint,
+                        ]));
+                    }
                 });
+                if (!line.selects["Panels"]) {
+                    attrsBox.appendChild(el("div", { class: "col-6 col-md-3" }, [
+                        el("label", { class: "form-label small mb-1", text: "Drum" }), drumSel, drumHint,
+                    ]));
+                }
                 optsBox.parentElement.classList.toggle("d-none", !hasMulti);
             }
 
             function pickByPrefix(attrName, prefixes) {
                 const s = line.selects[attrName];
-                if (!s) return;
+                if (!s) return false;
                 for (const pre of prefixes) {
                     const v = s.values.find((x) => x.name.startsWith(pre));
-                    if (v) { s.sel.value = v.id; return; }
+                    if (v) { s.sel.value = v.id; return true; }
+                }
+                return false;
+            }
+
+            function kitDrums() {
+                const s = line.selects["Drum"];
+                return s ? s.values.map((v) => v.name) : [];
+            }
+
+            // Drums offered for this lift type (standard ones only if the kit has them).
+            function drumChoices() {
+                if (liftSel.value === "highlift") return HL_DRUMS.slice();
+                const kd = kitDrums();
+                return STD_DRUMS.filter((d) => !kd.length || kd.some((n) => n.startsWith(d)));
+            }
+
+            function fillDrums(keep) {
+                const choices = drumChoices();
+                const cur = drumSel.value;
+                drumSel.innerHTML = "";
+                choices.forEach((d) => drumSel.appendChild(el("option", { value: d, text: HL_DRUMS.includes(d) ? d + " (High Lift)" : d })));
+                if (keep && choices.includes(cur)) drumSel.value = cur;
+            }
+
+            function autoDrum() {
+                const choices = drumChoices();
+                const w = Number(weight.value) || 0;
+                const need = drumFor(liftSel.value, w, Number(hlInput.value) || 0);
+                let pick = need;
+                if (!choices.includes(need)) {
+                    // Kit series does not carry that drum: take the next bigger one it has.
+                    const order = liftSel.value === "highlift" ? HL_DRUMS : STD_DRUMS;
+                    pick = order.slice(order.indexOf(need)).find((d) => choices.includes(d)) || choices[choices.length - 1];
+                }
+                if (pick) drumSel.value = pick;
+            }
+
+            function syncKitDrum() {
+                const d = drumSel.value;
+                const ok = pickByPrefix("Drum", [d]);
+                if (!ok && line.selects["Drum"]) {
+                    // High-lift drum is not a kit variant: keep the kit's biggest drum, AA swaps it.
+                    const s = line.selects["Drum"];
+                    s.sel.value = s.values[s.values.length - 1].id;
+                }
+                drumHint.textContent = HL_DRUMS.includes(d) ? "High-lift drum: AA swaps it in the kit." : "";
+            }
+
+            function syncRoller() {
+                const t = trackSel.value;
+                if (t) pickByPrefix("Roller Size", [t.charAt(0) + '"']);
+            }
+
+            function syncLift() {
+                const lift = liftSel.value;
+                hlCol.classList.toggle("d-none", lift !== "highlift");
+                if (lift === "lhr" && trackSel.value && !trackSel.value.includes("LHR")) {
+                    trackSel.value = trackSel.value.charAt(0) + "-LHR";
+                    syncRoller();
                 }
             }
 
-            function autoPick() {
-                const h = (Number(hFt.value) || 0) * 12 + (Number(hIn.value) || 0);
-                const w = Number(weight.value) || 0;
-                const panels = panelsFor(h);
-                if (panels) pickByPrefix("Panels", [panels + " Panel"]);
-                const d = drumFor(w, h);
-                if (d !== null) pickByPrefix("Drum", DRUMS.slice(d)); // smallest allowed drum that is big enough
-                price();
+            function heightIn() {
+                return (Number(hFt.value) || 0) * 12 + (Number(hIn.value) || 0);
+            }
+
+            function autoPanels() {
+                const p = panelsFor(heightIn());
+                if (p) pickByPrefix("Panels", [p + " Panel"]);
+            }
+
+            function refreshDrum() {
+                fillDrums(false);
+                autoDrum();
+                syncKitDrum();
             }
 
             function ptavIds() {
@@ -211,29 +322,48 @@
                 width: wFt.value || wIn.value ? (wFt.value || 0) + "' " + (wIn.value || 0) + '"' : "",
                 height: hFt.value || hIn.value ? (hFt.value || 0) + "' " + (hIn.value || 0) + '"' : "",
                 weight: weight.value,
+                track_type: trackSel.value,
+                lift_type: liftSel.value,
+                high_lift: liftSel.value === "highlift" ? hlInput.value : "",
+                drum: drumSel.value,
             });
             line.copyInto = (other) => {
                 other.kitSel.value = kitSel.value;
                 other.buildAttrs();
                 Object.entries(line.selects).forEach(([k, s]) => other.selects[k] && (other.selects[k].sel.value = s.sel.value));
                 Object.entries(line.checks).forEach(([k, c]) => other.checks[k] && (other.checks[k].cb.checked = c.cb.checked));
-                [["wFt", wFt], ["wIn", wIn], ["hFt", hFt], ["hIn", hIn], ["weight", weight], ["qty", qty]].forEach(([k, i]) => (other.inputs[k].value = i.value));
+                Object.entries(line.inputs).forEach(([k, i]) => (other.inputs[k].value = i.value));
+                other.syncLift();
+                other.fillDrums(false);
+                other.drumSel.value = drumSel.value;
+                other.syncKitDrum();
                 other.price();
             };
             line.kitSel = kitSel;
             line.buildAttrs = buildAttrs;
             line.price = price;
-            line.inputs = { wFt, wIn, hFt, hIn, weight, qty };
+            line.syncLift = syncLift;
+            line.fillDrums = fillDrums;
+            line.syncKitDrum = syncKitDrum;
+            line.drumSel = drumSel;
+            line.inputs = { wFt, wIn, hFt, hIn, weight, qty, trackSel, liftSel, hlInput };
 
-            kitSel.addEventListener("change", () => { buildAttrs(); autoPick(); });
-            [wFt, wIn, hFt, hIn, weight].forEach((i) => i.addEventListener("change", autoPick));
+            kitSel.addEventListener("change", () => { buildAttrs(); syncRoller(); autoPanels(); refreshDrum(); price(); });
+            [hFt, hIn].forEach((i) => i.addEventListener("change", () => { autoPanels(); price(); }));
+            [weight, hlInput].forEach((i) => i.addEventListener("change", () => { autoDrum(); syncKitDrum(); price(); }));
+            trackSel.addEventListener("change", () => {
+                if (liftSel.value === "lhr" && !trackSel.value.includes("LHR")) liftSel.value = "standard";
+                syncLift(); syncRoller(); refreshDrum(); price();
+            });
+            liftSel.addEventListener("change", () => { syncLift(); refreshDrum(); price(); });
+            drumSel.addEventListener("change", () => { syncKitDrum(); price(); });
             qty.addEventListener("change", price);
 
             linesBox.appendChild(card);
             lines.push(line);
             renumber();
             if (copyFrom) copyFrom.copyInto(line);
-            else { buildAttrs(); price(); }
+            else { buildAttrs(); refreshDrum(); price(); }
         }
 
         root.querySelector("#aa_add_line").addEventListener("click", () => addLine());
@@ -243,6 +373,10 @@
             errorEl.textContent = "";
             const po = root.querySelector("#aa_po").value.trim();
             if (!po) { errorEl.textContent = "Please enter your PO number."; root.querySelector("#aa_po").focus(); return; }
+            const missing = lines.findIndex((l) => !l.payload().track_type);
+            if (missing >= 0) { errorEl.textContent = "Door " + (missing + 1) + ": choose the track type."; return; }
+            const noHl = lines.findIndex((l) => l.payload().lift_type === "highlift" && !(Number(l.payload().high_lift) > 0));
+            if (noHl >= 0) { errorEl.textContent = "Door " + (noHl + 1) + ": enter the high lift in inches."; return; }
             submitBtn.disabled = true;
             submitBtn.textContent = "Placing order...";
             rpc("/dealer/order/submit", {
