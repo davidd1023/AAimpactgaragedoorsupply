@@ -7,6 +7,8 @@ from odoo.http import request
 
 from odoo.addons.portal.controllers.portal import CustomerPortal
 
+from .models import AA_DRUMS, AA_HL_DRUMS, AA_LIFT_TYPES, AA_STD_DRUMS, AA_TRACK_TYPES
+
 _logger = logging.getLogger(__name__)
 
 MAX_LINES = 50
@@ -156,7 +158,8 @@ class AADealerOrder(http.Controller):
                 if self._unit_price(partner, variant, no_variant, qty) <= 0:
                     raise ValidationError(_(
                         "Line %s: no price is set for this kit yet. Please call AA Impact.", idx))
-                order_lines.append((variant, no_variant, qty, self._line_note(line)))
+                track_vals = self._track_values(line, idx, variant)
+                order_lines.append((variant, no_variant, qty, self._line_note(line), track_vals))
         except (ValidationError, ValueError, TypeError) as e:
             return {'error': str(e.args[0]) if e.args else _("Invalid order.")}
 
@@ -176,8 +179,9 @@ class AADealerOrder(http.Controller):
             'aa_dealer_quick_order': True,
             'note': notes and notes.strip()[:2000] or False,
         })
-        for variant, no_variant, qty, note in order_lines:
+        for variant, no_variant, qty, note, track_vals in order_lines:
             sol = request.env['sale.order.line'].sudo().create({
+                **track_vals,
                 'order_id': order.id,
                 'product_id': variant.id,
                 'product_no_variant_attribute_value_ids': [fields.Command.set(no_variant.ids)],
@@ -193,8 +197,51 @@ class AADealerOrder(http.Controller):
                                   request.env.user.name))
         return {'redirect': order.get_portal_url()}
 
+    def _track_values(self, line, idx, variant):
+        """Track type / lift type / high lift, validated with the AA Calculator rules."""
+        track = line.get('track_type') or ''
+        lift = line.get('lift_type') or ''
+        if track not in dict(AA_TRACK_TYPES):
+            raise ValidationError(_("Line %s: choose the track type.", idx))
+        if lift not in dict(AA_LIFT_TYPES):
+            raise ValidationError(_("Line %s: choose the lift type.", idx))
+        high_lift = 0.0
+        if lift == 'highlift':
+            try:
+                high_lift = float(line.get('high_lift') or 0)
+            except (TypeError, ValueError):
+                high_lift = 0.0
+            if high_lift <= 0 or high_lift > 300:
+                raise ValidationError(_("Line %s: enter the high lift in inches.", idx))
+        if lift == 'lhr' and 'LHR' not in track:
+            raise ValidationError(_("Line %s: Low Headroom needs an LHR track.", idx))
+        drum = line.get('drum') or ''
+        allowed = AA_HL_DRUMS if lift == 'highlift' else AA_STD_DRUMS
+        if drum not in allowed:
+            raise ValidationError(_("Line %s: choose a drum for this lift type.", idx))
+        if lift != 'highlift':
+            kit_drum = variant.product_template_attribute_value_ids.filtered(
+                lambda v: v.attribute_id.name == 'Drum')
+            if kit_drum and not kit_drum[0].name.startswith(drum):
+                raise ValidationError(_("Line %s: drum %s is not available for this kit.", idx, drum))
+        return {'aa_track_type': track, 'aa_lift_type': lift, 'aa_high_lift': high_lift,
+                'aa_drum': drum}
+
     def _line_note(self, line):
         parts = []
+        track = dict(AA_TRACK_TYPES).get(line.get('track_type'))
+        lift = dict(AA_LIFT_TYPES).get(line.get('lift_type'))
+        if track or lift:
+            lift_txt = lift or ''
+            if line.get('lift_type') == 'highlift' and line.get('high_lift'):
+                lift_txt += f' {str(line.get("high_lift"))[:8]}"'
+            parts.append(f"Track: {track or '-'} | Lift: {lift_txt}")
+        drum = line.get('drum')
+        if drum in dict(AA_DRUMS):
+            if drum in AA_HL_DRUMS:
+                parts.append(f"Drum: {drum} (HIGH LIFT - swap drums in the kit)")
+            else:
+                parts.append(f"Drum: {drum}")
         tag = (line.get('tag') or '').strip()[:80]
         if tag:
             parts.append(f"Door: {tag}")

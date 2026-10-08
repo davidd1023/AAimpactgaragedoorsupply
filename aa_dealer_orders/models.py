@@ -94,6 +94,32 @@ class SaleOrder(models.Model):
     )
 
 
+# Same track and lift choices as the AA Calculator.
+AA_TRACK_TYPES = [
+    ('3-15R', '3" 15R'),
+    ('2-12R', '2" 12R'),
+    ('3-LHR', '3" LHR'),
+    ('2-LHR', '2" LHR'),
+]
+AA_STD_DRUMS = ['D400-96', 'D400-144', 'D525-216']
+AA_HL_DRUMS = ['D525-54', 'D575-120', 'D800-120']
+AA_DRUMS = [(d, d) for d in AA_STD_DRUMS] + [(d, f"{d} (High Lift)") for d in AA_HL_DRUMS]
+AA_LIFT_TYPES = [
+    ('standard', 'Standard'),
+    ('highlift', 'High Lift'),
+    ('lhr', 'Low Headroom'),
+]
+
+
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    aa_track_type = fields.Selection(AA_TRACK_TYPES, string="Track Type")
+    aa_lift_type = fields.Selection(AA_LIFT_TYPES, string="Lift Type")
+    aa_high_lift = fields.Float(string="High Lift (in)", digits=(6, 3))
+    aa_drum = fields.Selection(AA_DRUMS, string="Drum")
+
+
 
 
 class PaymentProvider(models.Model):
