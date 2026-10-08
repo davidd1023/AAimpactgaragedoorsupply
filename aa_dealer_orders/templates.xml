@@ -16,6 +16,16 @@
         </div>
     </template>
 
+    <!-- "Dealer Quick Order" in the user menu (top right), for dealers only -->
+    <template id="user_dropdown_dealer_link" name="Dealer Quick Order link" inherit_id="portal.my_account_link">
+        <xpath expr="//a[@href='/my/home']" position="before">
+            <a t-if="not request.env.user._is_public() and request.env.user.partner_id._aa_is_on_account_dealer()"
+               href="/dealer/order" role="menuitem" class="dropdown-item ps-3">
+                <i class="fa fa-fw fa-truck me-1 small text-primary-emphasis"/> Dealer Quick Order
+            </a>
+        </xpath>
+    </template>
+
     <template id="dealer_order_denied" name="Dealer Quick Order - not available">
         <t t-call="website.layout">
             <div class="container py-5 text-center">

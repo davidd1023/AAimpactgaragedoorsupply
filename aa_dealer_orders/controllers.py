@@ -17,7 +17,10 @@ class AADealerPortal(CustomerPortal):
 
     def _prepare_home_portal_values(self, counters):
         values = super()._prepare_home_portal_values(counters)
-        values['aa_is_dealer'] = request.env.user.partner_id._aa_is_on_account_dealer()
+        if not counters:
+            # Only on the /my page render. The counters RPC must return counters only,
+            # otherwise the portal JS looks for a placeholder that does not exist.
+            values['aa_is_dealer'] = request.env.user.partner_id._aa_is_on_account_dealer()
         return values
 
 
