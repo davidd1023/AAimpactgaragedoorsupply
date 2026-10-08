@@ -188,6 +188,10 @@ class AADealerOrder(http.Controller):
                 'product_no_variant_attribute_value_ids': [fields.Command.set(no_variant.ids)],
                 'product_uom_qty': qty,
             })
+            kit_drum = variant.product_template_attribute_value_ids.filtered(
+                lambda v: v.attribute_id.name == 'Drum')[:1]
+            if track_vals.get('aa_drum') and kit_drum and not kit_drum.name.startswith(track_vals['aa_drum']):
+                note = f"{note} | HIGH LIFT DRUM NOT IN KIT - swap to {track_vals['aa_drum']}"
             if note:
                 sol.name = f"{sol.name}\n{note}"
         try:
@@ -229,17 +233,18 @@ class AADealerOrder(http.Controller):
                 high_lift = 0.0
             if high_lift <= 0 or high_lift > 300:
                 raise ValidationError(_("Line %s: enter the high lift in inches.", idx))
-        if lift == 'lhr' and 'LHR' not in track:
-            raise ValidationError(_("Line %s: Low Headroom needs an LHR track.", idx))
         drum = line.get('drum') or ''
         allowed = AA_HL_DRUMS if lift == 'highlift' else AA_STD_DRUMS
         if drum not in allowed:
             raise ValidationError(_("Line %s: choose a drum for this lift type.", idx))
-        if lift != 'highlift':
-            kit_drum = variant.product_template_attribute_value_ids.filtered(
-                lambda v: v.attribute_id.name == 'Drum')
-            if kit_drum and not kit_drum[0].name.startswith(drum):
-                raise ValidationError(_("Line %s: drum %s is not available for this kit.", idx, drum))
+        kit_drum = variant.product_template_attribute_value_ids.filtered(
+            lambda v: v.attribute_id.name == 'Drum')
+        kit_has_drum = variant.product_tmpl_id.attribute_line_ids.filtered(
+            lambda l: l.attribute_id.name == 'Drum').value_ids.filtered(lambda v: v.name.startswith(drum))
+        # The kit variant must carry the chosen drum. Only a high-lift drum the kit
+        # does not offer yet is allowed through, flagged on the line for AA to swap.
+        if kit_drum and not kit_drum[0].name.startswith(drum) and (kit_has_drum or lift != 'highlift'):
+            raise ValidationError(_("Line %s: drum %s is not available for this kit.", idx, drum))
         return {'aa_track_type': track, 'aa_lift_type': lift, 'aa_high_lift': high_lift,
                 'aa_drum': drum}
 
@@ -254,10 +259,7 @@ class AADealerOrder(http.Controller):
             parts.append(f"Track: {track or '-'} | Lift: {lift_txt}")
         drum = line.get('drum')
         if drum in dict(AA_DRUMS):
-            if drum in AA_HL_DRUMS:
-                parts.append(f"Drum: {drum} (HIGH LIFT - swap drums in the kit)")
-            else:
-                parts.append(f"Drum: {drum}")
+            parts.append(f"Drum: {drum}")
         tag = (line.get('tag') or '').strip()[:80]
         if tag:
             parts.append(f"Door: {tag}")

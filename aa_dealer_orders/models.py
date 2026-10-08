@@ -97,6 +97,7 @@ class SaleOrder(models.Model):
 # Same track and lift choices as the AA Calculator.
 AA_TRACK_TYPES = [
     ('3-15R', '3" 15R'),
+    ('2-15R', '2" 15R'),
     ('2-12R', '2" 12R'),
     ('3-LHR', '3" LHR'),
     ('2-LHR', '2" LHR'),
@@ -107,7 +108,6 @@ AA_DRUMS = [(d, d) for d in AA_STD_DRUMS] + [(d, f"{d} (High Lift)") for d in AA
 AA_LIFT_TYPES = [
     ('standard', 'Standard'),
     ('highlift', 'High Lift'),
-    ('lhr', 'Low Headroom'),
 ]
 
 
