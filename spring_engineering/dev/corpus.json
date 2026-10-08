@@ -349584,6 +349584,5039 @@
    },
    "referenceCycles": 155000,
    "flagged": true
+  },
+  {
+   "id": "V10-D400144-4218-3437-709lb-109in-1spr-r10-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "50,000",
+    "weight": "709",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 54,
+    "duplexOuterLength": 55,
+    "duplexInnerWeight": 53.17,
+    "duplexOuterWeight": 104.25
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 61000
+  },
+  {
+   "id": "V10-D800120-4218-3437-271lb-127in-1spr-r15-hl95-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "95",
+    "cycles": "100,000",
+    "weight": "271",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 91,
+    "duplexOuterLength": 92,
+    "duplexInnerWeight": 89.59,
+    "duplexOuterWeight": 174.38
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 123000
+  },
+  {
+   "id": "V10-D525216-4218-3437-487lb-140in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "487",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 8,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 63,
+    "duplexOuterLength": 64,
+    "duplexInnerWeight": 62.03,
+    "duplexOuterWeight": 121.31
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 112000
+  },
+  {
+   "id": "V10-D400144-4218-3437-662lb-84in-1spr-r12-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "75,000",
+    "weight": "662",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3437\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 48,
+    "duplexOuterLength": 49,
+    "duplexInnerWeight": 47.26,
+    "duplexOuterWeight": 92.88
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 82000
+  },
+  {
+   "id": "V10-D400144-3938-3065-541lb-118in-1spr-r15-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "541",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 52,
+    "duplexOuterLength": 53,
+    "duplexInnerWeight": 45.24,
+    "duplexOuterWeight": 93.38
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 60000
+  },
+  {
+   "id": "V10-52554HL-3938-3065-532lb-117in-1spr-r15-hl18-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "18",
+    "cycles": "15,000",
+    "weight": "532",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 9,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3065\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 33,
+    "duplexOuterLength": 34,
+    "duplexInnerWeight": 28.71,
+    "duplexOuterWeight": 59.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 17000
+  },
+  {
+   "id": "V10-D525216-295-2343-714lb-85in-4spr-r15-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "714",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 18.25,
+    "duplexOuterLength": 19.25,
+    "duplexInnerWeight": 11.92,
+    "duplexOuterWeight": 25.02
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 102000
+  },
+  {
+   "id": "V10-D525216-295-2343-581lb-85in-4spr-r10-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "LHR",
+    "cycles": "250,000",
+    "weight": "581",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2343\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 20.25,
+    "duplexOuterLength": 21.25,
+    "duplexInnerWeight": 13.23,
+    "duplexOuterWeight": 27.61
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 270000
+  },
+  {
+   "id": "V10-575120-331-273-684lb-136in-2spr-r15-hl34-t10000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "34",
+    "cycles": "10,000",
+    "weight": "684",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.273\"",
+    "duplexOuterWire": "0.331\"",
+    "duplexInnerLength": 25.25,
+    "duplexOuterLength": 26.25,
+    "duplexInnerWeight": 19.41,
+    "duplexOuterWeight": 38.49
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 10000
+  },
+  {
+   "id": "V10-D400144-295-2437-575lb-134in-3spr-r12-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "12",
+    "cycles": "250,000",
+    "weight": "575",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 44.25,
+    "duplexOuterLength": 45.25,
+    "duplexInnerWeight": 30.14,
+    "duplexOuterWeight": 58.8
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 261000
+  },
+  {
+   "id": "V10-52554HL-295-2437-684lb-90in-3spr-r15-hl51-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "51",
+    "cycles": "15,000",
+    "weight": "684",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 6,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.2437\"",
+    "duplexOuterWire": "0.295\"",
+    "duplexInnerLength": 21.25,
+    "duplexOuterLength": 22.25,
+    "duplexInnerWeight": 14.47,
+    "duplexOuterWeight": 28.91
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 15000
+  },
+  {
+   "id": "V10-D800120-3938-3125-741lb-118in-2spr-r15-hl39-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "39",
+    "cycles": "15,000",
+    "weight": "741",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 27,
+    "duplexOuterLength": 28,
+    "duplexInnerWeight": 23.99,
+    "duplexOuterWeight": 49.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 17000
+  },
+  {
+   "id": "V10-D40096-3938-3125-424lb-93in-1spr-r12-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "200,000",
+    "weight": "424",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 9,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3125\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 56,
+    "duplexOuterLength": 57,
+    "duplexInnerWeight": 49.75,
+    "duplexOuterWeight": 100.43
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 252000
+  },
+  {
+   "id": "V10-D400144-3437-283-326lb-95in-1spr-r12-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "150,000",
+    "weight": "326",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.283\"",
+    "duplexOuterWire": "0.3437\"",
+    "duplexInnerLength": 41,
+    "duplexOuterLength": 42,
+    "duplexInnerWeight": 32.75,
+    "duplexOuterWeight": 64.08
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 158000
+  },
+  {
+   "id": "V10-D525216-4218-331-607lb-125in-1spr-r12-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "25,000",
+    "weight": "607",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 41,
+    "duplexOuterLength": 42,
+    "duplexInnerWeight": 38.75,
+    "duplexOuterWeight": 79.61
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 29000
+  },
+  {
+   "id": "V10-D525216-4218-331-416lb-107in-1spr-r10-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "150,000",
+    "weight": "416",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 46.32,
+    "duplexOuterWeight": 94.77
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 175000
+  },
+  {
+   "id": "V10-575120-3125-25-617lb-120in-4spr-r15-hl70-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 4,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "70",
+    "cycles": "100,000",
+    "weight": "617",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.25\"",
+    "duplexOuterWire": "0.3125\"",
+    "duplexInnerLength": 40.25,
+    "duplexOuterLength": 41.25,
+    "duplexInnerWeight": 28.16,
+    "duplexOuterWeight": 56.94
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 113000
+  },
+  {
+   "id": "V10-D400144-3938-3195-424lb-95in-1spr-r10-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "250,000",
+    "weight": "424",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 56,
+    "duplexOuterLength": 57,
+    "duplexInnerWeight": 50.95,
+    "duplexOuterWeight": 100.43
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 267000
+  },
+  {
+   "id": "V10-D400144-4062-331-650lb-107in-1spr-r15-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "50,000",
+    "weight": "650",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 52,
+    "duplexOuterLength": 53,
+    "duplexInnerWeight": 49.15,
+    "duplexOuterWeight": 96.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 54000
+  },
+  {
+   "id": "V10-D525216-4062-331-1285lb-124in-2spr-r12-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "12",
+    "cycles": "15,000",
+    "weight": "1285",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 35.25,
+    "duplexOuterLength": 36.25,
+    "duplexInnerWeight": 33.32,
+    "duplexOuterWeight": 66.01
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 18000
+  },
+  {
+   "id": "V10-D800120-4062-331-297lb-89in-1spr-r15-hl48-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "48",
+    "cycles": "75,000",
+    "weight": "297",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 41.59,
+    "duplexOuterWeight": 81.94
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 80000
+  },
+  {
+   "id": "V10-D400144-4062-331-466lb-140in-1spr-r10-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "250,000",
+    "weight": "466",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 8,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 86,
+    "duplexOuterLength": 87,
+    "duplexInnerWeight": 81.29,
+    "duplexOuterWeight": 158.42
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 262000
+  },
+  {
+   "id": "V10-D525216-4062-331-590lb-106in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "590",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 34,
+    "duplexOuterLength": 35,
+    "duplexInnerWeight": 32.14,
+    "duplexOuterWeight": 63.73
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 27000
+  },
+  {
+   "id": "V10-575120-4062-331-227lb-135in-1spr-r15-hl110-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "110",
+    "cycles": "300,000",
+    "weight": "227",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 3,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 117,
+    "duplexOuterLength": 118,
+    "duplexInnerWeight": 110.59,
+    "duplexOuterWeight": 214.87
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 347000,
+   "flagged": true
+  },
+  {
+   "id": "V10-D525216-4062-331-1300lb-172in-2spr-r10-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "LHR",
+    "cycles": "15,000",
+    "weight": "1300",
+    "doorHeightFeet": 14,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 45.25,
+    "duplexOuterLength": 46.25,
+    "duplexInnerWeight": 42.77,
+    "duplexOuterWeight": 84.22
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 17000
+  },
+  {
+   "id": "V10-575120-4062-331-732lb-94in-2spr-r15-hl34-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "34",
+    "cycles": "100,000",
+    "weight": "732",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 50,
+    "duplexOuterLength": 51,
+    "duplexInnerWeight": 47.26,
+    "duplexOuterWeight": 92.87
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 114000
+  },
+  {
+   "id": "V10-D525216-4062-331-655lb-112in-1spr-r15-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "15,000",
+    "weight": "655",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 32,
+    "duplexOuterLength": 33,
+    "duplexInnerWeight": 30.25,
+    "duplexOuterWeight": 60.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 17000
+  },
+  {
+   "id": "V10-575120-4062-331-703lb-131in-2spr-r15-hl24-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "24",
+    "cycles": "150,000",
+    "weight": "703",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 61,
+    "duplexOuterLength": 62,
+    "duplexInnerWeight": 57.66,
+    "duplexOuterWeight": 112.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 172000
+  },
+  {
+   "id": "V10-52554HL-4062-331-310lb-121in-1spr-r15-hl47-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "47",
+    "cycles": "250,000",
+    "weight": "310",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 79,
+    "duplexOuterLength": 80,
+    "duplexInnerWeight": 74.67,
+    "duplexOuterWeight": 145.67
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 251000
+  },
+  {
+   "id": "V10-D525216-4062-331-755lb-151in-2spr-r12-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "12",
+    "cycles": "200,000",
+    "weight": "755",
+    "doorHeightFeet": 12,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 70,
+    "duplexOuterLength": 71,
+    "duplexInnerWeight": 66.17,
+    "duplexOuterWeight": 129.28
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 219000
+  },
+  {
+   "id": "V10-D525216-4062-331-1334lb-104in-2spr-r15-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "15,000",
+    "weight": "1334",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 8,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 30.25,
+    "duplexOuterLength": 31.25,
+    "duplexInnerWeight": 28.59,
+    "duplexOuterWeight": 56.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 15000
+  },
+  {
+   "id": "V10-D400144-4062-331-607lb-95in-1spr-r12-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "75,000",
+    "weight": "607",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 46.32,
+    "duplexOuterWeight": 91.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 76000
+  },
+  {
+   "id": "V10-D525216-4062-331-1343lb-134in-2spr-r12-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "12",
+    "cycles": "15,000",
+    "weight": "1343",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 36.25,
+    "duplexOuterLength": 37.25,
+    "duplexInnerWeight": 34.26,
+    "duplexOuterWeight": 67.83
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 14000
+  },
+  {
+   "id": "V10-D800120-4062-331-561lb-129in-2spr-r15-hl64-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "64",
+    "cycles": "75,000",
+    "weight": "561",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 9,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 55.25,
+    "duplexOuterLength": 56.25,
+    "duplexInnerWeight": 52.22,
+    "duplexOuterWeight": 102.43
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 88000
+  },
+  {
+   "id": "V10-D40096-4218-331-475lb-95in-1spr-r12-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "250,000",
+    "weight": "475",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4218\"",
+    "duplexInnerLength": 69,
+    "duplexOuterLength": 70,
+    "duplexInnerWeight": 65.22,
+    "duplexOuterWeight": 132.68
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 306000
+  },
+  {
+   "id": "V10-D400144-4062-331-740lb-87in-1spr-r12-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "25,000",
+    "weight": "740",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 3,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 37,
+    "duplexOuterLength": 38,
+    "duplexInnerWeight": 34.97,
+    "duplexOuterWeight": 69.19
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 30000
+  },
+  {
+   "id": "V10-D525216-4062-331-428lb-183in-1spr-r12-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "100,000",
+    "weight": "428",
+    "doorHeightFeet": 15,
+    "doorHeightInches": 3,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 74,
+    "duplexOuterLength": 75,
+    "duplexInnerWeight": 69.95,
+    "duplexOuterWeight": 136.57
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 125000
+  },
+  {
+   "id": "V10-52554HL-4062-331-626lb-142in-2spr-r15-hl34-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "34",
+    "cycles": "250,000",
+    "weight": "626",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 85.25,
+    "duplexOuterLength": 86.25,
+    "duplexInnerWeight": 80.58,
+    "duplexOuterWeight": 157.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 321000
+  },
+  {
+   "id": "V10-575120-4062-331-632lb-117in-2spr-r15-hl20-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "20",
+    "cycles": "300,000",
+    "weight": "632",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 9,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 62.25,
+    "duplexOuterLength": 63.25,
+    "duplexInnerWeight": 58.84,
+    "duplexOuterWeight": 115.17
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 302000
+  },
+  {
+   "id": "V10-D400144-4062-331-656lb-124in-1spr-r12-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "50,000",
+    "weight": "656",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 57,
+    "duplexOuterLength": 58,
+    "duplexInnerWeight": 53.88,
+    "duplexOuterWeight": 105.61
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 52000
+  },
+  {
+   "id": "V10-575120-4062-331-309lb-126in-1spr-r15-hl101-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "101",
+    "cycles": "75,000",
+    "weight": "309",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 6,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 85,
+    "duplexOuterLength": 86,
+    "duplexInnerWeight": 80.34,
+    "duplexOuterWeight": 156.6
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 91000
+  },
+  {
+   "id": "V10-D40096-4062-331-454lb-96in-1spr-r10-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "300,000",
+    "weight": "454",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 63,
+    "duplexOuterLength": 64,
+    "duplexInnerWeight": 59.55,
+    "duplexOuterWeight": 116.54
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 307000
+  },
+  {
+   "id": "V10-D400144-4062-331-487lb-91in-1spr-r15-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "487",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 60,
+    "duplexOuterLength": 61,
+    "duplexInnerWeight": 56.71,
+    "duplexOuterWeight": 111.08
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 213000
+  },
+  {
+   "id": "V10-52554HL-4062-331-620lb-131in-2spr-r15-hl42-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "42",
+    "cycles": "250,000",
+    "weight": "620",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 82.25,
+    "duplexOuterLength": 83.25,
+    "duplexInnerWeight": 77.75,
+    "duplexOuterWeight": 151.59
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 283000
+  },
+  {
+   "id": "V10-D525216-4062-331-1176lb-151in-2spr-r10-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "LHR",
+    "cycles": "25,000",
+    "weight": "1176",
+    "doorHeightFeet": 12,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 44.25,
+    "duplexOuterLength": 45.25,
+    "duplexInnerWeight": 41.83,
+    "duplexOuterWeight": 82.4
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 27000
+  },
+  {
+   "id": "V10-D525216-4062-331-456lb-193in-1spr-r10-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "75,000",
+    "weight": "456",
+    "doorHeightFeet": 16,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 71,
+    "duplexOuterLength": 72,
+    "duplexInnerWeight": 67.11,
+    "duplexOuterWeight": 131.11
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 92000
+  },
+  {
+   "id": "V10-D525216-4062-331-706lb-172in-2spr-r15-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "706",
+    "doorHeightFeet": 14,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 86.25,
+    "duplexOuterLength": 87.25,
+    "duplexInnerWeight": 81.53,
+    "duplexOuterWeight": 158.87
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 301000
+  },
+  {
+   "id": "V10-D40096-4062-331-504lb-86in-1spr-r10-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "150,000",
+    "weight": "504",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 51,
+    "duplexOuterLength": 52,
+    "duplexInnerWeight": 48.21,
+    "duplexOuterWeight": 94.69
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 193000
+  },
+  {
+   "id": "V10-575120-4062-331-693lb-100in-2spr-r15-hl89-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "89",
+    "cycles": "50,000",
+    "weight": "693",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 81,
+    "duplexOuterLength": 82,
+    "duplexInnerWeight": 76.56,
+    "duplexOuterWeight": 149.31
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 62000
+  },
+  {
+   "id": "V10-D400144-4062-331-551lb-116in-1spr-r12-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "100,000",
+    "weight": "551",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 8,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 63,
+    "duplexOuterLength": 64,
+    "duplexInnerWeight": 59.55,
+    "duplexOuterWeight": 116.54
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 119000
+  },
+  {
+   "id": "V10-52554HL-4062-331-632lb-120in-2spr-r15-hl42-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "42",
+    "cycles": "250,000",
+    "weight": "632",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 76,
+    "duplexOuterLength": 77,
+    "duplexInnerWeight": 71.84,
+    "duplexOuterWeight": 140.21
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 258000
+  },
+  {
+   "id": "V10-D800120-4062-331-410lb-91in-1spr-r15-hl60-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "60",
+    "cycles": "15,000",
+    "weight": "410",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 39,
+    "duplexOuterLength": 40,
+    "duplexInnerWeight": 36.86,
+    "duplexOuterWeight": 72.84
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 15000
+  },
+  {
+   "id": "V10-D400144-4062-331-524lb-115in-1spr-r15-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "150,000",
+    "weight": "524",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 68,
+    "duplexOuterLength": 69,
+    "duplexInnerWeight": 64.28,
+    "duplexOuterWeight": 125.64
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 150000
+  },
+  {
+   "id": "V10-D800120-4062-3195-661lb-108in-2spr-r15-hl89-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "89",
+    "cycles": "25,000",
+    "weight": "661",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 63,
+    "duplexOuterLength": 64,
+    "duplexInnerWeight": 57.32,
+    "duplexOuterWeight": 116.54
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 25000
+  },
+  {
+   "id": "V10-D40096-4062-331-480lb-96in-1spr-r10-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "200,000",
+    "weight": "480",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 60,
+    "duplexOuterLength": 61,
+    "duplexInnerWeight": 56.71,
+    "duplexOuterWeight": 111.08
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 237000
+  },
+  {
+   "id": "V10-D525216-4062-331-937lb-132in-2spr-r15-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "75,000",
+    "weight": "937",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 51,
+    "duplexOuterLength": 52,
+    "duplexInnerWeight": 48.21,
+    "duplexOuterWeight": 94.69
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 79000
+  },
+  {
+   "id": "V10-D800120-4062-331-553lb-121in-2spr-r15-hl39-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "39",
+    "cycles": "100,000",
+    "weight": "553",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 46.25,
+    "duplexOuterLength": 47.25,
+    "duplexInnerWeight": 43.72,
+    "duplexOuterWeight": 86.04
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 116000
+  },
+  {
+   "id": "V10-D525216-4062-331-1198lb-106in-3spr-r10-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "LHR",
+    "cycles": "150,000",
+    "weight": "1198",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 46.25,
+    "duplexOuterLength": 47.25,
+    "duplexInnerWeight": 43.72,
+    "duplexOuterWeight": 86.04
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 174000
+  },
+  {
+   "id": "V10-D400144-4062-331-448lb-113in-1spr-r15-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "250,000",
+    "weight": "448",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 78,
+    "duplexOuterLength": 79,
+    "duplexInnerWeight": 73.73,
+    "duplexOuterWeight": 143.85
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 319000
+  },
+  {
+   "id": "V10-D525216-4062-331-811lb-113in-2spr-r15-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "150,000",
+    "weight": "811",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 52,
+    "duplexOuterLength": 53,
+    "duplexInnerWeight": 49.15,
+    "duplexOuterWeight": 96.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 157000
+  },
+  {
+   "id": "V10-D525216-4062-331-453lb-144in-1spr-r10-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "75,000",
+    "weight": "453",
+    "doorHeightFeet": 12,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 54,
+    "duplexOuterLength": 55,
+    "duplexInnerWeight": 51.04,
+    "duplexOuterWeight": 100.15
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 97000
+  },
+  {
+   "id": "V10-D800120-4062-331-742lb-105in-3spr-r15-hl34-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "34",
+    "cycles": "200,000",
+    "weight": "742",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 9,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 46.25,
+    "duplexOuterLength": 47.25,
+    "duplexInnerWeight": 43.72,
+    "duplexOuterWeight": 86.04
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 210000
+  },
+  {
+   "id": "V10-D800120-4062-331-446lb-94in-2spr-r15-hl42-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "42",
+    "cycles": "300,000",
+    "weight": "446",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 54.25,
+    "duplexOuterLength": 55.25,
+    "duplexInnerWeight": 51.28,
+    "duplexOuterWeight": 100.61
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 313000
+  },
+  {
+   "id": "V10-52554HL-4062-331-580lb-131in-1spr-r15-hl15-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "15",
+    "cycles": "25,000",
+    "weight": "580",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 43,
+    "duplexOuterLength": 44,
+    "duplexInnerWeight": 40.64,
+    "duplexOuterWeight": 80.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 27000
+  },
+  {
+   "id": "V10-52554HL-4062-331-381lb-107in-1spr-r15-hl18-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "18",
+    "cycles": "150,000",
+    "weight": "381",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 56,
+    "duplexOuterLength": 57,
+    "duplexInnerWeight": 52.93,
+    "duplexOuterWeight": 103.79
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 186000
+  },
+  {
+   "id": "V10-D40096-4062-331-489lb-86in-1spr-r12-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "200,000",
+    "weight": "489",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 56,
+    "duplexOuterLength": 57,
+    "duplexInnerWeight": 52.93,
+    "duplexOuterWeight": 103.79
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 216000
+  },
+  {
+   "id": "V10-D40096-4062-331-452lb-84in-1spr-r15-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "250,000",
+    "weight": "452",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 62,
+    "duplexOuterLength": 63,
+    "duplexInnerWeight": 58.6,
+    "duplexOuterWeight": 114.72
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 322000
+  },
+  {
+   "id": "V10-52554HL-4062-331-354lb-125in-1spr-r15-hl54-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "54",
+    "cycles": "100,000",
+    "weight": "354",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 71,
+    "duplexOuterLength": 72,
+    "duplexInnerWeight": 67.11,
+    "duplexOuterWeight": 131.11
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 118000
+  },
+  {
+   "id": "V10-D800120-4062-331-670lb-86in-2spr-r15-hl20-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "20",
+    "cycles": "50,000",
+    "weight": "670",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 27,
+    "duplexOuterLength": 28,
+    "duplexInnerWeight": 25.52,
+    "duplexOuterWeight": 50.99
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 63000
+  },
+  {
+   "id": "V10-D525216-4062-331-359lb-139in-1spr-r10-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "250,000",
+    "weight": "359",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 66,
+    "duplexOuterLength": 67,
+    "duplexInnerWeight": 62.39,
+    "duplexOuterWeight": 122
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 274000
+  },
+  {
+   "id": "V10-D800120-4062-331-445lb-109in-1spr-r15-hl25-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "25",
+    "cycles": "15,000",
+    "weight": "445",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 24,
+    "duplexOuterLength": 25,
+    "duplexInnerWeight": 22.69,
+    "duplexOuterWeight": 45.52
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 15000
+  },
+  {
+   "id": "V10-D525216-4062-331-944lb-96in-2spr-r10-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "LHR",
+    "cycles": "75,000",
+    "weight": "944",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 36,
+    "duplexOuterLength": 37,
+    "duplexInnerWeight": 34.03,
+    "duplexOuterWeight": 67.37
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 75000
+  },
+  {
+   "id": "V10-D40096-4062-331-521lb-88in-1spr-r15-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "150,000",
+    "weight": "521",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 56,
+    "duplexOuterLength": 57,
+    "duplexInnerWeight": 52.93,
+    "duplexOuterWeight": 103.79
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 165000
+  },
+  {
+   "id": "V10-D800120-4062-331-737lb-91in-3spr-r15-hl18-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "18",
+    "cycles": "250,000",
+    "weight": "737",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.331\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 37.25,
+    "duplexOuterLength": 38.25,
+    "duplexInnerWeight": 35.21,
+    "duplexOuterWeight": 69.65
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 258000
+  },
+  {
+   "id": "V10-D800120-4062-3195-283lb-144in-1spr-r15-hl91-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "91",
+    "cycles": "50,000",
+    "weight": "283",
+    "doorHeightFeet": 12,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 60,
+    "duplexOuterLength": 61,
+    "duplexInnerWeight": 54.59,
+    "duplexOuterWeight": 111.08
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 50000
+  },
+  {
+   "id": "V10-D40096-4062-3195-496lb-84in-1spr-r12-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "150,000",
+    "weight": "496",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 50,
+    "duplexOuterLength": 51,
+    "duplexInnerWeight": 45.49,
+    "duplexOuterWeight": 92.87
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 164000
+  },
+  {
+   "id": "V10-D400144-4062-3195-423lb-96in-1spr-r10-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "300,000",
+    "weight": "423",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 61,
+    "duplexOuterLength": 62,
+    "duplexInnerWeight": 55.5,
+    "duplexOuterWeight": 112.9
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 333000
+  },
+  {
+   "id": "V10-D525216-4062-3195-960lb-225in-2spr-r10-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "LHR",
+    "cycles": "50,000",
+    "weight": "960",
+    "doorHeightFeet": 18,
+    "doorHeightInches": 9,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 72,
+    "duplexOuterLength": 73,
+    "duplexInnerWeight": 65.51,
+    "duplexOuterWeight": 132.93
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 56000
+  },
+  {
+   "id": "V10-D400144-4062-3195-486lb-123in-1spr-r15-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "150,000",
+    "weight": "486",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 3,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 71,
+    "duplexOuterLength": 72,
+    "duplexInnerWeight": 64.6,
+    "duplexOuterWeight": 131.11
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 168000
+  },
+  {
+   "id": "V10-D400144-4062-3195-447lb-97in-1spr-r10-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "250,000",
+    "weight": "447",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 58,
+    "duplexOuterLength": 59,
+    "duplexInnerWeight": 52.77,
+    "duplexOuterWeight": 107.43
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 253000
+  },
+  {
+   "id": "V10-D40096-4062-3195-492lb-86in-1spr-r15-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "150,000",
+    "weight": "492",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 53,
+    "duplexOuterLength": 54,
+    "duplexInnerWeight": 48.22,
+    "duplexOuterWeight": 98.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 166000
+  },
+  {
+   "id": "V10-D525216-4062-3195-558lb-148in-1spr-r12-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "25,000",
+    "weight": "558",
+    "doorHeightFeet": 12,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 43,
+    "duplexOuterLength": 44,
+    "duplexInnerWeight": 39.12,
+    "duplexOuterWeight": 80.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 28000
+  },
+  {
+   "id": "V10-D800120-4062-3195-411lb-135in-2spr-r15-hl58-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "58",
+    "cycles": "300,000",
+    "weight": "411",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 3,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 66,
+    "duplexOuterLength": 67,
+    "duplexInnerWeight": 60.05,
+    "duplexOuterWeight": 122
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 314000
+  },
+  {
+   "id": "V10-D400144-4062-3195-458lb-113in-1spr-r15-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "458",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 70,
+    "duplexOuterLength": 71,
+    "duplexInnerWeight": 63.69,
+    "duplexOuterWeight": 129.28
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 227000
+  },
+  {
+   "id": "V10-D525216-4062-3195-1349lb-227in-2spr-r10-t10000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "LHR",
+    "cycles": "10,000",
+    "weight": "1349",
+    "doorHeightFeet": 18,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 51,
+    "duplexOuterLength": 52,
+    "duplexInnerWeight": 46.4,
+    "duplexOuterWeight": 94.69
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "V10-575120-4062-3195-736lb-107in-2spr-r15-hl40-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "40",
+    "cycles": "75,000",
+    "weight": "736",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 50,
+    "duplexOuterLength": 51,
+    "duplexInnerWeight": 45.49,
+    "duplexOuterWeight": 92.87
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 79000
+  },
+  {
+   "id": "V10-D400144-4062-3195-719lb-111in-1spr-r10-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "25,000",
+    "weight": "719",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 3,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 41,
+    "duplexOuterLength": 42,
+    "duplexInnerWeight": 37.3,
+    "duplexOuterWeight": 76.48
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 27000
+  },
+  {
+   "id": "V10-D400144-4062-3195-722lb-109in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "722",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 43,
+    "duplexOuterLength": 44,
+    "duplexInnerWeight": 39.12,
+    "duplexOuterWeight": 80.12
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 27000
+  },
+  {
+   "id": "V10-D40096-4062-3195-448lb-86in-1spr-r12-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "250,000",
+    "weight": "448",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 56,
+    "duplexOuterLength": 57,
+    "duplexInnerWeight": 50.95,
+    "duplexOuterWeight": 103.79
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 256000
+  },
+  {
+   "id": "V10-575120-4062-3195-554lb-107in-1spr-r15-hl24-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "24",
+    "cycles": "15,000",
+    "weight": "554",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 28.2,
+    "duplexOuterWeight": 58.27
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 15000
+  },
+  {
+   "id": "V10-D800120-4062-3195-222lb-108in-1spr-r15-hl50-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "50",
+    "cycles": "200,000",
+    "weight": "222",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 55,
+    "duplexOuterLength": 56,
+    "duplexInnerWeight": 50.04,
+    "duplexOuterWeight": 101.97
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 232000
+  },
+  {
+   "id": "V10-D525216-4062-3195-444lb-230in-1spr-r12-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "75,000",
+    "weight": "444",
+    "doorHeightFeet": 19,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 81,
+    "duplexOuterLength": 82,
+    "duplexInnerWeight": 73.7,
+    "duplexOuterWeight": 149.31
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 81000
+  },
+  {
+   "id": "V10-D40096-4062-3195-462lb-94in-1spr-r12-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "200,000",
+    "weight": "462",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 59,
+    "duplexOuterLength": 60,
+    "duplexInnerWeight": 53.68,
+    "duplexOuterWeight": 109.25
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 223000
+  },
+  {
+   "id": "V10-D40096-4062-3195-498lb-85in-1spr-r15-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "150,000",
+    "weight": "498",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 52,
+    "duplexOuterLength": 53,
+    "duplexInnerWeight": 47.31,
+    "duplexOuterWeight": 96.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 159000
+  },
+  {
+   "id": "V10-575120-4062-3195-447lb-140in-1spr-r15-hl13-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "13",
+    "cycles": "50,000",
+    "weight": "447",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 8,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 46,
+    "duplexOuterLength": 47,
+    "duplexInnerWeight": 41.85,
+    "duplexOuterWeight": 85.58
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 53000
+  },
+  {
+   "id": "V10-D800120-4062-3195-670lb-137in-3spr-r15-hl25-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "25",
+    "cycles": "300,000",
+    "weight": "670",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 51.25,
+    "duplexOuterLength": 52.25,
+    "duplexInnerWeight": 46.63,
+    "duplexOuterWeight": 95.14
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 309000
+  },
+  {
+   "id": "V10-D800120-4062-3195-353lb-133in-1spr-r15-hl50-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "50",
+    "cycles": "25,000",
+    "weight": "353",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 37,
+    "duplexOuterLength": 38,
+    "duplexInnerWeight": 33.66,
+    "duplexOuterWeight": 69.19
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 27000
+  },
+  {
+   "id": "V10-52554HL-4062-3195-321lb-130in-1spr-r15-hl53-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "53",
+    "cycles": "150,000",
+    "weight": "321",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 73,
+    "duplexOuterLength": 74,
+    "duplexInnerWeight": 66.42,
+    "duplexOuterWeight": 134.75
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 152000
+  },
+  {
+   "id": "V10-D525216-4062-3195-624lb-192in-1spr-r10-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "15,000",
+    "weight": "624",
+    "doorHeightFeet": 16,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 47,
+    "duplexOuterLength": 48,
+    "duplexInnerWeight": 42.76,
+    "duplexOuterWeight": 87.4
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 16000
+  },
+  {
+   "id": "V10-575120-4062-3195-554lb-120in-2spr-r15-hl47-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "47",
+    "cycles": "250,000",
+    "weight": "554",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 72,
+    "duplexOuterLength": 73,
+    "duplexInnerWeight": 65.51,
+    "duplexOuterWeight": 132.93
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 260000
+  },
+  {
+   "id": "V10-D525216-4062-3195-1134lb-86in-2spr-r10-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "LHR",
+    "cycles": "25,000",
+    "weight": "1134",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 25,
+    "duplexOuterLength": 26,
+    "duplexInnerWeight": 22.75,
+    "duplexOuterWeight": 47.34
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 25000
+  },
+  {
+   "id": "V10-575120-4062-3195-729lb-110in-2spr-r15-hl43-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "43",
+    "cycles": "75,000",
+    "weight": "729",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 52,
+    "duplexOuterLength": 53,
+    "duplexInnerWeight": 47.31,
+    "duplexOuterWeight": 96.51
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 76000
+  },
+  {
+   "id": "V10-D800120-4062-3195-270lb-127in-1spr-r15-hl105-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "105",
+    "cycles": "50,000",
+    "weight": "270",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 78,
+    "duplexOuterLength": 79,
+    "duplexInnerWeight": 70.97,
+    "duplexOuterWeight": 143.85
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 56000
+  },
+  {
+   "id": "V10-D525216-4062-3195-764lb-86in-2spr-r10-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "LHR",
+    "cycles": "150,000",
+    "weight": "764",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 37,
+    "duplexOuterLength": 38,
+    "duplexInnerWeight": 33.66,
+    "duplexOuterWeight": 69.19
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 162000
+  },
+  {
+   "id": "V10-D40096-3938-3195-486lb-88in-1spr-r10-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "150,000",
+    "weight": "486",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.3938\"",
+    "duplexInnerLength": 46,
+    "duplexOuterLength": 47,
+    "duplexInnerWeight": 41.85,
+    "duplexOuterWeight": 82.81
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 148000
+  },
+  {
+   "id": "V10-D800120-4062-3195-603lb-97in-2spr-r15-hl47-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "47",
+    "cycles": "50,000",
+    "weight": "603",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 39,
+    "duplexOuterLength": 40,
+    "duplexInnerWeight": 35.48,
+    "duplexOuterWeight": 72.84
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 59000
+  },
+  {
+   "id": "V10-52554HL-4062-3195-383lb-135in-1spr-r15-hl46-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "46",
+    "cycles": "75,000",
+    "weight": "383",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 3,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 62,
+    "duplexOuterLength": 63,
+    "duplexInnerWeight": 56.41,
+    "duplexOuterWeight": 114.72
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 77000
+  },
+  {
+   "id": "V10-D525216-4062-3195-780lb-101in-2spr-r12-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "12",
+    "cycles": "150,000",
+    "weight": "780",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 40.03,
+    "duplexOuterWeight": 81.94
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 148000
+  },
+  {
+   "id": "V10-D800120-4062-3195-703lb-138in-2spr-r15-hl52-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "52",
+    "cycles": "25,000",
+    "weight": "703",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 6,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 38,
+    "duplexOuterLength": 39,
+    "duplexInnerWeight": 34.57,
+    "duplexOuterWeight": 71.02
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 26000
+  },
+  {
+   "id": "V10-D400144-4062-3195-730lb-125in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "730",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 48,
+    "duplexOuterLength": 49,
+    "duplexInnerWeight": 43.67,
+    "duplexOuterWeight": 89.22
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 25000
+  },
+  {
+   "id": "V10-D40096-4062-3195-472lb-96in-1spr-r12-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "200,000",
+    "weight": "472",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 59,
+    "duplexOuterLength": 60,
+    "duplexInnerWeight": 53.68,
+    "duplexOuterWeight": 109.25
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 207000
+  },
+  {
+   "id": "V10-52554HL-4062-3195-647lb-140in-2spr-r15-hl19-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "19",
+    "cycles": "300,000",
+    "weight": "647",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 8,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 74,
+    "duplexOuterLength": 75,
+    "duplexInnerWeight": 67.33,
+    "duplexOuterWeight": 136.57
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 302000
+  },
+  {
+   "id": "V10-D800120-4062-3195-635lb-140in-3spr-r15-hl37-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "37",
+    "cycles": "300,000",
+    "weight": "635",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 8,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 58.25,
+    "duplexOuterLength": 59.25,
+    "duplexInnerWeight": 53,
+    "duplexOuterWeight": 107.89
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 336000
+  },
+  {
+   "id": "V10-D40096-4062-3195-440lb-91in-1spr-r10-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "250,000",
+    "weight": "440",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 57,
+    "duplexOuterLength": 58,
+    "duplexInnerWeight": 51.86,
+    "duplexOuterWeight": 105.61
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 283000
+  },
+  {
+   "id": "V10-D400144-4062-3195-574lb-86in-1spr-r15-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "75,000",
+    "weight": "574",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 45,
+    "duplexOuterLength": 46,
+    "duplexInnerWeight": 40.94,
+    "duplexOuterWeight": 83.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 79000
+  },
+  {
+   "id": "V10-575120-4062-3195-709lb-137in-2spr-r15-hl30-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "30",
+    "cycles": "100,000",
+    "weight": "709",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 58,
+    "duplexOuterLength": 59,
+    "duplexInnerWeight": 52.77,
+    "duplexOuterWeight": 107.43
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 112000
+  },
+  {
+   "id": "V10-D800120-4062-3195-589lb-97in-2spr-r15-hl26-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "26",
+    "cycles": "75,000",
+    "weight": "589",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 32,
+    "duplexOuterLength": 33,
+    "duplexInnerWeight": 29.11,
+    "duplexOuterWeight": 60.09
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 80000
+  },
+  {
+   "id": "V10-D800120-4062-3195-651lb-121in-3spr-r15-hl41-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "41",
+    "cycles": "250,000",
+    "weight": "651",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 54.25,
+    "duplexOuterLength": 55.25,
+    "duplexInnerWeight": 49.36,
+    "duplexOuterWeight": 100.61
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 285000
+  },
+  {
+   "id": "V10-D525216-4062-3195-764lb-104in-2spr-r12-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "12",
+    "cycles": "150,000",
+    "weight": "764",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 8,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 46,
+    "duplexOuterLength": 47,
+    "duplexInnerWeight": 41.85,
+    "duplexOuterWeight": 85.58
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 161000
+  },
+  {
+   "id": "V10-D800120-4062-3195-750lb-101in-2spr-r15-hl18-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "18",
+    "cycles": "25,000",
+    "weight": "750",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 24,
+    "duplexOuterLength": 25,
+    "duplexInnerWeight": 21.84,
+    "duplexOuterWeight": 45.52
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 29000
+  },
+  {
+   "id": "V10-D800120-4062-3195-677lb-130in-2spr-r15-hl64-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "64",
+    "cycles": "25,000",
+    "weight": "677",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 42,
+    "duplexOuterLength": 43,
+    "duplexInnerWeight": 38.21,
+    "duplexOuterWeight": 78.3
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 29000
+  },
+  {
+   "id": "V10-D400144-4062-3195-526lb-139in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "526",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 73,
+    "duplexOuterLength": 74,
+    "duplexInnerWeight": 66.42,
+    "duplexOuterWeight": 134.75
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 117000
+  },
+  {
+   "id": "V10-D400144-4062-3195-622lb-101in-1spr-r10-t50000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "50,000",
+    "weight": "622",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 44,
+    "duplexOuterLength": 45,
+    "duplexInnerWeight": 40.03,
+    "duplexOuterWeight": 81.94
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 54000
+  },
+  {
+   "id": "V10-D800120-4062-3195-449lb-85in-2spr-r15-hl52-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "52",
+    "cycles": "200,000",
+    "weight": "449",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 59,
+    "duplexOuterLength": 60,
+    "duplexInnerWeight": 53.68,
+    "duplexOuterWeight": 109.25
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 214000
+  },
+  {
+   "id": "V10-52554HL-4062-3195-360lb-84in-1spr-r15-hl43-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "43",
+    "cycles": "100,000",
+    "weight": "360",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 55,
+    "duplexOuterLength": 56,
+    "duplexInnerWeight": 50.04,
+    "duplexOuterWeight": 101.97
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 109000
+  },
+  {
+   "id": "V10-D525216-4062-3195-383lb-194in-1spr-r10-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "LHR",
+    "cycles": "150,000",
+    "weight": "383",
+    "doorHeightFeet": 16,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 78,
+    "duplexOuterLength": 79,
+    "duplexInnerWeight": 70.97,
+    "duplexOuterWeight": 143.85
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 162000
+  },
+  {
+   "id": "V10-575120-4062-3195-305lb-133in-1spr-r15-hl101-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "101",
+    "cycles": "75,000",
+    "weight": "305",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 78,
+    "duplexOuterLength": 79,
+    "duplexInnerWeight": 70.97,
+    "duplexOuterWeight": 143.85
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 74000
+  },
+  {
+   "id": "V10-575120-4062-3195-293lb-107in-1spr-r15-hl61-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "61",
+    "cycles": "150,000",
+    "weight": "293",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 70,
+    "duplexOuterLength": 71,
+    "duplexInnerWeight": 63.69,
+    "duplexOuterWeight": 129.28
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 158000
+  },
+  {
+   "id": "V10-D525216-4062-3195-1263lb-84in-3spr-r15-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "1263",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 36.25,
+    "duplexOuterLength": 37.25,
+    "duplexInnerWeight": 32.98,
+    "duplexOuterWeight": 67.83
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 101000
+  },
+  {
+   "id": "V10-D40096-4062-3195-471lb-84in-1spr-r15-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "471",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 55,
+    "duplexOuterLength": 56,
+    "duplexInnerWeight": 50.04,
+    "duplexOuterWeight": 101.97
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 209000
+  },
+  {
+   "id": "V10-D800120-4062-3195-678lb-141in-3spr-r15-hl16-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "16",
+    "cycles": "300,000",
+    "weight": "678",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 9,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 50.25,
+    "duplexOuterLength": 51.25,
+    "duplexInnerWeight": 45.72,
+    "duplexOuterWeight": 93.32
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 326000
+  },
+  {
+   "id": "V10-D400144-4062-3195-722lb-142in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "722",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 54,
+    "duplexOuterLength": 55,
+    "duplexInnerWeight": 49.13,
+    "duplexOuterWeight": 100.15
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 26000
+  },
+  {
+   "id": "V10-D800120-4062-3195-470lb-118in-2spr-r15-hl39-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D800-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "39",
+    "cycles": "200,000",
+    "weight": "470",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 49,
+    "duplexOuterLength": 50,
+    "duplexInnerWeight": 44.58,
+    "duplexOuterWeight": 91.05
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 198000
+  },
+  {
+   "id": "V10-D525216-4062-3195-387lb-230in-1spr-r15-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "150,000",
+    "weight": "387",
+    "doorHeightFeet": 19,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 94,
+    "duplexOuterLength": 95,
+    "duplexInnerWeight": 85.52,
+    "duplexOuterWeight": 172.99
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 153000,
+   "flagged": true
+  },
+  {
+   "id": "V10-575120-4062-3195-441lb-107in-1spr-r15-hl56-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "56",
+    "cycles": "25,000",
+    "weight": "441",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 45,
+    "duplexOuterLength": 46,
+    "duplexInnerWeight": 40.94,
+    "duplexOuterWeight": 83.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 26000
+  },
+  {
+   "id": "V10-D525216-4062-3195-1272lb-154in-2spr-r15-t15000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "15,000",
+    "weight": "1272",
+    "doorHeightFeet": 12,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 40,
+    "duplexOuterLength": 41,
+    "duplexInnerWeight": 36.39,
+    "duplexOuterWeight": 74.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 15000
+  },
+  {
+   "id": "V10-D525216-4062-3195-420lb-202in-1spr-r15-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "100,000",
+    "weight": "420",
+    "doorHeightFeet": 16,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 77,
+    "duplexOuterLength": 78,
+    "duplexInnerWeight": 70.06,
+    "duplexOuterWeight": 142.03
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 107000
+  },
+  {
+   "id": "V10-D400144-4062-3195-544lb-139in-1spr-r12-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "100,000",
+    "weight": "544",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 69,
+    "duplexOuterLength": 70,
+    "duplexInnerWeight": 62.78,
+    "duplexOuterWeight": 127.46
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 101000
+  },
+  {
+   "id": "V10-575120-4062-3195-529lb-112in-1spr-r15-hl52-t10000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "52",
+    "cycles": "10,000",
+    "weight": "529",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 37,
+    "duplexOuterLength": 38,
+    "duplexInnerWeight": 33.66,
+    "duplexOuterWeight": 69.19
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 11000
+  },
+  {
+   "id": "V10-D525216-4062-3195-989lb-103in-3spr-r10-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "LHR",
+    "cycles": "300,000",
+    "weight": "989",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 50.25,
+    "duplexOuterLength": 51.25,
+    "duplexInnerWeight": 45.72,
+    "duplexOuterWeight": 93.32
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 321000
+  },
+  {
+   "id": "V10-575120-4062-3195-277lb-119in-1spr-r15-hl106-t100000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "106",
+    "cycles": "100,000",
+    "weight": "277",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 92,
+    "duplexOuterLength": 93,
+    "duplexInnerWeight": 83.7,
+    "duplexOuterWeight": 169.34
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 113000,
+   "flagged": true
+  },
+  {
+   "id": "V10-D40096-4062-3195-425lb-88in-1spr-r15-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "300,000",
+    "weight": "425",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 63,
+    "duplexOuterLength": 64,
+    "duplexInnerWeight": 57.32,
+    "duplexOuterWeight": 116.54
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 338000
+  },
+  {
+   "id": "V10-D525216-4062-3195-568lb-192in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "568",
+    "doorHeightFeet": 16,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 54,
+    "duplexOuterLength": 55,
+    "duplexInnerWeight": 49.13,
+    "duplexOuterWeight": 100.15
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 26000
+  },
+  {
+   "id": "V10-D525216-4062-3195-1108lb-122in-2spr-r15-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "1108",
+    "doorHeightFeet": 10,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 37,
+    "duplexOuterLength": 38,
+    "duplexInnerWeight": 33.66,
+    "duplexOuterWeight": 69.19
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 29000
+  },
+  {
+   "id": "V10-575120-4062-3195-215lb-137in-1spr-r15-hl112-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "112",
+    "cycles": "300,000",
+    "weight": "215",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 5,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 114,
+    "duplexOuterLength": 115,
+    "duplexInnerWeight": 103.72,
+    "duplexOuterWeight": 209.4
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 346000,
+   "flagged": true
+  },
+  {
+   "id": "V10-D525216-4062-3195-1141lb-100in-2spr-r15-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "1141",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 31,
+    "duplexOuterLength": 32,
+    "duplexInnerWeight": 28.2,
+    "duplexOuterWeight": 58.27
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 26000
+  },
+  {
+   "id": "V10-52554HL-4062-3195-448lb-143in-1spr-r15-hl12-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "12",
+    "cycles": "75,000",
+    "weight": "448",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 11,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 54,
+    "duplexOuterLength": 55,
+    "duplexInnerWeight": 49.13,
+    "duplexOuterWeight": 100.15
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 77000
+  },
+  {
+   "id": "V10-D40096-4062-3195-436lb-86in-1spr-r12-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "250,000",
+    "weight": "436",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 58,
+    "duplexOuterLength": 59,
+    "duplexInnerWeight": 52.77,
+    "duplexOuterWeight": 107.43
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 291000
+  },
+  {
+   "id": "V10-D400144-4062-3195-730lb-115in-1spr-r15-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "730",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 7,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 45,
+    "duplexOuterLength": 46,
+    "duplexInnerWeight": 40.94,
+    "duplexOuterWeight": 83.76
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 25000
+  },
+  {
+   "id": "V10-D400144-4062-3195-579lb-102in-1spr-r15-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-144",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "75,000",
+    "weight": "579",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 6,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 51,
+    "duplexOuterLength": 52,
+    "duplexInnerWeight": 46.4,
+    "duplexOuterWeight": 94.69
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 75000
+  },
+  {
+   "id": "V10-52554HL-4062-3195-414lb-138in-1spr-r15-hl28-t75000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "28",
+    "cycles": "75,000",
+    "weight": "414",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 6,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 58,
+    "duplexOuterLength": 59,
+    "duplexInnerWeight": 52.77,
+    "duplexOuterWeight": 107.43
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 77000
+  },
+  {
+   "id": "V10-D40096-4062-3195-488lb-88in-1spr-r12-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "12",
+    "cycles": "150,000",
+    "weight": "488",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 53,
+    "duplexOuterLength": 54,
+    "duplexInnerWeight": 48.22,
+    "duplexOuterWeight": 98.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 177000
+  },
+  {
+   "id": "V10-D525216-4062-3195-1137lb-136in-2spr-r15-t25000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "cycles": "25,000",
+    "weight": "1137",
+    "doorHeightFeet": 11,
+    "doorHeightInches": 4,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 40,
+    "duplexOuterLength": 41,
+    "duplexInnerWeight": 36.39,
+    "duplexOuterWeight": 74.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 25000
+  },
+  {
+   "id": "V10-D525216-4062-3195-1077lb-84in-3spr-r15-t200000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "15",
+    "cycles": "200,000",
+    "weight": "1077",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 42.25,
+    "duplexOuterLength": 43.25,
+    "duplexInnerWeight": 38.44,
+    "duplexOuterWeight": 78.75
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 213000
+  },
+  {
+   "id": "V10-52554HL-4062-3195-608lb-118in-2spr-r15-hl25-t300000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 525-54HL",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 2,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "25",
+    "cycles": "300,000",
+    "weight": "608",
+    "doorHeightFeet": 9,
+    "doorHeightInches": 10,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 70,
+    "duplexOuterLength": 71,
+    "duplexInnerWeight": 63.69,
+    "duplexOuterWeight": 129.28
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 342000
+  },
+  {
+   "id": "V10-D525216-4062-3195-1032lb-105in-3spr-r12-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 3,
+    "radius": "12",
+    "cycles": "250,000",
+    "weight": "1032",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 9,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 51.25,
+    "duplexOuterLength": 52.25,
+    "duplexInnerWeight": 46.63,
+    "duplexOuterWeight": 95.14
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 272000
+  },
+  {
+   "id": "V10-575120-4062-3195-251lb-97in-1spr-r15-hl77-t250000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF 575-120",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "liftType": "Hi-Lift",
+    "liftin": "77",
+    "cycles": "250,000",
+    "weight": "251",
+    "doorHeightFeet": 8,
+    "doorHeightInches": 1,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 94,
+    "duplexOuterLength": 95,
+    "duplexInnerWeight": 85.52,
+    "duplexOuterWeight": 172.99
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 256000,
+   "flagged": true
+  },
+  {
+   "id": "V10-D40096-4062-3195-494lb-86in-1spr-r15-t150000",
+   "status": "verified",
+   "source": "Rung-targeted volume batch 10",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D400-96",
+    "springId": "3 3/4\" inside 6\"",
+    "springs": 1,
+    "radius": "15",
+    "cycles": "150,000",
+    "weight": "494",
+    "doorHeightFeet": 7,
+    "doorHeightInches": 2,
+    "doorWidthFeet": 18,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.3195\"",
+    "duplexOuterWire": "0.4062\"",
+    "duplexInnerLength": 53,
+    "duplexOuterLength": 54,
+    "duplexInnerWeight": 48.22,
+    "duplexOuterWeight": 98.33
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 162000
   }
  ]
 }
