@@ -25,7 +25,10 @@ import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
 const BASE = "https://shop.servicespring.com";
-const DELAY_MS = 1000;
+// One request a second by default. PULL_DELAY_MS can only make it SLOWER.
+// Asking faster is never the fix for anything here - this is someone else's
+// server and the account - so the floor is not negotiable.
+const DELAY_MS = Math.max(1000, Number(process.env.PULL_DELAY_MS) || 1000);
 const MAX_REQUESTS = 400;
 const UA = "Mozilla/5.0 (X11; Linux x86_64) spring_engineering/dev-pull";
 
@@ -95,6 +98,35 @@ function login() {
     }
 
     console.log("authenticated");
+}
+
+// A LOST SESSION WOULD OTHERWISE THROW AWAY EVERY REMAINING REQUEST.
+//
+// If the cookie jar expires partway through a long pull the server stops
+// answering with JSON and answers with the login page - HTML, status 200. The
+// loop below caught the JSON.parse failure, recorded "non-JSON response", and
+// would then ask an unauthenticated server every remaining question. So a
+// non-JSON body is now treated as "log in again and ask once more".
+//
+// BUT AN HTML BODY IS USUALLY NOT A LOST SESSION, AND ASSUMING IT WAS COST AN
+// HOUR. A run of 200 came back with 48 HTML bodies and the obvious reading was
+// expiry: they began at reading 123 and never recovered. They were NOT
+// contiguous, which should have been the tell, and a fresh login did not fix
+// them. Every one of the 48 was a STANDARD-lift request against 525-54HL,
+// 575-120 or D800-120 - hi-lift drums, which answer only when lift=HiLift and
+// serve an HTML page otherwise. 0 of 48 such requests returned JSON; 120 of
+// 120 of the same three drums under HiLift did. The combination was
+// impossible, and no amount of logging in was ever going to help.
+//
+// Hence RELOGIN_CAP: when the far end keeps serving HTML the likeliest
+// explanation is that the REQUEST is wrong, not the session, and retrying is a
+// slow way to hammer someone else's server. Read what is being ASKED before
+// concluding anything about the cookie.
+const RELOGIN_CAP = 5;
+let relogins = 0;
+
+function looksLikeHtml(body) {
+    return /^\s*(<!DOCTYPE|<html)/i.test(body);
 }
 
 // our vocabulary -> the calculator's query parameters
@@ -189,11 +221,33 @@ for (let i = 0; i < cases.length; i++) {
     let parsed = null;
     let raw = "";
 
-    try {
-        raw = curl(["-L", url]);
-        parsed = JSON.parse(raw);
-    } catch {
-        parsed = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+            raw = curl(["-L", url]);
+            parsed = JSON.parse(raw);
+            break;
+        } catch {
+            parsed = null;
+        }
+
+        // Second time round there is nothing left to try - fall through and
+        // record the failure rather than logging in again on the way out.
+        if (attempt > 0 || !looksLikeHtml(raw) || relogins >= RELOGIN_CAP) {
+            break;
+        }
+
+        relogins += 1;
+        console.log(`  session lost at ${i + 1}/${cases.length} - re-authenticating (${relogins}/${RELOGIN_CAP})`);
+        await sleep(DELAY_MS);
+
+        try {
+            login();
+        } catch (e) {
+            console.log(`  re-login failed: ${e.message}`);
+            break;
+        }
+
+        await sleep(DELAY_MS);
     }
 
     if (!parsed) {

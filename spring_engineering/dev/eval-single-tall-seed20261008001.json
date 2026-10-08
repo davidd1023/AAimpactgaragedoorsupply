@@ -1,0 +1,4103 @@
+[
+ {
+  "input": {
+   "label": "single-tall 0",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 75000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 186,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 36.5,
+   "multiplier": 0.196123,
+   "cycles": 84000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2437,
+    "innerDiameter": 2.625,
+    "springLength": 49.5,
+    "springWeight": 24.2153
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 1",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 219,
+   "weight": 381,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13.6,
+   "totalInchPoundPerTurn": 82.1,
+   "multiplier": 0.215425,
+   "cycles": 150000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4615,
+    "innerDiameter": 5.25,
+    "springLength": 132.75,
+    "springWeight": 244.8499
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 2",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 250000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 114,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 22.4,
+   "multiplier": 0.196123,
+   "cycles": 299000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 3.75,
+    "springLength": 67,
+    "springWeight": 54.7257
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 3",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 230,
+   "weight": 1142,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 14.3,
+   "totalInchPoundPerTurn": 235,
+   "multiplier": 0.205739,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4375,
+    "innerDiameter": 5.25,
+    "springLength": 71.75,
+    "springWeight": 124.9293
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 4",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 687,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 127.5,
+   "multiplier": 0.185656,
+   "cycles": 221000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 5.25,
+    "springLength": 78.25,
+    "springWeight": 111.402
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 5",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 180,
+   "weight": 1383,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.4,
+   "totalInchPoundPerTurn": 357.5,
+   "multiplier": 0.258527,
+   "cycles": 19000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 5.25,
+    "springLength": 59.25,
+    "springWeight": 99.1878
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 6",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 3,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 216,
+   "heightInches": 186,
+   "weight": 594,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.4,
+   "totalInchPoundPerTurn": 153,
+   "multiplier": 0.257526,
+   "cycles": 213000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 2.625,
+    "springLength": 144.5,
+    "springWeight": 113.7533
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 7",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 151,
+   "weight": 177,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.9,
+   "totalInchPoundPerTurn": 52.7,
+   "multiplier": 0.297473,
+   "cycles": 16000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.295,
+    "innerDiameter": 3.75,
+    "springLength": 32.25,
+    "springWeight": 26.9292
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 8",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 372,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 70.5,
+   "multiplier": 0.189581,
+   "cycles": 117000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 2.625,
+    "springLength": 58,
+    "springWeight": 29.1703
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 9",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 188,
+   "weight": 316,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.8,
+   "totalInchPoundPerTurn": 78.5,
+   "multiplier": 0.248343,
+   "cycles": 57000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 2.625,
+    "springLength": 77.5,
+    "springWeight": 49.782
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 10",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 3,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 270,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 50.1,
+   "multiplier": 0.185656,
+   "cycles": 258000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 2.625,
+    "springLength": 77.25,
+    "springWeight": 40.9734
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 11",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 300000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 681,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 133.6,
+   "multiplier": 0.196123,
+   "cycles": 358000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 5.25,
+    "springLength": 88.25,
+    "springWeight": 130.2604
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 12",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 602,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 118.1,
+   "multiplier": 0.196123,
+   "cycles": 181000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 5.25,
+    "springLength": 84.75,
+    "springWeight": 131.8041
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 13",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 194,
+   "weight": 508,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.2,
+   "totalInchPoundPerTurn": 122.5,
+   "multiplier": 0.241214,
+   "cycles": 57000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 3.75,
+    "springLength": 49.25,
+    "springWeight": 40.2275
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 14",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 4,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 216,
+   "heightInches": 184,
+   "weight": 1100,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.8,
+   "totalInchPoundPerTurn": 274.1,
+   "multiplier": 0.249218,
+   "cycles": 213000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 3.75,
+    "springLength": 139.5,
+    "springWeight": 171.7698
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 15",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 229,
+   "weight": 299,
+   "eval": true
+  },
+  "status": "warning",
+  "messages": [
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 14.2,
+   "totalInchPoundPerTurn": 61.8,
+   "multiplier": 0.206584,
+   "cycles": 59000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 3.75,
+    "springLength": 110.75,
+    "springWeight": 126.462
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 16",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 4,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 216,
+   "heightInches": 156,
+   "weight": 1500,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.2,
+   "totalInchPoundPerTurn": 433.5,
+   "multiplier": 0.289013,
+   "cycles": 353000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 3.75,
+    "springLength": 183.25,
+    "springWeight": 266.4128
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 17",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 225,
+   "weight": 220,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 14,
+   "totalInchPoundPerTurn": 46.2,
+   "multiplier": 0.210032,
+   "cycles": 53000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 3.75,
+    "springLength": 49.25,
+    "springWeight": 37.8507
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 18",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 250000,
+   "widthInches": 216,
+   "heightInches": 171,
+   "weight": 116,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 32.4,
+   "multiplier": 0.278963,
+   "cycles": 322000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 3.75,
+    "springLength": 76,
+    "springWeight": 69.1475
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 19",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 221,
+   "weight": 364,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 13.7,
+   "totalInchPoundPerTurn": 77.7,
+   "multiplier": 0.213597,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 2.625,
+    "springLength": 53.75,
+    "springWeight": 31.6746
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 20",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 4,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 208,
+   "weight": 1184,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13.2,
+   "totalInchPoundPerTurn": 263.8,
+   "multiplier": 0.222843,
+   "cycles": 33000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 5.25,
+    "springLength": 60,
+    "springWeight": 88.5623
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 21",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 292,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 55.4,
+   "multiplier": 0.189581,
+   "cycles": 27000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 2.625,
+    "springLength": 47.25,
+    "springWeight": 25.0614
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 22",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 142.2,
+   "multiplier": 0.189581,
+   "cycles": 172000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 2.625,
+    "springLength": 112.75,
+    "springWeight": 77.1955
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 23",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 186,
+   "weight": 378,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 94.8,
+   "multiplier": 0.250814,
+   "cycles": 52000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 2.625,
+    "springLength": 85,
+    "springWeight": 58.1962
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 24",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 139.2,
+   "multiplier": 0.185656,
+   "cycles": 228000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 5.25,
+    "springLength": 84.75,
+    "springWeight": 125.0942
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 25",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 169,
+   "weight": 223,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.4,
+   "totalInchPoundPerTurn": 62.9,
+   "multiplier": 0.282093,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 2.625,
+    "springLength": 54.5,
+    "springWeight": 35.8781
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 26",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 387,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 73.4,
+   "multiplier": 0.189581,
+   "cycles": 179000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4305,
+    "innerDiameter": 3.75,
+    "springLength": 144,
+    "springWeight": 181.3456
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 27",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 4,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 147.1,
+   "multiplier": 0.196123,
+   "cycles": 14000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 2.625,
+    "springLength": 43.25,
+    "springWeight": 23.9443
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 28",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 202,
+   "weight": 591,
+   "eval": true
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.6,
+   "totalInchPoundPerTurn": 137.3,
+   "multiplier": 0.232318,
+   "cycles": 42000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 5.25,
+    "springLength": 107,
+    "springWeight": 210.5915
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 29",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 300000,
+   "widthInches": 216,
+   "heightInches": 231,
+   "weight": 118,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 14,
+   "totalInchPoundPerTurn": 24.7,
+   "multiplier": 0.209253,
+   "cycles": 471000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 2.625,
+    "springLength": 161.75,
+    "springWeight": 110.7439
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 30",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 250000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 139.2,
+   "multiplier": 0.185656,
+   "cycles": 256000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4375,
+    "innerDiameter": 5.25,
+    "springLength": 120.25,
+    "springWeight": 209.3763
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 31",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 139.2,
+   "multiplier": 0.185656,
+   "cycles": 65000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 3.75,
+    "springLength": 98.5,
+    "springWeight": 112.4741
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 32",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 3,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 216,
+   "weight": 369,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13.5,
+   "totalInchPoundPerTurn": 80.5,
+   "multiplier": 0.218226,
+   "cycles": 183000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 2.625,
+    "springLength": 112.75,
+    "springWeight": 72.4247
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 33",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 166,
+   "weight": 894,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.2,
+   "totalInchPoundPerTurn": 256.5,
+   "multiplier": 0.286922,
+   "cycles": 146000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 5.25,
+    "springLength": 82.25,
+    "springWeight": 137.6911
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 34",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 75000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 334,
+   "eval": true
+  },
+  "status": "warning",
+  "messages": [
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 62,
+   "multiplier": 0.185656,
+   "cycles": 111000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 3.75,
+    "springLength": 110.25,
+    "springWeight": 125.891
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 35",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 250000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 136,
+   "eval": true
+  },
+  "status": "warning",
+  "messages": [
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 25.8,
+   "multiplier": 0.189581,
+   "cycles": 283000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 2.625,
+    "springLength": 106.75,
+    "springWeight": 67.1186
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 36",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 187,
+   "weight": 1428,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.8,
+   "totalInchPoundPerTurn": 356.4,
+   "multiplier": 0.249572,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 5.25,
+    "springLength": 56.5,
+    "springWeight": 87.8694
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 37",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 4,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 556,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 109,
+   "multiplier": 0.196123,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 2.625,
+    "springLength": 38,
+    "springWeight": 19.1116
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 38",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 75000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 204,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 38.7,
+   "multiplier": 0.189581,
+   "cycles": 76000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 2.625,
+    "springLength": 53,
+    "springWeight": 26.6556
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 39",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 192,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 36.4,
+   "multiplier": 0.189581,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 3.75,
+    "springLength": 41.75,
+    "springWeight": 34.1015
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 40",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 175,
+   "weight": 510,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.1,
+   "totalInchPoundPerTurn": 135.3,
+   "multiplier": 0.265324,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 5.25,
+    "springLength": 52.5,
+    "springWeight": 87.8879
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 41",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 75000,
+   "widthInches": 216,
+   "heightInches": 178,
+   "weight": 396,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 103.4,
+   "multiplier": 0.261204,
+   "cycles": 87000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 2.625,
+    "springLength": 61,
+    "springWeight": 33.7711
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 42",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 212,
+   "weight": 132,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 13.2,
+   "totalInchPoundPerTurn": 29.3,
+   "multiplier": 0.222076,
+   "cycles": 14000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 2.625,
+    "springLength": 44.5,
+    "springWeight": 23.6028
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 43",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 190,
+   "weight": 590,
+   "eval": true
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.9,
+   "totalInchPoundPerTurn": 145.1,
+   "multiplier": 0.245921,
+   "cycles": 15000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4531,
+    "innerDiameter": 5.25,
+    "springLength": 69.25,
+    "springWeight": 125.2195
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 44",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 179,
+   "weight": 392,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.3,
+   "totalInchPoundPerTurn": 101.9,
+   "multiplier": 0.259858,
+   "cycles": 72000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 2.625,
+    "springLength": 95,
+    "springWeight": 67.8279
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 45",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 4,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 636,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 118.1,
+   "multiplier": 0.185656,
+   "cycles": 136000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 2.625,
+    "springLength": 93.5,
+    "springWeight": 58.7877
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 46",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 147,
+   "weight": 1006,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.6,
+   "totalInchPoundPerTurn": 306.4,
+   "multiplier": 0.3046,
+   "cycles": 17000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4305,
+    "innerDiameter": 5.25,
+    "springLength": 51.25,
+    "springWeight": 87.6994
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 47",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 4,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 139.2,
+   "multiplier": 0.185656,
+   "cycles": 172000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 2.625,
+    "springLength": 115.25,
+    "springWeight": 78.9072
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 48",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 484,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 91.8,
+   "multiplier": 0.189581,
+   "cycles": 63000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4305,
+    "innerDiameter": 5.25,
+    "springLength": 84.75,
+    "springWeight": 145.0249
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 49",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 142.2,
+   "multiplier": 0.189581,
+   "cycles": 22000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 5.25,
+    "springLength": 47.25,
+    "springWeight": 67.2683
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 50",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 4,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 139.2,
+   "multiplier": 0.185656,
+   "cycles": 29000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 3.75,
+    "springLength": 43.5,
+    "springWeight": 35.5309
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 51",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 185,
+   "weight": 964,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.8,
+   "totalInchPoundPerTurn": 239.1,
+   "multiplier": 0.247997,
+   "cycles": 109000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 5.25,
+    "springLength": 122.5,
+    "springWeight": 241.0978
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 52",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 216,
+   "heightInches": 208,
+   "weight": 1500,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13,
+   "totalInchPoundPerTurn": 339.1,
+   "multiplier": 0.226063,
+   "cycles": 264000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5312,
+    "innerDiameter": 5.25,
+    "springLength": 192,
+    "springWeight": 412.5932
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 53",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 133,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 24.7,
+   "multiplier": 0.185656,
+   "cycles": 69000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 2.625,
+    "springLength": 63.75,
+    "springWeight": 35.2936
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 54",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 173,
+   "weight": 422,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.9,
+   "totalInchPoundPerTurn": 113.2,
+   "multiplier": 0.268143,
+   "cycles": 203000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 5.25,
+    "springLength": 129.5,
+    "springWeight": 254.8748
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 55",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 170,
+   "weight": 562,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11,
+   "totalInchPoundPerTurn": 150.4,
+   "multiplier": 0.267664,
+   "cycles": 79000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 3.75,
+    "springLength": 91.25,
+    "springWeight": 104.1955
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 56",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 172,
+   "weight": 376,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.9,
+   "totalInchPoundPerTurn": 101.4,
+   "multiplier": 0.269575,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 5.25,
+    "springLength": 39.5,
+    "springWeight": 58.3035
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 57",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 211,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 40,
+   "multiplier": 0.189581,
+   "cycles": 36000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 3.75,
+    "springLength": 50.5,
+    "springWeight": 43.9367
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 58",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 392,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 76.9,
+   "multiplier": 0.196123,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.283,
+    "innerDiameter": 3.75,
+    "springLength": 35.75,
+    "springWeight": 28.5524
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 59",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 250000,
+   "widthInches": 216,
+   "heightInches": 207,
+   "weight": 428,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13.1,
+   "totalInchPoundPerTurn": 95.8,
+   "multiplier": 0.223831,
+   "cycles": 281000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 2.625,
+    "springLength": 194.5,
+    "springWeight": 161.7973
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 60",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 75000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 372,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 73,
+   "multiplier": 0.196123,
+   "cycles": 84000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 2.625,
+    "springLength": 83.25,
+    "springWeight": 53.4755
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 61",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 300000,
+   "widthInches": 216,
+   "heightInches": 208,
+   "weight": 1500,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13,
+   "totalInchPoundPerTurn": 339.1,
+   "multiplier": 0.226063,
+   "cycles": 353000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 5.25,
+    "springLength": 172.25,
+    "springWeight": 339.013
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 62",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 224,
+   "weight": 1016,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13.9,
+   "totalInchPoundPerTurn": 214.3,
+   "multiplier": 0.210912,
+   "cycles": 43000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 3.75,
+    "springLength": 85.5,
+    "springWeight": 89.1917
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 63",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 4,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 199,
+   "weight": 1420,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.7,
+   "totalInchPoundPerTurn": 329.5,
+   "multiplier": 0.232058,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 5.25,
+    "springLength": 61,
+    "springWeight": 94.8678
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 64",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 591,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 115.9,
+   "multiplier": 0.196123,
+   "cycles": 134000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 5.25,
+    "springLength": 126.25,
+    "springWeight": 248.4783
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 65",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 75000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 484,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 94.9,
+   "multiplier": 0.196123,
+   "cycles": 78000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4375,
+    "innerDiameter": 5.25,
+    "springLength": 88.75,
+    "springWeight": 154.5293
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 66",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 576,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 113,
+   "multiplier": 0.196123,
+   "cycles": 118000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 5.25,
+    "springLength": 69.75,
+    "springWeight": 102.9537
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 67",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 185,
+   "weight": 784,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.6,
+   "totalInchPoundPerTurn": 197.6,
+   "multiplier": 0.252067,
+   "cycles": 72000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 2.625,
+    "springLength": 98,
+    "springWeight": 69.9699
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 68",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 3,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 432,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 81.9,
+   "multiplier": 0.189581,
+   "cycles": 29000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 2.625,
+    "springLength": 47.75,
+    "springWeight": 25.3266
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 69",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 138,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 26.2,
+   "multiplier": 0.189581,
+   "cycles": 19000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.25,
+    "innerDiameter": 2.625,
+    "springLength": 39.5,
+    "springWeight": 19.866
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 70",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 200000,
+   "widthInches": 216,
+   "heightInches": 154,
+   "weight": 298,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 9.8,
+   "totalInchPoundPerTurn": 88.9,
+   "multiplier": 0.298214,
+   "cycles": 259000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 3.75,
+    "springLength": 79.25,
+    "springWeight": 78.025
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 71",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 75000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 139.2,
+   "multiplier": 0.185656,
+   "cycles": 147000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 5.25,
+    "springLength": 71.75,
+    "springWeight": 102.1481
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 72",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 3,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 142.2,
+   "multiplier": 0.189581,
+   "cycles": 73000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 3.75,
+    "springLength": 74.5,
+    "springWeight": 73.3485
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 73",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 182,
+   "weight": 825,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.2,
+   "totalInchPoundPerTurn": 216.9,
+   "multiplier": 0.262914,
+   "cycles": 30000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 5.25,
+    "springLength": 46.5,
+    "springWeight": 66.2005
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 74",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 3,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 300000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 142.2,
+   "multiplier": 0.189581,
+   "cycles": 431000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 3.75,
+    "springLength": 143.75,
+    "springWeight": 164.1437
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 75",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 300000,
+   "widthInches": 216,
+   "heightInches": 207,
+   "weight": 187,
+   "eval": true
+  },
+  "status": "warning",
+  "messages": [
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.6,
+   "totalInchPoundPerTurn": 43.5,
+   "multiplier": 0.232501,
+   "cycles": 527000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 5.25,
+    "springLength": 114.75,
+    "springWeight": 178.4604
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 76",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 142.2,
+   "multiplier": 0.189581,
+   "cycles": 34000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 5.25,
+    "springLength": 55.75,
+    "springWeight": 82.2891
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 77",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 204,
+   "weight": 500,
+   "eval": true
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.9,
+   "totalInchPoundPerTurn": 113.4,
+   "multiplier": 0.226847,
+   "cycles": 52000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4687,
+    "innerDiameter": 5.25,
+    "springLength": 104,
+    "springWeight": 195.06
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 78",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 736,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 139.5,
+   "multiplier": 0.189581,
+   "cycles": 118000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3195,
+    "innerDiameter": 2.625,
+    "springLength": 97,
+    "springWeight": 63.8565
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 79",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 209,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 39.6,
+   "multiplier": 0.189581,
+   "cycles": 103000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 3.75,
+    "springLength": 74,
+    "springWeight": 69.947
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 80",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 250000,
+   "widthInches": 216,
+   "heightInches": 152,
+   "weight": 1500,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9.4,
+   "totalInchPoundPerTurn": 467.7,
+   "multiplier": 0.311823,
+   "cycles": 264000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5312,
+    "innerDiameter": 5.25,
+    "springLength": 139.5,
+    "springWeight": 299.7747
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 81",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 3,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 75000,
+   "widthInches": 216,
+   "heightInches": 173,
+   "weight": 351,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.6,
+   "totalInchPoundPerTurn": 96.8,
+   "multiplier": 0.275901,
+   "cycles": 84000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 2.625,
+    "springLength": 64.5,
+    "springWeight": 38.0095
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 82",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 4,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 216,
+   "weight": 1192,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13.2,
+   "totalInchPoundPerTurn": 266.1,
+   "multiplier": 0.223203,
+   "cycles": 146000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4218,
+    "innerDiameter": 3.75,
+    "springLength": 143.75,
+    "springWeight": 177.0029
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 83",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 230,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 42.7,
+   "multiplier": 0.185656,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 2.625,
+    "springLength": 49,
+    "springWeight": 28.8754
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 84",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 166,
+   "weight": 288,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.5,
+   "totalInchPoundPerTurn": 80.2,
+   "multiplier": 0.278495,
+   "cycles": 24000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 5.25,
+    "springLength": 42,
+    "springWeight": 59.794
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 85",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 139.2,
+   "multiplier": 0.185656,
+   "cycles": 228000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 5.25,
+    "springLength": 84.75,
+    "springWeight": 125.0942
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 86",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 3,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 164,
+   "weight": 1068,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.6,
+   "totalInchPoundPerTurn": 295.2,
+   "multiplier": 0.27642,
+   "cycles": 26000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 3.75,
+    "springLength": 70.25,
+    "springWeight": 80.2163
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 87",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 180,
+   "weight": 1500,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.4,
+   "totalInchPoundPerTurn": 387.8,
+   "multiplier": 0.258527,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 5.25,
+    "springLength": 41,
+    "springWeight": 60.5176
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 88",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 196,
+   "weight": 1053,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12,
+   "totalInchPoundPerTurn": 258,
+   "multiplier": 0.244971,
+   "cycles": 173000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4531,
+    "innerDiameter": 5.25,
+    "springLength": 116,
+    "springWeight": 209.754
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 89",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 75000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 676,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 128.2,
+   "multiplier": 0.189581,
+   "cycles": 102000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 3.75,
+    "springLength": 62.75,
+    "springWeight": 54.5946
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 90",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 3,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 171,
+   "weight": 306,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.8,
+   "totalInchPoundPerTurn": 82.9,
+   "multiplier": 0.271022,
+   "cycles": 159000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 2.625,
+    "springLength": 75,
+    "springWeight": 44.1971
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 91",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 75000,
+   "widthInches": 216,
+   "heightInches": 187,
+   "weight": 517,
+   "eval": true
+  },
+  "status": "warning",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.5,
+   "totalInchPoundPerTurn": 132.5,
+   "multiplier": 0.256213,
+   "cycles": 79000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 5.25,
+    "springLength": 110.75,
+    "springWeight": 217.9721
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 92",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 300000,
+   "widthInches": 216,
+   "heightInches": 194,
+   "weight": 264,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.2,
+   "totalInchPoundPerTurn": 63.7,
+   "multiplier": 0.241214,
+   "cycles": 456000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 3.75,
+    "springLength": 110,
+    "springWeight": 108.2997
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 93",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 3,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 372,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 69.1,
+   "multiplier": 0.185656,
+   "cycles": 22000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2437,
+    "innerDiameter": 2.625,
+    "springLength": 39.5,
+    "springWeight": 19.3233
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 94",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 510,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 100,
+   "multiplier": 0.196123,
+   "cycles": 134000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 5.25,
+    "springLength": 66.75,
+    "springWeight": 95.0298
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 95",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 3,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 167,
+   "weight": 1116,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.3,
+   "totalInchPoundPerTurn": 318.4,
+   "multiplier": 0.285294,
+   "cycles": 132000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4531,
+    "innerDiameter": 3.75,
+    "springLength": 128.25,
+    "springWeight": 170.9103
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 96",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 4,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 157,
+   "weight": 1044,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.2,
+   "totalInchPoundPerTurn": 300,
+   "multiplier": 0.287378,
+   "cycles": 111000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 3.75,
+    "springLength": 91.5,
+    "springWeight": 104.481
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 97",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 3,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 300000,
+   "widthInches": 216,
+   "heightInches": 223,
+   "weight": 1188,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.4062 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13.6,
+   "totalInchPoundPerTurn": 257.2,
+   "multiplier": 0.216469,
+   "cycles": 356000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5,
+    "innerDiameter": 3.75,
+    "springLength": 254.75,
+    "springWeight": 378.8098
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 98",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 220,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 40.8,
+   "multiplier": 0.185656,
+   "cycles": 14000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2253,
+    "innerDiameter": 2.625,
+    "springLength": 30.5,
+    "springWeight": 13.7051
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 99",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 648,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 120.3,
+   "multiplier": 0.185656,
+   "cycles": 22000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 3.75,
+    "springLength": 59,
+    "springWeight": 58.088
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 100",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 3,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 50000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 252,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 46.8,
+   "multiplier": 0.185656,
+   "cycles": 81000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2343,
+    "innerDiameter": 2.625,
+    "springLength": 47.75,
+    "springWeight": 22.3845
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 101",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 172,
+   "weight": 988,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.9,
+   "totalInchPoundPerTurn": 266.3,
+   "multiplier": 0.269575,
+   "cycles": 215000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4062,
+    "innerDiameter": 5.25,
+    "springLength": 87.5,
+    "springWeight": 140.6759
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 102",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 300000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 450,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.7,
+   "totalInchPoundPerTurn": 88.3,
+   "multiplier": 0.196123,
+   "cycles": 478000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.49,
+    "innerDiameter": 5.25,
+    "springLength": 165.5,
+    "springWeight": 325.728
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 103",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 162,
+   "weight": 610,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.3,
+   "totalInchPoundPerTurn": 173.7,
+   "multiplier": 0.284775,
+   "cycles": 18000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 3.75,
+    "springLength": 53.25,
+    "springWeight": 55.5492
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 104",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 4,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 200000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 142.2,
+   "multiplier": 0.189581,
+   "cycles": 281000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 5.25,
+    "springLength": 72,
+    "springWeight": 96.8613
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 105",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 566,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 107.3,
+   "multiplier": 0.189581,
+   "cycles": 12000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 3.75,
+    "springLength": 41.75,
+    "springWeight": 37.0888
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 106",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 100000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 204,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 37.9,
+   "multiplier": 0.185656,
+   "cycles": 144000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.2625,
+    "innerDiameter": 2.625,
+    "springLength": 68.25,
+    "springWeight": 36.1998
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 107",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 4,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 186,
+   "weight": 720,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.9,
+   "totalInchPoundPerTurn": 177.7,
+   "multiplier": 0.246787,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.289,
+    "innerDiameter": 2.625,
+    "springLength": 47.25,
+    "springWeight": 27.8442
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 108",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 3,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 75000,
+   "widthInches": 216,
+   "heightInches": 183,
+   "weight": 429,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11.5,
+   "totalInchPoundPerTurn": 109.2,
+   "multiplier": 0.254612,
+   "cycles": 91000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3125,
+    "innerDiameter": 3.75,
+    "springLength": 60.75,
+    "springWeight": 53.9675
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 109",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 204,
+   "weight": 903,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.9,
+   "totalInchPoundPerTurn": 204.8,
+   "multiplier": 0.226847,
+   "cycles": 19000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 5.25,
+    "springLength": 49.25,
+    "springWeight": 70.1156
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 110",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 1,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 250000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 167,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 31,
+   "multiplier": 0.185656,
+   "cycles": 295000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.331,
+    "innerDiameter": 2.625,
+    "springLength": 129.25,
+    "springWeight": 88.4924
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 111",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 3,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 250000,
+   "widthInches": 216,
+   "heightInches": 150,
+   "weight": 639,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 9.6,
+   "totalInchPoundPerTurn": 195.2,
+   "multiplier": 0.305416,
+   "cycles": 287000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 2.625,
+    "springLength": 143.75,
+    "springWeight": 119.5803
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 112",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 300000,
+   "widthInches": 216,
+   "heightInches": 171,
+   "weight": 398,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 11,
+   "totalInchPoundPerTurn": 106,
+   "multiplier": 0.266257,
+   "cycles": 394000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 3.75,
+    "springLength": 128.75,
+    "springWeight": 147.0156
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 113",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 3,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 172,
+   "weight": 462,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.9,
+   "totalInchPoundPerTurn": 124.5,
+   "multiplier": 0.269575,
+   "cycles": 11000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.273,
+    "innerDiameter": 2.625,
+    "springLength": 38.5,
+    "springWeight": 21.3146
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 114",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 250000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 256,
+   "eval": true
+  },
+  "status": "warning",
+  "messages": [
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 48.5,
+   "multiplier": 0.189581,
+   "cycles": 386000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3938,
+    "innerDiameter": 5.25,
+    "springLength": 102.75,
+    "springWeight": 159.7978
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 115",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 1,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 213,
+   "weight": 521,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Wire size exceeds 0.4375 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 120\" are supported",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 13,
+   "totalInchPoundPerTurn": 117.9,
+   "multiplier": 0.226219,
+   "cycles": 218000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.5312,
+    "innerDiameter": 5.25,
+    "springLength": 184.25,
+    "springWeight": 395.9391
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 116",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 12,
+   "springs": 2,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 25000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 736,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.1,
+   "totalInchPoundPerTurn": 139.5,
+   "multiplier": 0.189581,
+   "cycles": 37000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.375,
+    "innerDiameter": 3.75,
+    "springLength": 77.75,
+    "springWeight": 84.1588
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 117",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 15,
+   "springs": 3,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D400-144",
+   "cycles": 10000,
+   "widthInches": 216,
+   "heightInches": 144,
+   "weight": 750,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 12.4,
+   "totalInchPoundPerTurn": 139.2,
+   "multiplier": 0.185656,
+   "cycles": 16000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3065,
+    "innerDiameter": 5.25,
+    "springLength": 31.75,
+    "springWeight": 37.8382
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 118",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 2,
+   "innerDiameter": 5.25,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 15000,
+   "widthInches": 216,
+   "heightInches": 174,
+   "weight": 500,
+   "eval": true
+  },
+  "status": "success",
+  "messages": [],
+  "data": {
+   "turnsOnSprings": 10.7,
+   "totalInchPoundPerTurn": 137.2,
+   "multiplier": 0.274395,
+   "cycles": 23000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3437,
+    "innerDiameter": 5.25,
+    "springLength": 37.75,
+    "springWeight": 50.7849
+   }
+  }
+ },
+ {
+  "input": {
+   "label": "single-tall 119",
+   "assembly": "Single",
+   "lift": "Standard",
+   "radius": 10,
+   "springs": 3,
+   "innerDiameter": 3.75,
+   "drum": "CANIMEX/TF D525-216",
+   "cycles": 150000,
+   "widthInches": 216,
+   "heightInches": 196,
+   "weight": 525,
+   "eval": true
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 216 \" wide door!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 12,
+   "totalInchPoundPerTurn": 128.6,
+   "multiplier": 0.244971,
+   "cycles": 244000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 3.75,
+    "springLength": 106.25,
+    "springWeight": 110.8376
+   }
+  }
+ }
+]

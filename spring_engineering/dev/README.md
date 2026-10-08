@@ -2556,3 +2556,85 @@ With that, every avenue tried in two days of this is closed:
 placement, about one miss apiece across many groups, each needing data from a
 group a random door rarely visits. That is a property of reverse-engineering a
 black box from the outside, not a bug waiting to be found.
+
+## Single, measured where it had never been measured (2026-10-08)
+
+Single had been reported as 100% on everything - every spring ID, drum, spring
+count, cycle target, radius, lift type and height. That was true of the data
+and badly oversold, because `dev/eval-single.json` is not balanced:
+
+| slice | clean readings | what "100%" rested on |
+|---|---|---|
+| hi-lift | **6** | one drum, one spring ID, two hi-lift amounts |
+| 525-54HL, D800-120 | **0** | never drawn for Single at all |
+| doors over 12 ft | 33 | thin above 15 ft |
+
+Six readings give a Wilson interval of +-19.5 points. "100% of 6" and "100% of
+123" print identically and mean nothing alike, which is why
+`dev/single-breakdown.mjs` now prints the interval next to every slice.
+
+Two draws filled the holes - `dev/single-gap-sample.mjs`, seeds 20261008 (200
+cases, hi-lift) and 20261008001 (120 cases, tall standard). Pooled with the
+original, 558 readings and 275 clean:
+
+| | n | wire | length | within 1" | weight |
+|---|---|---|---|---|---|
+| all clean | 275 | **99.6%** | 100.0% | 100.0% | 100.0% |
+| the three IDs sold | 216 | 99.5% | 100.0% | 100.0% | 100.0% |
+| hi-lift (was 6) | **36** | 100.0% | 100.0% | 100.0% | 100.0% |
+| 525-54HL (was 0) | 11 | 100.0% | 100.0% | 100.0% | 100.0% |
+| D800-120 (was 0) | 11 | 100.0% | 100.0% | 100.0% | 100.0% |
+| 12-14 ft | 63 | 98.4% | 100.0% | 100.0% | 100.0% |
+
+Length and weight are still exact on all 275. Hi-lift is still exact, now on 36
+readings across three drums and 12"-118" of lift rather than 6 on one drum.
+
+### The one wire miss, and why it is the floor
+
+`single-tall 117` - D400-144, 5 1/4", 3 springs, radius 15, 12 ft, 750 lb,
+10,000 cycles. The reference picks 0.3065; we pick 0.295.
+
+Our own cycle estimate at 0.295 is **10000.019** against a target of 10000.
+Nineteen parts per million. We accept the smaller wire, the reference rejects
+it, and nothing about the selection rule is wrong - the rule is "smallest wire
+reaching the target" in both.
+
+The obvious next move is to claim our cycle formula runs high and scale it
+down. It does not. Across 275 clean readings, ours/theirs has median **1.0007**
+with 53.5% above 1.0 - centred, not biased. The +-2-4% spread is mostly the
+reference ROUNDING its reported cycle count: this case returns "16000" where we
+compute 16458, and 16458 rounded down to a round thousand is 16000.
+
+So the estimate is already as centred as the data can show, and deciding this
+reading correctly would need the reference's cycle formula to about 1e-5
+relative. One reading in 275 sitting that close to a threshold is the
+resolution limit, not a bug. **Do not calibrate a scale on it** - that is the
+same mistake as the reverted `cycles-low` fix and the withdrawn Duplex end-coil
+term, both of which were one or five readings wide.
+
+## A hi-lift drum answers ONLY under hi-lift (2026-10-08)
+
+`525-54HL`, `575-120` and `D800-120` return an HTML page, not JSON, for any
+request with `lift=Standard`. Under `lift=HiLift` they answer normally.
+
+| | standard lift | hi-lift |
+|---|---|---|
+| the three hi-lift drums | **0 of 48** returned JSON | **120 of 120** |
+| D400-144, D525-216 | 15 of 15 | n/a |
+
+This cost an hour, because a logged-out server also answers with HTML. 48 of
+200 readings came back that way, starting at reading 123 and never recovering,
+and the obvious diagnosis was an expired session - a diagnosis that survived
+writing a re-login into `dev/pull.mjs`, which then re-authenticated five times
+and failed five times. Two things should have stopped it sooner: the failures
+were **not contiguous** (124 and 126 answered fine between 123, 125 and 127),
+and one of the original cases replayed later still succeeded unchanged.
+
+The real tell is in the cross-tab above, which takes one query. **When the far
+end keeps serving HTML, suspect the REQUEST before the cookie.** The re-login
+in `dev/pull.mjs` is still worth having, but it is capped at five for exactly
+this reason: retrying an impossible request is just a slow way to hammer
+someone else's server.
+
+`dev/single-gap-sample.mjs` now draws standard lift only from drums that have
+it, so the combination cannot be generated again.
