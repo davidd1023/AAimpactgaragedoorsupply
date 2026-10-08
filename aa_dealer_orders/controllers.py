@@ -7,6 +7,7 @@ from odoo.http import request
 
 from odoo.addons.portal.controllers.portal import CustomerPortal
 
+from .door_options import Catalog
 from .models import AA_DRUMS, AA_HL_DRUMS, AA_LIFT_TYPES, AA_STD_DRUMS, AA_TRACK_TYPES
 
 _logger = logging.getLogger(__name__)
@@ -118,7 +119,7 @@ class AADealerOrder(http.Controller):
         })
 
     @http.route('/dealer/order/price', type='jsonrpc', auth='user', website=True)
-    def dealer_order_price(self, template_id, ptav_ids, qty=1, **kw):
+    def dealer_order_price(self, template_id, ptav_ids, qty=1, line=None, **kw):
         partner = self._dealer_partner()
         if not partner:
             return {'error': _("Not available.")}
@@ -131,7 +132,48 @@ class AADealerOrder(http.Controller):
             return {'error': str(e.args[0])}
         qty = max(1, min(int(qty or 1), MAX_QTY))
         unit = self._unit_price(partner, variant, no_variant, qty)
-        return {'unit_price': unit, 'subtotal': unit * qty}
+        extras, notes = self._priced_options(partner, variant, no_variant, line or {}, qty, Catalog(request.env))
+        door_unit = unit + sum(e['unit_price'] * e['qty'] for e in extras)
+        return {
+            'unit_price': door_unit,
+            'subtotal': door_unit * qty,
+            'kit_price': unit,
+            'extras': [{'label': e['label'], 'name': e['product'].display_name,
+                        'qty': e['qty'], 'unit_price': e['unit_price']} for e in extras],
+            'notes': notes,
+        }
+
+    def _door_data(self, variant, no_variant, line):
+        options = set(no_variant.mapped('name'))
+        color = variant.product_template_attribute_value_ids.filtered(
+            lambda v: v.attribute_id.name == 'Finish Color')[:1].name or 'White'
+        def num(key):
+            try:
+                return float(line.get(key) or 0)
+            except (TypeError, ValueError):
+                return 0.0
+        return {
+            'height': num('height_in'),
+            'lift': line.get('lift_type') or 'standard',
+            'high_lift': num('high_lift'),
+            'track_type': line.get('track_type') or '',
+            'drum': line.get('drum') or '',
+            'color': 'Black' if 'Black' in color else 'White',
+            'tracks': 'Tracks' in options,
+            'cables': 'Cables' in options,
+        }
+
+    def _priced_options(self, partner, variant, no_variant, line, qty, catalog):
+        """Prepared tracks / cables for this door, priced for the dealer. Unpriced ones become notes."""
+        items, notes = catalog.door_items(self._door_data(variant, no_variant, line))
+        extras = []
+        for product, per_door, label in items:
+            price = self._unit_price(partner, product, request.env['product.template.attribute.value'], qty * per_door)
+            if price <= 0:
+                notes.append(f"{label}: {product.display_name} has no price yet - AA will quote it")
+                continue
+            extras.append({'label': label, 'product': product, 'qty': per_door, 'unit_price': price})
+        return extras, notes
 
     @http.route('/dealer/order/submit', type='jsonrpc', auth='user', website=True)
     def dealer_order_submit(self, lines, po_number='', notes='', pickup_date=None, **kw):
@@ -145,6 +187,7 @@ class AADealerOrder(http.Controller):
             return {'error': _("Add at least one kit to the order.")}
 
         products = self._quick_order_products()
+        catalog = Catalog(request.env)
         order_lines = []
         try:
             for idx, line in enumerate(lines, start=1):
@@ -160,7 +203,9 @@ class AADealerOrder(http.Controller):
                     raise ValidationError(_(
                         "Line %s: no price is set for this kit yet. Please call AA Impact.", idx))
                 track_vals = self._track_values(line, idx, variant)
-                order_lines.append((variant, no_variant, qty, self._line_note(line), track_vals))
+                extras, opt_notes = self._priced_options(partner, variant, no_variant, line, qty, catalog)
+                note = " | ".join(filter(None, [self._line_note(line)] + opt_notes))
+                order_lines.append((variant, no_variant, qty, note, track_vals, extras, idx, line))
         except (ValidationError, ValueError, TypeError) as e:
             return {'error': str(e.args[0]) if e.args else _("Invalid order.")}
 
@@ -180,7 +225,7 @@ class AADealerOrder(http.Controller):
             'aa_dealer_quick_order': True,
             'note': notes and notes.strip()[:2000] or False,
         })
-        for variant, no_variant, qty, note, track_vals in order_lines:
+        for variant, no_variant, qty, note, track_vals, extras, idx, line in order_lines:
             sol = request.env['sale.order.line'].sudo().create({
                 **track_vals,
                 'order_id': order.id,
@@ -194,6 +239,14 @@ class AADealerOrder(http.Controller):
                 note = f"{note} | HIGH LIFT DRUM NOT IN KIT - swap to {track_vals['aa_drum']}"
             if note:
                 sol.name = f"{sol.name}\n{note}"
+            door = f"Door {idx}" + (f" ({(line.get('tag') or '').strip()[:80]})" if (line.get('tag') or '').strip() else "")
+            for extra in extras:
+                request.env['sale.order.line'].sudo().create({
+                    'order_id': order.id,
+                    'product_id': extra['product'].id,
+                    'product_uom_qty': extra['qty'] * qty,
+                    'name': f"{extra['product'].display_name}\n{extra['label']} for {door}",
+                })
         try:
             order.with_context(send_email=True).action_confirm()
         except UserError as e:
