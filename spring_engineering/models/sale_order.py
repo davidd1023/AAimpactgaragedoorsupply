@@ -142,34 +142,16 @@ class SaleOrder(models.Model):
         """
         Product = self.env["product.product"].sudo()
 
-        # TOLERANT, BECAUSE AN EXACT NAME IS A TRAP. The first version required
-        # the name to be exactly "Jamb Bracket # 10 Black". Any difference -
-        # "#10" without the space, a hyphen, a double space, a trailing one -
-        # matched nothing, and a bracket that is not found takes the WHOLE
-        # preparation down: _track_prep_sync removes every part and adds none,
-        # so the cart shows the track alone with no brackets and no flag
-        # angles. That is a lot of consequence to hang on a space.
-        #
-        # So: find anything that looks like a jamb bracket, then pick the one
-        # whose name carries this size as a whole number and this finish as a
-        # whole word. "# 10" does not match a "# 100" bracket, and Black does
-        # not match Blackened.
-        candidates = Product.search([("name", "ilike", "jamb")])
+        # As the owner names them, and the same without the space after the
+        # hash - the obvious way for someone to type it next time.
+        for pattern in ("Jamb Bracket # %s %s", "Jamb Bracket #%s %s"):
+            found = Product.search(
+                [("name", "=ilike", pattern % (size, colour))], limit=1
+            )
 
-        for product in candidates:
-            name = product.name or ""
+            if found:
+                return found
 
-            if not re.search(r"\bbracket\b", name, re.I):
-                continue
-
-            if not re.search(r"(?<!\d)%s(?!\d)" % re.escape(size), name):
-                continue
-
-            if re.search(r"\b%s\b" % re.escape(colour), name, re.I):
-                return product
-
-        # The catalogue part numbers, for a database carrying
-        # garage_door_supply's data instead of the owner's own products.
         code = self.BRACKET_CODES.get(size)
 
         if code:
@@ -226,37 +208,39 @@ class SaleOrder(models.Model):
 
         return None
 
+    def _track_prep_configured_part(self, key):
+        """The product named in the settings for this role, or an empty set."""
+        ref = self.env["ir.config_parameter"].sudo().get_param(
+            "spring_engineering.track_prep_%s_product_id" % key
+        )
+
+        if not ref:
+            return self.env["product.product"]
+
+        try:
+            return self.env["product.product"].sudo().browse(int(ref)).exists()
+        except (TypeError, ValueError):
+            return self.env["product.product"]
+
     def _track_prep_flag_product(self, line):
         """The flag angle in the track's own finish.
 
-        Looked up BY NAME, because there is one per colour and the right one
-        depends on the track rather than on a setting. There was a setting
-        here as a fallback; it is gone, because moving this feature between
-        modules left it in no view at all - unreachable, and so a fallback
-        that could never be populated. A missing product now names itself in
-        the refusal, which is what a person can actually act on.
+        Looked up BY NAME rather than configured, because there is one per
+        colour and the right one depends on the track rather than on a setting.
+        The setting stays as a fallback for a track whose finish is a colour
+        these products do not cover.
         """
         colour = self._track_prep_colour(line)
 
-        if not colour:
-            return self.env["product.product"]
+        if colour:
+            found = self.env["product.product"].sudo().search(
+                [("name", "=ilike", "Flag Angle %s" % colour)], limit=1
+            )
 
-        Product = self.env["product.product"].sudo()
-        exact = Product.search([("name", "=ilike", "Flag Angle %s" % colour)], limit=1)
+            if found:
+                return found
 
-        if exact:
-            return exact
-
-        # Same tolerance as the brackets - a flag angle that is not found
-        # takes the whole preparation down with it.
-        for product in Product.search([("name", "ilike", "flag")]):
-            name = product.name or ""
-
-            if re.search(r"\bangle\b", name, re.I) \
-                    and re.search(r"\b%s\b" % re.escape(colour), name, re.I):
-                return product
-
-        return Product
+        return self._track_prep_configured_part("flag")
 
     # --- keeping the parts in step with the track -----------------------------
 
