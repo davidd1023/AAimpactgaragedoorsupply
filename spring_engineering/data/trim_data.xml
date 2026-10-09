@@ -3,7 +3,7 @@
   <data>
 
     <!--
-      THE TRIM COLOUR ON A HARDWARE KIT.
+      THE TRIMS ON A HARDWARE KIT.
 
       The kit pages carry a set of "add to your order" extras, three of which
       open a box to type into - that is Odoo's "Custom value" flag on an
@@ -22,7 +22,7 @@
       nothing to go wrong between the page and the order.
     -->
     <record id="attribute_trim_colour" model="product.attribute">
-      <field name="name">Trim Color</field>
+      <field name="name">Trims</field>
       <field name="display_type">radio</field>
       <field name="create_variant">no_variant</field>
       <field name="sequence">20</field>
@@ -36,35 +36,42 @@
     </record>
 
     <!--
-      NO TRIM COMES FIRST, AND IS THEREFORE THE DEFAULT.
+      NO TRIMS COMES FIRST, AND IS THEREFORE THE DEFAULT.
 
       Trims are an extra, not a requirement, so a kit ordered without them must
       be orderable without a colour. A no-variant attribute always has one
-      value selected - there is no blank state - so "No Trim" is how a kit says
-      it does not want any, and being first makes it what a customer who
+      value selected - there is no blank state - so "No Trims" is how a kit
+      says it does not want any, and being first makes it what a customer who
       ignores the option gets.
+
+      THE COUNT IS IN THE VALUE NAME, which is why the colours read "Black,
+      3 Trim". A door takes three pieces - two jambs and the header - and the
+      owner wants the order line to say so, as "Trims: Black, 3 Trim". Odoo
+      prints an attribute as "<attribute>: <value>", so putting the count in
+      the value is what produces that line exactly, with nothing to compute.
+      If a kit ever needs a different count, it needs its own value here.
     -->
     <record id="attribute_value_trim_none" model="product.attribute.value">
       <field name="attribute_id" ref="attribute_trim_colour"/>
-      <field name="name">No Trim</field>
+      <field name="name">No Trims</field>
       <field name="sequence">1</field>
     </record>
 
     <record id="attribute_value_trim_black" model="product.attribute.value">
       <field name="attribute_id" ref="attribute_trim_colour"/>
-      <field name="name">Black</field>
+      <field name="name">Black, 3 Trim</field>
       <field name="sequence">2</field>
     </record>
 
     <record id="attribute_value_trim_bronze" model="product.attribute.value">
       <field name="attribute_id" ref="attribute_trim_colour"/>
-      <field name="name">Bronze</field>
+      <field name="name">Bronze, 3 Trim</field>
       <field name="sequence">3</field>
     </record>
 
     <record id="attribute_value_trim_white" model="product.attribute.value">
       <field name="attribute_id" ref="attribute_trim_colour"/>
-      <field name="name">White</field>
+      <field name="name">White, 3 Trim</field>
       <field name="sequence">4</field>
     </record>
 
