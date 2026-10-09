@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class ResConfigSettings(models.TransientModel):
@@ -17,8 +17,8 @@ class ResConfigSettings(models.TransientModel):
         config_parameter="garage_door_supply.track_prep_jamb_product_id",
         domain="[('sale_ok', '=', True)]",
         help="The jamb bracket added when a vertical track is ordered prepared."
-             " The quantity is one per the inches of door height set below,"
-             " rounded up.",
+             " The quantity comes from the door height: 3 per track for a 6-7 ft"
+             " door, 4 for 8-9 ft, 5 for 10-12 ft.",
     )
     track_prep_flag_product_id = fields.Many2one(
         "product.product",
@@ -28,19 +28,3 @@ class ResConfigSettings(models.TransientModel):
         help="The flag angle added when a vertical track is ordered prepared."
              " One per track.",
     )
-    track_prep_inches_per_bracket = fields.Float(
-        string="Inches of door height per jamb bracket",
-        config_parameter="garage_door_supply.track_prep_inches_per_bracket",
-        default=24.0,
-        help="A 7 ft door at 24 inches per bracket takes 4 brackets"
-             " (84 / 24 = 3.5, rounded up).",
-    )
-
-    @api.onchange("track_prep_inches_per_bracket")
-    def _onchange_track_prep_inches_per_bracket(self):
-        # A zero or negative spacing would ask for an infinite number of
-        # brackets, so it is refused here rather than guarded in six places.
-        for record in self:
-            if record.track_prep_inches_per_bracket is not None \
-                    and record.track_prep_inches_per_bracket <= 0:
-                record.track_prep_inches_per_bracket = 24.0

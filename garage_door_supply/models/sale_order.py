@@ -23,8 +23,8 @@ class SaleOrder(models.Model):
             (v.name or "").strip().lower() == PREPARED for v in values
         )
 
-    def _track_prep_door_height_inches(self, line):
-        """The door height this track is for, in inches, or 0 if unreadable.
+    def _track_prep_door_height_feet(self, line):
+        """The door height this track is for, in FEET, or 0 if unreadable.
 
         READ FROM THE PRODUCT NAME, because that is where it lives: the
         products are named like "CH-VT-2-2 Vertical Track 76-7 door height
@@ -50,23 +50,41 @@ class SaleOrder(models.Model):
         if not 5 <= feet <= 20:
             return 0
 
-        return feet * 12
+        return feet
 
-    def _track_prep_bracket_count(self, height_inches):
-        """One jamb bracket per PER_BRACKET inches of door height, rounded up."""
-        per = self.env["ir.config_parameter"].sudo().get_param(
-            "garage_door_supply.track_prep_inches_per_bracket", "24"
-        )
+    # JAMB BRACKETS PER SIDE, by door height, from the owner:
+    #
+    #   4-Section / 6-to-7-foot door   6 total, 3 per side
+    #   5-Section / 8-to-9-foot door   8 total, 4 per side
+    #   6-Section / 10-to-12-foot door 10 total, 5 per side
+    #
+    # A TABLE, NOT A FORMULA. "One per 24 inches, rounded up" was the first
+    # rule tried here and it is wrong: it gives four brackets for a 7 ft door
+    # where the trade fits three, and it would have shipped a spare on every
+    # residential order. The bands do not divide evenly either - 6 and 7 feet
+    # share a count, so do 8 and 9, and then three heights share the next - so
+    # there is no spacing that reproduces them. Written down as the owner gave
+    # it, bounds inclusive, in feet.
+    BRACKETS_PER_SIDE = (
+        (6, 7, 3),
+        (8, 9, 4),
+        (10, 12, 5),
+    )
 
-        try:
-            per = float(per)
-        except (TypeError, ValueError):
-            per = 24.0
+    def _track_prep_bracket_count(self, height_feet):
+        """Jamb brackets for ONE vertical track, or 0 if the height is off the
+        table.
 
-        if per <= 0:
-            per = 24.0
+        Off the table means off it: a 14 ft door is not in the bands the owner
+        gave, and extrapolating the pattern would be inventing a trade rule.
+        It adds nothing and says to call, which is the same answer this gives
+        for a height it cannot read at all.
+        """
+        for low, high, count in self.BRACKETS_PER_SIDE:
+            if low <= height_feet <= high:
+                return count
 
-        return int(math.ceil(height_inches / per))
+        return 0
 
     # The finishes a track and its flag angle come in. Matched as whole words so
     # a track that merely mentions a colour elsewhere in its name is not caught.
@@ -146,9 +164,9 @@ class SaleOrder(models.Model):
             existing.unlink()
             return None
 
-        height = self._track_prep_door_height_inches(line)
+        height_feet = self._track_prep_door_height_feet(line)
 
-        if not height:
+        if not height_feet:
             existing.unlink()
             return _(
                 "We could not read the door height from “%s”, so the jamb"
@@ -167,7 +185,18 @@ class SaleOrder(models.Model):
                 line.product_id.display_name,
             )
 
-        brackets = self._track_prep_bracket_count(height)
+        brackets = self._track_prep_bracket_count(height_feet)
+
+        if not brackets:
+            existing.unlink()
+
+            return _(
+                "A %s ft door is outside the sizes we prepare tracks for, so"
+                " the parts were not added. Please call us and we will prepare"
+                " it for you.",
+                ("%g" % height_feet),
+            )
+
         wanted = {
             "jamb": (self._track_prep_jamb_product(line), brackets * line.product_uom_qty),
             "flag": (self._track_prep_flag_product(line), 1 * line.product_uom_qty),
