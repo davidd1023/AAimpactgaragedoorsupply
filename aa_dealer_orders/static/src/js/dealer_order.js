@@ -129,11 +129,10 @@
             const priceEl = el("div", { class: "aa-price", text: "-" });
             const breakdown = el("div", { class: "small text-muted mt-2 aa-breakdown" });
             // Springs: AA's Spring Engineering model picks them; the dealer chooses nothing.
-            // Tried in this order, 10,000 cycles; the first set with no red warning wins.
-            const SPRING_CANDIDATES = [
-                [2, '2 5/8"'], [2, '3 3/4"'], [2, '5 1/4"'],
-                [2, '3 3/4" inside 6"'], [4, '3 3/4"'], [4, '5 1/4"'], [4, '3 3/4" inside 6"'],
-            ];
+            // How many springs follows the AA Calculator: doors wider than 12' (144") take 4,
+            // the rest 2. Spring IDs are tried in this order at 10,000 cycles and the first
+            // with no red warning wins.
+            const SPRING_IDS = ['2 5/8"', '3 3/4"', '5 1/4"', '3 3/4" inside 6"'];
             const SPRING_CYCLES = "10,000";
             const spResult = el("div", { class: "small mt-1" });
             const springBox = el("div", { class: "mt-1 d-none aa-springs" }, [
@@ -219,6 +218,8 @@
             // follows our drum dropdown, so both stay hidden.
             const HIDDEN = ["Roller Size", "Drum"];
             function buildAttrs() {
+                // Keep the options the dealer already ticked when the kit changes (e.g. width).
+                const keepChecked = Object.values(line.checks || {}).filter((c) => c.cb.checked).map((c) => c.name);
                 attrsBox.innerHTML = "";
                 optsBox.innerHTML = "";
                 line.selects = {};
@@ -230,6 +231,7 @@
                         a.values.forEach((v) => {
                             const cb = el("input", { type: "checkbox", class: "form-check-input me-1", value: v.id, onchange: price });
                             line.checks[v.id] = { cb, name: v.name };
+                            cb.checked = keepChecked.includes(v.name);
                             const extra = v.price_extra ? " (+" + money(v.price_extra) + ")" : "";
                             optsBox.appendChild(el("label", { class: "form-check-label" }, [cb, document.createTextNode(v.name + extra)]));
                         });
@@ -357,7 +359,8 @@
                 };
                 let r = null;
                 try {
-                    for (const [count, id] of SPRING_CANDIDATES) {
+                    const count = widthIn() > 144 ? 4 : 2;
+                    for (const id of SPRING_IDS) {
                         const t = window.aaSpringCalc({ ...door, springs: count, springId: id });
                         if (t.error) { r = r || t; break; }
                         if (!t.warnings.some((w) => w.severity === "red")) { r = t; break; }
