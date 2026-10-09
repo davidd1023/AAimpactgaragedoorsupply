@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GD Calc">
+<title>Garage Door Calculator</title><!-- v1779999770205 -->
+<style>
+:root{--blue:#1B2A6B;--blue-light:#e8eaf6;--blue-border:#9fa8da;--red:#C0272D;--red-light:#fdecea;--gray:#6b7280;--gray-light:#f4f5f7;--gray-border:#e2e4e8;--text:#111827;--text-muted:#6b7280;--white:#fff;--radius:12px;--radius-sm:8px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;background:#f0f2f5;color:var(--text);min-height:100vh;padding-bottom:40px;}
+.top-bar{background:var(--blue);color:white;padding:54px 20px 12px;position:sticky;top:0;z-index:200;display:flex;justify-content:space-between;align-items:center;}
+.top-bar-left h1{font-size:20px;font-weight:600;}
+.top-bar-left p{font-size:13px;opacity:0.75;margin-top:2px;}
+#server-status{font-size:11px;margin-top:3px;opacity:0.9;}
+.settings-icon-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;color:white;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:none;}
+.settings-overlay.open{display:block;}
+.settings-drawer{position:fixed;top:0;right:-100%;width:min(360px,100vw);height:100%;background:var(--white);z-index:400;transition:right 0.3s ease;overflow-y:auto;padding-bottom:40px;}
+.settings-drawer.open{right:0;}
+.settings-header{background:var(--blue);color:white;padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;}
+.settings-header h2{font-size:18px;font-weight:600;}
+.close-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;color:white;font-size:20px;cursor:pointer;}
+.settings-body{padding:16px;}
+.settings-section{margin-bottom:20px;}
+.settings-section-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--gray-border);}
+.printer-item{margin-bottom:12px;}
+.printer-item label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;}
+.printer-item select{width:100%;height:42px;padding:0 12px;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);background:var(--gray-light);color:var(--text);font-size:14px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+.printer-status{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11px;color:var(--text-muted);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#86efac;flex-shrink:0;}
+.status-dot.unset{background:#fcd34d;}
+.save-confirm{background:#dcfce7;border:1px solid #86efac;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:#166534;text-align:center;margin-top:12px;display:none;}
+.save-confirm.show{display:block;}
+.add-printer-btn{width:100%;height:38px;background:var(--gray-light);color:var(--text-muted);border:1.5px dashed var(--gray-border);border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;margin-top:8px;}
+.rot-btn{height:36px;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);background:var(--gray-light);color:var(--text-muted);font-size:13px;font-weight:600;cursor:pointer;}
+.rot-btn.active{background:var(--blue);color:white;border-color:var(--blue);}
+.content{padding:16px;max-width:480px;margin:0 auto;}
+.card{background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.07);}
+.card-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;background:#f3f4f6;color:#6b7280;}
+.field{margin-bottom:12px;}.field:last-child{margin-bottom:0;}
+.field label{display:block;font-size:13px;color:var(--text-muted);margin-bottom:6px;font-weight:500;}
+.field label .req-cable{font-size:11px;color:#b45309;font-weight:400;margin-left:4px;}
+.field input,.field select{width:100%;height:44px;padding:0 14px;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);background:var(--gray-light);color:var(--text);font-size:16px;-webkit-appearance:none;appearance:none;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--blue);background:white;}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.field-row .field{margin-bottom:0;}
+.panel-hint{font-size:12px;color:var(--blue);margin-top:5px;font-weight:500;}
+.hl-field{display:none;}.hl-field.visible{display:block;}
+.clear-btn{width:100%;height:46px;background:var(--red-light);color:var(--red);border:1.5px solid #f5c6c2;border-radius:var(--radius-sm);font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;}
+.results{display:none;}.results.visible{display:block;}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:12px;}
+.tab{height:38px;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);background:var(--white);font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.tab.active{background:var(--blue);color:white;border-color:var(--blue);}
+.page{display:none;}.page.active{display:block;}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--gray-border);font-size:14px;}
+.result-row:last-child{border-bottom:none;}
+.result-row .rlabel{color:var(--text-muted);font-size:13px;}
+.result-row .rvalue{font-weight:600;font-size:15px;}
+.result-row .rvalue.big{font-size:18px;color:var(--blue);}
+.jb-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px;}
+.jb-box{background:var(--gray-light);border:1px solid var(--gray-border);border-radius:var(--radius-sm);padding:10px 6px;text-align:center;}
+.jb-type{font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:4px;}
+.jb-qty{font-size:24px;font-weight:700;}
+.jb-na{font-size:20px;color:#ccc;}
+.cable-box{background:var(--blue-light);border:1.5px solid var(--blue-border);border-radius:var(--radius-sm);padding:14px;display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+.cable-size{font-size:32px;font-weight:700;color:var(--blue);}
+.cable-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.cable-badge{background:white;border:1.5px solid var(--blue-border);border-radius:20px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--blue);}
+.notice{background:#fffbeb;border:1.5px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:#92400e;margin-bottom:12px;}
+.label-missing{background:#f3f4f6;border:1.5px dashed #d1d5db;border-radius:var(--radius-sm);padding:20px;text-align:center;font-size:13px;color:#9ca3af;}
+.label-preview-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;margin-top:12px;}
+.small-label{border:2px solid #222;border-radius:3px;padding:8px 10px;display:grid;grid-template-columns:1fr 1fr;background:white;font-family:Arial,sans-serif;}
+.small-label .lrow{font-size:11px;color:#111;line-height:1.5;}
+.small-label .lrow strong{font-weight:700;}
+.big-label-wrap{border:3px solid #222;border-radius:3px;background:white;padding:8px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;}
+.suggest-list.open{display:block;}
+.big-label-panel{font-size:15px;font-weight:700;color:#111;padding-top:4px;flex-shrink:0;}
+.label-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px 0;}
+.label-nav button{width:34px;height:34px;border:1.5px solid var(--gray-border);border-radius:50%;background:white;font-size:16px;cursor:pointer;}
+.label-nav span{font-size:13px;color:var(--text-muted);font-weight:600;}
+.print-btn{width:100%;height:46px;margin-top:10px;background:var(--blue);border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:600;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.print-btn:active{opacity:0.85;}
+.print-all-btn{width:100%;height:52px;margin-top:4px;background:#C0272D;border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:700;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.print-all-btn:active{opacity:0.85;}
+.springs-msg{text-align:center;padding:24px 16px;color:var(--text-muted);font-size:14px;line-height:1.6;}
+.open-btn{display:inline-block;margin-top:16px;padding:12px 24px;background:var(--blue);color:white;border-radius:var(--radius-sm);font-size:15px;font-weight:600;text-decoration:none;}
+.suggest-list{position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--blue-border);border-radius:var(--radius-sm);z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.12);overflow:hidden;}
+.suggest-list div{padding:10px 14px;font-size:15px;cursor:pointer;border-bottom:1px solid var(--gray-border);}
+.suggest-list div:last-child{border-bottom:none;}
+.suggest-list div:hover{background:var(--blue-light);color:var(--blue);}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:white;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;z-index:999;display:none;white-space:nowrap;}
+
+@media print {
+  body > *:not(#preview-print-area) { display:none !important; }
+  #preview-print-area { display:block !important; position:static !important; padding:20px; }
+  #preview-overlay { display:none !important; }
+  @page { margin:15mm; }
+}
+#preview-print-area { display:none; }
+@media print{body>*:not(#sp-print-area):not(#preview-print-area){display:none!important;}#sp-print-area{display:block!important;}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="settings-overlay" id="settings-overlay" onclick="closeSettings()"></div>
+<div class="settings-drawer" id="settings-drawer">
+  <div class="settings-header"><h2>&#9881; Settings</h2><button class="close-btn" onclick="closeSettings()">&#10005;</button></div>
+  <div class="settings-body">
+    <div class="settings-section">
+      <div class="settings-section-title">&#128424; Printer Assignment</div>
+      <div class="printer-item"><label>Tracks Page</label><select id="cfg-tracks" onchange="savePrinters()"></select><div class="printer-status"><div class="status-dot" id="dot-tracks"></div><span id="lbl-tracks">--</span></div></div>
+      <div class="printer-item"><label>Cables Page</label><select id="cfg-cables" onchange="savePrinters()"></select><div class="printer-status"><div class="status-dot" id="dot-cables"></div><span id="lbl-cables">--</span></div></div>
+      <div class="printer-item"><label>Small Label - GX420d</label><select id="cfg-small" onchange="savePrinters()"></select><div class="printer-status"><div class="status-dot" id="dot-small"></div><span id="lbl-small">--</span></div></div>
+      <div class="printer-item"><label>Big Label - Westinghouse WHTP203e</label><select id="cfg-big" onchange="savePrinters()"></select><div class="printer-status"><div class="status-dot" id="dot-big"></div><span id="lbl-big">--</span></div></div>
+      <div class="printer-item" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--gray-border);">
+        <label>&#128260; Big Label Rotation</label>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px;">
+          <button class="rot-btn" id="rot-0" onclick="setRotation(0)">0deg</button>
+          <button class="rot-btn" id="rot-90" onclick="setRotation(90)">90deg</button>
+          <button class="rot-btn" id="rot-180" onclick="setRotation(180)">180deg</button>
+          <button class="rot-btn" id="rot-270" onclick="setRotation(270)">270deg</button>
+        </div>
+        <div class="printer-status" style="margin-top:6px;"><div class="status-dot" id="dot-rotation"></div><span id="lbl-rotation">--</span></div>
+      </div>
+      <button class="add-printer-btn" onclick="addPrinter()">+ Add printer manually</button>
+      <div class="settings-section" style="margin-top:14px"><div class="settings-section-title">Odoo Address</div>
+        <div class="printer-item"><label>Used by "Send to Manufacturing"</label>
+        <input id="cfg-odoo" type="url" inputmode="url" placeholder="https://your-odoo-address" oninput="saveOdooUrl()" style="width:100%;padding:8px;border:1px solid var(--gray-border);border-radius:8px;font-size:14px"/>
+        <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div></div>
+      </div>
+      <div class="save-confirm" id="save-confirm">Saved</div>
+    </div>
+    <div class="settings-section"><div class="settings-section-title">Glass Options</div><div id="glass-list"></div><button class="add-printer-btn" onclick="addGlass()">+ Add glass type</button></div>
+    <div class="settings-section"><div class="settings-section-title">Frame Color Options</div><div id="frame-list"></div><button class="add-printer-btn" onclick="addFrame()">+ Add frame color</button></div>
+    <div class="settings-section">
+      <div class="settings-section-title">&#128421; Jamb Bracket Quantities (per side)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">J-10</label>
+          <input type="number" id="jb-j10" min="0" max="20" style="width:100%;height:38px;padding:0 10px;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);background:var(--gray-light);font-size:15px;" onchange="saveJBSettings()">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">J-12</label>
+          <input type="number" id="jb-j12" min="0" max="20" style="width:100%;height:38px;padding:0 10px;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);background:var(--gray-light);font-size:15px;" onchange="saveJBSettings()">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">J-14</label>
+          <input type="number" id="jb-j14" min="0" max="20" style="width:100%;height:38px;padding:0 10px;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);background:var(--gray-light);font-size:15px;" onchange="saveJBSettings()">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">J-16</label>
+          <input type="number" id="jb-j16" min="0" max="20" style="width:100%;height:38px;padding:0 10px;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);background:var(--gray-light);font-size:15px;" onchange="saveJBSettings()">
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);">These override the calculated values.</div>
+      <button class="add-printer-btn" onclick="resetJBSettings()" style="margin-top:8px;">Reset to calculated defaults</button>
+    </div>
+  </div>
+</div>
+<div class="top-bar">
+  <div class="top-bar-left" style="display:flex;align-items:center;gap:12px;">
+    <div style="flex-shrink:0;margin-right:8px;">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGYAAABQCAYAAADr/ADSAAAxm0lEQVR42u19eZgWxbX+e6qqu79tdhhAQBZ3UEFAIi4MiCKyKKiDRk2M0WgSNcZrYnJNcj8nMRo1avAaI0mMxkQTmRhxAVGUYRARVBBEURBk3wZm+/burqrz++ObQTSK5sYo3t+t55nhoburuqrfOefUe86pGuB/cWmoqVF7/5+RFPi/8vkVTiYFAwQADVMu6DX3mNH3P370yLM+DKz/K58FIADNQK0EAGam2ceOuWrWwBN2zzvieJ51+IjgsWNGTgKA6UOHOvv7WOh/Cygzamvl1Pp6AwBzR04cEba23+Zoc0LOaBhGKAnKkVKHUfesM5c1PjV96FDn8qVLw/8D5t9UkkgKoA51gH3h/G9VpFevvoHzhSuFsSJvjQGRIIAYsBIgJaUOY96UyUvnz9qfwfkiA0MNNTVydGOjBhGePm7sl20qc7NnuE/KhExEFoD8gKr7woBDX3S19fxptYcVdjbdGgn0GTlrELItECOyDzvUCU6gI+7kM19rnNNQU6NGNzbq/wPmXzDu9YCYCpiGZDKSm73w+5zJ1ZUyUaukrW6vbpcUNmz9s2R00WCmjxifBduokAJEyHrO+NrlC57e38D5wqzrG2pqFAE8FTDPjppwWu7vzy9OZP2fhoSXU5JeZwAHXX3pSxDCAXhf4NoYSWEryh/WRG+U+/qJvw8dPXZ0Y6Pen5bS+z0wnZxkdGOjfm5Cbc9Zx9Q8IHe1z5GhGZSzWnslZZflYmWnCSnbWh6eXUWCzL4bZBuVEk4k0uhUV/5OSqm9XH72o8fUjNufwBH7s9pqQI2iujpLUvCcY0/5Vn7D1tfLfHNRGvYvQUn8W55UinXQrc/h/cJ4Vdm5BcpHSAhi/ti2YUIdh0FpKuZeboC3Sv3wsSeOHTVmfwFnvwRmRm2tJIBHo1HPHTPl2GeOGvmCly/co7VRObbwyir+Oun+X/0hZ00Q5gJuWvnG9Lw1zaP+fN9brLUh+njD6nheO7EVSts3EfUejEJEVMZ/7tGhI08d3dioP28SKvc3TjIfjXTkqlV28VXJ0rO0uInb2v+gtDmwUFV6jtu3z02F5pbJFPE2bZ630BbSmQO04gWS6WyRDyaf26N/lQzCCbY44T4cHiIIBuUDPxSucr1E6TuiJJHIpFKHQakFicDedE6vgxZesOyltdOHDnWe2r7d/v+8KtuLkwCzh596nsnk7iwj0b1diQaKey/ZdF6WML7WbvTOLgOPmNpmCiFv3DpESdnfzxYuqLR0NEmJ3WEQgq3zMaM2JdKRBWtAPaouU260i59Oz49UVO6m7Ttm+7l83yDuTDhr6QvPfl6rNdof1FYnJ5l1+uRDaUvzNBc0rqDEYyoe+y27ztFeScm69jVr/xpT6pUgHnmKC7rNNeYbPtudlRCnpY0GK7moEI1N51y+tESH/50zxoDogxrBuiChI85bsZLELwst7b9KSFWSVmJG5ZAjr2l74+1zqbxsPTc1n+cF4TnZaOTUyUvnNXwe4HxuwBQ5Sa2Yinoz/dXpzoGXz/ihKPg/1IRtsrL0T5Hu3QqZjVsKKh6vEFKtKqTaMyBxoBsGk/LZ3Mhuwi1pZpNnz/mTLqv401kLZi4EAy/17D8+U9Z9ViYMNYjUhwLjqTVnvr7wCJ46qvqZt/khZezJObJrqSQxzXVUhkoT2/31m+/3SPRIe+6Ys5c1zPusPQSfCzB7z8CnayacIlpSd1lj+gaEt6K9ul8fNLeOjlRVbtC53C6W8sSwPdPHtfyW7/vXl0kHWSWWmljsfvTt/cgZf/ntbgCYnpwe+4nT+7Sxy+Zf8ZWV807OkmD6x8WNdUmIuIfFl5Uc//KOrPbbX5v2g/nHjrk6l/PvBKEN5aU/MZlsGUgc50ix2SsE38q46pQzXpv//GcJDn0ekkIAPz3lgh68fustKgi/YpR81Zd4Otqteoc0pinfnhoc7VEdC3e3tYbpTG3M8FEhASbiPqgrutw3ee6MBZ3tHXX9X4fsNPJcrc1ZbdGyg0dtWI4fvPgXZNwYBP+D3bYuCVHi4aXz3C8t1VpcqSiYt+3Agy8p6FnO85v8v1mtjy6DQGvUvT7Ro3qt2bj15oI1pazkV898feFn5r5Rn7HaZBKCnxk25nJes/5nISgI2WbdqspZbjbfVnnMUSva31w9WLSlWvxN27+pgrBKKPFGvrzsGh542J/P+O0duwFgzE1/r1rbbs5MMy7Y4HMNO56EzYHzGUtBHiASH9cThlVS2I3G8BFVa9es7hE56jvpt6YNmnX0STfmffOjCPPwfLbQLrp1uUlmsicjm5v51OATJ45ubHyOkRSEOvuFl5jOaOLSyy6Lbl+y+gkZhmM46s1hpZp1Jjs2cmDPq4RFd93aOs7mCiMBGHLUU6q88t7TGv6+RzoGJetH7QrogmxoJxnpdmNrwEEBRKSVkCIdLxOnbFiOaxc+vE+JiXtYfL43fHEqY74rrB9qFk5Z3M2S4LnbTjzl4rWv33XQul3hkxaIckXZgyafP1J5kXVBa9uF7GDCmSsWzUcySVT37wNHfYbiwgtavTiCYIwPrO96zJGzs5u39Wc/WGm3Nf3MwPZg0BYTT/y0zyFd7h/85z83AcDw6/7Ua6fwpmYtvrw+R8OMUGBTAOmsIelCRGIC0lEgApRXVJSfoBhtARCEEKY8FnmHAFUIwslVzz0zanji2Eta3rr9gNlHnvAb09J2EUk5k6OUiAkRzWYLUwhomP7UUwq1tYT6GbYY7vniqjL4EWs12Cepcv7WpipuTQ1WjANZqVd1JHbFmS8+ORcA8Iv1kaEHThyyM6TBq4V3p7Fcao0GaZ9JWSNcT0I6EkJ2+r8AtsV/P4H4SimtYUTK43KL1k7AzLF01u/LbK3rSC/G/m+/MuSciSMGFP5j4crsTAoKD3E2W2Bt2CgVTEw+Eft23Rk5LF1anHI1NQqNjQb78p7uz8B4hZzIAIFiPjS/fecUuOrRyqrEfcfPm7UVAA7/+ZNHZlKF8zPPrLhwC4uNrkPzNJxSCrMFKR0XXlRASPUeGMxgMAAGMwMsAPpYNxMTCEQ6V9AVUth8Nhd2kcSciHvbpUA6lafu70bimzdsaLnYlJcul1W9j+A16+6KSHle1hravHVTv0Fjvn9Ca8HoqBKzVzX+ckeH70LgU7I9n6mvTEEYQRQH008mLp8/aOLLz/10yh1PtR1y/d++Vn1d/fPbmjPL21j9Z0hOb80oROIJX0biTJGEghsRIMGw1sJaDWbDAEE5AtGEpESFEpGEELDmY4FhJkmkfY2474fljqRCZUV8pdHWSWeDfjCm/EnbddkxjXPvlIJLvFxu1PjljV9ps+aPFPrxFfdf/eYRpWVPSkI6lQ0fPmDY1bdMmzbNK4Ly6aRIfQ5OTBLaz751xD0vHnPETx6dXnjwkbU7jLw/C3myISkJCGQ0arWXQHMgMhDKglmzsRYkCF5MULxciXi5lFJBQa+PWH9GOfLf6VbmDP7qW/O+RV4Mwhr9MUbPSsGWhAiqKmIvp1L5wwqBriawIoXdtWbzt9ePHXv4pOcee0KQaFjynesPhaN8BtGAv2j33Xzu9MMO7PrcQT3LzzLWHnfjH9YtP+rE7/b/tMD5TIHZkohJL/TTj54w5TeFtvZlKpa4LBGPdreWDUnHyEjCwvGIIS0xpIJV8GKSYqURGS8RgpBxTLAoYnO3VIrwjKO7lPb/zujDhxzTu+x7McI7banC2Y8ffMI3OfTZkvhIB60kmDA0XRMxZ3PUU+t2tWRPCjR7jhKtsYi33nOcwjpRsjpn5aonR02+COltmeP+++ZVxoShFUKtmkoBtzU/8/aG3cnGx+dndiy9a5S12tmWChtPPu/n3d5Ta18giSFrOYyXHqAiUXZdGfToUh726loOpRxplSsoknAQSShHiKqqhNfu6OzshM1/r1ecRo88pPzoY/tVX1AVcWcH1hy8qqX9F3c1rF768oaWTdut93ReRH7SGisbAqsJ9NHLs5ylaPdSb57xw0SgcZS1oIgndpCgwLCN5XJhr+1atA987ul7WdBKHa0+d9Hl1/S0vm7r/GBLFk/fGobB9n4jjplMRFwaUz/Q7PVatXrbnUR1FlhFXyhgGIB0lHHiCRLRhItYqVNeWS77VEV1Qtg3RJD/Q4Vpv7JXRfSqHuXRpw6I8h2QMrczlf/ai2vbnlj87o4123xqTFP0jkBGp2rI/tpY2Gy7QbZVI/DtvugZwyLPsmzVwjseKBzY+5BSyTdFXLXLcZQ2lmP5fHBAyKEdROlxb5887pKCUWtOnVP/RyovddyyRD9YqwHAgklr3hAEZjgAisQib0NnTKGgpw4Y9b2DgHrzr0jNZxypS4CIuS0gqQ2nhS6slGRejki1okdV6bZ+XYzbmgn6vd0cnrChNXf8htbMfE5U/9ayAEsGbAA2ASiXMQAziAjF31T0JNPHUmYCgQQycyedN6Fy1wtvDF0x+0fHTr7pju3vbv4PYrrEdd2Silh0+8KsXESydUkU5pJ54768fMQtdY2PHjJskxCi2x5mRlf0thYxABxo9gAmS0qkc8EIAOtQA4FG2P1eYip0yoYqEhu4ZdXtNpE4u0ss9t8Soj0XBrWbW9P3b24Pn8zJ6F2VXSq/7Ag6JupIZQpZy/l2H7m0QehbAjMIssNzLEH7CIp9xIAJIq9b0yNas5nVTw0d86uH4m+GW17/zY8GDu5zRGVJ5Ce5wNgqpQcMmDvrjUnz/j4Nriy8+oMfH6UikXKANcCkAA61rRWSlgBAGITDmBwBBoLAVH+hjH+rEkLqwN/dq9/ZmzfurN+QNX8J3FgylJHxTOIAExRYZ9uDmM6ag7rEdJe4p8AQzKSKYOwTBO4kN/tk/GAw2y6nvzTnx2HUGeeyPXTjW9uWzh4+NvlCS2PunZfuvNF3oseMS+TnPTdyfHLuKWcedfITf14y7JYbVwoC+ZAuQNxv2JUXgtGzd7++fyMi5HKFS4qJn2ApKPsFc2ImQNZaGy/t26Ukgi07mk3f6jwLEgRmQQSAIZmYAm25OuEU8iTM9l1ZbS1Y/AMkRACICQIgYlKA+PghsbWaQ62IaD6A+XNHjjvGyYVXPLPLPPvEl059dNK1639NU+tvnjR6fJ8IyVPmnl47AL0r5jTPe625EjqByX+sSr+75E8l8cgFi+uvzff50tVfa8vo4bB5TVKoeMR9EwBQvYr3a2BuKM5y2/kt29JZUxGRbB0htrX54sDKKAyIiARIkBSOB+MXSlpzxnapqpJRz5E7sxr5kN8TF7bFH2sAoyF0YBRMzjEBA1T6UQsPR0iEfrBl9ohxP5s3bEz/sKLyh6fOrX8NwKXPj558EOWyX5/1y7aHnjhx/KyJDbP/BOC+OWPP7e24FX27J1TXrUGki1i3bJHj0JPvLr7z4S9N+PEh72xqucPo0EAoQWS3DBrec+maFwHU19v9GBimOpBNPvZaOebOlJKYU9aRLcbBgd0rsXpXFm0+UBkhNsw5Yk4j8DOekm+WR8T2llz6sTKEu+MR27Yul28zltuiilqjDqVIqXYlkYkrL9e9YMNszz6582b9cjLc6L3Cmg+LYHY4syhOkh43eX0jdjW99MyQUbMoEfvlmIaZbwH40dMnndaDrD776RNOv5Fdb8G4Zx95Hs9i80+PPn3zo7L/N+LQq2pr+p+7rHey/M31u/4WhraC2Aakom4iKh6ov/PaPGqSCo11+l9QL/9O1ZUkoM5O/PIvD+duPYIHUs/vWrzozZaF/Y+5675TL3ruxHgoN/vkp/KaB/Qo8cmw7ygbWOGGiijs4er0urzs354vxCRQ4gnECoEtXdecKcuGtkwSlVnL5QDKyJrStBsvOeWdxd2+8+Ij3TJOhAVb+gAoNkJC+OAVU1YvGQwAz9RMOJIyuW+QxYksxSs64twzfuGc1wHgnhPPrxgYyQ4/pMKlydu6Hfx6C//Cc+XO4f0rRgQKubfXtszJ5fUJsEHIJJWraNcxh/QZ8PzM61uKU4D2O1VWtBao46FTbuyxYefuU974y/fubrj4qq4l1gTvVvQ8OZXxB73Umo33qy6JGq0jL7yzK9K/MhqzgCccE4EOt213xM/8SNl9lh1AKGSYQC5Q0SUGP1VA1teQEmC2EFYjlB58GSmquH1POsvJBkV1o/VpjbPeAHB1w5lnlofbsuc5gUnOGj52S6Dx4JSFDy/F92cuOrDh+enZwP1ywsmvG35oxYkpBLxmTXpePrDHwgaaAVKOS5Xl7pXPz7y+GbW1EvVk9jfjTwD41Atvqz5+WJ/I/X9ZeI0n6DEAaLKerGAdtsTKB2snilyosT0HdC1PoKUpi515i24JBxYEa60oaJvXubS1YWj3/syKgF4eYXfoozkbFmkMGyIQYEPaFyiSCAxueXrOTXXPDx59mJ9I/HT8widfH/34420A7gXo3nXHnTh8eyw6+bzhF31z1uw549spdoCnCs/Ou37UpCm/eemItubg8UJg+3SAwsKJOXEPt61beEc9apIK9XX/cuhZ/DvU19GnXhtv250+9ZGZr/QrFMJxa6454UUAqBaOYRBRUAhRyPpSF8LdrWmdzeZN71JpW1I5zhQCS2xYCeF2TUSjxCwILKmIhyJAMUMxs6pOeKpXeUQqSdIwBDpWZ/vqoC0qmBgi8kkGxyndPnfWMaPnPH7s2HEKgADjIO80e1r6iEFzsmWXSnIOSHjBT5tf//VpE25/6YLdu/zFeV93ggLpxBxP6unblv33dYxaicY682l8yE8XmNpaAdTZVNpcAbbLm5vTXwlD44upU/d0lpgZkYSDWLmHSMIhL6q2prVUQoiuJR5vbfONZRgAhpgZBMt7OMr7i2ZGwlPoUxFBwlMw9uNVOhebiY1vnLP4lOXzT9dVJUO6ifDx7uxfc/PgiX8vHXzljMrd215xjJhEQr/VvdI7/tKJI2/rMujKh9oy4R/CIIgQ65BJKOVEVWlM/LJ55W++yZwUQL39tIJlnyIwSYH6enPE6OsGGmOOWTb3xje1seeAwJ1zOFJoZl+5kYN3rn0wqjO3eSb/mGuDV9nq7dvbC2F1RamIlZY5O3VEGUa3XdkwhPKEcDwBoahowNlyMRajAWjDrIUg06vcs9UJ92PDmBaAAXGnvpvUMGvrsG5nv3S6Pab1tqDXFB2oWgsbxDz9419cOW6YH3LPux5teCdf4PNNmNcEDiFcRymVqixXX9vyyrTvW66VQB3vnxHMDr9Qqj13ZWh4yeU/uTvxcP3KMrb24LHn/LzrnPqguRBpoRgzAsctcVz1agXka8KLtEaV8POGqMKhhJtA1dvNbQeoMqe0xHM2tAeFRWxtNQNdmFAm3Zgg5WBPWNlasLWACVBdEkW3sig+KDjFaUwQYMRgESMTjvz2jMSmZUvOzeUKXw83vnN8yC5CgBNRe9/gg/v/oiWTSvz413NmhkacqrUBcRAA5JCKUNTBS90rY99Y0XDrm0CNAuo/9XSmTw+YxjrDzNT16G+d7gh6bOuGUIE5YHITb6zf/jXg7ttWtPxHZJQJC5sqD5yS4ugUmBA2o4GgoIWg5i3NvKNvVXxr/0pv27tNmU2jD4nuciXdxFK2ea4oAA5M4Efy2i8LAu6ire1uwT2t4Z5kzQEsVTcPupqJEh1sFrIDDAVGDoLeRAyNVNV/WeO81wU7/Sw5EDan4554sF+vrvcGoTBLV2+8IQz5QmMZbPKaAIZwXCWgy0qdmx+4+Yyfjh49Wv+rXOUz4DHFWPeIKcnq1e807Yg4YvLWZXc/WXXkN9cFGn0cJbJde1efuPrpG1bOPmRY+vYTzovM7zfUlvhZYUkSiASEBAuJaMRFn66l2LpjN3qXupeS5/0+LORBhBZiNAkhtgjwJinlBgHa5AneUqKws2sml5IHH5oee/OVZ1U0N/0+MKFmIpWCwgaKYgVK7GtcaFvvQFSBjCoIQBCbbTH3j616VM5MZfzKpta2K4OQJ1omsPGZgJBJuEK6iLi0sEtl7NpV8259+dOO7//7JCYJoA7I5EwFkyLLZjQRPdF72FV3mTzu1GEh1rR117Onjrvump8hKDhSxnnPVokOu24sCxNy1s/bJuvTAQmZWr0j3dK91PcTUcczTJVCykoW6nArFYyQIEHwCUhZjW0RCvK7WprCo0eZEc/MwOtuN/k2x+xqjtsd8KRPrnClFBH2UeqY5xIlsT/17N5j5ZZtuwev2bjjv7URX7IMsAmYgBAgl5TnOpJ3JqLOz7a+Ou3XTZb3yoj59yb8fao8Jmo5sNrXPouvnDblxluffezHv6oe9O1jC4icH/r5bku28MO3ch+zOxvAARN7kQ4vGgPMxMwkBYvmvEbCk5EBvcq8t3dmEEtEIAkMQQxYZuPDasvWD6CzeQrb2oXf3O76ze29ntyxAzPkQJ1mVxEp8qQQHgcoEXpZNKYe69Gt+/xCqFXTrtQZr7+94RYLtzsbBqxvADYgciFc1xFciMfU9KP79vzF7PrrdgAgJJOEurrPJOufPsV2+KKL7o88+epLb4fW6RP1MO+C0f0n/urOa/MHDLvqllxefz80oJw18GC1U15G3LWLQEUFIREHIh6gHEAIMAk4xMGQSvW9lc2F21zAKyODIJuDzuQQtqc5TKU4bM+yzmTZ+D6xsZJIAm4E0nEgTSFwlHw5GnOfLq8oWaRI6V0t7cdn8n6tMRjGkGDjA2xDgJgBl6QLARvGIs5fqqujt6545tail7goJV/UbRi1Eqg3PY658oFM3nwVYIp4cvEBlfFLVzTc+uaAmu8N3t1e+KkOw0mGHdgwAHQAhmWS0kJKhlKAKHJEZoYwJk9A1GgNGANrLIFZFB3RCqQckHSKVTg0Qoq3HEcuKo3HFpUm4mu1DuK7WtqH+76eqA1/ickt4mBDBigEWDAJJaQLAVOIRp1HEhF15zsv3rnivTH9ezItPztgkkmBujp72Mhrjmpqzq8IQx2QUJ4UyMei7u+6dSu54/XZP9944pRkr7Wb28/2g2CCNvYYhugCCICpg/y9xyVZyD0R5GLUmAEYADZFJDYpotWOkm/EopG3SkojO4zWqj2dP6hQCE8Mw/AkC9mXIcFWAxwCjA7pYIeEQyQkJNmdsaj3UGVV4rdvPHPjat4DyAD+d9uRz867XFsrqb7e9Bx2ZTKdFzeYMFsAUURIDwKhlVK8EPO8mWWlsXljThq+KYPdYtXSLdXNmVzPQl73MEZ3CQNTIqSIRqOek8vlCkTSl1KkHSXaXEe1RSJeGhIBh4jk8/lueV8f6ofh4FCbQczUB+QUAbYhwMYC1KGCWDFJQcKBJAOlxOKo5/6x/8Flf2v8S91u7CeA/Bvd/rWSqN70GHLl9GyBLjNhjokQMJNHwoGQEgQLWJ0RhHUkaK0QYpOQYqerRKrg6ywRrBLCEVJGQ2NKmG2Vtahm5gOMtT2t5QMIopzJ6XCz2I5QvGEwdFH1MDHggBSEUCCykBLrPEc9UVYSnfHOC7ctfs+Fs/8A8u+MxxCQJEF19sDhV/+gPRPcoC1F2AYg5gBEFsyKSahiYovo2M6yV4YLvz94sCc1Gfa9yCWsBcMUUQbAEAwokCQiCRICAhpKyrdcV82NuOqJr4w96sW6uosLe1qvqZFonG8+DxvyOQbKigRs0GnXDdzRlL/OD8IplmVJMffbdMxyNlRcon7CmcoEhgAgmUgUnckSRAJFM6QhBDY70lmmHDm/NBZpXNX4i9eJ9o6N1CgkR1nU7T/S8VlHMPes1AjA0LE/6t3Umj3N1/pErfUga7ivBcoBCd67G4xiAj/jvWRK2rvDRckh2IIgsUMIeldJ+abynNdKEu7yk07sv/p3dZfn3i8CNQq11dwRg2d8AcpnsKMsKYrpovV7Zq0UhBFn39h1x85UL+2HvY0Ne4YhVzPbCmttggEvFvW8dLaQc5TUREgTqFUI2u04cofrqK2l5Yntx5/6pZ13Xz3e5w+bEDUDCKNgUffpen3/FwGzF0A1EGhcxXuD9DGx6U8YuqgRqBmFLzIQnxCYjo+4x3N8wycxkISa5HsZ9sWPZPdpL5I30FUPLXFSPbsRALyR8czSpau5dkC16B6kKRXmi9e7HGaWJnoU39+Zq1U/gBk38PyaUXveuau6mqfW1xsGaH5NzYdm+48aNcrua+9kEhCjamr2jH1+Y6Otw77TXJNIilE1898X25rfOMrWfWCVN6O2VnZtatqnMHSOAf+/luSnEyTcc2rth5UZqJX8P9RK9CHsnYed9uNDMwHVaJ0zSnkyGqVnXpv9842d7P4fZj6IT6z9edfdu9NTQh1YR8WF45pXVz5z07J9uceZQc+MnjhVWi6T0kGkS+ms4+sf3Dr3tLNHRQJzaCr02ZECpb3KHznuoYdSnWcEdNZfc9VV3toV714ACxUTAmEksunUZ+vnLBh3cVc/t3tKaG2nrmMAEIGfUfHEmpMbH18Ky9i7vWQyKerq6rjhzHP7qJQ/Nh0Epsx1ZVaKhrHP/X1tMpmkur3Gvnfd5886v4/etmtUWPD7EhM5jrNRdqlaMGbOI+v2PEvEz4yefI6jdWVgLX9wS4IAWApBmpCOIFX/fu9y3SoiwG7e2XKTbyJnscmDFBB1CvcAuALzIfBBsa65QaIReuP6HZdmAvcmq/OAYLjSXyyIRnxEGL7DhCSpsPPZaeUkukmlkGWaCGBr0Np2VUkuPItMiBLlYlc+7wG4e35NjUTHeWKjGxvN2lfeHl+a9e9Law1XSGQiTiOAOYX09oPcVG46a92xFaAjssAW+UwOTx81cgFXVnydGmauSwKiDrCj5s8XdYBOb9p5fXXI34AJIKQDX9EjAM4bWLdKfAAUvJFMupueWnBT/u0N33QYcafTlRSEKORy+dlDRt1XfsGk6+jaa/MkJfzm5jujoe1lmKHoA3SNAVcQska3dT24y+Pi/TO/3pxQ+/OuQWDGaD+ljQkLupDShYI+45prbo92ROvoQyKXIu+H54Z+RhsT5o2fCsPQDj3y5B8cCtRZJPexT4S5JRUGOhUG2ggEAMCW06kw0AVtcq1+QZusfwkz06jizmDsamxkABxkcpdlg8AUtM6mwkCDbXtxJDJMhYHOhGGYDgOdDsMwY0JjAfhhCMcPRga7dz316mWXxW4AOAmI0Y2N+pkLr41b35/Y5Od0wehCk5/Xxg/Gzqm9pHIqirark0A3JJNy/eMNj8bywbVBGMa0MWAqfsXQGPhh4EXz4ZXNf35iZkMyqWwYEohaUibUGauDlA51sW+BTulgzzWAdgfRKIv3zXwAGzY2TbJQZQQmQTICWLKQvR5fvO3kfzDwtbUSAB8+6roh2uBosBaCZJSIhIV0mloyU4uWcB/6nCCJSBGRImYCACISRKRA7BbYCtfawc+eNP54AvjVoUOdqYCZe/q5h0rDY3LWChB7RKS447QlspZApCSRQ45qk6WJ40RZfBAqSi5RUmbTxoRxg8N3rtwwlgD+0sHjHACk16w8NcrUQwPkkIwYgOKgCr1+4wR0LCgaamokoc5mZy28piQwE1vCoBCRimzMm2Xi8a/rkuilHHHnxpUrWnWAisCOzc5e+EMiYrfMO1uWxgZHSsqPFp57b1RKFZVSCdCMSEn50ao0NtiNR8aNmDGj8J4qa4QlAnw/uMBaMAnS8ZizJJM1I6wF5/L5CwHMKi53O0rTAAKAtlTuPAtJRJoTCXdJJpM/yhoT05rP4xkzbqa90pf+B8UqBhUy2W8CeLGpvV0AQL5p59digNMOq8VH5JIRAEEUTpp+60oaNiwE8ObMgSec7THGs7VWp3KHFp9cCwCs/cKFDjMTARyLLKJsbri1lo1fuACEP+1qrOapqLeLrrkm2vTMkqtTobYxqSI65v520muNl+/RTULc9+SRJ94fsWZ0a+izzZlTG5LJX4yuq1vb2bfHB564XXTQZWbedfqrz6x+r+PUOZOLBnrIaT86KNT2RGZDRGJnv95VV0hJAZuQ/ECPGzP5h1VFDtKR/dNYZ66aNs3ToT7H6hBCCOrTvctVQoh3AYY2NPCQX790LADukK5/ugglVd4aQhCe2VB7Uffxa9cGi665JmoK/gUFYyCVs88oLAPA0KEWABZcfHFXARwSsrUgEtJz2gBg/Nq1wYLai7tyqE/1rSESMh3v2+vbpGR7YC3BmFHPn35+n6lF/sVti986UjH3NGARCsrFD+qbZAbNGDDAbaipUbCWJr2+4OKDTcVheZU5rCXjnDaqrs4kAfHGgFq3eLo6u3tNICeJpJgxoNbtXC0WgengLDt2pc6xLF0SEkqKl1+cecMKKeRykICFKl+zNTexqM5ukKidIQDw04+sr9FW9AEBSol1i578r1c913lRCAnLhEy7f35Rupr+qWUjAxAgKVxvkQHScaaS7PpNFwLg5gUrJsQtHRgwByoefYk+RGIIgAEzG1P5+MDjZz92xIinW15e/YoN9cFgFr5AEO1e8UzHh+D0ho1nRhmlkgTIUa+NmfnQCiHVK0oIRJi8/M7tZ+3pm7UHKhArEtDMG0bNeGAnATx11aqg42QmTgLi0LVz/KmrVgUXb2wsEMB1gN3VtcnWoc4yvccLGeA61NmuXZv2cCaxtwEv+MF51mgIAscTkelExNGI81spJYw1KAT6QiIwGmFRXw8ASOfCCy0DQipEXOf3RMQlpd50Imus1fBDPaX2mtujHaHZTwyOZUZUSGKB56TrLBfMbPL+VyEEOAwudhgsHbWalPOkJ4SwHwWuZa+CxdgqkuMShvvEhCDXdTVi0cvGzP77xlEokkldCM7X1kAIAeV508EM8rzfkBAIjUFYCM5nLtpkIrbvjYXlDUX2TXuv2j6OlH58MkZtrUR9vTni5P8cYiwNAmsmwHeEOKLv8KsPIEHdwb6FtRSGOOmoU37U7/W5desB4MyL7ixf8OrbE9hYCClYSlXSd/jVX9WaPcE2bZhLLTu9Xl60cTSAp1E7Q6D+k9sbSQQOdIuMeDNg/JOsDgfOPmnCVf7OpuOIFMhzn2SLLY6QCD7kvAUCYAX5LTZ8AYBWrmtcpd6i8oo/T2p4bEXn2WPPj558UHb7zhMCa5mIrKNUn1nDx34VRF0KbENmqxxrhzxdc+YgAK+R420MkUHIFg5Uv2Mnnt2XgHdnHzzO21y2y9LSpWFDMhmpWLaux8aCjwiA9nJs+mcYveo04O3tmfMtJBHC0BiO7G7z7+qMvbO1ILC2cLyW1vZzANwGgJav3jTeQlUSCsZalm0Z/aNibMXAWi7WYVChoC8AMLtTyv4ZdUaMmOzf5/fZN97+FSzLoGn37TBW+g4oXt3lwVzz7hP4I+pKEFkpW85aveRUq81HMv9ce/vUGJGbAjRZq9z29C2CCJYZRZJKYQTk5NOpqQBeO/zkoauWP/rcWsdQf2nZtVub77z11VfPGTZsmA8Ai665Jtry2LzH88bWKLYcOM7q2uvrhnJ9Pf02k/lEWkOgsc5MmzbNC4LwHGtCgMgBuGBMIWV0PmVNIQVwCCJhbQjfD7/cIdKczxcutNZyh4oPrQlSRudTRufbAc6DSLENKdRm/Jiv3LT3wuETqzPAxsfX379LK/lSVEhmbeAKIfKEt8c8W78alkt43+nK9OZXLyphQDQAqqGmRnEyWSSVjY2GmYUJg/N8Y0BEkhlB2oSpdh2k0iZMWcAHQRWMgQnD2jXTpnn96uoKXiJ2Y8JxRcEaXxT8M7Zf/N2XHx9UU/f40SN/1jz3lVdEEJ6aL/gUh/TIU3fR6NF6fk2NPDSR4E8GDMDT/rr+BG1Fb7bWKCmaqitKjrJSH+ZaNcBKfViXyvIThBQhG20CQ0cdfvJ1h5xS+4syP7AjrQ6sFBJdKxPjrAyLdUge0TURO1wpuZ6ZjWZR9s6aHafvzZfe45dswWzAbPYYxL2uQQgwQDISeVAIQRYcuEJCuOohMIhJSu54lri4Y0kJwXvqM4xfUWEJsKMAM7qxUVNdne08dHvOyEmDlTYDA2sMSZF1q6qGaYXDNMsBWuGwaNeKoaRkOrTGONr2W/PXp74EAOOXPPfHdET9psL1vNBYkB8MjvjBf0WC8McIgoGBsajyIk7KE/dNfHX+fYyk+MCRjXv62GGz3q/KCEDeD79FwiPHc2XUM3PXLb5zLQDkOh7aAOyoPPrylyHiJ5FQyGb9r6wr7NwmnHhciRBKhivXL/7VPOb36rwL4IChVz3JQn6HrYHv6ys4mXyY6t5vFEnIkpiQUioHQed5yVLGYo4jiQgFwS4BvKCqYmZrLndHhXITWQFEqqoeAcBSsoo5jjRWICNEHABCFK+BBLKCylrz+X+Q0k4vr85lvlUuHWmEQsoRCycsfnrlBx7d8eSgkQ2lJM8kENoL4RUAFkznIc4Zy+Z/e9awU15XhO+xMQd1up+ElJBSbspHo9POePW5O4rUqO59kiIEeTHHkQwgF5rYP9oYAspKY3dHffuAVApller1bUuTArWriqfX1U4VXD+Au3b1LzUBH2KMZc91mx3JATk0AeyQp3jDbgYBtQIo1kH9AO7ZDTe3pQvPGu1DKC+cOnAgAXsb/zr2Kk67MLCIKyXhdO/2MgBEyip+roXzRyhAMb8DACPn1O+ac9KEMR5k1yyZ1Njn/v4OAMQqus4IvfSbRhuIWKwJAESP+NshYSK0gSuVP2rUqDzuuQd7O0A7Z28kkfhj4OnHlBQUdSNvJQExsLaWauvrbX1trXizvp5VecV3YcPfZbWBclUWAC7HUp1kiAmvPHdvQ/L+B+y8+iGFXL4vsaBI3Nssjjp22eh76jIfdLx2upUi5aUPhMyLACBqYxuw+r17n3IUuVaiJqlQk1T7WBa///o/98cN3l936GXOh5LWmqTahx2jPX2snSE/tJ97xrCvc2Deu5esqfnIZ2f8D0n1+z9qba0sdpY/OnhWO6P4XDIpkEyKPfWKYHzYh6R9t7nHKwjeiwtwMinEXtf3HugHj8aoRa2cUfuPcQ8GaEZt8d6+ht75zPShlzkfBUBt0R7h/Zs73w/GXuMQH9afD4sHdb77w2JDn0JouRiP6X/cd0/I+qZWSrll3NE9pv/hDz9Id7p6Djv++yXtvn9ZmaJHVy+ZtgEALrtsuvPsyrcu9n3bWyq584xhBz1wzz1XZjp4lT14+LVHZEww7qT+J91dXz916Gzr61+/peTZlVsv0xoHlpR4f3tnwW0vAMAptb8oe2Ptlq/7ge7qOtIcdOCBty164gfpjv4BAPc67ppKq/XXCVROgt695PTBDxfTmYptH3v6Dw/dvCN7MRGZvt1LfvfS7J9v7Lw3tjZZuXJtyzcsUXVZwvnrmgW3vwIAQycmY7t2tl2qLXUnwev/69IBD1x++eX6A4lY/7wr6l+WNBD3Gvadi9uz4UIT6r5BEH796eVbllxwwbTSzjO7CqE/ybelv0wF+tudEyIer1DpdOGeMNQn5PPhN//24qoZBABvQgLglF/4oW9Kbn9t2+Ka4gRaRTW1dyeeWrb5pbxvvqV12LO1LTf/oBHfvQwAAhNUGxZ3SCkOV4qqEp7aSwKSBACtTdme2by9zS8ERxcK+vrfPL504fFn3FIC3MADTr5u+IZtmeXGmOO0sSev3da+fOAp1x0BACeO+8+uy9Y0Lwm0vZBNOKC13V/Sb8R3zwGA9qZ8ZSobTMvlc0cUCvpHP75n+b1FQGo/t4PkCPX1lplFrhDc6rnix127xq4mQUnHi7z29u6dBwP1hgjI+8FFilOrQ20mXHRRMgKAW0qzTMTZHtUl0yKeeDgM9QgQgFX1wXG1yUprzUkOZdekMoWvF41nvVm3fvVFOjQHjBjY5Tgp5K2eo+40QF8AIOOE1oS5srLSV6orE088W39tS0c395q1mmGD1D3/9Zspu1acc7jWZuC7mzefDxDvbs7czODG3a/fM7p5xd3HW61X79qdvQGos+82pb9tjE60vvnro3at+M3pQuCudKZwKwEIOaPZ6mx5RfwGJcUcY8xJn0aGy78a9+YbbpgvrDUllWXRl1vaChfn8vqKtrb0GTtbM8cAwNFjf9A3NDwqEUG9sej34tr0SQDQurnJsUytW3akZuYK+sauXUu/zB0JZls2tJxuLZVFXcwMtT3j1NrbKwFAa9MbsOt3tmdVzg9vT2ULE1paspMAoPh3/Jh2NadO37S15fR9qGr63l3/WUo0WgN2K4N7AoC1tjuseaMj3xNE/A5b2wMAQm16CmCTtZ3eCP0aM1cQAXmhmAhBe1t+eajNV/v1qPxKMVY9gD8vYBiolT+tG60jrjNz267Mn+IxtaS8xH3BUSIei6oXAWDnruxFIOVk83oSSNlUOn8ZAGA3AOKqbl1K/gusC9mMnwCKO5wLhfBSCIlcIRwHUrE33t04FQAqSkseEdIZsmF74VtVpe7PHEdWxWLuEgDwcwVFJKMxj6ZFo5Hf9emQzA/4EogZJUEmNaL70Kt+JIRzUCIRmwkAjuP8jiGv7THoiik9hl5xPpN7YSTi/h4AEgnvTyTd4T2GXPXdHkOuOC208k7Pc2ZYBmJCR4xhFXHldwg20poLiip01ed69OIMywCddfyAS6OuMzuV1tP9kCeVJyKnr2m8420iQBINSUTFT5pX3ju4JKa+JpXsm0zOcC+8sF/Oc5x3qhLuE66SNzDhu5xkMfKMZLlSqqqi1DurZeW9g6IefiWIjwOAtxfc8lpZQk1my2dlCvb3jpL1l58x7EoAqKoozSuJ5YE2txhj/nJEzi15b3HSQdri0ayj5JvG4g6r+cyyhJr87gu3LUNtrdy5/O5fea5Mhow7whA/jXni2q2vTHsQtbVyw6JfvRCPygtCbS8LNaa7jnz43PNHfhcAlCzLRTxnLSk87Ljq7iAIrmNmQv2A/Se3rSP4974VX0NDg6L3PyOSHTkA3LG9r/gcKzBTMpkUndc6G2loaFB7tymoWPfD3i+FgBBin32UQoA+YmUqpYAU9MF7e79XfFib6EjQSCZnuJ/Gavf/AbyrTtU5RqFZAAAAAElFTkSuQmCC" alt="AA Impact Garage Door" style="height:72px;width:auto;display:block;">
+    </div>
+    <div>
+      <div style="font-size:16px;font-weight:900;letter-spacing:0.06em;line-height:1.1;">AA IMPACT <span style="color:#C0272D;">GARAGE DOOR</span></div>
+      <div style="font-size:11px;opacity:0.8;margin-top:1px;">Tracks &middot; Cables &middot; Drums &middot; Labels</div>
+      <div id="server-status" style="font-size:10px;margin-top:2px;opacity:0.85;">Checking print server...</div>
+    </div>
+  </div>
+  <button class="settings-icon-btn" onclick="openSettings()">&#9881;</button>
+</div>
+<div class="content">
+  <div class="card" id="order-preview">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span style="display:flex;align-items:center;gap:8px">Order&nbsp;<input type="text" id="wo" placeholder="W/O #" style="width:110px;height:32px;padding:0 8px;border:1.5px solid var(--gray-border);border-radius:6px;font-size:14px;font-weight:700;color:#1B2A6B;text-transform:none"></span>
+      <span id="op-tot" style="font-size:11px;color:#8a9bb0;text-transform:none;letter-spacing:0">&mdash;</span>
+    </div>
+    <input type="hidden" id="mark" value="">
+    <div id="op-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
+    <div id="op-undo" style="display:none;align-items:center;justify-content:space-between;gap:8px;background:#fff3cd;border:1px solid #ffe08a;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:13px;color:#7a5b00">
+      <span id="op-undo-txt">Mark removed</span>
+      <span style="display:flex;align-items:center;gap:6px">
+        <button type="button" onclick="opUndo()" style="border:1px solid #C0272D;background:#fff;color:#C0272D;border-radius:6px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer">Undo</button>
+        <button type="button" onclick="opDismissUndo()" aria-label="close" style="border:1px solid #ffe08a;background:#fff;color:#7a5b00;border-radius:6px;width:26px;height:26px;font-size:16px;line-height:1;cursor:pointer">&times;</button>
+      </span>
+    </div>
+    <button type="button" onclick="opAddDoor()" style="width:100%;height:40px;background:var(--gray-light);color:var(--text-muted);border:1.5px dashed var(--gray-border);border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">+ Add door</button>
+  </div>
+  <script>
+  var opLastDeleted=null,opActive=null,opCur=null,opMidSeq=0,opData={};
+  var OPF=['width','height','highlift','weight'];
+  function opRecalc(){var mk=document.querySelectorAll('#op-list .op-mk');var t=0;mk.forEach(function(m){t+=parseInt(m.querySelector('.op-q').textContent)||0;});var el=document.getElementById('op-tot');if(el)el.textContent=mk.length+' marks · '+t+' doors';}
+  function saveMarkForm(){if(!opCur)return;var d=opData[opCur]||(opData[opCur]={});OPF.forEach(function(id){var e=document.getElementById(id);if(e)d[id]=e.value;});d.trackType=(document.getElementById('track-type')||{value:''}).value;d.liftType=(document.getElementById('lift-type')||{value:''}).value;}
+  function loadMarkForm(d){d=d||{};OPF.forEach(function(id){var e=document.getElementById(id);if(e)e.value=(d[id]!=null?d[id]:'');});var tt=document.getElementById('track-type');if(tt)tt.value=d.trackType||'';var lt=document.getElementById('lift-type');if(lt)lt.value=d.liftType||'';try{syncDisplayFields();}catch(e){}var hlf=document.getElementById('hl-field');if(hlf)hlf.classList.toggle('visible',d.liftType==='highlift');try{calculate();}catch(e){}try{runSprings();}catch(e){}try{renderDespacho();}catch(e){}}
+  function renderMarkBoxes(){var box=document.getElementById('mark-boxes');if(!box)return;box.innerHTML='';document.querySelectorAll('#op-list .op-mk').forEach(function(m){var mid=m.getAttribute('data-mid');var L=(m.querySelector('.op-lbl').value||'?');var on=(mid===opCur);var b=document.createElement('div');b.className='mark-box';b.setAttribute('data-mid',mid);b.setAttribute('data-letter',L);b.style.cssText='min-width:52px;height:52px;padding:0 8px;border:1.5px solid #1B2A6B;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:'+(on?'#fff':'#1B2A6B')+';background:'+(on?'#1B2A6B':'#fff')+';cursor:pointer';b.textContent=L;b.onclick=function(){opOpenMark(mid,L);};box.appendChild(b);});}
+  function opRefresh(){renderMarkBoxes();opRecalc();}
+  function opOpenMark(mid,label){if(opCur&&opCur!==mid){try{saveMarkForm();}catch(e){}}opCur=mid;opActive=label;loadMarkForm(opData[mid]||{});var ed=document.getElementById('door-editor');if(ed)ed.style.display='';var t=document.getElementById('editing-mark');if(t)t.textContent='Editing mark '+label;document.querySelectorAll('#mark-boxes .mark-box').forEach(function(b){var o=b.getAttribute('data-mid')===mid;b.style.background=o?'#1B2A6B':'#fff';b.style.color=o?'#fff':'#1B2A6B';});}
+  function opChg(b,d){var q=b.parentNode.querySelector('.op-q');q.textContent=Math.max(1,(parseInt(q.textContent)||1)+d);opRecalc();}
+  function opDel(b){var m=b.closest('.op-mk');if(!m)return;var mid=m.getAttribute('data-mid');var lbl=m.querySelector('.op-lbl').value;var q=parseInt(m.querySelector('.op-q').textContent)||1;opLastDeleted={label:lbl,qty:q,data:opData[mid]||{}};delete opData[mid];m.remove();if(opCur===mid){var ed=document.getElementById('door-editor');if(ed)ed.style.display='none';var t=document.getElementById('editing-mark');if(t)t.textContent='';opCur=null;opActive=null;}opRefresh();var ub=document.getElementById('op-undo');if(ub){document.getElementById('op-undo-txt').textContent='Mark '+lbl+' removed';ub.style.display='flex';}}
+  function opUndo(){if(opLastDeleted){var chip=opChip(opLastDeleted.label,opLastDeleted.qty);document.getElementById('op-list').appendChild(chip);opData[chip.getAttribute('data-mid')]=opLastDeleted.data||{};opLastDeleted=null;opRefresh();}var ub=document.getElementById('op-undo');if(ub)ub.style.display='none';}
+  function opDismissUndo(){opLastDeleted=null;var ub=document.getElementById('op-undo');if(ub)ub.style.display='none';}
+  function opChip(label,q){var mid='m'+(++opMidSeq);opData[mid]={};var d=document.createElement('div');d.className='op-mk';d.setAttribute('data-mid',mid);d.style.cssText='display:flex;align-items:center;gap:6px;border:1px solid #e8ecf0;border-radius:10px;padding:6px 8px';d.innerHTML='<input class="op-lbl" type="text" maxlength="4" value="'+label+'" oninput="renderMarkBoxes()" style="width:44px;height:34px;border:none;border-radius:8px;background:#1B2A6B;color:#fff;font-size:16px;font-weight:700;text-align:center" title="Edit mark"><button type="button" onclick="opChg(this,-1)" style="width:26px;height:26px;border:1px solid #dee2e6;border-radius:6px;background:#f5f5f7;font-size:15px;cursor:pointer">−</button><span class="op-q" style="min-width:18px;text-align:center;font-weight:700;color:#1B2A6B">'+q+'</span><button type="button" onclick="opChg(this,1)" style="width:26px;height:26px;border:1px solid #dee2e6;border-radius:6px;background:#f5f5f7;font-size:15px;cursor:pointer">+</button><button type="button" onclick="opDel(this)" aria-label="delete" style="width:26px;height:26px;margin-left:2px;border:1px solid #f1c9cc;border-radius:6px;background:#fdeef0;color:#C0272D;font-size:15px;cursor:pointer">×</button>';return d;}
+  function opAddDoor(){var n=document.querySelectorAll('#op-list .op-mk').length;var letter=String.fromCharCode(65+n);document.getElementById('op-list').appendChild(opChip(letter,1));opRefresh();}
+  (function(){function go(){var l=document.getElementById('op-list');if(!l)return;l.appendChild(opChip('A',1));opRefresh();var f=l.querySelector('.op-mk');if(f)opOpenMark(f.getAttribute('data-mid'),f.querySelector('.op-lbl').value);}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();})();
+  </script>
+  <div id="mark-boxes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+  <div id="door-editor" style="display:none">
+  <div id="editing-mark" style="font-size:13px;font-weight:700;color:#1B2A6B;margin-bottom:8px"></div>
+  <div class="card">
+    <div class="card-title">Door Information</div>
+    <div class="field-row">
+      <div class="field" style="position:relative;" onmouseenter="showSuggest('width-suggest')" onmouseleave="hideSuggest('width-suggest')">
+    <label>Width (inches)</label>
+    <input type="number" id="width" placeholder="e.g. 192" inputmode="decimal" autocomplete="off"
+      onmouseenter="showSuggest('width-suggest')" onfocus="showSuggest('width-suggest')"
+      onblur="setTimeout(function(){hideSuggest('width-suggest')},200)">
+    <div id="width-suggest" class="suggest-list" style="display:none;">
+      <div onclick="setSuggest('width',84)">84"</div>
+      <div onclick="setSuggest('width',96)">96"</div>
+      <div onclick="setSuggest('width',108)">108"</div>
+      <div onclick="setSuggest('width',120)">120"</div>
+      <div onclick="setSuggest('width',192)">192"</div>
+      <div onclick="setSuggest('width',216)">216"</div>
+    </div>
+  </div>
+      <div class="field" style="position:relative;" onmouseenter="showSuggest('height-suggest')" onmouseleave="hideSuggest('height-suggest')">
+    <label>Height (inches)</label>
+    <input type="number" id="height" placeholder="e.g. 96" inputmode="decimal" autocomplete="off"
+      onmouseenter="showSuggest('height-suggest')" onfocus="showSuggest('height-suggest')"
+      onblur="setTimeout(function(){hideSuggest('height-suggest')},200)">
+    <div id="height-suggest" class="suggest-list" style="display:none;">
+      <div onclick="setSuggest('height',84)">84"</div>
+      <div onclick="setSuggest('height',96)">96"</div>
+      <div onclick="setSuggest('height',108)">108"</div>
+      <div onclick="setSuggest('height',120)">120"</div>
+      <div onclick="setSuggest('height',144)">144"</div>
+    </div>
+    <div class="panel-hint" id="panel-hint"></div>
+  </div>
+    </div>
+    <div class="field-row">
+      <div class="field" style="position:relative;" onmouseenter="showSuggest('cs-track')" onmouseleave="hideSuggest('cs-track')">
+    <label>Track type</label>
+    <input type="text" id="track-type-display" readonly placeholder="Select..." style="cursor:pointer;" value="">
+    <input type="hidden" id="track-type" value="">
+    <div id="cs-track" class="suggest-list" style="display:none;">
+      <div onmousedown="setSelect('track-type','3-15R','3&quot; 15R')">3" 15R</div>
+      <div onmousedown="setSelect('track-type','2-12R','2&quot; 12R')">2" 12R</div>
+      <div onmousedown="setSelect('track-type','3-LHR','3&quot; LHR')">3" LHR</div>
+      <div onmousedown="setSelect('track-type','2-LHR','2&quot; LHR')">2" LHR</div>
+    </div>
+  </div>
+      <div class="field" style="position:relative;" onmouseenter="showSuggest('cs-lift')" onmouseleave="hideSuggest('cs-lift')">
+    <label>Lift type</label>
+    <input type="text" id="lift-type-display" readonly placeholder="Select..." style="cursor:pointer;" value="">
+    <input type="hidden" id="lift-type" value="">
+    <div id="cs-lift" class="suggest-list" style="display:none;">
+      <div onmousedown="setSelect('lift-type','standard','Standard')">Standard</div>
+      <div onmousedown="setSelect('lift-type','highlift','High Lift')">High Lift</div>
+      <div onmousedown="setSelect('lift-type','lhr','Low Headroom')">Low Headroom</div>
+    </div>
+  </div>
+    </div>
+    <div class="field-row">
+      <div class="field hl-field" id="hl-field"><label>High Lift (in)</label><input type="number" id="highlift" placeholder="e.g. 24" inputmode="decimal"></div>
+      <div class="field"><label>Door weight (lbs)</label><input type="number" id="weight" placeholder="e.g. 400" inputmode="decimal"></div>
+    </div>
+    <button class="clear-btn" onclick="clearAll()">Clear</button>
+  </div>
+  <div class="card" style="display:none">
+    <div class="card-title" onclick="toggleLabel()" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between">Label Information <span style="display:flex;align-items:center;gap:8px"><span class="badge">Optional</span><span id="lbl-chev" style="font-size:18px;transition:transform .3s">&#9654;</span></span></div>
+    <div id="lbl-body" style="display:none">
+    <div class="field-row">
+      <div class="field" style="position:relative;" onmouseenter="showSuggest('cs-lites')" onmouseleave="hideSuggest('cs-lites')">
+    <label>Lites</label>
+    <input type="text" id="lites-display" readonly placeholder="Select..." style="cursor:pointer;" value="">
+    <input type="hidden" id="lites" value="">
+    <div id="cs-lites" class="suggest-list" style="display:none;">
+      <div onmousedown="setSelect('lites','1','1',true)">1</div>
+      <div onmousedown="setSelect('lites','2','2',true)">2</div>
+      <div onmousedown="setSelect('lites','3','3',true)">3</div>
+      <div onmousedown="setSelect('lites','4','4',true)">4</div>
+      <div onmousedown="setSelect('lites','5','5',true)">5</div>
+    </div>
+  </div>
+      <div class="field" style="position:relative;" onmouseenter="buildGlassOptions();showSuggest('cs-glass')" onmouseleave="hideSuggest('cs-glass')">
+    <label>Glass</label>
+    <input type="text" id="glass-display" readonly placeholder="Select..." style="cursor:pointer;" value="">
+    <input type="hidden" id="glass" value="">
+    <div id="cs-glass" class="suggest-list"></div>
+  </div>
+    </div>
+    <div class="field" style="position:relative;" onmouseenter="buildFrameOptions();showSuggest('cs-frame')" onmouseleave="hideSuggest('cs-frame')">
+    <label>Frame Color</label>
+    <input type="text" id="frame-display" readonly placeholder="Select..." style="cursor:pointer;" value="">
+    <input type="hidden" id="frame" value="">
+    <div id="cs-frame" class="suggest-list"></div>
+    </div>
+  </div>
+  </div>
+  <div class="results" id="results">
+    <div class="tabs">
+      <div class="tab active" onclick="showTab(0)">Tracks</div>
+      <div class="tab" onclick="showTab(1)">Cables</div>
+      <div class="tab" onclick="showTab(2)">Springs</div>
+      <div class="tab" onclick="showTab(3)" style="display:none">Labels</div>
+      <div class="tab" onclick="showTab(4)">Hardware</div>
+      <div class="tab" onclick="showTab(5)">Dispatch</div>
+    </div>
+    <div class="page active" id="page-0">
+      <div class="card"><div class="card-title">Track Measurements</div>
+        <div class="result-row"><span class="rlabel">Vertical (L &amp; R)</span><span class="rvalue big" id="r-vertical">--</span></div>
+        <div class="result-row"><span class="rlabel">Horizontal (L &amp; R)</span><span class="rvalue big" id="r-horizontal">--</span></div>
+        <div class="result-row"><span class="rlabel">2x2 projection</span><span class="rvalue" id="r-2x2">--</span></div>
+        <div class="result-row"><span class="rlabel">Sections</span><span class="rvalue" id="r-panels">--</span></div>
+        <div class="result-row"><span class="rlabel">Configuration</span><span class="rvalue" id="r-config" style="font-size:13px;text-align:right;max-width:55%">--</span></div>
+      </div>
+      <div class="card"><div class="card-title">Jamb Brackets -- per side</div><div class="jb-grid" id="jb-grid"></div></div>
+      <div style="display:flex;gap:8px;">
+      <button class="print-btn" style="flex:1;" onclick="doPrint('tracks')">&#128424; Print Tracks</button>
+      <button class="print-btn" style="flex:1;background:white;color:#111;border:2px solid #1B2A6B;" onclick="openPreview('tracks')">&#128065; Preview</button>
+    </div>
+    </div>
+    <div class="page" id="page-1">
+      <div class="notice" id="weight-notice" style="display:none">Enter door weight to calculate cables.</div>
+      <div id="cable-results">
+        <div class="card"><div class="card-title">Drum &amp; End Bearing Plate</div>
+          <div class="result-row"><span class="rlabel">Selected drum</span><span class="rvalue big" id="r-drum">--</span></div>
+          <div class="result-row"><span class="rlabel">Quantity</span><span class="rvalue" id="r-drum-qty">--</span></div>
+          <div class="result-row"><span class="rlabel">End bearing plate</span><span class="rvalue" id="r-ebf">--</span></div>
+          <div class="result-row"><span class="rlabel">Total capacity</span><span class="rvalue" id="r-capacity">--</span></div>
+        </div>
+        <div class="card"><div class="card-title">Cable Calculation</div>
+          <div class="result-row"><span class="rlabel">Floor to shaft center</span><span class="rvalue" id="r-ftsc">--</span></div>
+          <div class="cable-box"><div><div class="cable-size" id="r-cable">--</div><div class="cable-sub">Cable length &middot; left &amp; right</div></div><div class="cable-badge" id="r-cable-type">--</div></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+      <button class="print-btn" style="flex:1;" onclick="doPrint('cables')">&#128424; Print Cables</button>
+      <button class="print-btn" style="flex:1;background:white;color:#111;border:2px solid #1B2A6B;" onclick="openPreview('cables')">&#128065; Preview</button>
+    </div>
+      </div>
+    </div>
+    <div class="page" id="page-2">
+<div class="card" style="padding:0">
+<div style="padding:16px 20px;border-bottom:1px solid #e8ecf0">
+<div style="font-size:11px;font-weight:600;color:#8a9bb0;letter-spacing:.06em;margin-bottom:10px">SPRING INFORMATION</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+<div><div style="font-size:12px;color:#8a9bb0;margin-bottom:4px">Lift Type</div><div style="font-size:14px;font-weight:600" id="sp-lift">--</div></div>
+<div id="sp-hlbox" style="display:none"><div style="font-size:12px;color:#8a9bb0;margin-bottom:4px">High Lift</div><div style="font-size:14px;font-weight:600" id="sp-hlval">--</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+<div><div style="font-size:12px;color:#8a9bb0;margin-bottom:4px">Spring Qty</div><select id="sp-qty" onchange="runSprings()" style="width:100%;padding:5px 6px;border:1.5px solid #1B2A6B;border-radius:7px;font-size:15px;font-weight:700;color:#1B2A6B;background:white"><option value="">Auto</option><option value="1">1</option><option value="2">2</option><option value="4">4</option></select><div style="font-size:11px;color:#8a9bb0;margin-top:2px" id="sp-qty-lbl">--</div></div>
+<div><div style="font-size:12px;color:#8a9bb0;margin-bottom:4px">Wire Size</div><select id="sp-wire" onchange="runSprings()" style="width:100%;padding:5px 6px;border:1.5px solid #1B2A6B;border-radius:7px;font-size:15px;font-weight:700;color:#1B2A6B;background:white"><option value="">Auto</option><option value="0.2253">0.2253</option><option value="0.2437">0.2437</option><option value="0.250">0.250</option><option value="0.2625">0.2625</option><option value="0.273">0.273</option><option value="0.283">0.283</option><option value="0.289">0.289</option><option value="0.295">0.295</option><option value="0.306">0.306</option><option value="0.3065">0.3065</option><option value="0.3125">0.3125</option><option value="0.319">0.319</option><option value="0.331">0.331</option><option value="0.343">0.343</option><option value="0.362">0.362</option></select><div style="font-size:11px;color:#8a9bb0;margin-top:2px" id="sp-wire-lbl">--</div></div>
+<div><div style="font-size:12px;color:#8a9bb0;margin-bottom:4px">Spring ID</div><select id="sp-id" onchange="runSprings()" style="width:100%;padding:5px 6px;border:1.5px solid #1B2A6B;border-radius:7px;font-size:15px;font-weight:700;color:#1B2A6B;background:white"><option value="">All IDs</option><option value="2.625">2.625</option><option value="3.75">3.750</option><option value="5.25">5.250</option></select><div style="font-size:11px;color:#8a9bb0;margin-top:2px" id="sp-id-lbl">--</div></div>
+</div>
+
+</div>
+<div style="padding:8px 20px;border-bottom:1px solid #e8ecf0">
+<div style="font-size:11px;font-weight:600;color:#8a9bb0;letter-spacing:.06em;margin-bottom:.6rem">RESULTS</div>
+<div class="result-row"><span class="rlabel">Drum</span><span class="rvalue"><span style="display:flex;align-items:center;gap:6px"><select id="sp-drum" onchange="runSprings()" style="border:1px solid #dee2e6;border-radius:5px;padding:2px 4px;font-size:13px;font-weight:600;color:#1B2A6B;background:white"><option value="">Auto</option><option value="D400-96" class="std-only">D400-96</option><option value="D400-144" class="std-only">D400-144</option><option value="5250-18" class="std-only">5250-18</option><option value="D525-54" class="hl-only">D525-54 (HL)</option><option value="D575-120" class="hl-only">D575-120 (HL)</option><option value="D800-120" class="hl-only">D800-120 (HL)</option></select><span id="sp-warn" onclick="showSpWarn()" style="display:none;cursor:pointer;font-size:22px;line-height:1;position:relative;padding:2px 4px" title=""><span style="color:#C0272D">&#9888;</span></span></span></span></div>
+<div class="result-row"><span class="rlabel">Length (2.625")</span><span class="rvalue" id="sp-len">--</span></div>
+<div class="result-row"><span class="rlabel">Cycles</span><span class="rvalue" id="sp-cyc">--</span></div>
+<div class="result-row"><span class="rlabel">TIPPT</span><span class="rvalue" id="sp-tippt">--</span></div>
+<div class="result-row"><span class="rlabel">Turns</span><span class="rvalue" id="sp-turns">--</span></div>
+<div class="result-row"><span class="rlabel">Multiplier</span><span class="rvalue" id="sp-multi">--</span></div>
+</div>
+<div style="padding:8px 20px">
+<div style="font-size:11px;font-weight:600;color:#8a9bb0;letter-spacing:.06em;margin-bottom:8px">LENGTH BY ID</div>
+<div id="sp-cards" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"></div>
+</div>
+</div>
+<div style="display:flex;gap:8px;padding:4px 0 8px">
+<button class="print-btn" style="flex:1" onclick="doPrint('springs')">&#128424; Print Springs</button>
+<button class="print-btn" style="flex:1;background:white;color:#111;border:2px solid #1B2A6B" onclick="openSpPreview()">&#128065; Preview</button>
+</div>
+    </div>
+<div class="page" id="page-3">
+      <div id="label-missing" class="label-missing">Fill in Label Information above to preview labels.</div>
+      <div id="label-content" style="display:none">
+        <div class="label-preview-title">Small Label (4" x 1") -- GX420d</div>
+        <div class="small-label"><div id="sl-left"></div><div id="sl-right"></div></div>
+        <div class="label-preview-title">Big Label (3" x 6") -- Westinghouse WHTP203e</div>
+        <div id="big-label-preview"></div>
+        <div class="label-nav">
+          <button onclick="prevLabel()">&#8592;</button>
+          <span id="label-nav-text">1 / 1</span>
+          <button onclick="nextLabel()">&#8594;</button>
+        </div>
+        <button class="print-btn" onclick="doPrint('labels')">&#128424; Print Labels</button>
+      </div>
+    </div>
+    <div class="page" id="page-4">
+      <div class="notice" id="hw-notice" style="display:none">Enter width, height, track &amp; lift to calculate hardware.</div>
+      <div id="hw-content" style="display:none">
+        <div class="card"><div class="card-title" id="hw-series-title">Hardware List</div>
+          <div id="hw-rows"></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="print-btn" style="flex:1;" onclick="doPrint('hardware')">&#128424; Print Hardware</button>
+          <button class="print-btn" style="flex:1;background:white;color:#111;border:2px solid #1B2A6B;" onclick="openPreview('hardware')">&#128065; Preview</button>
+        </div>
+      </div>
+    </div>
+    <div class="page" id="page-5">
+      <div class="notice" id="desp-notice" style="display:none">Enter Door Information to build the dispatch sheet.</div>
+      <div id="desp-content" style="display:none">
+        <div class="card"><div class="card-title">Dispatch &mdash; preview</div>
+          <div id="desp-preview" style="overflow-x:auto"></div>
+        </div>
+        <button class="print-btn" onclick="doPrint('despacho')">&#128424; Print Despacho</button>
+      </div>
+    </div>
+  </div>
+  <div class="results" id="print-all-wrap" style="margin-top:4px">
+    <button class="print-all-btn" onclick="opPrintChoice()">&#128424; Print All</button>
+    <button class="print-all-btn" style="display:none" onclick="doPrintAll()">&#128424; Print All (print server)</button>
+    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff">&#128296; Send to Manufacturing</button>
+  </div>
+  </div>
+</div>
+<script>
+var SERVER='http://localhost:5000';
+var SK='gdCalc_v4';
+var DEF_GLASS=['Clear','5/16 GRAY-CLEAR','5/16 BRONZE-CLEAR','5/16 CLEAR-CLEAR','1/4 CLEAR','1/4 GRAY','1/4 BRONZE','OBSCURE'];
+var DEF_FRAME=['Black','White','Bronze','Anodized','Mill','Dark Bronze'];
+var DEF_PRINTERS=['ZDesigner GX420d','Westinghouse WHTP203e','Microsoft Print to PDF','Microsoft XPS Document Writer'];
+var JB=[{min:0,max:84,j10:4,j12:4,j14:4,j16:null},{min:85,max:96,j10:4,j12:5,j14:5,j16:null},{min:97,max:108,j10:4,j12:5,j14:5,j16:2},{min:109,max:120,j10:4,j12:5,j14:5,j16:4},{min:121,max:132,j10:4,j12:5,j14:5,j16:6},{min:133,max:144,j10:4,j12:6,j14:6,j16:6},{min:145,max:156,j10:4,j12:6,j14:6,j16:8},{min:157,max:168,j10:4,j12:6,j14:8,j16:8},{min:169,max:180,j10:4,j12:6,j14:8,j16:10},{min:181,max:192,j10:4,j12:6,j14:10,j16:10}];
+var serverOK=false,curLabel=0,labelRoles=[],CD={},curRotation=0;
+
+function load(){try{return JSON.parse(localStorage.getItem(SK))||{};}catch(e){return{};}}
+function save(d){try{var s=load();Object.assign(s,d);localStorage.setItem(SK,JSON.stringify(s));}catch(e){}}
+function toast(msg,ms){var t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(function(){t.style.display='none';},ms||2500);}
+function checkServer(){
+  fetch(SERVER+'/ping',{signal:AbortSignal.timeout(2000)})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      serverOK=true;
+      curRotation=d.bigRotation!==undefined?d.bigRotation:0;
+      updateRotUI(curRotation);
+      if(d.printers){mergeServerPrinters(d.printers);}
+      document.getElementById('server-status').textContent='Green Print server connected';
+    })
+    .catch(function(){
+      serverOK=false;
+      curRotation=load().bigRotation||0;
+      updateRotUI(curRotation);
+      document.getElementById('server-status').textContent='Red Print server offline';
+    });
+}
+function mergeServerPrinters(printers){
+  var s=load();var extra=s.extraPrinters||[];
+  var newEx=printers.filter(function(p){return DEF_PRINTERS.indexOf(p)<0&&extra.indexOf(p)<0;});
+  if(newEx.length>0){save({extraPrinters:extra.concat(newEx)});}
+}
+
+
+function printPreview(){
+  var content = document.getElementById('preview-content').innerHTML;
+  var title = document.getElementById('preview-title').textContent;
+  var area = document.getElementById('preview-print-area');
+  area.innerHTML = '<h2 style="font-family:Arial;color:#1B2A6B;margin-bottom:16px;">'+title+'</h2>' + content;
+  window.print();
+}
+function openPreview(type){
+  var overlay = document.getElementById('preview-overlay');
+  var content = document.getElementById('preview-content');
+  var title = document.getElementById('preview-title');
+  overlay.style.display='flex';
+  document.body.style.overflow='hidden';
+  if(type==='tracks'){
+    title.textContent='Track Preview';
+    var d=getTracksData();
+    var info=getInfo();
+    content.innerHTML = buildTracksPreviewHTML(d, info);
+  } else if(type==='cables'){
+    title.textContent='Cable Preview';
+    var d=getCablesData();
+    var info=getInfo();
+    content.innerHTML = buildCablesPreviewHTML(d, info);
+  } else if(type==='hardware'){
+    title.textContent='Hardware Preview';
+    content.innerHTML = buildHardwarePreviewHTML(computeHardware(), getInfo(), hwChecks());
+  }
+}
+function hwChecks(){
+  var m={};
+  var els=document.querySelectorAll('#hw-rows .hw-chk');
+  Array.prototype.forEach.call(els,function(c){m[c.getAttribute('data-key')]=c.checked;});
+  return m;
+}
+
+function closePreview(){
+  document.getElementById('preview-overlay').style.display='none';
+  document.body.style.overflow='';
+}
+
+function buildTracksPreviewHTML(d, info){
+  var td='border:1px solid #888;padding:8px 12px;';
+  var tdv='border:1px solid #888;padding:8px 12px;text-align:right;font-weight:700;color:#1B2A6B;';
+  var tdhot='border:1px solid #888;padding:8px 12px;text-align:right;font-weight:800;color:#C0272D;font-size:17px;background:#fff5f5;';
+  var th='border:1px solid #888;padding:8px 12px;background:#1B2A6B;color:#fff;';
+  var h='<div style="font-family:Arial,sans-serif;">';
+  h+='<div style="background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;">TRACKS</div>';
+  h+='<div style="text-align:center;margin:8px 0 12px;font-size:13px;color:#666;">W/O: '+(info.wo||'-')+' &nbsp;|&nbsp; '+info.width+'" x '+info.height+'" &nbsp;|&nbsp; '+info.trackType+'</div>';
+  h+='<table style="border-collapse:collapse;width:100%;max-width:480px;margin:0 auto 0 0;font-size:15px;">';
+  h+='<tr><th style="'+th+'text-align:left;">Measurement</th><th style="'+th+'text-align:right;">Value</th></tr>';
+  h+='<tr style="background:#f8f9fa;"><td style="'+td+'">Vertical (L &amp; R)</td><td style="'+tdhot+'">'+String(d.vertical).replace(/"/g,'')+'"</td></tr>';
+  h+='<tr><td style="'+td+'">Horizontal (L &amp; R)</td><td style="'+tdhot+'">'+String(d.horizontal).replace(/"/g,'')+'"</td></tr>';
+  h+='<tr style="background:#f8f9fa;"><td style="'+td+'">2x2 Projection</td><td style="'+tdv+'">'+d.projection+'"</td></tr>';
+  h+='<tr><td style="'+td+'">Sections</td><td style="'+tdv+'">'+d.sections+'</td></tr>';
+  h+='<tr style="background:#f8f9fa;"><td style="'+td+'">Configuration</td><td style="'+tdv+'">'+d.config+'</td></tr>';
+  h+='</table>';
+  if(d.jb && d.jb.length){
+    var jbs=d.jb.filter(function(j){return j.qty!==null && j.qty!=='--';});
+    if(jbs.length){
+      h+='<div style="margin:14px 0 4px;font-weight:800;font-size:13px;color:#1B2A6B;">JAMB BRACKETS &mdash; per side</div>';
+      h+='<table style="border-collapse:collapse;max-width:480px;margin:0 auto 0 0;font-size:14px;text-align:center;"><tr>';
+      jbs.forEach(function(j){h+='<th style="'+th+'padding:6px 14px;">'+j.label+'</th>';});
+      h+='</tr><tr>';
+      jbs.forEach(function(j){h+='<td style="border:1px solid #888;padding:6px 14px;font-weight:800;color:#C0272D;">'+j.qty+'</td>';});
+      h+='</tr></table>';
+    }
+  }
+  h+='</div>';
+  return h;
+}
+
+function buildCablesPreviewHTML(d, info){
+  var td='border:1px solid #888;padding:8px 12px;';
+  var tdv='border:1px solid #888;padding:8px 12px;text-align:right;font-weight:700;color:#1B2A6B;';
+  var tdhot='border:1px solid #888;padding:8px 12px;text-align:right;font-weight:800;color:#C0272D;font-size:19px;background:#fff5f5;';
+  var th='border:1px solid #888;padding:8px 12px;background:#1B2A6B;color:#fff;';
+  var h='<div style="font-family:Arial,sans-serif;">';
+  h+='<div style="background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;">CABLES</div>';
+  h+='<div style="text-align:center;margin:8px 0 12px;font-size:13px;color:#666;">W/O: '+(info.wo||'-')+' &nbsp;|&nbsp; '+info.width+'" x '+info.height+'" &nbsp;|&nbsp; Door Weight: '+(info.weight||CD.wt||'-')+' lbs</div>';
+  h+='<table style="border-collapse:collapse;width:100%;max-width:480px;margin:0 auto 0 0;font-size:15px;">';
+  h+='<tr><th style="'+th+'text-align:left;">Item</th><th style="'+th+'text-align:right;">Value</th></tr>';
+  h+='<tr style="background:#f8f9fa;"><td style="'+td+'">Drum</td><td style="'+tdv+'">'+d.drum+'</td></tr>';
+  h+='<tr><td style="'+td+'">EBF</td><td style="'+tdv+'">'+d.ebf+'</td></tr>';
+  h+='<tr style="background:#f8f9fa;"><td style="'+td+'">Capacity (per drum)</td><td style="'+tdv+'">'+d.capacity+' lbs</td></tr>';
+  h+='<tr><td style="'+td+'">FTSC</td><td style="'+tdv+'">'+String(d.ftsc).replace(/"/g,'')+'"</td></tr>';
+  h+='<tr><td style="'+td+'font-weight:700;">Cable Length</td><td style="'+tdhot+'">'+String(d.cable).replace(/"/g,'')+'"</td></tr>';
+  h+='<tr style="background:#f8f9fa;"><td style="'+td+'">Cable Type</td><td style="'+tdv+'">'+d.cableType+'</td></tr>';
+  h+='</table>';
+  h+='</div>';
+  return h;
+}
+
+var SP_REF=[
+  {nS:2,wire:0.2500,l2:24.54,tippt:85.79,turns:8.38,cyc:10234,drum:'D400-96'},
+  {nS:2,wire:0.2500,l2:24.49,tippt:85.98,turns:7.94,cyc:13045,drum:'D400-96'},
+  {nS:2,wire:0.2625,l2:28.83,tippt:92.28,turns:7.94,cyc:17701,drum:'D400-96'},
+  {nS:2,wire:0.2830,l2:36.50,tippt:104.67,turns:8.82,cyc:15972,drum:'D400-96'},
+  {nS:2,wire:0.2890,l2:30.77,tippt:100.13,turns:10.69,cyc:10525,drum:'D400-144'},
+  {nS:2,wire:0.2890,l2:34.87,tippt:121.74,turns:8.76,cyc:10738,drum:'D400-144'},
+  {nS:4,wire:0.2437,l2:22.37,tippt:166.63,turns:7.73,cyc:12239,drum:'D400-144'},
+  {nS:4,wire:0.2500,l2:25.77,tippt:162.98,turns:7.88,cyc:17354,drum:'D400-144'},
+  {nS:4,wire:0.2500,l2:25.13,tippt:167.34,turns:7.88,cyc:15338,drum:'D400-144'},
+  {nS:4,wire:0.3065,l2:31.16,tippt:366.39,turns:6.72,cyc:11779,drum:'5250-18'},
+  {nS:4,wire:0.2730,l2:26.74,tippt:242.60,turns:7.49,cyc:10804,drum:'D525-54'},
+  {nS:4,wire:0.2730,l2:28.0,tippt:230.1,turns:7.80,cyc:11000,drum:'D525-54'},
+  {nS:4,wire:0.2730,l2:26.78,tippt:242.25,turns:7.32,cyc:12104,drum:'D525-54'},
+  {nS:4,wire:0.3065,l2:32.48,tippt:350.74,turns:7.02,cyc:11814,drum:'D525-54'}
+];
+var SP_ID_R={2.625:1.0,3.75:0.729,5.25:0.531};
+var SP_MIN={2.625:0.243,3.75:0.273,5.25:0.331};
+var SP_DR={
+  'D400-96':{m:0.257806,hma:2.27478,a:8.24462,b:0.29479,dw:1.64},
+  'D400-144':{m:0.254654,hma:2.29329,a:8.82065,b:0.240367,dw:1.64},
+  '5250-18':{m:0.436698,hma:2.93165,a:12.12421,b:0.332726,dw:3.62},
+  'D525-54':{m:0.359566,hma:2.719,dw:3.66},
+  'D575-120':{m:null,hma:2.969,dw:3.71},
+  'D800-120':{m:null,hma:4.125,dw:5.22}
+};
+function spDrum(lt,wt,hl){
+  if(lt==='highlift'){
+    if(hl<=54&&wt<=1000) return 'D525-54';
+    if(wt<=1000) return 'D575-120';
+    return 'D800-120';
+  }
+  if(wt<=530) return 'D400-96';
+  if(wt<=750) return 'D400-144';
+  return '5250-18';
+}
+function spMT(drum,height){
+  var d=SP_DR[drum];
+  if(!d||!d.m) return {multi:0.257806*(96/height),turns:8.82};
+  // Drum cable build-up: effective radius grows as cable wraps, so door height
+  // is quadratic in turns:  height = a*turns + b*turns^2.  Invert for turns.
+  // Then multiplier follows from the (drum-constant) torque relation hma = multi*turns.
+  if(d.a&&d.b){
+    var turns=(-d.a+Math.sqrt(d.a*d.a+4*d.b*height))/(2*d.b);
+    return {multi:d.hma/turns,turns:turns};
+  }
+  // Fallback (hi-lift drums without fitted coefficients): legacy linear model
+  var m=d.m*(96/height);
+  return {multi:m,turns:d.hma/m};
+}
+function spRef(tippt,nS,drum){
+  var r=SP_REF.filter(function(x){return x.drum===drum&&x.nS===nS;});
+  if(!r.length) r=SP_REF.filter(function(x){return x.drum===drum;});
+  if(!r.length) r=SP_REF;
+  var tps=tippt/nS;
+  r=r.map(function(x){return {dist:Math.abs(x.tippt/x.nS-tps),ref:x};});
+  r.sort(function(a,b){return a.dist-b.dist;});
+  return r[0].ref;
+}
+function spLen(wire,id,tippt,nS){
+  // Physical close-wound torsion spring length.
+  // Active coils N = (E*d^4)/(10.8*Dm*ipptPerSpring), length = N*d.
+  // Steel torsion modulus E ~= 33.38e6 psi; K = E/10.8 fitted to SSC data.
+  if(!wire||!tippt||!nS) return null;
+  var K=3091089;
+  var Dm=id+wire;
+  var ipptPS=tippt/nS;
+  if(!ipptPS) return null;
+  return K*Math.pow(wire,5)/(Dm*ipptPS);
+}
+function spW(d,id,len){
+  var mD=id+d;
+  return Math.PI*mD*(Math.PI*d*d/4)*0.283*(1/d)*len;
+}
+function spEl(id){return document.getElementById(id);}
+function spSet(id,val){var el=spEl(id);if(el&&el.tagName!=='SELECT')el.textContent=val;}
+function runSprings(){
+  var wt=parseFloat((spEl('weight')||{value:0}).value)||0;
+  var ht=parseFloat((spEl('height')||{value:96}).value)||96;
+  var wd=parseFloat((spEl('width')||{value:144}).value)||144;
+  var lt=(spEl('lift-type')||{value:'standard'}).value||'standard';
+  var hl=parseFloat((spEl('highlift')||{value:0}).value)||0;
+  if(!wt){return;}
+  var qEl=spEl('sp-qty');
+  var wEl=spEl('sp-wire');
+  var iEl=spEl('sp-id');
+  var dEl=spEl('sp-drum');
+  // Filter drum options by lift type
+  if(dEl){
+    var isHL=lt==='highlift';
+    // Master drum list — hardcoded so it never gets corrupted by filtering
+    var DRUMS=[
+      {val:'',text:'Auto',cls:''},
+      {val:'D400-96',text:'D400-96',cls:'std-only'},
+      {val:'D400-144',text:'D400-144',cls:'std-only'},
+      {val:'5250-18',text:'5250-18',cls:'std-only'},
+      {val:'D525-54',text:'D525-54 (HL)',cls:'hl-only'},
+      {val:'D575-120',text:'D575-120 (HL)',cls:'hl-only'},
+      {val:'D800-120',text:'D800-120 (HL)',cls:'hl-only'}
+    ];
+    var cur=dEl.value;
+    dEl.innerHTML='';
+    DRUMS.forEach(function(od){
+      if(od.cls==='hl-only'&&!isHL) return;
+      if(od.cls==='std-only'&&isHL) return;
+      var o=document.createElement('option');
+      o.value=od.val; o.textContent=od.text; o.className=od.cls;
+      dEl.appendChild(o);
+    });
+    if(Array.from(dEl.options).some(function(o){return o.value===cur;})){
+      dEl.value=cur;
+    } else {
+      dEl.value='';
+    }
+  }
+  var nS=qEl&&qEl.value?parseInt(qEl.value):(wd>144?4:2);
+  var autoDrum=spDrum(lt,wt,hl);
+  var drum=dEl&&dEl.value?dEl.value:autoDrum;
+  var maxWt={'D400-96':530,'D400-144':750,'5250-18':1500,'D525-54':1000,'D575-120':1000,'D800-120':2200};
+  var drumOverCap=wt>(maxWt[drum]||9999);
+  var mr=spMT(drum,ht);
+  var tippt=mr.multi*wt;
+  var ref=spRef(tippt,nS,drum);
+  var wire=wEl&&wEl.value?parseFloat(wEl.value):ref.wire;
+  var idOvr=iEl&&iEl.value?parseFloat(iEl.value):null;
+  var IDS=idOvr?[idOvr]:[2.625,3.75,5.25];
+  // Recalculate cycles for selected wire & ID (Wahl: cyc proportional to wire^3 / meanDiam)
+  var dispID=idOvr||2.625;
+  var refMD=ref.wire+2.625;
+  var newMD=wire+dispID;
+  var cyc=Math.round(ref.cyc*Math.pow(wire/ref.wire,3)*(refMD/newMD));
+  // Length for the displayed ID
+  var len2=spLen(wire,dispID,tippt,nS);
+  var usable=(wd+4)-2*(SP_DR[drum]?SP_DR[drum].dw:2)-8;
+  spSet('sp-lift',lt==='highlift'?'High Lift':'Standard');
+  var hlb=spEl('sp-hlbox');
+  if(hlb) hlb.style.display=lt==='highlift'?'':'none';
+  spSet('sp-hlval',hl+'"');
+  spSet('sp-qty-lbl',nS+' (auto)');
+  spSet('sp-wire-lbl',wire+'" (auto)');
+  spSet('sp-id-lbl',idOvr?idOvr+'"':'All IDs');
+  // Results color
+  var setRes=function(id,val,forceRed){
+    var el=spEl(id);
+    if(el&&el.tagName!=='SELECT'){
+      el.textContent=val;
+      el.style.color=forceRed||drumOverCap?'#C0272D':'';
+    }
+  };
+  setRes('sp-tippt',tippt.toFixed(1));
+  setRes('sp-multi',mr.multi.toFixed(6));
+  setRes('sp-turns',mr.turns.toFixed(2));
+  setRes('sp-len',len2?len2.toFixed(2)+'"':'--');
+  setRes('sp-cyc',cyc.toLocaleString()+' cycles',cyc<10000);
+  // Update Length label to show the active ID
+  var lenLbl=document.querySelector('#sp-len')&&document.querySelector('#sp-len').closest('.result-row')&&document.querySelector('#sp-len').closest('.result-row').querySelector('.rlabel');
+  if(lenLbl) lenLbl.textContent='Length ('+dispID+'")';
+  // Drum dropdown color
+  if(dEl){
+    dEl.style.color=drumOverCap?'#C0272D':'#1B2A6B';
+    dEl.style.borderColor=drumOverCap?'#C0272D':'#dee2e6';
+    var autoOpt=dEl.querySelector('option[value=""]');
+    if(autoOpt) autoOpt.textContent=dEl.value?'Auto':'Auto ('+autoDrum+')';
+  }
+  // Warning icon
+  var warnEl=spEl('sp-warn');
+  if(warnEl){
+    var warnings=[];
+    if(drumOverCap) warnings.push('Drum '+drum+' max capacity is '+maxWt[drum]+' lbs but door weighs '+wt+' lbs');
+    if(cyc<10000) warnings.push('Estimated cycles ('+cyc.toLocaleString()+') are below 10,000 - consider a different wire or drum');
+    if(warnings.length>0){
+      warnEl.style.display='inline-block';
+      var msg=warnings.join('\n\n');
+      warnEl.setAttribute('title',warnings.join(' | '));
+      warnEl.setAttribute('data-msg',msg);
+      var inner=warnEl.querySelector('span');
+      if(inner) inner.style.color=drumOverCap?'#C0272D':'#f59f00';
+    } else {
+      warnEl.style.display='none';
+      warnEl.setAttribute('title','');
+      warnEl.setAttribute('data-msg','');
+    }
+  }
+  // ID Cards
+  var cards='';
+  IDS.forEach(function(id){
+    var mn=SP_MIN[id]||0;
+    var wireOK=wire>=mn;
+    var ln=wireOK?spLen(wire,id,tippt,nS):null;
+    var tot=ln?ln*nS:0;
+    var sl=ln?(usable-tot):0;
+    var fits=ln?sl>=-2:false;
+    var wts=ln?spW(wire,id,ln):0;
+    var good=fits&&wireOK;
+    var cardColor,borderColor,textColor;
+    if(drumOverCap||!wireOK){
+      cardColor='#fff5f5'; borderColor='2px solid #C0272D'; textColor='#C0272D';
+    } else if(cyc<10000){
+      cardColor='#fffde7'; borderColor='2px solid #f59f00'; textColor='#b76e00';
+    } else if(good){
+      cardColor='#f0fff4'; borderColor='2px solid #28a745'; textColor='#155724';
+    } else {
+      cardColor='white'; borderColor='0.5px solid #dee2e6'; textColor='#333';
+    }
+    cards+='<div style="border:'+borderColor+';border-radius:8px;padding:.6rem .75rem;background:'+cardColor+'">';
+    cards+='<div style="font-size:13px;font-weight:600;color:'+textColor+'">ID '+id+'"</div>';
+    if(!wireOK){
+      cards+='<div style="font-size:12px;color:#C0272D;margin-top:4px">Wire below min ('+mn+'")</div>';
+    } else {
+      var cycColor=drumOverCap?'#C0272D':(cyc<10000?'#b76e00':'#1B2A6B');
+      cards+='<div style="font-size:12px;color:#666;margin-top:2px">'+ln.toFixed(2)+'" / '+wts.toFixed(2)+' lbs</div>';
+      cards+='<div style="font-size:12px;font-weight:600;color:'+cycColor+';margin-top:2px">'+cyc.toLocaleString()+' cycles</div>';
+      if(drumOverCap){
+        cards+='<div style="font-size:11px;color:#C0272D;margin-top:3px">&#9888; Drum over capacity!</div>';
+      } else {
+        var fc=fits?(cyc<10000?'#b76e00':'#28a745'):'#dc3545';
+        var fitTxt=fits?'fits':'no fit';
+        var slStr=(sl>=0?'+':'')+sl.toFixed(1)+'"';
+        cards+='<div style="font-size:11px;color:'+fc+';margin-top:3px">'+fitTxt+' ('+slStr+')'+(cyc<10000?' &#9888; Low cycles':'')+'</div>';
+      }
+    }
+    cards+='</div>';
+  });
+  var cd=spEl('sp-cards');
+  if(cd) cd.innerHTML=cards;
+}
+function showSpWarn(){
+  var w=spEl('sp-warn');
+  var msg=w?w.getAttribute('data-msg'):'';
+  if(msg){alert(msg);}
+}
+function buildSpringsText(){
+  var wo=(spEl('wo')||{value:'--'}).value||'--';
+  var w=(spEl('width')||{value:'--'}).value;
+  var h=(spEl('height')||{value:'--'}).value;
+  var wt=(spEl('weight')||{value:'--'}).value;
+  var mk=(spEl('mark')||{value:''}).value;
+  var lt=(spEl('lift-type-display')||{value:'Standard'}).value||'Standard';
+  var hl=(spEl('highlift')||{value:''}).value;
+  var ns=(spEl('sp-qty-lbl')||{textContent:'--'}).textContent;
+  var wire=(spEl('sp-wire-lbl')||{textContent:'--'}).textContent;
+  var tippt=(spEl('sp-tippt')||{textContent:'--'}).textContent;
+  var dEl=spEl('sp-drum');
+  var drum=dEl?((dEl.value||dEl.getAttribute('data-auto')||'--')):'--';
+  var multi=(spEl('sp-multi')||{textContent:'--'}).textContent;
+  var turns=(spEl('sp-turns')||{textContent:'--'}).textContent;
+  var cycs=(spEl('sp-cyc')||{textContent:'--'}).textContent;
+  var lenr=(spEl('sp-len')||{textContent:'--'}).textContent;
+  var mkStr=mk?' MK-'+mk:'';
+  var hlLine=lt.toLowerCase().indexOf('high')!==-1&&hl?'\nHi-Lift: '+hl+'"':'';
+  var txt='Spring Engineering\n===============\n';
+  txt+='W/O: '+wo+mkStr+'\n';
+  txt+='Assembly: Single\nCycles: 10,000\n';
+  txt+='Lift Type: '+lt+hlLine+'\n';
+  txt+='Radius: 15\nDrum: CANIMEX/TF '+drum+'\n';
+  txt+='Width: '+w+'" Height: '+h+'" Weight: '+wt+' lb\n';
+  txt+='Springs: '+ns+'\n';
+  txt+='------ Results ------\n';
+  txt+='Wire Size: '+wire+'\n';
+  txt+='TIPPT: '+tippt+'\n';
+  txt+='Turns: '+turns+'\n';
+  txt+='Multiplier: '+multi+'\n';
+  txt+='Cycles: '+cycs+'\n';
+  txt+='Length (2.625"): '+lenr+'\n\n';
+  txt+='--- Selected ID ---\n';
+  // Show only cards that are selected/visible
+  var cs=document.querySelectorAll('#sp-cards > div');
+  cs.forEach(function(c){
+    var ds=c.querySelectorAll('div');
+    if(ds.length>=1){
+      txt+=ds[0].textContent+'\n';
+      for(var i=1;i<ds.length;i++) txt+='  '+ds[i].textContent+'\n';
+      txt+='\n';
+    }
+  });
+  return txt;
+}
+function openSpPreview(){
+  var txt=buildSpringsText();
+  var ov=spEl('sp-overlay');
+  var ct=spEl('sp-preview-txt');
+  if(ov&&ct){ct.textContent=txt;ov.style.display='flex';document.body.style.overflow='hidden';}
+}
+function closeSpPreview(){
+  var o=spEl('sp-overlay');
+  if(o){o.style.display='none';document.body.style.overflow='';}
+}
+function printSpPreview(){
+  var t=(spEl('sp-preview-txt')||{textContent:''}).textContent;
+  var a=spEl('sp-print-area');
+  if(a){a.textContent=t;window.print();}
+}
+// Print Tracks + Cables + Springs + Hardware in one browser print job (no server).
+// Labels are intentionally excluded. Everything goes to whichever printer the user
+// picks in the single browser print dialog.
+function buildAllSections(info){
+  try{calculate();}catch(e){}
+  try{runSprings();}catch(e){}
+  var parts=[];
+  try{ parts.push(buildTracksPreviewHTML(getTracksData(), info)); }catch(e){console.error('tracks',e);}
+  if(CD.hasWeight){
+    try{ parts.push(buildCablesPreviewHTML(getCablesData(), info)); }catch(e){console.error('cables',e);}
+    try{ parts.push('<pre style="font-family:monospace;font-size:12px;white-space:pre-wrap;line-height:1.5;margin:0">'+buildSpringsText()+'</pre>'); }catch(e){console.error('springs',e);}
+  }
+  try{ var hw=computeHardware(); if(hw&&hw.series){ parts.push(buildHardwarePreviewHTML(hw, info, hwChecks())); } }catch(e){console.error('hardware',e);}
+  return parts;
+}
+function partsToHtml(parts){
+  var html='';
+  parts.forEach(function(p,i){html+='<div style="'+(i<parts.length-1?'page-break-after:always;break-after:page;':'')+'padding:6px 0">'+p+'</div>';});
+  return html;
+}
+function printPageStyle(){return '<style>@media print{@page{size:letter portrait;margin:10mm}@page dland{size:letter landscape;margin:10mm}.disp-land{page:dland}}</style>';}
+function dispatchPageHtml(){var d;try{d=buildDespachoHTML(getInfo(),{noPage:true,checks:despChecks(),comments:despComments(),motor:despMotor(),recv:despRecv(),date:despDate(),sign:despSignature()});}catch(e){d='';}return d?'<div class="disp-land" style="page-break-before:always;break-before:page">'+d+'</div>':'';}
+function doPrintAllBrowser(){
+  var info=getInfo();
+  if(typeof opActive!=='undefined'&&opActive) info.mark=opActive;
+  var parts=buildAllSections(info);
+  var area=document.getElementById('preview-print-area');
+  area.innerHTML=partsToHtml(parts)+dispatchPageHtml()+printPageStyle();
+  setTimeout(function(){window.print();},60);
+}
+function doPrintAllMarks(){
+  var chips=document.querySelectorAll('#op-list .op-mk');
+  if(!chips.length){ doPrintAllBrowser(); return; }
+  var base=getInfo();
+  var blocks='';
+  Array.prototype.forEach.call(chips,function(m,idx){
+    var label=(m.querySelector('.op-lbl').value||'?');
+    var qty=(m.querySelector('.op-q').textContent||'1');
+    var info={}; for(var k in base) info[k]=base[k]; info.mark=label;
+    var parts=buildAllSections(info);
+    if(!parts.length) return;
+    var header='<div style="font-family:Arial,sans-serif;font-size:16px;font-weight:800;color:#1B2A6B;border-bottom:2px solid #C0272D;padding:4px 0;margin-bottom:8px">Mark '+label+' &mdash; qty '+qty+'</div>';
+    blocks+='<div style="'+(idx>0?'page-break-before:always;break-before:page;':'')+'">'+header+partsToHtml(parts)+'</div>';
+  });
+  var area=document.getElementById('preview-print-area');
+  area.innerHTML=blocks+dispatchPageHtml()+printPageStyle();
+  setTimeout(function(){window.print();},60);
+}
+function opCloseChoice(){var o=document.getElementById('op-print-choice');if(o)o.remove();}
+function opPickPrint(w){opCloseChoice();if(w===1)doPrintAllBrowser();else doPrintAllMarks();}
+function opPrintChoice(){
+  if(document.getElementById('op-print-choice'))return;
+  var ov=document.createElement('div');ov.id='op-print-choice';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.onclick=function(e){if(e.target===ov)opCloseChoice();};
+  ov.innerHTML='<div style="background:#fff;border-radius:14px;padding:20px;max-width:320px;width:100%;text-align:center;font-family:-apple-system,sans-serif"><div style="font-size:16px;font-weight:700;color:#1B2A6B;margin-bottom:16px">What do you want to print?</div><button type="button" onclick="opPickPrint(1)" style="width:100%;height:46px;background:#C0272D;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px">Print this mark</button><button type="button" onclick="opPickPrint(2)" style="width:100%;height:46px;background:#1B2A6B;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px">Print all marks</button><button type="button" onclick="opCloseChoice()" style="width:100%;height:40px;background:#f5f5f7;color:#111;border:1px solid #dee2e6;border-radius:8px;font-size:14px;cursor:pointer">Cancel</button></div>';
+  document.body.appendChild(ov);
+}
+
+
+function toggleLabel(){
+  var b=document.getElementById("lbl-body");
+  var c=document.getElementById("lbl-chev");
+  if(b.style.display==="none"){b.style.display="";c.innerHTML="&#9660;";}else{b.style.display="none";c.innerHTML="&#9654;";}
+}
+function openSettings(){document.getElementById('settings-overlay').classList.add('open');document.getElementById('settings-drawer').classList.add('open');document.body.style.overflow='hidden';renderSettings();loadJBSettingsUI();}
+function closeSettings(){document.getElementById('settings-overlay').classList.remove('open');document.getElementById('settings-drawer').classList.remove('open');document.body.style.overflow='';}
+function getPrinters(){var s=load();var all=DEF_PRINTERS.concat(s.extraPrinters||[]);return all.filter(function(v,i,a){return a.indexOf(v)===i;});}
+function renderSettings(){
+  var s=load();var printers=getPrinters();
+  var odooEl=document.getElementById('cfg-odoo');
+  if(odooEl){odooEl.value=s.odooUrl||'';renderOdooStatus();}
+  var cfgs=[{id:'cfg-tracks',key:'pTracks',dot:'dot-tracks',lbl:'lbl-tracks'},{id:'cfg-cables',key:'pCables',dot:'dot-cables',lbl:'lbl-cables'},{id:'cfg-small',key:'pSmall',dot:'dot-small',lbl:'lbl-small',def:'ZDesigner GX420d'},{id:'cfg-big',key:'pBig',dot:'dot-big',lbl:'lbl-big',def:'Westinghouse WHTP203e'}];
+  cfgs.forEach(function(c){
+    var sel=document.getElementById(c.id);var cur=s[c.key]||c.def||printers[0]||'';
+    sel.innerHTML=printers.map(function(p){return '<option value="'+p+'"'+(p===cur?' selected':'')+'>'+p+'</option>';}).join('');
+    if(cur&&printers.indexOf(cur)<0)sel.innerHTML='<option value="'+cur+'" selected>'+cur+'</option>'+sel.innerHTML;
+    document.getElementById(c.dot).className=cur?'status-dot':'status-dot unset';
+    document.getElementById(c.lbl).textContent=cur||'Not set';
+  });
+  updateRotUI(curRotation);
+  var allG=getAllGlass();
+  var allF=getAllFrame();
+  document.getElementById('glass-list').innerHTML=allG.map(function(g){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border);font-size:13px;"><span>'+g+'</span><button onmousedown="removeAnyGlass(\''+g+'\')" style="border:none;background:none;color:var(--red);font-size:20px;cursor:pointer;line-height:1;">x</button></div>';}).join('');
+  document.getElementById('frame-list').innerHTML=allF.map(function(f){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border);font-size:13px;"><span>'+f+'</span><button onmousedown="removeAnyFrame(\''+f+'\')" style="border:none;background:none;color:var(--red);font-size:20px;cursor:pointer;line-height:1;">x</button></div>';}).join('');
+}
+// WHERE THE ORDER GETS SENT. Kept as a setting rather than written into this
+// file so the page can be pointed at a test build without being edited, and so
+// this public file never has to name the company's systems.
+function saveOdooUrl(){var el=document.getElementById('cfg-odoo');if(!el)return;save({odooUrl:(el.value||'').trim()});renderOdooStatus();}
+function renderOdooStatus(){var url=(load().odooUrl||'').trim();var dot=document.getElementById('dot-odoo'),lbl=document.getElementById('lbl-odoo');if(!dot||!lbl)return;dot.className=url?'status-dot':'status-dot unset';lbl.textContent=url||'Not set';}
+function odooBase(){return (load().odooUrl||'').trim().replace(/\/+$/,'');}
+
+// SEND THE DOOR, NOT THE ANSWER. What crosses to Odoo is the door and its
+// measurements - width, height, track, lift, and the lengths worked out here.
+// Odoo decides for itself which stock item each length is cut from, so this
+// page cannot ask for a particular product to be booked out of stock, and a
+// stale copy of this file cannot send a part number that has since changed.
+//
+// It opens a review page rather than creating the order outright. Two reasons:
+// a link that creates records can be triggered by anything that can make a
+// browser fetch a URL, and a mistyped door should be read by someone before it
+// becomes a job on the floor.
+function sendToManufacturing(){
+  var base=odooBase();
+  if(!base){alert('Set your Odoo address first - the gear icon, under "Odoo Address".');try{openSettings();}catch(e){}return;}
+  // typeof, NOT a plain truth test: CD is an implicit global created by
+  // calculate(), so before the first door it is an undeclared name and
+  // touching it throws instead of being falsy.
+  if(typeof CD==='undefined'||!CD||!CD.vert||!CD.horiz){alert('Work out a door first.');return;}
+  var el=function(id){var n=document.getElementById(id);return n?(n.value||'').trim():'';};
+  var spec={
+    wo:el('wo'),mark:el('mark'),
+    width:CD.width,height:CD.height,
+    track:CD.tt,lift:CD.lt,hilift:CD.hl||0,
+    sections:CD.panels,
+    vertical:CD.vert,horizontal:CD.horiz,
+    weight:CD.hasWeight?CD.wt:null,
+    cable:CD.hasWeight?CD.cable:null,
+    cable_type:CD.hasWeight?(CD.cableType||''):'',
+    drum:CD.hasWeight?(CD.drum||''):''
+  };
+  if(!spec.wo&&!confirm('This door has no W/O number. Without one, sending twice will raise two orders. Send anyway?'))return;
+  window.open(base+'/door-work-order/new?spec='+encodeURIComponent(JSON.stringify(spec)),'_blank','noopener');
+}
+function savePrinters(){save({pTracks:document.getElementById('cfg-tracks').value,pCables:document.getElementById('cfg-cables').value,pSmall:document.getElementById('cfg-small').value,pBig:document.getElementById('cfg-big').value});var c=document.getElementById('save-confirm');c.classList.add('show');setTimeout(function(){c.classList.remove('show');},2000);}
+function setRotation(deg){
+  curRotation=deg;save({bigRotation:deg});updateRotUI(deg);renderBigLabelPreview();
+  fetch(SERVER+'/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bigRotation:deg})})
+    .then(function(){toast('Rotation '+deg+'deg saved',1500);})
+    .catch(function(){toast('Rotation '+deg+'deg saved locally',1500);});
+}
+function updateRotUI(deg){
+  [0,90,180,270].forEach(function(d){var b=document.getElementById('rot-'+d);if(b)b.className='rot-btn'+(d===deg?' active':'');});
+  var l=document.getElementById('lbl-rotation');if(l)l.textContent=deg+'deg current';
+}
+function addPrinter(){var v=prompt('Enter printer name:');if(!v||!v.trim())return;var s=load();var ep=(s.extraPrinters||[]);if(ep.indexOf(v.trim())<0)ep.push(v.trim());save({extraPrinters:ep});renderSettings();}
+function addGlass(){var v=prompt('Glass type:');if(!v||!v.trim())return;var all=getAllGlass();if(all.indexOf(v.trim())<0)all.push(v.trim());save({allGlass:all});rebuildDropdowns();renderSettings();}
+
+function getAllGlass(){var s=load();if(s.allGlass!==undefined)return s.allGlass;return DEF_GLASS.slice();}
+function getAllFrame(){var s=load();if(s.allFrame!==undefined)return s.allFrame;return DEF_FRAME.slice();}
+function removeAnyGlass(g){var all=getAllGlass().filter(function(x){return x!==g;});save({allGlass:all,extraGlass:[]});rebuildDropdowns();renderSettings();}
+function removeAnyFrame(f){var all=getAllFrame().filter(function(x){return x!==f;});save({allFrame:all,extraFrame:[]});rebuildDropdowns();renderSettings();}
+function removeGlass(g){var s=load();save({extraGlass:(s.extraGlass||[]).filter(function(x){return x!==g;})});rebuildDropdowns();renderSettings();}
+function addFrame(){var v=prompt('Frame color:');if(!v||!v.trim())return;var all=getAllFrame();if(all.indexOf(v.trim())<0)all.push(v.trim());save({allFrame:all});rebuildDropdowns();renderSettings();}
+function removeFrame(f){var s=load();save({extraFrame:(s.extraFrame||[]).filter(function(x){return x!==f;})});rebuildDropdowns();renderSettings();}
+function rebuildDropdowns(){var s=load();var ag=getAllGlass();var af=getAllFrame();var cg=document.getElementById('glass').value;var cf=document.getElementById('frame').value;document.getElementById('glass').innerHTML='<option value="">Select...</option>'+ag.map(function(g){return'<option'+(g===cg?' selected':'')+'>'+g+'</option>';}).join('');document.getElementById('frame').innerHTML='<option value="">Select...</option>'+af.map(function(f){return'<option'+(f===cf?' selected':'')+'>'+f+'</option>';}).join('');}
+function frac(val){var w=Math.floor(val),d=val-w;var fs=[[0,''],[0.125,'1/8'],[0.25,'1/4'],[0.375,'3/8'],[0.5,'1/2'],[0.625,'5/8'],[0.75,'3/4'],[0.875,'7/8'],[1,'']];var best=fs[0],bd=999;fs.forEach(function(f){var dd=Math.abs(d-f[0]);if(dd<bd){bd=dd;best=f;}});if(best[0]===1)return(w+1)+'"';if(w===0)return best[1]?best[1]+'"':'0"';return best[1]?w+' '+best[1]+'"':w+'"';}
+function getJB(v){return JB.filter(function(r){return v>=r.min&&v<=r.max;})[0]||JB[JB.length-1];}
+function getPanels(h){if(h<=99.625)return 4;if(h<=123.625)return 5;if(h<=147.625)return 6;if(h<=171.625)return 7;return 8;}
+function get2x2(p){return 6.5+(p-4)*0.25;}
+var CTYPE={'D400-96':'1/8"','D400-144':'5/32"'};
+function getCT(d){return CTYPE[d]||'3/16"';}
+function getTracksData(){var grid=document.getElementById('jb-grid');var jb=['J-10','J-12','J-14','J-16'].map(function(t,i){var box=grid?grid.children[i]:null;var qEl=box?box.querySelector('.jb-qty'):null;return{label:t,qty:qEl?qEl.textContent:'--'};});return{vertical:document.getElementById('r-vertical').textContent,horizontal:document.getElementById('r-horizontal').textContent,projection:document.getElementById('r-2x2').textContent,sections:document.getElementById('r-panels').textContent,config:document.getElementById('r-config').textContent,jb:jb};}
+function getCablesData(){return{drum:document.getElementById('r-drum').textContent,qty:document.getElementById('r-drum-qty').textContent,ebf:document.getElementById('r-ebf').textContent,capacity:document.getElementById('r-capacity').textContent,ftsc:document.getElementById('r-ftsc').textContent,cableType:document.getElementById('r-cable-type').textContent,cable:document.getElementById('r-cable').textContent};}
+
+function saveForm(){
+  var fields=['width','height','highlift','weight','wo'];
+  var data={};
+  fields.forEach(function(id){data[id]=document.getElementById(id).value;});
+  data.mark=document.getElementById('mark')?document.getElementById('mark').value:'';
+  data.lites=document.getElementById('lites')?document.getElementById('lites').value:'';
+  data.trackType=document.getElementById('track-type').value;
+  data.liftType=document.getElementById('lift-type').value;
+  data.glass=document.getElementById('glass').value;
+  data.frame=document.getElementById('frame').value;
+  save({formData:data});
+}
+function restoreForm(){
+  var s=load();
+  if(!s.formData)return;
+  var d=s.formData;
+  var fields=['width','height','highlift','weight','wo'];
+  fields.forEach(function(id){if(d[id]!==undefined)document.getElementById(id).value=d[id];});
+  if(d.mark){var mi=document.getElementById('mark');var md=document.getElementById('mark-display');if(mi)mi.value=d.mark;if(md)md.value=d.mark;}
+  if(d.lites){var li=document.getElementById('lites');var ld=document.getElementById('lites-display');if(li)li.value=d.lites;if(ld)ld.value=d.lites;}
+  if(d.trackType){document.getElementById('track-type').value=d.trackType;}
+  if(d.liftType){
+    document.getElementById('lift-type').value=d.liftType;
+    document.getElementById('hl-field').classList.toggle('visible',d.liftType==='highlift');
+  }
+  if(d.glass){document.getElementById('glass').value=d.glass;}
+  if(d.frame){document.getElementById('frame').value=d.frame;}
+  calculate();
+}
+
+
+function setSelect(fieldId, val, label, triggerLabels){
+  document.getElementById(fieldId).value = val;
+  var disp = document.getElementById(fieldId+'-display');
+  if(disp) disp.value = label || val;
+  var _cl=document.getElementById('cs-'+fieldId); if(_cl){_cl.classList.remove('open');_cl.style.display='none';}
+  if(triggerLabels){ updateLabels(); saveForm(); }
+  else {
+    if(fieldId==='lift-type'){
+      document.getElementById('hl-field').classList.toggle('visible', val==='highlift');
+      setTimeout(runSprings, 0);
+    }
+    calculate(); saveForm();
+  }
+}
+function buildGlassOptions(){
+  var list=document.getElementById('cs-glass');
+  if(!list||list.children.length>0)return;
+  var cur=document.getElementById('glass').value;
+  list.innerHTML=getAllGlass().map(function(g){
+    return '<div onmousedown="setSelect(\'glass\',\''+g+'\',\''+g+'\',true)"'+(g===cur?' style="font-weight:700;"':'')+'>'+g+'</div>';
+  }).join('');
+}
+function buildFrameOptions(){
+  var list=document.getElementById('cs-frame');
+  if(!list||list.children.length>0)return;
+  var cur=document.getElementById('frame').value;
+  list.innerHTML=getAllFrame().map(function(f){
+    return '<div onmousedown="setSelect(\'frame\',\''+f+'\',\''+f+'\',true)"'+(f===cur?' style="font-weight:700;"':'')+'>'+f+'</div>';
+  }).join('');
+}
+function syncDisplayFields(){
+  var map={
+    'track-type':{'3-15R':'3" 15R','2-12R':'2" 12R','3-LHR':'3" LHR','2-LHR':'2" LHR'},
+    'lift-type':{'standard':'Standard','highlift':'High Lift','lhr':'Low Headroom'}
+  };
+  ['track-type','lift-type','mark','lites','glass','frame'].forEach(function(id){
+    var inp=document.getElementById(id);
+    var disp=document.getElementById(id+'-display');
+    if(!inp||!disp)return;
+    var v=inp.value;
+    var m=map[id];
+    disp.value = m ? (m[v]||v||'') : (v||'');
+  });
+}
+setTimeout(function(){document.querySelectorAll('.suggest-list').forEach(function(e){e.classList.remove('open');e.style.display='none';});},0);function showSuggest(id){var el=document.getElementById(id);if(el){el.classList.add('open');el.style.display='block';}}
+function hideSuggest(id){setTimeout(function(){var el=document.getElementById(id);if(el){el.classList.remove('open');el.style.display='none';}},300);}
+function setSuggest(fieldId,val){
+  var el=document.getElementById(fieldId);
+  if(el){el.value=val;el.dispatchEvent(new Event('input'));}
+  hideSuggest(fieldId+'-suggest');
+}
+// Touch-friendly dropdown handling: open the tapped field's list, close all
+// others, and close everything when tapping outside a field. Fixes menus that
+// stayed open on touch devices (no mouseleave) and the delay after selecting.
+document.addEventListener('click',function(e){
+  var t=e.target;
+  var insideList=t.closest?t.closest('.suggest-list'):null;
+  var field=t.closest?t.closest('.field'):null;
+  var thisList=field?field.querySelector('.suggest-list'):null;
+  document.querySelectorAll('.suggest-list').forEach(function(list){
+    if(list!==thisList){list.classList.remove('open');list.style.display='none';}
+  });
+  if(thisList&&!insideList){thisList.classList.add('open');thisList.style.display='block';}
+});
+
+function saveJBSettings(){
+  var j10=document.getElementById('jb-j10').value;
+  var j12=document.getElementById('jb-j12').value;
+  var j14=document.getElementById('jb-j14').value;
+  var j16=document.getElementById('jb-j16').value;
+  var overrides={};
+  if(j10!=='')overrides.j10=parseInt(j10);
+  if(j12!=='')overrides.j12=parseInt(j12);
+  if(j14!=='')overrides.j14=parseInt(j14);
+  if(j16!=='')overrides.j16=parseInt(j16);
+  save({jbOverrides:overrides});
+  calculate();
+}
+
+function resetJBSettings(){
+  save({jbOverrides:{}});
+  document.getElementById('jb-j10').value='';
+  document.getElementById('jb-j12').value='';
+  document.getElementById('jb-j14').value='';
+  document.getElementById('jb-j16').value='';
+  calculate();
+}
+
+function loadJBSettingsUI(){
+  var s=load();var ov=s.jbOverrides||{};
+  document.getElementById('jb-j10').value=ov.j10!==undefined?ov.j10:'';
+  document.getElementById('jb-j12').value=ov.j12!==undefined?ov.j12:'';
+  document.getElementById('jb-j14').value=ov.j14!==undefined?ov.j14:'';
+  document.getElementById('jb-j16').value=ov.j16!==undefined?ov.j16:'';
+}
+
+function getJBOverride(key,calculated){
+  var s=load();var ov=s.jbOverrides||{};
+  return ov[key]!==undefined?ov[key]:calculated;
+}
+function setupListeners(){
+  ['width','height','highlift','weight'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){calculate();runSprings();saveForm();});});
+  // track-type handled by setSelect
+  // lift-type handled by setSelect
+  ['wo','mark','lites'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){updateLabels();saveForm();});});
+  // glass handled by setSelect
+  // frame handled by setSelect
+}
+function calculate(){
+  try{if(typeof opCur!=='undefined'&&opCur&&typeof saveMarkForm==='function')saveMarkForm();}catch(e){}
+  var width=parseFloat(document.getElementById('width').value);
+  var height=parseFloat(document.getElementById('height').value);
+  var tt=document.getElementById('track-type').value;
+  var lt=document.getElementById('lift-type').value;
+  var hl=parseFloat(document.getElementById('highlift').value)||0;
+  var wt=parseFloat(document.getElementById('weight').value);
+  var hasWeight=!isNaN(wt)&&wt>0;
+  if(!isNaN(height)&&height>0)document.getElementById('panel-hint').textContent='-> '+getPanels(height)+' sections';
+  else document.getElementById('panel-hint').textContent='';
+  if(!width||!height||!tt||!lt){document.getElementById('results').classList.remove('visible');document.getElementById('print-all-wrap').classList.remove('visible');return;}
+  if(lt==='highlift'&&!hl)return;
+  if(lt==='lhr'&&!tt.includes('LHR'))return;
+  var panels=getPanels(height),x2=get2x2(panels);
+  var vert,horiz;
+  if(lt==='highlift'){vert=(height-8)+(hl-9);horiz=(height+12)-(hl-9);}
+  else if(lt==='lhr'){vert=tt==='3-LHR'?height-18:height-16;horiz=height+12;}
+  else{vert=height-8;horiz=height+12;}
+  var jb=getJB(vert);
+  var tlbl={'3-15R':'3in 15R','2-12R':'2in 12R','3-LHR':'3in LHR','2-LHR':'2in LHR'};
+  var llbl={standard:'Standard Lift',highlift:'High Lift ('+hl+'in)',lhr:'Low Headroom'};
+  CD={width:width,height:height,tt:tt,lt:lt,hl:hl,wt:wt,hasWeight:hasWeight,panels:panels,x2:x2,vert:vert,horiz:horiz,jb:jb,tlbl:tlbl,llbl:llbl};
+  document.getElementById('r-vertical').textContent=frac(vert);
+  document.getElementById('r-horizontal').textContent=frac(horiz);
+  document.getElementById('r-2x2').textContent=frac(x2)+' projection';
+  document.getElementById('r-panels').textContent=panels+' sections';
+  document.getElementById('r-config').textContent=tlbl[tt]+' - '+llbl[lt];
+  var jbKeys=['j10','j12','j14','j16'];
+  document.getElementById('jb-grid').innerHTML=['J-10','J-12','J-14','J-16'].map(function(t,i){
+    var calc=[jb.j10,jb.j12,jb.j14,jb.j16][i];
+    var q=getJBOverride(jbKeys[i],calc);
+    var isOverridden=(load().jbOverrides||{})[jbKeys[i]]!==undefined;
+    return'<div class="jb-box"'+(isOverridden?' style="border:2px solid var(--blue);"':'')+'>'+
+      '<div class="jb-type">'+t+'</div>'+
+      (q!==null?'<div class="jb-qty">'+q+'</div>':'<div class="jb-na">--</div>')+
+    '</div>';
+  }).join('');
+  var notice=document.getElementById('weight-notice'),cableDiv=document.getElementById('cable-results');
+  if(!hasWeight){notice.style.display='block';cableDiv.style.display='none';}
+  else{
+    notice.style.display='none';cableDiv.style.display='block';
+    var drum,cap,ebf,ebfA,cA;
+    if(lt==='highlift'){if(hl<=54&&wt<=1000){drum='D525-54';cap=500;ebf='EBP 4 3/8in';ebfA=3.125;cA=66;}else if(wt<=1000){drum='D575-120';cap=500;ebf='EBP 6in';ebfA=4.875;cA=133;}else{drum='D800-120';cap=1100;ebf='EBP 6in';ebfA=4.875;cA=137;}}
+    else{if(wt<=530){drum='D400-96';cap=265;ebf='EBP 3 3/8in';ebfA=3.125;cA=8;}else if(wt<=750){drum='D400-144';cap=375;ebf='EBP 3 3/8in';ebfA=3.125;cA=8;}else{drum='5250-18 (525-216)';cap=750;ebf='EBP 3 3/8in';ebfA=3.125;cA=10;}}
+    var toff={'3-15R':17,'3-LHR':25,'2-LHR':19,'2-12R':13.125}[tt];
+    var ftsc=vert+toff+ebfA,cable=Math.ceil(lt==='highlift'?ftsc+cA-hl:ftsc+cA);
+    CD.drum=drum;CD.cap=cap;CD.ebf=ebf;CD.ftsc=ftsc;CD.cable=cable;CD.cableType=getCT(drum);
+    document.getElementById('r-drum').textContent=drum;
+    document.getElementById('r-drum-qty').textContent='2 (left & right)';
+    document.getElementById('r-ebf').textContent=ebf+' x2';
+    document.getElementById('r-capacity').textContent=(cap*2)+' lbs total';
+    document.getElementById('r-ftsc').textContent=frac(ftsc);
+    document.getElementById('r-cable').textContent=cable+'"';
+    document.getElementById('r-cable-type').textContent='Cable '+getCT(drum);
+  }
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('print-all-wrap').classList.add('visible');
+  updateLabels();
+  try{renderHardware();}catch(e){console.error('renderHardware:',e);}
+  try{renderDespacho();}catch(e){console.error('renderDespacho:',e);}
+}
+function updateLabels(){
+  var wo=document.getElementById('wo').value.trim(),mark=document.getElementById('mark').value.trim(),lites=document.getElementById('lites').value.trim(),glass=document.getElementById('glass').value,frame=document.getElementById('frame').value;
+  var panels=CD.panels||getPanels(parseFloat(document.getElementById('height').value)||0)||4;
+  var width=document.getElementById('width').value,height=document.getElementById('height').value;
+  var hasLabel=wo||mark||lites||glass||frame;
+  document.getElementById('label-missing').style.display=hasLabel?'none':'block';
+  document.getElementById('label-content').style.display=hasLabel?'block':'none';
+  if(!hasLabel)return;
+  if(panels>=2){labelRoles=['Top'];for(var i=1;i<=panels-2;i++)labelRoles.push('Center '+i);labelRoles.push('Bottom');}else{labelRoles=['Top'];}
+  curLabel=Math.min(curLabel,labelRoles.length-1);
+  var role=labelRoles[curLabel]||'',size=width&&height?width+' X '+height:'';
+  document.getElementById('sl-left').innerHTML='<div class="lrow"><strong>W/O: '+(wo||'--')+'</strong></div><div class="lrow">Mark: '+(mark||'--')+'</div><div class="lrow">Panels: '+(panels||'--')+'</div><div class="lrow">Size: '+(size||'--')+'</div>';
+  document.getElementById('sl-right').innerHTML='<div class="lrow">Lites: '+(lites||'--')+'</div><div class="lrow">Glass: '+(glass||'--')+'</div><div class="lrow">Frame: '+(frame||'--')+'</div><div class="lrow">Panel: '+role+'</div>';
+  document.getElementById('label-nav-text').textContent=(curLabel+1)+' / '+labelRoles.length;
+  renderBigLabelPreview();
+}
+function renderBigLabelPreview(){
+  var container=document.getElementById('big-label-preview');if(!container)return;
+  var wo=document.getElementById('wo').value.trim();
+  var role=labelRoles[curLabel]||'',panels=CD.panels||4;
+  var woText='W/O: '+(wo||'--'),panelText=role+' ('+(curLabel+1)+'/'+panels+')';
+  // Preview is always shown upright for readability. Physical print orientation
+  // is handled separately by the print server.
+  var svg,wrapStyle;
+  // Big label is 3" wide x 6" tall (portrait). Show it upright.
+  wrapStyle='width:100%;max-width:240px;margin:0 auto;display:flex;flex-direction:column;';
+  svg='<svg viewBox="0 0 270 200" style="display:block;width:100%;height:auto;" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><text x="135" y="100" text-anchor="middle" dominant-baseline="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="55" textLength="258" lengthAdjust="spacingAndGlyphs">'+woText+'</text></svg>';
+  container.innerHTML='<div class="big-label-wrap" style="'+wrapStyle+'">'+svg+'<div class="big-label-panel" style="text-align:right;">'+panelText+'</div></div>';
+}
+function prevLabel(){curLabel=Math.max(0,curLabel-1);updateLabels();}
+function nextLabel(){curLabel=Math.min(labelRoles.length-1,curLabel+1);updateLabels();}
+function showTab(n){if(n===2&&typeof runSprings==="function")setTimeout(runSprings,50);if(n===5&&typeof renderDespacho==="function")setTimeout(renderDespacho,20);document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',i===n);});document.querySelectorAll('.page').forEach(function(p,i){p.classList.toggle('active',i===n);});}
+function clearAll(){
+  ['width','height','highlift','weight','wo','mark','lites'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('track-type').value='';document.getElementById('lift-type').value='';
+  document.getElementById('glass').value='';document.getElementById('frame').value='';
+  document.getElementById('hl-field').classList.remove('visible');document.getElementById('panel-hint').textContent='';
+  document.getElementById('results').classList.remove('visible');document.getElementById('print-all-wrap').classList.remove('visible');
+  CD={};labelRoles=[];curLabel=0;showTab(0);save({formData:{}});['track-type','lift-type','mark','lites','glass','frame'].forEach(function(id){var d=document.getElementById(id+'-display');if(d)d.value='';var i=document.getElementById(id);if(i)i.value='';});
+}
+function getInfo(){function gv(id){var e=document.getElementById(id);return e?e.value:"";}function gd(id){var e=document.getElementById(id+"-display");if(e&&e.value)return e.value;return gv(id);}return{width:gv("width"),height:gv("height"),trackType:gd("track-type"),liftType:gd("lift-type"),mark:gv("mark"),lites:gv("lites"),glass:gv("glass"),frame:gv("frame"),wo:gv("wo")};}
+function getTracksData(){
+  var grid=document.getElementById('jb-grid');
+  var jb=['J-10','J-12','J-14','J-16'].map(function(t,i){
+    var box=grid?grid.children[i]:null;
+    var qEl=box?box.querySelector('.jb-qty'):null;
+    return{label:t,qty:qEl?qEl.textContent:'--'};
+  });
+  return{vertical:document.getElementById('r-vertical').textContent,horizontal:document.getElementById('r-horizontal').textContent,projection:document.getElementById('r-2x2').textContent,sections:document.getElementById('r-panels').textContent,config:document.getElementById('r-config').textContent,jb:jb};
+}
+function getCablesData(){
+  return{drum:document.getElementById('r-drum').textContent,qty:document.getElementById('r-drum-qty').textContent,ebf:document.getElementById('r-ebf').textContent,capacity:document.getElementById('r-capacity').textContent,ftsc:document.getElementById('r-ftsc').textContent,cableType:document.getElementById('r-cable-type').textContent,cable:document.getElementById('r-cable').textContent};
+}
+// ---------- HARDWARE ----------
+function hwSeries(width){
+  if(width<=144)return{name:'AA-1200',code:'1200',perRow:3};
+  if(width<=194)return{name:'AA-1600',code:'1600',perRow:5};
+  if(width<=220)return{name:'AA-1800',code:'1800',perRow:5};
+  return null;
+}
+function computeHardware(){
+  var d=CD;
+  if(!d||!d.width||!d.height)return null;
+  var width=d.width,height=d.height,sections=d.panels||getPanels(height);
+  var series=hwSeries(width);
+  var joints=Math.max(sections-1,0);
+  // spring count (same rule as runSprings)
+  var qEl=document.getElementById('sp-qty');
+  var nS=(qEl&&qEl.value)?parseInt(qEl.value):(width>144?4:2);
+  // jamb brackets: grid values (incl. overrides) are PER SIDE -> x2 for real total
+  var jambSide=0,jambList=[],grid=document.getElementById('jb-grid');
+  if(grid){Array.prototype.forEach.call(grid.children,function(box){
+    var t=box.querySelector('.jb-type'),q=box.querySelector('.jb-qty');
+    var n=q?parseInt(q.textContent):NaN;
+    if(t&&!isNaN(n)){jambSide+=n;jambList.push({label:t.textContent.trim(),perSide:n,total:n*2});}
+  });}
+  var jambTotal=jambSide*2;
+  // hinges
+  var H=2*joints,I=2*joints,J=series?series.perRow*joints:0;
+  var hingeNums=[];for(var k=0;k<joints;k++)hingeNums.push('#'+(k+3));
+  // rollers
+  var roller7=4,roller9=Math.max(2*sections-2,0);
+  // hinge screws = 4*(H+I+J) + 12 top + 14 bottom
+  var hingeScrews=4*(H+I+J)+26;
+  // weight -> shaft type
+  var wt=d.hasWeight?d.wt:null;
+  var solid=(wt!=null)&&wt>=500;
+  var endBearingPlate=2,springAnchorBracket=nS;
+  // lag screws = 1/jamb bracket + 2/end bearing plate + 3/spring anchor bracket + 8
+  var lagScrews=jambTotal*1+2*endBearingPlate+3*springAnchorBracket+8;
+  return{
+    series:series,width:width,height:height,sections:sections,joints:joints,
+    nS:nS,jambSide:jambSide,jambTotal:jambTotal,
+    H:H,I:I,J:J,hingeNums:hingeNums,
+    roller7:roller7,roller9:roller9,hingeScrews:hingeScrews,
+    wt:wt,solid:solid,
+    shaftType:(wt==null)?null:(solid?'2 Solid Shaft':'1 Hollow Shaft'),
+    shaftLen:(wt==null||solid)?null:(width+12),
+    coupler:solid?1:0,
+    shaftKey:(wt==null)?null:(solid?4:0),
+    springAnchorBracket:springAnchorBracket,
+    springsRight:Math.ceil(nS/2),springsLeft:Math.floor(nS/2),
+    centerBearings:nS,springAnchorBolt:2*nS,
+    endBearingPlate:endBearingPlate,lagScrews:lagScrews,
+    drum:d.hasWeight?d.drum:null,
+    ebf:d.hasWeight?d.ebf:null,
+    cable:d.hasWeight?d.cable:null,
+    cableGauge:d.hasWeight?d.cableType:null,
+    jambList:jambList,
+    vert:d.vert,horiz:d.horiz,x2:d.x2
+  };
+}
+function renderHardware(){
+  var notice=document.getElementById('hw-notice'),content=document.getElementById('hw-content');
+  if(!notice||!content)return;
+  var hw=computeHardware();
+  if(!hw){notice.style.display='block';content.style.display='none';notice.textContent='Enter width, height, track & lift to calculate hardware.';return;}
+  if(!hw.series){
+    notice.style.display='block';content.style.display='none';
+    notice.textContent='Width '+hw.width+'" is out of range (max 220").';
+    return;
+  }
+  notice.style.display='none';content.style.display='block';
+  document.getElementById('hw-series-title').textContent=hw.series.name+' — '+hw.width+'" x '+hw.height+'" — '+hw.sections+' sections';
+  var em=function(v){return v==null?'<span style="color:#C0272D">enter weight</span>':v;};
+  var hnum=hw.hingeNums.length?hw.hingeNums[0]+'–'+hw.hingeNums[hw.hingeNums.length-1]:'–';
+  var ebfDesc='End bearing plate'+(hw.ebf?' — '+hw.ebf:'');
+  var drumDesc='Drum (1 red, 1 black)'+(hw.drum?' — '+hw.drum:'');
+  var wireDesc='Steel wire'+(hw.cable?' — '+hw.cable+'" &middot; '+(hw.cableGauge||''):'');
+  var shaftDesc,shaftQty;
+  if(hw.wt==null){shaftDesc='Torsion shaft';shaftQty=em(null);}
+  else if(hw.solid){shaftDesc='Torsion shaft (solid shaft)';shaftQty=2;}
+  else{shaftDesc='Torsion shaft (hollow shaft'+(hw.shaftLen?' '+hw.shaftLen+'"':'')+')';shaftQty=1;}
+  var fmt=function(v){return (v!=null&&!isNaN(v))?frac(v):'';};
+  var rDesc='Vertical track'+(fmt(hw.vert)?' — '+fmt(hw.vert):'');
+  var sDesc='Horizontal track'+(fmt(hw.horiz)?' — '+fmt(hw.horiz):'');
+  var tDesc='Hanger track';
+  var rows=[
+    ['A',ebfDesc,hw.endBearingPlate],
+    ['B',drumDesc,2],
+    ['B1',wireDesc,2],
+    ['C',shaftDesc,shaftQty],
+    ['D','Spring anchor bracket',hw.springAnchorBracket],
+    ['E','Coupler',hw.wt==null?em(null):(hw.coupler||'—')],
+    ['E1','Right spring',hw.springsRight],
+    ['E2','Left spring',hw.springsLeft],
+    ['F','Bottom bracket',2],
+    ['G','Top bracket',2],
+    ['J','Center hinge',hw.J],
+    ['K','Roller 7"',hw.roller7],
+    ['L','Roller 9"',hw.roller9],
+    ['O','Lock',2]
+  ];
+  var tracks=[
+    ['Q','Flag bracket',2],
+    ['R',rDesc,2],
+    ['S',sDesc,2],
+    ['T',tDesc,3]
+  ];
+  var bolts=[
+    ['Center bearings',hw.centerBearings],
+    ['Spring anchor bolt',hw.springAnchorBolt],
+    ['Perforated angle bolt/nut',12],
+    ['Track / hanger bolt/nut',4],
+    ['Hinge screws',hw.hingeScrews],
+    ['End bearing plate bolt/nut',6],
+    ['Shaft key',hw.shaftKey==null?em(null):hw.shaftKey],
+    ['Lag screws',hw.lagScrews]
+  ];
+  var chk=function(key){return '<input type="checkbox" class="hw-chk" data-key="'+key+'" onchange="var r=this.closest(\'.result-row\')||this.closest(\'tr\');if(r)r.style.opacity=this.checked?\'0.45\':\'\';">';};
+  var h='';
+  rows.forEach(function(r){
+    h+='<div class="result-row"><span class="rlabel" style="display:flex;align-items:center;gap:10px">'+chk(r[0])+'<span><b style="color:#1B2A6B">'+r[0]+'</b> &nbsp;'+r[1]+'</span></span><span class="rvalue">'+r[2]+'</span></div>';
+  });
+  // Hinges table (# on top, qty below, a check per hinge) — like the PDFs
+  var chkCell=function(key){return '<input type="checkbox" class="hw-chk" data-key="'+key+'" onchange="var t=this.closest(\'td\');if(t)t.style.opacity=this.checked?\'0.4\':\'\';">';};
+  h+='<div class="card-title" style="margin-top:14px">Hinges</div>';
+  h+='<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px;text-align:center">';
+  h+='<tr style="background:#1B2A6B;color:#fff"><th style="padding:5px 6px">Pt</th><th style="padding:5px 6px;text-align:left">Hinge</th>';
+  hw.hingeNums.forEach(function(n){h+='<th style="padding:5px 6px">'+n+'</th>';});
+  h+='</tr>';
+  var hingeRow=function(letter,label){
+    var c='<tr><td style="border:1px solid #ccc;padding:4px 6px;font-weight:700;color:#1B2A6B">'+letter+'</td><td style="border:1px solid #ccc;padding:4px 6px;text-align:left">'+label+'</td>';
+    hw.hingeNums.forEach(function(n){c+='<td style="border:1px solid #ccc;padding:4px 6px;white-space:nowrap">2 '+chkCell(letter+n)+'</td>';});
+    c+='</tr>';
+    return c;
+  };
+  h+=hingeRow('H','Cut-down hinge');
+  h+=hingeRow('I','Hinges');
+  h+='</table></div>';
+  h+='<div class="card-title" style="margin-top:14px">Bolts &amp; Screws</div>';
+  bolts.forEach(function(r){
+    h+='<div class="result-row"><span class="rlabel" style="display:flex;align-items:center;gap:10px">'+chk(r[0])+'<span>'+r[0]+'</span></span><span class="rvalue">'+r[1]+'</span></div>';
+  });
+  // Jamb brackets + Q–T in one table (no checkboxes, no borders)
+  var jcols=hw.jambList?hw.jambList.length:0;
+  h+='<div class="card-title" style="margin-top:14px">Jamb brackets &amp; Tracks</div>';
+  h+='<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px;text-align:center">';
+  h+='<tr style="background:#1B2A6B;color:#fff"><th style="padding:5px 6px">Pt</th><th style="padding:5px 6px;text-align:left">Description</th>';
+  (hw.jambList||[]).forEach(function(j){h+='<th style="padding:5px 6px">'+j.label+'</th>';});
+  h+='<th style="padding:5px 6px">Qty</th></tr>';
+  h+='<tr><td style="padding:4px 6px;font-weight:700;color:#1B2A6B">N</td><td style="padding:4px 6px;text-align:left">Jamb bracket</td>';
+  (hw.jambList||[]).forEach(function(j){h+='<td style="padding:4px 6px">'+j.total+'</td>';});
+  h+='<td style="padding:4px 6px;font-weight:700">'+hw.jambTotal+'</td></tr>';
+  tracks.forEach(function(r){
+    h+='<tr><td style="padding:4px 6px;font-weight:700;color:#1B2A6B">'+r[0]+'</td><td style="padding:4px 6px;text-align:left">'+r[1]+'</td>';
+    for(var ci=0;ci<jcols;ci++){h+='<td style="padding:4px 6px"></td>';}
+    h+='<td style="padding:4px 6px;font-weight:700">'+r[2]+'</td></tr>';
+  });
+  h+='</table></div>';
+  document.getElementById('hw-rows').innerHTML=h;
+}
+function getHardwareData(){return computeHardware();}
+function buildHardwarePreviewHTML(hw,info,checks){
+  if(!hw||!hw.series)return'<div style="font-family:Arial">No hardware data.</div>';
+  checks=checks||{};
+  var ebfDesc='End bearing plate (1 L &amp; 1 R)'+(hw.ebf?' — '+hw.ebf:'');
+  var drumDesc='Drum (1 red &amp; 1 black)'+(hw.drum?' — '+hw.drum:'');
+  var wireDesc='Steel wire'+(hw.cable?' — '+hw.cable+'" &middot; '+(hw.cableGauge||''):'');
+  var shaftDesc,shaftQty;
+  if(hw.wt==null){shaftDesc='Torsion shaft';shaftQty='-';}
+  else if(hw.solid){shaftDesc='Torsion shaft (solid shaft)';shaftQty=2;}
+  else{shaftDesc='Torsion shaft (hollow shaft'+(hw.shaftLen?' '+hw.shaftLen+'"':'')+')';shaftQty=1;}
+  var fmt=function(v){return (v!=null&&!isNaN(v))?frac(v):'';};
+  var rDesc='Vertical track (1 L &amp; 1 R)'+(fmt(hw.vert)?' — '+fmt(hw.vert):'');
+  var sDesc='Horizontal track (1 L &amp; 1 R)'+(fmt(hw.horiz)?' — '+fmt(hw.horiz):'');
+  var tDesc='Hanger track';
+  var rows=[
+    ['A',ebfDesc,hw.endBearingPlate],['B',drumDesc,2],
+    ['B1',wireDesc,2],['C',shaftDesc,shaftQty],['D','Spring anchor bracket',hw.springAnchorBracket],
+    ['E','Coupler',hw.coupler||'-'],['E1','Right spring',hw.springsRight],['E2','Left spring',hw.springsLeft],
+    ['F','Bottom bracket',2],['G','Top bracket',2],['J','Center hinge',hw.J],['K','Roller (7")',hw.roller7],
+    ['L','Roller (9")',hw.roller9],['O','Lock',2]
+  ];
+  var tracks=[['Q','Flag bracket (1 L &amp; 1 R)',2],['R',rDesc,2],['S',sDesc,2],['T',tDesc,3]];
+  var bolts=[
+    ['Center bearings',hw.centerBearings,'1 per spring'],['Spring anchor bolt',hw.springAnchorBolt,'2 per spring'],
+    ['Perforated angle bolt/nut',12,''],['Track / hanger bolt/nut',4,''],
+    ['Hinge screws',hw.hingeScrews,'4x(H,I,J)+26'],['End bearing plate bolt/nut',6,''],
+    ['Shaft key',hw.shaftKey==null?'-':hw.shaftKey,''],['Lag screws',hw.lagScrews,'']
+  ];
+  var box=function(on){return on
+    ?'<span style="display:inline-block;width:14px;height:14px;border:1.5px solid #1B2A6B;background:#1B2A6B;color:#fff;font-size:11px;line-height:14px;text-align:center;">&#10003;</span>'
+    :'<span style="display:inline-block;width:14px;height:14px;border:1.5px solid #333;"></span>';};
+  var h='<div class="hwsheet" style="font-family:Arial,sans-serif;">';
+  h+='<style>'
+    +'#preview-print-area h2{display:none;}'
+    +'.hwsheet .ttl{text-align:center;font-size:21px;font-weight:800;color:#1B2A6B;}'
+    +'.hwsheet .sub{text-align:center;margin-bottom:6px;font-size:13px;color:#666;}'
+    +'.hwsheet .hcap{text-align:center;font-weight:700;font-size:13px;color:#1B2A6B;margin:8px 0 3px;}'
+    +'.hwsheet table{page-break-inside:avoid;}'
+    +'.hwtbl{border-collapse:collapse;width:100%;max-width:520px;margin:0 auto 0 0;font-size:14px;}'
+    +'.hwtbl th,.hwtbl td{border:1px solid #888;padding:3px 8px;}'
+    +'.hwtbl th{background:#1B2A6B;color:#fff;text-align:left;}'
+    +'.hwtbl td.ck{width:24px;text-align:center;padding:2px;}'
+    +'.hwtbl td.pt{width:36px;font-weight:700;color:#1B2A6B;text-align:center;}'
+    +'.hwtbl td.qty{text-align:right;font-weight:700;background:#eef1f8;width:56px;}'
+    +'.hwtbl tr:nth-child(even) td{background:#f8f9fa;}'
+    +'.hwtbl tr:nth-child(even) td.qty{background:#e6ebf7;}'
+    +'.htbl{border-collapse:collapse;width:100%;max-width:540px;margin:0 auto 0 0;font-size:14px;text-align:center;}'
+    +'.htbl th,.htbl td{border:1px solid #888;padding:3px 6px;}'
+    +'.htbl th{background:#1B2A6B;color:#fff;}'
+    +'.htbl td.ck{width:24px;padding:2px;}'
+    +'.htbl td.pt{font-weight:700;color:#1B2A6B;}'
+    +'.htbl td.tot{font-weight:700;background:#eef1f8;}'
+    +'.jtbl{border-collapse:collapse;width:100%;max-width:540px;margin:0 auto 0 0;font-size:14px;text-align:center;}'
+    +'.jtbl th{background:#1B2A6B;color:#fff;padding:3px 6px;}'
+    +'.jtbl td{padding:3px 6px;}'
+    +'.jtbl td.pt{font-weight:700;color:#1B2A6B;}'
+    +'.jtbl td.tot{font-weight:700;}'
+    +'@media print{@page{size:letter portrait;margin:10mm;}.hwsheet{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}'
+    +'</style>';
+  h+='<div class="ttl">'+hw.series.name+' ELEGANT</div>';
+  h+='<div class="sub">W/O: '+(info.wo||'-')+' &nbsp;|&nbsp; '+hw.width+'" x '+hw.height+'" &nbsp;|&nbsp; '+hw.sections+' sections</div>';
+  h+='<table class="hwtbl"><tr><th style="text-align:center;width:22px">&#10003;</th><th style="text-align:center;width:34px">Pt</th><th>Description</th><th style="text-align:right">Qty</th></tr>';
+  rows.forEach(function(r){h+='<tr><td class="ck">'+box(checks[r[0]])+'</td><td class="pt">'+r[0]+'</td><td>'+r[1]+'</td><td class="qty">'+r[2]+'</td></tr>';});
+  h+='</table>';
+  h+='<div class="hcap">HINGES</div>';
+  h+='<table class="htbl"><tr><th style="width:30px">Pt</th><th style="text-align:left">Hinge</th>';
+  hw.hingeNums.forEach(function(n){h+='<th>'+n+'</th>';});
+  h+='</tr>';
+  var hr=function(letter,label){var c='<tr><td class="pt">'+letter+'</td><td style="text-align:left">'+label+'</td>';hw.hingeNums.forEach(function(n){c+='<td style="white-space:nowrap">2 '+box(checks[letter+n])+'</td>';});c+='</tr>';return c;};
+  h+=hr('H','Cut-down hinge')+hr('I','Hinges');
+  h+='</table>';
+  h+='<div class="hcap">BOLTS &amp; SCREWS</div>';
+  h+='<table class="hwtbl"><tr><th style="text-align:center;width:22px">&#10003;</th><th>Description</th><th style="text-align:right">Qty</th></tr>';
+  bolts.forEach(function(r){h+='<tr><td class="ck">'+box(checks[r[0]])+'</td><td>'+r[0]+(r[2]?' <span style="color:#888;font-size:10px">('+r[2]+')</span>':'')+'</td><td class="qty">'+r[1]+'</td></tr>';});
+  h+='</table>';
+  var jcols=hw.jambList?hw.jambList.length:0;
+  h+='<div class="hcap">JAMB BRACKETS &amp; TRACKS</div>';
+  h+='<table class="jtbl"><tr><th style="width:30px">Pt</th><th style="text-align:left">Description</th>';
+  (hw.jambList||[]).forEach(function(j){h+='<th>'+j.label+'</th>';});
+  h+='<th>Qty</th></tr>';
+  h+='<tr><td class="pt">N</td><td style="text-align:left">Jamb bracket</td>';
+  (hw.jambList||[]).forEach(function(j){h+='<td>'+j.total+'</td>';});
+  h+='<td class="tot">'+hw.jambTotal+'</td></tr>';
+  tracks.forEach(function(r){
+    h+='<tr><td class="pt">'+r[0]+'</td><td style="text-align:left">'+r[1]+'</td>';
+    for(var ci=0;ci<jcols;ci++){h+='<td></td>';}
+    h+='<td class="tot">'+r[2]+'</td></tr>';
+  });
+  h+='</table></div>';
+  return h;
+}
+function srvFetch(endpoint,payload){
+  return fetch(SERVER+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(15000)}).then(function(r){return r.json();});
+}
+// ---------- DESPACHO (dispatch / signing page) ----------
+function markCalc(d){d=d||{};var w=parseFloat(d.width)||0,h=parseFloat(d.height)||0,hl=parseFloat(d.highlift)||0,wt=parseFloat(d.weight)||0;var lt=d.liftType||'standard',tt=d.trackType||'';var panels=h?getPanels(h):0;var nS=w>144?4:2;var vert,horiz;if(lt==='highlift'){vert=(h-8)+(hl-9);horiz=(h+12)-(hl-9);}else if(lt==='lhr'){vert=tt==='3-LHR'?h-18:h-16;horiz=h+12;}else{vert=h-8;horiz=h+12;}return {w:w,h:h,hl:hl,wt:wt,lt:lt,tt:tt,panels:panels,nS:nS,vert:vert,horiz:horiz};}
+function markList(){var out=[];document.querySelectorAll('#op-list .op-mk').forEach(function(m){var mid=m.getAttribute('data-mid');var lbl=(m.querySelector('.op-lbl')||{value:'?'}).value||'?';var q=parseInt((m.querySelector('.op-q')||{textContent:'1'}).textContent)||1;var d=(typeof opData!=='undefined'&&opData[mid])?opData[mid]:{};out.push({label:lbl,qty:q,d:d,calc:markCalc(d)});});return out;}
+function buildDespachoHTML(info,opts){
+  opts=opts||{};
+  var elegFont="'Segoe Script','Brush Script MT','Lucida Handwriting','Snell Roundhand',cursive";
+  var logo=(document.querySelector('img[alt="AA Impact Garage Door"]')||{}).src||'';
+  var boxOf=function(key){
+    if(opts.interactive) return '<input type="checkbox" class="desp-chk" data-key="'+key+'" style="width:19px;height:19px;cursor:pointer;accent-color:#1B2A6B;" onchange="var r=this.closest(\'tr\');if(r)r.style.background=this.checked?\'#eef7ee\':\'\';">';
+    var on=opts.checks&&opts.checks[key];
+    return on
+      ?'<span style="display:inline-block;width:17px;height:17px;border:1.6px solid #1B2A6B;background:#1B2A6B;color:#fff;font-size:13px;line-height:17px;text-align:center;">&#10003;</span>'
+      :'<span style="display:inline-block;width:17px;height:17px;border:1.6px solid #111;"></span>';
+  };
+  var esc=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+  var cmtCell=function(key){
+    if(opts.interactive) return '<input type="text" class="desp-cmt" data-key="'+key+'" placeholder="comment&hellip;" style="width:100%;box-sizing:border-box;border:none;outline:none;background:transparent;font-family:Arial;font-size:14px;color:#111;">';
+    var c=(opts.comments&&opts.comments[key])?opts.comments[key]:'';
+    return c?'<span style="font-size:14px;">'+esc(c)+'</span>':'';
+  };
+  var motorField=function(){
+    if(opts.interactive) return '<input type="text" class="desp-motor" placeholder="which motor&hellip;" style="border:none;outline:none;border-bottom:1.3px solid #111;background:transparent;font-family:Arial;font-size:14px;width:62%;min-width:170px;">';
+    var m=opts.motor||'';
+    return m?'<b>'+esc(m)+'</b>':ln(64);
+  };
+  var color='<span style="white-space:nowrap">White&nbsp;/&nbsp;Black&nbsp;/&nbsp;Bronze</span>';
+  var ln=function(n){var s='';for(var i=0;i<n;i++)s+='&nbsp;';return '<u>'+s+'</u>';};
+  var tdc='border:1px solid #111;padding:6px 6px;text-align:center;width:42px;vertical-align:top;';
+  var td='border:1px solid #111;padding:6px 12px;vertical-align:top;';
+  var tdcm='border:1px solid #111;padding:6px 12px;vertical-align:top;';
+  function row(key,art){return '<tr><td style="'+tdc+'">'+boxOf(key)+'</td><td style="'+td+'">'+art+'</td><td style="'+tdcm+'height:'+(opts.interactive?26:30)+'px;">'+cmtCell(key)+'</td></tr>';}
+  var tls={'3-15R':'3" 15R','2-12R':'2" 12R','3-LHR':'3" LHR','2-LHR':'2" LHR'};
+  var lts={standard:'Std lift',highlift:'High lift',lhr:'Low HR'};
+  var ms=(typeof markList==='function')?markList():[];
+  var totalDoors=0;ms.forEach(function(m){totalDoors+=m.qty;});
+  var per=function(fn){return ms.length?ms.map(fn).join(' &nbsp;&middot;&nbsp; '):'&mdash;';};
+  var panelsTxt=per(function(m){return 'MK '+esc(m.label)+' <b>'+(m.calc.h?m.calc.panels:'—')+'</b>';});
+  var springTxt=per(function(m){return 'MK '+esc(m.label)+' <b>'+(m.calc.w?m.calc.nS:'—')+'</b>';});
+  var shaftTxt=per(function(m){return 'MK '+esc(m.label)+' <b>'+(m.calc.wt?(m.calc.wt>=500?'2 Solid':'1 Hollow '+(m.calc.w+12)+'"'):'—')+'</b>';});
+  var tracksDetail=per(function(m){return 'MK '+esc(m.label)+': '+(m.calc.h?(frac(m.calc.vert)+' / '+frac(m.calc.horiz)):'—')+' '+(tls[m.calc.tt]||'')+' '+(lts[m.calc.lt]||'');});
+  var h=opts.noPage?'':'<style>@media print{@page{size:letter landscape;margin:10mm;}}</style>';
+  h+='<div class="desp-sheet" style="font-family:Arial,sans-serif;border:2px solid #111;padding:14px 26px;max-width:1000px;margin:0 auto 0 0;-webkit-print-color-adjust:exact;print-color-adjust:exact;">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">';
+  h+='<div style="font-size:16px;font-weight:800;">W/O #: '+(info.wo?'<b>&nbsp;'+esc(info.wo)+'&nbsp;</b>':ln(8))+'<div style="font-size:12px;font-weight:400;color:#555;margin-top:3px">Total: <b>'+totalDoors+'</b> doors &middot; <b>'+ms.length+'</b> marks</div></div>';
+  if(logo) h+='<img src="'+logo+'" style="height:50px;">';
+  h+='</div>';
+  h+='<div style="text-align:center;font-size:19px;font-weight:800;color:#1B2A6B;letter-spacing:.1em;margin:8px 0 10px;border-bottom:3px solid #C0272D;padding-bottom:5px;">DISPATCH &mdash; ORDER</div>';
+  h+='<table style="width:100%;border-collapse:collapse;font-size:14px;">';
+  h+='<tr style="background:#1B2A6B;color:#fff;"><th style="'+tdc+'">&#10003;</th><th style="'+td+'text-align:left;">Article</th><th style="'+td+'text-align:left;width:32%;white-space:nowrap;">Comments</th></tr>';
+  h+=row('1','<b>1. Panels</b> &mdash; '+panelsTxt);
+  h+=row('2','<b>2. Hardware Box</b> &mdash; Qty: <b>'+totalDoors+'</b> <span style="color:#888;font-size:11px">(1 per door)</span>');
+  h+=row('3','<b>3. Tracks</b> &mdash; <b>'+totalDoors+'</b> set of tracks<div style="font-size:11px;color:#666;margin-top:3px">'+tracksDetail+'</div>');
+  h+=row('4','<b>4. Perforated Angles</b> &mdash; Qty: <b>'+(3*totalDoors)+'</b> <span style="color:#888;font-size:11px">(3 &times; '+totalDoors+')</span> &nbsp; '+color);
+  h+=row('5','<b>5. Spring</b> <span style="color:#888;font-size:11px">(per door)</span> &mdash; '+springTxt);
+  h+=row('6','<b>6. Trims</b> &mdash; Qty: <b>'+(3*totalDoors)+'</b> <span style="color:#888;font-size:11px">(3 &times; '+totalDoors+')</span> &nbsp; '+color);
+  h+=row('7','<b>7. Shaft</b> <span style="color:#888;font-size:11px">(per door)</span> &mdash; '+shaftTxt);
+  h+=row('8','<b>8. Motor</b> &mdash; '+motorField()+' <span style="color:#888;font-size:11px">(qty &amp; type per door)</span>');
+  h+='</table>';
+  var fmtDate=function(s){var p=String(s).split('-');return p.length===3?(p[1]+'/'+p[2]+'/'+p[0]):s;};
+  if(opts.interactive){
+    var dn=new Date(),pad=function(n){return(n<10?'0':'')+n;};
+    var today=dn.getFullYear()+'-'+pad(dn.getMonth()+1)+'-'+pad(dn.getDate());
+    var lbl='font-weight:700;color:#1B2A6B;margin-bottom:5px;';
+    h+='<div style="margin-top:20px;font-size:14px;">';
+    h+='<div style="margin-bottom:14px;"><div style="'+lbl+'">RECEIVED BY <span style="font-weight:400;color:#888;font-size:12px;">(full name)</span></div><input type="text" class="desp-recv" style="width:100%;box-sizing:border-box;border:none;border-bottom:1.5px solid #111;outline:none;font-size:22px;padding:3px 0;font-family:'+elegFont+';background:transparent;"></div>';
+    h+='<div style="margin-bottom:14px;"><div style="'+lbl+'">DATE</div><input type="date" class="desp-date" value="'+today+'" style="border:1px solid #bbb;border-radius:6px;padding:7px 9px;font-size:15px;font-family:Arial;"></div>';
+    h+='<div><div style="'+lbl+'">SIGNATURE OF RECIPIENT <span style="font-weight:400;color:#888;font-size:12px;">(sign with your finger)</span></div>';
+    h+='<canvas id="desp-sign-canvas" width="640" height="150" style="border:1.5px solid #111;border-radius:8px;width:100%;max-width:640px;height:150px;touch-action:none;display:block;background:#fff;"></canvas>';
+    h+='<button type="button" onclick="clearSignPad()" style="margin-top:6px;font-size:12px;padding:5px 12px;border:1px solid #bbb;border-radius:6px;background:#f5f5f5;cursor:pointer;">Clear signature</button></div>';
+    h+='</div>';
+  } else {
+    var recvOut=opts.recv?'<span style="font-family:'+elegFont+';font-size:22px;">&nbsp;'+esc(opts.recv)+'&nbsp;</span>':ln(56);
+    var dateOut=opts.date?'<b>&nbsp;'+fmtDate(opts.date)+'&nbsp;</b>':ln(26);
+    var signOut=opts.sign?'<img src="'+opts.sign+'" style="height:46px;vertical-align:bottom;">':ln(78);
+    h+='<div style="margin-top:16px;font-size:15px;line-height:1.5;">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:30px;"><div style="flex:1;">RECEIVED BY: <u>'+recvOut+'</u></div><div style="white-space:nowrap;margin-right:80px;">ON: <u>'+dateOut+'</u></div></div>';
+    h+='<div style="display:flex;justify-content:space-between;font-size:11px;color:#555;margin-top:2px;"><span style="margin-left:92px;">(FULL NAME)</span><span style="margin-right:88px;">(DATE)</span></div>';
+    h+='<div style="margin-top:14px;">SIGNATURE OF RECIPIENT: '+signOut+'</div>';
+    h+='</div>';
+  }
+  h+='</div>';
+  return h;
+}
+function renderDespacho(){
+  var notice=document.getElementById('desp-notice'),content=document.getElementById('desp-content');
+  if(!notice||!content)return;
+  var any=markList().some(function(m){return m.calc.h>0;});
+  if(!any){notice.style.display='block';content.style.display='none';notice.textContent='Enter door sizes to build the dispatch sheet.';return;}
+  notice.style.display='none';content.style.display='block';
+  try{document.getElementById('desp-preview').innerHTML=buildDespachoHTML(getInfo(),{interactive:true});setTimeout(initSignPad,0);}catch(e){console.error('despacho',e);}
+}
+function despChecks(){
+  var m={};
+  var els=document.querySelectorAll('#desp-preview .desp-chk');
+  Array.prototype.forEach.call(els,function(c){m[c.getAttribute('data-key')]=c.checked;});
+  return m;
+}
+function despComments(){
+  var m={};
+  var els=document.querySelectorAll('#desp-preview .desp-cmt');
+  Array.prototype.forEach.call(els,function(c){if(c.value&&c.value.trim())m[c.getAttribute('data-key')]=c.value;});
+  return m;
+}
+function despMotor(){
+  var el=document.querySelector('#desp-preview .desp-motor');
+  return el&&el.value?el.value:'';
+}
+function despRecv(){var el=document.querySelector('#desp-preview .desp-recv');return el&&el.value?el.value:'';}
+function despDate(){var el=document.querySelector('#desp-preview .desp-date');return el&&el.value?el.value:'';}
+var _signDrawing=false,_signHasInk=false;
+function initSignPad(){
+  var c=document.getElementById('desp-sign-canvas');
+  if(!c)return;
+  var ctx=c.getContext('2d');
+  ctx.lineWidth=2.6;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#111';
+  _signHasInk=false;_signDrawing=false;
+  var pos=function(e){var r=c.getBoundingClientRect();var t=(e.touches&&e.touches[0])?e.touches[0]:e;return {x:(t.clientX-r.left)*(c.width/r.width),y:(t.clientY-r.top)*(c.height/r.height)};};
+  var start=function(e){e.preventDefault();_signDrawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);};
+  var move=function(e){if(!_signDrawing)return;e.preventDefault();var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();_signHasInk=true;};
+  c.addEventListener('mousedown',start);c.addEventListener('mousemove',move);
+  c.addEventListener('touchstart',start,{passive:false});c.addEventListener('touchmove',move,{passive:false});
+  if(!window._signEnd){window._signEnd=function(){_signDrawing=false;};window.addEventListener('mouseup',window._signEnd);window.addEventListener('touchend',window._signEnd);}
+}
+function clearSignPad(){var c=document.getElementById('desp-sign-canvas');if(c){c.getContext('2d').clearRect(0,0,c.width,c.height);_signHasInk=false;}}
+function despSignature(){var c=document.getElementById('desp-sign-canvas');return (c&&_signHasInk)?c.toDataURL('image/png'):'';}
+// Browser-print a single section (no print server needed).
+function printOne(type){
+  if((type==='cables'||type==='springs') && !CD.hasWeight){ try{toast('Enter door weight first',2000);}catch(e){} return; }
+  try{ if(type==='springs') runSprings(); }catch(e){}
+  var info=getInfo();
+  var html='';
+  try{
+    if(type==='tracks') html=buildTracksPreviewHTML(getTracksData(), info);
+    else if(type==='cables') html=buildCablesPreviewHTML(getCablesData(), info);
+    else if(type==='springs') html='<pre style="font-family:monospace;font-size:13px;white-space:pre-wrap;line-height:1.5;margin:0">'+buildSpringsText()+'</pre>';
+    else if(type==='hardware'){ var hw=computeHardware(); if(hw&&hw.series) html=buildHardwarePreviewHTML(hw, info, hwChecks()); }
+    else if(type==='despacho') html=buildDespachoHTML(info,{checks:despChecks(),comments:despComments(),motor:despMotor(),recv:despRecv(),date:despDate(),sign:despSignature()});
+  }catch(e){console.error('printOne',e);}
+  if(!html){ try{toast('Fill in the door info first',2000);}catch(e){} return; }
+  var area=document.getElementById('preview-print-area');
+  if(area){ area.innerHTML=html; setTimeout(function(){window.print();},60); }
+}
+function doPrint(type){
+  var s=load();
+  if(type==='tracks'||type==='cables'||type==='springs'||type==='hardware'||type==='despacho'){ printOne(type); return; }
+  if(type==='tracks'){
+    if(!serverOK){toast('Print server offline',2000);return;}
+    toast('Printing Tracks...',2000);
+    srvFetch('/print/tracks',{printer:s.pTracks||'',data:getTracksData(),info:getInfo()})
+      .then(function(d){toast(d.status==='ok'?'Tracks printed':'Error: '+d.error,3000);})
+      .catch(function(e){toast('Error: '+e.message,3000);});
+  } else if(type==='cables'){
+    if(!CD.hasWeight){toast('Enter door weight first');return;}
+    if(!serverOK){toast('Print server offline',2000);return;}
+    toast('Printing Cables...',2000);
+    srvFetch('/print/cables',{printer:s.pCables||'',data:getCablesData(),info:getInfo()})
+      .then(function(d){toast(d.status==='ok'?'Cables printed':'Error: '+d.error,3000);})
+      .catch(function(e){toast('Error: '+e.message,3000);});
+  } else if(type==='labels'){
+    if(!serverOK){toast('Print server offline',2000);return;}
+    var wo=document.getElementById('wo').value.trim(),mark=document.getElementById('mark').value.trim();
+    var lites=document.getElementById('lites').value.trim(),glass=document.getElementById('glass').value,frame=document.getElementById('frame').value;
+    var panels=CD.panels||4,size=CD.width&&CD.height?CD.width+' X '+CD.height:'';
+    toast('Printing Labels...',4000);
+    srvFetch('/print/labels',{wo:wo,mark:mark,lites:lites,glass:glass,frame:frame,panels:panels,size:size,roles:labelRoles,printerSmall:s.pSmall||'',printerBig:s.pBig||'',printSmall:true,printBig:true,bigRotation:curRotation})
+      .then(function(d){toast(d.status==='ok'?'Labels: '+d.printed.length+' jobs':'Error: '+d.error,3000);})
+      .catch(function(e){toast('Error: '+e.message,3000);});
+  }
+}
+function doPrintAll(){
+  var s=load();
+  if(!serverOK){toast('Print server offline',2000);return;}
+  toast('Printing all...',5000);
+  var jobs=[];
+  // Tracks
+  jobs.push(function(){
+    return srvFetch('/print/tracks',{printer:s.pTracks||'',data:getTracksData(),info:getInfo()});
+  });
+  // Cables (only if weight entered)
+  if(CD.hasWeight){
+    jobs.push(function(){
+      return srvFetch('/print/cables',{printer:s.pCables||'',data:getCablesData(),info:getInfo()});
+    });
+  }
+  // Springs (only if server supports it; skipped gracefully on error)
+  if(typeof getSpringsData==='function'){
+    jobs.push(function(){
+      return srvFetch('/print/springs',{printer:s.pSprings||s.pTracks||'',data:getSpringsData(),info:getInfo()});
+    });
+  }
+  // Labels (only if there is label info)
+  var wo=document.getElementById('wo').value.trim(),mark=document.getElementById('mark').value.trim();
+  if(wo||mark){
+    var lites=document.getElementById('lites').value.trim(),glass=document.getElementById('glass').value,frame=document.getElementById('frame').value;
+    var panels=CD.panels||4,size=CD.width&&CD.height?CD.width+' X '+CD.height:'';
+    jobs.push(function(){
+      return srvFetch('/print/labels',{wo:wo,mark:mark,lites:lites,glass:glass,frame:frame,panels:panels,size:size,roles:labelRoles,printerSmall:s.pSmall||'',printerBig:s.pBig||'',printSmall:true,printBig:true,bigRotation:curRotation});
+    });
+  }
+  // Run jobs sequentially but DO NOT wait on a hung/slow printer:
+  // each job is fired with a short cap, then we move to the next regardless.
+  // This keeps the original behaviour where labels still print even if
+  // tracks/cables hang on a non-responsive printer.
+  var i=0;
+  function next(){
+    if(i>=jobs.length){toast('All sent!',3000);return;}
+    var job=jobs[i++];
+    // Fire the job; move on after it settles OR after 1.2s, whichever first.
+    var moved=false;
+    function go(){ if(moved)return; moved=true; setTimeout(next,200); }
+    try{ job().then(go).catch(go); }catch(e){ go(); }
+    setTimeout(go,1200);
+  }
+  next();
+}
+try{rebuildDropdowns();}catch(e){console.error('rebuildDropdowns:',e);}
+try{restoreForm();syncDisplayFields();}catch(e){console.error('restoreForm:',e);}
+try{setupListeners();}catch(e){console.error('setupListeners:',e);}
+try{curRotation=load().bigRotation||0;}catch(e){console.error('curRotation:',e);}
+try{checkServer();}catch(e){console.error('checkServer:',e);}
+try{setInterval(checkServer,15000);}catch(e){}
+</script>
+
+<div id="preview-print-area"></div>
+<div id="preview-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:1000;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;">
+  <div style="width:100%;max-width:780px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <button onclick="closePreview()" style="background:white;color:#1B2A6B;border:none;padding:10px 20px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">&#8592; Back</button>
+      <div id="preview-title" style="color:white;font-size:18px;font-weight:700;"></div>
+      <button onclick="printPreview()" style="background:#C0272D;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">&#128424; Print</button>
+    </div>
+    <div id="preview-content" style="background:white;border-radius:12px;padding:24px;overflow-y:auto;max-height:calc(100vh - 120px);"></div>
+  </div>
+</div><div id="sp-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:2000;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;overflow-y:auto;"><div style="width:100%;max-width:480px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;"><button onclick="closeSpPreview()" style="background:white;color:#1B2A6B;border:none;padding:10px 20px;border-radius:8px;font-size:15px;font-weight:700
