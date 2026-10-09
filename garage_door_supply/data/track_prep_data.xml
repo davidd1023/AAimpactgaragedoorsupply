@@ -41,5 +41,17 @@
       <field name="sequence">2</field>
     </record>
 
+    <!--
+      PUT IT ON THE TRACKS, on install and on every update.
+
+      Creating the attribute is not enough: until it is on a product, the
+      option appears nowhere. That is exactly what happened - the code was
+      merged, a track was opened, and the feature was missing from all of them.
+
+      The method only adds, never removes, so this is safe to re-run and a
+      track added next month picks the option up at the next module update.
+    -->
+    <function model="product.template" name="_attach_track_preparation"/>
+
   </data>
 </odoo>

@@ -207,3 +207,42 @@ class TestTrackPreparation(TransactionCase):
                      "Vertical Track 14 door height black"]:
             order = self._add(self._track(name), "Prepared")
             self.assertEqual(len(order.order_line), 1, name)
+
+    def test_the_option_is_attached_to_vertical_tracks_automatically(self):
+        """The bug the owner hit: the attribute existed and was on nothing.
+
+        Creating the attribute does not put it on a product, so the option
+        appeared nowhere until each track was edited by hand. This asserts the
+        attaching actually happens, for a track created WITHOUT it.
+        """
+        bare = self.env["product.template"].create({
+            "name": "CH-VT-3-2 Vertical Track 100-9 door height white",
+            "type": "consu", "list_price": 55.0})
+        self.assertFalse(bare.attribute_line_ids.filtered(
+            lambda l: l.attribute_id == self.attr))
+
+        self.env["product.template"]._attach_track_preparation()
+        bare.invalidate_recordset()
+
+        line = bare.attribute_line_ids.filtered(lambda l: l.attribute_id == self.attr)
+        self.assertTrue(line, "the option was not attached to a vertical track")
+        self.assertEqual(
+            sorted(line.value_ids.mapped("name")), ["Prepared", "Unprepared"])
+
+    def test_attaching_twice_changes_nothing(self):
+        # It runs on every module update, so it has to be idempotent.
+        tmpl = self._track("CH-VT-2-2 Vertical Track 76-7 door height black")
+        before = len(tmpl.attribute_line_ids)
+        self.env["product.template"]._attach_track_preparation()
+        self.env["product.template"]._attach_track_preparation()
+        tmpl.invalidate_recordset()
+        self.assertEqual(len(tmpl.attribute_line_ids), before)
+
+    def test_it_leaves_other_products_alone(self):
+        # A horizontal track is not a vertical one and must not get the option.
+        other = self.env["product.template"].create({
+            "name": "CH-HT-2 Horizontal Track 96 black", "type": "consu"})
+        self.env["product.template"]._attach_track_preparation()
+        other.invalidate_recordset()
+        self.assertFalse(other.attribute_line_ids.filtered(
+            lambda l: l.attribute_id == self.attr))
