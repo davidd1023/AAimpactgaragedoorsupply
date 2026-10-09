@@ -94,7 +94,7 @@ class TestTrackPreparation(TransactionCase):
     def test_prepared_adds_the_mix_and_two_flag_angles(self):
         order = self._add(
             self._track("CH-VT-2-2 Vertical Track 76-7 door height black"), "Prepared")
-        self.assertEqual(self._qty(order, self.brackets["10"].product_variant_id), 4)
+        self.assertEqual(self._qty(order, self.brackets["10"].product_variant_id), 8)
         self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 2)
     def _mix(self, order):
         """{size: quantity} of brackets on this order."""
@@ -112,13 +112,19 @@ class TestTrackPreparation(TransactionCase):
         # The four readings, verbatim. These are the feature: a prepared pair
         # ships a graduated mix, not a count of one size.
         for name, expected in [
-            ("Vertical Track 6 door height black", {"10": 4, "12": 4, "14": 4}),
-            ("Vertical Track 7 door height black", {"10": 4, "12": 4, "14": 4}),
-            ("Vertical Track 8 door height black", {"10": 4, "12": 5, "14": 5}),
+            ("Vertical Track 6 door height black", {"10": 8, "12": 8, "14": 8}),
+            ("Vertical Track 7 door height black", {"10": 8, "12": 8, "14": 8}),
+            ("Vertical Track 8 door height black", {"10": 8, "12": 10, "14": 10}),
             ("Vertical Track 9 door height white",
-             {"10": 4, "12": 5, "14": 5, "16": 2}),
+             {"10": 8, "12": 10, "14": 10, "16": 4}),
             ("Vertical Track 10 door height black",
-             {"10": 4, "12": 5, "14": 5, "16": 4}),
+             {"10": 8, "12": 10, "14": 10, "16": 8}),
+            ("Vertical Track 11 door height black",
+             {"10": 8, "12": 10, "14": 10, "16": 12}),
+            ("Vertical Track 12 door height white",
+             {"10": 8, "12": 12, "14": 12, "16": 12}),
+            ("Vertical Track 16 door height black",
+             {"10": 8, "12": 12, "14": 20, "16": 20}),
         ]:
             order = self._add(self._track(name), "Prepared")
             self.assertEqual(self._mix(order), expected, name)
@@ -129,7 +135,7 @@ class TestTrackPreparation(TransactionCase):
         # that. This is the check that the per-pair reading is the right one.
         order = self._add(
             self._track("CH-VT-2-2 Vertical Track 76-7 door height black"), "Prepared")
-        self.assertEqual(sum(self._mix(order).values()), 12)
+        self.assertEqual(sum(self._mix(order).values()), 24)
         self.assertEqual(len(self._mix(order)), 3)
 
     def test_sixteens_appear_only_from_nine_feet(self):
@@ -152,7 +158,7 @@ class TestTrackPreparation(TransactionCase):
         track_line = order.order_line.filtered(lambda l: not l.track_prep_role)
         order._cart_update_line_quantity(track_line.id, 2)
         # Two pairs is two doors: every size doubles, and so do the flags.
-        self.assertEqual(self._mix(order), {"10": 8, "12": 8, "14": 8})
+        self.assertEqual(self._mix(order), {"10": 16, "12": 16, "14": 16})
         self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 4)
 
     def test_a_part_cannot_be_edited_on_its_own(self):
@@ -160,9 +166,9 @@ class TestTrackPreparation(TransactionCase):
         order = self._add(tmpl, "Prepared")
         bracket = order.order_line.filtered(lambda l: l.track_prep_role == "jamb_12")
         order._cart_update_line_quantity(bracket.id, 99)
-        # Still the four the pair needs, not ninety-nine - and the OTHER sizes
-        # are untouched, which a single shared role could not have managed.
-        self.assertEqual(self._mix(order), {"10": 4, "12": 4, "14": 4})
+        # Still the eight the pair needs, not ninety-nine - and the OTHER
+        # sizes are untouched, which one shared role could not have managed.
+        self.assertEqual(self._mix(order), {"10": 8, "12": 8, "14": 8})
 
     def test_removing_the_track_removes_its_parts(self):
         tmpl = self._track("CH-VT-2-2 Vertical Track 76-7 door height black")
@@ -214,11 +220,11 @@ class TestTrackPreparation(TransactionCase):
         self.assertEqual(len(order.order_line), 1)
 
     def test_a_height_off_the_table_adds_nothing(self):
-        # #16 is still climbing at 10 ft, two more per foot, so 11 and 12 are
-        # NOT extrapolated from four readings. They add nothing and say to call.
-        for name in ["Vertical Track 11 door height black",
-                     "Vertical Track 12 door height black",
-                     "Vertical Track 14 door height black"]:
+        # The owner's calculator carries the table to 16 ft, so 11 and 12 are
+        # now served. Past 16 there is no rule to follow, and guessing one
+        # would be inventing a trade figure - those still say to call.
+        for name in ["Vertical Track 17 door height black",
+                     "Vertical Track 20 door height black"]:
             order = self._add(self._track(name), "Prepared")
             self.assertEqual(len(order.order_line), 1, name)
 
@@ -264,13 +270,13 @@ class TestTrackPreparation(TransactionCase):
     # The names as they actually are on the live site, prime marks and all.
     LIVE_NAMES = [
         ('[CH-VT-2"] 2" Vertical Track 76" - 7\' Door Height Black',
-         {"10": 4, "12": 4, "14": 4}, "Black"),
+         {"10": 8, "12": 8, "14": 8}, "Black"),
         ('[CH-VT-3"] 3" Vertical Track 88" - 8\' Door Height White',
-         {"10": 4, "12": 5, "14": 5}, "White"),
+         {"10": 8, "12": 10, "14": 10}, "White"),
         ('[CH-VT-3"] 3" Vertical Track 100" - 9\' Door Height White',
-         {"10": 4, "12": 5, "14": 5, "16": 2}, "White"),
+         {"10": 8, "12": 10, "14": 10, "16": 4}, "White"),
         ('[CH-VT-2"] 2" Vertical Track 112" - 10\' Door Height Black',
-         {"10": 4, "12": 5, "14": 5, "16": 4}, "Black"),
+         {"10": 8, "12": 10, "14": 10, "16": 8}, "Black"),
     ]
 
     def test_the_live_product_names_are_read_correctly(self):
@@ -326,7 +332,7 @@ class TestTrackPreparation(TransactionCase):
             self._track('[CH-VT-2"] 2" Vertical Track 76" - 7\' Door Height Black'),
             "Prepared")
 
-        for size, qty in (("10", 4), ("12", 4), ("14", 4)):
+        for size, qty in (("10", 8), ("12", 8), ("14", 8)):
             self.assertEqual(
                 self._qty(order, brackets[(size, "Black")].product_variant_id), qty,
                 "wrong quantity of Jamb Bracket # %s Black" % size)
@@ -340,7 +346,7 @@ class TestTrackPreparation(TransactionCase):
             "Prepared")
 
         self.assertEqual(
-            self._qty(order, brackets[("12", "White")].product_variant_id), 5)
+            self._qty(order, brackets[("12", "White")].product_variant_id), 10)
         self.assertEqual(
             self._qty(order, brackets[("12", "Black")].product_variant_id), 0,
             "a white track was given black brackets")
@@ -355,3 +361,108 @@ class TestTrackPreparation(TransactionCase):
         # Bronze is an unknown finish, so it stops before the brackets - the
         # point here is simply that no part number is quoted at a customer.
         self.assertNotIn("ATL-", warning or "")
+
+    # --- the lookup has to survive the owner retitling a product -------------
+
+    def test_bracket_names_are_matched_tolerantly(self):
+        """A space should not cost the customer every part on the order.
+
+        The lookup used to require exactly "Jamb Bracket # 10 Black". Any
+        variation matched nothing, and a bracket that is not found takes the
+        WHOLE preparation down - _track_prep_sync adds no parts at all - so
+        the cart shows the track alone, with no brackets AND no flag angles,
+        which is exactly what the owner reported.
+        """
+        for spelling in ["Jamb Bracket #10 Black", "Jamb Bracket # 10 - Black",
+                         "JAMB BRACKET #10 BLACK", "Black Jamb Bracket #10",
+                         "Jamb Bracket 10 Black", "Jamb  Bracket  # 10  Black "]:
+            tmpl = self.env["product.template"].create({
+                "name": spelling, "type": "consu", "list_price": 1.63})
+            found = self.env["sale.order"]._track_prep_bracket_product("10", "Black")
+            self.assertEqual(
+                found, tmpl.product_variant_id,
+                "did not match the bracket named %r" % spelling)
+            tmpl.unlink()
+
+    def test_a_bracket_size_is_not_confused_with_a_longer_number(self):
+        # "# 10" must not match a "# 100" bracket, nor 1 match 10.
+        wrong = self.env["product.template"].create({
+            "name": "Jamb Bracket # 100 Black", "type": "consu"})
+        self.assertNotEqual(
+            self.env["sale.order"]._track_prep_bracket_product("10", "Black"),
+            wrong.product_variant_id)
+
+    def test_a_pack_count_is_not_mistaken_for_the_size(self):
+        """The reason the size is read from ONE declared place in the name.
+
+        A tolerant lookup that merely asks "does 10 appear in this name"
+        answers yes to a size-TWELVE bracket sold in a pack of ten, and the
+        customer gets the wrong bracket - a worse outcome than the refusal
+        this tolerance was added to prevent. The size is taken from the hash,
+        so a pack count cannot be read as one.
+        """
+        decoy = self.env["product.template"].create({
+            "name": "Jamb Bracket # 12 Black (10 pack)", "type": "consu"})
+        found = self.env["sale.order"]._track_prep_bracket_product("10", "Black")
+        self.assertNotEqual(
+            found, decoy.product_variant_id,
+            "a size 12 bracket in a 10 pack was offered as a size 10")
+
+    def test_a_black_track_never_gets_a_white_bracket(self):
+        only_white = self.env["product.template"].create({
+            "name": "Jamb Bracket #12 White", "type": "consu"})
+        found = self.env["sale.order"]._track_prep_bracket_product("12", "Black")
+        self.assertNotEqual(found, only_white.product_variant_id)
+
+    def test_flag_angle_names_are_matched_tolerantly(self):
+        """Fixed: the previous version of this test could not fail.
+
+        It created the variant spelling while "Flag Angle Black" was still in
+        the database, then asserted only that SOMETHING was found - which the
+        exact-name product satisfied on its own. It passed whether the tolerant
+        path worked or not. The exact name is moved out of the way here, so the
+        product that comes back has to come back through the tolerant path.
+        """
+        self.flag_black.name = "Corner Piece Noir"
+        track = self._track('2" Vertical Track 76" - 7\' Door Height Black')
+        order = self.env["sale.order"].create({"partner_id": self.partner.id})
+        # A REAL LINE, not sale.order.line.new(). A new() record lives only in
+        # the cache, so the product.template.create() inside this loop
+        # invalidates it, the line loses its product_id, the finish reads as
+        # None and the lookup returns the configured fallback - which had this
+        # test failing against correct code until the cause was traced.
+        line = self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": track.product_variant_id.id,
+            "product_uom_qty": 1})
+
+        for spelling in ["Flag Angle - Black", "FLAG ANGLE BLACK",
+                         "Black Flag Angle"]:
+            tmpl = self.env["product.template"].create({
+                "name": spelling, "type": "consu", "list_price": 7.5})
+            found = order._track_prep_flag_product(line)
+            self.assertEqual(
+                found, tmpl.product_variant_id,
+                "did not match the flag angle named %r" % spelling)
+            tmpl.unlink()
+
+    def test_a_retitled_bracket_still_fills_the_whole_order(self):
+        """The reported symptom, end to end: the track arriving by itself.
+
+        One bracket renamed is enough to empty the order under the strict
+        lookup, because the preparation is all or nothing. This asserts the
+        other three brackets AND the flag angle survive it.
+        """
+        brackets = self._owner_brackets()
+        brackets[("12", "Black")].name = "Jamb Bracket #12 - Black"
+        order = self._add(
+            self._track('[CH-VT-2"] 2" Vertical Track 76" - 7\' Door Height Black'),
+            "Prepared")
+
+        for size in ("10", "12", "14"):
+            self.assertEqual(
+                self._qty(order, brackets[(size, "Black")].product_variant_id), 8,
+                "the renamed bracket cost the order its # %s" % size)
+
+        self.assertEqual(
+            self._qty(order, self.flag_black.product_variant_id), 2,
+            "the renamed bracket cost the order its flag angles")

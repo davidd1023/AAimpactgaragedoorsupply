@@ -69,37 +69,38 @@ class SaleOrder(models.Model):
 
     # THE JAMB BRACKETS A PAIR OF VERTICAL TRACKS NEEDS, by door height.
     #
-    # From the owner's own kit configurator, 9 ft wide, standard lift, 3" white,
-    # and "everything below 7 ft is the same as 7 ft":
+    # Taken from the owner's own garage door calculator, which carries the rule
+    # as a table - andy0808al.github.io/garage-door-calculator, the JB array:
     #
-    #   ft  vertical  horizontal  flags  #10 #12 #14 #16  total
-    #   <=7     76"        96"       2     4   4   4   0    12
-    #    8      88"       108"       2     4   5   5   0    14
-    #    9     100"       120"       2     4   5   5   2    16
-    #   10     112"       132"       2     4   5   5   4    18
+    #     {min:0,   max:84,  j10:4, j12:4,  j14:4,  j16:null}
+    #     {min:85,  max:96,  j10:4, j12:5,  j14:5,  j16:null}
+    #     {min:97,  max:108, j10:4, j12:5,  j14:5,  j16:2}
+    #     ... up to 192 inches
     #
-    # A GRADUATED MIX, NOT A COUNT, which is the whole point and took three
-    # tries to establish. The owner's words: "each individual track should come
-    # with the brackets it needs, like one vertical track might come with 2
-    # brackets of 3 different sizes" - and a 7 ft pair is 4+4+4, which is
-    # exactly two of each of three sizes per track. The sizes grade upward
-    # because the track curves away from the jamb as it rises, so #16 only
-    # appears from 9 ft, two more per foot.
+    # ITS NUMBERS ARE PER SIDE - the card is titled "Jamb Brackets - per side"
+    # and the code does `jambTotal = jambSide * 2`. The owner confirms it: "for
+    # one track its 4/4/4 for a 7 foot door". A vertical track PRODUCT is the
+    # L & R pair, so one of them is two tracks, and the quantities below are
+    # the table DOUBLED.
     #
-    # Quantities are FOR THE PAIR, because one of these products is the L & R
-    # pair. At 8 ft the pair wants 4/5/5, which does not halve evenly - the two
-    # tracks are not identical - so there is nothing to be gained by storing
-    # this per side.
+    # That correction matters: this previously shipped 4/4/4 for a 7 ft pair,
+    # read off the same per-side display and mistaken for a whole-door figure.
+    # Every prepared track since has gone out with half the brackets it needs.
     #
-    # Two earlier rules are buried here and both were wrong: "one per 24 inches
-    # rounded up" (gives 4 a side at 7 ft where the trade fits more, and no
-    # spacing reproduces the bands) and a flat 6/8/10 total with a single size.
-    # The second one shipped for a while. It is gone.
+    # The table also reaches 16 ft, which closes the 11 and 12 ft gap that used
+    # to refuse those doors - #16 climbs to 6 at 11 ft and the pattern was not
+    # safe to guess from four readings. It no longer has to be guessed.
     BRACKET_MIX = (
-        (0, 7, {"10": 4, "12": 4, "14": 4}),
-        (8, 8, {"10": 4, "12": 5, "14": 5}),
-        (9, 9, {"10": 4, "12": 5, "14": 5, "16": 2}),
-        (10, 10, {"10": 4, "12": 5, "14": 5, "16": 4}),
+        (0, 7, {"10": 8, "12": 8, "14": 8}),
+        (8, 8, {"10": 8, "12": 10, "14": 10}),
+        (9, 9, {"10": 8, "12": 10, "14": 10, "16": 4}),
+        (10, 10, {"10": 8, "12": 10, "14": 10, "16": 8}),
+        (11, 11, {"10": 8, "12": 10, "14": 10, "16": 12}),
+        (12, 12, {"10": 8, "12": 12, "14": 12, "16": 12}),
+        (13, 13, {"10": 8, "12": 12, "14": 12, "16": 16}),
+        (14, 14, {"10": 8, "12": 12, "14": 16, "16": 16}),
+        (15, 15, {"10": 8, "12": 12, "14": 16, "16": 20}),
+        (16, 16, {"10": 8, "12": 12, "14": 20, "16": 20}),
     )
 
     # The catalogue part numbers, which are what the lookup keys on - a SKU is
@@ -125,6 +126,32 @@ class SaleOrder(models.Model):
 
         return {}
 
+    # WHERE A BRACKET'S SIZE LIVES IN ITS NAME. Anchored on the hash the owner
+    # writes, or the "J-" the catalogue uses, so the size is read from the
+    # place it is declared rather than from the first number that happens to
+    # appear - a pack count, a length, a price.
+    _BRACKET_SIZE_ANCHORED = r"(?:#|\bJ-?)\s*-?\s*(\d+)"
+    # A name with no hash at all - "Jamb Bracket 10 Black" - declares its size
+    # with a bare number, so that is the fallback reading.
+    _BRACKET_SIZE_BARE = r"(?<!\d)(\d+)(?!\d)"
+
+    def _track_prep_declared_size(self, name):
+        """The size this product's name claims to be, as an int, or None.
+
+        ONE PRODUCT IS ONE SIZE, which is true of every bracket the owner
+        stocks, and reading the name that way is what keeps a size-12 bracket
+        named "Jamb Bracket # 12 Black (10 pack)" from answering to size 10.
+        The alternative - asking "does 10 appear anywhere in this name" - says
+        yes to that product, and the customer gets the wrong bracket.
+        """
+        for pattern in (self._BRACKET_SIZE_ANCHORED, self._BRACKET_SIZE_BARE):
+            hit = re.search(pattern, name or "", re.I)
+
+            if hit:
+                return int(hit.group(1))
+
+        return None
+
     def _track_prep_bracket_product(self, size, colour):
         """The jamb bracket of this size, in the track's finish.
 
@@ -133,17 +160,25 @@ class SaleOrder(models.Model):
         products, four per finish - and only four of them belong on any given
         track.
 
-        An earlier version searched only the catalogue part numbers and the
-        "J-10 Jamb Bracket" names that come from garage_door_supply's data. The
+        TOLERANT, BECAUSE AN EXACT NAME IS A TRAP. This once required the name
+        to be exactly "Jamb Bracket # 10 Black". Any difference - "#10" without
+        the space, a hyphen, a double space, a trailing one - matched nothing,
+        and a bracket that is not found does not fail by itself: _track_prep_sync
+        abandons the WHOLE preparation, removing every part and adding none. So
+        one space in one product name empties the order of brackets AND flag
+        angles, leaving the track by itself. That is a great deal of consequence
+        to hang on a space.
+
+        An earlier version before that searched only the catalogue part numbers
+        and the "J-10 Jamb Bracket" names from garage_door_supply's data. The
         live site has neither, so every prepared track was refused with a list
-        of three part numbers that exist nowhere. The finish-matched name is
-        tried FIRST because that is what the live site actually has; the part
-        numbers remain for a database carrying the catalogue data instead.
+        of three part numbers that exist nowhere.
         """
         Product = self.env["product.product"].sudo()
 
-        # As the owner names them, and the same without the space after the
-        # hash - the obvious way for someone to type it next time.
+        # 1. The names the owner actually stocks, and the obvious variant of
+        #    them. First, so the ordinary case never depends on the scan below
+        #    and always answers with the same product.
         for pattern in ("Jamb Bracket # %s %s", "Jamb Bracket #%s %s"):
             found = Product.search(
                 [("name", "=ilike", pattern % (size, colour))], limit=1
@@ -152,6 +187,27 @@ class SaleOrder(models.Model):
             if found:
                 return found
 
+        # 2. Anything that reads like a jamb bracket of this size in this
+        #    finish. Ordered by name so a catalogue holding two candidates
+        #    resolves the same way on every order rather than by chance.
+        wanted = int(size)
+
+        for product in Product.search([("name", "ilike", "jamb")], order="name"):
+            name = product.name or ""
+
+            if not re.search(r"\bbracket\b", name, re.I):
+                continue
+
+            # A black track must never be given a white bracket, so the finish
+            # is required as a WHOLE WORD - Black does not match Blackened.
+            if not re.search(r"\b%s\b" % re.escape(colour), name, re.I):
+                continue
+
+            if self._track_prep_declared_size(name) == wanted:
+                return product
+
+        # 3. The catalogue part numbers, for a database carrying
+        #    garage_door_supply's data instead of the owner's own products.
         code = self.BRACKET_CODES.get(size)
 
         if code:
@@ -172,20 +228,6 @@ class SaleOrder(models.Model):
     # configurator returns "2 flag angles" for a 9' x 7' door, which is the
     # same answer from the other direction.
     FLAG_ANGLES_PER_DOOR = 2
-
-    def _track_prep_bracket_count(self, height_feet):
-        """Jamb brackets for one L & R pair, or 0 if the height is off the table.
-
-        Off the table means off it: a 14 ft door is not in the bands the owner
-        gave, and extrapolating the pattern would be inventing a trade rule.
-        It adds nothing and says to call, which is the same answer this gives
-        for a height it cannot read at all.
-        """
-        for low, high, count in self.BRACKETS_PER_DOOR:
-            if low <= height_feet <= high:
-                return count
-
-        return 0
 
     # The finishes a track and its flag angle come in. Matched as whole words so
     # a track that merely mentions a colour elsewhere in its name is not caught.
@@ -233,12 +275,24 @@ class SaleOrder(models.Model):
         colour = self._track_prep_colour(line)
 
         if colour:
-            found = self.env["product.product"].sudo().search(
+            Product = self.env["product.product"].sudo()
+            exact = Product.search(
                 [("name", "=ilike", "Flag Angle %s" % colour)], limit=1
             )
 
-            if found:
-                return found
+            if exact:
+                return exact
+
+            # SAME TOLERANCE AS THE BRACKETS, for the same reason: a flag angle
+            # that is not found takes the whole preparation down with it, so
+            # "Flag Angle - Black" costing the customer every bracket on the
+            # order is not a trade the strict lookup was ever worth making.
+            for product in Product.search([("name", "ilike", "flag")], order="name"):
+                name = product.name or ""
+
+                if re.search(r"\bangle\b", name, re.I) \
+                        and re.search(r"\b%s\b" % re.escape(colour), name, re.I):
+                    return product
 
         return self._track_prep_configured_part("flag")
 
