@@ -96,3 +96,20 @@ def _pick_drum(hl_products, old_product):
     """Same color as the drum it replaces when the high-lift drum comes in colors."""
     color = 'Black' if 'Black' in (old_product.display_name or '') else 'White'
     return hl_products.filtered(lambda p: color in p.display_name)[:1] or hl_products[:1]
+
+
+def refresh_prepared_costs(env):
+    """Cost of the prepared tracks and cable pairs = their full BoM (raw track, flag
+    angles, jamb brackets, screws / cable, sleeves, thimbles, stops) plus any
+    work-center time, so the dealer price is the price of the prepared part."""
+    products = env['product.product'].search([
+        ('sale_ok', '=', True),
+        ('name', 'not ilike', 'RAW'),
+        '|', '|',
+        ('name', 'ilike', 'Horizontal Track -'),
+        ('name', 'ilike', 'Vertical Track'),
+        ('name', 'ilike', 'Lift Cable'),
+    ])
+    for product in products:
+        if hasattr(product, 'button_bom_cost') and product.bom_count:
+            product.button_bom_cost()

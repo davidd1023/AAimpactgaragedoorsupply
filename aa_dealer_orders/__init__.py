@@ -1,6 +1,6 @@
 from . import controllers
 from . import models
-from .kit_setup import setup_kit_options
+from .kit_setup import refresh_prepared_costs, setup_kit_options
 
 from odoo.addons.payment import reset_payment_provider
 
@@ -15,6 +15,7 @@ def post_init_hook(env):
     )
     kits.write({'aa_dealer_quick_order': True})
     setup_kit_options(env)
+    refresh_prepared_costs(env)
 
 
 def uninstall_hook(env):
