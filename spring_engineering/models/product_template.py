@@ -27,16 +27,16 @@ class ProductTemplate(models.Model):
         once.
         """
         attribute = self.env.ref(
-            "garage_door_supply.attribute_track_preparation", raise_if_not_found=False
+            "spring_engineering.attribute_track_preparation", raise_if_not_found=False
         )
 
         if not attribute:
             return
 
         values = (
-            self.env.ref("garage_door_supply.attribute_value_track_unprepared",
+            self.env.ref("spring_engineering.attribute_value_track_unprepared",
                          raise_if_not_found=False)
-            | self.env.ref("garage_door_supply.attribute_value_track_prepared",
+            | self.env.ref("spring_engineering.attribute_value_track_prepared",
                            raise_if_not_found=False)
         )
 

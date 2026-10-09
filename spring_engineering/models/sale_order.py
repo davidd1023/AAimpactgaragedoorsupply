@@ -173,7 +173,7 @@ class SaleOrder(models.Model):
     def _track_prep_configured_part(self, key):
         """The product named in the settings for this role, or an empty set."""
         ref = self.env["ir.config_parameter"].sudo().get_param(
-            "garage_door_supply.track_prep_%s_product_id" % key
+            "spring_engineering.track_prep_%s_product_id" % key
         )
 
         if not ref:
@@ -265,9 +265,22 @@ class SaleOrder(models.Model):
 
         if missing:
             existing.unlink()
+
+            # NAME WHAT IS MISSING. The brackets are catalogue data in the
+            # garage_door_supply module and this feature lives in
+            # spring_engineering, so on a database with one installed and not
+            # the other some of these products simply are not there. "Not
+            # configured yet" sent someone hunting for a setting that does not
+            # exist; a part number does not.
+            wants = ", ".join(
+                self.BRACKET_CODES.get(key.replace("jamb_", ""), key)
+                for key in sorted(missing)
+            )
+
             return _(
-                "The track preparation parts are not configured yet, so they"
-                " were not added. Please call us and we will prepare it for you."
+                "We are missing a part needed to prepare this track (%s), so it"
+                " was not added. Please call us and we will prepare it for you.",
+                wants,
             )
 
         for role, (product, qty) in wanted.items():
