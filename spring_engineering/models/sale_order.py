@@ -125,25 +125,48 @@ class SaleOrder(models.Model):
 
         return {}
 
-    def _track_prep_bracket_product(self, size):
-        """The bracket product for a catalogue size, or an empty set."""
+    def _track_prep_bracket_product(self, size, colour):
+        """The jamb bracket of this size, in the track's finish.
+
+        THE BRACKETS ARE COLOUR-MATCHED, like the flag angles. The owner stocks
+        "Jamb Bracket # 10 Black" and "Jamb Bracket # 10 White" - eight
+        products, four per finish - and only four of them belong on any given
+        track.
+
+        An earlier version searched only the catalogue part numbers and the
+        "J-10 Jamb Bracket" names that come from garage_door_supply's data. The
+        live site has neither, so every prepared track was refused with a list
+        of three part numbers that exist nowhere. The finish-matched name is
+        tried FIRST because that is what the live site actually has; the part
+        numbers remain for a database carrying the catalogue data instead.
+        """
+        Product = self.env["product.product"].sudo()
+
+        # As the owner names them, and the same without the space after the
+        # hash - the obvious way for someone to type it next time.
+        for pattern in ("Jamb Bracket # %s %s", "Jamb Bracket #%s %s"):
+            found = Product.search(
+                [("name", "=ilike", pattern % (size, colour))], limit=1
+            )
+
+            if found:
+                return found
+
         code = self.BRACKET_CODES.get(size)
 
-        if not code:
-            return self.env["product.product"]
+        if code:
+            found = Product.search([("default_code", "=", code)], limit=1)
 
-        product = self.env["product.product"].sudo().search(
-            [("default_code", "=", code)], limit=1
-        )
+            if found:
+                return found
 
-        if product:
-            return product
-
-        # Fall back on the catalogue name, for a database where the part was
-        # created by hand without its code.
-        return self.env["product.product"].sudo().search(
+        return Product.search(
             [("name", "=ilike", "J-%s Jamb Bracket" % size)], limit=1
         )
+
+    def _track_prep_bracket_name(self, size, colour):
+        """What the lookup wanted, phrased so a person can search for it."""
+        return "Jamb Bracket # %s %s" % (size, colour)
 
     # One at each top corner, so two for the pair. The owner's own kit
     # configurator returns "2 flag angles" for a 9' x 7' door, which is the
@@ -242,7 +265,9 @@ class SaleOrder(models.Model):
                 line.product_id.display_name,
             )
 
-        if not self._track_prep_colour(line):
+        colour = self._track_prep_colour(line)
+
+        if not colour:
             existing.unlink()
 
             return _(
@@ -273,7 +298,8 @@ class SaleOrder(models.Model):
 
         for size, qty in mix.items():
             wanted["jamb_%s" % size] = (
-                self._track_prep_bracket_product(size), qty * line.product_uom_qty
+                self._track_prep_bracket_product(size, colour),
+                qty * line.product_uom_qty,
             )
 
         missing = [k for k, (p, _q) in wanted.items() if not p]
@@ -281,16 +307,19 @@ class SaleOrder(models.Model):
         if missing:
             existing.unlink()
 
-            # NAME WHAT IS MISSING. The brackets are catalogue data in the
-            # garage_door_supply module and this feature lives in
-            # spring_engineering, so on a database with one installed and not
-            # the other some of these products simply are not there. "Not
-            # configured yet" sent someone hunting for a setting that does not
-            # exist; a part number does not.
-            wants = ", ".join(
-                self.BRACKET_CODES.get(key.replace("jamb_", ""), key)
-                for key in sorted(missing)
-            )
+            # NAME WHAT IS MISSING, THE WAY THE OWNER NAMES IT. The first
+            # version of this said "the parts are not configured yet", which
+            # sent someone looking for a setting that does not exist. The
+            # second named the catalogue PART NUMBERS - better, but they were
+            # the numbers from a module the live site does not have, so the
+            # message listed three codes that exist nowhere. A product name is
+            # something that can actually be searched for in the back end.
+            wants = ", ".join(sorted(
+                self._track_prep_bracket_name(key.replace("jamb_", ""), colour)
+                if key.startswith("jamb_")
+                else "Flag Angle %s" % colour
+                for key in missing
+            ))
 
             return _(
                 "We are missing a part needed to prepare this track (%s), so it"

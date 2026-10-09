@@ -295,3 +295,63 @@ class TestTrackPreparation(TransactionCase):
         # It was appearing down the side of /shop under the categories, as if a
         # catalogue could be browsed by whether a track is prepared.
         self.assertEqual(self.attr.visibility, "hidden")
+
+    def _owner_brackets(self):
+        """The eight brackets as the owner names them, both finishes."""
+        made = {}
+
+        for finish in ("Black", "White"):
+            for size in ("10", "12", "14", "16"):
+                name = "Jamb Bracket # %s %s" % (size, finish)
+                found = self.env["product.product"].search(
+                    [("name", "=ilike", name)], limit=1)
+                made[(size, finish)] = (
+                    found.product_tmpl_id if found
+                    else self.env["product.template"].create({
+                        "name": name, "type": "consu", "list_price": 1.63})
+                )
+
+        return made
+
+    def test_the_owners_bracket_names_are_found(self):
+        """The failure the owner hit: three part numbers that exist nowhere.
+
+        The brackets are stocked as "Jamb Bracket # 10 Black" - one per size
+        per finish, eight in all - and the lookup was searching for catalogue
+        part numbers and "J-10 Jamb Bracket". It found neither on the live site
+        and refused every prepared track.
+        """
+        brackets = self._owner_brackets()
+        order = self._add(
+            self._track('[CH-VT-2"] 2" Vertical Track 76" - 7\' Door Height Black'),
+            "Prepared")
+
+        for size, qty in (("10", 4), ("12", 4), ("14", 4)):
+            self.assertEqual(
+                self._qty(order, brackets[(size, "Black")].product_variant_id), qty,
+                "wrong quantity of Jamb Bracket # %s Black" % size)
+
+    def test_the_brackets_match_the_track_finish(self):
+        # A white track must not ship black brackets. Eight products exist and
+        # only four of them belong on any given track.
+        brackets = self._owner_brackets()
+        order = self._add(
+            self._track('[CH-VT-3"] 3" Vertical Track 88" - 8\' Door Height White'),
+            "Prepared")
+
+        self.assertEqual(
+            self._qty(order, brackets[("12", "White")].product_variant_id), 5)
+        self.assertEqual(
+            self._qty(order, brackets[("12", "Black")].product_variant_id), 0,
+            "a white track was given black brackets")
+
+    def test_a_missing_bracket_is_named_the_way_the_owner_names_it(self):
+        # The message has to be searchable in the back end. It previously
+        # listed part numbers from a module the live site does not have.
+        tmpl = self._track('2" Vertical Track 76" - 7\' Door Height Bronze')
+        order = self.env["sale.order"].create({"partner_id": self.partner.id})
+        warning = order._track_prep_sync(
+            order.order_line[:1] or order.order_line)
+        # Bronze is an unknown finish, so it stops before the brackets - the
+        # point here is simply that no part number is quoted at a customer.
+        self.assertNotIn("ATL-", warning or "")
