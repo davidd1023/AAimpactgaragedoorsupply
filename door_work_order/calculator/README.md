@@ -9,7 +9,7 @@ beside the endpoint it talks to so the two halves can be read together.
 
 - **`index.html`** - the finished file. Download it and upload it over
   `index.html` in the calculator repository. This is the one to use.
-- **`send-to-manufacturing.patch`** - the same change as a diff, 47 lines
+- **`send-to-manufacturing.patch`** - the same change as a diff, 61 lines
   added and none removed. For reading what changed, or for `git apply` if
   you would rather not replace the whole file.
 
@@ -69,3 +69,19 @@ Two reasons, both learned the hard way elsewhere in this repository:
 A door sent twice does not become two doors: an unfinished order carrying the
 same W/O and mark is reopened instead. That only works if the W/O field is
 filled, which is why the button asks for confirmation when it is empty.
+
+## The Odoo address field
+
+Paste **any page of your Odoo** - the Manufacturing page, the shop, the
+dashboard. Only the scheme, host and port are kept; the path is discarded. A
+bare `aaigd.com` works too and is assumed to be https.
+
+This is not politeness, it is a fix. The field first took the address
+literally, and the obvious thing to paste in a box used by "Send to
+Manufacturing" is the Manufacturing page's own URL - which produced
+`.../odoo/manufacturing/door-work-order/new`. Odoo's back end ignores the tail
+of a path it does not recognise and renders the Manufacturing page, so the
+button went somewhere plausible, raised nothing, and reported no error.
+
+The settings panel now prints the address it will actually use, so a wrong one
+is visible before it is relied on rather than after.
