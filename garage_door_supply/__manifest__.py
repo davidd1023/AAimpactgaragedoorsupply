@@ -1,6 +1,6 @@
 {
     'name': 'AA Impact Garage Door Supply',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': 'Complete garage door supply store configuration',
     'description': """
         Custom module for AA Impact Garage Door Supply.
