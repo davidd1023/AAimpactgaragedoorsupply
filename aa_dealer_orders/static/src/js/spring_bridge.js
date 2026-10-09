@@ -58,3 +58,25 @@ window.aaSpringCalc = function (door) {
         warnings: (calc.warnings || []).map((w) => ({ severity: w.severity, message: w.message })),
     };
 };
+
+// AA's automatic choice, shared by the Quick Order page and the shop kit page.
+// How many springs follows the AA Calculator: doors wider than 12' (144") take 4,
+// the rest 2. Spring IDs are tried in this order at 10,000 cycles and the first
+// with no red warning wins (if none is clean, the first result is kept).
+const AUTO_SPRING_IDS = ['2 5/8"', '3 3/4"', '5 1/4"', '3 3/4" inside 6"'];
+
+window.aaPickSprings = function (door) {
+    const count = (door.widthIn || 0) > 144 ? 4 : 2;
+    let first = null;
+    for (const id of AUTO_SPRING_IDS) {
+        const r = window.aaSpringCalc({ ...door, cycles: "10,000", springs: count, springId: id });
+        if (r.error) {
+            return first || r;
+        }
+        if (!r.warnings.some((w) => w.severity === "red")) {
+            return r;
+        }
+        first = first || r;
+    }
+    return first || { error: "Could not calculate the springs." };
+};

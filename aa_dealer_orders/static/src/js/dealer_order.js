@@ -128,12 +128,7 @@
             const drumHint = el("div", { class: "small text-muted mt-1" });
             const priceEl = el("div", { class: "aa-price", text: "-" });
             const breakdown = el("div", { class: "small text-muted mt-2 aa-breakdown" });
-            // Springs: AA's Spring Engineering model picks them; the dealer chooses nothing.
-            // How many springs follows the AA Calculator: doors wider than 12' (144") take 4,
-            // the rest 2. Spring IDs are tried in this order at 10,000 cycles and the first
-            // with no red warning wins.
-            const SPRING_IDS = ['2 5/8"', '3 3/4"', '5 1/4"', '3 3/4" inside 6"'];
-            const SPRING_CYCLES = "10,000";
+            // Springs: AA's spring calculator picks them (aaPickSprings); the dealer chooses nothing.
             const spResult = el("div", { class: "small mt-1" });
             const springBox = el("div", { class: "mt-1 d-none aa-springs" }, [
                 el("div", { class: "small fw-bold", text: "Springs (calculated by AA's spring calculator)" }),
@@ -352,24 +347,15 @@
                     spResult.textContent = "Spring calculator not available.";
                     return null;
                 }
-                const door = {
-                    liftType: liftSel.value, highLift: Number(hlInput.value) || 0, trackType: trackSel.value,
-                    drum: drumSel.value, widthIn: widthIn(), heightIn: heightIn(), weight: Number(weight.value) || 0,
-                    cycles: SPRING_CYCLES,
-                };
-                let r = null;
+                let r;
                 try {
-                    const count = widthIn() > 144 ? 4 : 2;
-                    for (const id of SPRING_IDS) {
-                        const t = window.aaSpringCalc({ ...door, springs: count, springId: id });
-                        if (t.error) { r = r || t; break; }
-                        if (!t.warnings.some((w) => w.severity === "red")) { r = t; break; }
-                        r = r && !r.error ? r : t;  // keep the first try if nothing is clean
-                    }
+                    r = window.aaPickSprings({
+                        liftType: liftSel.value, highLift: Number(hlInput.value) || 0, trackType: trackSel.value,
+                        drum: drumSel.value, widthIn: widthIn(), heightIn: heightIn(), weight: Number(weight.value) || 0,
+                    });
                 } catch (e) {
                     r = { error: "Could not calculate the springs." };
                 }
-                r = r || { error: "Could not calculate the springs." };
                 if (r.error) {
                     spResult.appendChild(el("div", { class: "text-warning-emphasis", text: r.error }));
                     line.springWarnings = [];
