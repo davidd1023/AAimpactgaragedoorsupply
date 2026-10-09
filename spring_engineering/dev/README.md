@@ -3006,3 +3006,46 @@ variants - tempting because "the reference computes from the figures it
 displays" is a documented principle here, and it is why TIPPT is rounded to one
 decimal - are seven points worse. Moving the threshold to catch two of the
 three misses would cost about sixty readings elsewhere.
+
+## A third never-tuned draw, and what it says about the first two (2026-10-09)
+
+The two validation draws were getting spent. Each question checked against a
+clean sample costs a little of its independence, and this session checked
+several: whether to re-enable the held-out uniform readings, whether per-count
+stiffness helped, whether the acceptance threshold should move, and the
+rung-volume campaign was measured against them after every one of ten batches.
+So: 400 fresh uniform cases, seed 20261009, drawn after all of it and used for
+nothing before this measurement.
+
+**The campaign's gain is confirmed on data nothing was tuned against.** Scoring
+the pre-campaign table and the current one against this draw:
+
+| on the fresh draw | pre-campaign | now |
+|---|---|---|
+| clean | 95.1% | **97.3%** |
+| orderable | 95.6% | **97.4%** |
+| within 1" | 100.0% | 100.0% |
+| refused | 75.2% | 77.9% |
+
+Paired on the 185 clean readings: 5 fixed, 1 broken, net +4, sign test
+p = 0.2188 - the same direction and size as the spent draws showed, and
+underpowered on its own at half their pooled size. Pooling all three gives 16
+fixed against 3 broken, but draws one and two are partly spent so that
+overstates the confidence; the honest statement is that the unbiased draw moves
++1.8 points on orderable doors and agrees in direction.
+
+### The draws read about a point high, and now we know how much
+
+| | orderable, exact |
+|---|---|
+| draws 1+2, used for every decision this session | 98.4% |
+| draw 3, used for nothing | **97.4%** |
+
+One point. That is what the monitoring bought, and it is why `dev/honest.sh`
+now prints the newest draw first and labels it the one to quote. Not a large
+bias - it is roughly the sampling error on 228 readings either way - but it is
+in the direction theory predicts, and it is better measured than assumed.
+
+**Within an inch is 100.0% of 228 orderable readings** on the fresh draw, which
+is the figure that matters for a customer who can live with a quarter turn of
+adjustment.
