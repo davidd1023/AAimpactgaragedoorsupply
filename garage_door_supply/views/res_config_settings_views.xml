@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Anchored on website_info_settings, which is the block
+    spring_engineering already extends successfully in this database. The
+    obvious-looking shop_checkout_process block does not exist in this version
+    and the module refused to load against it.
+  -->
+  <record id="res_config_settings_view_form_track_prep" model="ir.ui.view">
+    <field name="name">res.config.settings.view.form.inherit.track.prep</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//block[@id='website_info_settings']" position="after">
+        <block title="Prepared Vertical Tracks" id="track_preparation_settings">
+          <setting string="Jamb bracket"
+                   help="Added when a vertical track is ordered prepared. The quantity is one per the inches of door height set below, rounded up.">
+            <div class="content-group">
+              <div class="mt16">
+                <field name="track_prep_jamb_product_id" class="oe_inline"/>
+              </div>
+            </div>
+          </setting>
+          <setting string="Flag angle"
+                   help="Added when a vertical track is ordered prepared. One per track.">
+            <div class="content-group">
+              <div class="mt16">
+                <field name="track_prep_flag_product_id" class="oe_inline"/>
+              </div>
+            </div>
+          </setting>
+          <setting string="Door height per jamb bracket"
+                   help="A 7 ft door at 24 inches per bracket takes 4 brackets, because 84 / 24 is 3.5 and it rounds up.">
+            <div class="content-group">
+              <div class="mt16">
+                <field name="track_prep_inches_per_bracket" class="oe_inline"/>
+                <span class="ms-1">inches</span>
+              </div>
+            </div>
+          </setting>
+        </block>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>
