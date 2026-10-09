@@ -73,6 +73,28 @@ class SaleOrder(models.Model):
         (10, 12, 10),
     )
 
+    # WHY THESE AND NOT THE KIT CONFIGURATOR'S NUMBERS, which the next person
+    # will find and try to reconcile. Two results from the owner's own kit
+    # configurator, for a 9 ft wide standard-lift door:
+    #
+    #   7 ft:  vertical 76", horizontal 96",  2 flag angles, 4x#10 4x#12 4x#14
+    #   8 ft:  vertical 88", horizontal 108", 2 flag angles, 4x#10 5x#12 5x#14
+    #
+    # Those total 12 and 14 against the table's 6 and 8 - a difference of
+    # EXACTLY SIX in both cases, which is why the owner's answer that the
+    # configurator covers the whole hardware kit holds up: six of its brackets
+    # go somewhere other than the vertical track. A per-side/per-door mix-up
+    # would have shown a constant RATIO, not a constant difference.
+    #
+    # The configurator also lists brackets in a graduated MIX of sizes, where
+    # the table gives only a total. Which sizes make up the 6, 8 or 10 is not
+    # recorded anywhere yet, so one configured bracket is used for all of them -
+    # see _track_prep_jamb_product.
+    #
+    # Those readings double as a check on the name-reading: a 7 ft door takes a
+    # 76" vertical and an 8 ft door an 88" one, both the door height in inches
+    # less 8, and 76 is exactly what "Vertical Track 76-7 door height" carries.
+
     # One at each top corner, so two for the pair. The owner's own kit
     # configurator returns "2 flag angles" for a 9' x 7' door, which is the
     # same answer from the other direction.
