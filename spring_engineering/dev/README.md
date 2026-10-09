@@ -2556,3 +2556,496 @@ With that, every avenue tried in two days of this is closed:
 placement, about one miss apiece across many groups, each needing data from a
 group a random door rarely visits. That is a property of reverse-engineering a
 black box from the outside, not a bug waiting to be found.
+
+## Single, measured where it had never been measured (2026-10-08)
+
+Single had been reported as 100% on everything - every spring ID, drum, spring
+count, cycle target, radius, lift type and height. That was true of the data
+and badly oversold, because `dev/eval-single.json` is not balanced:
+
+| slice | clean readings | what "100%" rested on |
+|---|---|---|
+| hi-lift | **6** | one drum, one spring ID, two hi-lift amounts |
+| 525-54HL, D800-120 | **0** | never drawn for Single at all |
+| doors over 12 ft | 33 | thin above 15 ft |
+
+Six readings give a Wilson interval of +-19.5 points. "100% of 6" and "100% of
+123" print identically and mean nothing alike, which is why
+`dev/single-breakdown.mjs` now prints the interval next to every slice.
+
+Two draws filled the holes - `dev/single-gap-sample.mjs`, seeds 20261008 (200
+cases, hi-lift) and 20261008001 (120 cases, tall standard). Pooled with the
+original, 558 readings and 275 clean:
+
+| | n | wire | length | within 1" | weight |
+|---|---|---|---|---|---|
+| all clean | 275 | **99.6%** | 100.0% | 100.0% | 100.0% |
+| the three IDs sold | 216 | 99.5% | 100.0% | 100.0% | 100.0% |
+| hi-lift (was 6) | **36** | 100.0% | 100.0% | 100.0% | 100.0% |
+| 525-54HL (was 0) | 11 | 100.0% | 100.0% | 100.0% | 100.0% |
+| D800-120 (was 0) | 11 | 100.0% | 100.0% | 100.0% | 100.0% |
+| 12-14 ft | 63 | 98.4% | 100.0% | 100.0% | 100.0% |
+
+Length and weight are still exact on all 275. Hi-lift is still exact, now on 36
+readings across three drums and 12"-118" of lift rather than 6 on one drum.
+
+### The one wire miss, and why it is the floor
+
+`single-tall 117` - D400-144, 5 1/4", 3 springs, radius 15, 12 ft, 750 lb,
+10,000 cycles. The reference picks 0.3065; we pick 0.295.
+
+Our own cycle estimate at 0.295 is **10000.019** against a target of 10000.
+Nineteen parts per million. We accept the smaller wire, the reference rejects
+it, and nothing about the selection rule is wrong - the rule is "smallest wire
+reaching the target" in both.
+
+The obvious next move is to claim our cycle formula runs high and scale it
+down. It does not. Across 275 clean readings, ours/theirs has median **1.0007**
+with 53.5% above 1.0 - centred, not biased. The +-2-4% spread is mostly the
+reference ROUNDING its reported cycle count: this case returns "16000" where we
+compute 16458, and 16458 rounded down to a round thousand is 16000.
+
+So the estimate is already as centred as the data can show, and deciding this
+reading correctly would need the reference's cycle formula to about 1e-5
+relative. One reading in 275 sitting that close to a threshold is the
+resolution limit, not a bug. **Do not calibrate a scale on it** - that is the
+same mistake as the reverted `cycles-low` fix and the withdrawn Duplex end-coil
+term, both of which were one or five readings wide.
+
+## A hi-lift drum answers ONLY under hi-lift (2026-10-08)
+
+`525-54HL`, `575-120` and `D800-120` return an HTML page, not JSON, for any
+request with `lift=Standard`. Under `lift=HiLift` they answer normally.
+
+| | standard lift | hi-lift |
+|---|---|---|
+| the three hi-lift drums | **0 of 48** returned JSON | **120 of 120** |
+| D400-144, D525-216 | 15 of 15 | n/a |
+
+This cost an hour, because a logged-out server also answers with HTML. 48 of
+200 readings came back that way, starting at reading 123 and never recovering,
+and the obvious diagnosis was an expired session - a diagnosis that survived
+writing a re-login into `dev/pull.mjs`, which then re-authenticated five times
+and failed five times. Two things should have stopped it sooner: the failures
+were **not contiguous** (124 and 126 answered fine between 123, 125 and 127),
+and one of the original cases replayed later still succeeded unchanged.
+
+The real tell is in the cross-tab above, which takes one query. **When the far
+end keeps serving HTML, suspect the REQUEST before the cookie.** The re-login
+in `dev/pull.mjs` is still worth having, but it is capped at five for exactly
+this reason: retrying an impossible request is just a slow way to hammer
+someone else's server.
+
+`dev/single-gap-sample.mjs` now draws standard lift only from drums that have
+it, so the combination cannot be generated again.
+
+## Five more Duplex hypotheses, all refuted (2026-10-08)
+
+The open lead was the note in `duplexActiveLength`: sMult averages 1.18% off
+1.000 and correlates with the outer spring's share of the divider sum, so
+"whatever the real coupling is, finding it is the one lead left that could move
+accuracy by more than noise". Five attempts on it. **Nothing shipped, accuracy
+unchanged.** Each one is written down because each is a query someone will
+otherwise run again.
+
+### 1. The error is NOT upstream - proved from the reference's own numbers
+
+The reference reports `totalInchPoundPerTurn`, `turnsOnSprings` and
+`multiplier` on every reading, so our chain can be checked link by link
+instead of only at the end. On the two never-tuned draws, 347 clean modelled
+readings with the wire agreeing:
+
+| | on the 331 exact | on the 16 misses |
+|---|---|---|
+| TIPPT matches | 97.6% | **100%** |
+| turns matches | 99.1% | **100%** |
+| multiplier matches | 93.4% | **100%** |
+
+Upstream is *perfect* on every miss and imperfect on the readings we get right.
+That is the opposite of a confound and it settles the question: the whole error
+is in S, and the S the reference implies is 0.957-1.038 times ours.
+
+This also re-confirms `dev/mult-survey.mjs`: the D800-120 hi-lift multiplier
+surface really is inaccurate, and really does cost the length nothing.
+
+### 2. sMult is NOT an additive dead-coil term in multiplicative clothing
+
+The tempting story: dead coils add `dead * wire` to a length, the model
+multiplies instead, so one constant per rung cannot fit both short and long
+springs. It predicts an intercept.
+
+Per rung, regressing the reference's length on `x = springs/TIPPT` over 4,486
+deduped readings, 31 rungs:
+
+- intercepts land between **-0.54 and +0.82**, scattered around zero, against a
+  predicted `5*dIn` of **1.13 to 1.81**
+- a free intercept improves pooled RMS from 0.3243 to 0.3177 - **2%**
+- free slopes straddle the computed A both ways, ratio 0.977 to 1.053
+
+So sMult is a genuine multiplicative per-rung scale. The additive story is dead,
+which is consistent with the end-coil term having been withdrawn once already.
+
+### 3. The residual has no structure left in it
+
+Pooled residual around the per-rung line, 4,486 readings, RMS 0.3177":
+
+| against | r |
+|---|---|
+| turns | -0.005 |
+| turns * inner wire | -0.004 |
+| predicted length | 0.000 |
+| door height | 0.050 |
+| hi-lift | 0.054 |
+| spring count | 0.159 |
+
+and the RMS is flat - 0.29 to 0.33 in every spring-count band and every turns
+band. **0.3177 is what rounding to the inch produces** (1/sqrt(12) = 0.289), so
+the line already explains the physics and the residual is the snap. There is no
+missing term to find by regression, which is why four sessions of looking for
+one came back empty.
+
+### 4. The grid is {k, k+0.25}, and the quarter inch is a spring-count rule
+
+Over the same 4,486, the fractional part of the inner length is **only ever .00
+(52.6%) or .25 (47.4%)** - never .5, never .75. And it is nearly deterministic:
+
+| springs | n | share with .25 |
+|---|---|---|
+| 1 | 1208 | **0.0%** |
+| 2 | 1649 | 30.3% |
+| 3 | 1032 | **100.0%** |
+| 4 | 597 | **100.0%** |
+
+Inner and outer always agree on the fraction (100%) and the pair is always
+exactly 1.00" apart (100%).
+
+This looked like a free fix for ten minutes. **The model already reproduces it
+exactly** - 100%, 99.0%, 100%, 100% agreement by spring count, disagreeing on
+17 of 4,472 readings and on none that it otherwise gets right. The three-regime
+rounding is already carrying this rule; checking before "fixing" saved a
+regression.
+
+### 5. One slope per rung cannot even reach where the model already is
+
+With a single slope per rung and a nearest-grid snap, sweeping every slope that
+any reading admits, the best achievable in sample is **4100/4486 = 91.40%** -
+and three rungs reach 100% only because they have 12 to 19 readings. The model
+is at 92-95% on never-tuned data with the fitted per-rung thresholds, so the
+threshold machinery is extracting *more* than the clean closed form can. A
+tidier model here would be a downgrade.
+
+### Where that leaves it
+
+Every link is now measured rather than assumed: upstream is exact on the
+misses, the shape is multiplicative not additive, the residual is structureless
+at the grid scale, the grid and its quarter-inch rule are known and already
+reproduced, and the simple closed form is worse than what ships. The
+`~94.5% clean length` conclusion stands, and now stands on five refutations
+instead of an absence of ideas.
+
+What would actually move it is not another fit. It is the reference's own rule
+for S - a published duplex rate table, or a reading where the two springs'
+coupling can be observed directly rather than inferred through a rounded
+length.
+
+## Per-rung data volume IS causal, and that reopens the pull (2026-10-08)
+
+Every previous lead was about the SHAPE of the length model. This one is about
+how much data each rung has, and it is the first thing in many sessions that
+measures as a real, causal effect on never-tuned data.
+
+### The observation
+
+On the never-tuned draws, split the 347 clean readings by how many length
+readings their rung has in the corpus:
+
+| rung's corpus length readings | never-tuned readings | exact |
+|---|---|---|
+| 300+ (four rungs) | 121 | **100.00%** |
+| under 300 (the rest) | 226 | 92.9% |
+
+Zero misses in 121 if the true rate were 7.1% is p = 0.0001. But that could
+just mean the well-covered rungs are the ones a random door lands on, and
+therefore the easy ones.
+
+### The experiment that settles it
+
+`sh dev/rung-volume.sh`. Cap how many LENGTH readings those four rungs may
+contribute, leave K alone so rung selection cannot move, and re-score **the
+same 121 readings**. Random subsample, two seeds, mean:
+
+| length readings per rung | exact |
+|---|---|
+| 40 | 87.60% |
+| 80 | 90.50% |
+| 160 | 92.56% |
+| 240 | 97.52% |
+| 320 | 98.35% |
+| full (309-1199) | **100.00%** |
+
+Monotone, still climbing at 320, on a fixed population, with nothing changed
+but how much data the rung got. **Data volume per rung causes length
+accuracy.** And the thin rungs show the same slope - starving the 42 rungs
+under 200 readings gives 83.44% at 50, 88.96% at 90, 92.64% at 140 against
+93.87% as they stand - so the curve is a property of the fit, not of those four
+rungs.
+
+### THE SEED MATTERS - the first version of this overstated the effect
+
+Capping by corpus ORDER keeps the first N readings, and the corpus is in batch
+order with the early batches deliberately boundary-dense. File-order capping at
+120 reported 88.43%; a random subsample of the same size reports 92.56%. The
+effect is real either way but a third smaller than first measured. Quote the
+seeded numbers, and never subsample a batch-ordered corpus by slicing it.
+
+### Why the U5-U8 result does not contradict this
+
+a3002a7 re-enabled 794 clean uniform readings and measured net -3 on the
+never-tuned draws, concluding more data does not help. Re-tested here, admitted
+for the 42 thin rungs only, it moves 153/163 to 154/163 - one reading.
+
+That is not a refutation, it is the dose-response being honest. Uniform data
+lands on rungs in proportion to how often a door hits them, so it piles onto
+the four rungs already at 100% and adds a **median of 14** readings to a thin
+rung. All 42 are still under 300 afterwards. The previous conclusion was right
+about the data it had and wrong to generalise: the allocation failed, not the
+idea.
+
+### Aiming at a rung is possible
+
+The rung is an OUTPUT - the reference picks the wire pair - so a pull cannot
+request one directly. But our own wire choice is right 99.1% of the time, so the
+model is an adequate targeting system: sample geometries locally for nothing,
+keep those it says land on the wanted rung and raise no warning, and pull only
+those. 15,000 free local samples reach **every one of the 25 visited thin
+rungs**, none unreachable, 55 to 411 candidates each.
+
+### What it would cost
+
+Bringing every rung a real door visits up to 320 length readings:
+
+| budget | projected gain | time at 1 req/sec |
+|---|---|---|
+| 400 | +0.7 pts | 7 min |
+| 800 | +1.2 pts | 13 min |
+| 1600 | +1.9 pts | 27 min |
+| 3200 | +3.0 pts | 53 min |
+| 4624 (all of it) | **+3.5 pts** | 77 min |
+
+which would put clean length near 98.9%. The projection interpolates the curve
+above and assumes new readings inform a rung as much as the ones removed did -
+the honest caveat, and the reason to run it in batches and re-measure rather
+than all at once.
+
+A 400-request pilot cannot be validated on its own: +0.7 points is under 3
+readings of 347, which no paired test can resolve. The evidence for going ahead
+is the starvation experiment, not a pilot.
+
+## Per-spring-count stiffness: cross-validation said yes, the model said no (2026-10-08)
+
+The campaign took the busy rungs from about 230 length readings past 320, and
+more data can afford more parameters - so the per-rung sMult decision, made at
+the smaller size, was worth re-opening. `STIFFNESS_REPORT=1 node
+dev/derive.mjs` measures it. Over the 35 rungs with 40+ readings:
+
+| | in sample | five-fold CV |
+|---|---|---|
+| one multiplier per rung | 6673 | 6551 |
+| one multiplier per spring count | 6948 | **6831** |
+
+An out-of-fold gain (+280) **larger** than the in-sample one (+275) is normally
+the end of the argument: extra parameters that generalise are not overfitting.
+The per-count multipliers also differ by real amounts - 0.273/0.2253 wants
+1.00725, 0.99525, 1.014, 1.01725 across one to four springs, a 2.2% spread, and
+2% of a 50" spring is an inch.
+
+**Built properly it lost a reading.** Per-count multipliers in the table, the
+component selecting by spring count, the bands refitted against the same
+multiplier so nothing was scored under a value it was not fitted under: the
+never-tuned draws went 340/347 to 339/347.
+
+### Why the cross-validation was wrong
+
+It scored ONE STAGE in isolation, and the stage below it already does that job.
+`lineByCount` and `byCount` are keyed by spring count, so the thresholds were
+already absorbing the per-count variation. The CV counted a gain the pipeline
+already had, and paid for it with parameters.
+
+The lesson generalises past stiffness: **a fitter stage cannot be scored on its
+own when a later stage can compensate for it.** Only the whole pipeline,
+against data nothing was tuned on, settles anything. That is the same mistake
+shape as the five-fold holdout rising while the never-tuned draws fell during
+the U5-U8 question - a number that improves because the fit suits the corpus,
+not the door.
+
+### One more near miss worth recording
+
+Getting this wrong the first time cost 97.98% -> 83.00%, because `sMultByCount`
+was fitted in `derive.mjs` but left out of the object the installer reads. The
+bands were built on `rawActive * mFor(springs)` and the component still applied
+the rung-wide `sMult`. That returned object is the ONLY channel between the
+fitter and the model: a quantity that is not in it does not exist downstream,
+and the failure is silent and total rather than loud and local.
+
+## The CANIMEX rate chart: three formulas confirmed, the coupling closed (2026-10-08)
+
+The owner found `idcspring.com/.../RCI3_75.pdf` - a **CANIMEX SPRING CHART**,
+the same manufacturer as the drums, covering 29 wire sizes at 3.750" inside
+diameter. Single springs only; no duplex, nested or concentric content anywhere
+in its 1,899 lines. Four other links sent with it were compression-spring pages
+or inaccessible (one 403 to both WebFetch and curl, one Scribd error page, two
+covering compression springs only). One of them, Tokaibane, does state the
+nested rule: concentric springs in parallel are **K = k1 + k2 + k3** with no
+correction factor published anywhere.
+
+### What it confirms, independently of the reference
+
+| our formula | against the chart | agreement |
+|---|---|---|
+| `divider = 30e6*d^5/(10.2*(ID+d))` | published Rate x wire, 29 sizes | **1.7 parts in 10,000** |
+| `cycles = (124205*d^2.79/torque)^4.67` | 145 published MIP values | mean ratio **0.9952**, sd 0.58% |
+| `weight = density*(pi^2/4)*d*(ID+d)*L` | published weight per inch, 29 sizes | implied density constant to **0.01%** |
+
+G = 30e6 and K = 10.2 were taken from the SSC catalogue; a second manufacturer
+publishing the same thing settles them. The MIP agreement matters most, because
+the cycle model is what produced the single Single wire miss, and it is now
+checked against 145 values nobody fitted it to.
+
+### Where SSC and CANIMEX actually differ, so this chart cannot correct us
+
+Two constants, both differing in the same direction:
+
+| | CANIMEX chart | SSC, as the model reproduces it |
+|---|---|---|
+| dead coils at 3.75" ID | **3** | **5** |
+| steel density | 0.28320 lb/in^3 | 0.2836 |
+
+The dead-coil one is not arguable: our Single path uses 5 and reproduces 275
+never-tuned readings exactly, 65 of them at 3.75". At 3 every one would be
+2 x 0.2253 = 0.45" short, far outside the quarter-inch grid. These are two
+different houses' conventions and SSC's is the one being modelled.
+
+### And the coupling question is now closed, not open
+
+The withdrawn end-coil term assumed 5 inner / 3 outer. With dead coils FITTED
+instead - two global parameters, which would replace fifty per-rung sMults -
+over 6,748 clean duplex readings:
+
+| dead coils, inner / outer | bias | spread |
+|---|---|---|
+| 0 / 0, what ships | -2.85% | 2.48% |
+| 5 / 3, the withdrawn attempt | +1.25% | 2.48% |
+| 3 / 3, CANIMEX published | +0.48% | 2.46% |
+| **7 / 0, best of the whole grid** | -0.19% | **2.18%** |
+
+Freeing both parameters buys 2.48% to 2.18%, and the optimum is physically
+meaningless - seven dead coils on the inner spring and NONE on the outer. More
+to the point, 2.2% of a 50" spring is 1.1 inches, larger than the 1" grid step
+the model has to land on. **No choice of dead coils lets rate-addition reach the
+grid.**
+
+So rates do not add for these pairs, confirmed now with two free parameters and
+6,748 readings rather than one fixed guess. The literature route is finished:
+the published nested rule is the one that does not work here, and nothing in
+these sources suggests another. What would still help is a duplex rate chart -
+IPPT for a NESTED pair - and this document shows such charts exist in this
+exact format, just not for pairs.
+
+## The flagged half was refusals, not a weakness (2026-10-09)
+
+`dev/clean-cases.mjs` has always reported two numbers - clean at about 95-98%
+and flagged at about 79% - and the second one looked like the model falling
+apart on half the population. It is not. Splitting flagged by what the
+reference is actually complaining about, on the two never-tuned draws:
+
+| class | n | wire | length exact | within 1" |
+|---|---|---|---|---|
+| clean | 350 | 99.1% | 98.0% | 99.7% |
+| **warned but buildable** | 85 | 98.8% | **100.0%** | 100.0% |
+| **ORDERABLE, both** | **435** | **99.1%** | **98.4%** | **99.8%** |
+| refused by the reference | 286 | 99.3% | 73.9% | 89.1% |
+
+Of 2,910 flagged Duplex readings the complaints are 1,426 wire past the inside
+diameter's maximum, 1,251 assembly too long for the door, 1,111 spring over
+120", 37 drum overloaded, 23 over max MIP - all refusals. The reference will
+not build any of them, so the model's length there is not a quote, it is the
+input to a warning. The genuinely orderable remainder is "only spring lengths
+between 0 and 96 are recommended" and the short-cycle-life notes, and the model
+gets **every one of those 85 readings exactly right**.
+
+So the figure to quote for doors a customer can actually order is **98.4%
+exact, 99.8% within an inch**, and the hard-looking flagged bucket was 97%
+refusals. `dev/orderable.mjs` prints this split and `dev/honest.sh` now runs it.
+
+## Wire selection is at its floor too (2026-10-09)
+
+Length has had all the attention because it is where the misses are, but the
+wire is chosen first and a wire miss is excluded from the length figure - so
+three wire misses on the draws were never anyone's target. All three:
+
+- have an **exactly correct TIPPT and multiplier**, so nothing upstream is wrong
+- are **hi-lift at radius 15**, two on 525-54HL and one on 575-120
+- sit within **0.2% of the acceptance boundary** - 0.9984, 1.0016, 1.0021 of
+  target - and pull in OPPOSITE directions, so no scale correction fixes them
+
+The rule itself was then tested on all 6,748 clean duplex readings, because a
+rule chosen to fit three readings of the evaluation set is the mistake this
+project keeps re-learning:
+
+| acceptance rule | reference's rung reproduced |
+|---|---|
+| `exact >= target` (ships) | **99.50%** |
+| `exact >= 0.998 * target` | 98.98% |
+| `exact >= 1.003 * target` | 98.61% |
+| `round1000(cycles) > target` | 92.29% |
+| `round1000(cycles) >= target` | 89.98% |
+| `ceil1000(cycles) >= target` | 82.84% |
+
+The shipped rule is the best of the family by half a point, and the rounded
+variants - tempting because "the reference computes from the figures it
+displays" is a documented principle here, and it is why TIPPT is rounded to one
+decimal - are seven points worse. Moving the threshold to catch two of the
+three misses would cost about sixty readings elsewhere.
+
+## A third never-tuned draw, and what it says about the first two (2026-10-09)
+
+The two validation draws were getting spent. Each question checked against a
+clean sample costs a little of its independence, and this session checked
+several: whether to re-enable the held-out uniform readings, whether per-count
+stiffness helped, whether the acceptance threshold should move, and the
+rung-volume campaign was measured against them after every one of ten batches.
+So: 400 fresh uniform cases, seed 20261009, drawn after all of it and used for
+nothing before this measurement.
+
+**The campaign's gain is confirmed on data nothing was tuned against.** Scoring
+the pre-campaign table and the current one against this draw:
+
+| on the fresh draw | pre-campaign | now |
+|---|---|---|
+| clean | 95.1% | **97.3%** |
+| orderable | 95.6% | **97.4%** |
+| within 1" | 100.0% | 100.0% |
+| refused | 75.2% | 77.9% |
+
+Paired on the 185 clean readings: 5 fixed, 1 broken, net +4, sign test
+p = 0.2188 - the same direction and size as the spent draws showed, and
+underpowered on its own at half their pooled size. Pooling all three gives 16
+fixed against 3 broken, but draws one and two are partly spent so that
+overstates the confidence; the honest statement is that the unbiased draw moves
++1.8 points on orderable doors and agrees in direction.
+
+### The draws read about a point high, and now we know how much
+
+| | orderable, exact |
+|---|---|
+| draws 1+2, used for every decision this session | 98.4% |
+| draw 3, used for nothing | **97.4%** |
+
+One point. That is what the monitoring bought, and it is why `dev/honest.sh`
+now prints the newest draw first and labels it the one to quote. Not a large
+bias - it is roughly the sampling error on 228 readings either way - but it is
+in the direction theory predicts, and it is better measured than assumed.
+
+**Within an inch is 100.0% of 228 orderable readings** on the fresh draw, which
+is the figure that matters for a customer who can live with a quarter turn of
+adjustment.

@@ -24,8 +24,14 @@ import { readFileSync, writeFileSync, existsSync, mkdtempSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
-const BASE = "https://shop.servicespring.com";
-const DELAY_MS = 1000;
+// SSC_BASE exists so the failure handling below can be tested against a server
+// that is deliberately broken, without touching the real one. It is a test
+// seam and nothing else - leave it unset and this is unchanged.
+const BASE = process.env.SSC_BASE || "https://shop.servicespring.com";
+// One request a second by default. PULL_DELAY_MS can only make it SLOWER.
+// Asking faster is never the fix for anything here - this is someone else's
+// server and the account - so the floor is not negotiable.
+const DELAY_MS = Math.max(1000, Number(process.env.PULL_DELAY_MS) || 1000);
 const MAX_REQUESTS = 400;
 const UA = "Mozilla/5.0 (X11; Linux x86_64) spring_engineering/dev-pull";
 
@@ -95,6 +101,58 @@ function login() {
     }
 
     console.log("authenticated");
+}
+
+// A LOST SESSION WOULD OTHERWISE THROW AWAY EVERY REMAINING REQUEST.
+//
+// If the cookie jar expires partway through a long pull the server stops
+// answering with JSON and answers with the login page - HTML, status 200. The
+// loop below caught the JSON.parse failure, recorded "non-JSON response", and
+// would then ask an unauthenticated server every remaining question. So a
+// non-JSON body is now treated as "log in again and ask once more".
+//
+// BUT AN HTML BODY IS USUALLY NOT A LOST SESSION, AND ASSUMING IT WAS COST AN
+// HOUR. A run of 200 came back with 48 HTML bodies and the obvious reading was
+// expiry: they began at reading 123 and never recovered. They were NOT
+// contiguous, which should have been the tell, and a fresh login did not fix
+// them. Every one of the 48 was a STANDARD-lift request against 525-54HL,
+// 575-120 or D800-120 - hi-lift drums, which answer only when lift=HiLift and
+// serve an HTML page otherwise. 0 of 48 such requests returned JSON; 120 of
+// 120 of the same three drums under HiLift did. The combination was
+// impossible, and no amount of logging in was ever going to help.
+//
+// Hence RELOGIN_CAP: when the far end keeps serving HTML the likeliest
+// explanation is that the REQUEST is wrong, not the session, and retrying is a
+// slow way to hammer someone else's server. Read what is being ASKED before
+// concluding anything about the cookie.
+const RELOGIN_CAP = 5;
+let relogins = 0;
+
+// BACK OFF WHEN THE FAR END STOPS ANSWERING, AND GIVE UP IF IT KEEPS NOT
+// ANSWERING.
+//
+// Batch V9 spent 124 requests on nothing. The server began returning HTML
+// instead of JSON part way in - interleaved across every drum and both lift
+// types, so not an impossible combination - the re-login fired its five
+// attempts, and then the loop marched through the rest of the sweep at a
+// request a second collecting error pages. It recovered on its own later, which
+// is the signature of a transient limit on their side, not of anything wrong
+// with the request.
+//
+// Hammering a server that is already refusing is the one thing a polite
+// scraper must not do. So consecutive failures now sleep for longer and longer,
+// and after GIVE_UP of them in a row the run stops and keeps what it has.
+// Stopping loses nothing: results are flushed after every reading, and
+// dev/rung-target-sample.mjs dedupes against what is already on disk, so the
+// unpulled remainder simply turns up in the next batch.
+const BACKOFF_MAX_MS = 60000;
+// PULL_GIVE_UP exists so the give-up path can be exercised in seconds instead
+// of twenty minutes; the default is what matters.
+const GIVE_UP = Number(process.env.PULL_GIVE_UP) || 25;
+let consecutiveBad = 0;
+
+function looksLikeHtml(body) {
+    return /^\s*(<!DOCTYPE|<html)/i.test(body);
 }
 
 // our vocabulary -> the calculator's query parameters
@@ -189,17 +247,56 @@ for (let i = 0; i < cases.length; i++) {
     let parsed = null;
     let raw = "";
 
-    try {
-        raw = curl(["-L", url]);
-        parsed = JSON.parse(raw);
-    } catch {
-        parsed = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+            raw = curl(["-L", url]);
+            parsed = JSON.parse(raw);
+            break;
+        } catch {
+            parsed = null;
+        }
+
+        // Second time round there is nothing left to try - fall through and
+        // record the failure rather than logging in again on the way out.
+        if (attempt > 0 || !looksLikeHtml(raw) || relogins >= RELOGIN_CAP) {
+            break;
+        }
+
+        relogins += 1;
+        console.log(`  session lost at ${i + 1}/${cases.length} - re-authenticating (${relogins}/${RELOGIN_CAP})`);
+        await sleep(DELAY_MS);
+
+        try {
+            login();
+        } catch (e) {
+            console.log(`  re-login failed: ${e.message}`);
+            break;
+        }
+
+        await sleep(DELAY_MS);
     }
 
     if (!parsed) {
-        console.log(`${i + 1}/${cases.length}  ${c.label ?? ""}  NOT JSON - session may have expired`);
+        consecutiveBad += 1;
+        console.log(`${i + 1}/${cases.length}  ${c.label ?? ""}  NOT JSON`
+            + ` (${consecutiveBad} in a row)`);
         results.push({ input: c, error: "non-JSON response", bodyHead: raw.slice(0, 200) });
+        writeFileSync(outFile, JSON.stringify(results, null, 1) + "\n");
+
+        if (consecutiveBad >= GIVE_UP) {
+            console.log(`\n${GIVE_UP} unanswered in a row - stopping and keeping`
+                + ` the ${results.filter((r) => !r.error).length} readings already gathered.`
+                + `\nThe rest of the sweep is simply unpulled; the next batch will pick it up.`);
+            break;
+        }
+
+        // 2s, 4s, 8s ... capped. Deliberately slower than the steady rate.
+        const wait = Math.min(BACKOFF_MAX_MS, 1000 * 2 ** Math.min(consecutiveBad, 6));
+
+        console.log(`  backing off ${wait / 1000}s`);
+        await sleep(wait);
     } else {
+        consecutiveBad = 0;
         const d = parsed.data ?? {};
         const inner = d.innerSpring ?? {};
         const outer = d.outerSpring ?? {};

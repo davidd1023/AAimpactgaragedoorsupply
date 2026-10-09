@@ -9,13 +9,16 @@
     # in that database. Adding product_custom_spring without moving the version
     # left branches where /spring-calculator/add-to-cart answered "the spring
     # product is missing", because the route was there and the record was not.
-    'version': '19.0.1.6.0',
+    'version': '19.0.2.1.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
     'author': 'AA Impact Garage Door Supply',
-    'depends': ['base', 'web', 'website', 'website_sale'],
+    'depends': [
+        'sale_management','base', 'web', 'website', 'website_sale'],
     'data': [
+        'data/track_prep_data.xml',
+        'data/trim_data.xml',
         'views/spring_engineering_views.xml',
         'views/spring_engineering_templates.xml',
         'views/spring_engineering_product.xml',

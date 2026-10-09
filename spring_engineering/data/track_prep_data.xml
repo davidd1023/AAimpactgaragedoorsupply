@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!--
+      PREPARED OR UNPREPARED, as an ordinary product attribute.
+
+      It is `no_variant` so it adds no product variants - a hundred tracks
+      would otherwise become two hundred - and `radio` so both choices are
+      visible on the page rather than hidden in a select. The parts a prepared
+      track needs are added by garage_door_supply/models/sale_order.py when the
+      track goes in the cart; the attribute itself carries no price.
+
+      Attach this attribute to a vertical track the same way the other options
+      on those pages are attached: the product's Attributes tab, both values.
+      Nothing happens to a track that does not have it.
+    -->
+    <record id="attribute_track_preparation" model="product.attribute">
+      <field name="name">Track Preparation</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">no_variant</field>
+      <!--
+        HIDDEN FROM THE SHOP SIDEBAR, VISIBLE ON THE PRODUCT.
+
+        website_sale lists every attribute whose visibility is "visible" as a
+        filter down the side of the /shop page, so this one appeared under the
+        categories as if a customer could browse by it - which is not a thing
+        you filter a catalogue by. Hidden removes it from that list; the product
+        page renders a product's own attribute lines regardless, so the choice
+        still appears where it belongs.
+      -->
+      <field name="visibility">hidden</field>
+      <field name="sequence">10</field>
+    </record>
+
+    <record id="attribute_value_track_unprepared" model="product.attribute.value">
+      <field name="attribute_id" ref="attribute_track_preparation"/>
+      <field name="name">Unprepared</field>
+      <field name="sequence">1</field>
+    </record>
+
+    <!--
+      The VALUE NAME IS THE SWITCH. models/sale_order.py matches on the text
+      "Prepared", case-insensitively, rather than on this record's xml id, so
+      that a value the owner adds by hand on the live site works too. Renaming
+      this value turns the feature off, which is why the name is also asserted
+      in the module's tests.
+    -->
+    <record id="attribute_value_track_prepared" model="product.attribute.value">
+      <field name="attribute_id" ref="attribute_track_preparation"/>
+      <field name="name">Prepared</field>
+      <field name="sequence">2</field>
+    </record>
+
+    <!--
+      PUT IT ON THE TRACKS, on install and on every update.
+
+      Creating the attribute is not enough: until it is on a product, the
+      option appears nowhere. That is exactly what happened - the code was
+      merged, a track was opened, and the feature was missing from all of them.
+
+      The method only adds, never removes, so this is safe to re-run and a
+      track added next month picks the option up at the next module update.
+    -->
+    <function model="product.template" name="_attach_track_preparation"/>
+
+  </data>
+</odoo>
