@@ -44,12 +44,12 @@
       says it does not want any, and being first makes it what a customer who
       ignores the option gets.
 
-      THE COUNT IS IN THE VALUE NAME, which is why the colours read "Black,
-      3 Trim". A door takes three pieces - two jambs and the header - and the
-      owner wants the order line to say so, as "Trims: Black, 3 Trim". Odoo
-      prints an attribute as "<attribute>: <value>", so putting the count in
-      the value is what produces that line exactly, with nothing to compute.
-      If a kit ever needs a different count, it needs its own value here.
+      THE VALUE IS ONLY THE COLOUR. The count is not fixed: trims come in 18'
+      pieces sold whole, and a door up to 9' tall takes 2 (one piece for both
+      jambs, one for the header) while a taller door takes 3 (owner, 2026-10-09).
+      aa_dealer_orders reads the colour and the door height and adds that many
+      "<Colour> Trims" pieces as their own order lines, priced and taken out of
+      stock. The kit line just reads "Trims: White".
     -->
     <record id="attribute_value_trim_none" model="product.attribute.value">
       <field name="attribute_id" ref="attribute_trim_colour"/>
@@ -59,19 +59,19 @@
 
     <record id="attribute_value_trim_black" model="product.attribute.value">
       <field name="attribute_id" ref="attribute_trim_colour"/>
-      <field name="name">Black, 3 Trim</field>
+      <field name="name">Black</field>
       <field name="sequence">2</field>
     </record>
 
     <record id="attribute_value_trim_bronze" model="product.attribute.value">
       <field name="attribute_id" ref="attribute_trim_colour"/>
-      <field name="name">Bronze, 3 Trim</field>
+      <field name="name">Bronze</field>
       <field name="sequence">3</field>
     </record>
 
     <record id="attribute_value_trim_white" model="product.attribute.value">
       <field name="attribute_id" ref="attribute_trim_colour"/>
-      <field name="name">White, 3 Trim</field>
+      <field name="name">White</field>
       <field name="sequence">4</field>
     </record>
 
