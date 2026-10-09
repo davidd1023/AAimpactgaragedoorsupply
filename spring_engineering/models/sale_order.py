@@ -126,6 +126,32 @@ class SaleOrder(models.Model):
 
         return {}
 
+    # WHERE A BRACKET'S SIZE LIVES IN ITS NAME. Anchored on the hash the owner
+    # writes, or the "J-" the catalogue uses, so the size is read from the
+    # place it is declared rather than from the first number that happens to
+    # appear - a pack count, a length, a price.
+    _BRACKET_SIZE_ANCHORED = r"(?:#|\bJ-?)\s*-?\s*(\d+)"
+    # A name with no hash at all - "Jamb Bracket 10 Black" - declares its size
+    # with a bare number, so that is the fallback reading.
+    _BRACKET_SIZE_BARE = r"(?<!\d)(\d+)(?!\d)"
+
+    def _track_prep_declared_size(self, name):
+        """The size this product's name claims to be, as an int, or None.
+
+        ONE PRODUCT IS ONE SIZE, which is true of every bracket the owner
+        stocks, and reading the name that way is what keeps a size-12 bracket
+        named "Jamb Bracket # 12 Black (10 pack)" from answering to size 10.
+        The alternative - asking "does 10 appear anywhere in this name" - says
+        yes to that product, and the customer gets the wrong bracket.
+        """
+        for pattern in (self._BRACKET_SIZE_ANCHORED, self._BRACKET_SIZE_BARE):
+            hit = re.search(pattern, name or "", re.I)
+
+            if hit:
+                return int(hit.group(1))
+
+        return None
+
     def _track_prep_bracket_product(self, size, colour):
         """The jamb bracket of this size, in the track's finish.
 
@@ -134,17 +160,25 @@ class SaleOrder(models.Model):
         products, four per finish - and only four of them belong on any given
         track.
 
-        An earlier version searched only the catalogue part numbers and the
-        "J-10 Jamb Bracket" names that come from garage_door_supply's data. The
+        TOLERANT, BECAUSE AN EXACT NAME IS A TRAP. This once required the name
+        to be exactly "Jamb Bracket # 10 Black". Any difference - "#10" without
+        the space, a hyphen, a double space, a trailing one - matched nothing,
+        and a bracket that is not found does not fail by itself: _track_prep_sync
+        abandons the WHOLE preparation, removing every part and adding none. So
+        one space in one product name empties the order of brackets AND flag
+        angles, leaving the track by itself. That is a great deal of consequence
+        to hang on a space.
+
+        An earlier version before that searched only the catalogue part numbers
+        and the "J-10 Jamb Bracket" names from garage_door_supply's data. The
         live site has neither, so every prepared track was refused with a list
-        of three part numbers that exist nowhere. The finish-matched name is
-        tried FIRST because that is what the live site actually has; the part
-        numbers remain for a database carrying the catalogue data instead.
+        of three part numbers that exist nowhere.
         """
         Product = self.env["product.product"].sudo()
 
-        # As the owner names them, and the same without the space after the
-        # hash - the obvious way for someone to type it next time.
+        # 1. The names the owner actually stocks, and the obvious variant of
+        #    them. First, so the ordinary case never depends on the scan below
+        #    and always answers with the same product.
         for pattern in ("Jamb Bracket # %s %s", "Jamb Bracket #%s %s"):
             found = Product.search(
                 [("name", "=ilike", pattern % (size, colour))], limit=1
@@ -153,6 +187,27 @@ class SaleOrder(models.Model):
             if found:
                 return found
 
+        # 2. Anything that reads like a jamb bracket of this size in this
+        #    finish. Ordered by name so a catalogue holding two candidates
+        #    resolves the same way on every order rather than by chance.
+        wanted = int(size)
+
+        for product in Product.search([("name", "ilike", "jamb")], order="name"):
+            name = product.name or ""
+
+            if not re.search(r"\bbracket\b", name, re.I):
+                continue
+
+            # A black track must never be given a white bracket, so the finish
+            # is required as a WHOLE WORD - Black does not match Blackened.
+            if not re.search(r"\b%s\b" % re.escape(colour), name, re.I):
+                continue
+
+            if self._track_prep_declared_size(name) == wanted:
+                return product
+
+        # 3. The catalogue part numbers, for a database carrying
+        #    garage_door_supply's data instead of the owner's own products.
         code = self.BRACKET_CODES.get(size)
 
         if code:
@@ -220,12 +275,24 @@ class SaleOrder(models.Model):
         colour = self._track_prep_colour(line)
 
         if colour:
-            found = self.env["product.product"].sudo().search(
+            Product = self.env["product.product"].sudo()
+            exact = Product.search(
                 [("name", "=ilike", "Flag Angle %s" % colour)], limit=1
             )
 
-            if found:
-                return found
+            if exact:
+                return exact
+
+            # SAME TOLERANCE AS THE BRACKETS, for the same reason: a flag angle
+            # that is not found takes the whole preparation down with it, so
+            # "Flag Angle - Black" costing the customer every bracket on the
+            # order is not a trade the strict lookup was ever worth making.
+            for product in Product.search([("name", "ilike", "flag")], order="name"):
+                name = product.name or ""
+
+                if re.search(r"\bangle\b", name, re.I) \
+                        and re.search(r"\b%s\b" % re.escape(colour), name, re.I):
+                    return product
 
         return self._track_prep_configured_part("flag")
 
