@@ -5,17 +5,21 @@ The calculator lives in a **different repository** -
 cannot be committed here. `send-to-manufacturing.patch` is that change, kept
 beside the endpoint it talks to so the two halves can be read together.
 
-## Applying it
+## Two forms of the same change
 
-```sh
-git clone https://github.com/andy0808al/garage-door-calculator
-cd garage-door-calculator
-git apply /path/to/send-to-manufacturing.patch
-git commit -am "Add a Send to Manufacturing button"
-git push
-```
+- **`index.html`** - the finished file. Download it and upload it over
+  `index.html` in the calculator repository. This is the one to use.
+- **`send-to-manufacturing.patch`** - the same change as a diff, 47 lines
+  added and none removed. For reading what changed, or for `git apply` if
+  you would rather not replace the whole file.
 
-It touches `index.html` only, adds 44 lines and removes none.
+**It was built on commit `6f4c9d730388eef56299877e01c10d9821b9c65f` of `index.html`.** If that file has been
+edited since, uploading this one would discard those edits - apply the patch
+instead, or tell me and I will rebase it. `index-sandbox.html` and
+`backup.html` are untouched.
+
+Nothing was removed and no existing function was altered: the change adds a
+button, a settings field for the Odoo address, and four functions.
 
 Then open the calculator, press the gear, and put the Odoo address under
 **Odoo Address** - e.g. `https://aaigd.com`. It is stored in that browser's

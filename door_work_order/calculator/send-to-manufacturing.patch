@@ -1,5 +1,5 @@
 diff --git a/index.html b/index.html
-index 780c8da..6bc7aa0 100644
+index 780c8da..16ad3a3 100644
 --- a/index.html
 +++ b/index.html
 @@ -128,6 +128,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
@@ -31,7 +31,7 @@ index 780c8da..6bc7aa0 100644
    var cfgs=[{id:'cfg-tracks',key:'pTracks',dot:'dot-tracks',lbl:'lbl-tracks'},{id:'cfg-cables',key:'pCables',dot:'dot-cables',lbl:'lbl-cables'},{id:'cfg-small',key:'pSmall',dot:'dot-small',lbl:'lbl-small',def:'ZDesigner GX420d'},{id:'cfg-big',key:'pBig',dot:'dot-big',lbl:'lbl-big',def:'Westinghouse WHTP203e'}];
    cfgs.forEach(function(c){
      var sel=document.getElementById(c.id);var cur=s[c.key]||c.def||printers[0]||'';
-@@ -922,6 +930,42 @@ function renderSettings(){
+@@ -922,6 +930,45 @@ function renderSettings(){
    document.getElementById('glass-list').innerHTML=allG.map(function(g){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border);font-size:13px;"><span>'+g+'</span><button onmousedown="removeAnyGlass(\''+g+'\')" style="border:none;background:none;color:var(--red);font-size:20px;cursor:pointer;line-height:1;">x</button></div>';}).join('');
    document.getElementById('frame-list').innerHTML=allF.map(function(f){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border);font-size:13px;"><span>'+f+'</span><button onmousedown="removeAnyFrame(\''+f+'\')" style="border:none;background:none;color:var(--red);font-size:20px;cursor:pointer;line-height:1;">x</button></div>';}).join('');
  }
@@ -55,7 +55,10 @@ index 780c8da..6bc7aa0 100644
 +function sendToManufacturing(){
 +  var base=odooBase();
 +  if(!base){alert('Set your Odoo address first - the gear icon, under "Odoo Address".');try{openSettings();}catch(e){}return;}
-+  if(!CD||!CD.vert||!CD.horiz){alert('Work out a door first.');return;}
++  // typeof, NOT a plain truth test: CD is an implicit global created by
++  // calculate(), so before the first door it is an undeclared name and
++  // touching it throws instead of being falsy.
++  if(typeof CD==='undefined'||!CD||!CD.vert||!CD.horiz){alert('Work out a door first.');return;}
 +  var el=function(id){var n=document.getElementById(id);return n?(n.value||'').trim():'';};
 +  var spec={
 +    wo:el('wo'),mark:el('mark'),
