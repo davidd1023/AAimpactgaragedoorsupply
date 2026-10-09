@@ -7,6 +7,8 @@ from odoo.http import request
 
 from odoo.addons.portal.controllers.portal import CustomerPortal
 
+from odoo.addons.spring_engineering.controllers.main import add_assembly_lines, quote_assembly
+
 from .door_options import Catalog
 from .models import AA_DRUMS, AA_HL_DRUMS, AA_LIFT_TYPES, AA_STD_DRUMS, AA_TRACK_TYPES
 
@@ -138,7 +140,7 @@ class AADealerOrder(http.Controller):
             'unit_price': door_unit,
             'subtotal': door_unit * qty,
             'kit_price': unit,
-            'extras': [{'label': e['label'], 'name': e['product'].display_name,
+            'extras': [{'label': e['label'], 'name': e.get('name') or e['product'].display_name,
                         'qty': e['qty'], 'unit_price': e['unit_price']} for e in extras],
             'notes': notes,
         }
@@ -163,10 +165,36 @@ class AADealerOrder(http.Controller):
             'cables': 'Cables' in options,
         }
 
+    def _spring_factor(self, partner):
+        """Springs are priced like the rest of the dealer's order: cost + dealer margin.
+        No margin set -> the Spring Engineering website markup."""
+        margin = partner.commercial_partner_id.aa_dealer_margin
+        return (1.0 + margin / 100.0) if margin else None
+
+    def _spring_quote(self, partner, variant, no_variant, line):
+        """(quote, note): the Spring Engineering quote for this door, or a note why not."""
+        if 'Springs' not in set(no_variant.mapped('name')):
+            return None, None
+        spec = line.get('spring_spec')
+        if not isinstance(spec, dict) or not spec.get('springsSpec'):
+            return None, "Springs: enter the door weight and height so the springs can be calculated"
+        quote = quote_assembly(spec, factor=self._spring_factor(partner))
+        if quote.get('error'):
+            return None, f"Springs: {quote['error']}"
+        return quote, None
+
     def _priced_options(self, partner, variant, no_variant, line, qty, catalog):
-        """Prepared tracks / cables for this door, priced for the dealer. Unpriced ones become notes."""
+        """Prepared tracks / cables / springs for this door, priced for the dealer.
+        Unpriced ones become notes."""
         items, notes = catalog.door_items(self._door_data(variant, no_variant, line))
         extras = []
+        quote, spring_note = self._spring_quote(partner, variant, no_variant, line)
+        if spring_note:
+            notes.append(spring_note)
+        if quote:
+            spec_lines = quote['description'].split('\n')[1:-1]
+            extras.append({'label': 'Springs', 'product': None, 'quote': quote, 'qty': 1,
+                           'unit_price': quote['total'], 'name': '; '.join(spec_lines)})
         for product, per_door, label in items:
             price = self._unit_price(partner, product, request.env['product.template.attribute.value'], qty * per_door)
             if price <= 0:
@@ -241,6 +269,12 @@ class AADealerOrder(http.Controller):
                 sol.name = f"{sol.name}\n{note}"
             door = f"Door {idx}" + (f" ({(line.get('tag') or '').strip()[:80]})" if (line.get('tag') or '').strip() else "")
             for extra in extras:
+                if extra.get('quote'):
+                    booked = add_assembly_lines(order, extra['quote'], qty=qty, note=f"Springs for {door}")
+                    if booked.get('error'):
+                        order.message_post(body=_("Springs for %(door)s were not added: %(err)s",
+                                                  door=door, err=booked['error']))
+                    continue
                 request.env['sale.order.line'].sudo().create({
                     'order_id': order.id,
                     'product_id': extra['product'].id,
@@ -326,4 +360,6 @@ class AADealerOrder(http.Controller):
         weight = str(line.get('weight') or '').strip()[:10]
         if weight:
             parts.append(f"{weight} lb")
+        for warning in (line.get('spring_warnings') or [])[:3]:
+            parts.append(f"SPRING WARNING: {str(warning)[:200]}")
         return " | ".join(parts)
