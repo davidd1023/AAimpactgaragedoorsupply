@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_door_wo" model="ir.ui.view">
+        <field name="name">res.config.settings.form.door.work.order</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="mrp.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[1]" position="before">
+                <block title="Garage Door Work Orders"
+                       name="door_work_order_setting_container">
+                    <setting id="door_wo_job_product"
+                             string="Work Order Product"
+                             help="The product each door's manufacturing order is raised against.">
+                        <field name="door_wo_job_product_id"/>
+                    </setting>
+                    <setting id="door_wo_track_stock"
+                             string="Track Stock"
+                             help="The stock lengths that vertical and horizontal tracks are cut from.">
+                        <div class="content-group">
+                            <div class="row">
+                                <label for="door_wo_track_2_product_id" class="col-lg-4 o_light_label"/>
+                                <field name="door_wo_track_2_product_id"/>
+                            </div>
+                            <div class="row">
+                                <label for="door_wo_track_3_product_id" class="col-lg-4 o_light_label"/>
+                                <field name="door_wo_track_3_product_id"/>
+                            </div>
+                        </div>
+                    </setting>
+                    <setting id="door_wo_cable_reels"
+                             string="Cable Reels"
+                             help="Which reel each cable size is cut from. Left empty, a reel is matched by name.">
+                        <div class="content-group">
+                            <div class="row">
+                                <label for="door_wo_cable_18_product_id" class="col-lg-4 o_light_label"/>
+                                <field name="door_wo_cable_18_product_id"/>
+                            </div>
+                            <div class="row">
+                                <label for="door_wo_cable_532_product_id" class="col-lg-4 o_light_label"/>
+                                <field name="door_wo_cable_532_product_id"/>
+                            </div>
+                            <div class="row">
+                                <label for="door_wo_cable_316_product_id" class="col-lg-4 o_light_label"/>
+                                <field name="door_wo_cable_316_product_id"/>
+                            </div>
+                        </div>
+                    </setting>
+                    <setting id="door_wo_consume"
+                             string="Book Material On The Order"
+                             help="Add the stock items as components. Off by default: the order is a cut instruction, and how a 500 ft reel is counted against 20 ft taken off it is a separate decision.">
+                        <field name="door_wo_consume_components"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

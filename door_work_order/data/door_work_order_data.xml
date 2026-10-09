@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- THE PRODUCT EACH DOOR'S ORDER IS RAISED AGAINST.
+         A manufacturing order has to be an order to make something, and what
+         is being made here is one door's worth of tracks and cables cut to
+         size. Shipped as data so the feature works on first install; the
+         setting overrides it for a shop that would rather use its own. -->
+    <record id="product_door_work_order" model="product.product">
+        <field name="name">Garage Door Tracks &amp; Cables (Cut To Size)</field>
+        <field name="default_code">DOOR-WO</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="sale_ok" eval="False"/>
+        <field name="description">One door's tracks and cables, cut to the lengths on the order's cut list.</field>
+    </record>
+</odoo>

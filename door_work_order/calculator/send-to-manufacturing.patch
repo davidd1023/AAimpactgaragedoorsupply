@@ -1,0 +1,76 @@
+diff --git a/index.html b/index.html
+index 780c8da..6bc7aa0 100644
+--- a/index.html
++++ b/index.html
+@@ -128,6 +128,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
+         <div class="printer-status" style="margin-top:6px;"><div class="status-dot" id="dot-rotation"></div><span id="lbl-rotation">--</span></div>
+       </div>
+       <button class="add-printer-btn" onclick="addPrinter()">+ Add printer manually</button>
++      <div class="settings-section" style="margin-top:14px"><div class="settings-section-title">Odoo Address</div>
++        <div class="printer-item"><label>Used by "Send to Manufacturing"</label>
++        <input id="cfg-odoo" type="url" inputmode="url" placeholder="https://your-odoo-address" oninput="saveOdooUrl()" style="width:100%;padding:8px;border:1px solid var(--gray-border);border-radius:8px;font-size:14px"/>
++        <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div></div>
++      </div>
+       <div class="save-confirm" id="save-confirm">Saved</div>
+     </div>
+     <div class="settings-section"><div class="settings-section-title">Glass Options</div><div id="glass-list"></div><button class="add-printer-btn" onclick="addGlass()">+ Add glass type</button></div>
+@@ -415,6 +420,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
+   <div class="results" id="print-all-wrap" style="margin-top:4px">
+     <button class="print-all-btn" onclick="opPrintChoice()">&#128424; Print All</button>
+     <button class="print-all-btn" style="display:none" onclick="doPrintAll()">&#128424; Print All (print server)</button>
++    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff">&#128296; Send to Manufacturing</button>
+   </div>
+   </div>
+ </div>
+@@ -908,6 +914,8 @@ function closeSettings(){document.getElementById('settings-overlay').classList.r
+ function getPrinters(){var s=load();var all=DEF_PRINTERS.concat(s.extraPrinters||[]);return all.filter(function(v,i,a){return a.indexOf(v)===i;});}
+ function renderSettings(){
+   var s=load();var printers=getPrinters();
++  var odooEl=document.getElementById('cfg-odoo');
++  if(odooEl){odooEl.value=s.odooUrl||'';renderOdooStatus();}
+   var cfgs=[{id:'cfg-tracks',key:'pTracks',dot:'dot-tracks',lbl:'lbl-tracks'},{id:'cfg-cables',key:'pCables',dot:'dot-cables',lbl:'lbl-cables'},{id:'cfg-small',key:'pSmall',dot:'dot-small',lbl:'lbl-small',def:'ZDesigner GX420d'},{id:'cfg-big',key:'pBig',dot:'dot-big',lbl:'lbl-big',def:'Westinghouse WHTP203e'}];
+   cfgs.forEach(function(c){
+     var sel=document.getElementById(c.id);var cur=s[c.key]||c.def||printers[0]||'';
+@@ -922,6 +930,42 @@ function renderSettings(){
+   document.getElementById('glass-list').innerHTML=allG.map(function(g){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border);font-size:13px;"><span>'+g+'</span><button onmousedown="removeAnyGlass(\''+g+'\')" style="border:none;background:none;color:var(--red);font-size:20px;cursor:pointer;line-height:1;">x</button></div>';}).join('');
+   document.getElementById('frame-list').innerHTML=allF.map(function(f){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border);font-size:13px;"><span>'+f+'</span><button onmousedown="removeAnyFrame(\''+f+'\')" style="border:none;background:none;color:var(--red);font-size:20px;cursor:pointer;line-height:1;">x</button></div>';}).join('');
+ }
++// WHERE THE ORDER GETS SENT. Kept as a setting rather than written into this
++// file so the page can be pointed at a test build without being edited, and so
++// this public file never has to name the company's systems.
++function saveOdooUrl(){var el=document.getElementById('cfg-odoo');if(!el)return;save({odooUrl:(el.value||'').trim()});renderOdooStatus();}
++function renderOdooStatus(){var url=(load().odooUrl||'').trim();var dot=document.getElementById('dot-odoo'),lbl=document.getElementById('lbl-odoo');if(!dot||!lbl)return;dot.className=url?'status-dot':'status-dot unset';lbl.textContent=url||'Not set';}
++function odooBase(){return (load().odooUrl||'').trim().replace(/\/+$/,'');}
++
++// SEND THE DOOR, NOT THE ANSWER. What crosses to Odoo is the door and its
++// measurements - width, height, track, lift, and the lengths worked out here.
++// Odoo decides for itself which stock item each length is cut from, so this
++// page cannot ask for a particular product to be booked out of stock, and a
++// stale copy of this file cannot send a part number that has since changed.
++//
++// It opens a review page rather than creating the order outright. Two reasons:
++// a link that creates records can be triggered by anything that can make a
++// browser fetch a URL, and a mistyped door should be read by someone before it
++// becomes a job on the floor.
++function sendToManufacturing(){
++  var base=odooBase();
++  if(!base){alert('Set your Odoo address first - the gear icon, under "Odoo Address".');try{openSettings();}catch(e){}return;}
++  if(!CD||!CD.vert||!CD.horiz){alert('Work out a door first.');return;}
++  var el=function(id){var n=document.getElementById(id);return n?(n.value||'').trim():'';};
++  var spec={
++    wo:el('wo'),mark:el('mark'),
++    width:CD.width,height:CD.height,
++    track:CD.tt,lift:CD.lt,hilift:CD.hl||0,
++    sections:CD.panels,
++    vertical:CD.vert,horizontal:CD.horiz,
++    weight:CD.hasWeight?CD.wt:null,
++    cable:CD.hasWeight?CD.cable:null,
++    cable_type:CD.hasWeight?(CD.cableType||''):'',
++    drum:CD.hasWeight?(CD.drum||''):''
++  };
++  if(!spec.wo&&!confirm('This door has no W/O number. Without one, sending twice will raise two orders. Send anyway?'))return;
++  window.open(base+'/door-work-order/new?spec='+encodeURIComponent(JSON.stringify(spec)),'_blank','noopener');
++}
+ function savePrinters(){save({pTracks:document.getElementById('cfg-tracks').value,pCables:document.getElementById('cfg-cables').value,pSmall:document.getElementById('cfg-small').value,pBig:document.getElementById('cfg-big').value});var c=document.getElementById('save-confirm');c.classList.add('show');setTimeout(function(){c.classList.remove('show');},2000);}
+ function setRotation(deg){
+   curRotation=deg;save({bigRotation:deg});updateRotUI(deg);renderBigLabelPreview();
