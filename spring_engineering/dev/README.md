@@ -2950,3 +2950,59 @@ the published nested rule is the one that does not work here, and nothing in
 these sources suggests another. What would still help is a duplex rate chart -
 IPPT for a NESTED pair - and this document shows such charts exist in this
 exact format, just not for pairs.
+
+## The flagged half was refusals, not a weakness (2026-10-09)
+
+`dev/clean-cases.mjs` has always reported two numbers - clean at about 95-98%
+and flagged at about 79% - and the second one looked like the model falling
+apart on half the population. It is not. Splitting flagged by what the
+reference is actually complaining about, on the two never-tuned draws:
+
+| class | n | wire | length exact | within 1" |
+|---|---|---|---|---|
+| clean | 350 | 99.1% | 98.0% | 99.7% |
+| **warned but buildable** | 85 | 98.8% | **100.0%** | 100.0% |
+| **ORDERABLE, both** | **435** | **99.1%** | **98.4%** | **99.8%** |
+| refused by the reference | 286 | 99.3% | 73.9% | 89.1% |
+
+Of 2,910 flagged Duplex readings the complaints are 1,426 wire past the inside
+diameter's maximum, 1,251 assembly too long for the door, 1,111 spring over
+120", 37 drum overloaded, 23 over max MIP - all refusals. The reference will
+not build any of them, so the model's length there is not a quote, it is the
+input to a warning. The genuinely orderable remainder is "only spring lengths
+between 0 and 96 are recommended" and the short-cycle-life notes, and the model
+gets **every one of those 85 readings exactly right**.
+
+So the figure to quote for doors a customer can actually order is **98.4%
+exact, 99.8% within an inch**, and the hard-looking flagged bucket was 97%
+refusals. `dev/orderable.mjs` prints this split and `dev/honest.sh` now runs it.
+
+## Wire selection is at its floor too (2026-10-09)
+
+Length has had all the attention because it is where the misses are, but the
+wire is chosen first and a wire miss is excluded from the length figure - so
+three wire misses on the draws were never anyone's target. All three:
+
+- have an **exactly correct TIPPT and multiplier**, so nothing upstream is wrong
+- are **hi-lift at radius 15**, two on 525-54HL and one on 575-120
+- sit within **0.2% of the acceptance boundary** - 0.9984, 1.0016, 1.0021 of
+  target - and pull in OPPOSITE directions, so no scale correction fixes them
+
+The rule itself was then tested on all 6,748 clean duplex readings, because a
+rule chosen to fit three readings of the evaluation set is the mistake this
+project keeps re-learning:
+
+| acceptance rule | reference's rung reproduced |
+|---|---|
+| `exact >= target` (ships) | **99.50%** |
+| `exact >= 0.998 * target` | 98.98% |
+| `exact >= 1.003 * target` | 98.61% |
+| `round1000(cycles) > target` | 92.29% |
+| `round1000(cycles) >= target` | 89.98% |
+| `ceil1000(cycles) >= target` | 82.84% |
+
+The shipped rule is the best of the family by half a point, and the rounded
+variants - tempting because "the reference computes from the figures it
+displays" is a documented principle here, and it is why TIPPT is rounded to one
+decimal - are seven points worse. Moving the threshold to catch two of the
+three misses would cost about sixty readings elsewhere.

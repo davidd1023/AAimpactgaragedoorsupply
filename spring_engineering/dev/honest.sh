@@ -53,6 +53,17 @@ if [ -f "$VALIDATION2" ]; then
 fi
 
 echo ""
+echo "ORDERABLE vs REFUSED - the split that matters commercially"
+# dev/clean-cases.mjs reports flagged readings at about 79% and that reads like
+# a weakness in half the population. Nearly all of them are the reference
+# REFUSING to build - over 120", wider than the door, wire past the ID's limit -
+# and those doors cannot be bought at any accuracy. The readings it warns about
+# and will still build come out at 100%.
+if [ -f "$VALIDATION" ]; then
+    node dev/orderable.mjs "$VALIDATION" "$VALIDATION2" 2>&1 | sed 's/^/  /'
+fi
+
+echo ""
 echo "TUNED SAMPLES - knobs were set against these, so they read high"
 node dev/clean-cases.mjs dev/eval-rand-seed777001.json dev/eval-soft2-spread.json \
     dev/eval-clean.json 2>&1 | head -2 | sed 's/^/  /'
