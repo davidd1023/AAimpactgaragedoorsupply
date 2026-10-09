@@ -10,7 +10,7 @@ from odoo.addons.website_sale.controllers.cart import Cart
 
 from odoo.addons.spring_engineering.controllers.main import add_assembly_lines, quote_assembly
 
-from .door_options import Catalog
+from .door_options import TRIM_COLOURS, Catalog
 from .models import AA_DRUMS, AA_HL_DRUMS, AA_LIFT_TYPES, AA_STD_DRUMS, AA_TRACK_TYPES
 
 _logger = logging.getLogger(__name__)
@@ -81,6 +81,7 @@ class AAOptionPricing:
             except (TypeError, ValueError):
                 return 0.0
         return {
+            'trims': self._trim_colour(no_variant),
             'height': num('height_in'),
             'lift': line.get('lift_type') or 'standard',
             'high_lift': num('high_lift'),
@@ -90,6 +91,15 @@ class AAOptionPricing:
             'tracks': 'Tracks' in options,
             'cables': 'Cables' in options,
         }
+
+    @staticmethod
+    def _trim_colour(no_variant):
+        """The trim colour picked on the kit's Trims option, or '' for No Trims."""
+        for ptav in no_variant.filtered(lambda v: v.attribute_id.name == 'Trims'):
+            word = (ptav.name or '').split(',')[0].split(' ')[0].strip()
+            if word in TRIM_COLOURS:
+                return word
+        return ''
 
     def _spring_factor(self, partner):
         """Springs are priced like the rest of the dealer's order: cost + dealer margin.
@@ -124,10 +134,14 @@ class AAOptionPricing:
                            'name': '; '.join(spec_lines) + ' (cones, spring and labor included)'})
         for product, per_door, label in items:
             price = self._unit_price(partner, product, request.env['product.template.attribute.value'], qty * per_door)
-            if price <= 0:
+            # A trim with no cost yet still carries the $1 placeholder price, so cost is checked too.
+            if price <= 0 or (label == 'Trims' and product.standard_price <= 0):
                 notes.append(f"{label}: {product.display_name} has no price yet - AA will quote it")
                 continue
-            extras.append({'label': label, 'product': product, 'qty': per_door, 'unit_price': price})
+            extra = {'label': label, 'product': product, 'qty': per_door, 'unit_price': price}
+            if label == 'Trims':
+                extra['name'] = f"{per_door} x {product.display_name} (18' pieces, sold whole)"
+            extras.append(extra)
         return extras, notes
 
     def _line_note(self, line):
@@ -267,6 +281,9 @@ class AADealerOrder(AAOptionPricing, http.Controller):
                     raise ValidationError(_(
                         "Line %s: no price is set for this kit yet. Please call AA Impact.", idx))
                 track_vals = self._track_values(line, idx, variant)
+                if self._trim_colour(no_variant) and not float(line.get('height_in') or 0):
+                    raise ValidationError(_(
+                        "Line %s: enter the door height for the trims (up to 9' takes 2, taller takes 3).", idx))
                 extras, opt_notes = self._priced_options(partner, variant, no_variant, line, qty, catalog)
                 note = " | ".join(filter(None, [self._line_note(line)] + opt_notes))
                 order_lines.append((variant, no_variant, qty, note, track_vals, extras, idx, line))
@@ -377,8 +394,8 @@ SESSION_KEY = 'aa_kit_door'
 
 
 class AAKitCart(AAOptionPricing, Cart):
-    """The shop's hardware-kit page: when Springs / Tracks / Cables are ticked the
-    page asks for the door (size, weight, track, lift) and those extras are priced
+    """The shop's hardware-kit page: when Springs / Tracks / Cables are ticked or a
+    trim colour is picked, the page asks for the door (size, weight, track, lift) and those extras are priced
     and added to the cart next to the kit, exactly like the dealer Quick Order."""
 
     def _pricelist(self, partner):
@@ -425,6 +442,8 @@ class AAKitCart(AAOptionPricing, Cart):
         no_variant = request.env['product.template.attribute.value'].sudo().browse(
             [int(v) for v in no_variant_attribute_value_ids or []]).exists()
         wanted = KIT_EXTRAS & set(no_variant.mapped('name')) if template else set()
+        if template and self._trim_colour(no_variant):
+            wanted.add('Trims')
         plan = None
         if wanted:
             door = (request.session.get(SESSION_KEY) or {}).get(str(template.id)) or {}

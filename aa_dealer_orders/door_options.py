@@ -21,6 +21,17 @@ CABLE_QTY_PER_DOOR = 1  # the product is already a pair
 
 CABLE_SIZE_BY_DRUM = {'D400-96': '1/8"', 'D400-144': '5/32"'}  # everything else 3/16"
 
+# Trims come in 18' pieces and are sold whole, never cut. One piece covers both
+# jambs when the door is up to 9' tall, plus one for the header: 2 pieces.
+# Taller doors need a piece per jamb: 3 pieces. (Owner's rule, 2026-10-09.)
+TRIM_COLOURS = ('White', 'Bronze', 'Black')
+TRIM_TWO_PIECE_MAX_HEIGHT = 108  # inches (9')
+
+
+def trim_count(height):
+    return 2 if height <= TRIM_TWO_PIECE_MAX_HEIGHT else 3
+
+
 _H_RE = re.compile(r'^(\d)" Horizontal Track -\s+(\d+)" (White|Black)$')
 _V_RE = re.compile(r'^(\d)" Vertical Track (\d+)" - .*\b(White|Black)$')
 _C_RE = re.compile(r'^Lift Cable (\S+) Pair - Prepared \((\d+)\' Door, \d" Track \((\d+)R\)\)$')
@@ -48,15 +59,22 @@ class Catalog:
             ('name', 'ilike', 'Horizontal Track -'),
             ('name', 'ilike', 'Vertical Track'),
             ('name', 'ilike', 'Lift Cable'),
+        ]) | env['product.product'].sudo().search([
+            ('sale_ok', '=', True),
+            ('name', 'in', [f'{c} Trims' for c in TRIM_COLOURS]),
         ])
         self.horizontal = []  # (size, length, color, product)
         self.vertical = []
         self.cables = {}      # (size, feet, radius) -> product
+        self.trims = {}  # colour -> product
         for p in products.with_context(display_default_code=False):
             # Display name = template name + variant values, e.g.
             # 'Lift Cable 5/32" Pair - Prepared (8' Door, 3" Track (15R))'
             name = (p.display_name or '').strip()
             if 'RAW' in name:
+                continue
+            if name.endswith(' Trims') and name.split(' ')[0] in TRIM_COLOURS:
+                self.trims[name.split(' ')[0]] = p
                 continue
             m = _H_RE.match(name)
             if m:
@@ -77,7 +95,9 @@ class Catalog:
         return fits[0][1] if fits else None
 
     def door_items(self, door):
-        """door: dict(height, lift, high_lift, track_type, drum, color, tracks, cables).
+        """door: dict(height, lift, high_lift, track_type, drum, color, tracks, cables, trims).
+
+        trims is the trim colour ('White', 'Bronze', 'Black') or empty for none.
 
         Returns (items, notes): items = [(product, qty, label)], notes = [str].
         """
@@ -123,4 +143,13 @@ class Catalog:
                     items.append((p, CABLE_QTY_PER_DOOR, 'Cables'))
                 else:
                     notes.append(f"Cables: no prepared {size} pair for a {feet}' door ({radius}R) - AA cuts it")
+
+        trim = door.get('trims')
+        if trim:
+            if not height:
+                notes.append("Trims: enter the door height (up to 9' takes 2 trims, taller takes 3)")
+            elif trim not in self.trims:
+                notes.append(f"Trims: no {trim} trims product found - AA will add them")
+            else:
+                items.append((self.trims[trim], trim_count(height), 'Trims'))
         return items, notes
