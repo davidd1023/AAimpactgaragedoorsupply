@@ -1,5 +1,5 @@
 diff --git a/index.html b/index.html
-index 780c8da..16ad3a3 100644
+index 780c8da..95ffd37 100644
 --- a/index.html
 +++ b/index.html
 @@ -128,6 +128,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
@@ -7,8 +7,8 @@ index 780c8da..16ad3a3 100644
        </div>
        <button class="add-printer-btn" onclick="addPrinter()">+ Add printer manually</button>
 +      <div class="settings-section" style="margin-top:14px"><div class="settings-section-title">Odoo Address</div>
-+        <div class="printer-item"><label>Used by "Send to Manufacturing"</label>
-+        <input id="cfg-odoo" type="url" inputmode="url" placeholder="https://your-odoo-address" oninput="saveOdooUrl()" style="width:100%;padding:8px;border:1px solid var(--gray-border);border-radius:8px;font-size:14px"/>
++        <div class="printer-item"><label>Paste any page of your Odoo - only the address is used</label>
++        <input id="cfg-odoo" type="text" inputmode="url" placeholder="aaigd.com  or  https://aaigd.com/odoo/manufacturing" oninput="saveOdooUrl()" style="width:100%;padding:8px;border:1px solid var(--gray-border);border-radius:8px;font-size:14px"/>
 +        <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div></div>
 +      </div>
        <div class="save-confirm" id="save-confirm">Saved</div>
@@ -31,7 +31,7 @@ index 780c8da..16ad3a3 100644
    var cfgs=[{id:'cfg-tracks',key:'pTracks',dot:'dot-tracks',lbl:'lbl-tracks'},{id:'cfg-cables',key:'pCables',dot:'dot-cables',lbl:'lbl-cables'},{id:'cfg-small',key:'pSmall',dot:'dot-small',lbl:'lbl-small',def:'ZDesigner GX420d'},{id:'cfg-big',key:'pBig',dot:'dot-big',lbl:'lbl-big',def:'Westinghouse WHTP203e'}];
    cfgs.forEach(function(c){
      var sel=document.getElementById(c.id);var cur=s[c.key]||c.def||printers[0]||'';
-@@ -922,6 +930,45 @@ function renderSettings(){
+@@ -922,6 +930,59 @@ function renderSettings(){
    document.getElementById('glass-list').innerHTML=allG.map(function(g){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border);font-size:13px;"><span>'+g+'</span><button onmousedown="removeAnyGlass(\''+g+'\')" style="border:none;background:none;color:var(--red);font-size:20px;cursor:pointer;line-height:1;">x</button></div>';}).join('');
    document.getElementById('frame-list').innerHTML=allF.map(function(f){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border);font-size:13px;"><span>'+f+'</span><button onmousedown="removeAnyFrame(\''+f+'\')" style="border:none;background:none;color:var(--red);font-size:20px;cursor:pointer;line-height:1;">x</button></div>';}).join('');
  }
@@ -39,8 +39,22 @@ index 780c8da..16ad3a3 100644
 +// file so the page can be pointed at a test build without being edited, and so
 +// this public file never has to name the company's systems.
 +function saveOdooUrl(){var el=document.getElementById('cfg-odoo');if(!el)return;save({odooUrl:(el.value||'').trim()});renderOdooStatus();}
-+function renderOdooStatus(){var url=(load().odooUrl||'').trim();var dot=document.getElementById('dot-odoo'),lbl=document.getElementById('lbl-odoo');if(!dot||!lbl)return;dot.className=url?'status-dot':'status-dot unset';lbl.textContent=url||'Not set';}
-+function odooBase(){return (load().odooUrl||'').trim().replace(/\/+$/,'');}
++function renderOdooStatus(){var base=odooBase();var dot=document.getElementById('dot-odoo'),lbl=document.getElementById('lbl-odoo');if(!dot||!lbl)return;dot.className=base?'status-dot':'status-dot unset';lbl.textContent=base?('Sends to '+base+'/door-work-order/new'):'Not set';}
++// ONLY THE ADDRESS, WHATEVER GETS PASTED IN. The obvious thing to paste in a
++// box used by "Send to Manufacturing" is the Manufacturing page's own URL -
++// and appending /door-work-order/new to that produced
++// .../odoo/manufacturing/door-work-order/new, which Odoo's back end quietly
++// ignores the tail of and renders as the Manufacturing page. The button
++// appeared to work, went to a plausible page and created nothing.
++//
++// So the path is thrown away and only scheme+host+port kept, and a missing
++// scheme is assumed to be https. Any page of the Odoo will do now.
++function odooBase(){
++  var raw=(load().odooUrl||'').trim();
++  if(!raw)return '';
++  if(!/^https?:\/\//i.test(raw))raw='https://'+raw;
++  try{return new URL(raw).origin;}catch(e){return '';}
++}
 +
 +// SEND THE DOOR, NOT THE ANSWER. What crosses to Odoo is the door and its
 +// measurements - width, height, track, lift, and the lengths worked out here.
