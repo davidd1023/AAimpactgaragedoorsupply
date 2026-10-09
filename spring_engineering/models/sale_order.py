@@ -67,7 +67,7 @@ class SaleOrder(models.Model):
 
         return feet
 
-    # THE JAMB BRACKETS A PAIR OF VERTICAL TRACKS NEEDS, by door height.
+    # THE JAMB BRACKETS ONE VERTICAL TRACK NEEDS, by door height.
     #
     # Taken from the owner's own garage door calculator, which carries the rule
     # as a table - andy0808al.github.io/garage-door-calculator, the JB array:
@@ -77,30 +77,35 @@ class SaleOrder(models.Model):
     #     {min:97,  max:108, j10:4, j12:5,  j14:5,  j16:2}
     #     ... up to 192 inches
     #
-    # ITS NUMBERS ARE PER SIDE - the card is titled "Jamb Brackets - per side"
-    # and the code does `jambTotal = jambSide * 2`. The owner confirms it: "for
-    # one track its 4/4/4 for a 7 foot door". A vertical track PRODUCT is the
-    # L & R pair, so one of them is two tracks, and the quantities below are
-    # the table DOUBLED.
+    # PER TRACK, which is what a customer buys. The calculator calls these
+    # numbers "per side" and doubles them for a door, because a door has two
+    # vertical tracks - but the shop sells the tracks ONE AT A TIME, so the
+    # per-side figure is the per-product figure and no doubling belongs here.
+    # The owner states it plainly: "for one track its 4/4/4 for a 7 foot door",
+    # and "when buying vertical tracks users are buying them individually not
+    # in pairs".
     #
-    # That correction matters: this previously shipped 4/4/4 for a 7 ft pair,
-    # read off the same per-side display and mistaken for a whole-door figure.
-    # Every prepared track since has gone out with half the brackets it needs.
+    # These quantities have now been wrong in both directions. They were first
+    # read off a configurator result pasted into chat, which gave 6, 8 and 10
+    # brackets by section count. Then the calculator's own table replaced that,
+    # but doubled, on the belief that one product was the L & R pair - a belief
+    # taken from the words "(L & R pair)" in a pasted track description, never
+    # checked against what the product actually is. Doubled, every prepared
+    # track shipped twice the brackets it needs.
     #
-    # The table also reaches 16 ft, which closes the 11 and 12 ft gap that used
-    # to refuse those doors - #16 climbs to 6 at 11 ft and the pattern was not
-    # safe to guess from four readings. It no longer has to be guessed.
+    # The table reaches 16 ft, which is what closes the 11 and 12 ft gap that
+    # used to refuse those doors.
     BRACKET_MIX = (
-        (0, 7, {"10": 8, "12": 8, "14": 8}),
-        (8, 8, {"10": 8, "12": 10, "14": 10}),
-        (9, 9, {"10": 8, "12": 10, "14": 10, "16": 4}),
-        (10, 10, {"10": 8, "12": 10, "14": 10, "16": 8}),
-        (11, 11, {"10": 8, "12": 10, "14": 10, "16": 12}),
-        (12, 12, {"10": 8, "12": 12, "14": 12, "16": 12}),
-        (13, 13, {"10": 8, "12": 12, "14": 12, "16": 16}),
-        (14, 14, {"10": 8, "12": 12, "14": 16, "16": 16}),
-        (15, 15, {"10": 8, "12": 12, "14": 16, "16": 20}),
-        (16, 16, {"10": 8, "12": 12, "14": 20, "16": 20}),
+        (0, 7, {"10": 4, "12": 4, "14": 4}),
+        (8, 8, {"10": 4, "12": 5, "14": 5}),
+        (9, 9, {"10": 4, "12": 5, "14": 5, "16": 2}),
+        (10, 10, {"10": 4, "12": 5, "14": 5, "16": 4}),
+        (11, 11, {"10": 4, "12": 5, "14": 5, "16": 6}),
+        (12, 12, {"10": 4, "12": 6, "14": 6, "16": 6}),
+        (13, 13, {"10": 4, "12": 6, "14": 6, "16": 8}),
+        (14, 14, {"10": 4, "12": 6, "14": 8, "16": 8}),
+        (15, 15, {"10": 4, "12": 6, "14": 8, "16": 10}),
+        (16, 16, {"10": 4, "12": 6, "14": 10, "16": 10}),
     )
 
     # The catalogue part numbers, which are what the lookup keys on - a SKU is
@@ -113,12 +118,12 @@ class SaleOrder(models.Model):
     }
 
     def _track_prep_bracket_mix(self, height_feet):
-        """{size: quantity for the pair} for this door, or {} if off the table.
+        """{size: quantity for ONE track} for this door, or {} if off the table.
 
-        Off the table means off it. #16 is still climbing at 10 ft - two more
-        per foot - so continuing the pattern to 11 and 12 would be inventing a
-        trade rule from four readings. An unknown height adds nothing and says
-        to call.
+        Off the table means off it. The table stops at 16 ft because the
+        owner's calculator stops at 192 inches, and continuing the pattern past
+        it would be inventing a trade rule rather than following one. A height
+        it does not cover adds nothing and says to call.
         """
         for low, high, mix in self.BRACKET_MIX:
             if low <= height_feet <= high:
@@ -224,10 +229,15 @@ class SaleOrder(models.Model):
         """What the lookup wanted, phrased so a person can search for it."""
         return "Jamb Bracket # %s %s" % (size, colour)
 
-    # One at each top corner, so two for the pair. The owner's own kit
-    # configurator returns "2 flag angles" for a 9' x 7' door, which is the
-    # same answer from the other direction.
-    FLAG_ANGLES_PER_DOOR = 2
+    # ONE PER TRACK. A flag angle sits at the top of a single vertical track,
+    # so a door takes two and a track takes one - which is what the owner asked
+    # for in the first place: "jamb brackets, just 1 flag angle". The owner's
+    # own kit configurator returns "2 flag angles" for a 9' x 7' DOOR, the same
+    # answer counted the other way round.
+    #
+    # This was 2 for as long as the bracket table was doubled, on the same
+    # mistaken belief that one product was the L & R pair.
+    FLAG_ANGLES_PER_TRACK = 1
 
     # The finishes a track and its flag angle come in. Matched as whole words so
     # a track that merely mentions a colour elsewhere in its name is not caught.
@@ -346,7 +356,7 @@ class SaleOrder(models.Model):
         wanted = {
             "flag": (
                 self._track_prep_flag_product(line),
-                self.FLAG_ANGLES_PER_DOOR * line.product_uom_qty,
+                self.FLAG_ANGLES_PER_TRACK * line.product_uom_qty,
             ),
         }
 

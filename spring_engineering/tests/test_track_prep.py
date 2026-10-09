@@ -91,11 +91,11 @@ class TestTrackPreparation(TransactionCase):
 
         return sum(lines.mapped("product_uom_qty"))
 
-    def test_prepared_adds_the_mix_and_two_flag_angles(self):
+    def test_prepared_adds_the_mix_and_one_flag_angle(self):
         order = self._add(
             self._track("CH-VT-2-2 Vertical Track 76-7 door height black"), "Prepared")
-        self.assertEqual(self._qty(order, self.brackets["10"].product_variant_id), 8)
-        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 2)
+        self.assertEqual(self._qty(order, self.brackets["10"].product_variant_id), 4)
+        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 1)
     def _mix(self, order):
         """{size: quantity} of brackets on this order."""
         out = {}
@@ -109,34 +109,41 @@ class TestTrackPreparation(TransactionCase):
         return out
 
     def test_the_mix_matches_the_owners_configurator(self):
-        # The four readings, verbatim. These are the feature: a prepared pair
-        # ships a graduated mix, not a count of one size.
+        # The owner's own figures, PER TRACK, which is how tracks are sold:
+        # "at 8' height: 4x #10, 5x #12, 5x #14", "at 9': ... 2x #16", "at 10
+        # feet: ... 4x #16", "everything below 7' is the same as 7'". These are
+        # the feature: a prepared track ships a graduated mix, not a count of
+        # one size.
         for name, expected in [
-            ("Vertical Track 6 door height black", {"10": 8, "12": 8, "14": 8}),
-            ("Vertical Track 7 door height black", {"10": 8, "12": 8, "14": 8}),
-            ("Vertical Track 8 door height black", {"10": 8, "12": 10, "14": 10}),
+            ("Vertical Track 6 door height black", {"10": 4, "12": 4, "14": 4}),
+            ("Vertical Track 7 door height black", {"10": 4, "12": 4, "14": 4}),
+            ("Vertical Track 8 door height black", {"10": 4, "12": 5, "14": 5}),
             ("Vertical Track 9 door height white",
-             {"10": 8, "12": 10, "14": 10, "16": 4}),
+             {"10": 4, "12": 5, "14": 5, "16": 2}),
             ("Vertical Track 10 door height black",
-             {"10": 8, "12": 10, "14": 10, "16": 8}),
+             {"10": 4, "12": 5, "14": 5, "16": 4}),
             ("Vertical Track 11 door height black",
-             {"10": 8, "12": 10, "14": 10, "16": 12}),
+             {"10": 4, "12": 5, "14": 5, "16": 6}),
             ("Vertical Track 12 door height white",
-             {"10": 8, "12": 12, "14": 12, "16": 12}),
+             {"10": 4, "12": 6, "14": 6, "16": 6}),
             ("Vertical Track 16 door height black",
-             {"10": 8, "12": 12, "14": 20, "16": 20}),
+             {"10": 4, "12": 6, "14": 10, "16": 10}),
         ]:
             order = self._add(self._track(name), "Prepared")
             self.assertEqual(self._mix(order), expected, name)
 
-    def test_a_seven_foot_pair_is_two_of_each_per_track(self):
-        # The owner's own description - "one vertical track might come with 2
-        # brackets of 3 different sizes" - and 4/4/4 for the pair is exactly
-        # that. This is the check that the per-pair reading is the right one.
+    def test_a_seven_foot_track_is_four_of_each_of_three_sizes(self):
+        """THE PER-TRACK READING, which these numbers have twice got wrong.
+
+        The owner states it: "for one track its 4/4/4 for a 7 foot door", and
+        "when buying vertical tracks users are buying them individually not in
+        pairs". A product is ONE track, so the calculator's per-side column is
+        the per-product quantity and nothing here is doubled.
+        """
         order = self._add(
             self._track("CH-VT-2-2 Vertical Track 76-7 door height black"), "Prepared")
-        self.assertEqual(sum(self._mix(order).values()), 24)
-        self.assertEqual(len(self._mix(order)), 3)
+        self.assertEqual(self._mix(order), {"10": 4, "12": 4, "14": 4})
+        self.assertEqual(sum(self._mix(order).values()), 12)
 
     def test_sixteens_appear_only_from_nine_feet(self):
         for name, has16 in [
@@ -157,18 +164,19 @@ class TestTrackPreparation(TransactionCase):
         order = self._add(tmpl, "Prepared")
         track_line = order.order_line.filtered(lambda l: not l.track_prep_role)
         order._cart_update_line_quantity(track_line.id, 2)
-        # Two pairs is two doors: every size doubles, and so do the flags.
-        self.assertEqual(self._mix(order), {"10": 16, "12": 16, "14": 16})
-        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 4)
+        # Two tracks is two of everything - which for a single door is both
+        # sides of it.
+        self.assertEqual(self._mix(order), {"10": 8, "12": 8, "14": 8})
+        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 2)
 
     def test_a_part_cannot_be_edited_on_its_own(self):
         tmpl = self._track("CH-VT-2-2 Vertical Track 76-7 door height black")
         order = self._add(tmpl, "Prepared")
         bracket = order.order_line.filtered(lambda l: l.track_prep_role == "jamb_12")
         order._cart_update_line_quantity(bracket.id, 99)
-        # Still the eight the pair needs, not ninety-nine - and the OTHER
+        # Still the four the track needs, not ninety-nine - and the OTHER
         # sizes are untouched, which one shared role could not have managed.
-        self.assertEqual(self._mix(order), {"10": 8, "12": 8, "14": 8})
+        self.assertEqual(self._mix(order), {"10": 4, "12": 4, "14": 4})
 
     def test_removing_the_track_removes_its_parts(self):
         tmpl = self._track("CH-VT-2-2 Vertical Track 76-7 door height black")
@@ -204,13 +212,13 @@ class TestTrackPreparation(TransactionCase):
         # white one, so finding the black one proves the colour match wins.
         order = self._add(self._track("CH-VT-2-2 Vertical Track 76-7 door height black"),
                           "Prepared")
-        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 2)
+        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 1)
         self.assertEqual(self._qty(order, self.flag_white.product_variant_id), 0)
 
     def test_a_white_track_gets_the_white_angle(self):
         order = self._add(self._track("CH-VT-3-2 Vertical Track 92-8 door height white"),
                           "Prepared")
-        self.assertEqual(self._qty(order, self.flag_white.product_variant_id), 2)
+        self.assertEqual(self._qty(order, self.flag_white.product_variant_id), 1)
         self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 0)
 
     def test_an_unknown_finish_adds_nothing(self):
@@ -270,13 +278,13 @@ class TestTrackPreparation(TransactionCase):
     # The names as they actually are on the live site, prime marks and all.
     LIVE_NAMES = [
         ('[CH-VT-2"] 2" Vertical Track 76" - 7\' Door Height Black',
-         {"10": 8, "12": 8, "14": 8}, "Black"),
+         {"10": 4, "12": 4, "14": 4}, "Black"),
         ('[CH-VT-3"] 3" Vertical Track 88" - 8\' Door Height White',
-         {"10": 8, "12": 10, "14": 10}, "White"),
+         {"10": 4, "12": 5, "14": 5}, "White"),
         ('[CH-VT-3"] 3" Vertical Track 100" - 9\' Door Height White',
-         {"10": 8, "12": 10, "14": 10, "16": 4}, "White"),
+         {"10": 4, "12": 5, "14": 5, "16": 2}, "White"),
         ('[CH-VT-2"] 2" Vertical Track 112" - 10\' Door Height Black',
-         {"10": 8, "12": 10, "14": 10, "16": 8}, "Black"),
+         {"10": 4, "12": 5, "14": 5, "16": 4}, "Black"),
     ]
 
     def test_the_live_product_names_are_read_correctly(self):
@@ -294,7 +302,7 @@ class TestTrackPreparation(TransactionCase):
 
             flag = self.flag_black if finish == "Black" else self.flag_white
             self.assertEqual(
-                self._qty(order, flag.product_variant_id), 2,
+                self._qty(order, flag.product_variant_id), 1,
                 "wrong flag angle finish for %s" % name)
 
     def test_the_option_is_hidden_from_the_shop_filters(self):
@@ -332,7 +340,7 @@ class TestTrackPreparation(TransactionCase):
             self._track('[CH-VT-2"] 2" Vertical Track 76" - 7\' Door Height Black'),
             "Prepared")
 
-        for size, qty in (("10", 8), ("12", 8), ("14", 8)):
+        for size, qty in (("10", 4), ("12", 4), ("14", 4)):
             self.assertEqual(
                 self._qty(order, brackets[(size, "Black")].product_variant_id), qty,
                 "wrong quantity of Jamb Bracket # %s Black" % size)
@@ -346,7 +354,7 @@ class TestTrackPreparation(TransactionCase):
             "Prepared")
 
         self.assertEqual(
-            self._qty(order, brackets[("12", "White")].product_variant_id), 10)
+            self._qty(order, brackets[("12", "White")].product_variant_id), 5)
         self.assertEqual(
             self._qty(order, brackets[("12", "Black")].product_variant_id), 0,
             "a white track was given black brackets")
@@ -460,9 +468,9 @@ class TestTrackPreparation(TransactionCase):
 
         for size in ("10", "12", "14"):
             self.assertEqual(
-                self._qty(order, brackets[(size, "Black")].product_variant_id), 8,
+                self._qty(order, brackets[(size, "Black")].product_variant_id), 4,
                 "the renamed bracket cost the order its # %s" % size)
 
         self.assertEqual(
-            self._qty(order, self.flag_black.product_variant_id), 2,
-            "the renamed bracket cost the order its flag angles")
+            self._qty(order, self.flag_black.product_variant_id), 1,
+            "the renamed bracket cost the order its flag angle")
