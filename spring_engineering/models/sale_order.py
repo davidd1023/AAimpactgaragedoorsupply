@@ -1,10 +1,7 @@
-import logging
 import math
 import re
 
 from odoo import _, models
-
-_logger = logging.getLogger(__name__)
 
 # The attribute value that means "send it ready to fit". Matched on the VALUE's
 # name rather than on an xml id, so the owner can attach the attribute to track
@@ -211,39 +208,24 @@ class SaleOrder(models.Model):
 
         return None
 
-    def _track_prep_configured_part(self, key):
-        """The product named in the settings for this role, or an empty set."""
-        ref = self.env["ir.config_parameter"].sudo().get_param(
-            "spring_engineering.track_prep_%s_product_id" % key
-        )
-
-        if not ref:
-            return self.env["product.product"]
-
-        try:
-            return self.env["product.product"].sudo().browse(int(ref)).exists()
-        except (TypeError, ValueError):
-            return self.env["product.product"]
-
     def _track_prep_flag_product(self, line):
         """The flag angle in the track's own finish.
 
-        Looked up BY NAME rather than configured, because there is one per
-        colour and the right one depends on the track rather than on a setting.
-        The setting stays as a fallback for a track whose finish is a colour
-        these products do not cover.
+        Looked up BY NAME, because there is one per colour and the right one
+        depends on the track rather than on a setting. There was a setting
+        here as a fallback; it is gone, because moving this feature between
+        modules left it in no view at all - unreachable, and so a fallback
+        that could never be populated. A missing product now names itself in
+        the refusal, which is what a person can actually act on.
         """
         colour = self._track_prep_colour(line)
 
-        if colour:
-            found = self.env["product.product"].sudo().search(
-                [("name", "=ilike", "Flag Angle %s" % colour)], limit=1
-            )
+        if not colour:
+            return self.env["product.product"]
 
-            if found:
-                return found
-
-        return self._track_prep_configured_part("flag")
+        return self.env["product.product"].sudo().search(
+            [("name", "=ilike", "Flag Angle %s" % colour)], limit=1
+        )
 
     # --- keeping the parts in step with the track -----------------------------
 
@@ -358,30 +340,6 @@ class SaleOrder(models.Model):
         """Add a track, then add what preparing it needs."""
         result = super()._cart_add(product_id, quantity, uom_id=uom_id, **kwargs)
         line = self.env["sale.order.line"].browse(result.get("line_id"))
-
-        # TEMPORARY DIAGNOSTIC - REMOVE ONCE THE TRIMS QUESTION IS SETTLED.
-        #
-        # A kit ordered with a trim colour keeps arriving in the cart as "No
-        # Trims" on the live site, and every half of it tests clean in
-        # isolation: the browser has the right value checked in the button's
-        # own form, and this server records it correctly when the same request
-        # is posted by hand, including against a product built to the live
-        # kit's exact shape. The two cannot both be true, so this logs what
-        # actually crosses the boundary on the machine where it fails.
-        #
-        # It prints what the request carried and what the line ended up with.
-        # One line per add, on a low-traffic shop, and it goes as soon as the
-        # answer is in.
-        if kwargs.get("no_variant_attribute_value_ids") is not None:
-            _logger.info(
-                "TRIMS DIAGNOSTIC: product=%s received no_variant=%r"
-                " -> line=%s stored=%r",
-                product_id,
-                kwargs.get("no_variant_attribute_value_ids"),
-                line.id if line else None,
-                line.product_no_variant_attribute_value_ids.mapped("name")
-                if line else None,
-            )
 
         if line.exists():
             warning = self._track_prep_sync(line)
