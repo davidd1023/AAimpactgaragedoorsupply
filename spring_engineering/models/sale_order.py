@@ -142,16 +142,34 @@ class SaleOrder(models.Model):
         """
         Product = self.env["product.product"].sudo()
 
-        # As the owner names them, and the same without the space after the
-        # hash - the obvious way for someone to type it next time.
-        for pattern in ("Jamb Bracket # %s %s", "Jamb Bracket #%s %s"):
-            found = Product.search(
-                [("name", "=ilike", pattern % (size, colour))], limit=1
-            )
+        # TOLERANT, BECAUSE AN EXACT NAME IS A TRAP. The first version required
+        # the name to be exactly "Jamb Bracket # 10 Black". Any difference -
+        # "#10" without the space, a hyphen, a double space, a trailing one -
+        # matched nothing, and a bracket that is not found takes the WHOLE
+        # preparation down: _track_prep_sync removes every part and adds none,
+        # so the cart shows the track alone with no brackets and no flag
+        # angles. That is a lot of consequence to hang on a space.
+        #
+        # So: find anything that looks like a jamb bracket, then pick the one
+        # whose name carries this size as a whole number and this finish as a
+        # whole word. "# 10" does not match a "# 100" bracket, and Black does
+        # not match Blackened.
+        candidates = Product.search([("name", "ilike", "jamb")])
 
-            if found:
-                return found
+        for product in candidates:
+            name = product.name or ""
 
+            if not re.search(r"\bbracket\b", name, re.I):
+                continue
+
+            if not re.search(r"(?<!\d)%s(?!\d)" % re.escape(size), name):
+                continue
+
+            if re.search(r"\b%s\b" % re.escape(colour), name, re.I):
+                return product
+
+        # The catalogue part numbers, for a database carrying
+        # garage_door_supply's data instead of the owner's own products.
         code = self.BRACKET_CODES.get(size)
 
         if code:
@@ -223,9 +241,22 @@ class SaleOrder(models.Model):
         if not colour:
             return self.env["product.product"]
 
-        return self.env["product.product"].sudo().search(
-            [("name", "=ilike", "Flag Angle %s" % colour)], limit=1
-        )
+        Product = self.env["product.product"].sudo()
+        exact = Product.search([("name", "=ilike", "Flag Angle %s" % colour)], limit=1)
+
+        if exact:
+            return exact
+
+        # Same tolerance as the brackets - a flag angle that is not found
+        # takes the whole preparation down with it.
+        for product in Product.search([("name", "ilike", "flag")]):
+            name = product.name or ""
+
+            if re.search(r"\bangle\b", name, re.I) \
+                    and re.search(r"\b%s\b" % re.escape(colour), name, re.I):
+                return product
+
+        return Product
 
     # --- keeping the parts in step with the track -----------------------------
 
