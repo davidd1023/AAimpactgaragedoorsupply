@@ -78,6 +78,11 @@
         return "too-wide";
     }
 
+    function splitInches(total) {
+        const ft = Math.floor(total / 12);
+        return [ft, Math.round((total - ft * 12) * 1000) / 1000];
+    }
+
     function init(root) {
         const products = JSON.parse(root.dataset.products || "[]");
         const symbol = root.dataset.currencySymbol || "$";
@@ -135,6 +140,7 @@
                 spResult,
             ]);
             const kitLabel = el("div", { class: "form-control-plaintext fw-bold py-1", text: "Enter the door width" });
+            const woBox = el("div", { class: "alert alert-info py-2 small mb-2 d-none aa-wo-note" });
             line.numEl = el("span", { class: "aa-line-num" });
 
             const dup = el("button", { type: "button", class: "btn btn-sm btn-outline-secondary", text: "Duplicate", onclick: () => addLine(line) });
@@ -162,6 +168,7 @@
                     el("div", { class: "d-flex justify-content-between align-items-center mb-2" }, [
                         line.numEl, el("div", { class: "d-flex gap-2" }, [dup, del]),
                     ]),
+                    woBox,
                     el("div", { class: "row g-2 mb-2" }, [
                         el("div", { class: "d-none" }, [kitSel]),
                         field("Kit (from width)", kitLabel, "col-12 col-md-4"),
@@ -437,6 +444,61 @@
                 other.price();
             };
             line.kitSel = kitSel;
+            line.isEmpty = () => !widthIn() && !heightIn() && !weight.value;
+            line.remove = () => {
+                lines.splice(lines.indexOf(line), 1);
+                card.remove();
+            };
+
+            // Mark a field the dealer has to look at; the mark goes away once it is changed.
+            function flag(input, msg) {
+                input.classList.add(msg === "required" ? "is-invalid" : "aa-check");
+                if (msg && msg !== "required") input.title = msg;
+                const clear = () => { input.classList.remove("is-invalid", "aa-check"); input.removeAttribute("title"); };
+                input.addEventListener("change", clear, { once: true });
+            }
+
+            // Fill this door from one door of an uploaded work order (wo_reader.py).
+            line.fill = (d, wo) => {
+                const unsure = d.unsure || [];
+                if (d.width_in) { const [f, i] = splitInches(d.width_in); wFt.value = f; wIn.value = i || ""; }
+                if (d.height_in) { const [f, i] = splitInches(d.height_in); hFt.value = f; hIn.value = i || ""; }
+                qty.value = d.quantity || 1;
+                tag.value = ["Mark " + (d.mark || "").replace(/^mark\s*/i, ""), wo.job].filter((x) => x && x.trim() !== "Mark").join(" - ").slice(0, 80);
+                liftSel.value = d.lift_type === "highlift" ? "highlift" : "standard";
+                hlInput.value = d.lift_type === "highlift" && d.high_lift ? d.high_lift : "";
+                trackSel.value = d.track_type || "";
+                weight.value = "";
+
+                autoKit();
+                buildAttrs();
+                syncLift();
+                syncRoller();
+                autoPanels();
+                if (d.track_color) pickByPrefix("Finish Color", [d.track_color]);
+                refreshDrum();
+
+                // What the dealer must check.
+                flag(weight, "required");
+                weight.placeholder = "lb - required";
+                if (!d.width_in || unsure.includes("width_in")) { flag(wFt, "Check the width"); flag(wIn, "Check the width"); }
+                if (!d.height_in || unsure.includes("height_in")) { flag(hFt, "Check the height"); flag(hIn, "Check the height"); }
+                if (!d.track_type || unsure.includes("track_size") || unsure.includes("track_radius")) flag(trackSel, "Check the track type");
+                if (unsure.includes("lift_type")) flag(liftSel, "Check the lift type");
+                if (d.lift_type === "highlift" && (!d.high_lift || unsure.includes("high_lift_in"))) flag(hlInput, "Check the high lift");
+                const colorSel = line.selects["Finish Color"];
+                if (colorSel && (!d.track_color || unsure.includes("track_color"))) flag(colorSel.sel, "Check the color");
+
+                const bits = [];
+                bits.push("From work order" + (wo.wo_number ? " " + wo.wo_number : "") + (d.mark ? ", Mark " + d.mark.replace(/^mark\s*/i, "") : ""));
+                const s = seriesFor(widthIn());
+                if (d.series && s && s !== "too-wide" && s !== "AA-" + d.series) bits.push("the WO says series " + d.series + ", the width gives " + s);
+                if (d.frame_color) bits.push("frame: " + d.frame_color);
+                if (d.notes) bits.push("handwritten: " + d.notes);
+                woBox.textContent = bits.join(" \u00B7 ") + ". Check the highlighted fields and enter the weight.";
+                woBox.classList.remove("d-none");
+                price();
+            };
 
             line.autoKit = autoKit;
             line.buildAttrs = buildAttrs;
@@ -464,10 +526,53 @@
             renumber();
             if (copyFrom) copyFrom.copyInto(line);
             else { buildAttrs(); refreshDrum(); price(); }
+            return line;
         }
 
         root.querySelector("#aa_add_line").addEventListener("click", () => addLine());
         addLine();
+
+        // ── Upload a work order PDF: read it on the server, fill one door per Mark ──
+        const woFile = root.querySelector("#aa_wo_file");
+        const woBtn = root.querySelector("#aa_wo_upload");
+        const woStatus = root.querySelector("#aa_wo_status");
+        if (woFile && woBtn) {
+            woBtn.addEventListener("click", () => woFile.click());
+            woFile.addEventListener("change", () => {
+                const file = woFile.files && woFile.files[0];
+                woFile.value = "";
+                if (!file) return;
+                woStatus.className = "small w-100 text-muted";
+                if (file.size > 20 * 1024 * 1024) { woStatus.className = "small w-100 text-danger"; woStatus.textContent = "The file is too big (20 MB max)."; return; }
+                woBtn.disabled = true;
+                woStatus.textContent = "Reading " + file.name + "... this takes about half a minute.";
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const b64 = String(reader.result).split(",")[1] || "";
+                    rpc("/dealer/order/read_pdf", { pdf_base64: b64 })
+                        .then((wo) => {
+                            if (wo.error) throw new Error(wo.error);
+                            lines.filter((l) => l.isEmpty()).forEach((l) => l.remove());
+                            wo.doors.forEach((d) => addLine().fill(d, wo));
+                            renumber();
+                            refreshTotal();
+                            const po = root.querySelector("#aa_po");
+                            if (!po.value && wo.wo_number) po.value = "WO " + wo.wo_number.replace(/^\s*WO\s*#?\s*/i, "");
+                            const notes = root.querySelector("#aa_notes");
+                            const extra = [wo.client && "Client: " + wo.client, wo.job && "Job: " + wo.job, wo.quote_number && "Quote: " + wo.quote_number].filter(Boolean).join(" | ");
+                            if (extra && !notes.value.includes(extra)) notes.value = (notes.value ? notes.value + " | " : "") + extra;
+                            woStatus.className = "small w-100 text-success";
+                            woStatus.textContent = wo.doors.length + (wo.doors.length === 1 ? " door" : " doors") +
+                                " filled in from " + file.name + ". Check each door, enter the weights, then place the order.";
+                            lines[lines.length - wo.doors.length].inputs.weight.scrollIntoView({ behavior: "smooth", block: "center" });
+                        })
+                        .catch((e) => { woStatus.className = "small w-100 text-danger"; woStatus.textContent = e.message; })
+                        .finally(() => { woBtn.disabled = false; });
+                };
+                reader.onerror = () => { woBtn.disabled = false; woStatus.className = "small w-100 text-danger"; woStatus.textContent = "Could not open the file."; };
+                reader.readAsDataURL(file);
+            });
+        }
 
         submitBtn.addEventListener("click", () => {
             errorEl.textContent = "";
@@ -475,6 +580,8 @@
             if (!po) { errorEl.textContent = "Please enter your PO number."; root.querySelector("#aa_po").focus(); return; }
             const noKit = lines.findIndex((l) => !l.kitOk);
             if (noKit >= 0) { errorEl.textContent = "Door " + (noKit + 1) + ": enter a door width up to 18' 4\"."; return; }
+            const noWeight = lines.findIndex((l) => !(Number(l.inputs.weight.value) > 0));
+            if (noWeight >= 0) { errorEl.textContent = "Door " + (noWeight + 1) + ": enter the door weight."; lines[noWeight].inputs.weight.focus(); return; }
             const missing = lines.findIndex((l) => !l.payload().track_type);
             if (missing >= 0) { errorEl.textContent = "Door " + (missing + 1) + ": choose the track type."; return; }
             const noHl = lines.findIndex((l) => l.payload().lift_type === "highlift" && !(Number(l.payload().high_lift) > 0));
