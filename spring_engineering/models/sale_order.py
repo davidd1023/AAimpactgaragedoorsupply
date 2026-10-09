@@ -1,7 +1,10 @@
+import logging
 import math
 import re
 
 from odoo import _, models
+
+_logger = logging.getLogger(__name__)
 
 # The attribute value that means "send it ready to fit". Matched on the VALUE's
 # name rather than on an xml id, so the owner can attach the attribute to track
@@ -355,6 +358,30 @@ class SaleOrder(models.Model):
         """Add a track, then add what preparing it needs."""
         result = super()._cart_add(product_id, quantity, uom_id=uom_id, **kwargs)
         line = self.env["sale.order.line"].browse(result.get("line_id"))
+
+        # TEMPORARY DIAGNOSTIC - REMOVE ONCE THE TRIMS QUESTION IS SETTLED.
+        #
+        # A kit ordered with a trim colour keeps arriving in the cart as "No
+        # Trims" on the live site, and every half of it tests clean in
+        # isolation: the browser has the right value checked in the button's
+        # own form, and this server records it correctly when the same request
+        # is posted by hand, including against a product built to the live
+        # kit's exact shape. The two cannot both be true, so this logs what
+        # actually crosses the boundary on the machine where it fails.
+        #
+        # It prints what the request carried and what the line ended up with.
+        # One line per add, on a low-traffic shop, and it goes as soon as the
+        # answer is in.
+        if kwargs.get("no_variant_attribute_value_ids") is not None:
+            _logger.info(
+                "TRIMS DIAGNOSTIC: product=%s received no_variant=%r"
+                " -> line=%s stored=%r",
+                product_id,
+                kwargs.get("no_variant_attribute_value_ids"),
+                line.id if line else None,
+                line.product_no_variant_attribute_value_ids.mapped("name")
+                if line else None,
+            )
 
         if line.exists():
             warning = self._track_prep_sync(line)
