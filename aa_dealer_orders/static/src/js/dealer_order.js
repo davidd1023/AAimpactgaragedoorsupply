@@ -128,6 +128,24 @@
             const drumHint = el("div", { class: "small text-muted mt-1" });
             const priceEl = el("div", { class: "aa-price", text: "-" });
             const breakdown = el("div", { class: "small text-muted mt-2 aa-breakdown" });
+            // Springs (Spring Engineering): only the spring IDs AA sells.
+            const SPRING_IDS = ['2 5/8"', '3 3/4"', '5 1/4"', '3 3/4" inside 6"'];
+            const CYCLES = ["10,000", "15,000", "25,000", "50,000", "75,000", "100,000"];
+            const spIdSel = el("select", { class: "form-select form-select-sm", onchange: price },
+                SPRING_IDS.map((v) => el("option", { value: v, text: v.includes("inside") ? v + " (Duplex)" : v })));
+            const spCountSel = el("select", { class: "form-select form-select-sm", onchange: price },
+                [1, 2, 3, 4].map((n) => el("option", { value: n, text: n + (n === 1 ? " spring" : " springs") })));
+            spCountSel.value = "2";
+            const spCyclesSel = el("select", { class: "form-select form-select-sm", onchange: price },
+                CYCLES.map((v) => el("option", { value: v, text: v + " cycles" })));
+            const spResult = el("div", { class: "small mt-1" });
+            const springBox = el("div", { class: "row g-2 mt-1 d-none aa-springs" }, [
+                el("div", { class: "col-12 small fw-bold", text: "Springs (calculated like the Spring Engineering page)" }),
+                el("div", { class: "col-6 col-md-3" }, [el("label", { class: "form-label small mb-1", text: "Spring ID" }), spIdSel]),
+                el("div", { class: "col-6 col-md-3" }, [el("label", { class: "form-label small mb-1", text: "Springs" }), spCountSel]),
+                el("div", { class: "col-6 col-md-3" }, [el("label", { class: "form-label small mb-1", text: "Cycle life" }), spCyclesSel]),
+                el("div", { class: "col-12" }, [spResult]),
+            ]);
             const kitLabel = el("div", { class: "form-control-plaintext fw-bold py-1", text: "Enter the door width" });
             line.numEl = el("span", { class: "aa-line-num" });
 
@@ -174,6 +192,7 @@
                     ]),
                     attrsBox,
                     el("div", { class: "mt-2" }, [el("div", { class: "form-label small mb-1 fw-bold", text: "Add to your order" }), optsBox]),
+                    springBox,
                     breakdown,
                 ]),
             ]);
@@ -324,6 +343,45 @@
                 syncKitDrum();
             }
 
+            function springsChecked() {
+                return Object.values(line.checks).some((c) => c.name === "Springs" && c.cb.checked);
+            }
+
+            // Spring spec from the Spring Engineering model (spring_bridge.js).
+            function springSpec() {
+                springBox.classList.toggle("d-none", !springsChecked());
+                spResult.innerHTML = "";
+                if (!springsChecked()) return null;
+                if (typeof window.aaSpringCalc !== "function") {
+                    spResult.textContent = "Spring calculator not available.";
+                    return null;
+                }
+                let r;
+                try {
+                    r = window.aaSpringCalc({
+                        springId: spIdSel.value, springs: Number(spCountSel.value), cycles: spCyclesSel.value,
+                        liftType: liftSel.value, highLift: Number(hlInput.value) || 0, trackType: trackSel.value,
+                        drum: drumSel.value, widthIn: widthIn(), heightIn: heightIn(), weight: Number(weight.value) || 0,
+                    });
+                } catch (e) {
+                    r = { error: "Could not calculate the springs." };
+                }
+                if (r.error) {
+                    spResult.appendChild(el("div", { class: "text-warning-emphasis", text: r.error }));
+                    line.springWarnings = [];
+                    return null;
+                }
+                const n = r.spec.springs;
+                r.spec.springsSpec.forEach((x) => spResult.appendChild(el("div", {
+                    text: (x.role === "Spring" ? n + " x " : n + " x " + x.role + ": ") + x.wire + '" wire, ' + x.id + '" ID, ' + x.length + '" long',
+                })));
+                r.warnings.forEach((w) => spResult.appendChild(el("div", {
+                    class: w.severity === "red" ? "text-danger" : "text-warning-emphasis", text: "\u26A0 " + w.message,
+                })));
+                line.springWarnings = r.warnings.filter((w) => w.severity === "red").map((w) => w.message);
+                return r.spec;
+            }
+
             function ptavIds() {
                 const ids = Object.values(line.selects).map((s) => Number(s.sel.value));
                 Object.values(line.checks).forEach((c) => c.cb.checked && ids.push(Number(c.cb.value)));
@@ -370,6 +428,8 @@
                 lift_type: liftSel.value,
                 high_lift: liftSel.value === "highlift" ? hlInput.value : "",
                 drum: drumSel.value,
+                spring_spec: springSpec(),
+                spring_warnings: line.springWarnings || [],
             });
             line.copyInto = (other) => {
                 Object.entries(line.inputs).forEach(([k, i]) => (other.inputs[k].value = i.value));
@@ -383,9 +443,13 @@
                 other.fillDrums(false);
                 other.drumSel.value = drumSel.value;
                 other.syncKitDrum();
+                other.springInputs.id.value = spIdSel.value;
+                other.springInputs.count.value = spCountSel.value;
+                other.springInputs.cycles.value = spCyclesSel.value;
                 other.price();
             };
             line.kitSel = kitSel;
+            line.springInputs = { id: spIdSel, count: spCountSel, cycles: spCyclesSel };
             line.autoKit = autoKit;
             line.buildAttrs = buildAttrs;
             line.price = price;
