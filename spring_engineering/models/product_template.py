@@ -1,61 +1,96 @@
 from odoo import api, models
 
-# A product is a vertical track if its name says so. The category would be a
-# steadier signal, but the live track products were created by hand and their
-# category cannot be relied on, whereas every one of them is named
-# "... Vertical Track <length>-<height> door height <finish>".
+# A product is a vertical track if its name says so, and a hardware kit the
+# same way. The category would be a steadier signal, but the live products
+# were created by hand and their categories cannot be relied on, whereas the
+# names are consistent: "... Vertical Track 76" - 7' Door Height Black" and
+# "AA 1200 Hardware Kit".
 VERTICAL_TRACK = "vertical track"
+HARDWARE_KIT = "hardware kit"
 
 
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    @api.model
-    def _attach_track_preparation(self):
-        """Put the Prepared/Unprepared choice on every vertical track.
+    def _attach_option(self, attribute_ref, value_refs, name_fragment):
+        """Put one no-variant option on every product whose name matches.
 
-        WHY THIS IS AUTOMATIC. The module used to create the attribute and stop
-        there, which meant the option appeared on nothing until someone opened
-        each of the track products and added it by hand. The owner merged the
-        code, looked at a track, and quite reasonably reported the feature
-        missing - it was, on every product.
+        WHY THIS IS AUTOMATIC. Creating an attribute puts it on nothing. The
+        first version of the prepared-track feature did exactly that, and the
+        option appeared on no product at all until someone opened each one and
+        added it by hand - which, across a hundred tracks, was never a
+        reasonable thing to ask. The owner merged it, looked at a track, and
+        quite reasonably reported the feature missing.
 
-        Called from data/track_prep_data.xml on install AND on every update, so
-        a track added later picks it up the next time the module is updated. It
-        only ever ADDS: a track that already has the attribute is left alone,
-        and nothing is removed, so running it twice is the same as running it
-        once.
+        Called from the data files on install AND on every module update, so a
+        product added later picks the option up at the next update. It only
+        ever ADDS: a product that already has the attribute is skipped and
+        nothing is removed, so running it twice is the same as running it once.
         """
-        attribute = self.env.ref(
-            "spring_engineering.attribute_track_preparation", raise_if_not_found=False
-        )
+        attribute = self.env.ref(attribute_ref, raise_if_not_found=False)
 
         if not attribute:
             return
 
-        values = (
-            self.env.ref("spring_engineering.attribute_value_track_unprepared",
-                         raise_if_not_found=False)
-            | self.env.ref("spring_engineering.attribute_value_track_prepared",
-                           raise_if_not_found=False)
-        )
+        values = self.env["product.attribute.value"]
 
-        if len(values) != 2:
+        for ref in value_refs:
+            values |= self.env.ref(ref, raise_if_not_found=False) or values
+
+        if len(values) != len(value_refs):
             return
 
-        tracks = self.with_context(active_test=False).search(
-            [("name", "ilike", VERTICAL_TRACK)]
+        products = self.with_context(active_test=False).search(
+            [("name", "ilike", name_fragment)]
         )
         lines = self.env["product.template.attribute.line"]
 
-        for track in tracks:
-            if track.attribute_line_ids.filtered(
+        for product in products:
+            if product.attribute_line_ids.filtered(
                 lambda line: line.attribute_id == attribute
             ):
                 continue
 
             lines.create({
-                "product_tmpl_id": track.id,
+                "product_tmpl_id": product.id,
                 "attribute_id": attribute.id,
                 "value_ids": [(6, 0, values.ids)],
             })
+
+    @api.model
+    def _attach_track_preparation(self):
+        """The Prepared/Unprepared choice, on every vertical track."""
+        self._attach_option(
+            "spring_engineering.attribute_track_preparation",
+            (
+                "spring_engineering.attribute_value_track_unprepared",
+                "spring_engineering.attribute_value_track_prepared",
+            ),
+            VERTICAL_TRACK,
+        )
+
+    @api.model
+    def _attach_trim_colour(self):
+        """The trim colour, on every hardware kit.
+
+        WHY AN ATTRIBUTE AND NOT THE JAVASCRIPT THIS REPLACES. The first
+        attempt hooked Odoo's "Custom value" text box - the thing that makes
+        the other extras on a kit page open a square to type in - and swapped
+        it for a dropdown. It never worked on the live site, because it needed
+        the existing Trims value flagged as a custom value by hand, and because
+        it shipped in a module that site does not install.
+
+        The attribute route is the one that demonstrably works: the prepared
+        track option reached the live site by exactly this path. The choice
+        also lands on the order line by itself, with no code to collect it.
+        """
+        self._attach_option(
+            "spring_engineering.attribute_trim_colour",
+            (
+                "spring_engineering.attribute_value_trim_none",
+                "spring_engineering.attribute_value_trim_black",
+                "spring_engineering.attribute_value_trim_bronze",
+                "spring_engineering.attribute_value_trim_white",
+            ),
+            HARDWARE_KIT,
+        )

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!--
+      THE TRIM COLOUR ON A HARDWARE KIT.
+
+      The kit pages carry a set of "add to your order" extras, three of which
+      open a box to type into - that is Odoo's "Custom value" flag on an
+      attribute value, nothing custom - while Trims did nothing at all.
+
+      The first attempt at this patched the custom-value box into a dropdown in
+      JavaScript. It never worked on the live site: it needed the Trims value
+      flagged by hand on each product, and it shipped in a module that site
+      does not install. This is the same route the prepared-track option took,
+      which did reach the live site.
+
+      `no_variant` so a kit does not multiply into four variants, and `radio`
+      so the colours are visible rather than hidden behind a select. The chosen
+      colour lands on the order line by itself - a no-variant attribute value
+      is recorded against the line - so there is no code collecting it and
+      nothing to go wrong between the page and the order.
+    -->
+    <record id="attribute_trim_colour" model="product.attribute">
+      <field name="name">Trim Color</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">no_variant</field>
+      <field name="sequence">20</field>
+      <!--
+        Hidden from the shop sidebar. website_sale lists every visible
+        attribute as a filter down the side of /shop, and the prepared-track
+        option appeared there under the categories before this was set - a
+        catalogue is not browsed by trim colour.
+      -->
+      <field name="visibility">hidden</field>
+    </record>
+
+    <!--
+      NO TRIM COMES FIRST, AND IS THEREFORE THE DEFAULT.
+
+      Trims are an extra, not a requirement, so a kit ordered without them must
+      be orderable without a colour. A no-variant attribute always has one
+      value selected - there is no blank state - so "No Trim" is how a kit says
+      it does not want any, and being first makes it what a customer who
+      ignores the option gets.
+    -->
+    <record id="attribute_value_trim_none" model="product.attribute.value">
+      <field name="attribute_id" ref="attribute_trim_colour"/>
+      <field name="name">No Trim</field>
+      <field name="sequence">1</field>
+    </record>
+
+    <record id="attribute_value_trim_black" model="product.attribute.value">
+      <field name="attribute_id" ref="attribute_trim_colour"/>
+      <field name="name">Black</field>
+      <field name="sequence">2</field>
+    </record>
+
+    <record id="attribute_value_trim_bronze" model="product.attribute.value">
+      <field name="attribute_id" ref="attribute_trim_colour"/>
+      <field name="name">Bronze</field>
+      <field name="sequence">3</field>
+    </record>
+
+    <record id="attribute_value_trim_white" model="product.attribute.value">
+      <field name="attribute_id" ref="attribute_trim_colour"/>
+      <field name="name">White</field>
+      <field name="sequence">4</field>
+    </record>
+
+    <!-- On every hardware kit, on install and on every update. -->
+    <function model="product.template" name="_attach_trim_colour"/>
+
+  </data>
+</odoo>
