@@ -9,7 +9,7 @@ beside the endpoint it talks to so the two halves can be read together.
 
 - **`index.html`** - the finished file. Download it and upload it over
   `index.html` in the calculator repository. This is the one to use.
-- **`send-to-manufacturing.patch`** - the same change as a diff, 61 lines
+- **`send-to-manufacturing.patch`** - the same change as a diff, 65 lines
   added and none removed. For reading what changed, or for `git apply` if
   you would rather not replace the whole file.
 
@@ -85,3 +85,18 @@ button went somewhere plausible, raised nothing, and reported no error.
 
 The settings panel now prints the address it will actually use, so a wrong one
 is visible before it is relied on rather than after.
+
+## Which build is running
+
+The settings panel and the button both show a build number - currently
+**build 3**. This page is delivered by uploading a file and has no cache
+busting of its own, so a tab left open on the shop floor can keep running an
+older copy for as long as it stays open, and "it still does the same thing" is
+then indistinguishable from a real fault. The marker makes that answerable by
+looking at the screen.
+
+If the button does not say `b3`, the browser is running an older copy: reload
+with a new query string (`?v=p3`) or hard-reload (Ctrl-Shift-R, Cmd-Shift-R).
+
+The button also logs the exact address it is about to open to the browser
+console, and says so if a pop-up blocker stopped the new tab.

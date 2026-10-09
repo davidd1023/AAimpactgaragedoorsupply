@@ -131,7 +131,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
       <div class="settings-section" style="margin-top:14px"><div class="settings-section-title">Odoo Address</div>
         <div class="printer-item"><label>Paste any page of your Odoo - only the address is used</label>
         <input id="cfg-odoo" type="text" inputmode="url" placeholder="aaigd.com  or  https://aaigd.com/odoo/manufacturing" oninput="saveOdooUrl()" style="width:100%;padding:8px;border:1px solid var(--gray-border);border-radius:8px;font-size:14px"/>
-        <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div></div>
+        <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div>
+        <div style="margin-top:6px;font-size:11px;color:#888">Send to Manufacturing build <strong>3</strong> &#183; 2026-10-09</div></div>
       </div>
       <div class="save-confirm" id="save-confirm">Saved</div>
     </div>
@@ -420,7 +421,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
   <div class="results" id="print-all-wrap" style="margin-top:4px">
     <button class="print-all-btn" onclick="opPrintChoice()">&#128424; Print All</button>
     <button class="print-all-btn" style="display:none" onclick="doPrintAll()">&#128424; Print All (print server)</button>
-    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff">&#128296; Send to Manufacturing</button>
+    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff" title="Send to Manufacturing build 3">&#128296; Send to Manufacturing <span style="opacity:.55;font-size:11px">b3</span></button>
   </div>
   </div>
 </div>
@@ -981,7 +982,10 @@ function sendToManufacturing(){
     drum:CD.hasWeight?(CD.drum||''):''
   };
   if(!spec.wo&&!confirm('This door has no W/O number. Without one, sending twice will raise two orders. Send anyway?'))return;
-  window.open(base+'/door-work-order/new?spec='+encodeURIComponent(JSON.stringify(spec)),'_blank','noopener');
+  var target=base+'/door-work-order/new?spec='+encodeURIComponent(JSON.stringify(spec));
+  try{console.log('Send to Manufacturing b3 ->',target);}catch(e){}
+  var win=window.open(target,'_blank','noopener');
+  if(!win)alert('Your browser blocked the new tab. Allow pop-ups for this page, or open this address:\n\n'+target);
 }
 function savePrinters(){save({pTracks:document.getElementById('cfg-tracks').value,pCables:document.getElementById('cfg-cables').value,pSmall:document.getElementById('cfg-small').value,pBig:document.getElementById('cfg-big').value});var c=document.getElementById('save-confirm');c.classList.add('show');setTimeout(function(){c.classList.remove('show');},2000);}
 function setRotation(deg){
