@@ -24,7 +24,10 @@ import { readFileSync, writeFileSync, existsSync, mkdtempSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
-const BASE = "https://shop.servicespring.com";
+// SSC_BASE exists so the failure handling below can be tested against a server
+// that is deliberately broken, without touching the real one. It is a test
+// seam and nothing else - leave it unset and this is unchanged.
+const BASE = process.env.SSC_BASE || "https://shop.servicespring.com";
 // One request a second by default. PULL_DELAY_MS can only make it SLOWER.
 // Asking faster is never the fix for anything here - this is someone else's
 // server and the account - so the floor is not negotiable.
@@ -124,6 +127,29 @@ function login() {
 // concluding anything about the cookie.
 const RELOGIN_CAP = 5;
 let relogins = 0;
+
+// BACK OFF WHEN THE FAR END STOPS ANSWERING, AND GIVE UP IF IT KEEPS NOT
+// ANSWERING.
+//
+// Batch V9 spent 124 requests on nothing. The server began returning HTML
+// instead of JSON part way in - interleaved across every drum and both lift
+// types, so not an impossible combination - the re-login fired its five
+// attempts, and then the loop marched through the rest of the sweep at a
+// request a second collecting error pages. It recovered on its own later, which
+// is the signature of a transient limit on their side, not of anything wrong
+// with the request.
+//
+// Hammering a server that is already refusing is the one thing a polite
+// scraper must not do. So consecutive failures now sleep for longer and longer,
+// and after GIVE_UP of them in a row the run stops and keeps what it has.
+// Stopping loses nothing: results are flushed after every reading, and
+// dev/rung-target-sample.mjs dedupes against what is already on disk, so the
+// unpulled remainder simply turns up in the next batch.
+const BACKOFF_MAX_MS = 60000;
+// PULL_GIVE_UP exists so the give-up path can be exercised in seconds instead
+// of twenty minutes; the default is what matters.
+const GIVE_UP = Number(process.env.PULL_GIVE_UP) || 25;
+let consecutiveBad = 0;
 
 function looksLikeHtml(body) {
     return /^\s*(<!DOCTYPE|<html)/i.test(body);
@@ -251,9 +277,26 @@ for (let i = 0; i < cases.length; i++) {
     }
 
     if (!parsed) {
-        console.log(`${i + 1}/${cases.length}  ${c.label ?? ""}  NOT JSON - session may have expired`);
+        consecutiveBad += 1;
+        console.log(`${i + 1}/${cases.length}  ${c.label ?? ""}  NOT JSON`
+            + ` (${consecutiveBad} in a row)`);
         results.push({ input: c, error: "non-JSON response", bodyHead: raw.slice(0, 200) });
+        writeFileSync(outFile, JSON.stringify(results, null, 1) + "\n");
+
+        if (consecutiveBad >= GIVE_UP) {
+            console.log(`\n${GIVE_UP} unanswered in a row - stopping and keeping`
+                + ` the ${results.filter((r) => !r.error).length} readings already gathered.`
+                + `\nThe rest of the sweep is simply unpulled; the next batch will pick it up.`);
+            break;
+        }
+
+        // 2s, 4s, 8s ... capped. Deliberately slower than the steady rate.
+        const wait = Math.min(BACKOFF_MAX_MS, 1000 * 2 ** Math.min(consecutiveBad, 6));
+
+        console.log(`  backing off ${wait / 1000}s`);
+        await sleep(wait);
     } else {
+        consecutiveBad = 0;
         const d = parsed.data ?? {};
         const inner = d.innerSpring ?? {};
         const outer = d.outerSpring ?? {};

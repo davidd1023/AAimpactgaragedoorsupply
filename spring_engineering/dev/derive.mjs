@@ -441,6 +441,7 @@ const CAP_RUNGS = new Set((process.env.CAP_RUNGS || "").split(",").map((x) => x.
 // quantity the down-sampling experiment showed drives length accuracy - not
 // the `n` in the table, which counts K readings and is much larger.
 const LENS_REPORT = process.env.LENS_REPORT === "1";
+const STIFFNESS_REPORT = process.env.STIFFNESS_REPORT === "1";
 const UNFIT_RUNGS = new Set((process.env.ENABLE_UNFIT_RUNGS || "")
     .split(",").map((x) => x.trim()).filter(Boolean));
 const CAP_N = Number(process.env.CAP_N) || 0;
@@ -617,6 +618,77 @@ for (const g of rungs.values()) {
     const forStiffness = usable.filter((l) => !l.dense);
 
     g.sMult = 1;
+
+    // STIFFNESS_REPORT=1 asks whether sMult should be fitted per SPRING COUNT
+    // instead of per rung. It measures and changes nothing.
+    //
+    // IT SAID YES AND IT WAS WRONG - keep this, and keep reading. Over the 35
+    // rungs with 40+ readings:
+    //
+    //                      in sample   five-fold CV
+    //   one m per rung         6673         6551
+    //   one m per count        6948         6831
+    //
+    // An out-of-fold gain (+280) larger than the in-sample one (+275) is
+    // normally conclusive. Built properly - per-count m in the table, the
+    // component picking by spring count, the bands refitted against the same
+    // multiplier - the never-tuned draws went from 340/347 to 339/347. ONE
+    // READING WORSE.
+    //
+    // The reason is that this measures a stage in isolation, and the stage
+    // below it already does the job: lineByCount and byCount are keyed by
+    // SPRING COUNT, so the thresholds were already absorbing the per-count
+    // variation. The CV counted a gain the pipeline already had.
+    //
+    // The lesson is not about stiffness. It is that a fitter stage cannot be
+    // scored on its own when a later stage can compensate for it - only the
+    // whole pipeline, against data nothing was tuned on, settles anything.
+    if (STIFFNESS_REPORT && forStiffness.length >= 40) {
+        const whole = fitStiffness(forStiffness);
+        const counts = [...new Set(forStiffness.map((l) => l.springs))].sort();
+        let perCountOk = 0;
+        const ms = [];
+
+        for (const sp of counts) {
+            const rows = forStiffness.filter((l) => l.springs === sp);
+            const f = rows.length >= 8 ? fitStiffness(rows) : null;
+
+            perCountOk += f ? f.ok : 0;
+            ms.push(`${sp}:${f ? f.m.toFixed(4) : "-"}(${rows.length})`);
+        }
+
+        const cv = (mode) => {
+            let ok = 0;
+
+            for (let k = 0; k < 5; k++) {
+                const train = forStiffness.filter((_, i) => i % 5 !== k);
+                const test = forStiffness.filter((_, i) => i % 5 === k);
+
+                for (const l of test) {
+                    const rows = mode === "count"
+                        ? train.filter((t) => t.springs === l.springs)
+                        : train;
+                    const f = rows.length >= 8 ? fitStiffness(rows) : fitStiffness(train);
+
+                    if (f && Math.abs(
+                        snapGrid(l.rawActive * f.m, l.springs, f.twoOffset) - l.length
+                    ) < 1e-9) {
+                        ok += 1;
+                    }
+                }
+            }
+
+            return ok;
+        };
+
+        process.stderr.write(
+            `${(g.outer + "/" + g.inner).padEnd(14)} n=${String(forStiffness.length).padStart(4)}`
+            + `  rung m=${whole.m.toFixed(4)} ok=${String(whole.ok).padStart(4)}`
+            + `  perCount ok=${String(perCountOk).padStart(4)}`
+            + `  CV rung=${String(cv("rung")).padStart(4)} CV count=${String(cv("count")).padStart(4)}`
+            + `  [${ms.join(" ")}]\n`
+        );
+    }
 
     if (forStiffness.length >= 12) {
         const fit = fitStiffness(forStiffness);

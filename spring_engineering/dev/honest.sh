@@ -37,6 +37,13 @@ cd "$(dirname "$0")/.."
 # hides exactly that.
 VALIDATION=dev/eval-validation-seed61006.json
 VALIDATION2=dev/eval-validation2-seed20261007.json
+# A THIRD draw, because the first two are partly spent. Every question checked
+# against a clean sample costs a little of its independence, and the rung-volume
+# campaign was monitored against these two after every batch. This one was drawn
+# after all of that and reads about a point lower - 97.4% orderable against
+# 98.4% - which is the optimism those checks bought, and the reason to quote the
+# newest draw rather than the oldest.
+VALIDATION3=dev/eval-validation3-seed20261009.json
 
 echo "VALIDATION - never tuned against, these are the figures to quote"
 if [ -f "$VALIDATION" ]; then
@@ -50,6 +57,23 @@ fi
 if [ -f "$VALIDATION2" ]; then
     printf '  seed 20261007:\n'
     node dev/clean-cases.mjs "$VALIDATION2" 2>&1 | head -2 | sed 's/^/    /'
+fi
+
+if [ -f "$VALIDATION3" ]; then
+    printf '  seed 20261009 (newest, least spent - QUOTE THIS ONE):\n'
+    node dev/clean-cases.mjs "$VALIDATION3" 2>&1 | head -2 | sed 's/^/    /'
+fi
+
+echo ""
+echo "ORDERABLE vs REFUSED - the split that matters commercially"
+# dev/clean-cases.mjs reports flagged readings at about 79% and that reads like
+# a weakness in half the population. Nearly all of them are the reference
+# REFUSING to build - over 120", wider than the door, wire past the ID's limit -
+# and those doors cannot be bought at any accuracy. The readings it warns about
+# and will still build come out at 100%.
+if [ -f "$VALIDATION" ]; then
+    node dev/orderable.mjs "$VALIDATION3" 2>&1 | sed 's/^/  /'
+    printf '  (the newest draw alone; add the other two for a larger, slightly rosier n)\n' 
 fi
 
 echo ""
