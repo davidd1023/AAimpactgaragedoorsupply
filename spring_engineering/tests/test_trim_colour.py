@@ -9,6 +9,31 @@ class TestTrimColour(TransactionCase):
     widget swapped Odoo's "Custom value" text box for a dropdown, which needed
     the Trims value flagged by hand on every kit and shipped in a module the
     live site does not install. An attribute needs neither.
+
+    WHAT WAS RULED OUT when the owner reported that the chosen colour always
+    came back as "No Trim". Written down because it cost an afternoon and the
+    next person should not repeat it:
+
+      - the BACKEND IS NOT AT FAULT. A kit built to the same shape as the live
+        one - a variant attribute, a single-value attribute, AND the multi
+        checkbox "Add to Your Order" - records and prints the choice:
+            STORED: ['Springs', 'Bronze, 3 Trim']
+            LINE  : ... (4 Panels) | Trims: Bronze, 3 Trim | ...: Springs
+      - visibility="hidden" does NOT break it. It only removes the attribute
+        from the /shop sidebar filters; the model test passes with it set.
+      - the radios carry the classes website_sale collects
+        (input.no_variant.js_variant_change:checked) and sit inside the
+        add-to-cart form, checked against the served HTML.
+      - a second add cannot merge into the first line and lose the colour:
+        _cart_find_product_line matches on no-variant values whenever the
+        product has a no-variant attribute with more than one value.
+      - there are NOT two competing trim controls on the page. A screenshot of
+        the live kit shows one, and it already carries the renamed values.
+
+    The order line the owner quoted read "Trim Color: No Trim" - the names from
+    BEFORE the rename - so it was created by an earlier build. What remains
+    untested is the browser-to-server step, which needs a browser this
+    container does not have.
     """
 
     def setUp(self):
