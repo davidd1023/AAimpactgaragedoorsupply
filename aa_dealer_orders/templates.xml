@@ -26,16 +26,6 @@
         </xpath>
     </template>
 
-    <!-- Shop hardware-kit page: door details for Springs / Tracks / Cables -->
-    <template id="product_kit_door_extras" inherit_id="website_sale.product" name="Hardware kit door extras">
-        <xpath expr="//div[hasclass('o_wsale_product_details_content_section_cta')]" position="before">
-            <div t-if="product.aa_dealer_quick_order" id="aa_kit_door" class="mb-4 d-none"
-                 t-att-data-template-id="product.id"
-                 t-att-data-kit="product._aa_kit_page_json()"
-                 t-att-data-currency-symbol="website.currency_id.symbol"/>
-        </xpath>
-    </template>
-
     <template id="dealer_order_denied" name="Dealer Quick Order - not available">
         <t t-call="website.layout">
             <div class="container py-5 text-center">

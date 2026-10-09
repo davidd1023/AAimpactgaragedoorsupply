@@ -3,10 +3,9 @@ import logging
 
 from odoo import _, fields, http
 from odoo.exceptions import UserError, ValidationError
-from odoo.http import request, route
+from odoo.http import request
 
 from odoo.addons.portal.controllers.portal import CustomerPortal
-from odoo.addons.website_sale.controllers.cart import Cart
 
 from odoo.addons.spring_engineering.controllers.main import add_assembly_lines, quote_assembly
 
@@ -371,110 +370,3 @@ class AADealerOrder(AAOptionPricing, http.Controller):
         return {'aa_track_type': track, 'aa_lift_type': lift, 'aa_high_lift': high_lift,
                 'aa_drum': drum}
 
-
-KIT_EXTRAS = {'Springs', 'Tracks', 'Cables'}
-SESSION_KEY = 'aa_kit_door'
-
-
-class AAKitCart(AAOptionPricing, Cart):
-    """The shop's hardware-kit page: when Springs / Tracks / Cables are ticked the
-    page asks for the door (size, weight, track, lift) and those extras are priced
-    and added to the cart next to the kit, exactly like the dealer Quick Order."""
-
-    def _pricelist(self, partner):
-        # The shop's own pricelist: public price for visitors, the dealer's for a dealer.
-        return request.pricelist
-
-    def _shop_kit(self, template_id):
-        return request.env['product.template'].sudo().browse(int(template_id or 0)).exists().filtered(
-            'aa_dealer_quick_order')
-
-    @route('/aa/kit/extras', type='jsonrpc', auth='public', website=True, sitemap=False)
-    def aa_kit_extras(self, template_id, ptav_ids, door=None, qty=1, **kw):
-        """Price the ticked extras for the door entered on the kit page, and remember
-        the door for when the kit is added to the cart."""
-        template = self._shop_kit(template_id)
-        if not template:
-            return {'error': _("Product not available.")}
-        door = door if isinstance(door, dict) else {}
-        try:
-            variant, no_variant = self._resolve_combination(template, ptav_ids)
-        except ValidationError as e:
-            return {'error': str(e.args[0])}
-        stored = dict(request.session.get(SESSION_KEY) or {})
-        stored[str(template.id)] = door
-        request.session[SESSION_KEY] = stored
-        partner = request.env.user.partner_id
-        qty = max(1, min(int(qty or 1), MAX_QTY))
-        kit = self._unit_price(partner, variant, no_variant, qty)
-        extras, notes = self._priced_options(partner, variant, no_variant, door, qty, Catalog(request.env))
-        unit = kit + sum(e['unit_price'] * e['qty'] for e in extras)
-        return {
-            'kit_price': kit,
-            'unit_price': unit,
-            'extras': [{'label': e['label'], 'name': e.get('name') or e['product'].display_name,
-                        'qty': e['qty'], 'unit_price': e['unit_price']} for e in extras],
-            'notes': notes,
-        }
-
-    @route()
-    def add_to_cart(self, product_template_id, product_id, quantity=1.0, uom_id=None,
-                    product_custom_attribute_values=None, no_variant_attribute_value_ids=None,
-                    linked_products=None, **kwargs):
-        template = self._shop_kit(product_template_id)
-        no_variant = request.env['product.template.attribute.value'].sudo().browse(
-            [int(v) for v in no_variant_attribute_value_ids or []]).exists()
-        wanted = KIT_EXTRAS & set(no_variant.mapped('name')) if template else set()
-        plan = None
-        if wanted:
-            door = (request.session.get(SESSION_KEY) or {}).get(str(template.id)) or {}
-            variant = request.env['product.product'].sudo().browse(int(product_id)).exists()
-            missing = []
-            if not float(door.get('height_in') or 0):
-                missing.append(_("door height"))
-            if wanted & {'Tracks', 'Cables'} and not door.get('track_type'):
-                missing.append(_("track type"))
-            if 'Springs' in wanted and not float(door.get('weight') or 0):
-                missing.append(_("door weight"))
-            if missing:
-                raise UserError(_("To add %(extras)s, enter the %(missing)s on the product page.",
-                                  extras=", ".join(sorted(wanted)), missing=", ".join(missing)))
-            qty = max(1, int(quantity or 1))
-            extras, notes = self._priced_options(request.env.user.partner_id, variant, no_variant,
-                                                 door, qty, Catalog(request.env))
-            plan = (variant, door, qty, extras, notes)
-
-        result = super().add_to_cart(
-            product_template_id, product_id, quantity=quantity, uom_id=uom_id,
-            product_custom_attribute_values=product_custom_attribute_values,
-            no_variant_attribute_value_ids=no_variant_attribute_value_ids,
-            linked_products=linked_products, **kwargs)
-
-        if plan:
-            self._aa_add_extras(*plan)
-            order = request.cart
-            result['cart_quantity'] = order.cart_quantity
-        return result
-
-    def _aa_add_extras(self, variant, door, qty, extras, notes):
-        order = request.cart
-        if not order:
-            return
-        kit_line = order.order_line.filtered(lambda l: l.product_id == variant).sorted('id')[-1:]
-        info = " | ".join(filter(None, [self._line_note(door)] + notes))
-        if kit_line and info and info not in (kit_line.name or ''):
-            kit_line.name = f"{kit_line.name}\n{info}"
-        for extra in extras:
-            if extra.get('quote'):
-                before = order.order_line
-                booked = add_assembly_lines(order, extra['quote'], qty=qty, note="Springs for the kit above")
-                if booked.get('error'):
-                    raise UserError(booked['error'])
-                (order.order_line - before).write({'linked_line_id': kit_line.id})
-                continue
-            order.with_context(skip_cart_verification=True)._cart_add(
-                product_id=extra['product'].id,
-                quantity=extra['qty'] * qty,
-                linked_line_id=kit_line.id,
-            )
-        order._verify_cart_after_update()
