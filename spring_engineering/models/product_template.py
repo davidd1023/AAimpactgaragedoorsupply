@@ -1,12 +1,10 @@
 from odoo import api, models
 
-# A product is a vertical track if its name says so, and a hardware kit the
-# same way. The category would be a steadier signal, but the live products
-# were created by hand and their categories cannot be relied on, whereas the
-# names are consistent: "... Vertical Track 76" - 7' Door Height Black" and
-# "AA 1200 Hardware Kit".
+# A product is a vertical track if its name says so. The category would be a
+# steadier signal, but the live tracks were created by hand and their
+# categories cannot be relied on, whereas the names are consistent:
+# "... Vertical Track 76" - 7' Door Height Black".
 VERTICAL_TRACK = "vertical track"
-HARDWARE_KIT = "hardware kit"
 
 
 class ProductTemplate(models.Model):
@@ -67,30 +65,4 @@ class ProductTemplate(models.Model):
                 "spring_engineering.attribute_value_track_prepared",
             ),
             VERTICAL_TRACK,
-        )
-
-    @api.model
-    def _attach_trim_colour(self):
-        """The trim colour, on every hardware kit.
-
-        WHY AN ATTRIBUTE AND NOT THE JAVASCRIPT THIS REPLACES. The first
-        attempt hooked Odoo's "Custom value" text box - the thing that makes
-        the other extras on a kit page open a square to type in - and swapped
-        it for a dropdown. It never worked on the live site, because it needed
-        the existing Trims value flagged as a custom value by hand, and because
-        it shipped in a module that site does not install.
-
-        The attribute route is the one that demonstrably works: the prepared
-        track option reached the live site by exactly this path. The choice
-        also lands on the order line by itself, with no code to collect it.
-        """
-        self._attach_option(
-            "spring_engineering.attribute_trim_colour",
-            (
-                "spring_engineering.attribute_value_trim_none",
-                "spring_engineering.attribute_value_trim_black",
-                "spring_engineering.attribute_value_trim_bronze",
-                "spring_engineering.attribute_value_trim_white",
-            ),
-            HARDWARE_KIT,
         )
