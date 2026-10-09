@@ -260,3 +260,38 @@ class TestTrackPreparation(TransactionCase):
         other.invalidate_recordset()
         self.assertFalse(other.attribute_line_ids.filtered(
             lambda l: l.attribute_id == self.attr))
+
+    # The names as they actually are on the live site, prime marks and all.
+    LIVE_NAMES = [
+        ('[CH-VT-2"] 2" Vertical Track 76" - 7\' Door Height Black',
+         {"10": 4, "12": 4, "14": 4}, "Black"),
+        ('[CH-VT-3"] 3" Vertical Track 88" - 8\' Door Height White',
+         {"10": 4, "12": 5, "14": 5}, "White"),
+        ('[CH-VT-3"] 3" Vertical Track 100" - 9\' Door Height White',
+         {"10": 4, "12": 5, "14": 5, "16": 2}, "White"),
+        ('[CH-VT-2"] 2" Vertical Track 112" - 10\' Door Height Black',
+         {"10": 4, "12": 5, "14": 5, "16": 4}, "Black"),
+    ]
+
+    def test_the_live_product_names_are_read_correctly(self):
+        """The owner's real names, which the first pattern could not read.
+
+        "... 76" - 7' Door Height Black" carries the height as 7' with a PRIME,
+        and the original pattern allowed only ft/foot/feet - so every prepared
+        track answered "we could not read the door height". The inch marks are
+        why the first number in the name is the wrong one to take: 2" and 76"
+        both come before the 7'.
+        """
+        for name, expected_mix, finish in self.LIVE_NAMES:
+            order = self._add(self._track(name), "Prepared")
+            self.assertEqual(self._mix(order), expected_mix, name)
+
+            flag = self.flag_black if finish == "Black" else self.flag_white
+            self.assertEqual(
+                self._qty(order, flag.product_variant_id), 2,
+                "wrong flag angle finish for %s" % name)
+
+    def test_the_option_is_hidden_from_the_shop_filters(self):
+        # It was appearing down the side of /shop under the categories, as if a
+        # catalogue could be browsed by whether a track is prepared.
+        self.assertEqual(self.attr.visibility, "hidden")

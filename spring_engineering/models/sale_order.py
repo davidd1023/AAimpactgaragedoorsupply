@@ -37,8 +37,23 @@ class SaleOrder(models.Model):
         so on the first order rather than after fifty.
         """
         name = line.product_id.display_name or ""
-        # "... 76-7 door height ..." -> the 7, in feet.
-        hit = re.search(r"(\d+(?:\.\d+)?)\s*(?:ft\.?|foot|feet)?\s*door\s*height", name, re.I)
+        # THE FOOT MARK IS THE POINT. The live products are named
+        #
+        #   [CH-VT-2"] 2" Vertical Track 76" - 7' Door Height Black
+        #
+        # so the figure before "Door Height" carries a PRIME - 7' - and the
+        # first version of this pattern allowed only "ft", "foot" and "feet".
+        # It read nothing, and every prepared track came back "we could not
+        # read the door height". The inch marks are why this must not simply
+        # grab the first number either: 2" and 76" both appear before it.
+        #
+        # Accepted: 7' Door Height, 7’ Door Height, 7 ft door height, 76-7 door
+        # height, and a bare "8 door height".
+        hit = re.search(
+            r"(\d+(?:\.\d+)?)\s*(?:'|\u2019|ft\.?|foot|feet)?\s*[-\u2013]?\s*door\s*height",
+            name,
+            re.I,
+        )
 
         if not hit:
             return 0

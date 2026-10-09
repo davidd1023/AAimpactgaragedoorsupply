@@ -19,6 +19,17 @@
       <field name="name">Track Preparation</field>
       <field name="display_type">radio</field>
       <field name="create_variant">no_variant</field>
+      <!--
+        HIDDEN FROM THE SHOP SIDEBAR, VISIBLE ON THE PRODUCT.
+
+        website_sale lists every attribute whose visibility is "visible" as a
+        filter down the side of the /shop page, so this one appeared under the
+        categories as if a customer could browse by it - which is not a thing
+        you filter a catalogue by. Hidden removes it from that list; the product
+        page renders a product's own attribute lines regardless, so the choice
+        still appears where it belongs.
+      -->
+      <field name="visibility">hidden</field>
       <field name="sequence">10</field>
     </record>
 
