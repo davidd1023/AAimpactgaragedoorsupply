@@ -69,24 +69,23 @@ class TestTrackPreparation(TransactionCase):
     def test_prepared_adds_brackets_by_height_and_one_flag(self):
         order = self._add(
             self._track("CH-VT-2-2 Vertical Track 76-7 door height black"), "Prepared")
-        # A 7 ft door is a 4-section: 6 brackets total, 3 per side, and this
-        # product is one side. The earlier "one per 24 inches rounded up" rule
-        # gave 4 here, which is a spare on every residential order.
-        self.assertEqual(self._qty(order, self.jamb.product_variant_id), 3)
-        self.assertEqual(self._qty(order, self.flag.product_variant_id), 1)
+        # A 7 ft door is a 4-section: 6 brackets and 2 flag angles. The track
+        # product is the L & R pair, so one of them is the whole door.
+        self.assertEqual(self._qty(order, self.jamb.product_variant_id), 6)
+        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 2)
 
     def test_bracket_count_follows_the_owners_table(self):
-        # 4-section 6-7 ft -> 3 a side; 5-section 8-9 ft -> 4; 6-section
-        # 10-12 ft -> 5. Both ends of every band, because the bands are
+        # 4-section 6-7 ft -> 6 a door; 5-section 8-9 ft -> 8; 6-section
+        # 10-12 ft -> 10. Both ends of every band, because the bands are
         # inclusive and an off-by-one at a boundary ships the wrong count for
         # a whole door size.
         for name, expected in [
-            ("Vertical Track 6 door height black", 3),
-            ("Vertical Track 7 door height black", 3),
-            ("Vertical Track 8 door height black", 4),
-            ("Vertical Track 9 door height white", 4),
-            ("Vertical Track 10 door height black", 5),
-            ("Vertical Track 12 door height white", 5),
+            ("Vertical Track 6 door height black", 6),
+            ("Vertical Track 7 door height black", 6),
+            ("Vertical Track 8 door height black", 8),
+            ("Vertical Track 9 door height white", 8),
+            ("Vertical Track 10 door height black", 10),
+            ("Vertical Track 12 door height white", 10),
         ]:
             order = self._add(self._track(name), "Prepared")
             self.assertEqual(
@@ -102,18 +101,17 @@ class TestTrackPreparation(TransactionCase):
         order = self._add(tmpl, "Prepared")
         track_line = order.order_line.filtered(lambda l: not l.track_prep_role)
         order._cart_update_line_quantity(track_line.id, 2)
-        # Two tracks is one door's worth: 6 brackets, which is the owner's
-        # "6 total" for a 4-section door.
-        self.assertEqual(self._qty(order, self.jamb.product_variant_id), 6)
-        self.assertEqual(self._qty(order, self.flag.product_variant_id), 2)
+        # Two pairs is two doors: twelve brackets and four flag angles.
+        self.assertEqual(self._qty(order, self.jamb.product_variant_id), 12)
+        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 4)
 
     def test_a_part_cannot_be_edited_on_its_own(self):
         tmpl = self._track("CH-VT-2-2 Vertical Track 76-7 door height black")
         order = self._add(tmpl, "Prepared")
         bracket = order.order_line.filtered(lambda l: l.track_prep_role == "jamb")
         order._cart_update_line_quantity(bracket.id, 99)
-        # Still the three the side needs, not ninety-nine.
-        self.assertEqual(self._qty(order, self.jamb.product_variant_id), 3)
+        # Still the six the door needs, not ninety-nine.
+        self.assertEqual(self._qty(order, self.jamb.product_variant_id), 6)
 
     def test_removing_the_track_removes_its_parts(self):
         tmpl = self._track("CH-VT-2-2 Vertical Track 76-7 door height black")
@@ -149,13 +147,13 @@ class TestTrackPreparation(TransactionCase):
         # white one, so finding the black one proves the colour match wins.
         order = self._add(self._track("CH-VT-2-2 Vertical Track 76-7 door height black"),
                           "Prepared")
-        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 1)
+        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 2)
         self.assertEqual(self._qty(order, self.flag_white.product_variant_id), 0)
 
     def test_a_white_track_gets_the_white_angle(self):
         order = self._add(self._track("CH-VT-3-2 Vertical Track 92-8 door height white"),
                           "Prepared")
-        self.assertEqual(self._qty(order, self.flag_white.product_variant_id), 1)
+        self.assertEqual(self._qty(order, self.flag_white.product_variant_id), 2)
         self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 0)
 
     def test_an_unknown_finish_adds_nothing(self):

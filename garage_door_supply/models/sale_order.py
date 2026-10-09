@@ -52,35 +52,41 @@ class SaleOrder(models.Model):
 
         return feet
 
-    # JAMB BRACKETS PER SIDE, by door height, from the owner:
+    # JAMB BRACKETS FOR A WHOLE DOOR, by height, from the owner:
     #
-    #   4-Section / 6-to-7-foot door   6 total, 3 per side
-    #   5-Section / 8-to-9-foot door   8 total, 4 per side
+    #   4-Section / 6-to-7-foot door    6 total, 3 per side
+    #   5-Section / 8-to-9-foot door    8 total, 4 per side
     #   6-Section / 10-to-12-foot door 10 total, 5 per side
     #
-    # A TABLE, NOT A FORMULA. "One per 24 inches, rounded up" was the first
-    # rule tried here and it is wrong: it gives four brackets for a 7 ft door
-    # where the trade fits three, and it would have shipped a spare on every
-    # residential order. The bands do not divide evenly either - 6 and 7 feet
-    # share a count, so do 8 and 9, and then three heights share the next - so
-    # there is no spacing that reproduces them. Written down as the owner gave
-    # it, bounds inclusive, in feet.
-    BRACKETS_PER_SIDE = (
-        (6, 7, 3),
-        (8, 9, 4),
-        (10, 12, 5),
+    # THE TOTALS, because a vertical track product is the L & R PAIR - one of
+    # them is a whole door's worth of vertical track, which is also why the
+    # flag angle below is two and not one. Getting this wrong halves or doubles
+    # every bracket on every order, so it is stated rather than implied.
+    #
+    # A TABLE, NOT A FORMULA, and the formula was wrong. "One per 24 inches,
+    # rounded up" was tried first: it gives 4 a side for a 7 ft door where the
+    # trade fits 3. No spacing reproduces these bands anyway - 6 and 7 feet
+    # share a count, 8 and 9 share one, then three heights share the next.
+    BRACKETS_PER_DOOR = (
+        (6, 7, 6),
+        (8, 9, 8),
+        (10, 12, 10),
     )
 
+    # One at each top corner, so two for the pair. The owner's own kit
+    # configurator returns "2 flag angles" for a 9' x 7' door, which is the
+    # same answer from the other direction.
+    FLAG_ANGLES_PER_DOOR = 2
+
     def _track_prep_bracket_count(self, height_feet):
-        """Jamb brackets for ONE vertical track, or 0 if the height is off the
-        table.
+        """Jamb brackets for one L & R pair, or 0 if the height is off the table.
 
         Off the table means off it: a 14 ft door is not in the bands the owner
         gave, and extrapolating the pattern would be inventing a trade rule.
         It adds nothing and says to call, which is the same answer this gives
         for a height it cannot read at all.
         """
-        for low, high, count in self.BRACKETS_PER_SIDE:
+        for low, high, count in self.BRACKETS_PER_DOOR:
             if low <= height_feet <= high:
                 return count
 
@@ -199,7 +205,10 @@ class SaleOrder(models.Model):
 
         wanted = {
             "jamb": (self._track_prep_jamb_product(line), brackets * line.product_uom_qty),
-            "flag": (self._track_prep_flag_product(line), 1 * line.product_uom_qty),
+            "flag": (
+                self._track_prep_flag_product(line),
+                self.FLAG_ANGLES_PER_DOOR * line.product_uom_qty,
+            ),
         }
         missing = [k for k, (p, _q) in wanted.items() if not p]
 

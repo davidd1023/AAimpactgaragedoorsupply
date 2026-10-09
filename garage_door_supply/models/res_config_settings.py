@@ -17,8 +17,8 @@ class ResConfigSettings(models.TransientModel):
         config_parameter="garage_door_supply.track_prep_jamb_product_id",
         domain="[('sale_ok', '=', True)]",
         help="The jamb bracket added when a vertical track is ordered prepared."
-             " The quantity comes from the door height: 3 per track for a 6-7 ft"
-             " door, 4 for 8-9 ft, 5 for 10-12 ft.",
+             " A track product is the L & R pair, so the quantity is the whole"
+             " door's: 6 for a 6-7 ft door, 8 for 8-9 ft, 10 for 10-12 ft.",
     )
     track_prep_flag_product_id = fields.Many2one(
         "product.product",
@@ -26,5 +26,7 @@ class ResConfigSettings(models.TransientModel):
         config_parameter="garage_door_supply.track_prep_flag_product_id",
         domain="[('sale_ok', '=', True)]",
         help="The flag angle added when a vertical track is ordered prepared."
-             " One per track.",
+             " Two per pair, one at each top corner. Found by name from the"
+             " track's own finish - Flag Angle Black or Flag Angle White - so"
+             " this is only the fallback.",
     )
