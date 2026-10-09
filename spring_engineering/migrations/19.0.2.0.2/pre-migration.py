@@ -60,6 +60,14 @@ def _orphan_trim_attributes(cr):
     Matched on the VALUE NAMES, not on the attribute's name. "Trims" is a word
     the owner may well use for something of their own; "Black, 3 Trim" beside
     "No Trims" is this feature's fingerprint and nobody else's.
+
+    AND ONLY ON THOSE FOUR EXACT STRINGS. The first version of this also
+    matched the bare words Black, Bronze and White, which is not a fingerprint
+    of anything - it is what a colour attribute looks like. Any three-colour
+    attribute of the owner's with no external ID would have matched and been
+    DELETED, on a live shop, by a migration meant to clean up after me. That
+    was a genuinely dangerous rule and it is gone. "Black, 3 Trim" is a string
+    no one types by accident.
     """
     cr.execute(
         """
@@ -75,9 +83,9 @@ def _orphan_trim_attributes(cr):
                     WHERE v.attribute_id = pa.id
                       AND v.name->>'en_US' IN (
                           'No Trims', 'Black, 3 Trim', 'Bronze, 3 Trim',
-                          'White, 3 Trim', 'No Trim', 'Black', 'Bronze', 'White'
+                          'White, 3 Trim'
                       )
-               ) >= 3
+               ) >= 2
            AND (SELECT COUNT(*) FROM product_attribute_value v
                  WHERE v.attribute_id = pa.id) <= 4
         """
