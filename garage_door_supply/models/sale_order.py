@@ -73,27 +73,38 @@ class SaleOrder(models.Model):
         (10, 12, 10),
     )
 
-    # WHY THESE AND NOT THE KIT CONFIGURATOR'S NUMBERS, which the next person
-    # will find and try to reconcile. Two results from the owner's own kit
-    # configurator, for a 9 ft wide standard-lift door:
+    # THE KIT CONFIGURATOR DISAGREES WITH THIS TABLE AND IT IS NOT RECONCILED.
     #
-    #   7 ft:  vertical 76", horizontal 96",  2 flag angles, 4x#10 4x#12 4x#14
-    #   8 ft:  vertical 88", horizontal 108", 2 flag angles, 4x#10 5x#12 5x#14
+    # Four readings from the owner's own kit configurator, 9 ft wide, standard
+    # lift, 3" white track, and "everything below 7 ft is the same as 7 ft":
     #
-    # Those total 12 and 14 against the table's 6 and 8 - a difference of
-    # EXACTLY SIX in both cases, which is why the owner's answer that the
-    # configurator covers the whole hardware kit holds up: six of its brackets
-    # go somewhere other than the vertical track. A per-side/per-door mix-up
-    # would have shown a constant RATIO, not a constant difference.
+    #   ft  vertical  horizontal  flags  #10 #12 #14 #16  total
+    #   <=7     76"        96"       2     4   4   4   0    12
+    #    8      88"       108"       2     4   5   5   0    14
+    #    9     100"       120"       2     4   5   5   2    16
+    #   10     112"       132"       2     4   5   5   4    18
     #
-    # The configurator also lists brackets in a graduated MIX of sizes, where
-    # the table gives only a total. Which sizes make up the 6, 8 or 10 is not
-    # recorded anywhere yet, so one configured bracket is used for all of them -
-    # see _track_prep_jamb_product.
+    # Those totals are exactly 2h - 2 for the door height h in feet, so h - 1
+    # per side, and the sizes grade upward - #16 appears only from 9 ft, two
+    # more per foot, which is what a track curving away from the jamb would
+    # need.
     #
-    # Those readings double as a check on the name-reading: a 7 ft door takes a
-    # 76" vertical and an 8 ft door an 88" one, both the door height in inches
-    # less 8, and 76 is exactly what "Vertical Track 76-7 door height" carries.
+    # Against this table they differ by +6, +6, +8, +8 and by ratios of 2.00,
+    # 1.75, 2.00, 1.80. NEITHER A CONSTANT OFFSET NOR A CONSTANT RATIO. An
+    # earlier version of this comment claimed a constant +6 and used it to
+    # argue the configurator counts things outside the vertical track; that was
+    # two readings and a coincidence, and the third and fourth broke it.
+    #
+    # So the two sources genuinely disagree about how many jamb brackets a pair
+    # of vertical tracks takes, and arithmetic cannot say which is right. The
+    # owner's table is what ships because the owner stated it directly for this
+    # feature. It is flagged here, not quietly preferred.
+    #
+    # The readings do settle two other things, in both directions and on all
+    # four rows: "2 flag angles" confirms FLAG_ANGLES_PER_DOOR, and the
+    # vertical length is the door height in inches less 8 every time - 76" for
+    # 7 ft, matching the "Vertical Track 76-7 door height" the name-reading
+    # parses.
 
     # One at each top corner, so two for the pair. The owner's own kit
     # configurator returns "2 flag angles" for a 9' x 7' door, which is the
