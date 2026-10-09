@@ -113,3 +113,14 @@ def refresh_prepared_costs(env):
     for product in products:
         if hasattr(product, 'button_bom_cost') and product.bom_count:
             product.button_bom_cost()
+
+
+OLD_KIT_PAGE_VIEW = 'aa_custom.kit_addons'
+
+
+def retire_old_kit_page_script(env):
+    """The shop kit page used to load aa_kit_addons.js from a hand-made view. This module
+    now does that job with the same calculation as the dealer Quick Order, so the old
+    view is switched off (not deleted) to keep the two from adding extras twice."""
+    views = env['ir.ui.view'].with_context(active_test=False).search([('key', '=', OLD_KIT_PAGE_VIEW)])
+    views.filtered('active').write({'active': False})

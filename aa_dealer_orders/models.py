@@ -21,7 +21,7 @@ class ResPartner(models.Model):
         digits=(5, 2),
         tracking=True,
         help="Dealer price = product cost + this margin. Change it any time: the dealer's "
-             "own pricelist is updated automatically. Leave 0 to keep the normal store prices.",
+             "own pricelist is updated automatically. 0 = same prices as any other customer.",
     )
     aa_dealer_pricelist_id = fields.Many2one(
         'product.pricelist', string="Dealer Pricelist", readonly=True, copy=False,
@@ -50,6 +50,10 @@ class ResPartner(models.Model):
         website = self.env['website'].sudo().search([('company_id', '=', self.env.company.id)], limit=1)
         for partner in self.sudo():
             if not partner.aa_order_on_account or not partner.aa_dealer_margin:
+                # No margin: the dealer buys at the same prices as any other customer.
+                if partner.aa_dealer_pricelist_id and \
+                        partner.property_product_pricelist == partner.aa_dealer_pricelist_id:
+                    partner.specific_property_product_pricelist = False
                 continue
             pricelist = partner.aa_dealer_pricelist_id
             item_vals = {
