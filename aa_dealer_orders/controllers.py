@@ -194,7 +194,8 @@ class AADealerOrder(http.Controller):
         if quote:
             spec_lines = quote['description'].split('\n')[1:-1]
             extras.append({'label': 'Springs', 'product': None, 'quote': quote, 'qty': 1,
-                           'unit_price': quote['total'], 'name': '; '.join(spec_lines)})
+                           'unit_price': quote['total'],
+                           'name': '; '.join(spec_lines) + ' (cones, spring and labor included)'})
         for product, per_door, label in items:
             price = self._unit_price(partner, product, request.env['product.template.attribute.value'], qty * per_door)
             if price <= 0:
