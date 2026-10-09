@@ -79,6 +79,16 @@ class ResPartner(models.Model):
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    def _aa_kit_page_json(self):
+        """What the shop kit page needs to size the door extras: drum code per Drum value."""
+        self.ensure_one()
+        import json
+        drums = {}
+        for line in self.attribute_line_ids.filtered(lambda l: l.attribute_id.name == 'Drum'):
+            for ptav in line.product_template_value_ids:
+                drums[str(ptav.id)] = (ptav.name or '').split(' ')[0]
+        return json.dumps({'drums': drums, 'name': self.name})
+
     aa_dealer_quick_order = fields.Boolean(
         string="Dealer Quick Order",
         help="Show this product on the dealer Quick Order page (/dealer/order).",
