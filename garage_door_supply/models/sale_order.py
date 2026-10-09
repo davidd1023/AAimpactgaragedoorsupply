@@ -68,8 +68,29 @@ class SaleOrder(models.Model):
 
         return int(math.ceil(height_inches / per))
 
-    def _track_prep_part(self, key):
-        """The configured jamb bracket or flag angle product, or an empty set."""
+    # The finishes a track and its flag angle come in. Matched as whole words so
+    # a track that merely mentions a colour elsewhere in its name is not caught.
+    COLOURS = ("Black", "White")
+
+    def _track_prep_colour(self, line):
+        """The track's finish, as the flag angle products spell it, or None.
+
+        The flag angle has to MATCH THE TRACK: the products are "Flag Angle
+        Black" and "Flag Angle White", so a black track must not ship a white
+        angle. There is no sensible default here - shipping the wrong colour is
+        a return - so an unrecognised finish adds nothing and says so, the same
+        as an unreadable height.
+        """
+        name = line.product_id.display_name or ""
+
+        for colour in self.COLOURS:
+            if re.search(r"\b%s\b" % colour, name, re.I):
+                return colour
+
+        return None
+
+    def _track_prep_configured_part(self, key):
+        """The product named in the settings for this role, or an empty set."""
         ref = self.env["ir.config_parameter"].sudo().get_param(
             "garage_door_supply.track_prep_%s_product_id" % key
         )
@@ -78,11 +99,40 @@ class SaleOrder(models.Model):
             return self.env["product.product"]
 
         try:
-            product = self.env["product.product"].sudo().browse(int(ref)).exists()
+            return self.env["product.product"].sudo().browse(int(ref)).exists()
         except (TypeError, ValueError):
             return self.env["product.product"]
 
-        return product
+    def _track_prep_flag_product(self, line):
+        """The flag angle in the track's own finish.
+
+        Looked up BY NAME rather than configured, because there is one per
+        colour and the right one depends on the track rather than on a setting.
+        The setting stays as a fallback for a track whose finish is a colour
+        these products do not cover.
+        """
+        colour = self._track_prep_colour(line)
+
+        if colour:
+            found = self.env["product.product"].sudo().search(
+                [("name", "=ilike", "Flag Angle %s" % colour)], limit=1
+            )
+
+            if found:
+                return found
+
+        return self._track_prep_configured_part("flag")
+
+    def _track_prep_jamb_product(self, line):
+        """The jamb bracket for this track.
+
+        THE SIZE DEPENDS ON THE TRACK and the mapping is not yet recorded -
+        there are four in the catalogue, J-10 to J-16, at four prices. Until it
+        is, this is the single configured bracket, which is right for a shop
+        that stocks one size and wrong the moment it stocks two. The mapping
+        belongs here and nowhere else.
+        """
+        return self._track_prep_configured_part("jamb")
 
     # --- keeping the parts in step with the track -----------------------------
 
@@ -107,10 +157,20 @@ class SaleOrder(models.Model):
                 line.product_id.display_name,
             )
 
+        if not self._track_prep_colour(line):
+            existing.unlink()
+
+            return _(
+                "We could not tell what finish “%s” is, so the flag angle was"
+                " not added - it has to match the track. Please call us and we"
+                " will prepare it for you.",
+                line.product_id.display_name,
+            )
+
         brackets = self._track_prep_bracket_count(height)
         wanted = {
-            "jamb": (self._track_prep_part("jamb"), brackets * line.product_uom_qty),
-            "flag": (self._track_prep_part("flag"), 1 * line.product_uom_qty),
+            "jamb": (self._track_prep_jamb_product(line), brackets * line.product_uom_qty),
+            "flag": (self._track_prep_flag_product(line), 1 * line.product_uom_qty),
         }
         missing = [k for k, (p, _q) in wanted.items() if not p]
 

@@ -21,14 +21,20 @@ class TestTrackPreparation(TransactionCase):
 
         self.jamb = self.env["product.template"].create({
             "name": "Test Jamb Bracket", "type": "consu", "list_price": 1.63})
-        self.flag = self.env["product.template"].create({
-            "name": "Test Flag Angle", "type": "consu", "list_price": 7.5})
+        # The real products, by the names the owner gave: one per finish.
+        self.flag_black = self.env["product.template"].create({
+            "name": "Flag Angle Black", "type": "consu", "list_price": 7.5})
+        self.flag_white = self.env["product.template"].create({
+            "name": "Flag Angle White", "type": "consu", "list_price": 7.5})
+        self.flag = self.flag_black
 
         params = self.env["ir.config_parameter"].sudo()
         params.set_param("garage_door_supply.track_prep_jamb_product_id",
                          str(self.jamb.product_variant_id.id))
+        # Deliberately pointed at the WHITE angle, so a test that gets the
+        # black one proves the colour match beat the fallback.
         params.set_param("garage_door_supply.track_prep_flag_product_id",
-                         str(self.flag.product_variant_id.id))
+                         str(self.flag_white.product_variant_id.id))
         params.set_param("garage_door_supply.track_prep_inches_per_bracket", "24")
 
         self.partner = self.env["res.partner"].create({"name": "Test Buyer"})
@@ -70,9 +76,9 @@ class TestTrackPreparation(TransactionCase):
 
     def test_bracket_count_follows_the_door_height(self):
         for name, expected in [
-            ("Vertical Track 8 door height", 4),    # 96 / 24 = 4 exactly
-            ("Vertical Track 10 door height", 5),   # 120 / 24 = 5
-            ("Vertical Track 12 door height", 6),   # 144 / 24 = 6
+            ("Vertical Track 8 door height black", 4),    # 96 / 24 = 4 exactly
+            ("Vertical Track 10 door height black", 5),   # 120 / 24 = 5
+            ("Vertical Track 12 door height white", 6),   # 144 / 24 = 6
         ]:
             order = self._add(self._track(name), "Prepared")
             self.assertEqual(
@@ -118,7 +124,7 @@ class TestTrackPreparation(TransactionCase):
     def test_an_unreadable_name_adds_nothing_and_warns(self):
         # Fail loudly: no height in the name means no guess at the bracket
         # count. Shipping the wrong number silently is the thing to avoid.
-        tmpl = self._track("Mystery Vertical Track")
+        tmpl = self._track("Mystery Vertical Track black")
         order = self._add(tmpl, "Prepared")
         self.assertEqual(len(order.order_line), 1)
 
@@ -127,3 +133,23 @@ class TestTrackPreparation(TransactionCase):
         # added by hand on the live site works. If this value is ever renamed
         # the feature silently stops, so the name is asserted here.
         self.assertEqual(self.v_prepared.name, "Prepared")
+
+    def test_the_flag_angle_matches_the_track_finish(self):
+        # A black track must not ship a white angle. The setting points at the
+        # white one, so finding the black one proves the colour match wins.
+        order = self._add(self._track("CH-VT-2-2 Vertical Track 76-7 door height black"),
+                          "Prepared")
+        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 1)
+        self.assertEqual(self._qty(order, self.flag_white.product_variant_id), 0)
+
+    def test_a_white_track_gets_the_white_angle(self):
+        order = self._add(self._track("CH-VT-3-2 Vertical Track 92-8 door height white"),
+                          "Prepared")
+        self.assertEqual(self._qty(order, self.flag_white.product_variant_id), 1)
+        self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 0)
+
+    def test_an_unknown_finish_adds_nothing(self):
+        # Shipping the wrong colour is a return, so there is no default.
+        order = self._add(self._track("CH-VT-2-2 Vertical Track 76-7 door height bronze"),
+                          "Prepared")
+        self.assertEqual(len(order.order_line), 1)
