@@ -13,11 +13,11 @@ class TestTrackPreparation(TransactionCase):
 
     def setUp(self):
         super().setUp()
-        self.attr = self.env.ref("garage_door_supply.attribute_track_preparation")
+        self.attr = self.env.ref("spring_engineering.attribute_track_preparation")
         self.v_unprepared = self.env.ref(
-            "garage_door_supply.attribute_value_track_unprepared")
+            "spring_engineering.attribute_value_track_unprepared")
         self.v_prepared = self.env.ref(
-            "garage_door_supply.attribute_value_track_prepared")
+            "spring_engineering.attribute_value_track_prepared")
 
         # THE REAL CATALOGUE BRACKETS, not copies of them.
         #
@@ -34,17 +34,31 @@ class TestTrackPreparation(TransactionCase):
                 [("default_code", "=", code)], limit=1)
             self.assertTrue(found, "catalogue bracket %s is missing" % code)
             self.brackets[size] = found.product_tmpl_id
-        # The real products, by the names the owner gave: one per finish.
-        self.flag_black = self.env["product.template"].create({
-            "name": "Flag Angle Black", "type": "consu", "list_price": 7.5})
-        self.flag_white = self.env["product.template"].create({
-            "name": "Flag Angle White", "type": "consu", "list_price": 7.5})
+        # The flag angles, by the names the owner gave: one per finish.
+        #
+        # REUSED IF THEY EXIST, for the same reason as the brackets above. The
+        # lookup finds a product by NAME, so a test that creates its own
+        # "Flag Angle Black" alongside a real one asserts against the copy
+        # while the code quite correctly uses the original - and every flag
+        # assertion reads zero. That mistake was made twice in this file.
+        def flag(name):
+            found = self.env["product.product"].search(
+                [("name", "=ilike", name)], limit=1)
+
+            if found:
+                return found.product_tmpl_id
+
+            return self.env["product.template"].create({
+                "name": name, "type": "consu", "list_price": 7.5})
+
+        self.flag_black = flag("Flag Angle Black")
+        self.flag_white = flag("Flag Angle White")
         self.flag = self.flag_black
 
         params = self.env["ir.config_parameter"].sudo()
         # Deliberately pointed at the WHITE angle, so a test that gets the
         # black one proves the colour match beat the fallback.
-        params.set_param("garage_door_supply.track_prep_flag_product_id",
+        params.set_param("spring_engineering.track_prep_flag_product_id",
                          str(self.flag_white.product_variant_id.id))
 
         self.partner = self.env["res.partner"].create({"name": "Test Buyer"})

@@ -1,6 +1,6 @@
 {
     'name': 'AA Impact Garage Door Supply',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.5.0',
     'summary': 'Complete garage door supply store configuration',
     'description': """
         Custom module for AA Impact Garage Door Supply.
@@ -28,19 +28,12 @@
         'data/warehouse_data.xml',
         'data/pos_config_data.xml',
         'data/website_data.xml',
-        'data/track_prep_data.xml',
         'data/partners_taxes_data.xml',
         'data/arrow_products_data.xml',
         'data/hinge_additions_data.xml',
-        'views/res_config_settings_views.xml',
         'views/website_brand.xml',
         'views/website_homepage.xml',
     ],
-    'assets': {
-        'web.assets_frontend': [
-            'garage_door_supply/static/src/js/trim_colour_choice.js',
-        ],
-    },
     'installable': True,
     'application': True,
     'license': 'LGPL-3',
