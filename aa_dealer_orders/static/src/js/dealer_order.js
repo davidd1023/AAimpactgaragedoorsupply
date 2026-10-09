@@ -128,23 +128,17 @@
             const drumHint = el("div", { class: "small text-muted mt-1" });
             const priceEl = el("div", { class: "aa-price", text: "-" });
             const breakdown = el("div", { class: "small text-muted mt-2 aa-breakdown" });
-            // Springs (Spring Engineering): only the spring IDs AA sells.
-            const SPRING_IDS = ['2 5/8"', '3 3/4"', '5 1/4"', '3 3/4" inside 6"'];
-            const CYCLES = ["10,000", "15,000", "25,000", "50,000", "75,000", "100,000"];
-            const spIdSel = el("select", { class: "form-select form-select-sm", onchange: price },
-                SPRING_IDS.map((v) => el("option", { value: v, text: v.includes("inside") ? v + " (Duplex)" : v })));
-            const spCountSel = el("select", { class: "form-select form-select-sm", onchange: price },
-                [1, 2, 3, 4].map((n) => el("option", { value: n, text: n + (n === 1 ? " spring" : " springs") })));
-            spCountSel.value = "2";
-            const spCyclesSel = el("select", { class: "form-select form-select-sm", onchange: price },
-                CYCLES.map((v) => el("option", { value: v, text: v + " cycles" })));
+            // Springs: AA's Spring Engineering model picks them; the dealer chooses nothing.
+            // Tried in this order, 10,000 cycles; the first set with no red warning wins.
+            const SPRING_CANDIDATES = [
+                [2, '2 5/8"'], [2, '3 3/4"'], [2, '5 1/4"'],
+                [2, '3 3/4" inside 6"'], [4, '3 3/4"'], [4, '5 1/4"'], [4, '3 3/4" inside 6"'],
+            ];
+            const SPRING_CYCLES = "10,000";
             const spResult = el("div", { class: "small mt-1" });
-            const springBox = el("div", { class: "row g-2 mt-1 d-none aa-springs" }, [
-                el("div", { class: "col-12 small fw-bold", text: "Springs (calculated like the Spring Engineering page)" }),
-                el("div", { class: "col-6 col-md-3" }, [el("label", { class: "form-label small mb-1", text: "Spring ID" }), spIdSel]),
-                el("div", { class: "col-6 col-md-3" }, [el("label", { class: "form-label small mb-1", text: "Springs" }), spCountSel]),
-                el("div", { class: "col-6 col-md-3" }, [el("label", { class: "form-label small mb-1", text: "Cycle life" }), spCyclesSel]),
-                el("div", { class: "col-12" }, [spResult]),
+            const springBox = el("div", { class: "mt-1 d-none aa-springs" }, [
+                el("div", { class: "small fw-bold", text: "Springs (calculated by AA's spring calculator)" }),
+                spResult,
             ]);
             const kitLabel = el("div", { class: "form-control-plaintext fw-bold py-1", text: "Enter the door width" });
             line.numEl = el("span", { class: "aa-line-num" });
@@ -356,16 +350,23 @@
                     spResult.textContent = "Spring calculator not available.";
                     return null;
                 }
-                let r;
+                const door = {
+                    liftType: liftSel.value, highLift: Number(hlInput.value) || 0, trackType: trackSel.value,
+                    drum: drumSel.value, widthIn: widthIn(), heightIn: heightIn(), weight: Number(weight.value) || 0,
+                    cycles: SPRING_CYCLES,
+                };
+                let r = null;
                 try {
-                    r = window.aaSpringCalc({
-                        springId: spIdSel.value, springs: Number(spCountSel.value), cycles: spCyclesSel.value,
-                        liftType: liftSel.value, highLift: Number(hlInput.value) || 0, trackType: trackSel.value,
-                        drum: drumSel.value, widthIn: widthIn(), heightIn: heightIn(), weight: Number(weight.value) || 0,
-                    });
+                    for (const [count, id] of SPRING_CANDIDATES) {
+                        const t = window.aaSpringCalc({ ...door, springs: count, springId: id });
+                        if (t.error) { r = r || t; break; }
+                        if (!t.warnings.some((w) => w.severity === "red")) { r = t; break; }
+                        r = r && !r.error ? r : t;  // keep the first try if nothing is clean
+                    }
                 } catch (e) {
                     r = { error: "Could not calculate the springs." };
                 }
+                r = r || { error: "Could not calculate the springs." };
                 if (r.error) {
                     spResult.appendChild(el("div", { class: "text-warning-emphasis", text: r.error }));
                     line.springWarnings = [];
@@ -443,13 +444,11 @@
                 other.fillDrums(false);
                 other.drumSel.value = drumSel.value;
                 other.syncKitDrum();
-                other.springInputs.id.value = spIdSel.value;
-                other.springInputs.count.value = spCountSel.value;
-                other.springInputs.cycles.value = spCyclesSel.value;
+
                 other.price();
             };
             line.kitSel = kitSel;
-            line.springInputs = { id: spIdSel, count: spCountSel, cycles: spCyclesSel };
+
             line.autoKit = autoKit;
             line.buildAttrs = buildAttrs;
             line.price = price;
