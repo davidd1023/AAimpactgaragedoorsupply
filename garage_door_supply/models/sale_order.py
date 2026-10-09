@@ -52,31 +52,10 @@ class SaleOrder(models.Model):
 
         return feet
 
-    # JAMB BRACKETS FOR A WHOLE DOOR, by height, from the owner:
+    # THE JAMB BRACKETS A PAIR OF VERTICAL TRACKS NEEDS, by door height.
     #
-    #   4-Section / 6-to-7-foot door    6 total, 3 per side
-    #   5-Section / 8-to-9-foot door    8 total, 4 per side
-    #   6-Section / 10-to-12-foot door 10 total, 5 per side
-    #
-    # THE TOTALS, because a vertical track product is the L & R PAIR - one of
-    # them is a whole door's worth of vertical track, which is also why the
-    # flag angle below is two and not one. Getting this wrong halves or doubles
-    # every bracket on every order, so it is stated rather than implied.
-    #
-    # A TABLE, NOT A FORMULA, and the formula was wrong. "One per 24 inches,
-    # rounded up" was tried first: it gives 4 a side for a 7 ft door where the
-    # trade fits 3. No spacing reproduces these bands anyway - 6 and 7 feet
-    # share a count, 8 and 9 share one, then three heights share the next.
-    BRACKETS_PER_DOOR = (
-        (6, 7, 6),
-        (8, 9, 8),
-        (10, 12, 10),
-    )
-
-    # THE KIT CONFIGURATOR DISAGREES WITH THIS TABLE AND IT IS NOT RECONCILED.
-    #
-    # Four readings from the owner's own kit configurator, 9 ft wide, standard
-    # lift, 3" white track, and "everything below 7 ft is the same as 7 ft":
+    # From the owner's own kit configurator, 9 ft wide, standard lift, 3" white,
+    # and "everything below 7 ft is the same as 7 ft":
     #
     #   ft  vertical  horizontal  flags  #10 #12 #14 #16  total
     #   <=7     76"        96"       2     4   4   4   0    12
@@ -84,27 +63,72 @@ class SaleOrder(models.Model):
     #    9     100"       120"       2     4   5   5   2    16
     #   10     112"       132"       2     4   5   5   4    18
     #
-    # Those totals are exactly 2h - 2 for the door height h in feet, so h - 1
-    # per side, and the sizes grade upward - #16 appears only from 9 ft, two
-    # more per foot, which is what a track curving away from the jamb would
-    # need.
+    # A GRADUATED MIX, NOT A COUNT, which is the whole point and took three
+    # tries to establish. The owner's words: "each individual track should come
+    # with the brackets it needs, like one vertical track might come with 2
+    # brackets of 3 different sizes" - and a 7 ft pair is 4+4+4, which is
+    # exactly two of each of three sizes per track. The sizes grade upward
+    # because the track curves away from the jamb as it rises, so #16 only
+    # appears from 9 ft, two more per foot.
     #
-    # Against this table they differ by +6, +6, +8, +8 and by ratios of 2.00,
-    # 1.75, 2.00, 1.80. NEITHER A CONSTANT OFFSET NOR A CONSTANT RATIO. An
-    # earlier version of this comment claimed a constant +6 and used it to
-    # argue the configurator counts things outside the vertical track; that was
-    # two readings and a coincidence, and the third and fourth broke it.
+    # Quantities are FOR THE PAIR, because one of these products is the L & R
+    # pair. At 8 ft the pair wants 4/5/5, which does not halve evenly - the two
+    # tracks are not identical - so there is nothing to be gained by storing
+    # this per side.
     #
-    # So the two sources genuinely disagree about how many jamb brackets a pair
-    # of vertical tracks takes, and arithmetic cannot say which is right. The
-    # owner's table is what ships because the owner stated it directly for this
-    # feature. It is flagged here, not quietly preferred.
-    #
-    # The readings do settle two other things, in both directions and on all
-    # four rows: "2 flag angles" confirms FLAG_ANGLES_PER_DOOR, and the
-    # vertical length is the door height in inches less 8 every time - 76" for
-    # 7 ft, matching the "Vertical Track 76-7 door height" the name-reading
-    # parses.
+    # Two earlier rules are buried here and both were wrong: "one per 24 inches
+    # rounded up" (gives 4 a side at 7 ft where the trade fits more, and no
+    # spacing reproduces the bands) and a flat 6/8/10 total with a single size.
+    # The second one shipped for a while. It is gone.
+    BRACKET_MIX = (
+        (0, 7, {"10": 4, "12": 4, "14": 4}),
+        (8, 8, {"10": 4, "12": 5, "14": 5}),
+        (9, 9, {"10": 4, "12": 5, "14": 5, "16": 2}),
+        (10, 10, {"10": 4, "12": 5, "14": 5, "16": 4}),
+    )
+
+    # The catalogue part numbers, which are what the lookup keys on - a SKU is
+    # a far steadier handle than a name someone may retitle.
+    BRACKET_CODES = {
+        "10": "ATL-610J10JBBR",
+        "12": "ATL-614J12JBBR",
+        "14": "ATL-616J14JBBR",
+        "16": "ATL-616J16JBBR",
+    }
+
+    def _track_prep_bracket_mix(self, height_feet):
+        """{size: quantity for the pair} for this door, or {} if off the table.
+
+        Off the table means off it. #16 is still climbing at 10 ft - two more
+        per foot - so continuing the pattern to 11 and 12 would be inventing a
+        trade rule from four readings. An unknown height adds nothing and says
+        to call.
+        """
+        for low, high, mix in self.BRACKET_MIX:
+            if low <= height_feet <= high:
+                return dict(mix)
+
+        return {}
+
+    def _track_prep_bracket_product(self, size):
+        """The bracket product for a catalogue size, or an empty set."""
+        code = self.BRACKET_CODES.get(size)
+
+        if not code:
+            return self.env["product.product"]
+
+        product = self.env["product.product"].sudo().search(
+            [("default_code", "=", code)], limit=1
+        )
+
+        if product:
+            return product
+
+        # Fall back on the catalogue name, for a database where the part was
+        # created by hand without its code.
+        return self.env["product.product"].sudo().search(
+            [("name", "=ilike", "J-%s Jamb Bracket" % size)], limit=1
+        )
 
     # One at each top corner, so two for the pair. The owner's own kit
     # configurator returns "2 flag angles" for a 9' x 7' door, which is the
@@ -180,17 +204,6 @@ class SaleOrder(models.Model):
 
         return self._track_prep_configured_part("flag")
 
-    def _track_prep_jamb_product(self, line):
-        """The jamb bracket for this track.
-
-        THE SIZE DEPENDS ON THE TRACK and the mapping is not yet recorded -
-        there are four in the catalogue, J-10 to J-16, at four prices. Until it
-        is, this is the single configured bracket, which is right for a shop
-        that stocks one size and wrong the moment it stocks two. The mapping
-        belongs here and nowhere else.
-        """
-        return self._track_prep_configured_part("jamb")
-
     # --- keeping the parts in step with the track -----------------------------
 
     def _track_prep_sync(self, line):
@@ -224,9 +237,9 @@ class SaleOrder(models.Model):
                 line.product_id.display_name,
             )
 
-        brackets = self._track_prep_bracket_count(height_feet)
+        mix = self._track_prep_bracket_mix(height_feet)
 
-        if not brackets:
+        if not mix:
             existing.unlink()
 
             return _(
@@ -237,12 +250,17 @@ class SaleOrder(models.Model):
             )
 
         wanted = {
-            "jamb": (self._track_prep_jamb_product(line), brackets * line.product_uom_qty),
             "flag": (
                 self._track_prep_flag_product(line),
                 self.FLAG_ANGLES_PER_DOOR * line.product_uom_qty,
             ),
         }
+
+        for size, qty in mix.items():
+            wanted["jamb_%s" % size] = (
+                self._track_prep_bracket_product(size), qty * line.product_uom_qty
+            )
+
         missing = [k for k, (p, _q) in wanted.items() if not p]
 
         if missing:

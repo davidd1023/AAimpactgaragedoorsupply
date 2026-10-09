@@ -4,22 +4,16 @@ from odoo import fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
-    # WHICH PARTS A PREPARED TRACK SHIPS WITH, as settings rather than as code.
+    # ONLY THE FLAG ANGLE FALLBACK IS A SETTING.
     #
-    # There are four jamb brackets in the catalogue at four prices (J-10 to
-    # J-16) and the right one is a trade judgement, not something a program can
-    # infer. The flag angle already exists as a product. So both are pointed at
-    # from Website > Configuration > Settings, and changing supplier or size is
-    # a dropdown rather than a release.
-    track_prep_jamb_product_id = fields.Many2one(
-        "product.product",
-        string="Jamb bracket for prepared tracks",
-        config_parameter="garage_door_supply.track_prep_jamb_product_id",
-        domain="[('sale_ok', '=', True)]",
-        help="The jamb bracket added when a vertical track is ordered prepared."
-             " A track product is the L & R pair, so the quantity is the whole"
-             " door's: 6 for a 6-7 ft door, 8 for 8-9 ft, 10 for 10-12 ft.",
-    )
+    # The jamb brackets were a setting while the rule was thought to be "one
+    # size, count by height". It is not - a prepared pair ships a graduated mix
+    # of four catalogue sizes, picked by door height, so there is nothing for a
+    # person to choose and the setting is gone rather than left to mislead. The
+    # brackets are found by their part numbers in models/sale_order.py.
+    #
+    # The flag angle is found by the track's own finish, so this setting is
+    # only the fallback for a finish those products do not cover.
     track_prep_flag_product_id = fields.Many2one(
         "product.product",
         string="Flag angle for prepared tracks",

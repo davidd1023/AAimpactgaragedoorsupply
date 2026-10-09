@@ -22,8 +22,19 @@ class SaleOrderLine(models.Model):
 
     # What the part is for, so the sync knows how to recompute its quantity -
     # brackets scale with the door height, the flag angle is one per track.
+    # ONE ROLE PER BRACKET SIZE, because a prepared pair ships a graduated mix
+    # - four #10, five #12, five #14 and sometimes #16 - and each size is its
+    # own product on its own line. A single "jamb" role could not tell two
+    # bracket lines apart, so the sync would keep overwriting one with the
+    # other's quantity.
     track_prep_role = fields.Selection(
-        [("jamb", "Jamb brackets"), ("flag", "Flag angle")],
+        [
+            ("jamb_10", "Jamb brackets #10"),
+            ("jamb_12", "Jamb brackets #12"),
+            ("jamb_14", "Jamb brackets #14"),
+            ("jamb_16", "Jamb brackets #16"),
+            ("flag", "Flag angle"),
+        ],
         string="Preparation part",
         copy=False,
     )

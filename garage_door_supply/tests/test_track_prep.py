@@ -19,8 +19,21 @@ class TestTrackPreparation(TransactionCase):
         self.v_prepared = self.env.ref(
             "garage_door_supply.attribute_value_track_prepared")
 
-        self.jamb = self.env["product.template"].create({
-            "name": "Test Jamb Bracket", "type": "consu", "list_price": 1.63})
+        # THE REAL CATALOGUE BRACKETS, not copies of them.
+        #
+        # garage_door_supply/data/arrow_products_data.xml already ships J-10 to
+        # J-16 with these part numbers, and the lookup finds them by code. An
+        # earlier version of this test created its own products with the same
+        # codes and then asserted against those - the lookup quite correctly
+        # returned the catalogue ones, so every bracket assertion saw zero.
+        self.brackets = {}
+
+        for size, code in [("10", "ATL-610J10JBBR"), ("12", "ATL-614J12JBBR"),
+                           ("14", "ATL-616J14JBBR"), ("16", "ATL-616J16JBBR")]:
+            found = self.env["product.product"].search(
+                [("default_code", "=", code)], limit=1)
+            self.assertTrue(found, "catalogue bracket %s is missing" % code)
+            self.brackets[size] = found.product_tmpl_id
         # The real products, by the names the owner gave: one per finish.
         self.flag_black = self.env["product.template"].create({
             "name": "Flag Angle Black", "type": "consu", "list_price": 7.5})
@@ -29,8 +42,6 @@ class TestTrackPreparation(TransactionCase):
         self.flag = self.flag_black
 
         params = self.env["ir.config_parameter"].sudo()
-        params.set_param("garage_door_supply.track_prep_jamb_product_id",
-                         str(self.jamb.product_variant_id.id))
         # Deliberately pointed at the WHITE angle, so a test that gets the
         # black one proves the colour match beat the fallback.
         params.set_param("garage_door_supply.track_prep_flag_product_id",
@@ -66,30 +77,55 @@ class TestTrackPreparation(TransactionCase):
 
         return sum(lines.mapped("product_uom_qty"))
 
-    def test_prepared_adds_brackets_by_height_and_one_flag(self):
+    def test_prepared_adds_the_mix_and_two_flag_angles(self):
         order = self._add(
             self._track("CH-VT-2-2 Vertical Track 76-7 door height black"), "Prepared")
-        # A 7 ft door is a 4-section: 6 brackets and 2 flag angles. The track
-        # product is the L & R pair, so one of them is the whole door.
-        self.assertEqual(self._qty(order, self.jamb.product_variant_id), 6)
+        self.assertEqual(self._qty(order, self.brackets["10"].product_variant_id), 4)
         self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 2)
+    def _mix(self, order):
+        """{size: quantity} of brackets on this order."""
+        out = {}
 
-    def test_bracket_count_follows_the_owners_table(self):
-        # 4-section 6-7 ft -> 6 a door; 5-section 8-9 ft -> 8; 6-section
-        # 10-12 ft -> 10. Both ends of every band, because the bands are
-        # inclusive and an off-by-one at a boundary ships the wrong count for
-        # a whole door size.
+        for size, tmpl in self.brackets.items():
+            qty = self._qty(order, tmpl.product_variant_id)
+
+            if qty:
+                out[size] = qty
+
+        return out
+
+    def test_the_mix_matches_the_owners_configurator(self):
+        # The four readings, verbatim. These are the feature: a prepared pair
+        # ships a graduated mix, not a count of one size.
         for name, expected in [
-            ("Vertical Track 6 door height black", 6),
-            ("Vertical Track 7 door height black", 6),
-            ("Vertical Track 8 door height black", 8),
-            ("Vertical Track 9 door height white", 8),
-            ("Vertical Track 10 door height black", 10),
-            ("Vertical Track 12 door height white", 10),
+            ("Vertical Track 6 door height black", {"10": 4, "12": 4, "14": 4}),
+            ("Vertical Track 7 door height black", {"10": 4, "12": 4, "14": 4}),
+            ("Vertical Track 8 door height black", {"10": 4, "12": 5, "14": 5}),
+            ("Vertical Track 9 door height white",
+             {"10": 4, "12": 5, "14": 5, "16": 2}),
+            ("Vertical Track 10 door height black",
+             {"10": 4, "12": 5, "14": 5, "16": 4}),
         ]:
             order = self._add(self._track(name), "Prepared")
-            self.assertEqual(
-                self._qty(order, self.jamb.product_variant_id), expected, name)
+            self.assertEqual(self._mix(order), expected, name)
+
+    def test_a_seven_foot_pair_is_two_of_each_per_track(self):
+        # The owner's own description - "one vertical track might come with 2
+        # brackets of 3 different sizes" - and 4/4/4 for the pair is exactly
+        # that. This is the check that the per-pair reading is the right one.
+        order = self._add(
+            self._track("CH-VT-2-2 Vertical Track 76-7 door height black"), "Prepared")
+        self.assertEqual(sum(self._mix(order).values()), 12)
+        self.assertEqual(len(self._mix(order)), 3)
+
+    def test_sixteens_appear_only_from_nine_feet(self):
+        for name, has16 in [
+            ("Vertical Track 8 door height black", False),
+            ("Vertical Track 9 door height black", True),
+        ]:
+            order = self._add(self._track(name), "Prepared")
+            self.assertEqual("16" in self._mix(order), has16, name)
+
 
     def test_unprepared_adds_nothing(self):
         order = self._add(
@@ -101,17 +137,18 @@ class TestTrackPreparation(TransactionCase):
         order = self._add(tmpl, "Prepared")
         track_line = order.order_line.filtered(lambda l: not l.track_prep_role)
         order._cart_update_line_quantity(track_line.id, 2)
-        # Two pairs is two doors: twelve brackets and four flag angles.
-        self.assertEqual(self._qty(order, self.jamb.product_variant_id), 12)
+        # Two pairs is two doors: every size doubles, and so do the flags.
+        self.assertEqual(self._mix(order), {"10": 8, "12": 8, "14": 8})
         self.assertEqual(self._qty(order, self.flag_black.product_variant_id), 4)
 
     def test_a_part_cannot_be_edited_on_its_own(self):
         tmpl = self._track("CH-VT-2-2 Vertical Track 76-7 door height black")
         order = self._add(tmpl, "Prepared")
-        bracket = order.order_line.filtered(lambda l: l.track_prep_role == "jamb")
+        bracket = order.order_line.filtered(lambda l: l.track_prep_role == "jamb_12")
         order._cart_update_line_quantity(bracket.id, 99)
-        # Still the six the door needs, not ninety-nine.
-        self.assertEqual(self._qty(order, self.jamb.product_variant_id), 6)
+        # Still the four the pair needs, not ninety-nine - and the OTHER sizes
+        # are untouched, which a single shared role could not have managed.
+        self.assertEqual(self._mix(order), {"10": 4, "12": 4, "14": 4})
 
     def test_removing_the_track_removes_its_parts(self):
         tmpl = self._track("CH-VT-2-2 Vertical Track 76-7 door height black")
@@ -125,7 +162,7 @@ class TestTrackPreparation(TransactionCase):
         # so dropping the brackets drops the track rather than half-preparing it.
         tmpl = self._track("CH-VT-2-2 Vertical Track 76-7 door height black")
         order = self._add(tmpl, "Prepared")
-        bracket = order.order_line.filtered(lambda l: l.track_prep_role == "jamb")
+        bracket = order.order_line.filtered(lambda l: l.track_prep_role == "jamb_10")
         order._cart_update_line_quantity(bracket.id, 0)
         self.assertFalse(order.order_line)
 
@@ -163,7 +200,10 @@ class TestTrackPreparation(TransactionCase):
         self.assertEqual(len(order.order_line), 1)
 
     def test_a_height_off_the_table_adds_nothing(self):
-        # 14 ft is outside the bands the owner gave. Extrapolating the pattern
-        # would be inventing a trade rule, so it adds nothing and says to call.
-        order = self._add(self._track("Vertical Track 14 door height black"), "Prepared")
-        self.assertEqual(len(order.order_line), 1)
+        # #16 is still climbing at 10 ft, two more per foot, so 11 and 12 are
+        # NOT extrapolated from four readings. They add nothing and say to call.
+        for name in ["Vertical Track 11 door height black",
+                     "Vertical Track 12 door height black",
+                     "Vertical Track 14 door height black"]:
+            order = self._add(self._track(name), "Prepared")
+            self.assertEqual(len(order.order_line), 1, name)
