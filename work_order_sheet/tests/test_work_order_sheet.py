@@ -878,3 +878,114 @@ class TestWorkOrderSheetKitDoor(TestWorkOrderSheet):
             lambda m: m.product_id == kit).sale_line_id = kit_line.id
         sheet = self._sheet(picking)
         self.assertIn("355 lb", sheet, "the spring's own figures should win")
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetCableNames(TestWorkOrderSheet):
+    """This catalogue mostly does not use the word "cable"."""
+
+    def test_the_catalogue_s_own_cable_names_are_recognised(self):
+        """GAC is galvanized aircraft cable, and the reel never says "cable".
+
+        Matching the word alone recognised none of these, so they fell through
+        to their eCommerce category - which is Tracks - and printed on the
+        tracks page.
+        """
+        kind = self.Picking._work_order_kind
+        for name in ['1/8" 7X19 GAC (500 FT REEL)', '1/8" Oval Sleeve',
+                     '1/8" Thimble', '1/8" Aluminum Cable Stop',
+                     '5/32" 7x19 Cable 500ft Reel']:
+            self.assertEqual(kind(name), "cable", "%r was not read as a cable" % name)
+
+        self.assertEqual(kind('2" Vertical Track 76"'), "track")
+        self.assertEqual(kind("Canimex D400-96 White"), "")
+
+    def test_a_gac_reel_filed_under_tracks_prints_on_cables(self):
+        tracks = self.env["product.public.category"].create({"name": "Tracks"})
+        reel = self.env["product.product"].create({
+            "name": '1/8" 7X19 GAC (500 FT REEL)', "default_code": "9150000604",
+            "type": "consu", "public_categ_ids": [(6, 0, [tracks.id])]})
+        picking = self._picking([(reel, 1)])
+        pages = {s["title"]: [l["name"] for l in s["lines"]]
+                 for s in picking._work_order_sections()}
+        self.assertIn('1/8" 7X19 GAC (500 FT REEL)', pages.get("Cables", []))
+        self.assertNotIn("Tracks", pages)
+
+    def test_a_summarised_group_takes_its_kind_from_its_parts(self):
+        """The thing SOLD may be named in a way this cannot read.
+
+        Its components say plainly what it is - a GAC reel, an oval sleeve, a
+        thimble - so a group that cannot name itself is read from them.
+        """
+        tracks = self.env["product.public.category"].create({"name": "Tracks"})
+        sold = self.env["product.product"].create({
+            "name": "1/8 Assembly 7 ft", "default_code": "ASM",
+            "type": "consu", "public_categ_ids": [(6, 0, [tracks.id])]})
+        reel = self._product('1/8" 7X19 GAC (500 FT REEL)', "9150000604")
+        sleeve = self._product('1/8" Oval Sleeve', "9150000621")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        sale_line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": sold.id, "product_uom_qty": 1})
+        picking = self._picking([(reel, 17.5), (sleeve, 2)])
+        picking.move_ids.sale_line_id = sale_line.id
+
+        pages = {s["title"]: [l["name"] for l in s["lines"]]
+                 for s in picking._work_order_sections()}
+        self.assertIn("1/8 Assembly 7 ft", pages.get("Cables", []))
+        self.assertEqual(len(picking._work_order_lines()), 1,
+                         "the parts should be summarised into the thing sold")
+
+    def test_one_dimension_on_its_own_is_still_read(self):
+        """The dealer form writes "W 9' 0\"" alone when only one is given.
+
+        A pattern that required the pair found nothing at all in that case -
+        which is why a door showed its weight and neither measurement.
+        """
+        read = self.Picking._work_order_dealer_door
+        both = read('Track: 3" 15R | W 9\' 0" x H 7\' 0" | 300 lb')
+        self.assertEqual(both["width"], "9' 0\"")
+        self.assertEqual(both["height"], "7' 0\"")
+
+        width_only = read('Track: 3" 15R | W 9\' 0" | 300 lb')
+        self.assertEqual(width_only["width"], "9' 0\"")
+        self.assertNotIn("height", width_only)
+
+        height_only = read('Track: 3" 15R | H 7\' 0" | 300 lb')
+        self.assertEqual(height_only["height"], "7' 0\"")
+        self.assertNotIn("width", height_only)
+
+    def test_the_spring_block_shows_the_width_when_there_is_one(self):
+        product = self._product("Custom Torsion Spring Assembly", "SPRING-CUSTOM")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": product.id, "product_uom_qty": 1,
+            "name": TestWorkOrderSheetDoor.FULL})
+        picking = self._picking([(product, 1)])
+        picking.move_ids[0].sale_line_id = line.id
+        sheet = self._sheet(picking)
+        self.assertIn("Door width", sheet)
+        self.assertIn("9' 0\"", sheet)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetKitWithCable(TestWorkOrderSheet):
+    def test_a_kit_containing_a_cable_is_still_a_kit(self):
+        """EVERY part has to be a cable part, not merely one of them.
+
+        A hardware kit that happens to contain a cable is still a kit, and
+        summarising it would hide the rollers and hinges somebody has to pick.
+        """
+        kit = self._product("AA-1200 Hardware Kit", "AA-1200")
+        roller = self._product("Nylon Roller 2in", "ROLL")
+        hinge = self._product("Hinge #2", "HNG")
+        reel = self._product('1/8" 7X19 GAC (500 FT REEL)', "9150000604")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        sale_line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": kit.id, "product_uom_qty": 1})
+        picking = self._picking([(roller, 10), (hinge, 8), (reel, 1)])
+        picking.move_ids.sale_line_id = sale_line.id
+
+        names = [line["name"] for line in picking._work_order_lines()]
+        self.assertEqual(len(names), 3, "the kit was summarised away")
+        self.assertIn("Nylon Roller 2in", names)
+        self.assertIn("Hinge #2", names)
