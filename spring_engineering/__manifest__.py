@@ -9,7 +9,7 @@
     # in that database. Adding product_custom_spring without moving the version
     # left branches where /spring-calculator/add-to-cart answered "the spring
     # product is missing", because the route was there and the record was not.
-    'version': '19.0.2.5.0',
+    'version': '19.0.2.5.1',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
@@ -39,6 +39,7 @@
             'spring_engineering/static/src/js/spring_engineering.js',
             'spring_engineering/static/src/xml/spring_engineering.xml',
             'spring_engineering/static/src/css/spring_engineering.css',
+            'spring_engineering/static/src/css/spring_engineering_site.css',
         ],
     },
     'installable': True,
