@@ -82,7 +82,7 @@
                         </p>
                         <table t-if="lines" style="border-collapse:collapse;width:100%;font-size:13px;">
                             <tr>
-                                <th t-att-style="th + 'text-align:left;'">Station</th>
+                                <th t-att-style="th + 'text-align:left;'">Category</th>
                                 <th t-att-style="th + 'text-align:left;'">Code</th>
                                 <th t-att-style="th + 'text-align:left;'">Product</th>
                                 <th t-att-style="th + 'text-align:right;'">Length</th>
@@ -107,7 +107,7 @@
                         </table>
 
                         <div t-if="lines" style="margin-top:14px;font-size:13px;color:#666;border-top:1px solid #ccc;padding-top:8px;">
-                            <t t-esc="len(sections)"/> station<t t-if="len(sections) != 1">s</t>,
+                            <t t-esc="len(sections)"/> categor<t t-if="len(sections) != 1">ies</t><t t-else="">y</t>,
                             <t t-esc="len(lines)"/> line<t t-if="len(lines) != 1">s</t>,
                             <t t-esc="'%g' % sum(l['quantity'] for l in lines)"/> item<t t-if="sum(l['quantity'] for l in lines) != 1">s</t> in all.
                             <span style="float:right;">
@@ -124,6 +124,13 @@
                          style="font-family:Arial,sans-serif;page-break-before:always;">
                         <div style="background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;">
                             <t t-esc="section['title'].upper()"/>
+                        </div>
+                        <!-- WHERE THIS CATEGORY SITS. Two leaves can share a
+                             name - a Tracks under Hardware and a Tracks
+                             somewhere else - and the heading alone would not
+                             say which page you are holding. -->
+                        <div t-if="section['parent']" style="text-align:center;margin:4px 0 0;font-size:11px;color:#999;">
+                            <t t-esc="section['parent']"/>
                         </div>
                         <div style="text-align:center;margin:8px 0 14px;font-size:13px;color:#666;">
                             <strong style="font-size:16px;color:#1B2A6B;" t-esc="o.name"/>
