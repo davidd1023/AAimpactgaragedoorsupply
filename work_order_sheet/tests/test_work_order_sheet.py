@@ -1155,3 +1155,70 @@ class TestWorkOrderSheetThinNote(TestWorkOrderSheet):
         picking.move_ids[0].sale_line_id = line.id
         self.assertTrue(read(picking.move_ids[0]),
                         "the assembly was not recognised below the first row")
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetUnmovedLines(TestWorkOrderSheet):
+    """Ordered things that make no stock move still have to be made."""
+
+    def _order_with(self, spring_type):
+        spring = self.env.ref("spring_engineering.product_custom_spring")
+        spring.type = spring_type
+        kit = self.env["product.product"].create({
+            "name": "AA-1200 Hardware Kit", "default_code": "AA-1200",
+            "type": "consu", "is_storable": True})
+        order = self.env["sale.order"].create({"partner_id": self.partner.id})
+        self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": kit.id, "product_uom_qty": 1,
+            "name": 'AA-1200 Hardware Kit\nTrack: 3" 15R | W 108" x H 84" | 300 lb'})
+        self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": spring.product_variant_id.id,
+            "product_uom_qty": 1,
+            "name": TestWorkOrderSheetDoor.FULL + "\nSprings for the kit above"})
+        order.action_confirm()
+
+        return order.picking_ids[:1]
+
+    def test_a_spring_that_moves_no_stock_is_still_on_the_sheet(self):
+        """THE BUG BEHIND SEVERAL ROUNDS OF THE WRONG FIX.
+
+        A custom assembly is made to order. If its product moves no stock -
+        a service, for instance - Odoo puts no line on the transfer, so the
+        sheet listed nothing: no Springs page, no specification, and no door,
+        because the door is written on that very line. Every parsing fix was
+        aimed at text that was not on the record at all.
+        """
+        picking = self._order_with("service")
+        self.assertTrue(picking, "the order produced no transfer")
+        self.assertNotIn(
+            "Custom Torsion Spring Assembly",
+            picking.move_ids.mapped("product_id.name"),
+            "this test needs a product that makes no move")
+
+        pages = {s["title"]: [l["name"] for l in s["lines"]]
+                 for s in picking._work_order_sections()}
+        self.assertIn("Springs", pages, "the assembly got no page")
+        self.assertIn("Custom Torsion Spring Assembly", pages["Springs"])
+
+        sheet = self._sheet(picking)
+        self.assertIn("SPRING ASSEMBLY", sheet)
+        self.assertIn('0.2625"', sheet)
+        self.assertIn("9' 0\" x 7' 0\"", sheet)
+        self.assertIn("355 lb", sheet)
+
+    def test_it_says_made_to_order_rather_than_not_available(self):
+        """It is not on a shelf and never will be.
+
+        "Not available" would send somebody looking for it.
+        """
+        picking = self._order_with("service")
+        springs = [s for s in picking._work_order_sections()
+                   if s["title"] == "Springs"][0]
+        self.assertEqual(springs["lines"][0]["availability"], "Made to order")
+
+    def test_a_spring_that_does_move_stock_is_not_listed_twice(self):
+        picking = self._order_with("consu")
+        names = [l["name"] for l in picking._work_order_lines()]
+        self.assertEqual(
+            names.count("Custom Torsion Spring Assembly"), 1,
+            "the assembly was listed both as a move and as an order line")
