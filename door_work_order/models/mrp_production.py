@@ -517,10 +517,6 @@ class MrpProduction(models.Model):
         """Raise ONE manufacturing order for a whole W/O. Returns (order, reused)."""
         order = self._door_wo_parse_order(spec)
         existing = self._door_wo_existing(order)
-
-        if existing:
-            return existing, True
-
         planned = []
         missing = []
 
@@ -531,6 +527,33 @@ class MrpProduction(models.Model):
             for gap in gaps:
                 if gap not in missing:
                     missing.append(gap)
+
+        if existing:
+            # A MARK ADDED AFTER THE FIRST SEND MUST NOT VANISH. This used to
+            # return the existing order the moment the W/O matched, so a door
+            # added to an order already sent was dropped without a word - the
+            # person saw "that order already exists", pressed nothing more, and
+            # manufacturing never heard about mark B.
+            #
+            # Marks already on the order are LEFT ALONE rather than rewritten:
+            # the job may be part cut, and quietly changing a length somebody
+            # is working to is worse than the problem being fixed here.
+            on_order = set(existing.door_wo_mark_ids.mapped("label"))
+            fresh = [(parsed, items) for parsed, items in planned
+                     if parsed["mark"] not in on_order]
+
+            if not fresh:
+                return existing, True
+
+            if missing:
+                raise UserError(
+                    _("The new marks cannot be added yet, because the following"
+                      " is not set up:\n\n%s", "\n".join(missing))
+                )
+
+            existing._door_wo_add_marks(fresh)
+
+            return existing, True
 
         if missing:
             raise UserError(
@@ -564,39 +587,28 @@ class MrpProduction(models.Model):
             "door_wo_mark": ", ".join(labels) or False,
             "door_wo_summary": self._door_wo_order_summary(order, planned),
             "door_wo_mark_ids": [
-                (0, 0, {
-                    "sequence": (index + 1) * 10,
-                    "label": parsed["mark"] or chr(65 + index),
-                    "door_qty": parsed["door_qty"],
-                    "width": parsed["width"],
-                    "height": parsed["height"],
-                    "weight": parsed["weight"],
-                    "track_label": parsed["track_label"],
-                    "config": parsed["config"] or "%s - %s" % (
-                        parsed["track_label"], parsed["lift_label"]),
-                    "projection": parsed["projection"],
-                    "sections": parsed["sections"],
-                    "drum": parsed["drum"],
-                    "ebf": parsed["ebf"],
-                    "capacity": parsed["capacity"],
-                    "ftsc": parsed["ftsc"],
-                    "cable_type": parsed["cable_size"] or "",
-                    "jb_10": parsed["jb"].get("10", 0),
-                    "jb_12": parsed["jb"].get("12", 0),
-                    "jb_14": parsed["jb"].get("14", 0),
-                    "jb_16": parsed["jb"].get("16", 0),
-                })
+                (0, 0, self._door_wo_mark_values(parsed, index))
                 for index, (parsed, _items) in enumerate(planned)
             ],
         })
 
-        # The cut list is created after the order, not nested inside the marks,
-        # because an item carries BOTH its mark and its order and the nested
-        # form can only supply one of them.
-        for mark, (parsed, items) in zip(production.door_wo_mark_ids, planned):
+        production._door_wo_fill_marks(production.door_wo_mark_ids, planned)
+
+        return production, False
+
+    def _door_wo_fill_marks(self, marks, planned):
+        """The cut list for each mark.
+
+        Created after the order rather than nested inside the marks, because an
+        item carries BOTH its mark and its order and the nested form can only
+        supply one of them.
+        """
+        self.ensure_one()
+
+        for mark, (parsed, items) in zip(marks, planned):
             for index, item in enumerate(items):
                 self.env["door.work.order.item"].create({
-                    "production_id": production.id,
+                    "production_id": self.id,
                     "mark_id": mark.id,
                     "sequence": (index + 1) * 10,
                     "role": item["role"],
@@ -611,9 +623,57 @@ class MrpProduction(models.Model):
                 })
 
             if self._door_wo_consume_components():
-                production._door_wo_add_components(items, parsed["door_qty"])
+                self._door_wo_add_components(items, parsed["door_qty"])
 
-        return production, False
+    def _door_wo_add_marks(self, planned):
+        """Put marks that are not on this order yet onto it."""
+        self.ensure_one()
+        added = self.env["door.work.order.mark"]
+        start = len(self.door_wo_mark_ids)
+
+        for offset, (parsed, _items) in enumerate(planned):
+            added |= added.create(self._door_wo_mark_values(
+                parsed, start + offset, production_id=self.id))
+
+        self._door_wo_fill_marks(added, planned)
+        self.product_qty = (self.product_qty or 0) + sum(
+            parsed["door_qty"] for parsed, _i in planned)
+        self.door_wo_mark = ", ".join(
+            [m for m in self.door_wo_mark_ids.mapped("label") if m]) or False
+
+        return added
+
+    @api.model
+    def _door_wo_mark_values(self, parsed, index, production_id=None):
+        """One mark record's values. ONE definition, used by both the first
+        send and by a later one that adds a mark to an order already raised."""
+        values = {
+            "sequence": (index + 1) * 10,
+            "label": parsed["mark"] or chr(65 + index),
+            "door_qty": parsed["door_qty"],
+            "width": parsed["width"],
+            "height": parsed["height"],
+            "weight": parsed["weight"],
+            "track_label": parsed["track_label"],
+            "config": parsed["config"] or "%s - %s" % (
+                parsed["track_label"], parsed["lift_label"]),
+            "projection": parsed["projection"],
+            "sections": parsed["sections"],
+            "drum": parsed["drum"],
+            "ebf": parsed["ebf"],
+            "capacity": parsed["capacity"],
+            "ftsc": parsed["ftsc"],
+            "cable_type": parsed["cable_size"] or "",
+            "jb_10": parsed["jb"].get("10", 0),
+            "jb_12": parsed["jb"].get("12", 0),
+            "jb_14": parsed["jb"].get("14", 0),
+            "jb_16": parsed["jb"].get("16", 0),
+        }
+
+        if production_id:
+            values["production_id"] = production_id
+
+        return values
 
     @api.model
     def _door_wo_order_summary(self, order, planned):

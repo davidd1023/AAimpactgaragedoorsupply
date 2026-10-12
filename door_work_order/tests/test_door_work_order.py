@@ -609,3 +609,78 @@ class TestDoorWorkOrderQuantity(DoorWorkOrderCommon):
         many = [spec(mark=str(i)) for i in range(60)]
         with self.assertRaises(UserError):
             self.Production._door_wo_create(order(*many))
+
+
+@tagged("post_install", "-at_install")
+class TestDoorWorkOrderResend(DoorWorkOrderCommon):
+    """Pressing Send again after adding a door to the order."""
+
+    def test_a_mark_added_later_is_not_silently_dropped(self):
+        """THE BUG: a door added after the first send never reached the floor.
+
+        The order was returned the moment the W/O matched, before the new marks
+        were even looked at, so the person saw "that order already exists",
+        pressed nothing more, and manufacturing never heard about mark B. It
+        cost nothing to notice and everything to miss.
+        """
+        first, reused = self.Production._door_wo_create(
+            order(spec(mark="A", qty=2)))
+        self.assertFalse(reused)
+        self.assertEqual(first.product_qty, 2)
+
+        second, reused = self.Production._door_wo_create(order(
+            spec(mark="A", qty=2),
+            spec(mark="B", qty=3, height=96, vertical=88, horizontal=108),
+        ))
+        self.assertTrue(reused, "it must still be the same order")
+        self.assertEqual(first, second)
+        self.assertEqual(
+            sorted(second.door_wo_mark_ids.mapped("label")), ["A", "B"],
+            "mark B was dropped")
+        self.assertEqual(second.product_qty, 5, "2 doors of A plus 3 of B")
+
+        mark_b = second.door_wo_mark_ids.filtered(lambda m: m.label == "B")
+        self.assertEqual(mark_b._door_wo_item_length("track_vertical"), '88"')
+        self.assertEqual(
+            sum(mark_b.item_ids.filtered(
+                lambda i: i.role == "track_vertical").mapped("quantity")), 6,
+            "2 pieces x 3 doors")
+
+    def test_a_mark_already_on_the_order_is_left_alone(self):
+        """Not rewritten, deliberately: the job may already be part cut.
+
+        Quietly changing a length somebody is working to is worse than the
+        problem being solved here, so a mark that is already on the order keeps
+        the measurements it was raised with and the review page says so.
+        """
+        first, _r = self.Production._door_wo_create(order(spec(mark="A", qty=2)))
+        # the same mark, re-sent with a different size and quantity
+        second, reused = self.Production._door_wo_create(
+            order(spec(mark="A", qty=9, height=96, vertical=88)))
+        self.assertTrue(reused)
+        mark = second.door_wo_mark_ids
+        self.assertEqual(len(mark), 1)
+        self.assertEqual(mark.door_qty, 2, "the quantity was rewritten")
+        self.assertEqual(mark.height, 84, "the measurements were rewritten")
+        self.assertEqual(second.product_qty, 2)
+
+    def test_resending_an_unchanged_order_changes_nothing(self):
+        first, _r = self.Production._door_wo_create(order(
+            spec(mark="A", qty=2), spec(mark="B", qty=1, vertical=88)))
+        before = (len(first.door_wo_mark_ids), len(first.door_wo_item_ids),
+                  first.product_qty)
+        second, reused = self.Production._door_wo_create(order(
+            spec(mark="A", qty=2), spec(mark="B", qty=1, vertical=88)))
+        self.assertTrue(reused)
+        self.assertEqual(
+            (len(second.door_wo_mark_ids), len(second.door_wo_item_ids),
+             second.product_qty), before,
+            "re-sending the same order duplicated something")
+
+    def test_a_finished_order_does_not_absorb_a_new_job(self):
+        """A W/O number reused on a later job must not join a closed order."""
+        first, _r = self.Production._door_wo_create(order(spec(mark="A")))
+        first.state = "cancel"
+        second, reused = self.Production._door_wo_create(order(spec(mark="A")))
+        self.assertFalse(reused)
+        self.assertNotEqual(first, second)

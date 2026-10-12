@@ -132,7 +132,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
         <div class="printer-item"><label>Paste any page of your Odoo - only the address is used</label>
         <input id="cfg-odoo" type="text" inputmode="url" placeholder="aaigd.com  or  https://aaigd.com/odoo/manufacturing" oninput="saveOdooUrl()" style="width:100%;padding:8px;border:1px solid var(--gray-border);border-radius:8px;font-size:14px"/>
         <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div>
-        <div style="margin-top:6px;font-size:11px;color:#888">Send to Manufacturing build <strong>5</strong> &#183; 2026-10-09</div></div>
+        <div style="margin-top:6px;font-size:11px;color:#888">Send to Manufacturing build <strong>6</strong> &#183; 2026-10-09</div></div>
       </div>
       <div class="save-confirm" id="save-confirm">Saved</div>
     </div>
@@ -421,7 +421,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
   <div class="results" id="print-all-wrap" style="margin-top:4px">
     <button class="print-all-btn" onclick="opPrintChoice()">&#128424; Print All</button>
     <button class="print-all-btn" style="display:none" onclick="doPrintAll()">&#128424; Print All (print server)</button>
-    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff" title="Send to Manufacturing build 5">&#128296; Send to Manufacturing <span style="opacity:.55;font-size:11px">b5</span></button>
+    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff" title="Send to Manufacturing build 6">&#128296; Send to Manufacturing <span style="opacity:.55;font-size:11px">b6</span></button>
   </div>
   </div>
 </div>
@@ -1044,9 +1044,18 @@ function collectDoors(){
     d.mark=label; d.qty=qty;
     doors.push(d);
   });
-  if(prev){
-    var back=document.querySelector('#op-list .op-mk[data-mid="'+prev+'"]');
-    if(back){try{opOpenMark(prev,(back.querySelector('.op-lbl')||{value:'?'}).value||'?');}catch(e){}}
+  // PUT THE EDITOR BACK WHERE IT WAS. This loop opens every mark in turn, so
+  // without this the screen is left showing the LAST mark - press Send and the
+  // door you were working on silently changes under you.
+  //
+  // The fallback matters as much as the restore: opCur is null before any mark
+  // has been opened, and still points at a deleted mark after one is removed,
+  // so "restore only if we know where we were" leaves the editor moved in
+  // exactly the cases nobody would think to test.
+  var back=prev?document.querySelector('#op-list .op-mk[data-mid="'+prev+'"]'):null;
+  if(!back) back=document.querySelector('#op-list .op-mk');
+  if(back){
+    try{opOpenMark(back.getAttribute('data-mid'),(back.querySelector('.op-lbl')||{value:'?'}).value||'?');}catch(e){}
   }
   return {doors:doors,skipped:skipped};
 }
@@ -1062,7 +1071,7 @@ function sendToManufacturing(){
   var total=0; collected.doors.forEach(function(d){total+=(d.qty||1);});
   if(!spec.wo&&!confirm('This order has no W/O number. Without one, sending twice will raise two orders. Send anyway?'))return;
   var target=base+'/door-work-order/new?spec='+encodeURIComponent(JSON.stringify(spec));
-  try{console.log('Send to Manufacturing b5 -> '+collected.doors.length+' mark(s), '+total+' door(s)',target);}catch(e){}
+  try{console.log('Send to Manufacturing b6 -> '+collected.doors.length+' mark(s), '+total+' door(s)',target);}catch(e){}
   var win=window.open(target,'_blank','noopener');
   if(!win)alert('Your browser blocked the new tab. Allow pop-ups for this page, or open this address:\n\n'+target);
 }

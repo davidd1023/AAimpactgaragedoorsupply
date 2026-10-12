@@ -83,13 +83,20 @@ class DoorWorkOrder(http.Controller):
                 if gap not in missing:
                     missing.append(gap)
 
+        existing = Production._door_wo_existing(order)
+        on_order = set(existing.door_wo_mark_ids.mapped("label")) if existing else set()
+
         return self._render("review", {
             "spec": spec,
             "order": order,
             "doors": doors,
             "total_doors": sum(d["parsed"]["door_qty"] for d in doors),
             "missing": missing,
-            "existing": Production._door_wo_existing(order),
+            "existing": existing,
+            # WHAT SENDING AGAIN WILL ACTUALLY DO, named rather than implied.
+            "new_marks": [d["parsed"]["mark"] for d in doors
+                          if d["parsed"]["mark"] not in on_order],
+            "kept_marks": sorted(on_order),
         })
 
     # --- step two: raise it ---------------------------------------------------

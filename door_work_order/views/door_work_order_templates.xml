@@ -84,9 +84,22 @@
                 <h1>This W/O already has an order</h1>
                 <p class="sub">
                     <strong t-esc="existing.name"/> was already raised for
-                    <strong t-esc="order['reference']"/> and is not finished.
-                    Sending again will open that one rather than building the
-                    job twice.
+                    <strong t-esc="order['reference']"/> and is not finished,
+                    so the job will not be built twice.
+                </p>
+                <p class="sub" t-if="new_marks">
+                    Sending will ADD mark<t t-if="len(new_marks) != 1">s</t>
+                    <strong t-esc="', '.join(new_marks)"/> to it.
+                    Mark<t t-if="len(kept_marks) != 1">s</t>
+                    <strong t-esc="', '.join(kept_marks)"/>
+                    <t t-if="len(kept_marks) == 1">is</t><t t-else="">are</t>
+                    already on the order and will be left exactly as
+                    <t t-if="len(kept_marks) == 1">it is</t><t t-else="">they are</t>,
+                    because the job may already be part cut.
+                </p>
+                <p class="sub" t-else="">
+                    Every mark on this order is already on it, so sending will
+                    simply open it. Nothing will be changed or added.
                 </p>
             </div>
 
