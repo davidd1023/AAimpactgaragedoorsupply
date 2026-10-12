@@ -1,6 +1,7 @@
 import html
 import json
 import re
+import urllib.parse
 
 from odoo.exceptions import UserError
 from odoo.tests.common import HttpCase, TransactionCase, tagged
@@ -422,6 +423,39 @@ class TestDoorWorkOrderHttp(HttpCase):
         self.assertIn("mark B", added.replace("Mark B", "mark B"))
         unchanged = send(two)
         self.assertIn("nothing was changed", unchanged)
+
+    def test_an_empty_request_explains_itself(self):
+        """What the owner actually hit.
+
+        auth="user" bounces a signed-out request to /web/login and comes back
+        with a GET, so a POSTed order is gone and the page renders with no
+        spec. "The door calculator sent no door" is true and tells the person
+        nothing they can act on - least of all that pressing Send again now
+        works, because by then they are signed in.
+        """
+        self.authenticate("admin", "admin")
+        page = self.url_open("/door-work-order/new")
+        self.assertEqual(page.status_code, 200)
+        body = visible_text(page.text)
+        self.assertIn("sign in", body)
+        self.assertIn("press Send to Manufacturing again", body)
+
+    def test_the_sign_in_redirect_keeps_the_order(self):
+        """A URL survives the login round trip; a POST body does not.
+
+        This is why the button sends the order in the query string whenever it
+        fits. Losing it here is invisible until somebody is standing at the
+        review page wondering where their order went.
+        """
+        payload = order(spec(mark="A", qty=2, wo="W-HTTP"), wo="W-HTTP")
+        page = self.url_open(
+            "/door-work-order/new?spec=%s" % http_quote(payload),
+            allow_redirects=False)
+        self.assertIn(page.status_code, (302, 303))
+        location = page.headers.get("Location", "")
+        self.assertIn("/web/login", location)
+        self.assertIn(
+            "W-HTTP", urllib.parse.unquote(urllib.parse.unquote(location)))
 
     def test_a_stranger_gets_the_login_page(self):
         """auth="user" IS the security model, so it is asserted.
