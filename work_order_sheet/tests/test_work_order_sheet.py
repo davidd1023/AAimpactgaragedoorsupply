@@ -1023,3 +1023,71 @@ class TestWorkOrderSheetCableNamedForATrack(TestWorkOrderSheet):
                  for x in self._picking([(cable, 2), (track, 2)])._work_order_sections()}
         self.assertIn('1/8" Lift Cable for 2in Track', pages.get("Cables", []))
         self.assertIn('2" Vertical Track 76"', pages.get("Tracks", []))
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetDealerNoteEdges(TestWorkOrderSheet):
+    """What a dealer note really looks like, including its warnings."""
+
+    def test_a_spring_warning_is_not_the_door_weight(self):
+        """THE BUG: the sheet showed 530 lb for a door that was not 530 lb.
+
+        A warning is prose written after the door, and it repeats weights and
+        drum ratings - "above 530 lb" and the like. It is cut off before the
+        door is read rather than searched.
+        """
+        read = self.Picking._work_order_dealer_door
+        facts = read('Track: 3" 15R | Lift: Standard | W 108" x H 84" | 300 lb'
+                     ' | SPRING WARNING: doors above 530 lb need a bigger drum')
+        self.assertEqual(facts["weight"], "300 lb")
+        self.assertEqual(facts["width"], '108"')
+        self.assertEqual(facts["height"], '84"')
+
+    def test_a_line_that_is_not_a_dealer_note_gives_no_door(self):
+        """A figure in pounds elsewhere is not the door's weight."""
+        read = self.Picking._work_order_dealer_door
+        self.assertEqual(read("Drum rated to 530 lb"), {})
+        self.assertEqual(read("Some product 265 lb capacity"), {})
+
+    def test_the_fullest_note_wins_not_the_first(self):
+        """Several lines can carry a note.
+
+        Returning the first that yielded anything let a line with only a weight
+        beat the line that actually describes the door.
+        """
+        kit = self._product("AA-1200 Hardware Kit", "AA-1200")
+        other = self._product("Some Extra", "EX")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        thin = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": other.id, "product_uom_qty": 1,
+            "name": "Some Extra\nTrack: 3\" 15R | 530 lb"})
+        full = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": kit.id, "product_uom_qty": 1,
+            "name": 'AA-1200 Hardware Kit\nTrack: 3" 15R | Lift: High Lift 12" '
+                    '| W 108" x H 84" | 300 lb'})
+        picking = self._picking([(other, 1), (kit, 1)])
+        picking.move_ids.filtered(
+            lambda m: m.product_id == other).sale_line_id = thin.id
+        picking.move_ids.filtered(
+            lambda m: m.product_id == kit).sale_line_id = full.id
+
+        door = picking._work_order_door()
+        self.assertEqual(door["weight"], "300 lb")
+        self.assertEqual(door["width"], '108"')
+        self.assertEqual(door["height"], '84"')
+        self.assertEqual(door["hilift"], '12"')
+
+    def test_inches_from_the_dealer_form_reach_the_header(self):
+        """The form collects inches, so the note carries 108\" and 84\"."""
+        kit = self._product("AA-1200 Hardware Kit", "AA-1200")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": kit.id, "product_uom_qty": 1,
+            "name": 'AA-1200 Hardware Kit\nTrack: 3" 15R | Lift: High Lift 12" '
+                    '| W 108" x H 84" | 300 lb'})
+        picking = self._picking([(kit, 1)])
+        picking.move_ids[0].sale_line_id = line.id
+        sheet = self._sheet(picking)
+        self.assertIn('108" x 84"', sheet)
+        self.assertIn("300 lb", sheet)
+        self.assertIn('12" hi-lift', sheet)

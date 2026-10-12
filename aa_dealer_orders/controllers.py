@@ -160,9 +160,36 @@ class AAOptionPricing:
         tag = (line.get('tag') or '').strip()[:80]
         if tag:
             parts.append(f"Door: {tag}")
+        # THE KEYS THE FORM ACTUALLY POSTS. Both callers pass a dict holding
+        # width_in and height_in - _track_values reads them that way, and so
+        # does the validation above - while this read 'width' and 'height',
+        # which are in neither. The door size was therefore never written into
+        # the note, so it never reached the order line and never reached the
+        # work order sheet. The plain keys are still read second, in case
+        # something older passes them.
         dims = []
-        for key, label in (('width', 'W'), ('height', 'H')):
-            val = (line.get(key) or '').strip()[:20]
+        for keys, label in ((('width_in', 'width'), 'W'),
+                            (('height_in', 'height'), 'H')):
+            val = ''
+
+            for key in keys:
+                if line.get(key) not in (None, '', False):
+                    val = line.get(key)
+                    break
+
+            try:
+                number = float(val)
+            except (TypeError, ValueError):
+                number = None
+
+            if number:
+                # Inches, which is what the form collects.
+                val = f'{number:g}"'
+            elif number is not None:
+                val = ''
+            else:
+                val = str(val or '').strip()[:20]
+
             if val:
                 dims.append(f"{label} {val}")
         if dims:
