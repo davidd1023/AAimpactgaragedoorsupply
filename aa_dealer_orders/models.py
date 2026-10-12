@@ -54,8 +54,15 @@ class ResPartner(models.Model):
                 if partner.aa_dealer_pricelist_id and \
                         partner.property_product_pricelist == partner.aa_dealer_pricelist_id:
                     partner.specific_property_product_pricelist = False
+                # Archive the dealer's own pricelist too. Left active, the website kept
+                # using it (cost + the old margin) on the kit page while the cart charged
+                # the public price. Archived, not deleted: it comes back with a margin.
+                if partner.aa_dealer_pricelist_id.active:
+                    partner.aa_dealer_pricelist_id.active = False
                 continue
             pricelist = partner.aa_dealer_pricelist_id
+            if pricelist and not pricelist.active:
+                pricelist.active = True
             item_vals = {
                 'applied_on': '3_global',
                 'compute_price': 'formula',
