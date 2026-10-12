@@ -302,10 +302,29 @@ class StockPicking(models.Model):
     DEALER_HILIFT = re.compile(
         r"(?:high\s*lift|hi-?lift)\s*([\d.]+)\s*" + '"', re.I)
 
+    # The dealer note is recognisable, and a weight found anywhere else is not
+    # the door's. A spring warning is prose - it repeats door weights and drum
+    # ratings - and it is written AFTER the door, so it is cut off entirely
+    # rather than searched.
+    DEALER_MARK = re.compile(r"\b(?:Track|Lift|Drum)\s*:", re.I)
+    SPRING_WARNING = re.compile(r"SPRING\s+WARNING", re.I)
+
     def _work_order_dealer_door(self, text):
         """The door facts a dealer kit order carries, or {}."""
         facts = {}
         text = text or ""
+        warning = self.SPRING_WARNING.search(text)
+
+        if warning:
+            text = text[:warning.start()]
+
+        # Only from a line that IS a dealer note. Any other line that happens
+        # to carry a figure in pounds - a drum rating, a note about capacity -
+        # would otherwise be read as the door's weight.
+        if not (self.DEALER_MARK.search(text)
+                or self.DEALER_WIDTH.search(text)
+                or self.DEALER_HEIGHT.search(text)):
+            return {}
         width = self.DEALER_WIDTH.search(text)
         height = self.DEALER_HEIGHT.search(text)
 
@@ -346,6 +365,12 @@ class StockPicking(models.Model):
         # onto the kit line instead, and that was the only place this did not
         # look - so a kit ordered with a door specification printed a header
         # with no door on it.
+        # THE FULLEST ANSWER, not the first one. Several lines on an order can
+        # carry a note, and returning the first that yielded anything meant one
+        # line with only a weight on it could win over the line that actually
+        # describes the door.
+        best = {}
+
         for move in self.move_ids:
             sale_line = move.sale_line_id
 
@@ -354,10 +379,10 @@ class StockPicking(models.Model):
 
             facts = self._work_order_dealer_door(sale_line.name or "")
 
-            if facts:
-                return facts
+            if len(facts) > len(best):
+                best = facts
 
-        return {}
+        return best
 
     # --- what is on the shelf -------------------------------------------------
     AVAILABILITY = {
