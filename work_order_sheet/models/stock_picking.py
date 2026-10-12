@@ -651,10 +651,19 @@ class StockPicking(models.Model):
             # would otherwise never be seen. A GOOD that is simply not on this
             # transfer is a different matter - it is on another step, or not
             # delivered yet - and listing it here would put things on the sheet
-            # that nobody is picking today. The first version of this listed
-            # every line of any order whose name matched the Source Document,
-            # which on a partial delivery is most of it.
+            # that nobody is picking today.
             if sale_line.product_id.type != "service":
+                continue
+
+            # A SHIPPING LINE IS NOT SOMETHING TO MAKE. "Pickup - Medley
+            # Warehouse" is a delivery method and a deposit is money; both are
+            # service lines on the order and both turned up on the floor's
+            # sheet under Hardware, marked "Made to order", which is exactly
+            # what it reads like to somebody holding it.
+            if "is_delivery" in sale_line._fields and sale_line.is_delivery:
+                continue
+
+            if "is_downpayment" in sale_line._fields and sale_line.is_downpayment:
                 continue
 
             lines.append(self._work_order_sale_line(sale_line))
