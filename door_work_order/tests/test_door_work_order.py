@@ -489,6 +489,32 @@ class TestDoorWorkOrderPapers(DoorWorkOrderCommon):
         self.assertNotIn("2x2 Projection", html)
         self.assertNotIn("EBF", html)
 
+    def test_the_papers_are_plain_ascii(self):
+        """wkhtmltopdf RENDERS THIS PAGE AS LATIN-1 WHATEVER THE CHARSET SAYS.
+
+        A non-breaking space is two bytes in UTF-8 and printed as "Â "; an em
+        dash printed as "â€”". The owner read a header of
+        "W/O: 7 Â |Â Mark A Â |Â 2 doors" off a real sheet.
+
+        Declaring the charset did not help and arguing with the PDF engine is
+        not worth it, because neither character earned anything a pipe and a
+        hyphen do not. So the rule is that these papers are ASCII, and this
+        asserts the rule rather than the symptom - any future em dash, curly
+        quote or non-breaking space fails here instead of on paper.
+        """
+        production, _r = self.Production._door_wo_create(spec())
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "door_work_order.report_info_papers", production.ids)
+
+        if isinstance(rendered, bytes):
+            rendered = rendered.decode()
+
+        body = rendered[rendered.find("<main>"):]
+        offenders = sorted({c for c in html.unescape(body) if ord(c) > 127})
+        self.assertFalse(
+            offenders,
+            "the papers carry characters wkhtmltopdf will mangle: %r" % offenders)
+
     def test_an_ordinary_manufacturing_order_says_it_has_no_papers(self):
         """The Print entry shows on every MO, so the others must read sensibly."""
         other = self.env["mrp.production"].create({
