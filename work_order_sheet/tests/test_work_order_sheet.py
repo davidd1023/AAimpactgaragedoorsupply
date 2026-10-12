@@ -35,7 +35,7 @@ class TestWorkOrderSheet(TransactionCase):
 
         return self.env["product.product"].create(values)
 
-    def _picking(self, products, origin="S00003"):
+    def _picking(self, products, origin="WO-TEST-ORIGIN"):
         picking = self.Picking.create({
             "picking_type_id": self.picking_type.id,
             "partner_id": self.partner.id,
@@ -123,11 +123,11 @@ class TestWorkOrderSheet(TransactionCase):
 
     def test_the_sheet_names_the_order_it_is_for(self):
         track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
-        picking = self._picking([(track, 1)], origin="S00003")
+        picking = self._picking([(track, 1)], origin="WO-TEST-ORIGIN")
         sheet = self._sheet(picking)
         self.assertIn("WORK ORDER", sheet)
         self.assertIn(picking.name, sheet)
-        self.assertIn("S00003", sheet)
+        self.assertIn("WO-TEST-ORIGIN", sheet)
         self.assertIn("A Customer", sheet)
 
     def test_an_empty_work_order_says_so(self):
@@ -202,7 +202,7 @@ class TestWorkOrderSheetSpring(TestWorkOrderSheet):
 
     def _spring_picking(self, description=None, extra=()):
         product, line = self._spring_line(description)
-        picking = self._picking([(product, 1)] + list(extra), origin="S00011")
+        picking = self._picking([(product, 1)] + list(extra), origin="WO-TEST-ORIGIN")
         picking.move_ids[0].sale_line_id = line.id
 
         return picking
@@ -361,7 +361,7 @@ class TestWorkOrderSheetCover(TestWorkOrderSheet):
 
     def test_the_cover_says_who_what_and_when(self):
         track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
-        picking = self._picking([(track, 2)], origin="S00003")
+        picking = self._picking([(track, 2)], origin="WO-TEST-ORIGIN")
         picking.date_deadline = "2026-10-20 08:00:00"
         sheet = self._sheet(picking)
         self.assertIn("CUSTOMER", sheet)
@@ -369,7 +369,7 @@ class TestWorkOrderSheetCover(TestWorkOrderSheet):
         self.assertIn("Deadline", sheet)
         self.assertIn("10/20/2026", sheet)
         self.assertIn("EVERYTHING ON THIS ORDER", sheet)
-        self.assertIn("S00003", sheet)
+        self.assertIn("WO-TEST-ORIGIN", sheet)
         self.assertIn(picking.name, sheet)
 
     def test_the_summary_lists_every_category_and_line(self):
@@ -1222,3 +1222,67 @@ class TestWorkOrderSheetUnmovedLines(TestWorkOrderSheet):
         self.assertEqual(
             names.count("Custom Torsion Spring Assembly"), 1,
             "the assembly was listed both as a move and as an order line")
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetOriginOnly(TestWorkOrderSheet):
+    """A transfer that carries only a Source Document, and no links."""
+
+    def _order_and_picking(self):
+        template = self.env.ref("spring_engineering.product_custom_spring")
+        template.type = "service"
+        spring = template.product_variant_id
+        kit = self.env["product.product"].create({
+            "name": "AA-1200 Hardware Kit", "default_code": "AA-1200",
+            "type": "consu", "is_storable": True})
+        order = self.env["sale.order"].create({"partner_id": self.partner.id})
+        self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": kit.id, "product_uom_qty": 1,
+            "name": 'AA-1200 Hardware Kit\n'
+                    'Track: 3" 15R | W 9\' 0" x H 7\' 0" | 300 lb'})
+        self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": spring.id, "product_uom_qty": 1,
+            "name": TestWorkOrderSheetDoor.FULL + "\nSprings for the kit above"})
+
+        picking = self._picking([(kit, 1)], origin=order.name)
+
+        return order, picking
+
+    def test_a_transfer_with_only_an_origin_still_finds_its_order(self):
+        """THE OTHER HALF OF WHY NOTHING WORKED.
+
+        A transfer created straight from a sale order carries sale_id, and its
+        moves carry sale_line_id. One made by a route or by hand carries only
+        the Source Document - the plain "S00003" on the form - and everything
+        here read the links. So it found no spring, no specification and no
+        door, because each of those is written on an order line it could not
+        reach.
+        """
+        order, picking = self._order_and_picking()
+        self.assertFalse(picking.sale_id, "this test needs an unlinked transfer")
+        self.assertFalse(picking.move_ids.mapped("sale_line_id"))
+
+        self.assertEqual(picking._work_order_sale_order(), order)
+
+        pages = {s["title"]: [l["name"] for l in s["lines"]]
+                 for s in picking._work_order_sections()}
+        self.assertIn("Springs", pages, "the assembly got no page")
+
+        sheet = self._sheet(picking)
+        self.assertIn("SPRING ASSEMBLY", sheet)
+        self.assertIn("9' 0\" x 7' 0\"", sheet)
+        self.assertIn("355 lb", sheet)
+
+    def test_a_transfer_for_no_order_at_all_is_unharmed(self):
+        track = self._product('2" Vertical Track 76"', "VT")
+        picking = self._picking([(track, 2)], origin="Some internal move")
+        self.assertFalse(picking._work_order_sale_order())
+        sheet = self._sheet(picking)
+        self.assertIn("TRACKS", sheet)
+        self.assertIn('76"', sheet)
+
+    def test_a_line_matched_by_product_is_not_listed_twice(self):
+        order, picking = self._order_and_picking()
+        names = [l["name"] for l in picking._work_order_lines()]
+        self.assertEqual(names.count("AA-1200 Hardware Kit"), 1,
+                         "the kit was listed as a move and as an order line")
