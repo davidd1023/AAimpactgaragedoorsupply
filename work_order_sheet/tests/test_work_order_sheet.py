@@ -989,3 +989,37 @@ class TestWorkOrderSheetKitWithCable(TestWorkOrderSheet):
         self.assertEqual(len(names), 3, "the kit was summarised away")
         self.assertIn("Nylon Roller 2in", names)
         self.assertIn("Hinge #2", names)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetCableNamedForATrack(TestWorkOrderSheet):
+    def test_a_cable_named_for_its_track_is_still_a_cable(self):
+        """A cable is often named for the track or door it suits.
+
+        A track is never named for a cable, so testing track first read every
+        one of those as a track - and no amount of widening the cable pattern
+        could fix it, because the cable pattern was never reached.
+        """
+        kind = self.Picking._work_order_kind
+        for name in ['1/8" Lift Cable for 2in Track',
+                     'Cable 7ft - 3in Track',
+                     '7x19 GAC for 3in Track']:
+            self.assertEqual(kind(name), "cable", "%r read as the wrong kind" % name)
+
+        # and a track is still a track
+        for name in ['2" Vertical Track 76" - 7\' Door Height Black',
+                     "Horizontal Track 96 Black"]:
+            self.assertEqual(kind(name), "track", "%r read as the wrong kind" % name)
+
+    def test_such_a_cable_prints_on_the_cables_page(self):
+        tracks = self.env["product.public.category"].create({"name": "Tracks"})
+        cable = self.env["product.product"].create({
+            "name": '1/8" Lift Cable for 2in Track', "default_code": "LC2",
+            "type": "consu", "public_categ_ids": [(6, 0, [tracks.id])]})
+        track = self.env["product.product"].create({
+            "name": '2" Vertical Track 76"', "default_code": "VT",
+            "type": "consu", "public_categ_ids": [(6, 0, [tracks.id])]})
+        pages = {x["title"]: [l["name"] for l in x["lines"]]
+                 for x in self._picking([(cable, 2), (track, 2)])._work_order_sections()}
+        self.assertIn('1/8" Lift Cable for 2in Track', pages.get("Cables", []))
+        self.assertIn('2" Vertical Track 76"', pages.get("Tracks", []))
