@@ -378,6 +378,51 @@ class TestDoorWorkOrderHttp(HttpCase):
         self.env.invalidate_all()
         self.assertEqual(self._count(), 1)
 
+    def test_the_spec_can_arrive_in_the_body(self):
+        """A long order does not fit in a URL.
+
+        A mark is about 500 bytes encoded, so a fifteen-mark order runs past
+        the request-line limit most proxies allow and comes back as a bare 414
+        from something in front of Odoo rather than this module's own page.
+        """
+        self.authenticate("admin", "admin")
+        payload = order(
+            spec(mark="A", qty=3, wo="W-HTTP"),
+            spec(mark="B", qty=2, vertical=88, wo="W-HTTP"), wo="W-HTTP")
+        page = self.url_open("/door-work-order/new", data={"spec": payload})
+        self.assertEqual(page.status_code, 200)
+        body = visible_text(page.text)
+        self.assertIn("Mark A", body)
+        self.assertIn("Mark B", body)
+        self.assertEqual(self._count(), 0, "a review POST created an order")
+
+    def test_the_page_says_when_a_mark_was_added(self):
+        """"reused" alone could not tell "nothing changed" from "mark B added".
+
+        The feature whose whole point is that a later mark reaches the floor
+        was telling the person nothing had happened.
+        """
+        self.authenticate("admin", "admin")
+        one = order(spec(mark="A", qty=1, wo="W-HTTP"), wo="W-HTTP")
+        two = order(spec(mark="A", qty=1, wo="W-HTTP"),
+                    spec(mark="B", qty=1, vertical=88, wo="W-HTTP"), wo="W-HTTP")
+
+        def send(payload):
+            page = self.url_open("/door-work-order/new", data={"spec": payload})
+            token = re.search(r'name="csrf_token"\s+value="([^"]+)"', page.text)
+            done = self.url_open("/door-work-order/create",
+                                 data={"spec": payload,
+                                       "csrf_token": token.group(1)})
+
+            return visible_text(done.text)
+
+        self.assertIn("Sent to manufacturing", send(one))
+        added = send(two)
+        self.assertIn("Added to the existing order", added)
+        self.assertIn("mark B", added.replace("Mark B", "mark B"))
+        unchanged = send(two)
+        self.assertIn("nothing was changed", unchanged)
+
     def test_a_stranger_gets_the_login_page(self):
         """auth="user" IS the security model, so it is asserted.
 
@@ -741,3 +786,106 @@ class TestDoorWorkOrderCompany(DoorWorkOrderCommon):
             self.env["door.work.order.item"].with_user(insider).search(
                 [("production_id", "=", production.id)]),
             "the rule hid the user's own cut list")
+
+
+@tagged("post_install", "-at_install")
+class TestDoorWorkOrderReviewFindings(DoorWorkOrderCommon):
+    """Everything the review turned up, held down by a test each."""
+
+    def test_a_payload_with_no_mark_does_not_invent_a_door_each_send(self):
+        """An older calculator sends no mark at all.
+
+        The blank was STORED as "A" and COMPARED as "", so the resend check
+        asked whether "" was on the order, found it was not, and added another
+        door - ['A'], then ['A','B'], then ['A','B','C'], with the quantity
+        climbing behind it. Three presses of a button, three doors.
+        """
+        payload = json.loads(spec())
+        payload.pop("mark")
+        payload = json.dumps(payload)
+        first, _r = self.Production._door_wo_create(payload)
+
+        for _attempt in range(3):
+            again, reused = self.Production._door_wo_create(payload)
+            self.assertTrue(reused)
+            self.assertEqual(again, first)
+
+        self.assertEqual(len(first.door_wo_mark_ids), 1)
+        self.assertEqual(first.product_qty, 1)
+        self.assertEqual(len(first.door_wo_item_ids), 3)
+
+    def test_adding_a_mark_to_a_confirmed_order_keeps_its_moves_in_step(self):
+        """A plain write to product_qty leaves the finished move behind.
+
+        Odoo keeps that move in step through a wizard. Writing the field
+        directly gave an order claiming five doors that would only ever book
+        two into stock - and confirmed orders are exactly the ones a resend
+        lands on, so this is the normal path.
+        """
+        production, _r = self.Production._door_wo_create(
+            order(spec(mark="A", qty=2)))
+        production.action_confirm()
+        self.assertEqual(production.state, "confirmed")
+
+        self.Production._door_wo_create(order(
+            spec(mark="A", qty=2),
+            spec(mark="B", qty=3, height=96, vertical=88, horizontal=108)))
+        production.invalidate_recordset()
+
+        self.assertEqual(production.product_qty, 5)
+        finished = production.move_finished_ids.filtered(
+            lambda m: m.product_id == production.product_id)
+        self.assertEqual(
+            sum(finished.mapped("product_uom_qty")), 5,
+            "the order says 5 doors and the finished move says something else")
+
+    def test_material_added_to_a_confirmed_order_is_not_left_in_draft(self):
+        """A draft raw move on a confirmed order is never reserved.
+
+        It sits there looking like material was booked, and the production flow
+        ignores it, so the mark added later quietly had nothing allocated.
+        """
+        self.params.set_param("door_work_order.consume_components", "True")
+        self._reel('5/32" 7x19 Cable 500ft Reel')
+        production, _r = self.Production._door_wo_create(
+            order(spec(mark="A", qty=1)))
+        production.action_confirm()
+
+        self.Production._door_wo_create(order(
+            spec(mark="A", qty=1),
+            spec(mark="B", qty=1, vertical=88)))
+        production.invalidate_recordset()
+
+        self.assertTrue(production.move_raw_ids)
+        self.assertFalse(
+            production.move_raw_ids.filtered(lambda m: m.state == "draft"),
+            "material for the added mark was left in draft and never reserved")
+
+    def test_a_bad_section_count_is_refused_not_crashed(self):
+        """The one number that skipped validation.
+
+        A bare int() raised ValueError on text and TypeError on a list, and
+        neither is a UserError, so both escaped the controller and became a 500
+        traceback instead of the refusal page.
+        """
+        for bad in ["four", [1], {"a": 1}, 10 ** 12, -3]:
+            with self.assertRaises(UserError, msg=repr(bad)):
+                self.Production._door_wo_create(spec(sections=bad))
+
+    def test_several_orders_print_as_several_documents(self):
+        """Without an article wrapper Odoo merges them into one body.
+
+        Selecting two orders in the list and printing put the second order's
+        TRACKS sheet underneath the first order's CABLES sheet.
+        """
+        first, _r = self.Production._door_wo_create(order(spec(mark="A"), wo="W-1"))
+        second, _r = self.Production._door_wo_create(order(spec(mark="A"), wo="W-2"))
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "door_work_order.report_info_papers", (first | second).ids)
+
+        if isinstance(rendered, bytes):
+            rendered = rendered.decode()
+
+        self.assertEqual(
+            rendered.count('class="article"'), 2,
+            "two orders did not produce two documents")

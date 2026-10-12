@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
+<!-- noupdate="1": this product is a DEFAULT, and the comment below says so.
+     Without it every module update rewrote the name, description and the
+     sale/purchase flags, so a shop that renamed it to match its own catalogue
+     silently lost that rename on the next upgrade. The setting overrides which
+     product is used; this only has to exist for the feature to work on a fresh
+     install. -->
+<odoo noupdate="1">
     <!-- THE PRODUCT EACH DOOR'S ORDER IS RAISED AGAINST.
          A manufacturing order has to be an order to make something, and what
          is being made here is one door's worth of tracks and cables cut to

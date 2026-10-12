@@ -1,6 +1,6 @@
 {
     'name': "Garage Door Work Orders",
-    'version': '19.0.1.5.0',
+    'version': '19.0.1.6.0',
     'summary': "Turn a door calculator result into a manufacturing order",
     'description': """
 Takes the tracks and cables worked out by the shop's own door calculator and

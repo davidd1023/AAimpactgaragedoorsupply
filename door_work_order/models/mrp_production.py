@@ -52,6 +52,7 @@ BOUNDS = {
     "ftsc": (0.0, 600.0),
     "capacity": (0.0, 10000.0),
     "door_qty": (1.0, 999.0),
+    "sections": (1.0, 20.0),
 }
 
 
@@ -236,7 +237,14 @@ class MrpProduction(models.Model):
             "vertical": self._door_wo_number(spec.get("vertical"), "vertical"),
             "horizontal": self._door_wo_number(spec.get("horizontal"), "horizontal"),
             "hilift": self._door_wo_number(spec.get("hilift"), "hilift", required=False),
-            "sections": int(spec.get("sections") or 0),
+            # THROUGH THE SAME GATE AS EVERY OTHER NUMBER. This was a bare
+            # int(), so "four" raised ValueError and a list raised TypeError -
+            # neither is a UserError, so both escaped the controller and became
+            # a 500 traceback instead of the refusal page - and 10**12 parsed
+            # happily, then blew up inside create() with NumericValueOutOfRange
+            # once the transaction was already writing.
+            "sections": int(self._door_wo_number(
+                spec.get("sections"), "sections", required=False) or 0),
             "drum": (spec.get("drum") or "").strip(),
             # For the info papers. All optional: an order raised by an older
             # copy of the calculator simply prints fewer rows rather than
@@ -334,9 +342,20 @@ class MrpProduction(models.Model):
 
         if not isinstance(doors, list) or not doors:
             parsed = self._door_wo_parse(spec)
+            # THE SAME DEFAULT THE MULTI-MARK BRANCH APPLIES. Without it a
+            # payload carrying no mark - which is every payload an older
+            # calculator sends - was STORED as "A" and COMPARED as "", so the
+            # resend check asked whether "" was already on the order, found it
+            # was not, and added another door. Every press of Send invented one:
+            # ['A'] then ['A','B'] then ['A','B','C'], quantity climbing with
+            # it. Exactly the double-click this is supposed to defend against.
+            parsed["mark"] = parsed["mark"] or "A"
 
             return {"reference": parsed["reference"], "doors": [parsed]}
 
+        # A real order does not have fifty door designs on it; this is here to
+        # stop a malformed or malicious payload turning into fifty orders'
+        # worth of work in one request, not to ration the shop.
         if len(doors) > 50:
             raise UserError(
                 _("That order has %s marks on it, which is more than this"
@@ -625,6 +644,28 @@ class MrpProduction(models.Model):
             if self._door_wo_consume_components():
                 self._door_wo_add_components(items, parsed["door_qty"])
 
+    def _door_wo_set_qty(self, quantity):
+        """Change how many doors this order is for, safely.
+
+        A PLAIN WRITE IS WRONG ONCE THE ORDER IS CONFIRMED. Odoo keeps the
+        finished-goods move in step with product_qty through a wizard; writing
+        the field directly leaves the move behind, so the order claims five
+        doors and books two into stock. Orders in confirmed and progress are
+        exactly the ones a resend can land on, so this is the normal path and
+        not an edge case.
+        """
+        self.ensure_one()
+
+        if self.state == "draft":
+            self.product_qty = quantity
+
+            return
+
+        self.env["change.production.qty"].create({
+            "mo_id": self.id,
+            "product_qty": quantity,
+        }).change_prod_qty()
+
     def _door_wo_add_marks(self, planned):
         """Put marks that are not on this order yet onto it."""
         self.ensure_one()
@@ -636,8 +677,8 @@ class MrpProduction(models.Model):
                 parsed, start + offset, production_id=self.id))
 
         self._door_wo_fill_marks(added, planned)
-        self.product_qty = (self.product_qty or 0) + sum(
-            parsed["door_qty"] for parsed, _i in planned)
+        self._door_wo_set_qty((self.product_qty or 0) + sum(
+            parsed["door_qty"] for parsed, _i in planned))
         self.door_wo_mark = ", ".join(
             [m for m in self.door_wo_mark_ids.mapped("label") if m]) or False
 
@@ -767,6 +808,8 @@ class MrpProduction(models.Model):
         self.ensure_one()
         Move = self.env["stock.move"]
 
+        added = Move.browse()
+
         for item in items:
             product = item["product"]
 
@@ -775,7 +818,7 @@ class MrpProduction(models.Model):
 
             # NO `name`: stock.move lost it in 19, and the cut length it would
             # have carried is on the cut list where it belongs anyway.
-            Move.create({
+            added |= Move.create({
                 "product_id": product.id,
                 "product_uom_qty": item["quantity"] * (door_qty or 1),
                 "product_uom": product.uom_id.id,
@@ -784,3 +827,12 @@ class MrpProduction(models.Model):
                 "location_dest_id": self.production_location_id.id,
                 "company_id": self.company_id.id,
             })
+
+        # CONFIRM THEM IF THE ORDER ALREADY IS. A draft raw move on a confirmed
+        # order is never reserved and is ignored by the production flow, so a
+        # mark added later had its material silently never booked - the moves
+        # were there to read and did nothing.
+        if added and self.state != "draft":
+            added._action_confirm()
+
+        return added
