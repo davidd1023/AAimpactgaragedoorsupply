@@ -50,7 +50,7 @@
                             <div class="d-flex justify-content-between"><span>Steel weight</span><span id="aa_cts_weight"/></div>
                             <hr class="my-2"/>
                             <div class="d-flex justify-content-between fs-4 fw-bold"><span>Price</span><span id="aa_cts_total"/></div>
-                            <div class="small text-muted">Cones, labor and winding included.</div>
+                            <div class="small text-muted">Cones and labor included.</div>
                         </div>
                         <div id="aa_cts_error" class="text-danger mt-3"/>
 
