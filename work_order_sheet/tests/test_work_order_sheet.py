@@ -157,3 +157,123 @@ class TestWorkOrderSheet(TransactionCase):
             rendered = rendered.decode()
 
         self.assertEqual(rendered.count('class="article"'), 2)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetSpring(TestWorkOrderSheet):
+    """A configured assembly is not a catalogue item.
+
+    Its order line reads "Custom Torsion Spring Assembly" and the thing that
+    has to be wound is in the lines underneath it. Those lines ARE the record -
+    there are deliberately no extra columns holding a second copy - so this
+    reads them.
+    """
+
+    # The description spring_engineering writes, verbatim. If this ever stops
+    # matching what that module produces, the block silently empties, which is
+    # why its add-to-cart test asserts the same shape from the other side.
+    DESCRIPTION = (
+        "Custom Torsion Spring Assembly\n"
+        "Duplex, 2 springs\n"
+        'Outer: 0.2625" wire, 6" ID, 32.25" long\n'
+        'Inner: 0.2253" wire, 3.75" ID, 31.25" long\n'
+        "Door: 355 lb, 7' 0\", 25,000 cycles"
+    )
+
+    def _spring_line(self, description=None):
+        product = self._product("Custom Torsion Spring Assembly", "SPRING-CUSTOM")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        line = self.env["sale.order.line"].create({
+            "order_id": sale.id,
+            "product_id": product.id,
+            "product_uom_qty": 1,
+            "name": self.DESCRIPTION if description is None else description,
+        })
+
+        return product, line
+
+    def _spring_picking(self, description=None, extra=()):
+        product, line = self._spring_line(description)
+        picking = self._picking([(product, 1)] + list(extra), origin="S00011")
+        picking.move_ids[0].sale_line_id = line.id
+
+        return picking
+
+    def test_every_parameter_reaches_the_sheet(self):
+        sheet = self._sheet(self._spring_picking())
+        for wanted in ["SPRING ASSEMBLY", "Duplex", "Springs", "355 lb",
+                       "7' 0\"", "25,000"]:
+            self.assertIn(wanted, sheet, "the sheet omits %r" % wanted)
+
+    def test_each_spring_is_listed_with_its_own_figures(self):
+        """Wire, inside diameter and length, per position.
+
+        An outer spring wound to the inner spring's wire is scrap, so the two
+        rows must be complete and distinguishable rather than summarised.
+        """
+        sheet = self._sheet(self._spring_picking())
+        self.assertIn("Outer", sheet)
+        self.assertIn("Inner", sheet)
+        for figure in ['0.2625"', '0.2253"', '6"', '3.75"', '32.25"', '31.25"']:
+            self.assertIn(figure, sheet, "missing %s" % figure)
+
+    def test_a_single_spring_shows_one_row_not_two(self):
+        picking = self._spring_picking(
+            "Custom Torsion Spring Assembly\n"
+            "Single, 1 spring\n"
+            'Spring: 0.25" wire, 3.75" ID, 28" long\n'
+            "Door: 180 lb, 7' 0\", 10,000 cycles")
+        sheet = self._sheet(picking)
+        self.assertIn("Single", sheet)
+        self.assertIn("Spring", sheet)
+        self.assertNotIn("Inner", sheet)
+
+    def test_the_detail_survives_a_line_after_it(self):
+        """THE CASE EVERY OTHER TEST HERE ONCE MISSED.
+
+        The detail row was a sibling of the product loop rather than part of
+        it, so it rendered once, after the loop, against the LAST line. An
+        order of one spring printed it and every test passed; a real order - a
+        spring followed by a track - lost it silently.
+        """
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        sheet = self._sheet(self._spring_picking(extra=[(track, 2)]))
+        self.assertIn("SPRING ASSEMBLY", sheet, "the spring detail was dropped")
+        self.assertIn("Duplex", sheet)
+        self.assertIn('0.2625"', sheet)
+        self.assertIn('76"', sheet, "the track line lost its length")
+
+    def test_an_ordinary_product_gets_no_spring_block(self):
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        sheet = self._sheet(self._picking([(track, 2)]))
+        self.assertNotIn("SPRING ASSEMBLY", sheet)
+        self.assertIn('76"', sheet)
+
+    def test_a_description_it_cannot_read_prints_no_block(self):
+        """Half a specification is worse than none.
+
+        An empty "SPRING ASSEMBLY" heading says the assembly has no
+        specification. Saying nothing says the sheet does not know, which is
+        true and sends somebody to look at the order.
+        """
+        for description in [
+            "Custom Torsion Spring Assembly",
+            "Custom Torsion Spring Assembly\nDuplex, 2 springs",
+            "Custom Torsion Spring Assembly\nsomething else entirely",
+        ]:
+            sheet = self._sheet(self._spring_picking(description))
+            self.assertNotIn(
+                "SPRING ASSEMBLY", sheet,
+                "a block was printed for %r" % description)
+
+    def test_the_spring_detail_is_still_plain_ascii(self):
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "work_order_sheet.report_work_order_sheet",
+            self._spring_picking().ids)
+
+        if isinstance(rendered, bytes):
+            rendered = rendered.decode()
+
+        body = rendered[rendered.find("<main>"):]
+        offenders = sorted({c for c in html.unescape(body) if ord(c) > 127})
+        self.assertFalse(offenders, "wkhtmltopdf will mangle: %r" % offenders)
