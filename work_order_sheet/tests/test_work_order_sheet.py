@@ -23,9 +23,17 @@ class TestWorkOrderSheet(TransactionCase):
             [("code", "=", "internal")], limit=1)
         self.partner = self.env["res.partner"].create({"name": "A Customer"})
 
-    def _product(self, name, code=False):
-        return self.env["product.product"].create({
-            "name": name, "default_code": code, "type": "consu"})
+    def _category(self, name, parent=None):
+        return self.env["product.category"].create({
+            "name": name, "parent_id": parent.id if parent else False})
+
+    def _product(self, name, code=False, category=None):
+        values = {"name": name, "default_code": code, "type": "consu"}
+
+        if category:
+            values["categ_id"] = category.id
+
+        return self.env["product.product"].create(values)
 
     def _picking(self, products, origin="S00003"):
         picking = self.Picking.create({
@@ -332,40 +340,71 @@ class TestWorkOrderSheetFloor(TestWorkOrderSheet):
         self.assertIn("Printed", sheet)
         self.assertIn("State", sheet)
 
-    def test_lines_are_grouped_by_station(self):
-        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
-        reel = self._product('1/8" 7x19 Cable 500ft Reel')
-        drum = self._product("Canimex D400-96 White")
-        picking = self._picking([(drum, 1), (reel, 1), (track, 2)])
+    def test_lines_are_grouped_by_their_product_category(self):
+        """THE CATALOGUE DECIDES THE PAGES, not a list in the module.
+
+        Four buckets named in code meant a shop with Brackets, Hinges, Struts,
+        Rollers and Drums all saw them land in one "Hardware and Other" page,
+        and adding a category meant editing code.
+        """
+        hardware = self._category("Hardware")
+        brackets = self._category("Brackets", hardware)
+        hinges = self._category("Hinges", hardware)
+        cables = self._category("Lift Cables")
+
+        picking = self._picking([
+            (self._product("Jamb Bracket # 10 Black", "JB10", brackets), 4),
+            (self._product("Hinge #2", "HNG2", hinges), 8),
+            (self._product('1/8" 7x19 Cable 500ft Reel', "REEL", cables), 1),
+        ])
         sheet = self._sheet(picking)
-        self.assertIn("TRACKS", sheet)
-        self.assertIn("CABLES", sheet)
-        self.assertIn("HARDWARE AND OTHER", sheet)
-        # built in the order a door is built in, whatever order they were added
-        self.assertLess(sheet.index("TRACKS"), sheet.index("CABLES"))
-        self.assertLess(sheet.index("CABLES"), sheet.index("HARDWARE AND OTHER"))
 
-    def test_an_order_of_one_kind_gets_one_heading(self):
-        """Four headings for a tracks-only order would be noise."""
-        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
-        sheet = self._sheet(self._picking([(track, 2)]))
-        self.assertIn("TRACKS", sheet)
-        self.assertNotIn("CABLES", sheet)
-        self.assertNotIn("HARDWARE AND OTHER", sheet)
+        for heading in ["BRACKETS", "HINGES", "LIFT CABLES"]:
+            self.assertIn(heading, sheet, "no page for %s" % heading)
 
-    def test_the_springs_section_comes_first(self):
-        spring_cls = TestWorkOrderSheetSpring
-        product = self._product("Custom Torsion Spring Assembly", "SPRING-CUSTOM")
+        self.assertIn("3 categories", sheet)
+
+    def test_a_category_with_nothing_in_it_gets_no_page(self):
+        brackets = self._category("Brackets")
+        self._category("Hinges")
+        sheet = self._sheet(self._picking(
+            [(self._product("Jamb Bracket # 10 Black", "JB10", brackets), 4)]))
+        self.assertIn("BRACKETS", sheet)
+        self.assertNotIn("HINGES", sheet)
+        self.assertIn("1 category", sheet)
+
+    def test_two_categories_sharing_a_name_are_told_apart(self):
+        """A Tracks under Hardware is not the Tracks under something else.
+
+        The heading alone would not say which page you are holding, so the
+        parent path is printed under it.
+        """
+        hardware = self._category("Hardware")
+        doors = self._category("Doors")
+        picking = self._picking([
+            (self._product("Vertical Track 76", "VT", self._category("Tracks", hardware)), 2),
+            (self._product("Panel Track 80", "PT", self._category("Tracks", doors)), 1),
+        ])
+        sheet = self._sheet(picking)
+        self.assertEqual(sheet.count("TRACKS"), 2, "the two did not get a page each")
+        self.assertIn("Hardware", sheet)
+        self.assertIn("Doors", sheet)
+
+    def test_a_spring_keeps_its_detail_whatever_its_category(self):
+        """Grouping moved to categories; the assembly block must not depend on it."""
+        springs = self._category("Torsion Springs")
+        product = self._product(
+            "Custom Torsion Spring Assembly", "SPRING-CUSTOM", springs)
         sale = self.env["sale.order"].create({"partner_id": self.partner.id})
         line = self.env["sale.order.line"].create({
             "order_id": sale.id, "product_id": product.id,
-            "product_uom_qty": 1, "name": spring_cls.DESCRIPTION})
-        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
-        picking = self._picking([(track, 2), (product, 1)])
-        picking.move_ids.filtered(
-            lambda m: m.product_id == product).sale_line_id = line.id
+            "product_uom_qty": 1, "name": TestWorkOrderSheetSpring.DESCRIPTION})
+        picking = self._picking([(product, 1)])
+        picking.move_ids.sale_line_id = line.id
         sheet = self._sheet(picking)
-        self.assertLess(sheet.index("SPRINGS"), sheet.index("TRACKS"))
+        self.assertIn("TORSION SPRINGS", sheet)
+        self.assertIn("SPRING ASSEMBLY", sheet)
+        self.assertIn("32 1/4\"", sheet)
 
 
 @tagged("post_install", "-at_install")
@@ -401,21 +440,24 @@ class TestWorkOrderSheetCover(TestWorkOrderSheet):
         self.assertIn("S00003", sheet)
         self.assertIn(picking.name, sheet)
 
-    def test_the_summary_lists_every_station_and_line(self):
-        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
-        drum = self._product("Canimex D400-96 White")
+    def test_the_summary_lists_every_category_and_line(self):
+        tracks = self._category("Tracks")
+        drums = self._category("Drums & Shaft Parts")
+        track = self._product('2" Vertical Track 76"', "VT", tracks)
+        drum = self._product("Canimex D400-96 White", "CD", drums)
         sheet = self._sheet(self._picking([(track, 2), (drum, 1)]))
-        self.assertIn("2 stations", sheet)
+        self.assertIn("2 categories", sheet)
         self.assertIn("2 lines", sheet)
+        self.assertIn("Category", sheet)
 
-    def test_each_station_gets_its_own_page(self):
+    def test_each_category_gets_its_own_page(self):
         """The cover is read once; the pages behind it are handed out.
 
         So each one repeats the order number and the deadline - a sheet on its
         own at a bench has to say what it belongs to.
         """
-        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
-        drum = self._product("Canimex D400-96 White")
+        track = self._product('2" Vertical Track 76"', "VT", self._category("Tracks"))
+        drum = self._product("Canimex D400-96 White", "CD", self._category("Drums"))
         picking = self._picking([(track, 2), (drum, 1)], origin="S00009")
         rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
             "work_order_sheet.report_work_order_sheet", picking.ids)
