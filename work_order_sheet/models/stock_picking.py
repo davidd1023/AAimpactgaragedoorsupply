@@ -57,6 +57,29 @@ class StockPicking(models.Model):
 
         return '%s"' % hit.group(1).strip()
 
+    def _work_order_spring(self, move):
+        """The spring parameters behind this line, or None.
+
+        GUARDED RATHER THAN DEPENDED ON. This module prints transfers and knows
+        nothing about torsion springs; spring_engineering owns those numbers and
+        writes them on the sale line. Checking that the field exists keeps the
+        two apart - the sheet works on a database without the calculator, and
+        gains the detail on one that has it, with no third module to install
+        and no load order to get right.
+        """
+        line = move.sale_line_id if "sale_line_id" in move._fields else False
+
+        if not line or "spring_assembly" not in line._fields:
+            return None
+
+        if not line.spring_assembly:
+            return None
+
+        return {
+            "parameters": line.spring_parameter_rows(),
+            "springs": line.spring_detail_rows(),
+        }
+
     def _work_order_lines(self):
         """Every product on this work order, in the order it appears.
 
@@ -77,6 +100,7 @@ class StockPicking(models.Model):
                 "uom": move.product_uom.name or "",
                 "kind": self._work_order_kind(name),
                 "length": self._work_order_length(name),
+                "spring": self._work_order_spring(move),
             })
 
         return lines

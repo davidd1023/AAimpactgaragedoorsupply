@@ -51,8 +51,16 @@
                                 <th t-att-style="th + 'text-align:right;'">Qty</th>
                                 <th t-att-style="th + 'text-align:left;'">Unit</th>
                             </tr>
-                            <tr t-foreach="lines" t-as="line"
-                                t-att-style="'background:#f8f9fa;' if line_index % 2 == 0 else ''">
+                            <!-- THE LOOP WRAPS BOTH ROWS. With t-foreach on the
+                                 first <tr>, the detail row below was a SIBLING
+                                 of the loop rather than part of it: it rendered
+                                 once, after the loop, against whatever "line"
+                                 was left bound - the LAST one. An order whose
+                                 spring was followed by a track lost the spring
+                                 detail entirely, and an order of one spring
+                                 printed it, which is why every test passed. -->
+                            <t t-foreach="lines" t-as="line">
+                            <tr t-att-style="'background:#f8f9fa;' if line_index % 2 == 0 else ''">
                                 <td t-att-style="td" t-esc="line['code']"/>
                                 <td t-att-style="td">
                                     <t t-esc="line['name']"/>
@@ -66,6 +74,40 @@
                                 </td>
                                 <td t-att-style="td" t-esc="line['uom']"/>
                             </tr>
+                            <!-- A CONFIGURED ASSEMBLY IS NOT A CATALOGUE ITEM.
+                                 Its line reads "Custom Torsion Spring Assembly"
+                                 and the thing that has to be built is in the
+                                 numbers underneath, so they are printed in full
+                                 rather than left to a description somebody has
+                                 to squint at. -->
+                            <tr t-if="line['spring']">
+                                <td t-att-style="td" colspan="5" style="padding:0 12px 12px;">
+                                    <div style="border-left:4px solid #C0272D;padding:8px 0 4px 12px;margin-top:4px;">
+                                        <div style="font-weight:800;font-size:12px;color:#1B2A6B;letter-spacing:.06em;margin-bottom:6px;">SPRING ASSEMBLY</div>
+                                        <table style="border-collapse:collapse;font-size:13px;margin-bottom:10px;">
+                                            <tr t-foreach="line['spring']['parameters']" t-as="row">
+                                                <td style="padding:2px 18px 2px 0;color:#666;" t-esc="row[0]"/>
+                                                <td style="padding:2px 0;font-weight:700;color:#1B2A6B;" t-esc="row[1]"/>
+                                            </tr>
+                                        </table>
+                                        <table style="border-collapse:collapse;font-size:13px;">
+                                            <tr>
+                                                <th t-att-style="th + 'text-align:left;padding:4px 12px;'">Position</th>
+                                                <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Wire</th>
+                                                <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Inside Dia.</th>
+                                                <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Length</th>
+                                            </tr>
+                                            <tr t-foreach="line['spring']['springs']" t-as="sp">
+                                                <td style="border:1px solid #888;padding:4px 12px;" t-esc="sp['role']"/>
+                                                <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:700;" t-esc="sp['wire']"/>
+                                                <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:700;" t-esc="sp['inside_diameter']"/>
+                                                <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:800;color:#C0272D;" t-esc="sp['length']"/>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                            </t>
                         </table>
 
                         <div t-if="lines" style="margin-top:14px;font-size:13px;color:#666;">

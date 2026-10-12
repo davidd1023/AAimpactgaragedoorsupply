@@ -1,6 +1,6 @@
 {
     'name': "Work Order Sheet",
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': "Print what a work order is for, product by product",
     'description': """
 Adds a printable sheet to a work order - the transfer the shop sees under
@@ -15,7 +15,7 @@ machinery it does not use.
 """,
     'category': 'Inventory/Inventory',
     'license': 'LGPL-3',
-    'depends': ['stock'],
+    'depends': ['stock', 'sale_stock'],
     'data': [
         'report/work_order_sheet_reports.xml',
     ],
