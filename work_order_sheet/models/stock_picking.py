@@ -163,10 +163,19 @@ class StockPicking(models.Model):
     SPRING_ITEM = re.compile(
         r'^\s*(\w+):\s*([\d.]+)"\s*wire,\s*([\d.]+)"\s*ID,\s*([\d.]+)"\s*long',
         re.I)
-    # Triple-quoted: this pattern contains both a foot mark and an inch mark.
-    SPRING_DOOR = re.compile(
-        r"""^\s*Door:\s*([\d,]+)\s*lb,\s*(\d+)'\s*(\d+)",\s*([\d,]+)\s*cycles""",
-        re.I)
+    # EACH FACT ON ITS OWN, not the line as a whole. The door line gained a
+    # width and a hi-lift, and an order placed before they existed has neither
+    # - matching the whole line would print nothing for those rather than
+    # printing what they do have.
+    SPRING_DOOR = re.compile(r"^\s*Door:", re.I)
+    DOOR_WIDE = re.compile(r"""(\d+)'\s*(\d+)"\s*wide""", re.I)
+    DOOR_HIGH = re.compile(r"""(\d+)'\s*(\d+)"\s*high""", re.I)
+    # The trailing inch mark is appended rather than written inside the
+    # string: a raw literal ending in a quote cannot close cleanly.
+    DOOR_FEET = re.compile(r"(\d+)'\s*(\d+)" + '"')
+    DOOR_WEIGHT = re.compile(r"([\d,]+)\s*lb", re.I)
+    DOOR_HILIFT = re.compile(r"""([\d.]+)"\s*hi-?lift""", re.I)
+    DOOR_CYCLES = re.compile(r"([\d,]+)\s*cycles", re.I)
 
     def _work_order_spring(self, move):
         """The assembly behind this line, read off its description, or None.
@@ -185,6 +194,7 @@ class StockPicking(models.Model):
 
         parameters = []
         springs = []
+        door = {}
 
         for row in rows[1:]:
             hit = self.SPRING_ITEM.match(row)
@@ -198,13 +208,8 @@ class StockPicking(models.Model):
                 })
                 continue
 
-            hit = self.SPRING_DOOR.match(row)
-
-            if hit:
-                parameters.append(("Door weight", "%s lb" % hit.group(1)))
-                parameters.append(
-                    ("Door height", "%s' %s\"" % (hit.group(2), hit.group(3))))
-                parameters.append(("Cycle target", hit.group(4)))
+            if self.SPRING_DOOR.match(row):
+                door = self._work_order_door_facts(row)
                 continue
 
             hit = self.SPRING_ASSEMBLY.match(row)
@@ -219,7 +224,71 @@ class StockPicking(models.Model):
         if not springs:
             return None
 
-        return {"parameters": parameters, "springs": springs}
+        # Only what the customer actually gave. A door with no hi-lift says
+        # nothing about hi-lift rather than printing a zero somebody has to
+        # decide the meaning of.
+        for label, key in (("Door width", "width"), ("Door height", "height"),
+                           ("Door weight", "weight"), ("Hi-lift", "hilift"),
+                           ("Cycle target", "cycles")):
+            if door.get(key):
+                parameters.append((label, door[key]))
+
+        return {"parameters": parameters, "springs": springs, "door": door}
+
+    def _work_order_door_facts(self, row):
+        """The door line read fact by fact: width, height, weight, hi-lift."""
+        facts = {}
+        wide = self.DOOR_WIDE.search(row)
+        high = self.DOOR_HIGH.search(row)
+
+        if wide:
+            facts["width"] = "%s' %s\"" % (wide.group(1), wide.group(2))
+
+        if high:
+            facts["height"] = "%s' %s\"" % (high.group(1), high.group(2))
+        else:
+            # The older line carried one foot-and-inch figure and it was the
+            # height, so a sheet printed from an old order still says so.
+            plain = [m for m in self.DOOR_FEET.finditer(row)
+                     if not wide or m.start() != wide.start()]
+
+            if plain:
+                facts["height"] = "%s' %s\"" % (plain[0].group(1),
+                                                 plain[0].group(2))
+
+        weight = self.DOOR_WEIGHT.search(row)
+
+        if weight:
+            facts["weight"] = "%s lb" % weight.group(1)
+
+        hilift = self.DOOR_HILIFT.search(row)
+
+        if hilift:
+            facts["hilift"] = '%s"' % hilift.group(1)
+
+        cycles = self.DOOR_CYCLES.search(row)
+
+        if cycles:
+            facts["cycles"] = cycles.group(1)
+
+        return facts
+
+    def _work_order_door(self):
+        """The door this whole order is for, if anything on it says.
+
+        Taken from the spring assembly, which is the only thing a website order
+        carries that describes a door. Printed on EVERY page, because a track
+        cutter holding the tracks page is cutting for that same door.
+        """
+        self.ensure_one()
+
+        for line in self._work_order_lines():
+            spring = line.get("spring")
+
+            if spring and spring.get("door"):
+                return spring["door"]
+
+        return {}
 
     # --- what is on the shelf -------------------------------------------------
     AVAILABILITY = {

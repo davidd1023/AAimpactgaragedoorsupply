@@ -21,6 +21,11 @@
                     <t t-set="td" t-value="'border:1px solid #888;padding:7px 12px;'"/>
                     <t t-set="th" t-value="'border:1px solid #888;padding:7px 12px;background:#1B2A6B;color:#fff;'"/>
                     <t t-set="sections" t-value="o._work_order_sections()"/>
+                    <!-- THE DOOR THIS ORDER IS FOR. Computed once and printed
+                         on every page, because a track cutter holding the
+                         tracks page is cutting for that same door. Only the
+                         facts the customer actually gave appear. -->
+                    <t t-set="door" t-value="o._work_order_door()"/>
                     <t t-set="lines" t-value="o._work_order_lines()"/>
 
                     <!-- PLAIN ASCII THROUGHOUT. wkhtmltopdf renders these pages
@@ -130,6 +135,21 @@
                             <t t-if="o.origin"> | Order <t t-esc="o.origin"/></t>
                             <t t-if="o.partner_id"> | <t t-esc="o.partner_id.display_name"/></t>
                             <t t-if="o.date_deadline"> | Due <span t-field="o.date_deadline" t-options="{'widget': 'date'}"/></t>
+                            <t t-if="door.get('width') and door.get('height')">
+                                | <strong style="color:#1B2A6B;"><t t-esc="door['width']"/> x <t t-esc="door['height']"/></strong>
+                            </t>
+                            <t t-elif="door.get('height')">
+                                | <strong style="color:#1B2A6B;"><t t-esc="door['height']"/> high</strong>
+                            </t>
+                            <t t-elif="door.get('width')">
+                                | <strong style="color:#1B2A6B;"><t t-esc="door['width']"/> wide</strong>
+                            </t>
+                            <t t-if="door.get('weight')">
+                                | <strong style="color:#1B2A6B;"><t t-esc="door['weight']"/></strong>
+                            </t>
+                            <t t-if="door.get('hilift')">
+                                | <strong style="color:#C0272D;"><t t-esc="door['hilift']"/> hi-lift</strong>
+                            </t>
                         </div>
 
                         <table style="border-collapse:collapse;width:100%;font-size:14px;">

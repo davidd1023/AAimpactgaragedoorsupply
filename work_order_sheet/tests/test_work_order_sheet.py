@@ -703,3 +703,79 @@ class TestWorkOrderSheetMeasurements(TestWorkOrderSheet):
         self.assertEqual(lines[0]["length"], '210"')
         # NOT a bare "ft" search: the page's own stylesheet contains "left".
         self.assertNotIn("17.5 ft", self._sheet(picking))
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetDoor(TestWorkOrderSheet):
+    """The door on every page header, and only what the customer gave."""
+
+    FULL = ("Custom Torsion Spring Assembly\n"
+            "Duplex, 2 springs\n"
+            'Outer: 0.2625" wire, 6.0" ID, 32.25" long\n'
+            "Door: 9' 0\" wide, 7' 0\" high, 355 lb, 12\" hi-lift, 25,000 cycles")
+    NO_HILIFT = ("Custom Torsion Spring Assembly\n"
+                 "Duplex, 2 springs\n"
+                 'Outer: 0.2625" wire, 6.0" ID, 32.25" long\n'
+                 "Door: 9' 0\" wide, 7' 0\" high, 355 lb, 25,000 cycles")
+    OLD = ("Custom Torsion Spring Assembly\n"
+           "Duplex, 2 springs\n"
+           'Outer: 0.2625" wire, 6.0" ID, 32.25" long\n'
+           "Door: 355 lb, 7' 0\", 25,000 cycles")
+
+    def _with_spring(self, description, extra=()):
+        product = self._product("Custom Torsion Spring Assembly", "SPRING-CUSTOM")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": product.id,
+            "product_uom_qty": 1, "name": description})
+        picking = self._picking([(product, 1)] + list(extra))
+        picking.move_ids[0].sale_line_id = line.id
+
+        return picking
+
+    def test_the_header_carries_the_whole_door(self):
+        sheet = self._sheet(self._with_spring(self.FULL))
+        self.assertIn("9' 0\" x 7' 0\"", sheet)
+        self.assertIn("355 lb", sheet)
+        self.assertIn('12" hi-lift', sheet)
+
+    def test_a_door_with_no_hi_lift_says_nothing_about_hi_lift(self):
+        """NOT a zero. A zero is a number somebody has to interpret."""
+        sheet = self._sheet(self._with_spring(self.NO_HILIFT))
+        self.assertIn("9' 0\" x 7' 0\"", sheet)
+        self.assertIn("355 lb", sheet)
+        self.assertNotIn("hi-lift", sheet)
+
+    def test_an_order_placed_before_width_existed_still_prints(self):
+        """The old line carried weight, height and cycles and no width.
+
+        Each fact is read on its own precisely so these keep working - matching
+        the whole line would print nothing at all for them.
+        """
+        sheet = self._sheet(self._with_spring(self.OLD))
+        self.assertIn("7' 0\" high", sheet)
+        self.assertIn("355 lb", sheet)
+        self.assertNotIn("wide", sheet)
+        self.assertNotIn("hi-lift", sheet)
+
+    def test_the_door_is_on_every_page_not_only_the_springs_one(self):
+        """A track cutter is cutting for that same door."""
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        sheet = self._sheet(self._with_spring(self.FULL, extra=[(track, 2)]))
+        self.assertIn("SPRINGS", sheet)
+        self.assertIn("TRACKS", sheet)
+        self.assertEqual(sheet.count("9' 0\" x 7' 0\""), 2,
+                         "the door should head both pages")
+
+    def test_an_order_with_no_spring_has_no_door_to_show(self):
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        sheet = self._sheet(self._picking([(track, 2)]))
+        self.assertIn("TRACKS", sheet)
+        self.assertNotIn("lb", sheet)
+        self.assertNotIn("hi-lift", sheet)
+
+    def test_the_spring_block_lists_them_too(self):
+        sheet = self._sheet(self._with_spring(self.FULL))
+        self.assertIn("Door width", sheet)
+        self.assertIn("Door height", sheet)
+        self.assertIn("Hi-lift", sheet)
