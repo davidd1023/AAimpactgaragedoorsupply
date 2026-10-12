@@ -340,74 +340,6 @@ class TestWorkOrderSheetFloor(TestWorkOrderSheet):
         self.assertIn("Printed", sheet)
         self.assertIn("State", sheet)
 
-    def test_lines_are_grouped_by_their_product_category(self):
-        """THE CATALOGUE DECIDES THE PAGES, not a list in the module.
-
-        Four buckets named in code meant a shop with Brackets, Hinges, Struts,
-        Rollers and Drums all saw them land in one "Hardware and Other" page,
-        and adding a category meant editing code.
-        """
-        hardware = self._category("Hardware")
-        brackets = self._category("Brackets", hardware)
-        hinges = self._category("Hinges", hardware)
-        cables = self._category("Lift Cables")
-
-        picking = self._picking([
-            (self._product("Jamb Bracket # 10 Black", "JB10", brackets), 4),
-            (self._product("Hinge #2", "HNG2", hinges), 8),
-            (self._product('1/8" 7x19 Cable 500ft Reel', "REEL", cables), 1),
-        ])
-        sheet = self._sheet(picking)
-
-        for heading in ["BRACKETS", "HINGES", "LIFT CABLES"]:
-            self.assertIn(heading, sheet, "no page for %s" % heading)
-
-        self.assertIn("3 categories", sheet)
-
-    def test_a_category_with_nothing_in_it_gets_no_page(self):
-        brackets = self._category("Brackets")
-        self._category("Hinges")
-        sheet = self._sheet(self._picking(
-            [(self._product("Jamb Bracket # 10 Black", "JB10", brackets), 4)]))
-        self.assertIn("BRACKETS", sheet)
-        self.assertNotIn("HINGES", sheet)
-        self.assertIn("1 category", sheet)
-
-    def test_two_categories_sharing_a_name_are_told_apart(self):
-        """A Tracks under Hardware is not the Tracks under something else.
-
-        The heading alone would not say which page you are holding, so the
-        parent path is printed under it.
-        """
-        hardware = self._category("Hardware")
-        doors = self._category("Doors")
-        picking = self._picking([
-            (self._product("Vertical Track 76", "VT", self._category("Tracks", hardware)), 2),
-            (self._product("Panel Track 80", "PT", self._category("Tracks", doors)), 1),
-        ])
-        sheet = self._sheet(picking)
-        self.assertEqual(sheet.count("TRACKS"), 2, "the two did not get a page each")
-        self.assertIn("Hardware", sheet)
-        self.assertIn("Doors", sheet)
-
-    def test_a_spring_keeps_its_detail_whatever_its_category(self):
-        """Grouping moved to categories; the assembly block must not depend on it."""
-        springs = self._category("Torsion Springs")
-        product = self._product(
-            "Custom Torsion Spring Assembly", "SPRING-CUSTOM", springs)
-        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
-        line = self.env["sale.order.line"].create({
-            "order_id": sale.id, "product_id": product.id,
-            "product_uom_qty": 1, "name": TestWorkOrderSheetSpring.DESCRIPTION})
-        picking = self._picking([(product, 1)])
-        picking.move_ids.sale_line_id = line.id
-        sheet = self._sheet(picking)
-        self.assertIn("TORSION SPRINGS", sheet)
-        self.assertIn("SPRING ASSEMBLY", sheet)
-        self.assertIn("32 1/4\"", sheet)
-
-
-@tagged("post_install", "-at_install")
 class TestWorkOrderSheetCover(TestWorkOrderSheet):
     """A cover to read, and a page per station to hand out."""
 
@@ -507,7 +439,8 @@ class TestWorkOrderSheetCover(TestWorkOrderSheet):
         # cable to cut. Collapsing the four without carrying it would lose the
         # only measurement on the line.
         self.assertTrue(feet, "this database has no feet unit to test with")
-        self.assertEqual(lines[0]["length"], "17.5 ft")
+        # IN INCHES: stock counts the reel in feet, the bench works in inches.
+        self.assertEqual(lines[0]["length"], '210"')
 
         sheet = self._sheet(picking)
         self.assertNotIn("Oval Sleeve", sheet)
@@ -574,7 +507,7 @@ class TestWorkOrderSheetKits(TestWorkOrderSheet):
 
         lines = picking._work_order_lines()
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]["length"], "17.5 ft")
+        self.assertEqual(lines[0]["length"], '210"')
         self.assertNotIn("Oval Sleeve", self._sheet(picking))
 
     def test_a_cable_counted_in_units_is_still_summarised(self):
@@ -623,132 +556,150 @@ class TestWorkOrderSheetKits(TestWorkOrderSheet):
 
 
 @tagged("post_install", "-at_install")
-class TestWorkOrderSheetUncategorised(TestWorkOrderSheet):
-    """categ_id is not required in Odoo 19 and has no default."""
-
-    def test_products_with_no_category_are_still_sorted(self):
-        """ONE GIANT "UNCATEGORISED" PAGE IS TRUE AND USELESS.
-
-        The owner's catalogue has products with no category at all - Odoo 19
-        neither requires one nor sets a default - so every line landed in one
-        bucket. What the module can still read off the name is used instead,
-        and the page says the category is missing rather than pretending it
-        knows.
-        """
-        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
-        reel = self._product('1/8" 7x19 Cable 500ft Reel')
-        drum = self._product("Canimex D400-96 White")
-        self.assertFalse(track.categ_id, "this test needs uncategorised products")
-
-        sheet = self._sheet(self._picking([(drum, 1), (reel, 1), (track, 2)]))
-        self.assertIn("TRACKS", sheet)
-        self.assertIn("CABLES", sheet)
-        self.assertIn("OTHER", sheet)
-        self.assertNotIn("UNCATEGORISED", sheet)
-
-    def test_the_sheet_says_the_category_is_missing(self):
-        """Printed where the person who can fix the catalogue will see it."""
-        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
-        sheet = self._sheet(self._picking([(track, 2)]))
-        self.assertIn("no category set", sheet)
-
-    def test_a_filed_product_says_nothing_of_the_sort(self):
-        tracks = self._category("Tracks")
-        track = self._product('2" Vertical Track 76"', "VT", tracks)
-        sheet = self._sheet(self._picking([(track, 2)]))
-        self.assertIn("TRACKS", sheet)
-        self.assertNotIn("no category set", sheet)
-
-    def test_filed_and_unfiled_products_on_one_order(self):
-        """A half-filed catalogue reads top to bottom, loose ends at the back."""
-        brackets = self._category("Brackets")
-        filed = self._product("Jamb Bracket # 10 Black", "JB10", brackets)
-        unfiled = self._product('2" Vertical Track 76" - 7\' Door Height Black')
-        sheet = self._sheet(self._picking([(unfiled, 2), (filed, 4)]))
-        self.assertIn("BRACKETS", sheet)
-        self.assertIn("TRACKS", sheet)
-        self.assertLess(
-            sheet.index("BRACKETS"), sheet.index("TRACKS"),
-            "the categorised page should come before the guessed one")
-        self.assertIn("2 categories", sheet)
 
 
 @tagged("post_install", "-at_install")
-class TestWorkOrderSheetEcommerceCategories(TestWorkOrderSheet):
-    """The shop files its catalogue in the eCommerce tree, not the accounting one."""
+class TestWorkOrderSheetPages(TestWorkOrderSheet):
+    """Four pages: Tracks, Springs, Cables, Hardware.
 
-    def _shop_category(self, name, sequence=10, parent=None):
+    The eCommerce tree has eleven categories and stays as it is for the
+    website. This is how the FLOOR wants the work divided, and the two are
+    allowed to differ.
+    """
+
+    def _shop_category(self, name, sequence=10):
         return self.env["product.public.category"].create({
-            "name": name, "sequence": sequence,
-            "parent_id": parent.id if parent else False})
+            "name": name, "sequence": sequence})
 
-    def _shop_product(self, name, code, categories):
+    def _filed(self, name, code, category):
         return self.env["product.product"].create({
             "name": name, "default_code": code, "type": "consu",
-            "public_categ_ids": [(6, 0, [c.id for c in categories])]})
+            "public_categ_ids": [(6, 0, [category.id])]})
 
-    def test_pages_come_from_the_ecommerce_categories(self):
-        """WHY EVERYTHING READ UNCATEGORISED.
-
-        Drums, Tracks, Shafts, Hinges, Rollers, EBF, Motors, Springs, Misc.,
-        Hardware Kits and Nuts & Bolts all live in public_categ_ids - the list
-        Website > eCommerce > Categories edits. categ_id, which this module
-        read first, was empty on every product, so the sheet correctly reported
-        no category while eleven of them were plainly on screen.
-        """
-        drums = self._shop_category("Drums", 1)
-        tracks = self._shop_category("Tracks", 2)
+    def test_everything_else_is_swept_into_hardware(self):
+        """Drums, Hinges, Rollers and the rest are one box, not six pages."""
         picking = self._picking([
-            (self._shop_product("Canimex D400-96 White", "CD02", [drums]), 2),
-            (self._shop_product('2" Vertical Track 76"', "VT2", [tracks]), 2),
+            (self._filed("Canimex D400-96", "CD", self._shop_category("Drums")), 2),
+            (self._filed("Hinge #2", "HG", self._shop_category("Hinges")), 8),
+            (self._filed("Nylon Roller", "RL", self._shop_category("Rollers")), 10),
+            (self._filed("Torsion Shaft", "SH", self._shop_category("Shafts")), 1),
         ])
         sheet = self._sheet(picking)
-        self.assertIn("DRUMS", sheet)
-        self.assertIn("TRACKS", sheet)
-        self.assertNotIn("no category set", sheet)
-        self.assertIn("2 categories", sheet)
+        self.assertIn("HARDWARE", sheet)
+        for gone in ["DRUMS", "HINGES", "ROLLERS", "SHAFTS"]:
+            self.assertNotIn(gone, sheet, "%s still has a page" % gone)
 
-    def test_the_pages_follow_the_owners_own_order(self):
-        """That list is dragged into an order; the order is a decision."""
-        drums = self._shop_category("Drums", 1)
-        tracks = self._shop_category("Tracks", 2)
-        shafts = self._shop_category("Shafts", 3)
+    def test_misc_is_hardware_now(self):
         picking = self._picking([
-            (self._shop_product("Shaft 1in", "SH1", [shafts]), 1),
-            (self._shop_product('2" Vertical Track 76"', "VT2", [tracks]), 2),
-            (self._shop_product("Canimex D400-96", "CD02", [drums]), 2),
-        ])
+            (self._filed("Odd Part", "ODD", self._shop_category("Misc.")), 1)])
         sheet = self._sheet(picking)
-        self.assertLess(sheet.index("DRUMS"), sheet.index("TRACKS"))
-        self.assertLess(sheet.index("TRACKS"), sheet.index("SHAFTS"))
-
-    def test_the_shop_category_wins_over_the_accounting_one(self):
-        """A product filed in both belongs where the shop filed it."""
-        shop = self._shop_category("Hinges", 4)
-        accounting = self._category("Goods")
-        product = self.env["product.product"].create({
-            "name": "Hinge #2", "default_code": "HNG2", "type": "consu",
-            "categ_id": accounting.id,
-            "public_categ_ids": [(6, 0, [shop.id])]})
-        sheet = self._sheet(self._picking([(product, 8)]))
-        self.assertIn("HINGES", sheet)
-        self.assertNotIn("GOODS", sheet)
-
-    def test_a_product_in_two_shop_categories_is_printed_once(self):
-        """A line on two pages is a part picked twice."""
-        first = self._shop_category("Drums", 1)
-        second = self._shop_category("Misc.", 9)
-        product = self._shop_product("Canimex D400-96", "CD02", [first, second])
-        picking = self._picking([(product, 2)])
-        sheet = self._sheet(picking)
-        self.assertEqual(len(picking._work_order_lines()), 1)
-        self.assertIn("DRUMS", sheet)
+        self.assertIn("HARDWARE", sheet)
         self.assertNotIn("MISC", sheet)
 
-    def test_the_accounting_category_still_works_without_a_shop_one(self):
-        """A database with no website_sale has nothing else to offer."""
-        accounting = self._category("Brackets")
-        product = self._product("Jamb Bracket # 10 Black", "JB10", accounting)
-        sheet = self._sheet(self._picking([(product, 4)]))
-        self.assertIn("BRACKETS", sheet)
-        self.assertNotIn("no category set", sheet)
+    def test_tracks_and_springs_keep_their_own_page(self):
+        picking = self._picking([
+            (self._filed('2" Vertical Track 76"', "VT", self._shop_category("Tracks")), 2),
+            (self._filed("Torsion Spring 2in", "SP", self._shop_category("Springs")), 2),
+        ])
+        sheet = self._sheet(picking)
+        self.assertIn("TRACKS", sheet)
+        self.assertIn("SPRINGS", sheet)
+
+    def test_a_cable_gets_a_page_with_no_category_to_file_it_under(self):
+        """Cables exists only on this sheet - the shop has no such category.
+
+        So it cannot be decided by where a product is filed, only by what the
+        product is.
+        """
+        cable = self._filed(
+            '1/8" 7x19 Cable 500ft Reel', "REEL", self._shop_category("Misc."))
+        sheet = self._sheet(self._picking([(cable, 1)]))
+        self.assertIn("CABLES", sheet)
+        self.assertNotIn("HARDWARE", sheet)
+
+    def test_an_unfiled_product_still_lands_somewhere_sensible(self):
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        drum = self._product("Canimex D400-96 White")
+        self.assertFalse(track.public_categ_ids)
+        sheet = self._sheet(self._picking([(track, 2), (drum, 1)]))
+        self.assertIn("TRACKS", sheet)
+        self.assertIn("HARDWARE", sheet)
+
+    def test_the_pages_are_always_in_the_same_order(self):
+        picking = self._picking([
+            (self._product("Canimex D400-96 White"), 1),
+            (self._product('1/8" 7x19 Cable 500ft Reel'), 1),
+            (self._product('2" Vertical Track 76"'), 2),
+        ])
+        sheet = self._sheet(picking)
+        self.assertLess(sheet.index("TRACKS"), sheet.index("CABLES"))
+        self.assertLess(sheet.index("CABLES"), sheet.index("HARDWARE"))
+
+    def test_a_page_with_nothing_on_it_is_left_out(self):
+        """An order of tracks alone is one page, not four with three empty."""
+        sheet = self._sheet(self._picking([(self._product('2" Vertical Track 76"'), 2)]))
+        self.assertIn("TRACKS", sheet)
+        self.assertNotIn("CABLES", sheet)
+        self.assertNotIn("HARDWARE", sheet)
+        self.assertIn("1 categor", sheet)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetMeasurements(TestWorkOrderSheet):
+    """The two measurements that were wrong on the floor's copy."""
+
+    def test_a_horizontal_track_shows_its_length(self):
+        """IT DID NOT, AND NOTHING SAID SO.
+
+        The length was read from the number FOLLOWING the words "Vertical
+        Track" or "Horizontal Track". That held for the vertical names and not
+        for the horizontal ones, which print a blank column - and a blank reads
+        like a product with no length rather than a rule that missed.
+        """
+        read = self.Picking._work_order_length
+        self.assertEqual(read('[CH-HT-3"] 3" Horizontal Track - 96" Black'), '96"')
+        self.assertEqual(read("CH-HT-2 Horizontal Track 96 black"), '96"')
+        self.assertEqual(read('2" Horizontal Track 120" Long White'), '120"')
+
+        # and on the sheet itself, not only in the helper
+        product = self._product('[CH-HT-3"] 3" Horizontal Track - 96" Black', "HT")
+        self.assertIn('96"', self._sheet(self._picking([(product, 2)])))
+
+    def test_a_profile_and_a_door_height_are_not_lengths(self):
+        read = self.Picking._work_order_length
+        self.assertEqual(
+            read('[CH-VT-2"] 2" Vertical Track 76" - 7\' Door Height Black'), '76"')
+        self.assertEqual(
+            read('[CH-VT-3"] 3" Vertical Track 100" - 9\' Door Height White'), '100"')
+
+    def test_a_fractional_track_length_survives(self):
+        self.assertEqual(
+            self.Picking._work_order_length("Horizontal Track 96 1/2 Black"),
+            '96 1/2"')
+
+    def test_a_cable_is_measured_in_inches_not_feet(self):
+        """THE REST OF THE SHEET IS IN INCHES.
+
+        Stock counts the reel in feet and 17.5 ft is a stock figure; the person
+        cutting it works to 210", the same units as every track length and
+        every spring on the page.
+        """
+        cable = self._product('1/8" 7x19 Cable', "CABLE-18")
+        reel = self._product('1/8" 7X19 GAC (500 FT REEL)', "9150000604")
+        sleeve = self._product('1/8" Oval Sleeve', "9150000621")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        sale_line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": cable.id, "product_uom_qty": 1})
+        picking = self._picking([(reel, 17.5), (sleeve, 2)])
+        picking.move_ids.sale_line_id = sale_line.id
+        feet = self.env["uom.uom"].with_context(active_test=False).search(
+            [("name", "=", "ft")], limit=1)
+        feet.active = True
+        picking.move_ids.filtered(
+            lambda m: m.product_id == reel).product_uom = feet.id
+
+        lines = picking._work_order_lines()
+        self.assertEqual(len(lines), 1)
+        self.assertEqual(lines[0]["length"], '210"')
+        # NOT a bare "ft" search: the page's own stylesheet contains "left".
+        self.assertNotIn("17.5 ft", self._sheet(picking))

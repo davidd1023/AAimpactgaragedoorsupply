@@ -1,6 +1,7 @@
 import re
 
 from odoo import fields, models
+from odoo.exceptions import UserError
 
 # WHAT A LENGTH LOOKS LIKE IN A PRODUCT NAME. The catalogue writes a track as
 #
@@ -10,10 +11,17 @@ from odoo import fields, models
 # suits. Three measurements in one name, and only the middle one is the length,
 # which is why this anchors on the words "Vertical Track" or "Horizontal Track"
 # rather than taking the first number it meets.
-TRACK_LENGTH = re.compile(
-    r"(?:vertical|horizontal)\s+track\s+(\d+(?:\s+\d+/\d+)?|\d+/\d+)\s*[\"”]?",
-    re.I,
-)
+# EVERY NUMBER IN THE NAME, so the length can be picked out of any of them.
+# The anchored pattern this replaces required the measurement to sit directly
+# after the words "Vertical Track" or "Horizontal Track", which held for the
+# vertical names and not for the horizontal ones - they lost their length
+# entirely, with no sign on the sheet that anything was missing.
+NAME_NUMBER = re.compile(r"(\d+\s+\d+/\d+|\d+/\d+|\d+(?:\.\d+)?)")
+
+# A track length in inches, bounded so the other numbers in a name cannot be
+# mistaken for one: the profile (2" or 3"), the door height in feet (7, 9, 10)
+# and anything inside a part code all fall outside it.
+TRACK_LENGTH_RANGE = (12.0, 300.0)
 
 # A cable's length, for a catalogue that ever carries cut cables. A reel is not
 # a length and must not be read as one - "500ft Reel" is a quantity of stock.
@@ -46,15 +54,65 @@ class StockPicking(models.Model):
         one the product itself names.
         """
         name = name or ""
-        hit = TRACK_LENGTH.search(name)
 
-        if not hit and "reel" not in name.lower():
+        if self._work_order_kind(name) == "track":
+            return self._work_order_track_length(name)
+
+        if "reel" not in name.lower():
             hit = CABLE_LENGTH.search(name)
 
-        if not hit:
-            return ""
+            if hit:
+                return self._work_order_inches(
+                    hit.group(1).strip().replace(" ", ""))
 
-        return self._work_order_inches(hit.group(1).strip().replace(" ", ""))
+        return ""
+
+    def _work_order_track_length(self, name):
+        """The longest plausible measurement in a track's name.
+
+        A TRACK NAME CARRIES SEVERAL NUMBERS and the length is the big one:
+
+            [CH-VT-2"] 2" Vertical Track 76" - 7' Door Height Black
+
+        2" is the profile, 7' is the door, 76" is what gets cut. Taking the
+        number that FOLLOWS the words "Vertical Track" worked for these and
+        silently failed on the horizontal names, whose wording differs - they
+        printed no length at all, and a blank column looks like a product that
+        has none rather than a rule that missed.
+
+        So every number is read and the ones that could be a track are kept,
+        which no profile and no door height can be.
+        """
+        low, high = TRACK_LENGTH_RANGE
+        best = 0.0
+
+        for text in NAME_NUMBER.findall(name):
+            value = self._work_order_number(text)
+
+            if value is not None and low <= value <= high:
+                best = max(best, value)
+
+        return self._work_order_inches(best) if best else ""
+
+    def _work_order_number(self, text):
+        """"76", "76 1/2" or "17.5" as a float, or None."""
+        text = (text or "").strip()
+
+        try:
+            if " " in text:
+                whole, fraction = text.split(" ", 1)
+                top, bottom = fraction.split("/")
+
+                return float(whole) + float(top) / float(bottom)
+
+            if "/" in text:
+                top, bottom = text.split("/")
+
+                return float(top) / float(bottom)
+
+            return float(text)
+        except (TypeError, ValueError, ZeroDivisionError):
+            return None
 
     def _work_order_inches(self, text, fraction=True):
         """32.25 -> 32 1/4", 6.0 -> 6", 0.2625 -> 0.2625".
@@ -196,11 +254,35 @@ class StockPicking(models.Model):
         length. So the length is the component measured in anything other than
         Units, rather than a part number this has to be told about.
         """
+        inch = self.env["uom.uom"].with_context(active_test=False).search(
+            [("name", "=", "in")], limit=1)
+
         for move in moves:
             name = (move.product_uom.name or "").strip().lower()
 
-            if name and name not in ("units", "unit", "each", "pc", "pcs"):
-                return "%g %s" % (move.product_uom_qty, move.product_uom.name)
+            if not name or name in ("units", "unit", "each", "pc", "pcs"):
+                continue
+
+            # IN INCHES, BECAUSE THAT IS WHAT THE REST OF THE SHEET IS IN.
+            # Stock counts the reel in feet, and 17.5 ft is a stock figure; the
+            # person cutting it works to 210", the same units as every track
+            # length and every spring on the page.
+            #
+            # ASKED FOR, NOT CHECKED FOR. Odoo 19 took categories off uom.uom -
+            # there is no category_id to compare any more - so whether a unit
+            # is a length is decided by trying the conversion and believing the
+            # answer. A unit that cannot reach inches keeps its own.
+            if inch:
+                try:
+                    inches = move.product_uom._compute_quantity(
+                        move.product_uom_qty, inch, round=False)
+                except (UserError, ValueError):
+                    inches = None
+
+                if inches:
+                    return self._work_order_inches(inches)
+
+            return "%g %s" % (move.product_uom_qty, move.product_uom.name)
 
         return ""
 
@@ -311,6 +393,8 @@ class StockPicking(models.Model):
             "parts": len(moves),
             "category": category,
             "category_source": source,
+            "page": self._work_order_page(
+                "spring" if spring else self._work_order_kind(name), category),
         }
 
     # --- which page a line belongs on -----------------------------------------
@@ -345,63 +429,59 @@ class StockPicking(models.Model):
 
         return self.env["product.category"].browse(), ""
 
-    # What to call a page when the products on it have no category at all.
-    # Read off the product name, which is the only thing this module can know
-    # without the catalogue telling it.
-    KIND_TITLES = {
+    # FOUR PAGES, AND NO MORE. The shop asked for Tracks, Springs, Cables and
+    # Hardware, and for everything else - Drums, Hinges, Rollers, Shafts, EBF,
+    # Motors, Nuts & Bolts, Misc. - to be swept into Hardware. The eCommerce
+    # tree stays as it is for the website; this is how the FLOOR wants the work
+    # divided, and the two are allowed to differ.
+    #
+    # Cables has no eCommerce category at all - it is a page that exists only
+    # on this sheet - so it is decided by what the product is rather than by
+    # where it is filed.
+    PAGES = ("Tracks", "Springs", "Cables", "Hardware")
+    PAGE_BY_CATEGORY = {
+        "tracks": "Tracks",
+        "springs": "Springs",
+        "cables": "Cables",
+    }
+    PAGE_BY_KIND = {
         "spring": "Springs",
-        "track": "Tracks",
         "cable": "Cables",
-        "": "Other",
+        "track": "Tracks",
     }
 
-    def _work_order_sections(self):
-        """The lines grouped into the pages they print on.
+    def _work_order_page(self, kind, category):
+        """Which of the four pages this line prints on.
 
-        Only categories with something in them get a page, and a product with
-        no category at all is sorted by what its name looks like with the page
-        saying so - categ_id is not required in Odoo 19 and has no default, so
-        "no category" is a normal state and not a mistake to print.
+        The category decides it when the shop has filed the product under one
+        of the three the floor keeps. Otherwise what the product IS decides -
+        which is the only thing that can place a cable, because there is no
+        Cables category to file one under. Anything left is Hardware, which is
+        the point of Hardware: it is the box, not a leftover.
+        """
+        name = (category.name or "").strip().lower() if category else ""
+        page = self.PAGE_BY_CATEGORY.get(name)
+
+        if page:
+            return page
+
+        return self.PAGE_BY_KIND.get(kind, "Hardware")
+
+    def _work_order_sections(self):
+        """The lines gathered onto the four pages the floor works from.
+
+        Always in the same order, and a page with nothing on it is left out -
+        an order of tracks alone is one page, not four with three empty.
         """
         self.ensure_one()
-        lines = self._work_order_lines()
         groups = {}
 
-        for line in lines:
-            category = line["category"]
-            source = line["category_source"]
-            key = (source, category.id) if category else ("kind", line["kind"])
-            groups.setdefault(
-                key, (category, source, line["kind"], []))[3].append(line)
+        for line in self._work_order_lines():
+            groups.setdefault(line["page"], []).append(line)
 
-        sections = []
-
-        for category, source, kind, rows in groups.values():
-            if category:
-                parent = category.parent_id
-                sections.append({
-                    "title": category.name,
-                    "parent": (parent.display_name or "") if parent else "",
-                    "uncategorised": False,
-                    # THE OWNER'S OWN ORDER. The eCommerce categories are a
-                    # dragged list - Drums, Tracks, Shafts, Hinges... - and
-                    # that sequence is a decision, so the pages follow it.
-                    # Accounting categories have no such order and go by name.
-                    "sort": ((0, category.sequence, category.name or "")
-                             if source == "public"
-                             else (1, 0, category.complete_name or "")),
-                    "lines": rows,
-                })
-                continue
-
-            sections.append({
-                "title": self.KIND_TITLES.get(kind, "Other"),
-                "parent": "",
-                "uncategorised": True,
-                # After every real category, so a half-filed catalogue puts its
-                # loose ends at the back rather than among the real ones.
-                "sort": (2, 0, self.KIND_TITLES.get(kind, "Other")),
-                "lines": rows,
-            })
-
-        return sorted(sections, key=lambda s: s["sort"])
+        return [{
+            "title": page,
+            "parent": "",
+            "uncategorised": False,
+            "lines": groups[page],
+        } for page in self.PAGES if groups.get(page)]

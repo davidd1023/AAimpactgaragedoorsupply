@@ -125,20 +125,6 @@
                         <div style="background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;">
                             <t t-esc="section['title'].upper()"/>
                         </div>
-                        <!-- WHERE THIS CATEGORY SITS. Two leaves can share a
-                             name - a Tracks under Hardware and a Tracks
-                             somewhere else - and the heading alone would not
-                             say which page you are holding. -->
-                        <div t-if="section['parent']" style="text-align:center;margin:4px 0 0;font-size:11px;color:#999;">
-                            <t t-esc="section['parent']"/>
-                        </div>
-                        <!-- SAY THE CATEGORY IS MISSING, where the person who
-                             can fix it will see it. Sorting these by what the
-                             name looks like keeps the sheet usable; it does not
-                             make the catalogue right. -->
-                        <div t-if="section['uncategorised']" style="text-align:center;margin:4px 0 0;font-size:11px;color:#C0272D;">
-                            Sorted by name - these products have no category set
-                        </div>
                         <div style="text-align:center;margin:8px 0 14px;font-size:13px;color:#666;">
                             <strong style="font-size:16px;color:#1B2A6B;" t-esc="o.name"/>
                             <t t-if="o.origin"> | Order <t t-esc="o.origin"/></t>
@@ -170,26 +156,34 @@
                                 </tr>
                                 <tr t-if="line['spring']">
                                     <td t-att-style="td" colspan="6">
-                                        <div style="border-left:4px solid #C0272D;padding:8px 0 4px 12px;margin-top:2px;">
-                                            <div style="font-weight:800;font-size:12px;color:#1B2A6B;letter-spacing:.06em;margin-bottom:6px;">SPRING ASSEMBLY</div>
-                                            <table style="border-collapse:collapse;font-size:13px;margin-bottom:10px;">
+                                        <!-- BIG ENOUGH TO READ AT A BENCH. This
+                                             block was set at 12 and 13 pixels
+                                             because it sits inside a table row,
+                                             not because anybody has to read it
+                                             at arm's length under a light. It
+                                             is the part somebody winds from, so
+                                             it is now the largest thing on the
+                                             page rather than the smallest. -->
+                                        <div style="border-left:6px solid #C0272D;padding:14px 0 10px 18px;margin-top:4px;">
+                                            <div style="font-weight:800;font-size:17px;color:#1B2A6B;letter-spacing:.08em;margin-bottom:12px;">SPRING ASSEMBLY</div>
+                                            <table style="border-collapse:collapse;font-size:19px;margin-bottom:16px;">
                                                 <tr t-foreach="line['spring']['parameters']" t-as="row">
-                                                    <td style="padding:2px 18px 2px 0;color:#666;" t-esc="row[0]"/>
-                                                    <td style="padding:2px 0;font-weight:700;color:#1B2A6B;" t-esc="row[1]"/>
+                                                    <td style="padding:5px 28px 5px 0;color:#555;" t-esc="row[0]"/>
+                                                    <td style="padding:5px 0;font-weight:800;color:#1B2A6B;" t-esc="row[1]"/>
                                                 </tr>
                                             </table>
-                                            <table style="border-collapse:collapse;font-size:13px;">
+                                            <table style="border-collapse:collapse;font-size:19px;">
                                                 <tr>
-                                                    <th t-att-style="th + 'text-align:left;padding:4px 12px;'">Position</th>
-                                                    <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Wire</th>
-                                                    <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Inside Dia.</th>
-                                                    <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Length</th>
+                                                    <th t-att-style="th + 'text-align:left;padding:8px 20px;font-size:15px;'">Position</th>
+                                                    <th t-att-style="th + 'text-align:right;padding:8px 20px;font-size:15px;'">Wire</th>
+                                                    <th t-att-style="th + 'text-align:right;padding:8px 20px;font-size:15px;'">Inside Dia.</th>
+                                                    <th t-att-style="th + 'text-align:right;padding:8px 20px;font-size:15px;'">Length</th>
                                                 </tr>
                                                 <tr t-foreach="line['spring']['springs']" t-as="sp">
-                                                    <td style="border:1px solid #888;padding:4px 12px;" t-esc="sp['role']"/>
-                                                    <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:700;" t-esc="sp['wire']"/>
-                                                    <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:700;" t-esc="sp['inside_diameter']"/>
-                                                    <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:800;color:#C0272D;" t-esc="sp['length']"/>
+                                                    <td style="border:1px solid #888;padding:8px 20px;font-weight:700;" t-esc="sp['role']"/>
+                                                    <td style="border:1px solid #888;padding:8px 20px;text-align:right;font-weight:800;" t-esc="sp['wire']"/>
+                                                    <td style="border:1px solid #888;padding:8px 20px;text-align:right;font-weight:800;" t-esc="sp['inside_diameter']"/>
+                                                    <td style="border:1px solid #888;padding:8px 20px;text-align:right;font-weight:800;color:#C0272D;font-size:23px;" t-esc="sp['length']"/>
                                                 </tr>
                                             </table>
                                         </div>
