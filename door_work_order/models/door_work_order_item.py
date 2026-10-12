@@ -23,6 +23,11 @@ class DoorWorkOrderItem(models.Model):
         ondelete="cascade",
         index=True,
     )
+    # OPTIONAL ON PURPOSE. Orders raised before marks existed have items with
+    # no mark, and they must keep printing rather than be migrated into a shape
+    # that did not exist when they were made. New items always carry one.
+    mark_id = fields.Many2one(
+        "door.work.order.mark", string="Mark", ondelete="cascade", index=True)
     sequence = fields.Integer(default=10)
     role = fields.Selection(
         [

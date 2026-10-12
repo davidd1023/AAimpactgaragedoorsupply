@@ -22,9 +22,21 @@
                             <field name="door_wo_summary" readonly="1"/>
                         </group>
                     </group>
+                    <field name="door_wo_mark_ids" readonly="1">
+                        <list>
+                            <field name="label"/>
+                            <field name="door_qty"/>
+                            <field name="width"/>
+                            <field name="height"/>
+                            <field name="weight"/>
+                            <field name="config"/>
+                            <field name="drum"/>
+                        </list>
+                    </field>
                     <field name="door_wo_item_ids">
                         <list editable="bottom">
                             <field name="sequence" widget="handle"/>
+                            <field name="mark_id"/>
                             <field name="role"/>
                             <field name="length_label" string="As Calculated"/>
                             <field name="length_inches"/>
