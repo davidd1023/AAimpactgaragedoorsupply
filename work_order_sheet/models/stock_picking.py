@@ -32,11 +32,16 @@ CABLE_LENGTH = re.compile(r"cable\s+(\d+(?:\s+\d+/\d+)?)\s*[\"”]", re.I)
 # - and its fittings are a sleeve and a thimble. Matching only the word cable
 # recognised none of them, so they fell through to their eCommerce category,
 # which is Tracks, and printed on the tracks page.
+# CABLE IS TESTED BEFORE TRACK, and the order is the point. A cable is often
+# named for the track or door it suits - "1/8\" Lift Cable for 2in Track" -
+# while a track is never named for a cable. Testing track first read every one
+# of those as a track and printed it on the wrong page, which no amount of
+# widening the cable pattern could fix.
 KINDS = (
-    ("track", re.compile(r"\btrack\b", re.I)),
     ("cable", re.compile(
         r"\bcable\b|\bgac\b|\b7\s*x\s*19\b|\bthimble\b"
         r"|\boval\s+sleeve\b|\baircraft\b", re.I)),
+    ("track", re.compile(r"\btrack\b", re.I)),
 )
 
 
