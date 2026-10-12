@@ -194,6 +194,51 @@ class StockPicking(models.Model):
 
         return {"parameters": parameters, "springs": springs}
 
+    def _work_order_component_length(self, moves):
+        """The cut length of a collapsed group, e.g. "17.5 ft".
+
+        A cable arrives as four moves - the reel and its sleeve, thimble and
+        stop - and only one of them is a measurement. The fittings are counted
+        in Units; the reel is consumed in feet, and that figure IS the cable
+        length. So the length is the component measured in anything other than
+        Units, rather than a part number this has to be told about.
+        """
+        for move in moves:
+            name = (move.product_uom.name or "").strip().lower()
+
+            if name and name not in ("units", "unit", "each", "pc", "pcs"):
+                return "%g %s" % (move.product_uom_qty, move.product_uom.name)
+
+        return ""
+
+    def _work_order_groups(self):
+        """The moves, gathered back into the things a customer bought.
+
+        ONE CART LINE IS ONE THING, however many moves it explodes into. A
+        cable is sold as a cable and picked as four moves - reel, sleeve,
+        thimble, stop - and a sheet listing all four asks the floor to read a
+        bill of materials to find out that somebody bought one cable.
+
+        Grouped by the sale line rather than by a list of part numbers, so a
+        box of sleeves bought on its own is still a box of sleeves: it has a
+        sale line of its own and nothing to group with.
+        """
+        self.ensure_one()
+        groups = []
+        index = {}
+
+        for move in self.move_ids:
+            key = move.sale_line_id.id if move.sale_line_id else ("move", move.id)
+            position = index.get(key)
+
+            if position is None:
+                index[key] = len(groups)
+                groups.append([move])
+            else:
+                groups[position].append(move)
+
+        return groups
+
     def _work_order_lines(self):
         """Every product on this work order, in the order it appears.
 
@@ -204,21 +249,39 @@ class StockPicking(models.Model):
         self.ensure_one()
         lines = []
 
-        for move in self.move_ids:
-            product = move.product_id
+        for moves in self._work_order_groups():
+            move = moves[0]
+            sale_line = move.sale_line_id
+            collapsed = len(moves) > 1 and sale_line
+
+            # What the CUSTOMER bought, when several moves are one purchase.
+            product = sale_line.product_id if collapsed else move.product_id
             name = product.display_name or ""
             spring = self._work_order_spring(move)
+            length = self._work_order_length(name)
+
+            if collapsed:
+                length = self._work_order_component_length(moves) or length
+
+            states = [m.state for m in moves]
+            short = [st for st in states
+                     if st in ("confirmed", "waiting", "partially_available")]
+            state = short[0] if short else states[0]
+
             lines.append({
                 "code": product.default_code or "",
                 "name": product.name or name,
-                "quantity": move.product_uom_qty,
-                "uom": move.product_uom.name or "",
+                "quantity": sale_line.product_uom_qty if collapsed
+                            else move.product_uom_qty,
+                "uom": (sale_line.product_uom_id.name if collapsed
+                        and "product_uom_id" in sale_line._fields
+                        else move.product_uom.name) or "",
                 "kind": "spring" if spring else self._work_order_kind(name),
-                "length": self._work_order_length(name),
+                "length": length,
                 "spring": spring,
-                "availability": self.AVAILABILITY.get(move.state, move.state or ""),
-                "short": move.state in ("confirmed", "waiting",
-                                        "partially_available"),
+                "availability": self.AVAILABILITY.get(state, state or ""),
+                "short": bool(short),
+                "parts": len(moves),
             })
 
         return lines

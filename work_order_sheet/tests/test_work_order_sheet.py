@@ -330,7 +330,7 @@ class TestWorkOrderSheetFloor(TestWorkOrderSheet):
         track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
         sheet = self._sheet(self._picking([(track, 1)]))
         self.assertIn("Printed", sheet)
-        self.assertIn("Order state", sheet)
+        self.assertIn("State", sheet)
 
     def test_lines_are_grouped_by_station(self):
         track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
@@ -366,3 +366,114 @@ class TestWorkOrderSheetFloor(TestWorkOrderSheet):
             lambda m: m.product_id == product).sale_line_id = line.id
         sheet = self._sheet(picking)
         self.assertLess(sheet.index("SPRINGS"), sheet.index("TRACKS"))
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetCover(TestWorkOrderSheet):
+    """A cover to read, and a page per station to hand out."""
+
+    def _ft(self):
+        """Feet, enabled if the database has it switched off.
+
+        Most units ship archived, so a plain search finds nothing and the test
+        quietly fell back to Units - which meant the cable's FOOTAGE, the whole
+        point of collapsing those four moves into one, was never asserted at
+        all. The test passed and the figure was untested.
+        """
+        feet = self.env["uom.uom"].with_context(active_test=False).search(
+            [("name", "=", "ft")], limit=1)
+
+        if feet and not feet.active:
+            feet.active = True
+
+        return feet
+
+    def test_the_cover_says_who_what_and_when(self):
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        picking = self._picking([(track, 2)], origin="S00003")
+        picking.date_deadline = "2026-10-20 08:00:00"
+        sheet = self._sheet(picking)
+        self.assertIn("CUSTOMER", sheet)
+        self.assertIn("A Customer", sheet)
+        self.assertIn("Deadline", sheet)
+        self.assertIn("10/20/2026", sheet)
+        self.assertIn("EVERYTHING ON THIS ORDER", sheet)
+        self.assertIn("S00003", sheet)
+        self.assertIn(picking.name, sheet)
+
+    def test_the_summary_lists_every_station_and_line(self):
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        drum = self._product("Canimex D400-96 White")
+        sheet = self._sheet(self._picking([(track, 2), (drum, 1)]))
+        self.assertIn("2 stations", sheet)
+        self.assertIn("2 lines", sheet)
+
+    def test_each_station_gets_its_own_page(self):
+        """The cover is read once; the pages behind it are handed out.
+
+        So each one repeats the order number and the deadline - a sheet on its
+        own at a bench has to say what it belongs to.
+        """
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        drum = self._product("Canimex D400-96 White")
+        picking = self._picking([(track, 2), (drum, 1)], origin="S00009")
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "work_order_sheet.report_work_order_sheet", picking.ids)
+
+        if isinstance(rendered, bytes):
+            rendered = rendered.decode()
+
+        # one cover plus one page per station
+        self.assertEqual(rendered.count('class="page"'), 3)
+        text = visible_text(rendered)
+        # the order number appears on the cover and on each station page
+        self.assertGreaterEqual(text.count(picking.name), 3)
+        self.assertGreaterEqual(text.count("S00009"), 3)
+
+    def test_a_cable_is_one_line_not_four(self):
+        """THE BUG: a cable is sold as a cable and picked as four moves.
+
+        Reel, sleeve, thimble and stop all come off one cart line, and listing
+        all four asks the floor to read a bill of materials to work out that
+        somebody bought one cable. Grouped by the SALE LINE rather than by a
+        list of part numbers, so a box of sleeves bought on its own still
+        appears - it has a sale line of its own and nothing to group with.
+        """
+        cable = self._product('1/8" 7x19 Cable', "CABLE-18")
+        reel = self._product('1/8" 7X19 GAC (500 FT REEL)', "9150000604")
+        sleeve = self._product('1/8" Oval Sleeve', "9150000621")
+        thimble = self._product('1/8" Thimble', "9150000633")
+        stop = self._product('1/8" Aluminum Cable Stop', "9150000627")
+
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        sale_line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": cable.id, "product_uom_qty": 1})
+
+        picking = self._picking(
+            [(reel, 17.5), (sleeve, 2), (thimble, 2), (stop, 2)])
+        picking.move_ids.sale_line_id = sale_line.id
+        feet = self._ft()
+        picking.move_ids.filtered(
+            lambda m: m.product_id == reel).product_uom = feet.id
+
+        lines = picking._work_order_lines()
+        self.assertEqual(len(lines), 1, "the cable printed as four parts")
+        self.assertEqual(lines[0]["name"], '1/8" 7x19 Cable')
+        self.assertEqual(lines[0]["parts"], 4)
+        # THE FOOTAGE IS THE POINT. The sleeve, thimble and stop are counted in
+        # Units; the reel is consumed in feet, and that figure is the length of
+        # cable to cut. Collapsing the four without carrying it would lose the
+        # only measurement on the line.
+        self.assertTrue(feet, "this database has no feet unit to test with")
+        self.assertEqual(lines[0]["length"], "17.5 ft")
+
+        sheet = self._sheet(picking)
+        self.assertNotIn("Oval Sleeve", sheet)
+        self.assertNotIn("Thimble", sheet)
+        self.assertNotIn("Aluminum Cable Stop", sheet)
+
+    def test_a_fitting_bought_on_its_own_still_appears(self):
+        """The rule must not hide a box of sleeves somebody actually ordered."""
+        sleeve = self._product('1/8" Oval Sleeve (100 pk)', "9150000621")
+        sheet = self._sheet(self._picking([(sleeve, 3)]))
+        self.assertIn("Oval Sleeve", sheet)

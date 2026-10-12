@@ -27,100 +27,162 @@
                          as Latin-1 whatever the charset says, so a non-breaking
                          space and an em dash both print as rubbish. Learned on
                          a sheet that reached the owner's hand. -->
+                    <!-- THE COVER. Who it is for, which order, when it is
+                         due, and everything on it at a glance - so the sheet
+                         can be read before it is split up and handed out. -->
                     <div class="page" style="font-family:Arial,sans-serif;">
                         <div style="background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;">WORK ORDER</div>
-                        <div style="text-align:center;margin:8px 0 4px;font-size:22px;font-weight:800;color:#1B2A6B;">
+                        <div style="text-align:center;margin:14px 0 2px;font-size:34px;font-weight:800;color:#1B2A6B;">
                             <span t-field="o.name"/>
                         </div>
-                        <div style="text-align:center;margin:0 0 16px;font-size:13px;color:#666;">
-                            <t t-if="o.origin">Order: <strong t-esc="o.origin"/> | </t>
-                            <t t-if="o.partner_id"><t t-esc="o.partner_id.display_name"/> | </t>
-                            <t t-esc="o.picking_type_id.display_name"/>
-                            <t t-if="o.scheduled_date"> | <span t-field="o.scheduled_date" t-options="{'widget': 'date'}"/></t>
+                        <div t-if="o.origin" style="text-align:center;margin:0 0 20px;font-size:15px;color:#666;">
+                            Order <strong t-esc="o.origin"/>
                         </div>
 
-                        <p t-if="not sections" style="font-size:15px;">
+                        <table style="border-collapse:collapse;width:100%;font-size:14px;margin-bottom:20px;">
+                            <tr>
+                                <td style="width:50%;vertical-align:top;padding:0 16px 0 0;">
+                                    <div style="font-weight:800;font-size:12px;color:#1B2A6B;letter-spacing:.06em;border-bottom:2px solid #C0272D;padding-bottom:3px;margin-bottom:6px;">CUSTOMER</div>
+                                    <div t-if="o.partner_id" style="font-size:15px;font-weight:700;" t-esc="o.partner_id.display_name"/>
+                                    <div t-if="o.partner_id" style="color:#444;" t-field="o.partner_id.contact_address"/>
+                                    <div t-if="o.partner_id.phone" style="color:#444;">Tel: <t t-esc="o.partner_id.phone"/></div>
+                                    <div t-if="not o.partner_id" style="color:#666;">No customer on this order.</div>
+                                </td>
+                                <td style="width:50%;vertical-align:top;">
+                                    <div style="font-weight:800;font-size:12px;color:#1B2A6B;letter-spacing:.06em;border-bottom:2px solid #C0272D;padding-bottom:3px;margin-bottom:6px;">WHEN</div>
+                                    <table style="border-collapse:collapse;font-size:14px;">
+                                        <tr t-if="o.date_deadline">
+                                            <td style="padding:2px 16px 2px 0;color:#666;">Deadline</td>
+                                            <td style="padding:2px 0;font-weight:800;color:#C0272D;font-size:16px;">
+                                                <span t-field="o.date_deadline" t-options="{'widget': 'date'}"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:2px 16px 2px 0;color:#666;">Scheduled</td>
+                                            <td style="padding:2px 0;font-weight:700;">
+                                                <span t-field="o.scheduled_date" t-options="{'widget': 'date'}"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:2px 16px 2px 0;color:#666;">Operation</td>
+                                            <td style="padding:2px 0;" t-esc="o.picking_type_id.display_name"/>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:2px 16px 2px 0;color:#666;">State</td>
+                                            <td style="padding:2px 0;font-weight:700;" t-esc="dict(o._fields['state'].selection).get(o.state, o.state)"/>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div style="font-weight:800;font-size:12px;color:#1B2A6B;letter-spacing:.06em;border-bottom:2px solid #C0272D;padding-bottom:3px;margin-bottom:6px;">EVERYTHING ON THIS ORDER</div>
+                        <p t-if="not lines" style="font-size:15px;">
                             There is nothing on this work order yet.
                         </p>
-
-                        <!-- ONE SECTION PER STATION, so a winder and a track
-                             cutter do not have to read each other's rows to
-                             find their own. Empty sections are left out. -->
-                        <div t-foreach="sections" t-as="section" style="margin-bottom:18px;">
-                            <div style="font-weight:800;font-size:13px;color:#1B2A6B;letter-spacing:.06em;border-bottom:2px solid #C0272D;padding-bottom:3px;margin-bottom:6px;">
-                                <t t-esc="section['title'].upper()"/>
-                            </div>
-                            <table style="border-collapse:collapse;width:100%;font-size:14px;">
-                                <tr>
-                                    <th t-att-style="th + 'text-align:left;'">Code</th>
-                                    <th t-att-style="th + 'text-align:left;'">Product</th>
-                                    <th t-att-style="th + 'text-align:right;'">Length</th>
-                                    <th t-att-style="th + 'text-align:right;'">Qty</th>
-                                    <th t-att-style="th + 'text-align:left;'">Unit</th>
-                                    <th t-att-style="th + 'text-align:left;'">Stock</th>
+                        <table t-if="lines" style="border-collapse:collapse;width:100%;font-size:13px;">
+                            <tr>
+                                <th t-att-style="th + 'text-align:left;'">Station</th>
+                                <th t-att-style="th + 'text-align:left;'">Code</th>
+                                <th t-att-style="th + 'text-align:left;'">Product</th>
+                                <th t-att-style="th + 'text-align:right;'">Length</th>
+                                <th t-att-style="th + 'text-align:right;'">Qty</th>
+                                <th t-att-style="th + 'text-align:left;'">Stock</th>
+                            </tr>
+                            <t t-foreach="sections" t-as="section">
+                                <tr t-foreach="section['lines']" t-as="line"
+                                    t-att-style="'background:#f8f9fa;' if line_index % 2 == 0 else ''">
+                                    <td t-att-style="td" t-esc="section['title']"/>
+                                    <td t-att-style="td" t-esc="line['code']"/>
+                                    <td t-att-style="td" t-esc="line['name']"/>
+                                    <td t-att-style="td + 'text-align:right;font-weight:700;white-space:nowrap;'">
+                                        <t t-if="line['length']" t-esc="line['length']"/>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td t-att-style="td + 'text-align:right;font-weight:700;'" t-esc="'%g' % line['quantity']"/>
+                                    <td t-att-style="td + ('font-weight:800;color:#C0272D;' if line['short'] else 'color:#666;')"
+                                        t-esc="line['availability']"/>
                                 </tr>
-                                <t t-foreach="section['lines']" t-as="line">
-                                    <tr t-att-style="'background:#f8f9fa;' if line_index % 2 == 0 else ''">
-                                        <td t-att-style="td" t-esc="line['code']"/>
-                                        <td t-att-style="td" t-esc="line['name']"/>
-                                        <td t-att-style="td + 'text-align:right;font-weight:800;color:#C0272D;white-space:nowrap;'">
-                                            <t t-if="line['length']" t-esc="line['length']"/>
-                                            <t t-else="">-</t>
-                                        </td>
-                                        <td t-att-style="td + 'text-align:right;font-weight:700;'">
-                                            <t t-esc="'%g' % line['quantity']"/>
-                                        </td>
-                                        <td t-att-style="td" t-esc="line['uom']"/>
-                                        <!-- WHAT IS ACTUALLY ON THE SHELF. The
-                                             order screen says "Not Available"
-                                             and the paper used not to, so a
-                                             picker found out at the rack. -->
-                                        <td t-att-style="td + ('font-weight:800;color:#C0272D;' if line['short'] else 'color:#666;')"
-                                            t-esc="line['availability']"/>
-                                    </tr>
-                                    <tr t-if="line['spring']">
-                                        <td t-att-style="td" colspan="6">
-                                            <div style="border-left:4px solid #C0272D;padding:8px 0 4px 12px;margin-top:2px;">
-                                                <div style="font-weight:800;font-size:12px;color:#1B2A6B;letter-spacing:.06em;margin-bottom:6px;">SPRING ASSEMBLY</div>
-                                                <table style="border-collapse:collapse;font-size:13px;margin-bottom:10px;">
-                                                    <tr t-foreach="line['spring']['parameters']" t-as="row">
-                                                        <td style="padding:2px 18px 2px 0;color:#666;" t-esc="row[0]"/>
-                                                        <td style="padding:2px 0;font-weight:700;color:#1B2A6B;" t-esc="row[1]"/>
-                                                    </tr>
-                                                </table>
-                                                <table style="border-collapse:collapse;font-size:13px;">
-                                                    <tr>
-                                                        <th t-att-style="th + 'text-align:left;padding:4px 12px;'">Position</th>
-                                                        <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Wire</th>
-                                                        <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Inside Dia.</th>
-                                                        <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Length</th>
-                                                    </tr>
-                                                    <tr t-foreach="line['spring']['springs']" t-as="sp">
-                                                        <td style="border:1px solid #888;padding:4px 12px;" t-esc="sp['role']"/>
-                                                        <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:700;" t-esc="sp['wire']"/>
-                                                        <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:700;" t-esc="sp['inside_diameter']"/>
-                                                        <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:800;color:#C0272D;" t-esc="sp['length']"/>
-                                                    </tr>
-                                                </table>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </t>
-                            </table>
-                        </div>
+                            </t>
+                        </table>
 
                         <div t-if="lines" style="margin-top:14px;font-size:13px;color:#666;border-top:1px solid #ccc;padding-top:8px;">
+                            <t t-esc="len(sections)"/> station<t t-if="len(sections) != 1">s</t>,
                             <t t-esc="len(lines)"/> line<t t-if="len(lines) != 1">s</t>,
                             <t t-esc="'%g' % sum(l['quantity'] for l in lines)"/> item<t t-if="sum(l['quantity'] for l in lines) != 1">s</t> in all.
-                            <!-- WHEN THIS PAPER WAS PRINTED AND WHAT THE ORDER
-                                 SAID THEN. A sheet on a bench is otherwise
-                                 undateable, and an order that has changed since
-                                 printing looks exactly like one that has not. -->
                             <span style="float:right;">
                                 Printed <t t-esc="o._work_order_printed_at()"/>
-                                | Order state: <strong t-esc="dict(o._fields['state'].selection).get(o.state, o.state)"/>
                             </span>
                         </div>
+                    </div>
+
+                    <!-- A PAGE PER STATION. The cover is read once and the
+                         pages behind it are handed out, so each one repeats the
+                         order number and the deadline - a sheet on its own at a
+                         bench has to say what it belongs to. -->
+                    <div t-foreach="sections" t-as="section" class="page"
+                         style="font-family:Arial,sans-serif;page-break-before:always;">
+                        <div style="background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;">
+                            <t t-esc="section['title'].upper()"/>
+                        </div>
+                        <div style="text-align:center;margin:8px 0 14px;font-size:13px;color:#666;">
+                            <strong style="font-size:16px;color:#1B2A6B;" t-esc="o.name"/>
+                            <t t-if="o.origin"> | Order <t t-esc="o.origin"/></t>
+                            <t t-if="o.partner_id"> | <t t-esc="o.partner_id.display_name"/></t>
+                            <t t-if="o.date_deadline"> | Due <span t-field="o.date_deadline" t-options="{'widget': 'date'}"/></t>
+                        </div>
+
+                        <table style="border-collapse:collapse;width:100%;font-size:14px;">
+                            <tr>
+                                <th t-att-style="th + 'text-align:left;'">Code</th>
+                                <th t-att-style="th + 'text-align:left;'">Product</th>
+                                <th t-att-style="th + 'text-align:right;'">Length</th>
+                                <th t-att-style="th + 'text-align:right;'">Qty</th>
+                                <th t-att-style="th + 'text-align:left;'">Unit</th>
+                                <th t-att-style="th + 'text-align:left;'">Stock</th>
+                            </tr>
+                            <t t-foreach="section['lines']" t-as="line">
+                                <tr t-att-style="'background:#f8f9fa;' if line_index % 2 == 0 else ''">
+                                    <td t-att-style="td" t-esc="line['code']"/>
+                                    <td t-att-style="td" t-esc="line['name']"/>
+                                    <td t-att-style="td + 'text-align:right;font-weight:800;color:#C0272D;white-space:nowrap;'">
+                                        <t t-if="line['length']" t-esc="line['length']"/>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td t-att-style="td + 'text-align:right;font-weight:700;'" t-esc="'%g' % line['quantity']"/>
+                                    <td t-att-style="td" t-esc="line['uom']"/>
+                                    <td t-att-style="td + ('font-weight:800;color:#C0272D;' if line['short'] else 'color:#666;')"
+                                        t-esc="line['availability']"/>
+                                </tr>
+                                <tr t-if="line['spring']">
+                                    <td t-att-style="td" colspan="6">
+                                        <div style="border-left:4px solid #C0272D;padding:8px 0 4px 12px;margin-top:2px;">
+                                            <div style="font-weight:800;font-size:12px;color:#1B2A6B;letter-spacing:.06em;margin-bottom:6px;">SPRING ASSEMBLY</div>
+                                            <table style="border-collapse:collapse;font-size:13px;margin-bottom:10px;">
+                                                <tr t-foreach="line['spring']['parameters']" t-as="row">
+                                                    <td style="padding:2px 18px 2px 0;color:#666;" t-esc="row[0]"/>
+                                                    <td style="padding:2px 0;font-weight:700;color:#1B2A6B;" t-esc="row[1]"/>
+                                                </tr>
+                                            </table>
+                                            <table style="border-collapse:collapse;font-size:13px;">
+                                                <tr>
+                                                    <th t-att-style="th + 'text-align:left;padding:4px 12px;'">Position</th>
+                                                    <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Wire</th>
+                                                    <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Inside Dia.</th>
+                                                    <th t-att-style="th + 'text-align:right;padding:4px 12px;'">Length</th>
+                                                </tr>
+                                                <tr t-foreach="line['spring']['springs']" t-as="sp">
+                                                    <td style="border:1px solid #888;padding:4px 12px;" t-esc="sp['role']"/>
+                                                    <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:700;" t-esc="sp['wire']"/>
+                                                    <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:700;" t-esc="sp['inside_diameter']"/>
+                                                    <td style="border:1px solid #888;padding:4px 12px;text-align:right;font-weight:800;color:#C0272D;" t-esc="sp['length']"/>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </t>
+                        </table>
                     </div>
                 </div>
             </t>
