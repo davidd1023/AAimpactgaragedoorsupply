@@ -67,6 +67,20 @@ class DoorWorkOrder(http.Controller):
 
         Production = request.env["mrp.production"]
 
+        # NO SPEC AT ALL IS ALMOST ALWAYS THE LOGIN REDIRECT. auth="user" sends
+        # a signed-out request to /web/login and comes back with a GET, so a
+        # POSTed body is gone by the time this runs and the order arrives
+        # empty. "The door calculator sent no door" is true and useless; the
+        # person needs to know their sign-in ate it and that pressing Send
+        # again now works.
+        if not spec:
+            return self._render("refused", {"message": _(
+                "No door reached this page.\n\n"
+                "If you were asked to sign in just now, that is why: signing in"
+                " loses what was being sent. Go back to the calculator and"
+                " press Send to Manufacturing again - you are signed in now, so"
+                " it will come straight through.")})
+
         try:
             # THE WHOLE ORDER, not one door. This read _door_wo_parse while the
             # creating path had already moved to _door_wo_parse_order, so an
