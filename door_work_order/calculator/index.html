@@ -132,7 +132,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
         <div class="printer-item"><label>Paste any page of your Odoo - only the address is used</label>
         <input id="cfg-odoo" type="text" inputmode="url" placeholder="aaigd.com  or  https://aaigd.com/odoo/manufacturing" oninput="saveOdooUrl()" style="width:100%;padding:8px;border:1px solid var(--gray-border);border-radius:8px;font-size:14px"/>
         <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div>
-        <div style="margin-top:6px;font-size:11px;color:#888">Send to Manufacturing build <strong>7</strong> &#183; 2026-10-09</div></div>
+        <div style="margin-top:6px;font-size:11px;color:#888">Send to Manufacturing build <strong>8</strong> &#183; 2026-10-09</div></div>
       </div>
       <div class="save-confirm" id="save-confirm">Saved</div>
     </div>
@@ -421,7 +421,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
   <div class="results" id="print-all-wrap" style="margin-top:4px">
     <button class="print-all-btn" onclick="opPrintChoice()">&#128424; Print All</button>
     <button class="print-all-btn" style="display:none" onclick="doPrintAll()">&#128424; Print All (print server)</button>
-    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff" title="Send to Manufacturing build 7">&#128296; Send to Manufacturing <span style="opacity:.55;font-size:11px">b7</span></button>
+    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff" title="Send to Manufacturing build 8">&#128296; Send to Manufacturing <span style="opacity:.55;font-size:11px">b8</span></button>
   </div>
   </div>
 </div>
@@ -898,16 +898,33 @@ function doPrintAllMarks(){
   var chips=document.querySelectorAll('#op-list .op-mk');
   if(!chips.length){ doPrintAllBrowser(); return; }
   var base=getInfo();
-  var blocks='';
+  var blocks='', wrong=[], prev=(typeof opCur!=='undefined')?opCur:null, printed=0;
   Array.prototype.forEach.call(chips,function(m,idx){
+    var mid=m.getAttribute('data-mid');
     var label=(m.querySelector('.op-lbl').value||'?');
     var qty=(m.querySelector('.op-q').textContent||'1');
-    var info={}; for(var k in base) info[k]=base[k]; info.mark=label;
+    // LOAD THE MARK BEFORE BUILDING ITS SHEETS. buildAllSections() runs
+    // calculate() on whatever is in the form and then reads the result off the
+    // DOM, so without this every mark printed whichever mark happened to be
+    // OPEN - same lengths, same drum, same cable, only the header letter and
+    // quantity changing. Marks of different sizes printed sheets that were
+    // simply wrong, and nothing on the page said so.
+    var want=(typeof opData!=='undefined'&&opData[mid])?opData[mid]:{};
+    try{opOpenMark(mid,label);}catch(e){}
+    if(!markIsLoaded(want)){wrong.push(label);return;}
+    var info={}; for(var k in base) info[k]=base[k];
+    info.mark=label; info.qty=parseInt(qty)||0;
     var parts=buildAllSections(info);
     if(!parts.length) return;
+    printed++;
     var header='<div style="font-family:Arial,sans-serif;font-size:16px;font-weight:800;color:#1B2A6B;border-bottom:2px solid #C0272D;padding:4px 0;margin-bottom:8px">Mark '+label+' &mdash; qty '+qty+'</div>';
-    blocks+='<div style="'+(idx>0?'page-break-before:always;break-before:page;':'')+'">'+header+partsToHtml(parts)+'</div>';
+    blocks+='<div style="'+(printed>1?'page-break-before:always;break-before:page;':'')+'">'+header+partsToHtml(parts)+'</div>';
   });
+  restoreMark(prev);
+  if(wrong.length){
+    alert('These marks have no complete door on them yet, so nothing was printed for them:\n\n  '+wrong.join(', ')+'\n\nFill them in and print again.');
+  }
+  if(!blocks){ return; }
   var area=document.getElementById('preview-print-area');
   area.innerHTML=blocks+dispatchPageHtml()+printPageStyle();
   setTimeout(function(){window.print();},60);
@@ -1013,6 +1030,39 @@ function doorSpecFromCD(){
   };
 }
 
+// DID THE FORM REALLY LOAD THIS MARK? Every input calculate() can bail on is
+// checked, not just the two dimensions. It returns early for a hi-lift door
+// with an empty hi-lift box, for a low-headroom lift on a non-LHR track, and
+// for a blank track or lift - and in every one of those cases CD still holds
+// the PREVIOUS mark's results. Two marks of the same width and height, which
+// is the ordinary case on a multi-door job, slip through a width-and-height
+// check, and the mark goes out carrying the other one's track lengths, drum
+// and cable.
+//
+// ONE DEFINITION, used by both the sending loop and the printing loop. Two
+// copies of a six-way comparison is how one of them quietly stops matching.
+function markIsLoaded(want){
+  want=want||{};
+  if(typeof CD==='undefined'||!CD) return false;
+  var num=function(v){return parseFloat(v)||0;};
+  return num(want.width)===num(CD.width)
+      && num(want.height)===num(CD.height)
+      && (want.trackType||'')===(CD.tt||'')
+      && (want.liftType||'')===(CD.lt||'')
+      && num(want.highlift)===num(CD.hl)
+      && num(want.weight)===num(CD.hasWeight?CD.wt:0);
+}
+// Put the editor back on the mark that was open, or on the first one if that
+// mark is gone - opCur is null before anything is opened and stale after a
+// delete, which are exactly the cases a bare "restore if known" misses.
+function restoreMark(prev){
+  var back=prev?document.querySelector('#op-list .op-mk[data-mid="'+prev+'"]'):null;
+  if(!back) back=document.querySelector('#op-list .op-mk');
+  if(back){
+    try{opOpenMark(back.getAttribute('data-mid'),(back.querySelector('.op-lbl')||{value:'?'}).value||'?');}catch(e){}
+  }
+}
+
 // EVERY MARK ON THE ORDER, EACH WITH ITS OWN NUMBERS.
 //
 // Each mark is opened in turn so that calculate() works it out properly -
@@ -1036,39 +1086,11 @@ function collectDoors(){
     var want=(typeof opData!=='undefined'&&opData[mid])?opData[mid]:{};
     try{opOpenMark(mid,label);}catch(e){skipped.push(label);return;}
     var d=doorSpecFromCD();
-    if(!d){skipped.push(label);return;}
-    // DID THE FORM REALLY LOAD THIS MARK? Every input calculate() can bail on
-    // is checked, not just the two dimensions. It returns early for a hi-lift
-    // door with an empty hi-lift box, for a low-headroom lift on a non-LHR
-    // track, and for a blank track or lift - and in every one of those cases
-    // CD still holds the PREVIOUS mark's results. Two marks of the same width
-    // and height, which is the ordinary case on a multi-door job, slipped
-    // through a width-and-height check and mark B went out carrying mark A's
-    // track lengths, drum and cable with nothing reported.
-    var num=function(v){return parseFloat(v)||0;};
-    if(num(want.width)!==num(d.width)||num(want.height)!==num(d.height)
-       ||(want.trackType||'')!==(d.track||'')
-       ||(want.liftType||'')!==(d.lift||'')
-       ||num(want.highlift)!==num(d.hilift)
-       ||num(want.weight)!==num(d.weight)){
-      skipped.push(label);return;
-    }
+    if(!d||!markIsLoaded(want)){skipped.push(label);return;}
     d.mark=label; d.qty=qty;
     doors.push(d);
   });
-  // PUT THE EDITOR BACK WHERE IT WAS. This loop opens every mark in turn, so
-  // without this the screen is left showing the LAST mark - press Send and the
-  // door you were working on silently changes under you.
-  //
-  // The fallback matters as much as the restore: opCur is null before any mark
-  // has been opened, and still points at a deleted mark after one is removed,
-  // so "restore only if we know where we were" leaves the editor moved in
-  // exactly the cases nobody would think to test.
-  var back=prev?document.querySelector('#op-list .op-mk[data-mid="'+prev+'"]'):null;
-  if(!back) back=document.querySelector('#op-list .op-mk');
-  if(back){
-    try{opOpenMark(back.getAttribute('data-mid'),(back.querySelector('.op-lbl')||{value:'?'}).value||'?');}catch(e){}
-  }
+  restoreMark(prev);
   return {doors:doors,skipped:skipped};
 }
 
@@ -1084,17 +1106,29 @@ function sendToManufacturing(){
   if(!spec.wo&&!confirm('This order has no W/O number. Without one, sending twice will raise two orders. Send anyway?'))return;
   var target=base+'/door-work-order/new';
   var body=JSON.stringify(spec);
-  try{console.log('Send to Manufacturing b7 -> '+collected.doors.length+' mark(s), '+total+' door(s), '+body.length+' bytes',target);}catch(e){}
+  try{console.log('Send to Manufacturing b8 -> '+collected.doors.length+' mark(s), '+total+' door(s), '+body.length+' bytes',target);}catch(e){}
   // POSTED, NOT HUNG OFF THE URL. A mark is about 500 bytes once encoded, so a
   // fifteen-mark order runs past the request-line limit most proxies allow and
   // comes back as a bare 414 from something in front of Odoo. A form body has
   // no such limit, and the page it opens still only reads and renders.
+  // THE WINDOW IS OPENED FIRST SO A BLOCKED POP-UP IS STILL NOTICED. Build 6
+  // used window.open and could check its return value; posting a form to
+  // target="_blank" cannot, so a blocked tab would have made the button look
+  // dead. Opening a NAMED window first restores the check, and the form then
+  // posts into that window.
+  var name='doorwo'+Date.now();
+  var win=window.open('', name);
+  if(!win){
+    alert('Your browser blocked the new tab. Allow pop-ups for this page, then press Send again.');
+    return;
+  }
   var f=document.createElement('form');
-  f.method='POST'; f.action=target; f.target='_blank';
+  f.method='POST'; f.action=target; f.target=name;
   var i=document.createElement('input');
   i.type='hidden'; i.name='spec'; i.value=body;
   f.appendChild(i); document.body.appendChild(f);
   try{ f.submit(); }catch(e){
+    try{win.close();}catch(e2){}
     alert('Could not open the order page:\n\n'+e);
   }
   document.body.removeChild(f);

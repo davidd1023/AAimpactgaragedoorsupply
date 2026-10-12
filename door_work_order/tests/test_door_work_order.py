@@ -872,6 +872,24 @@ class TestDoorWorkOrderReviewFindings(DoorWorkOrderCommon):
             with self.assertRaises(UserError, msg=repr(bad)):
                 self.Production._door_wo_create(spec(sections=bad))
 
+    def test_two_marks_cannot_share_a_letter(self):
+        """Two sheets headed "Mark A" with different measurements.
+
+        The only way to tell them apart on the bench is to measure, which is
+        the thing the sheet exists to save. Refused at the door instead.
+        """
+        with self.assertRaises(UserError):
+            self.Production._door_wo_create(order(
+                spec(mark="A", qty=1),
+                spec(mark="A", qty=1, height=96, vertical=88)))
+
+        # and the same order with distinct letters is fine
+        production, _r = self.Production._door_wo_create(order(
+            spec(mark="A", qty=1),
+            spec(mark="B", qty=1, height=96, vertical=88)))
+        self.assertEqual(
+            sorted(production.door_wo_mark_ids.mapped("label")), ["A", "B"])
+
     def test_several_orders_print_as_several_documents(self):
         """Without an article wrapper Odoo merges them into one body.
 

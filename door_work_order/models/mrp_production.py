@@ -378,6 +378,25 @@ class MrpProduction(models.Model):
 
             out.append(parsed)
 
+        # TWO MARKS CANNOT SHARE A LETTER. The papers are headed by the mark,
+        # so two marks both called A hand the floor two sheets with the same
+        # name and different measurements, and the only way to tell which is
+        # which is to measure. Refused here rather than on the bench.
+        seen = {}
+
+        for parsed in out:
+            seen[parsed["mark"]] = seen.get(parsed["mark"], 0) + 1
+
+        clashes = sorted(label for label, count in seen.items() if count > 1)
+
+        if clashes:
+            raise UserError(
+                _("Two doors on this order are both called %s. Give each mark"
+                  " its own letter and send it again - the printed sheets are"
+                  " headed by the mark, so two with the same name cannot be"
+                  " told apart.", ", ".join(clashes))
+            )
+
         return {"reference": reference, "doors": out}
 
     # --- which stock item each cut comes from --------------------------------
