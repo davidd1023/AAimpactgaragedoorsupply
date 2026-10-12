@@ -1,0 +1,126 @@
+"""Kit data AA asked for (idempotent, safe to run again):
+
+* "Trims" option on every hardware kit (it was only on AA-1200).
+* High-lift drums (D525-54, D575-120, D800-120) on every kit. Each new high-lift
+  variant gets the BoM of its D525-216 sibling with the drum swapped for the
+  high-lift drum of the same color, and its cost recomputed from that BoM.
+"""
+import logging
+
+_logger = logging.getLogger(__name__)
+
+KIT_NAMES = ['AA-1200 Hardware Kit', 'AA-1600 Hardware Kit', 'AA-1800 Hardware Kit']
+HL_DRUM_VALUES = [
+    ('D525-54', 'D525-54 (high lift up to 54", up to 1,000 lb)'),
+    ('D575-120', 'D575-120 (high lift up to 120", up to 1,000 lb)'),
+    ('D800-120', 'D800-120 (high lift, over 1,000 lb)'),
+]
+BASE_DRUM = 'D525-216'
+
+
+def setup_kit_options(env):
+    kits = env['product.template'].with_context(active_test=False).search([('name', 'in', KIT_NAMES)])
+    for kit in kits:
+        _add_trims(kit)
+        _add_high_lift_drums(kit)
+
+
+def _add_trims(kit):
+    line = kit.attribute_line_ids.filtered(lambda l: l.attribute_id.name == 'Add to Your Order')[:1]
+    if not line:
+        return
+    trims = line.attribute_id.value_ids.filtered(lambda v: v.name == 'Trims')[:1]
+    if trims and trims not in line.value_ids:
+        line.value_ids = [(4, trims.id)]
+        _logger.info("aa_dealer_orders: added Trims to %s", kit.name)
+
+
+def _add_high_lift_drums(kit):
+    env = kit.env
+    drum_line = kit.attribute_line_ids.filtered(lambda l: l.attribute_id.name == 'Drum')[:1]
+    if not drum_line:
+        return
+    attr = drum_line.attribute_id
+    to_add = []
+    for code, label in HL_DRUM_VALUES:
+        value = attr.value_ids.filtered(lambda v, c=code: v.name.startswith(c))[:1]
+        if not value:
+            value = env['product.attribute.value'].create({'attribute_id': attr.id, 'name': label})
+        if value not in drum_line.value_ids:
+            to_add.append(value.id)
+    if to_add:
+        drum_line.value_ids = [(4, vid) for vid in to_add]
+        _logger.info("aa_dealer_orders: added %s high-lift drums to %s", len(to_add), kit.name)
+
+    if 'mrp.bom' not in env:
+        return
+    Bom = env['mrp.bom']
+    base_ptav = drum_line.product_template_value_ids.filtered(lambda v: v.name.startswith(BASE_DRUM))[:1]
+    if not base_ptav:
+        return
+    for variant in kit.product_variant_ids:
+        vdrum = variant.product_template_attribute_value_ids.filtered(lambda v: v.attribute_id == attr)
+        code = next((c for c, _l in HL_DRUM_VALUES if vdrum and vdrum.name.startswith(c)), None)
+        if not code:
+            continue
+        hl_products = env['product.product'].with_context(active_test=True).search(
+            [('name', 'ilike', code), ('active', '=', True)])
+        bom = Bom.search([('product_id', '=', variant.id)], limit=1)
+        if bom:
+            # Repair: a drum line pointing to an archived product gets the active one.
+            changed = False
+            for bline in bom.bom_line_ids.filtered(
+                    lambda l: code in (l.product_id.name or '') and not l.product_id.active):
+                pick = _pick_drum(hl_products, bline.product_id)
+                if pick:
+                    bline.product_id = pick
+                    changed = True
+            if changed and hasattr(variant, 'button_bom_cost'):
+                variant.button_bom_cost()
+            continue
+        sibling = kit._get_variant_for_combination(
+            (variant.product_template_attribute_value_ids - vdrum) | base_ptav)
+        sib_bom = sibling and Bom.search([('product_id', '=', sibling.id)], limit=1)
+        if not sib_bom:
+            continue
+        new_bom = sib_bom.copy({'product_id': variant.id})
+        for bline in new_bom.bom_line_ids.filtered(lambda l: BASE_DRUM in (l.product_id.name or '')):
+            pick = _pick_drum(hl_products, bline.product_id)
+            if pick:
+                bline.product_id = pick
+        if hasattr(variant, 'button_bom_cost'):
+            variant.button_bom_cost()
+
+
+def _pick_drum(hl_products, old_product):
+    """Same color as the drum it replaces when the high-lift drum comes in colors."""
+    color = 'Black' if 'Black' in (old_product.display_name or '') else 'White'
+    return hl_products.filtered(lambda p: color in p.display_name)[:1] or hl_products[:1]
+
+
+def refresh_prepared_costs(env):
+    """Cost of the prepared tracks and cable pairs = their full BoM (raw track, flag
+    angles, jamb brackets, screws / cable, sleeves, thimbles, stops) plus any
+    work-center time, so the dealer price is the price of the prepared part."""
+    products = env['product.product'].search([
+        ('sale_ok', '=', True),
+        ('name', 'not ilike', 'RAW'),
+        '|', '|',
+        ('name', 'ilike', 'Horizontal Track -'),
+        ('name', 'ilike', 'Vertical Track'),
+        ('name', 'ilike', 'Lift Cable'),
+    ])
+    for product in products:
+        if hasattr(product, 'button_bom_cost') and product.bom_count:
+            product.button_bom_cost()
+
+
+OLD_KIT_PAGE_VIEW = 'aa_custom.kit_addons'
+
+
+def retire_old_kit_page_script(env):
+    """The shop kit page used to load aa_kit_addons.js from a hand-made view. This module
+    now does that job with the same calculation as the dealer Quick Order, so the old
+    view is switched off (not deleted) to keep the two from adding extras twice."""
+    views = env['ir.ui.view'].with_context(active_test=False).search([('key', '=', OLD_KIT_PAGE_VIEW)])
+    views.filtered('active').write({'active': False})

@@ -41,8 +41,8 @@ class TestTrimColour(TransactionCase):
         self.attr = self.env.ref("spring_engineering.attribute_trim_colour")
         self.values = {
             name: self.env.ref("spring_engineering.attribute_value_trim_%s" % key)
-            for key, name in [("none", "No Trims"), ("black", "Black, 3 Trim"),
-                              ("bronze", "Bronze, 3 Trim"), ("white", "White, 3 Trim")]
+            for key, name in [("none", "No Trims"), ("black", "Black"),
+                              ("bronze", "Bronze"), ("white", "White")]
         }
 
     def _kit(self, name="AA 1200 Hardware Kit"):
@@ -61,7 +61,7 @@ class TestTrimColour(TransactionCase):
         self.assertTrue(line, "the trims option was not attached to a hardware kit")
         self.assertEqual(
             sorted(line.value_ids.mapped("name")),
-            ["Black, 3 Trim", "Bronze, 3 Trim", "No Trims", "White, 3 Trim"],
+            ["Black", "Bronze", "No Trims", "White"],
         )
 
     def test_no_trims_is_first_so_it_is_the_default(self):
@@ -77,7 +77,7 @@ class TestTrimColour(TransactionCase):
         # records it against the line itself.
         tmpl = self._kit()
         ptav = self._line(tmpl).product_template_value_ids.filtered(
-            lambda p: p.name == "Bronze, 3 Trim")
+            lambda p: p.name == "Bronze")
         partner = self.env["res.partner"].create({"name": "Trim Buyer"})
         order = self.env["sale.order"].create({"partner_id": partner.id})
         order._cart_add(
@@ -85,13 +85,12 @@ class TestTrimColour(TransactionCase):
             no_variant_attribute_value_ids=[ptav.id])
         line = order.order_line[:1]
         self.assertIn(
-            "Bronze, 3 Trim",
+            "Bronze",
             line.product_no_variant_attribute_value_ids.mapped("name"))
 
-        # THE LINE HAS TO READ THE WAY THE OWNER ASKED: "Trims: Black, 3 Trim".
-        # Odoo prints an attribute as "<attribute>: <value>", so the count
-        # living in the value name is what produces that exactly.
-        self.assertIn("Trims: Bronze, 3 Trim", line.name or "")
+        # The kit line names the colour only. How many 18' pieces (2 or 3, by
+        # door height) is decided by aa_dealer_orders, on lines of their own.
+        self.assertIn("Trims: Bronze", line.name or "")
 
     def test_a_kit_with_no_trims_says_so(self):
         tmpl = self._kit()

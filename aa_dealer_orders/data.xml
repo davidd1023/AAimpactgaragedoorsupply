@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="payment_method_on_account" model="payment.method">
+        <field name="name">Charge to Account</field>
+        <field name="code">on_account</field>
+        <field name="sequence">1</field>
+        <field name="image" type="base64" file="payment/static/img/bank.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_refund">none</field>
+    </record>
+
+
+    <record id="payment_provider_on_account" model="payment.provider">
+        <field name="name">Charge to Account</field>
+        <field name="sequence">1</field>
+        <field name="image_128" type="base64" file="payment/static/img/bank.png"/>
+        <field name="code">custom</field>
+        <field name="custom_mode">on_account</field>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="payment_method_ids" eval="[Command.set([ref('aa_dealer_orders.payment_method_on_account')])]"/>
+        <field name="redirect_form_view_id" ref="payment_custom.redirect_form"/>
+        <field name="state">enabled</field>
+        <field name="is_published">True</field>
+        <field name="pre_msg" type="html">
+<p>No payment now. The order is charged to your dealer account and invoiced per your payment terms.</p>
+        </field>
+        <field name="pending_msg" type="html">
+<p>Thank you! Your order was charged to your dealer account and is confirmed. We will invoice you per your payment terms.</p>
+        </field>
+    </record>
+</odoo>
