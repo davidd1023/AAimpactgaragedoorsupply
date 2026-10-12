@@ -82,6 +82,7 @@ class AAOptionPricing:
                 return 0.0
         return {
             'trims': self._trim_colour(no_variant),
+            'width': num('width_in'),
             'height': num('height_in'),
             'lift': line.get('lift_type') or 'standard',
             'high_lift': num('high_lift'),
@@ -282,8 +283,7 @@ class AADealerOrder(AAOptionPricing, http.Controller):
                         "Line %s: no price is set for this kit yet. Please call AA Impact.", idx))
                 track_vals = self._track_values(line, idx, variant)
                 if self._trim_colour(no_variant) and not float(line.get('height_in') or 0):
-                    raise ValidationError(_(
-                        "Line %s: enter the door height for the trims (up to 9' takes 2, taller takes 3).", idx))
+                    raise ValidationError(_("Line %s: enter the door height for the trims.", idx))
                 extras, opt_notes = self._priced_options(partner, variant, no_variant, line, qty, catalog)
                 note = " | ".join(filter(None, [self._line_note(line)] + opt_notes))
                 order_lines.append((variant, no_variant, qty, note, track_vals, extras, idx, line))
@@ -451,6 +451,8 @@ class AAKitCart(AAOptionPricing, Cart):
             missing = []
             if not float(door.get('height_in') or 0):
                 missing.append(_("door height"))
+            if 'Trims' in wanted and not float(door.get('width_in') or 0):
+                missing.append(_("door width"))
             if wanted & {'Tracks', 'Cables'} and not door.get('track_type'):
                 missing.append(_("track type"))
             if 'Springs' in wanted and not float(door.get('weight') or 0):
