@@ -214,8 +214,14 @@ class TestWorkOrderSheetSpring(TestWorkOrderSheet):
         sheet = self._sheet(self._spring_picking())
         self.assertIn("Outer", sheet)
         self.assertIn("Inner", sheet)
-        for figure in ['0.2625"', '0.2253"', '6"', '3.75"', '32.25"', '31.25"']:
+        # Lengths and inside diameters in EIGHTHS, wire in decimals. A tape
+        # measure has no 32.25 on it, and a wire snapped to the nearest eighth
+        # would read 1/4" - a different wire.
+        for figure in ['0.2625"', '0.2253"', '6"', '3 3/4"', '32 1/4"',
+                       '31 1/4"']:
             self.assertIn(figure, sheet, "missing %s" % figure)
+        self.assertNotIn('3.75"', sheet, "an inside diameter printed as a decimal")
+        self.assertNotIn('32.25"', sheet, "a length printed as a decimal")
 
     def test_a_single_spring_shows_one_row_not_two(self):
         picking = self._spring_picking(
@@ -277,3 +283,86 @@ class TestWorkOrderSheetSpring(TestWorkOrderSheet):
         body = rendered[rendered.find("<main>"):]
         offenders = sorted({c for c in html.unescape(body) if ord(c) > 127})
         self.assertFalse(offenders, "wkhtmltopdf will mangle: %r" % offenders)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetFloor(TestWorkOrderSheet):
+    """The three things the floor asked for, and the grouping."""
+
+    def test_measurements_read_like_a_tape_measure(self):
+        read = self.Picking._work_order_inches
+        self.assertEqual(read("32.25"), '32 1/4"')
+        self.assertEqual(read("6.0"), '6"')
+        self.assertEqual(read("3.75"), '3 3/4"')
+        self.assertEqual(read("76"), '76"')
+        self.assertEqual(read("0.125"), '0 1/8"')
+        # 76.99 is a hair under 77 and must not read as a fraction of 76
+        self.assertEqual(read("76.99"), '77"')
+
+    def test_a_wire_size_keeps_its_decimals(self):
+        """0.2625 snapped to the nearest eighth is 1/4 - a different wire.
+
+        Wire is a decimal gauge, not a measurement off a tape, so it is the
+        one figure on this sheet that must not be rounded to eighths.
+        """
+        self.assertEqual(
+            self.Picking._work_order_inches("0.2625", fraction=False), '0.2625"')
+
+    def test_a_track_length_is_shown_in_eighths_too(self):
+        track = self._product('2" Vertical Track 76 1/2" - 7\' Door Height Black')
+        sheet = self._sheet(self._picking([(track, 2)]))
+        self.assertIn('76 1/2"', sheet)
+
+    def test_the_sheet_says_what_is_not_on_the_shelf(self):
+        """The order screen says Not Available and the paper used not to.
+
+        A picker found out at the rack instead of at the printer.
+        """
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        picking = self._picking([(track, 2)])
+        picking.move_ids.write({"state": "confirmed"})
+        sheet = self._sheet(picking)
+        self.assertIn("Not available", sheet)
+        self.assertIn("Stock", sheet, "the availability column is missing")
+
+    def test_the_sheet_dates_itself(self):
+        """A sheet on a bench is otherwise undateable."""
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        sheet = self._sheet(self._picking([(track, 1)]))
+        self.assertIn("Printed", sheet)
+        self.assertIn("Order state", sheet)
+
+    def test_lines_are_grouped_by_station(self):
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        reel = self._product('1/8" 7x19 Cable 500ft Reel')
+        drum = self._product("Canimex D400-96 White")
+        picking = self._picking([(drum, 1), (reel, 1), (track, 2)])
+        sheet = self._sheet(picking)
+        self.assertIn("TRACKS", sheet)
+        self.assertIn("CABLES", sheet)
+        self.assertIn("HARDWARE AND OTHER", sheet)
+        # built in the order a door is built in, whatever order they were added
+        self.assertLess(sheet.index("TRACKS"), sheet.index("CABLES"))
+        self.assertLess(sheet.index("CABLES"), sheet.index("HARDWARE AND OTHER"))
+
+    def test_an_order_of_one_kind_gets_one_heading(self):
+        """Four headings for a tracks-only order would be noise."""
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        sheet = self._sheet(self._picking([(track, 2)]))
+        self.assertIn("TRACKS", sheet)
+        self.assertNotIn("CABLES", sheet)
+        self.assertNotIn("HARDWARE AND OTHER", sheet)
+
+    def test_the_springs_section_comes_first(self):
+        spring_cls = TestWorkOrderSheetSpring
+        product = self._product("Custom Torsion Spring Assembly", "SPRING-CUSTOM")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": product.id,
+            "product_uom_qty": 1, "name": spring_cls.DESCRIPTION})
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        picking = self._picking([(track, 2), (product, 1)])
+        picking.move_ids.filtered(
+            lambda m: m.product_id == product).sale_line_id = line.id
+        sheet = self._sheet(picking)
+        self.assertLess(sheet.index("SPRINGS"), sheet.index("TRACKS"))

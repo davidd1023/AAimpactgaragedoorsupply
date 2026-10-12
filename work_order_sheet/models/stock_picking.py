@@ -1,6 +1,6 @@
 import re
 
-from odoo import models
+from odoo import fields, models
 
 # WHAT A LENGTH LOOKS LIKE IN A PRODUCT NAME. The catalogue writes a track as
 #
@@ -55,7 +55,7 @@ class StockPicking(models.Model):
         if not hit:
             return ""
 
-        return '%s"' % hit.group(1).strip()
+        return self._work_order_inches(hit.group(1).strip().replace(" ", ""))
 
     # THE DESCRIPTION IS THE RECORD, so it is parsed rather than duplicated.
     #
@@ -81,16 +81,65 @@ class StockPicking(models.Model):
         r"""^\s*Door:\s*([\d,]+)\s*lb,\s*(\d+)'\s*(\d+)",\s*([\d,]+)\s*cycles""",
         re.I)
 
-    def _work_order_inches(self, text):
-        """6.0 -> 6", 32.25 -> 32.25".
+    def _work_order_inches(self, text, fraction=True):
+        """32.25 -> 32 1/4", 6.0 -> 6", 0.2625 -> 0.2625".
 
-        The description carries Python's float formatting, so an inside
-        diameter of six arrives as "6.0". A shop sheet should read 6".
+        IN EIGHTHS, BECAUSE THAT IS WHAT A TAPE MEASURE READS. A length of
+        32.25" is correct and useless at a bench; the trade writes it 32 1/4",
+        and this project's own notes write inside diameters the same way -
+        3 3/4" inside 6", never 3.75.
+
+        WIRE IS THE EXCEPTION and passes fraction=False. A wire size is a
+        decimal gauge, not a measurement off a tape: 0.2625" snapped to the
+        nearest eighth would read 1/4", which is a different wire.
         """
         try:
-            return '%g"' % float(text)
+            value = float(text)
         except (TypeError, ValueError):
             return '%s"' % text
+
+        if not fraction:
+            return '%g"' % value
+
+        whole = int(value)
+        eighths = int(round((value - whole) * 8))
+
+        if eighths == 8:
+            whole += 1
+            eighths = 0
+
+        if not eighths:
+            return '%d"' % whole
+
+        numerator, denominator = eighths, 8
+
+        while numerator % 2 == 0:
+            numerator //= 2
+            denominator //= 2
+
+        return '%d %d/%d"' % (whole, numerator, denominator)
+
+    # --- 2. what the picker needs to know before walking to the shelf -------
+    AVAILABILITY = {
+        "assigned": "Ready",
+        "partially_available": "Part only",
+        "confirmed": "Not available",
+        "waiting": "Waiting",
+        "draft": "Draft",
+        "done": "Done",
+        "cancel": "Cancelled",
+    }
+
+    def _work_order_printed_at(self):
+        """When this sheet was printed, in the reader's own timezone.
+
+        A sheet lying on a bench is otherwise undateable, and an order that has
+        changed since it was printed looks exactly like one that has not.
+        """
+        self.ensure_one()
+        stamp = fields.Datetime.context_timestamp(self, fields.Datetime.now())
+
+        return stamp.strftime("%d %b %Y %H:%M")
 
     def _work_order_spring(self, move):
         """The assembly behind this line, read off its description, or None.
@@ -116,7 +165,7 @@ class StockPicking(models.Model):
             if hit:
                 springs.append({
                     "role": hit.group(1),
-                    "wire": self._work_order_inches(hit.group(2)),
+                    "wire": self._work_order_inches(hit.group(2), fraction=False),
                     "inside_diameter": self._work_order_inches(hit.group(3)),
                     "length": self._work_order_inches(hit.group(4)),
                 })
@@ -158,14 +207,45 @@ class StockPicking(models.Model):
         for move in self.move_ids:
             product = move.product_id
             name = product.display_name or ""
+            spring = self._work_order_spring(move)
             lines.append({
                 "code": product.default_code or "",
                 "name": product.name or name,
                 "quantity": move.product_uom_qty,
                 "uom": move.product_uom.name or "",
-                "kind": self._work_order_kind(name),
+                "kind": "spring" if spring else self._work_order_kind(name),
                 "length": self._work_order_length(name),
-                "spring": self._work_order_spring(move),
+                "spring": spring,
+                "availability": self.AVAILABILITY.get(move.state, move.state or ""),
+                "short": move.state in ("confirmed", "waiting",
+                                        "partially_available"),
             })
 
         return lines
+
+    # The order a door gets built in, and the order the sections print in.
+    SECTIONS = (
+        ("spring", "Springs"),
+        ("track", "Tracks"),
+        ("cable", "Cables"),
+        ("", "Hardware and Other"),
+    )
+
+    def _work_order_sections(self):
+        """The same lines, grouped so the sheet can be split between people.
+
+        A winder and a track cutter do not want to read each other's rows to
+        find their own. Only sections with something in them are printed, so a
+        tracks-only order is still one short list rather than four headings.
+        """
+        self.ensure_one()
+        lines = self._work_order_lines()
+        out = []
+
+        for kind, title in self.SECTIONS:
+            rows = [line for line in lines if line["kind"] == kind]
+
+            if rows:
+                out.append({"title": title, "lines": rows})
+
+        return out
