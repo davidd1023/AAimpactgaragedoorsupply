@@ -325,6 +325,16 @@ class StockPicking(models.Model):
             "category": product.categ_id,
         }
 
+    # What to call a page when the products on it have no category. These are
+    # read off the product name by _work_order_kind, which is the only thing
+    # this module can know without the catalogue telling it.
+    KIND_TITLES = {
+        "spring": "Springs",
+        "track": "Tracks",
+        "cable": "Cables",
+        "": "Other",
+    }
+
     def _work_order_sections(self):
         """The lines grouped by the category each product is filed under.
 
@@ -344,19 +354,42 @@ class StockPicking(models.Model):
         groups = {}
 
         for line in lines:
-            groups.setdefault(line["category"], []).append(line)
+            category = line["category"]
+            # A PRODUCT WITH NO CATEGORY IS NORMAL, not a mistake to print.
+            # categ_id is not required in Odoo 19 and has no default, so a
+            # product created without one simply has none - and a sheet that
+            # answers that with a single "Uncategorised" page is true and
+            # useless. What this module can still tell from the name is used
+            # instead, and the page says the category is missing so the
+            # catalogue gets fixed rather than the sheet being worked around.
+            key = category.id if category else ("kind", line["kind"])
+            groups.setdefault(key, (category, line["kind"], []))[2].append(line)
 
         sections = []
 
-        for category, rows in groups.items():
+        for category, kind, rows in groups.values():
+            if category:
+                sections.append({
+                    "title": category.name,
+                    # The path disambiguates two leaves that share a name - a
+                    # Tracks under Hardware and a Tracks somewhere else are two
+                    # pages, and the heading alone would not say which.
+                    "path": category.complete_name or category.name,
+                    "parent": (category.parent_id.complete_name or ""
+                               if category.parent_id else ""),
+                    "uncategorised": False,
+                    "lines": rows,
+                })
+                continue
+
             sections.append({
-                "title": category.name or "Uncategorised",
-                # The path disambiguates two leaves that share a name - a
-                # Tracks under Hardware and a Tracks somewhere else are two
-                # pages, and the heading alone would not say which is which.
-                "path": category.complete_name or "",
-                "parent": (category.parent_id.complete_name or ""
-                           if category.parent_id else ""),
+                "title": self.KIND_TITLES.get(kind, "Other"),
+                # Sorted after every real category, so a catalogue that is
+                # fully filed in reads top to bottom and a half-filed one puts
+                # its loose ends at the back rather than in the middle.
+                "path": "zzz %s" % self.KIND_TITLES.get(kind, "Other"),
+                "parent": "",
+                "uncategorised": True,
                 "lines": rows,
             })
 

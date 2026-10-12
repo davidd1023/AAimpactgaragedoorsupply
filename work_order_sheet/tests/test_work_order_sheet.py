@@ -620,3 +620,54 @@ class TestWorkOrderSheetKits(TestWorkOrderSheet):
         self.assertIn("Hinge #2", sheet)
         self.assertIn('1/8" 7x19 Cable', sheet)
         self.assertNotIn("Oval Sleeve", sheet, "the cable was not summarised")
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetUncategorised(TestWorkOrderSheet):
+    """categ_id is not required in Odoo 19 and has no default."""
+
+    def test_products_with_no_category_are_still_sorted(self):
+        """ONE GIANT "UNCATEGORISED" PAGE IS TRUE AND USELESS.
+
+        The owner's catalogue has products with no category at all - Odoo 19
+        neither requires one nor sets a default - so every line landed in one
+        bucket. What the module can still read off the name is used instead,
+        and the page says the category is missing rather than pretending it
+        knows.
+        """
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        reel = self._product('1/8" 7x19 Cable 500ft Reel')
+        drum = self._product("Canimex D400-96 White")
+        self.assertFalse(track.categ_id, "this test needs uncategorised products")
+
+        sheet = self._sheet(self._picking([(drum, 1), (reel, 1), (track, 2)]))
+        self.assertIn("TRACKS", sheet)
+        self.assertIn("CABLES", sheet)
+        self.assertIn("OTHER", sheet)
+        self.assertNotIn("UNCATEGORISED", sheet)
+
+    def test_the_sheet_says_the_category_is_missing(self):
+        """Printed where the person who can fix the catalogue will see it."""
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        sheet = self._sheet(self._picking([(track, 2)]))
+        self.assertIn("no category set", sheet)
+
+    def test_a_filed_product_says_nothing_of_the_sort(self):
+        tracks = self._category("Tracks")
+        track = self._product('2" Vertical Track 76"', "VT", tracks)
+        sheet = self._sheet(self._picking([(track, 2)]))
+        self.assertIn("TRACKS", sheet)
+        self.assertNotIn("no category set", sheet)
+
+    def test_filed_and_unfiled_products_on_one_order(self):
+        """A half-filed catalogue reads top to bottom, loose ends at the back."""
+        brackets = self._category("Brackets")
+        filed = self._product("Jamb Bracket # 10 Black", "JB10", brackets)
+        unfiled = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        sheet = self._sheet(self._picking([(unfiled, 2), (filed, 4)]))
+        self.assertIn("BRACKETS", sheet)
+        self.assertIn("TRACKS", sheet)
+        self.assertLess(
+            sheet.index("BRACKETS"), sheet.index("TRACKS"),
+            "the categorised page should come before the guessed one")
+        self.assertIn("2 categories", sheet)
