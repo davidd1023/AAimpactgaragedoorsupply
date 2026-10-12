@@ -84,9 +84,22 @@
                 <h1>This W/O already has an order</h1>
                 <p class="sub">
                     <strong t-esc="existing.name"/> was already raised for
-                    <strong t-esc="order['reference']"/> and is not finished.
-                    Sending again will open that one rather than building the
-                    job twice.
+                    <strong t-esc="order['reference']"/> and is not finished,
+                    so the job will not be built twice.
+                </p>
+                <p class="sub" t-if="new_marks">
+                    Sending will ADD mark<t t-if="len(new_marks) != 1">s</t>
+                    <strong t-esc="', '.join(new_marks)"/> to it.
+                    Mark<t t-if="len(kept_marks) != 1">s</t>
+                    <strong t-esc="', '.join(kept_marks)"/>
+                    <t t-if="len(kept_marks) == 1">is</t><t t-else="">are</t>
+                    already on the order and will be left exactly as
+                    <t t-if="len(kept_marks) == 1">it is</t><t t-else="">they are</t>,
+                    because the job may already be part cut.
+                </p>
+                <p class="sub" t-else="">
+                    Every mark on this order is already on it, so sending will
+                    simply open it. Nothing will be changed or added.
                 </p>
             </div>
 
@@ -101,7 +114,7 @@
             <div class="card" t-foreach="doors" t-as="door">
                 <h2>
                     Mark <t t-esc="door['parsed']['mark'] or '-'"/>
-                    &amp;middot;
+                    -
                     <t t-esc="door['parsed']['door_qty']"/>
                     door<t t-if="door['parsed']['door_qty'] != 1">s</t>
                 </h2>
@@ -139,7 +152,8 @@
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                 <input type="hidden" name="spec" t-att-value="spec"/>
                 <button type="submit" class="btn go" t-if="not missing">
-                    <t t-if="existing">Open the existing order</t>
+                    <t t-if="existing and new_marks">Add to the existing order</t>
+                    <t t-elif="existing">Open the existing order</t>
                     <t t-else="">Send to manufacturing</t>
                 </button>
                 <span t-else="" class="pieces">
@@ -153,12 +167,21 @@
         <t t-call="door_work_order.layout">
             <t t-set="title">Sent to manufacturing</t>
             <div class="card">
-                <h1 t-if="reused">That door already had an order</h1>
+                <h1 t-if="reused and added">Added to the existing order</h1>
+                <h1 t-elif="reused">That W/O already had an order</h1>
                 <h1 t-else="">Sent to manufacturing</h1>
                 <p class="sub">
                     <span class="ok" t-esc="production.name"/>
-                    <t t-if="reused"> was already open for this door, so no second
-                    order was raised.</t>
+                    <t t-if="reused and added">
+                        was already open for this W/O, so mark<t t-if="len(added) != 1">s</t>
+                        <strong t-esc="', '.join(added)"/>
+                        <t t-if="len(added) == 1">was</t><t t-else="">were</t>
+                        added to it rather than a second order being raised.
+                    </t>
+                    <t t-elif="reused">
+                        was already open for this W/O and every mark on it was
+                        already there, so nothing was changed.
+                    </t>
                     <t t-else=""> has been raised with the cut list.</t>
                 </p>
                 <p>
