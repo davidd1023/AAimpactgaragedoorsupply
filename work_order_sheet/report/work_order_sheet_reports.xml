@@ -132,6 +132,13 @@
                         <div t-if="section['parent']" style="text-align:center;margin:4px 0 0;font-size:11px;color:#999;">
                             <t t-esc="section['parent']"/>
                         </div>
+                        <!-- SAY THE CATEGORY IS MISSING, where the person who
+                             can fix it will see it. Sorting these by what the
+                             name looks like keeps the sheet usable; it does not
+                             make the catalogue right. -->
+                        <div t-if="section['uncategorised']" style="text-align:center;margin:4px 0 0;font-size:11px;color:#C0272D;">
+                            Sorted by name - these products have no category set
+                        </div>
                         <div style="text-align:center;margin:8px 0 14px;font-size:13px;color:#666;">
                             <strong style="font-size:16px;color:#1B2A6B;" t-esc="o.name"/>
                             <t t-if="o.origin"> | Order <t t-esc="o.origin"/></t>

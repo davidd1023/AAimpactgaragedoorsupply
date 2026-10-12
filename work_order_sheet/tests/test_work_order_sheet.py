@@ -620,3 +620,135 @@ class TestWorkOrderSheetKits(TestWorkOrderSheet):
         self.assertIn("Hinge #2", sheet)
         self.assertIn('1/8" 7x19 Cable', sheet)
         self.assertNotIn("Oval Sleeve", sheet, "the cable was not summarised")
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetUncategorised(TestWorkOrderSheet):
+    """categ_id is not required in Odoo 19 and has no default."""
+
+    def test_products_with_no_category_are_still_sorted(self):
+        """ONE GIANT "UNCATEGORISED" PAGE IS TRUE AND USELESS.
+
+        The owner's catalogue has products with no category at all - Odoo 19
+        neither requires one nor sets a default - so every line landed in one
+        bucket. What the module can still read off the name is used instead,
+        and the page says the category is missing rather than pretending it
+        knows.
+        """
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        reel = self._product('1/8" 7x19 Cable 500ft Reel')
+        drum = self._product("Canimex D400-96 White")
+        self.assertFalse(track.categ_id, "this test needs uncategorised products")
+
+        sheet = self._sheet(self._picking([(drum, 1), (reel, 1), (track, 2)]))
+        self.assertIn("TRACKS", sheet)
+        self.assertIn("CABLES", sheet)
+        self.assertIn("OTHER", sheet)
+        self.assertNotIn("UNCATEGORISED", sheet)
+
+    def test_the_sheet_says_the_category_is_missing(self):
+        """Printed where the person who can fix the catalogue will see it."""
+        track = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        sheet = self._sheet(self._picking([(track, 2)]))
+        self.assertIn("no category set", sheet)
+
+    def test_a_filed_product_says_nothing_of_the_sort(self):
+        tracks = self._category("Tracks")
+        track = self._product('2" Vertical Track 76"', "VT", tracks)
+        sheet = self._sheet(self._picking([(track, 2)]))
+        self.assertIn("TRACKS", sheet)
+        self.assertNotIn("no category set", sheet)
+
+    def test_filed_and_unfiled_products_on_one_order(self):
+        """A half-filed catalogue reads top to bottom, loose ends at the back."""
+        brackets = self._category("Brackets")
+        filed = self._product("Jamb Bracket # 10 Black", "JB10", brackets)
+        unfiled = self._product('2" Vertical Track 76" - 7\' Door Height Black')
+        sheet = self._sheet(self._picking([(unfiled, 2), (filed, 4)]))
+        self.assertIn("BRACKETS", sheet)
+        self.assertIn("TRACKS", sheet)
+        self.assertLess(
+            sheet.index("BRACKETS"), sheet.index("TRACKS"),
+            "the categorised page should come before the guessed one")
+        self.assertIn("2 categories", sheet)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetEcommerceCategories(TestWorkOrderSheet):
+    """The shop files its catalogue in the eCommerce tree, not the accounting one."""
+
+    def _shop_category(self, name, sequence=10, parent=None):
+        return self.env["product.public.category"].create({
+            "name": name, "sequence": sequence,
+            "parent_id": parent.id if parent else False})
+
+    def _shop_product(self, name, code, categories):
+        return self.env["product.product"].create({
+            "name": name, "default_code": code, "type": "consu",
+            "public_categ_ids": [(6, 0, [c.id for c in categories])]})
+
+    def test_pages_come_from_the_ecommerce_categories(self):
+        """WHY EVERYTHING READ UNCATEGORISED.
+
+        Drums, Tracks, Shafts, Hinges, Rollers, EBF, Motors, Springs, Misc.,
+        Hardware Kits and Nuts & Bolts all live in public_categ_ids - the list
+        Website > eCommerce > Categories edits. categ_id, which this module
+        read first, was empty on every product, so the sheet correctly reported
+        no category while eleven of them were plainly on screen.
+        """
+        drums = self._shop_category("Drums", 1)
+        tracks = self._shop_category("Tracks", 2)
+        picking = self._picking([
+            (self._shop_product("Canimex D400-96 White", "CD02", [drums]), 2),
+            (self._shop_product('2" Vertical Track 76"', "VT2", [tracks]), 2),
+        ])
+        sheet = self._sheet(picking)
+        self.assertIn("DRUMS", sheet)
+        self.assertIn("TRACKS", sheet)
+        self.assertNotIn("no category set", sheet)
+        self.assertIn("2 categories", sheet)
+
+    def test_the_pages_follow_the_owners_own_order(self):
+        """That list is dragged into an order; the order is a decision."""
+        drums = self._shop_category("Drums", 1)
+        tracks = self._shop_category("Tracks", 2)
+        shafts = self._shop_category("Shafts", 3)
+        picking = self._picking([
+            (self._shop_product("Shaft 1in", "SH1", [shafts]), 1),
+            (self._shop_product('2" Vertical Track 76"', "VT2", [tracks]), 2),
+            (self._shop_product("Canimex D400-96", "CD02", [drums]), 2),
+        ])
+        sheet = self._sheet(picking)
+        self.assertLess(sheet.index("DRUMS"), sheet.index("TRACKS"))
+        self.assertLess(sheet.index("TRACKS"), sheet.index("SHAFTS"))
+
+    def test_the_shop_category_wins_over_the_accounting_one(self):
+        """A product filed in both belongs where the shop filed it."""
+        shop = self._shop_category("Hinges", 4)
+        accounting = self._category("Goods")
+        product = self.env["product.product"].create({
+            "name": "Hinge #2", "default_code": "HNG2", "type": "consu",
+            "categ_id": accounting.id,
+            "public_categ_ids": [(6, 0, [shop.id])]})
+        sheet = self._sheet(self._picking([(product, 8)]))
+        self.assertIn("HINGES", sheet)
+        self.assertNotIn("GOODS", sheet)
+
+    def test_a_product_in_two_shop_categories_is_printed_once(self):
+        """A line on two pages is a part picked twice."""
+        first = self._shop_category("Drums", 1)
+        second = self._shop_category("Misc.", 9)
+        product = self._shop_product("Canimex D400-96", "CD02", [first, second])
+        picking = self._picking([(product, 2)])
+        sheet = self._sheet(picking)
+        self.assertEqual(len(picking._work_order_lines()), 1)
+        self.assertIn("DRUMS", sheet)
+        self.assertNotIn("MISC", sheet)
+
+    def test_the_accounting_category_still_works_without_a_shop_one(self):
+        """A database with no website_sale has nothing else to offer."""
+        accounting = self._category("Brackets")
+        product = self._product("Jamb Bracket # 10 Black", "JB10", accounting)
+        sheet = self._sheet(self._picking([(product, 4)]))
+        self.assertIn("BRACKETS", sheet)
+        self.assertNotIn("no category set", sheet)
