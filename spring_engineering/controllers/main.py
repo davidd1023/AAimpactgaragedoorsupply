@@ -490,30 +490,12 @@ class SpringEngineeringWebsite(http.Controller):
             f'Door: {weight} lb, {height[0]}\' {height[1]}", {cycles:,} cycles',
         ])
 
-        # THE SAME NUMBERS AS DATA, beside the sentence built for the
-        # customer. The shop floor builds from these, and reading them back out
-        # of the description is how a wire size loses a decimal place.
-        values = {
+        line = request.env["sale.order.line"].sudo().create({
             "order_id": order.id,
             "product_id": variant.id,
             "name": description,
             "product_uom_qty": 1,
-            "spring_assembly": assembly,
-            "spring_count": springs,
-            "spring_door_weight": weight,
-            "spring_door_height": "%d' %d\"" % (height[0], height[1]),
-            "spring_cycles": cycles,
-            "spring_steel_weight": round(steel_weight, 4),
-            "spring_filler_feet": filler_feet,
-        }
-
-        for slot, item in zip(("a", "b"), items):
-            values["spring_%s_role" % slot] = item.get("role", "Spring")
-            values["spring_%s_wire" % slot] = float(item["wire"])
-            values["spring_%s_id" % slot] = float(item["id"])
-            values["spring_%s_length" % slot] = float(item["length"])
-
-        line = request.env["sale.order.line"].sudo().create(values)
+        })
         # Written after creation: price_unit is computed from the product and
         # the pricelist on create, and the product deliberately lists at zero.
         line.write({"price_unit": assembly_total})

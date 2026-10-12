@@ -41,59 +41,58 @@ class TestSpringAddToCart(HttpCase):
 
     def _line(self):
         return self.env["sale.order.line"].search(
-            [("spring_assembly", "!=", False)], order="id desc", limit=1)
+            [("name", "like", "Custom Torsion Spring Assembly")],
+            order="id desc", limit=1)
 
-    def test_the_configured_assembly_is_stored_as_data(self):
+    def test_the_route_books_a_line(self):
         result = self._call(self._spec())
         self.assertNotIn("error", result, result)
-        line = self._line()
-        self.assertTrue(line, "no order line was created")
-        self.assertEqual(line.spring_assembly, "Duplex")
-        self.assertEqual(line.spring_count, 2)
-        self.assertEqual(line.spring_door_weight, 355)
-        self.assertEqual(line.spring_door_height, "7' 0\"")
-        self.assertEqual(line.spring_cycles, 25000)
-        self.assertTrue(line.spring_steel_weight > 0)
+        self.assertTrue(self._line(), "no order line was created")
 
-    def test_each_spring_keeps_its_own_wire_and_length(self):
+    def test_the_description_keeps_the_shape_the_work_order_sheet_reads(self):
+        """THE FORMAT IS AN INTERFACE, so it is pinned from this side too.
+
+        There are deliberately no columns holding the specification a second
+        time: the description IS the record, and work_order_sheet parses it to
+        print the shop floor's copy. That makes this wording an interface
+        rather than prose. If it changes, the sheet silently stops showing the
+        assembly - so the shape is asserted here, where a change to it is made.
+        """
+        self._call(self._spec())
+        rows = [r for r in self._line().name.splitlines() if r.strip()]
+        self.assertEqual(rows[0].strip(), "Custom Torsion Spring Assembly")
+        self.assertRegex(rows[1], r"^\w+, \d+ spring")
+        self.assertRegex(
+            rows[2], r'^\w+: [\d.]+" wire, [\d.]+" ID, [\d.]+" long')
+        self.assertRegex(
+            rows[-1], r"""^Door: [\d,]+ lb, \d+' \d+", [\d,]+ cycles""")
+
+    def test_both_springs_appear_with_their_own_figures(self):
         """An outer spring wound to the inner spring's wire is scrap."""
         self._call(self._spec())
-        line = self._line()
-        self.assertEqual(line.spring_a_role, "Outer")
-        self.assertEqual(line.spring_a_wire, 0.2625)
-        self.assertEqual(line.spring_a_id, 6)
-        self.assertEqual(line.spring_a_length, 32.25)
-        self.assertEqual(line.spring_b_role, "Inner")
-        self.assertEqual(line.spring_b_wire, 0.2253)
-        self.assertEqual(line.spring_b_id, 3.75)
-        self.assertEqual(line.spring_b_length, 31.25)
+        text = self._line().name
+        # 6.0, not 6: the description formats these with Python's float
+        # repr. Asserted as it really is, because a test written to the
+        # format I assumed would have passed while the sheet showed nothing.
+        self.assertIn('Outer: 0.2625" wire, 6.0" ID, 32.25" long', text)
+        self.assertIn('Inner: 0.2253" wire, 3.75" ID, 31.25" long', text)
 
-    def test_a_single_spring_fills_one_slot_only(self):
+    def test_a_single_spring_describes_one_spring(self):
         self._call(self._spec(
             assembly="Single", springs=1,
             springsSpec=[{"role": "Spring", "wire": 0.25, "id": 3.75,
                           "length": 28.0}]))
-        line = self._line()
-        self.assertEqual(line.spring_a_role, "Spring")
-        self.assertFalse(line.spring_b_role)
-        self.assertEqual(len(line.spring_detail_rows()), 1)
+        rows = [r for r in self._line().name.splitlines() if r.strip()]
+        self.assertIn("Single, 1 spring", rows[1])
+        self.assertEqual(
+            len([r for r in rows if '" wire,' in r]), 1,
+            "a single assembly described more than one spring")
 
-    def test_the_description_and_the_data_agree(self):
-        """Two records of the same assembly must not drift apart.
-
-        The description is what the customer reads and the fields are what the
-        shop builds from; if they can disagree, one of them is a lie and
-        nobody can tell which.
-        """
+    def test_the_door_is_described(self):
         self._call(self._spec())
-        line = self._line()
-        self.assertIn("Duplex", line.name)
-        self.assertIn('0.2625" wire', line.name)
-        self.assertIn('32.25" long', line.name)
-        self.assertEqual(line.spring_a_wire, 0.2625)
-        self.assertEqual(line.spring_a_length, 32.25)
+        self.assertIn("Door: 355 lb, 7' 0\", 25,000 cycles", self._line().name)
 
-    def test_a_refused_spec_stores_nothing(self):
+    def test_a_refused_spec_books_nothing(self):
         before = self.env["sale.order.line"].search_count([])
         result = self._call(self._spec(springs=99))
         self.assertIn("error", result)
