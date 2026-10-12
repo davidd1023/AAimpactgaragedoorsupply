@@ -29,6 +29,8 @@ CABLE_SIZE_BY_DRUM = {'D400-96': '1/8"', 'D400-144': '5/32"'}  # everything else
 #   3 pieces otherwise
 # 18' is the widest door AA offers trims for; wider doors get a warning, no trims.
 TRIM_COLOURS = ('White', 'Bronze', 'Black')
+# The kit option's name. Shown to customers as "Plastic Trims" (owner, 2026-10-12).
+TRIM_ATTRIBUTES = ('Trims', 'Plastic Trims')
 TRIM_PIECE_IN = 18 * 12  # 216"
 
 
@@ -160,15 +162,15 @@ class Catalog:
         if trim:
             width = door.get('width') or 0.0
             if not height or not width:
-                notes.append("Trims: enter the door width and height")
+                notes.append("Plastic Trims: enter the door width and height")
             elif width > TRIM_PIECE_IN:
-                notes.append("Trims: not available for doors wider than 18' - no trims were added")
+                notes.append("Plastic Trims: not available for doors wider than 18' - no trims were added")
             elif trim not in self.trims:
-                notes.append(f"Trims: no {trim} trims product found - AA will add them")
+                notes.append(f"Plastic Trims: no {trim} trims product found - AA will add them")
             else:
                 count = trim_count(width, height)
                 if count:
-                    items.append((self.trims[trim], count, 'Trims'))
+                    items.append((self.trims[trim], count, 'Plastic Trims'))
                 else:
-                    notes.append("Trims: not available for this door size - no trims were added")
+                    notes.append("Plastic Trims: not available for this door size - no trims were added")
         return items, notes

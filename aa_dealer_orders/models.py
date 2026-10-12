@@ -92,7 +92,7 @@ class ProductTemplate(models.Model):
         for line in self.attribute_line_ids.filtered(lambda l: l.attribute_id.name == 'Drum'):
             for ptav in line.product_template_value_ids:
                 drums[str(ptav.id)] = (ptav.name or '').split(' ')[0]
-        trims = [str(ptav.id) for line in self.attribute_line_ids.filtered(lambda l: l.attribute_id.name == 'Trims')
+        trims = [str(ptav.id) for line in self.attribute_line_ids.filtered(lambda l: l.attribute_id.name in ('Trims', 'Plastic Trims'))
                  for ptav in line.product_template_value_ids if not (ptav.name or '').startswith('No ')]
         return json.dumps({'drums': drums, 'trims': trims, 'name': self.name})
 

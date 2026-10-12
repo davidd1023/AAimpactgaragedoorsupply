@@ -10,7 +10,7 @@ from odoo.addons.website_sale.controllers.cart import Cart
 
 from odoo.addons.spring_engineering.controllers.main import add_assembly_lines, quote_assembly
 
-from .door_options import TRIM_COLOURS, Catalog
+from .door_options import TRIM_ATTRIBUTES, TRIM_COLOURS, Catalog
 from .models import AA_DRUMS, AA_HL_DRUMS, AA_LIFT_TYPES, AA_STD_DRUMS, AA_TRACK_TYPES
 
 _logger = logging.getLogger(__name__)
@@ -96,7 +96,7 @@ class AAOptionPricing:
     @staticmethod
     def _trim_colour(no_variant):
         """The trim colour picked on the kit's Trims option, or '' for No Trims."""
-        for ptav in no_variant.filtered(lambda v: v.attribute_id.name == 'Trims'):
+        for ptav in no_variant.filtered(lambda v: v.attribute_id.name in TRIM_ATTRIBUTES):
             word = (ptav.name or '').split(',')[0].split(' ')[0].strip()
             if word in TRIM_COLOURS:
                 return word
@@ -136,11 +136,11 @@ class AAOptionPricing:
         for product, per_door, label in items:
             price = self._unit_price(partner, product, request.env['product.template.attribute.value'], qty * per_door)
             # A trim with no cost yet still carries the $1 placeholder price, so cost is checked too.
-            if price <= 0 or (label == 'Trims' and product.standard_price <= 0):
+            if price <= 0 or (label == 'Plastic Trims' and product.standard_price <= 0):
                 notes.append(f"{label}: {product.display_name} has no price yet - AA will quote it")
                 continue
             extra = {'label': label, 'product': product, 'qty': per_door, 'unit_price': price}
-            if label == 'Trims':
+            if label == 'Plastic Trims':
                 extra['name'] = f"{per_door} x {product.display_name} (18' pieces, sold whole)"
             extras.append(extra)
         return extras, notes
@@ -443,7 +443,7 @@ class AAKitCart(AAOptionPricing, Cart):
             [int(v) for v in no_variant_attribute_value_ids or []]).exists()
         wanted = KIT_EXTRAS & set(no_variant.mapped('name')) if template else set()
         if template and self._trim_colour(no_variant):
-            wanted.add('Trims')
+            wanted.add('Plastic Trims')
         plan = None
         if wanted:
             door = (request.session.get(SESSION_KEY) or {}).get(str(template.id)) or {}
@@ -451,7 +451,7 @@ class AAKitCart(AAOptionPricing, Cart):
             missing = []
             if not float(door.get('height_in') or 0):
                 missing.append(_("door height"))
-            if 'Trims' in wanted and not float(door.get('width_in') or 0):
+            if 'Plastic Trims' in wanted and not float(door.get('width_in') or 0):
                 missing.append(_("door width"))
             if wanted & {'Tracks', 'Cables'} and not door.get('track_type'):
                 missing.append(_("track type"))
