@@ -13,6 +13,53 @@ PREPARED = "prepared"
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
+    # THE PRODUCTS WHOSE PRICE IS CONFIGURED, NOT LISTED. Both deliberately
+    # list at zero: what they cost is worked out by the calculator from cone,
+    # steel, labour and markup, and written onto the line.
+    CONFIGURED_PRICE_PRODUCTS = (
+        "spring_engineering.product_custom_spring",
+        "spring_engineering.product_custom_filler",
+    )
+
+    def _door_configured_price_products(self):
+        products = self.env["product.product"]
+
+        for ref in self.CONFIGURED_PRICE_PRODUCTS:
+            template = self.env.ref(ref, raise_if_not_found=False)
+
+            if template:
+                products |= template.sudo().product_variant_ids
+
+        return products
+
+    def _get_update_prices_lines(self):
+        """Leave a configured assembly's price alone when prices are recomputed.
+
+        THE BUG THIS FIXES CHARGED NOTHING. A custom spring assembly priced at
+        342.56 reached the payment step and became 0.00, and stayed 0.00 on
+        every page after it - the customer could pay nothing for a made-to-order
+        assembly.
+
+        _recompute_prices runs whenever the pricelist changes, and the pricelist
+        resolves late in checkout, when the partner is finally known. It calls
+        _compute_price_unit with force_price_recomputation, which overrides even
+        a manually written price, and the product deliberately lists at zero, so
+        zero is what it computed. An ordinary quantity change never did this,
+        which is why the cart looked right until the last screen.
+
+        This hook exists for exactly this: Odoo documents it as excluding lines
+        that should not be updated from the pricelist. These lines never came
+        from a pricelist - the price is cone plus steel plus labour, times the
+        markup - so there is nothing for a pricelist to say about them.
+        """
+        lines = super()._get_update_prices_lines()
+        configured = self._door_configured_price_products()
+
+        if not configured:
+            return lines
+
+        return lines - lines.filtered(lambda l: l.product_id in configured)
+
     # --- what counts as a prepared vertical track -----------------------------
 
     def _track_prep_is_prepared(self, line):
