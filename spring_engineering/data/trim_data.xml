@@ -22,7 +22,7 @@
       nothing to go wrong between the page and the order.
     -->
     <record id="attribute_trim_colour" model="product.attribute">
-      <field name="name">Trims</field>
+      <field name="name">Plastic Trims</field>
       <field name="display_type">radio</field>
       <field name="create_variant">no_variant</field>
       <field name="sequence">20</field>
@@ -49,7 +49,8 @@
       jambs, one for the header) while a taller door takes 3 (owner, 2026-10-09).
       aa_dealer_orders reads the colour and the door height and adds that many
       "<Colour> Trims" pieces as their own order lines, priced and taken out of
-      stock. The kit line just reads "Trims: White".
+      stock. The kit line just reads "Plastic Trims: White"
+      (the owner asked for "Plastic Trims" as the label, 2026-10-12).
     -->
     <record id="attribute_value_trim_none" model="product.attribute.value">
       <field name="attribute_id" ref="attribute_trim_colour"/>
