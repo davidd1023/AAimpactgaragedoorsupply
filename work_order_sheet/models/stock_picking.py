@@ -211,6 +211,34 @@ class StockPicking(models.Model):
 
         return ""
 
+    def _work_order_collapses(self, sale_line, moves):
+        """Is this group one thing to summarise, or a set to list in full?
+
+        A CABLE IS SUMMARISED AND A KIT IS NOT, and the difference is what the
+        floor needs from each. A cable is a LENGTH CUT FROM STOCK: the reel,
+        the sleeve, the thimble and the stop are how one cable is made, and
+        listing them asks somebody to reassemble a bill of materials to learn
+        that a customer bought one cable. A hardware kit is a set of whole
+        parts, and every one of them has to be picked off a shelf - summarising
+        it hides the work.
+
+        So the test is the cut, not the explosion. A group is summarised when
+        one of its components is measured in something other than Units - feet
+        of cable off a reel - or when the thing bought is itself a cable. A
+        kit's components are all counted in whole units and its name is not a
+        cable, so it is listed exactly as it is picked.
+        """
+        if len(moves) < 2 or not sale_line:
+            return False
+
+        if self._work_order_component_length(moves):
+            return True
+
+        # The name is a second signal rather than the only one, so a cable
+        # whose reel happens to be counted in Units still summarises.
+        return self._work_order_kind(
+            sale_line.product_id.display_name or "") == "cable"
+
     def _work_order_groups(self):
         """The moves, gathered back into the things a customer bought.
 
@@ -249,42 +277,52 @@ class StockPicking(models.Model):
         self.ensure_one()
         lines = []
 
-        for moves in self._work_order_groups():
-            move = moves[0]
-            sale_line = move.sale_line_id
-            collapsed = len(moves) > 1 and sale_line
+        for group in self._work_order_groups():
+            # A group that is not summarised is listed move by move, so a kit
+            # shows every part that has to come off a shelf.
+            collapses = self._work_order_collapses(group[0].sale_line_id, group)
 
-            # What the CUSTOMER bought, when several moves are one purchase.
-            product = sale_line.product_id if collapsed else move.product_id
-            name = product.display_name or ""
-            spring = self._work_order_spring(move)
-            length = self._work_order_length(name)
-
-            if collapsed:
-                length = self._work_order_component_length(moves) or length
-
-            states = [m.state for m in moves]
-            short = [st for st in states
-                     if st in ("confirmed", "waiting", "partially_available")]
-            state = short[0] if short else states[0]
-
-            lines.append({
-                "code": product.default_code or "",
-                "name": product.name or name,
-                "quantity": sale_line.product_uom_qty if collapsed
-                            else move.product_uom_qty,
-                "uom": (sale_line.product_uom_id.name if collapsed
-                        and "product_uom_id" in sale_line._fields
-                        else move.product_uom.name) or "",
-                "kind": "spring" if spring else self._work_order_kind(name),
-                "length": length,
-                "spring": spring,
-                "availability": self.AVAILABILITY.get(state, state or ""),
-                "short": bool(short),
-                "parts": len(moves),
-            })
+            if collapses:
+                lines.append(self._work_order_line(group, collapsed=True))
+            else:
+                lines.extend(self._work_order_line([m]) for m in group)
 
         return lines
+
+    def _work_order_line(self, moves, collapsed=False):
+        """One printed row: one move, or a summarised group of them."""
+        move = moves[0]
+        sale_line = move.sale_line_id
+
+        # What the CUSTOMER bought, when several moves are one purchase.
+        product = sale_line.product_id if collapsed else move.product_id
+        name = product.display_name or ""
+        spring = self._work_order_spring(move)
+        length = self._work_order_length(name)
+
+        if collapsed:
+            length = self._work_order_component_length(moves) or length
+
+        states = [m.state for m in moves]
+        short = [st for st in states
+                 if st in ("confirmed", "waiting", "partially_available")]
+        state = short[0] if short else states[0]
+
+        return {
+            "code": product.default_code or "",
+            "name": product.name or name,
+            "quantity": (sale_line.product_uom_qty if collapsed
+                         else move.product_uom_qty),
+            "uom": ((sale_line.product_uom_id.name
+                     if collapsed and "product_uom_id" in sale_line._fields
+                     else move.product_uom.name) or ""),
+            "kind": "spring" if spring else self._work_order_kind(name),
+            "length": length,
+            "spring": spring,
+            "availability": self.AVAILABILITY.get(state, state or ""),
+            "short": bool(short),
+            "parts": len(moves),
+        }
 
     # The order a door gets built in, and the order the sections print in.
     SECTIONS = (

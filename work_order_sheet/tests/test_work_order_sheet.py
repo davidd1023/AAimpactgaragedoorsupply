@@ -477,3 +477,104 @@ class TestWorkOrderSheetCover(TestWorkOrderSheet):
         sleeve = self._product('1/8" Oval Sleeve (100 pk)', "9150000621")
         sheet = self._sheet(self._picking([(sleeve, 3)]))
         self.assertIn("Oval Sleeve", sheet)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetKits(TestWorkOrderSheet):
+    """A cable is summarised; a kit is not."""
+
+    def _kit(self, parts, product_name="AA-1200 Hardware Kit"):
+        kit = self._product(product_name, "AA-1200")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        sale_line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": kit.id, "product_uom_qty": 1})
+        picking = self._picking(parts)
+        picking.move_ids.sale_line_id = sale_line.id
+
+        return kit, picking
+
+    def test_a_kit_shows_every_part_that_has_to_be_picked(self):
+        """THE CORRECTION: summarising a kit hides the work.
+
+        A cable is a LENGTH CUT FROM STOCK and its reel, sleeve, thimble and
+        stop are how one cable is made. A kit is a set of whole parts and every
+        one of them comes off a shelf, so listing them is the point. Grouping
+        on "one sale line, several moves" could not tell the two apart and
+        hid both.
+        """
+        rollers = self._product("Nylon Roller 2in", "ROLL-2")
+        hinges = self._product("Hinge #2", "HNG-2")
+        bearing = self._product("End Bearing Plate", "EBP-1")
+        kit, picking = self._kit([(rollers, 10), (hinges, 8), (bearing, 2)])
+
+        lines = picking._work_order_lines()
+        self.assertEqual(len(lines), 3, "the kit was summarised away")
+
+        sheet = self._sheet(picking)
+        for part in ["Nylon Roller 2in", "Hinge #2", "End Bearing Plate"]:
+            self.assertIn(part, sheet, "the kit hid %s" % part)
+
+    def test_a_cable_is_still_summarised(self):
+        cable = self._product('1/8" 7x19 Cable', "CABLE-18")
+        reel = self._product('1/8" 7X19 GAC (500 FT REEL)', "9150000604")
+        sleeve = self._product('1/8" Oval Sleeve', "9150000621")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        sale_line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": cable.id, "product_uom_qty": 1})
+        picking = self._picking([(reel, 17.5), (sleeve, 2)])
+        picking.move_ids.sale_line_id = sale_line.id
+
+        feet = self.env["uom.uom"].with_context(active_test=False).search(
+            [("name", "=", "ft")], limit=1)
+        feet.active = True
+        picking.move_ids.filtered(
+            lambda m: m.product_id == reel).product_uom = feet.id
+
+        lines = picking._work_order_lines()
+        self.assertEqual(len(lines), 1)
+        self.assertEqual(lines[0]["length"], "17.5 ft")
+        self.assertNotIn("Oval Sleeve", self._sheet(picking))
+
+    def test_a_cable_counted_in_units_is_still_summarised(self):
+        """The name is a second signal, not a fallback nobody reaches.
+
+        If the reel is counted in whole units rather than feet, the cut test
+        says nothing - and the thing bought is still a cable, which is enough.
+        """
+        cable = self._product('5/32" 7x19 Cable', "CABLE-532")
+        reel = self._product('5/32" 7X19 GAC Reel', "9150000608")
+        stop = self._product('5/32" Aluminum Cable Stop', "9150000628")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        sale_line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": cable.id, "product_uom_qty": 1})
+        picking = self._picking([(reel, 20), (stop, 2)])
+        picking.move_ids.sale_line_id = sale_line.id
+
+        self.assertEqual(len(picking._work_order_lines()), 1)
+
+    def test_a_kit_and_a_cable_on_one_order(self):
+        """Both rules at once, which is what a real order looks like."""
+        roller = self._product("Nylon Roller 2in", "ROLL-2")
+        hinge = self._product("Hinge #2", "HNG-2")
+        kit, picking = self._kit([(roller, 10), (hinge, 8)])
+
+        cable = self._product('1/8" 7x19 Cable', "CABLE-18")
+        reel = self._product('1/8" 7X19 GAC (500 FT REEL)', "9150000604")
+        sleeve = self._product('1/8" Oval Sleeve', "9150000621")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        cable_line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": cable.id, "product_uom_qty": 1})
+
+        for product, qty in [(reel, 17.5), (sleeve, 2)]:
+            move = self.env["stock.move"].create({
+                "picking_id": picking.id, "product_id": product.id,
+                "product_uom_qty": qty, "product_uom": product.uom_id.id,
+                "location_id": picking.location_id.id,
+                "location_dest_id": picking.location_dest_id.id})
+            move.sale_line_id = cable_line.id
+
+        sheet = self._sheet(picking)
+        self.assertIn("Nylon Roller 2in", sheet, "the kit was summarised")
+        self.assertIn("Hinge #2", sheet)
+        self.assertIn('1/8" 7x19 Cable', sheet)
+        self.assertNotIn("Oval Sleeve", sheet, "the cable was not summarised")
