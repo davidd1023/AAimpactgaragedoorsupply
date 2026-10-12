@@ -198,8 +198,12 @@ class StockPicking(models.Model):
         without the calculator and needs no bridge module.
         """
         line = move.sale_line_id if "sale_line_id" in move._fields else False
-        text = (line.name or "") if line else ""
-        rows = [r for r in text.splitlines() if r.strip()]
+
+        return self._work_order_spring_from_text((line.name or "") if line else "")
+
+    def _work_order_spring_from_text(self, text):
+        """The assembly a description carries, or None."""
+        rows = [r for r in (text or "").splitlines() if r.strip()]
 
         # THE MARKER IN THE FIRST FEW ROWS, not strictly the first. A spring
         # added as a kit option is described the same way but can carry a line
@@ -542,7 +546,77 @@ class StockPicking(models.Model):
             else:
                 lines.extend(self._work_order_line([m]) for m in group)
 
+        return lines + self._work_order_unmoved_lines()
+
+    def _work_order_unmoved_lines(self):
+        """Ordered things that make no stock move, which still have to be made.
+
+        A SHEET THAT LISTS ONLY MOVES IS NOT THE ORDER. A custom torsion spring
+        assembly is made to order; if its product is a service, or anything
+        else that moves no stock, Odoo puts no line on the transfer and the
+        assembly was invisible here - no Springs page, no specification, and
+        no door, because the door is written on that line.
+
+        Somebody still has to wind it. So the order's own lines are read, and
+        the ones that produced no move on this transfer are listed too.
+        """
+        self.ensure_one()
+        order = self.sale_id if "sale_id" in self._fields else False
+
+        if not order:
+            return []
+
+        # Only on the first transfer of the order, so an order split across
+        # several does not print these on every one of them.
+        others = order.picking_ids.filtered(lambda p: p.id < self.id)
+
+        if others:
+            return []
+
+        moved = order.order_line.browse()
+
+        for picking in order.picking_ids:
+            moved |= picking.move_ids.mapped("sale_line_id")
+
+        lines = []
+
+        for sale_line in order.order_line:
+            if sale_line in moved or sale_line.display_type:
+                continue
+
+            if not sale_line.product_id or not sale_line.product_uom_qty:
+                continue
+
+            lines.append(self._work_order_sale_line(sale_line))
+
         return lines
+
+    def _work_order_sale_line(self, sale_line):
+        """One printed row for an ordered thing that moves no stock."""
+        product = sale_line.product_id
+        name = product.display_name or ""
+        spring = self._work_order_spring_from_text(sale_line.name or "")
+        kind = "spring" if spring else self._work_order_kind(name)
+        category, source = self._work_order_category(product)
+
+        return {
+            "code": product.default_code or "",
+            "name": product.name or name,
+            "quantity": sale_line.product_uom_qty,
+            "uom": (sale_line.product_uom_id.name
+                    if "product_uom_id" in sale_line._fields else "") or "",
+            "kind": kind,
+            "length": self._work_order_length(name),
+            "spring": spring,
+            # It is not on a shelf and never will be, so saying "Not available"
+            # would send somebody looking for it.
+            "availability": "Made to order",
+            "short": False,
+            "parts": 1,
+            "category": category,
+            "category_source": source,
+            "page": self._work_order_page(kind, category),
+        }
 
     def _work_order_line(self, moves, collapsed=False):
         """One printed row: one move, or a summarised group of them."""
