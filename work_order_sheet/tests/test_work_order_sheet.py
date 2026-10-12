@@ -1091,3 +1091,67 @@ class TestWorkOrderSheetDealerNoteEdges(TestWorkOrderSheet):
         self.assertIn('108" x 84"', sheet)
         self.assertIn("300 lb", sheet)
         self.assertIn('12" hi-lift', sheet)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetThinNote(TestWorkOrderSheet):
+    """A kit ordered without a track or a lift still describes its door."""
+
+    def test_a_note_of_only_a_size_and_a_weight_is_still_a_door(self):
+        """MY OWN REGRESSION. Requiring Track:, Lift: or Drum: was too strict.
+
+        A kit ordered without a track or a lift has none of them, and its note
+        is a size and a weight joined by pipes. That change took the weight off
+        those sheets instead of correcting it - the opposite of the fix it was
+        meant to be.
+        """
+        read = self.Picking._work_order_dealer_door
+        facts = read('W 108" x H 84" | 300 lb')
+        self.assertEqual(facts["width"], '108"')
+        self.assertEqual(facts["height"], '84"')
+        self.assertEqual(facts["weight"], "300 lb")
+
+        weight_only = read("300 lb | something else")
+        self.assertEqual(weight_only["weight"], "300 lb")
+
+    def test_a_plain_product_description_is_still_not_a_door(self):
+        """The pipe is the signal; a description does not contain one."""
+        read = self.Picking._work_order_dealer_door
+        self.assertEqual(read("Drum rated to 530 lb"), {})
+        self.assertEqual(read("Some product 265 lb capacity"), {})
+
+    def test_a_kit_spring_is_described_like_any_other(self):
+        """A spring added as a kit option carries an extra line of its own.
+
+        It is the same assembly described the same way, so it gets the same
+        block - and its own page.
+        """
+        spring = self._product("Custom Torsion Spring Assembly", "SPRING-CUSTOM")
+        kit = self._product("AA-1200 Hardware Kit", "AA-1200")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": spring.id, "product_uom_qty": 1,
+            "name": TestWorkOrderSheetDoor.FULL + "\nSprings for the kit above"})
+        picking = self._picking([(kit, 1), (spring, 1)])
+        picking.move_ids.filtered(
+            lambda m: m.product_id == spring).sale_line_id = line.id
+
+        pages = {x["title"]: [l["name"] for l in x["lines"]]
+                 for x in picking._work_order_sections()}
+        self.assertIn("Springs", pages, "the kit's spring got no page")
+        sheet = self._sheet(picking)
+        self.assertIn("SPRING ASSEMBLY", sheet)
+        self.assertIn("0.2625\"", sheet)
+        self.assertIn("9' 0\" x 7' 0\"", sheet)
+
+    def test_a_marker_below_the_first_row_is_still_found(self):
+        read = self.Picking._work_order_spring
+        product = self._product("Custom Torsion Spring Assembly", "SP")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": product.id, "product_uom_qty": 1,
+            "name": "Springs for the kit above\n" + TestWorkOrderSheetDoor.FULL})
+        picking = self._picking([(product, 1)])
+        picking.move_ids[0].sale_line_id = line.id
+        self.assertTrue(read(picking.move_ids[0]),
+                        "the assembly was not recognised below the first row")

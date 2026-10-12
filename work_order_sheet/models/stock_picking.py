@@ -201,7 +201,11 @@ class StockPicking(models.Model):
         text = (line.name or "") if line else ""
         rows = [r for r in text.splitlines() if r.strip()]
 
-        if not rows or self.SPRING_MARKER not in rows[0].strip().lower():
+        # THE MARKER IN THE FIRST FEW ROWS, not strictly the first. A spring
+        # added as a kit option is described the same way but can carry a line
+        # above it, and a spring that is not recognised prints as a bare line
+        # with no specification at all.
+        if not any(self.SPRING_MARKER in row.strip().lower() for row in rows[:3]):
             return None
 
         parameters = []
@@ -321,9 +325,17 @@ class StockPicking(models.Model):
         # Only from a line that IS a dealer note. Any other line that happens
         # to carry a figure in pounds - a drum rating, a note about capacity -
         # would otherwise be read as the door's weight.
+        #
+        # THE PIPE IS ENOUGH ON ITS OWN. Requiring Track:, Lift: or Drum: was
+        # too strict: a kit ordered without a track or a lift has none of them,
+        # and its note is just a size and a weight joined by pipes. That change
+        # took the weight off those sheets instead of correcting it, which is
+        # the opposite of the fix it was meant to be. A product description
+        # does not contain " | ", so the join is a good enough signal.
         if not (self.DEALER_MARK.search(text)
                 or self.DEALER_WIDTH.search(text)
-                or self.DEALER_HEIGHT.search(text)):
+                or self.DEALER_HEIGHT.search(text)
+                or " | " in text):
             return {}
         width = self.DEALER_WIDTH.search(text)
         height = self.DEALER_HEIGHT.search(text)
