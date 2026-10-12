@@ -1,6 +1,7 @@
 /** @odoo-module ignore **/
 /* Shop hardware-kit page (AA-1200 / 1600 / 1800): when Springs, Tracks or Cables are
- * ticked, ask for the door and price those extras like the dealer Quick Order.
+ * ticked or a trim colour is picked, ask for the door once and price those extras like
+ * the dealer Quick Order. Trims need the height: up to 9' takes 2 trims, taller takes 3.
  * The server adds them to the cart next to the kit (see AAKitCart.add_to_cart). */
 (function () {
     "use strict";
@@ -49,7 +50,7 @@
         const out = el("div", { class: "small mt-2" });
         root.appendChild(el("div", { class: "border rounded p-3" }, [
             el("div", { class: "fw-bold mb-1", text: "Your door" }),
-            el("div", { class: "small text-muted mb-2", text: "Springs, tracks and cables are sized and priced for this door." }),
+            el("div", { class: "small text-muted mb-2", text: "Springs, tracks, cables and trims are sized and priced for this door." }),
             el("div", { class: "row g-2" }, [
                 pair("Width", wFt, wIn), pair("Height", hFt, hIn),
                 field("Door weight", weight), field("Track type", track), field("Lift type", lift), hlCol,
@@ -70,6 +71,11 @@
             return [...scope.querySelectorAll("input.js_variant_change:checked")]
                 .map((i) => i.getAttribute("title") || "")
                 .filter((t) => EXTRAS.includes(t));
+        }
+        function trimsPicked() {
+            const trims = (kit.trims || []).map(String);
+            return [...scope.querySelectorAll("input.js_variant_change:checked")].some((i) => trims.includes(String(i.value)))
+                || [...scope.querySelectorAll("select.js_variant_change")].some((s) => trims.includes(String(s.value)));
         }
         function drumCode(ids) {
             for (const id of ids) {
@@ -93,9 +99,10 @@
         }
         function update() {
             const ticked = tickedExtras();
-            root.classList.toggle("d-none", !ticked.length);
+            const wantsDoor = ticked.length > 0 || trimsPicked();
+            root.classList.toggle("d-none", !wantsDoor);
             hlCol.classList.toggle("d-none", lift.value !== "highlift");
-            if (!ticked.length) return;
+            if (!wantsDoor) return;
             const ids = selectedPtavs();
             const drum = drumCode(ids);
             const door = {

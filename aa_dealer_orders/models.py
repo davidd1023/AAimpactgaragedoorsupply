@@ -54,8 +54,15 @@ class ResPartner(models.Model):
                 if partner.aa_dealer_pricelist_id and \
                         partner.property_product_pricelist == partner.aa_dealer_pricelist_id:
                     partner.specific_property_product_pricelist = False
+                # Archive the dealer's own pricelist too. Left active, the website kept
+                # using it (cost + the old margin) on the kit page while the cart charged
+                # the public price. Archived, not deleted: it comes back with a margin.
+                if partner.aa_dealer_pricelist_id.active:
+                    partner.aa_dealer_pricelist_id.active = False
                 continue
             pricelist = partner.aa_dealer_pricelist_id
+            if pricelist and not pricelist.active:
+                pricelist.active = True
             item_vals = {
                 'applied_on': '3_global',
                 'compute_price': 'formula',
@@ -84,14 +91,17 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     def _aa_kit_page_json(self):
-        """What the shop kit page needs to size the door extras: drum code per Drum value."""
+        """What the shop kit page needs to size the door extras: drum code per Drum value,
+        and which Trims values are a colour (anything but "No Trims")."""
         self.ensure_one()
         import json
         drums = {}
         for line in self.attribute_line_ids.filtered(lambda l: l.attribute_id.name == 'Drum'):
             for ptav in line.product_template_value_ids:
                 drums[str(ptav.id)] = (ptav.name or '').split(' ')[0]
-        return json.dumps({'drums': drums, 'name': self.name})
+        trims = [str(ptav.id) for line in self.attribute_line_ids.filtered(lambda l: l.attribute_id.name in ('Trims', 'Plastic Trims'))
+                 for ptav in line.product_template_value_ids if not (ptav.name or '').startswith('No ')]
+        return json.dumps({'drums': drums, 'trims': trims, 'name': self.name})
 
     aa_dealer_quick_order = fields.Boolean(
         string="Dealer Quick Order",

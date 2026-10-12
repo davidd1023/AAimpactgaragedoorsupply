@@ -21,6 +21,31 @@ CABLE_QTY_PER_DOOR = 1  # the product is already a pair
 
 CABLE_SIZE_BY_DRUM = {'D400-96': '1/8"', 'D400-144': '5/32"'}  # everything else 3/16"
 
+# Trims come in 18' pieces and are sold whole. Each door takes 3 cuts at the exact
+# door size, nothing added: 1 header (the width) and 2 jambs (the height). The count
+# is how many 18' pieces those 3 cuts come out of (owner, 2026-10-12):
+#   1 piece  if width + 2 x height <= 18'
+#   2 pieces if width + height <= 18', or both jambs fit in one piece (2 x height <= 18')
+#   3 pieces otherwise
+# 18' is the widest door AA offers trims for; wider doors get a warning, no trims.
+TRIM_COLOURS = ('White', 'Bronze', 'Black')
+# The kit option's name. Shown to customers as "Plastic Trims" (owner, 2026-10-12).
+TRIM_ATTRIBUTES = ('Trims', 'Plastic Trims')
+TRIM_PIECE_IN = 18 * 12  # 216"
+
+
+def trim_count(width, height):
+    """18' trim pieces for a door of width x height (inches); None if no trims can be offered."""
+    s = TRIM_PIECE_IN
+    if width <= 0 or height <= 0 or width > s or height > s:
+        return None
+    if width + 2 * height <= s:
+        return 1
+    if width + height <= s or 2 * height <= s:
+        return 2
+    return 3
+
+
 _H_RE = re.compile(r'^(\d)" Horizontal Track -\s+(\d+)" (White|Black)$')
 _V_RE = re.compile(r'^(\d)" Vertical Track (\d+)" - .*\b(White|Black)$')
 _C_RE = re.compile(r'^Lift Cable (\S+) Pair - Prepared \((\d+)\' Door, \d" Track \((\d+)R\)\)$')
@@ -48,15 +73,22 @@ class Catalog:
             ('name', 'ilike', 'Horizontal Track -'),
             ('name', 'ilike', 'Vertical Track'),
             ('name', 'ilike', 'Lift Cable'),
+        ]) | env['product.product'].sudo().search([
+            ('sale_ok', '=', True),
+            ('name', 'in', [f'{c} Trims' for c in TRIM_COLOURS]),
         ])
         self.horizontal = []  # (size, length, color, product)
         self.vertical = []
         self.cables = {}      # (size, feet, radius) -> product
+        self.trims = {}  # colour -> product
         for p in products.with_context(display_default_code=False):
             # Display name = template name + variant values, e.g.
             # 'Lift Cable 5/32" Pair - Prepared (8' Door, 3" Track (15R))'
             name = (p.display_name or '').strip()
             if 'RAW' in name:
+                continue
+            if name.endswith(' Trims') and name.split(' ')[0] in TRIM_COLOURS:
+                self.trims[name.split(' ')[0]] = p
                 continue
             m = _H_RE.match(name)
             if m:
@@ -77,7 +109,9 @@ class Catalog:
         return fits[0][1] if fits else None
 
     def door_items(self, door):
-        """door: dict(height, lift, high_lift, track_type, drum, color, tracks, cables).
+        """door: dict(width, height, lift, high_lift, track_type, drum, color, tracks, cables, trims).
+
+        trims is the trim colour ('White', 'Bronze', 'Black') or empty for none.
 
         Returns (items, notes): items = [(product, qty, label)], notes = [str].
         """
@@ -123,4 +157,20 @@ class Catalog:
                     items.append((p, CABLE_QTY_PER_DOOR, 'Cables'))
                 else:
                     notes.append(f"Cables: no prepared {size} pair for a {feet}' door ({radius}R) - AA cuts it")
+
+        trim = door.get('trims')
+        if trim:
+            width = door.get('width') or 0.0
+            if not height or not width:
+                notes.append("Plastic Trims: enter the door width and height")
+            elif width > TRIM_PIECE_IN:
+                notes.append("Plastic Trims: not available for doors wider than 18' - no trims were added")
+            elif trim not in self.trims:
+                notes.append(f"Plastic Trims: no {trim} trims product found - AA will add them")
+            else:
+                count = trim_count(width, height)
+                if count:
+                    items.append((self.trims[trim], count, 'Plastic Trims'))
+                else:
+                    notes.append("Plastic Trims: not available for this door size - no trims were added")
         return items, notes
