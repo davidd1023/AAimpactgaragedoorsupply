@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Custom Torsion Spring: match a broken spring from its specs. -->
+    <template id="custom_torsion_spring_page" name="Custom Torsion Spring">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Custom Torsion Spring</t>
+            <div id="wrap">
+                <div class="container py-5" style="max-width: 760px;">
+                    <h1 class="mb-1">Custom Torsion Spring</h1>
+                    <p class="lead text-muted mb-4">
+                        Matching a broken spring? Enter its specs and we'll wind an exact replacement.
+                        Cones and labor included.
+                    </p>
+
+                    <form id="aa_cts_form" class="card card-body shadow-sm" t-att-data-combos="json.dumps(combos)">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="aa_cts_id">Inside diameter (I.D.)</label>
+                                <select class="form-select" id="aa_cts_id">
+                                    <t t-foreach="combos" t-as="inner">
+                                        <option t-att-value="inner" t-esc="id_labels[inner]"/>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="aa_cts_wire">Wire size</label>
+                                <select class="form-select" id="aa_cts_wire"/>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="aa_cts_length">Length (inches)</label>
+                                <input class="form-control" id="aa_cts_length" type="number"
+                                       step="0.25" min="1" max="120" placeholder="e.g. 28.5"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="aa_cts_wind">Wind</label>
+                                <select class="form-select" id="aa_cts_wind">
+                                    <option value="PAIR">Pair (1 LH + 1 RH)</option>
+                                    <option value="LH">Left hand (LH)</option>
+                                    <option value="RH">Right hand (RH)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="aa_cts_qty">Quantity</label>
+                                <input class="form-control" id="aa_cts_qty" type="number" min="1" max="20" step="1" value="1"/>
+                            </div>
+                        </div>
+
+                        <div id="aa_cts_result" class="border rounded p-3 mt-4 bg-light d-none">
+                            <div class="d-flex justify-content-between"><span>Springs</span><span id="aa_cts_springs"/></div>
+                            <div class="d-flex justify-content-between"><span>Steel weight</span><span id="aa_cts_weight"/></div>
+                            <hr class="my-2"/>
+                            <div class="d-flex justify-content-between fs-4 fw-bold"><span>Price</span><span id="aa_cts_total"/></div>
+                            <div class="small text-muted">Cones, labor and winding included.</div>
+                        </div>
+                        <div id="aa_cts_error" class="text-danger mt-3"/>
+
+                        <button id="aa_cts_add" type="button" class="btn btn-primary btn-lg mt-4" disabled="1">Add to cart</button>
+                    </form>
+                </div>
+            </div>
+
+            <script>
+(function () {
+    var el = function (id) { return document.getElementById(id); };
+    var combos = JSON.parse(el('aa_cts_form').dataset.combos || '{}');
+    var timer = null;
+
+    function rpc(url, spec) {
+        return fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({jsonrpc: '2.0', method: 'call', params: {spec: spec}})
+        }).then(function (r) { return r.json(); }).then(function (r) {
+            return r.error ? {error: 'Something went wrong - please call us to order.'} : r.result;
+        });
+    }
+
+    function spec() {
+        return {
+            id: el('aa_cts_id').value, wire: el('aa_cts_wire').value,
+            length: el('aa_cts_length').value, wind: el('aa_cts_wind').value, qty: el('aa_cts_qty').value
+        };
+    }
+
+    function fillWires() {
+        var sel = el('aa_cts_wire'), cur = sel.value;
+        sel.innerHTML = '';
+        (combos[el('aa_cts_id').value] || []).forEach(function (w) {
+            var o = document.createElement('option');
+            o.value = w; o.textContent = '.' + w;
+            sel.appendChild(o);
+        });
+        if (cur) { sel.value = cur; }
+        if (!sel.value &amp;&amp; sel.options.length) { sel.selectedIndex = 0; }
+    }
+
+    function show(d) {
+        el('aa_cts_add').disabled = true;
+        el('aa_cts_error').textContent = '';
+        if (!d || d.error) {
+            el('aa_cts_result').classList.add('d-none');
+            el('aa_cts_error').textContent = d ? d.error : '';
+            return;
+        }
+        el('aa_cts_springs').textContent = d.springs;
+        el('aa_cts_weight').textContent = d.weight + ' lb';
+        el('aa_cts_total').textContent = '$' + Number(d.total).toFixed(2);
+        el('aa_cts_result').classList.remove('d-none');
+        el('aa_cts_add').disabled = false;
+    }
+
+    function refresh() {
+        if (!el('aa_cts_length').value) { show(null); return; }
+        rpc('/custom-torsion-spring/quote', spec()).then(show);
+    }
+
+    function later() { el('aa_cts_add').disabled = true; clearTimeout(timer); timer = setTimeout(refresh, 300); }
+
+    el('aa_cts_id').addEventListener('change', function () { fillWires(); later(); });
+    ['aa_cts_wire', 'aa_cts_wind'].forEach(function (id) { el(id).addEventListener('change', later); });
+    ['aa_cts_length', 'aa_cts_qty'].forEach(function (id) { el(id).addEventListener('input', later); });
+    el('aa_cts_add').addEventListener('click', function () {
+        el('aa_cts_add').disabled = true;
+        rpc('/custom-torsion-spring/add-to-cart', spec()).then(function (d) {
+            if (d &amp;&amp; !d.error) { window.location.href = '/shop/cart'; }
+            else { show(d); }
+        });
+    });
+    fillWires();
+})();
+            </script>
+        </t>
+    </template>
+</odoo>
