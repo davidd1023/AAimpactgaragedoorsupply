@@ -779,3 +779,102 @@ class TestWorkOrderSheetDoor(TestWorkOrderSheet):
         self.assertIn("Door width", sheet)
         self.assertIn("Door height", sheet)
         self.assertIn("Hi-lift", sheet)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetCablePage(TestWorkOrderSheet):
+    """A cable is a cable wherever the shop files it."""
+
+    def test_a_lift_cable_filed_under_tracks_still_prints_on_cables(self):
+        """THE BUG: lift cables landed on the tracks page.
+
+        The shop keeps them under the Tracks eCommerce category, and the
+        category was read first. Cables is a page that exists only on this
+        sheet, with no category of its own to be filed under, so what the
+        product IS has to decide it - nothing else can.
+        """
+        tracks = self.env["product.public.category"].create({"name": "Tracks"})
+        cable = self.env["product.product"].create({
+            "name": '1/8" 7x19 Lift Cable', "default_code": "LC18",
+            "type": "consu", "public_categ_ids": [(6, 0, [tracks.id])]})
+        track = self.env["product.product"].create({
+            "name": '2" Vertical Track 76"', "default_code": "VT",
+            "type": "consu", "public_categ_ids": [(6, 0, [tracks.id])]})
+        picking = self._picking([(cable, 2), (track, 2)])
+        # ON THE STRUCTURE, not on a window of the rendered text. The cover
+        # lists every line before the pages begin, so a search for a product
+        # name in "the first 600 characters after TRACKS" reads into whatever
+        # page follows it - which is how the first version of this test failed
+        # against correct output.
+        pages = {section["title"]: [line["name"] for line in section["lines"]]
+                 for section in picking._work_order_sections()}
+
+        self.assertIn('1/8" 7x19 Lift Cable', pages.get("Cables", []))
+        self.assertNotIn('1/8" 7x19 Lift Cable', pages.get("Tracks", []))
+        self.assertIn('2" Vertical Track 76"', pages.get("Tracks", []))
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetKitDoor(TestWorkOrderSheet):
+    """A kit order records its door on the kit line, in its own shape."""
+
+    # What aa_dealer_orders appends to the kit line's description.
+    KIT_NOTE = ('AA-1200 Hardware Kit\n'
+                'Track: 3" 15R | Lift: High Lift 12" | Drum: D400-96 | '
+                'W 9\' 0" x H 7\' 0" | 300 lb')
+
+    def _kit_order(self, note):
+        kit = self._product("AA-1200 Hardware Kit", "AA-1200")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": kit.id,
+            "product_uom_qty": 1, "name": note})
+        picking = self._picking([(kit, 1)])
+        picking.move_ids[0].sale_line_id = line.id
+
+        return picking
+
+    def test_a_kit_order_puts_its_door_on_the_header(self):
+        """THE BUG: a kit ordered with a door specification showed none.
+
+        The sheet looked for the door only in a spring assembly's description.
+        A kit order has no spring to read - the dealer order writes the door
+        onto the kit line instead, in a different shape.
+        """
+        sheet = self._sheet(self._kit_order(self.KIT_NOTE))
+        self.assertIn("9' 0\" x 7' 0\"", sheet)
+        self.assertIn("300 lb", sheet)
+        self.assertIn('12" hi-lift', sheet)
+
+    def test_a_kit_with_no_hi_lift_says_nothing_about_it(self):
+        sheet = self._sheet(self._kit_order(
+            'AA-1200 Hardware Kit\nTrack: 2" 12R | Lift: Standard | '
+            'W 108" x H 84" | 250 lb'))
+        self.assertIn('108" x 84"', sheet)
+        self.assertIn("250 lb", sheet)
+        self.assertNotIn("hi-lift", sheet)
+
+    def test_a_kit_with_no_door_specification_shows_none(self):
+        sheet = self._sheet(self._kit_order(
+            'AA-1200 Hardware Kit\nTrack: 3" 15R | Lift: Standard'))
+        self.assertIn("HARDWARE", sheet)
+        self.assertNotIn(" lb", sheet)
+
+    def test_a_spring_on_the_order_is_still_preferred(self):
+        """The calculator's own figures beat a free-text note when both exist."""
+        kit = self._product("AA-1200 Hardware Kit", "AA-1200")
+        spring = self._product("Custom Torsion Spring Assembly", "SPRING-CUSTOM")
+        sale = self.env["sale.order"].create({"partner_id": self.partner.id})
+        kit_line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": kit.id,
+            "product_uom_qty": 1, "name": self.KIT_NOTE})
+        spring_line = self.env["sale.order.line"].create({
+            "order_id": sale.id, "product_id": spring.id, "product_uom_qty": 1,
+            "name": TestWorkOrderSheetDoor.FULL})
+        picking = self._picking([(spring, 1), (kit, 1)])
+        picking.move_ids.filtered(
+            lambda m: m.product_id == spring).sale_line_id = spring_line.id
+        picking.move_ids.filtered(
+            lambda m: m.product_id == kit).sale_line_id = kit_line.id
+        sheet = self._sheet(picking)
+        self.assertIn("355 lb", sheet, "the spring's own figures should win")

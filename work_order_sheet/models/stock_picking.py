@@ -273,6 +273,40 @@ class StockPicking(models.Model):
 
         return facts
 
+    # HOW A DEALER KIT ORDER WRITES THE DOOR. aa_dealer_orders appends a line
+    # to the kit's own description:
+    #
+    #   Track: 3" 15R | Lift: High Lift 12" | Drum: D400-96 | W 9' x H 7' | 300 lb
+    #
+    # A different shape from the spring calculator's, and the only record of a
+    # door on an order that has no spring on it.
+    DEALER_DIMS = re.compile(r"\bW\s*([^|x]+?)\s*x\s*H\s*([^|]+?)\s*(?:\||$)", re.I)
+    # The trailing inch mark is appended, as above: a raw literal cannot end
+    # in a quote.
+    DEALER_HILIFT = re.compile(
+        r"(?:high\s*lift|hi-?lift)\s*([\d.]+)\s*" + '"', re.I)
+
+    def _work_order_dealer_door(self, text):
+        """The door facts a dealer kit order carries, or {}."""
+        facts = {}
+        dims = self.DEALER_DIMS.search(text or "")
+
+        if dims:
+            facts["width"] = dims.group(1).strip()
+            facts["height"] = dims.group(2).strip()
+
+        weight = self.DOOR_WEIGHT.search(text or "")
+
+        if weight:
+            facts["weight"] = "%s lb" % weight.group(1)
+
+        hilift = self.DEALER_HILIFT.search(text or "")
+
+        if hilift:
+            facts["hilift"] = '%s"' % hilift.group(1)
+
+        return facts
+
     def _work_order_door(self):
         """The door this whole order is for, if anything on it says.
 
@@ -287,6 +321,21 @@ class StockPicking(models.Model):
 
             if spring and spring.get("door"):
                 return spring["door"]
+
+        # A KIT ORDER HAS NO SPRING TO READ. The dealer order writes the door
+        # onto the kit line instead, and that was the only place this did not
+        # look - so a kit ordered with a door specification printed a header
+        # with no door on it.
+        for move in self.move_ids:
+            sale_line = move.sale_line_id
+
+            if not sale_line:
+                continue
+
+            facts = self._work_order_dealer_door(sale_line.name or "")
+
+            if facts:
+                return facts
 
         return {}
 
@@ -528,6 +577,14 @@ class StockPicking(models.Model):
         Cables category to file one under. Anything left is Hardware, which is
         the point of Hardware: it is the box, not a leftover.
         """
+        # A CABLE IS A CABLE WHEREVER IT IS FILED. The shop keeps its lift
+        # cables under the Tracks category, so reading the category first put
+        # them on the tracks page - and Cables is a page that exists only on
+        # this sheet, with no category of its own to be filed under. What the
+        # product IS decides this one, and nothing else can.
+        if kind == "cable":
+            return "Cables"
+
         name = (category.name or "").strip().lower() if category else ""
         page = self.PAGE_BY_CATEGORY.get(name)
 
