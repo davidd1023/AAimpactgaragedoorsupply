@@ -48,6 +48,9 @@ BOUNDS = {
     "cable": (1.0, 600.0),
     "weight": (1.0, 5000.0),
     "hilift": (0.0, 240.0),
+    "projection": (0.0, 60.0),
+    "ftsc": (0.0, 600.0),
+    "capacity": (0.0, 10000.0),
 }
 
 
@@ -73,6 +76,48 @@ class MrpProduction(models.Model):
         copy=False,
     )
     door_wo_item_count = fields.Integer(compute="_compute_door_wo_item_count")
+
+    # WHAT THE TWO INFO PAPERS PRINT. These are carried from the calculator
+    # rather than recomputed here, and that is deliberate. The calculator lets
+    # the shop OVERRIDE the jamb bracket quantities in its own settings, so a
+    # figure recomputed in Odoo would quietly contradict the one the person
+    # read off the screen. The drum, EBF and capacity tables would likewise
+    # become a second copy free to drift from the first. The papers are meant
+    # to reproduce what the calculator showed, so they carry what it showed.
+    door_wo_width = fields.Float(string="Door Width (in)", copy=False)
+    door_wo_height = fields.Float(string="Door Height (in)", copy=False)
+    door_wo_weight = fields.Float(string="Door Weight (lb)", copy=False)
+    door_wo_track_label = fields.Char(string="Track", copy=False)
+    door_wo_config = fields.Char(string="Configuration", copy=False)
+    door_wo_projection = fields.Float(string="2x2 Projection (in)", copy=False)
+    door_wo_sections = fields.Integer(string="Sections", copy=False)
+    door_wo_drum = fields.Char(string="Drum", copy=False)
+    door_wo_ebf = fields.Char(string="EBF", copy=False)
+    door_wo_capacity = fields.Float(string="Capacity Per Drum (lb)", copy=False)
+    door_wo_ftsc = fields.Float(string="FTSC (in)", copy=False)
+    door_wo_cable_type = fields.Char(string="Cable Type", copy=False)
+    # ZERO MEANS "NOT APPLICABLE", which is what the calculator prints as "--".
+    # The #16 bracket does not appear at all below a 97" vertical track, and no
+    # band of the table ever calls for zero of a size it does list, so zero is
+    # free to carry the absence.
+    door_wo_jb_10 = fields.Integer(string="J-10", copy=False)
+    door_wo_jb_12 = fields.Integer(string="J-12", copy=False)
+    door_wo_jb_14 = fields.Integer(string="J-14", copy=False)
+    door_wo_jb_16 = fields.Integer(string="J-16", copy=False)
+
+    door_wo_has_papers = fields.Boolean(compute="_compute_door_wo_has_papers")
+
+    @api.depends("door_wo_item_ids", "door_wo_width")
+    def _compute_door_wo_has_papers(self):
+        for production in self:
+            production.door_wo_has_papers = bool(production.door_wo_item_ids)
+
+    def _door_wo_item_length(self, role):
+        """The cut length for one role, or 0 - for the papers to print."""
+        self.ensure_one()
+        item = self.door_wo_item_ids.filtered(lambda i: i.role == role)[:1]
+
+        return item.length_label or ""
 
     @api.depends("door_wo_item_ids")
     def _compute_door_wo_item_count(self):
@@ -188,6 +233,18 @@ class MrpProduction(models.Model):
             "hilift": self._door_wo_number(spec.get("hilift"), "hilift", required=False),
             "sections": int(spec.get("sections") or 0),
             "drum": (spec.get("drum") or "").strip(),
+            # For the info papers. All optional: an order raised by an older
+            # copy of the calculator simply prints fewer rows rather than
+            # being refused, because the cut list is the part that matters and
+            # it is already complete without these.
+            "config": (spec.get("config") or "").strip(),
+            "ebf": (spec.get("ebf") or "").strip(),
+            "projection": self._door_wo_number(
+                spec.get("projection"), "projection", required=False),
+            "ftsc": self._door_wo_number(spec.get("ftsc"), "ftsc", required=False),
+            "capacity": self._door_wo_number(
+                spec.get("capacity"), "capacity", required=False),
+            "jb": self._door_wo_jamb_counts(spec.get("jb")),
         }
 
         # THE CABLES ARE OPTIONAL, because the calculator cannot work them out
@@ -212,6 +269,36 @@ class MrpProduction(models.Model):
                 spec.get("weight"), "weight", required=False)
 
         return parsed
+
+    @api.model
+    def _door_wo_jamb_counts(self, raw):
+        """{"10": 4, ...} as the calculator DISPLAYED, overrides included.
+
+        Not recomputed from the door height. The calculator carries a per-shop
+        override for these, so the number on its screen is not always the
+        number its table gives - and a paper that disagrees with the screen it
+        was printed from is worse than no paper.
+        """
+        counts = {}
+
+        if not isinstance(raw, dict):
+            return counts
+
+        for size in ("10", "12", "14", "16"):
+            value = raw.get("j%s" % size)
+
+            if value in (None, "", False, "--"):
+                continue
+
+            try:
+                number = int(float(value))
+            except (TypeError, ValueError):
+                continue
+
+            if 0 <= number <= 99:
+                counts[size] = number
+
+        return counts
 
     # --- which stock item each cut comes from --------------------------------
 
@@ -395,6 +482,23 @@ class MrpProduction(models.Model):
             "door_wo_reference": parsed["reference"] or False,
             "door_wo_mark": parsed["mark"] or False,
             "door_wo_summary": self._door_wo_summary_text(parsed),
+            "door_wo_width": parsed["width"],
+            "door_wo_height": parsed["height"],
+            "door_wo_weight": parsed["weight"],
+            "door_wo_track_label": parsed["track_label"],
+            "door_wo_config": parsed["config"] or "%s - %s" % (
+                parsed["track_label"], parsed["lift_label"]),
+            "door_wo_projection": parsed["projection"],
+            "door_wo_sections": parsed["sections"],
+            "door_wo_drum": parsed["drum"],
+            "door_wo_ebf": parsed["ebf"],
+            "door_wo_capacity": parsed["capacity"],
+            "door_wo_ftsc": parsed["ftsc"],
+            "door_wo_cable_type": parsed["cable_size"] or "",
+            "door_wo_jb_10": parsed["jb"].get("10", 0),
+            "door_wo_jb_12": parsed["jb"].get("12", 0),
+            "door_wo_jb_14": parsed["jb"].get("14", 0),
+            "door_wo_jb_16": parsed["jb"].get("16", 0),
             "door_wo_item_ids": [
                 (0, 0, {
                     "sequence": (index + 1) * 10,

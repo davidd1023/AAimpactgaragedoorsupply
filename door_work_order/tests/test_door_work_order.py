@@ -15,6 +15,10 @@ def spec(**overrides):
         "weight": 300, "sections": 4,
         "vertical": 76, "horizontal": 96,
         "cable": 123, "cable_type": 'Cable 5/32"', "drum": "D400-144",
+        # what the two info papers print
+        "projection": 6.5, "config": "3in 15R - Standard Lift",
+        "jb": {"j10": 4, "j12": 4, "j14": 4, "j16": None},
+        "ebf": "EBP 3 3/8in", "capacity": 375, "ftsc": 85.125,
     }
     base.update(overrides)
 
@@ -314,3 +318,105 @@ def http_quote(value):
     from urllib.parse import quote
 
     return quote(value, safe="")
+
+
+@tagged("post_install", "-at_install")
+class TestDoorWorkOrderPapers(DoorWorkOrderCommon):
+    """The two sheets the calculator's preview shows, printed from Odoo."""
+
+    def _html(self, production):
+        """The rendered paper as a PERSON would read it.
+
+        Unescaped and with runs of whitespace collapsed, because QWeb emits an
+        inch mark as &#34; and wraps prose across source lines. Asserting on
+        the raw markup passes for the wrong reason the day the template stops
+        escaping, and fails for the wrong reason the day it reflows - both of
+        which happened here before this helper existed.
+        """
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "door_work_order.report_info_papers", production.ids)
+
+        if isinstance(rendered, bytes):
+            rendered = rendered.decode()
+
+        return re.sub(r"\s+", " ", html.unescape(rendered))
+
+    def test_the_papers_carry_what_the_calculator_showed(self):
+        production, _r = self.Production._door_wo_create(spec())
+        self.assertEqual(production.door_wo_projection, 6.5)
+        self.assertEqual(production.door_wo_ebf, "EBP 3 3/8in")
+        self.assertEqual(production.door_wo_capacity, 375)
+        self.assertEqual(production.door_wo_ftsc, 85.125)
+        self.assertEqual(production.door_wo_config, "3in 15R - Standard Lift")
+        self.assertEqual(production.door_wo_cable_type, '5/32"')
+        self.assertEqual(
+            (production.door_wo_jb_10, production.door_wo_jb_12,
+             production.door_wo_jb_14, production.door_wo_jb_16),
+            (4, 4, 4, 0),
+            "#16 is not called for on this door, so it must read as absent")
+
+    def test_an_overridden_bracket_count_reaches_the_paper(self):
+        """THE REASON THESE NUMBERS ARE CARRIED RATHER THAN RECOMPUTED.
+
+        The calculator lets a shop override a jamb bracket quantity in its own
+        settings. Recomputing here from the door height would print 4 where the
+        screen said 9, and a paper that contradicts the screen it was printed
+        from is worse than no paper at all.
+        """
+        payload = json.loads(spec())
+        payload["jb"] = {"j10": 4, "j12": 9, "j14": 4, "j16": 2}
+        production, _r = self.Production._door_wo_create(json.dumps(payload))
+        self.assertEqual(production.door_wo_jb_12, 9)
+        self.assertEqual(production.door_wo_jb_16, 2)
+        self.assertIn(">9<", self._html(production).replace(" ", ""))
+
+    def test_both_papers_print_with_their_numbers(self):
+        production, _r = self.Production._door_wo_create(spec())
+        html = self._html(production)
+        self.assertIn("TRACKS", html)
+        self.assertIn("CABLES", html)
+        # the measurements, in the units the floor reads
+        for wanted in ['76"', '96"', '123"', '6 1/2"', '85 1/8"',
+                       "D400-144", "EBP 3 3/8in", "W-1001", "3in 15R"]:
+            self.assertIn(wanted, html, "the papers omit %r" % wanted)
+
+    def test_the_cables_paper_says_so_when_there_is_no_cable(self):
+        """A door sent without a weight has no cable, and the paper says it.
+
+        Printing an empty table would read as "no cable needed" rather than
+        "not worked out", and those are different instructions to a person
+        holding a reel.
+        """
+        production, _r = self.Production._door_wo_create(
+            spec(weight=None, cable=None, cable_type="", ebf="", capacity=None,
+                 ftsc=None))
+        html = self._html(production)
+        self.assertIn("CABLES", html)
+        self.assertIn("no door weight", html)
+        self.assertNotIn("Cable Length", html)
+
+    def test_an_order_from_an_older_calculator_still_prints(self):
+        """Nothing was refused for lacking the extras, so nothing may crash.
+
+        An order raised before the calculator carried these fields has a
+        complete cut list and nothing else. The papers print the rows they
+        have and leave out the rows they do not, rather than printing a column
+        of blanks that look like measurements.
+        """
+        payload = json.loads(spec())
+        for key in ("projection", "config", "jb", "ebf", "capacity", "ftsc"):
+            payload.pop(key)
+        production, _r = self.Production._door_wo_create(json.dumps(payload))
+        html = self._html(production)
+        self.assertIn('76"', html)
+        self.assertIn('123"', html)
+        self.assertNotIn("2x2 Projection", html)
+        self.assertNotIn("EBF", html)
+
+    def test_an_ordinary_manufacturing_order_says_it_has_no_papers(self):
+        """The Print entry shows on every MO, so the others must read sensibly."""
+        other = self.env["mrp.production"].create({
+            "product_id": self.track_3.id, "product_qty": 1.0})
+        html = self._html(other)
+        self.assertIn("did not come from the door calculator", html)
+        self.assertNotIn("TRACKS", html)

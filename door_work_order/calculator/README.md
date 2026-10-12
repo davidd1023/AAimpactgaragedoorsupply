@@ -9,11 +9,11 @@ beside the endpoint it talks to so the two halves can be read together.
 
 - **`index.html`** - the finished file. Download it and upload it over
   `index.html` in the calculator repository. This is the one to use.
-- **`send-to-manufacturing.patch`** - the same change as a diff, 65 lines
+- **`send-to-manufacturing.patch`** - the same change as a diff, 24 lines
   added and none removed. For reading what changed, or for `git apply` if
   you would rather not replace the whole file.
 
-**It was built on commit `6f4c9d730388eef56299877e01c10d9821b9c65f` of `index.html`.** If that file has been
+**It was built on commit `da13de9` of `index.html`** - the copy you uploaded last time, with nothing of your own in it. If that file has been
 edited since, uploading this one would discard those edits - apply the patch
 instead, or tell me and I will rebase it. `index-sandbox.html` and
 `backup.html` are untouched.
@@ -89,14 +89,35 @@ is visible before it is relied on rather than after.
 ## Which build is running
 
 The settings panel and the button both show a build number - currently
-**build 3**. This page is delivered by uploading a file and has no cache
+**build 4**. This page is delivered by uploading a file and has no cache
 busting of its own, so a tab left open on the shop floor can keep running an
 older copy for as long as it stays open, and "it still does the same thing" is
 then indistinguishable from a real fault. The marker makes that answerable by
 looking at the screen.
 
-If the button does not say `b3`, the browser is running an older copy: reload
+If the button does not say `b4`, the browser is running an older copy: reload
 with a new query string (`?v=p3`) or hard-reload (Ctrl-Shift-R, Cmd-Shift-R).
 
 The button also logs the exact address it is about to open to the browser
 console, and says so if a pop-up blocker stopped the new tab.
+
+## The two info papers
+
+Build 4 widened the payload so Odoo can print the same two sheets the
+calculator's Preview shows. On a manufacturing order: **gear -> Print -> Info
+Papers**, which yields two pages, TRACKS and CABLES, in the calculator's own
+layout.
+
+Five values were added for this and nothing else uses them: `projection`,
+`config`, `jb`, `ebf`, `capacity`, `ftsc`.
+
+THE JAMB COUNTS GO THROUGH `getJBOverride`, which is the reason they are sent
+at all rather than recomputed in Odoo. A shop that has overridden a bracket
+quantity in Settings must see ITS number on the printed paper. A paper that
+contradicts the screen it was printed from is worse than no paper, and
+recomputing would also make the drum, EBF and capacity tables a second copy
+free to drift from this file.
+
+An order raised by an older build is not refused and does not crash: the cut
+list is complete without these, so the papers print the rows they have and
+leave out the rows they do not.
