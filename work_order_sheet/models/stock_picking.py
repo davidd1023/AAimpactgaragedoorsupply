@@ -27,9 +27,16 @@ TRACK_LENGTH_RANGE = (12.0, 300.0)
 # a length and must not be read as one - "500ft Reel" is a quantity of stock.
 CABLE_LENGTH = re.compile(r"cable\s+(\d+(?:\s+\d+/\d+)?)\s*[\"”]", re.I)
 
+# WHAT A CABLE IS CALLED IN THIS CATALOGUE, which is mostly not "cable".
+# The reel is "1/8" 7X19 GAC (500 FT REEL)" - GAC is galvanized aircraft cable
+# - and its fittings are a sleeve and a thimble. Matching only the word cable
+# recognised none of them, so they fell through to their eCommerce category,
+# which is Tracks, and printed on the tracks page.
 KINDS = (
     ("track", re.compile(r"\btrack\b", re.I)),
-    ("cable", re.compile(r"\bcable\b", re.I)),
+    ("cable", re.compile(
+        r"\bcable\b|\bgac\b|\b7\s*x\s*19\b|\bthimble\b"
+        r"|\boval\s+sleeve\b|\baircraft\b", re.I)),
 )
 
 
@@ -280,7 +287,11 @@ class StockPicking(models.Model):
     #
     # A different shape from the spring calculator's, and the only record of a
     # door on an order that has no spring on it.
-    DEALER_DIMS = re.compile(r"\bW\s*([^|x]+?)\s*x\s*H\s*([^|]+?)\s*(?:\||$)", re.I)
+    # EACH ONE ON ITS OWN. The dealer form writes "W 9' 0\" x H 7' 0\"" when it
+    # has both and "W 9' 0\"" when it has only one, so a pattern that required
+    # the pair found nothing whenever a customer gave one of them.
+    DEALER_WIDTH = re.compile(r"\bW\s+([^|]*?)\s*(?:x\s*H\b|\||$)", re.I)
+    DEALER_HEIGHT = re.compile(r"\bH\s+([^|]*?)\s*(?:\||$)", re.I)
     # The trailing inch mark is appended, as above: a raw literal cannot end
     # in a quote.
     DEALER_HILIFT = re.compile(
@@ -289,18 +300,22 @@ class StockPicking(models.Model):
     def _work_order_dealer_door(self, text):
         """The door facts a dealer kit order carries, or {}."""
         facts = {}
-        dims = self.DEALER_DIMS.search(text or "")
+        text = text or ""
+        width = self.DEALER_WIDTH.search(text)
+        height = self.DEALER_HEIGHT.search(text)
 
-        if dims:
-            facts["width"] = dims.group(1).strip()
-            facts["height"] = dims.group(2).strip()
+        if width and width.group(1).strip():
+            facts["width"] = width.group(1).strip()
 
-        weight = self.DOOR_WEIGHT.search(text or "")
+        if height and height.group(1).strip():
+            facts["height"] = height.group(1).strip()
+
+        weight = self.DOOR_WEIGHT.search(text)
 
         if weight:
             facts["weight"] = "%s lb" % weight.group(1)
 
-        hilift = self.DEALER_HILIFT.search(text or "")
+        hilift = self.DEALER_HILIFT.search(text)
 
         if hilift:
             facts["hilift"] = '%s"' % hilift.group(1)
@@ -428,8 +443,20 @@ class StockPicking(models.Model):
 
         # The name is a second signal rather than the only one, so a cable
         # whose reel happens to be counted in Units still summarises.
-        return self._work_order_kind(
-            sale_line.product_id.display_name or "") == "cable"
+        if self._work_order_kind(
+                sale_line.product_id.display_name or "") == "cable":
+            return True
+
+        # AND A THIRD: what the group is MADE OF. The thing sold may be named
+        # in a way this cannot read, while a reel, a sleeve and a thimble say
+        # plainly what they are.
+        #
+        # EVERY part has to be a cable part, not merely one of them. A hardware
+        # kit that happens to contain a cable is still a kit, and summarising
+        # it would hide the rollers and hinges somebody has to pick.
+        return all(
+            self._work_order_kind(move.product_id.display_name or "") == "cable"
+            for move in moves)
 
     def _work_order_groups(self):
         """The moves, gathered by the sale line they came from.
@@ -489,6 +516,19 @@ class StockPicking(models.Model):
         if collapsed:
             length = self._work_order_component_length(moves) or length
 
+        kind = "spring" if spring else self._work_order_kind(name)
+
+        # A SUMMARISED GROUP TAKES ITS KIND FROM WHAT IT IS MADE OF. The thing
+        # sold may be named in a way this cannot read, while its components -
+        # a GAC reel, an oval sleeve, a thimble - say plainly what it is.
+        if not kind and len(moves) > 1:
+            for part in moves:
+                found = self._work_order_kind(part.product_id.display_name or "")
+
+                if found:
+                    kind = found
+                    break
+
         category, source = self._work_order_category(product)
         states = [m.state for m in moves]
         short = [st for st in states
@@ -503,7 +543,7 @@ class StockPicking(models.Model):
             "uom": ((sale_line.product_uom_id.name
                      if collapsed and "product_uom_id" in sale_line._fields
                      else move.product_uom.name) or ""),
-            "kind": "spring" if spring else self._work_order_kind(name),
+            "kind": kind,
             "length": length,
             "spring": spring,
             "availability": self.AVAILABILITY.get(state, state or ""),
@@ -511,8 +551,7 @@ class StockPicking(models.Model):
             "parts": len(moves),
             "category": category,
             "category_source": source,
-            "page": self._work_order_page(
-                "spring" if spring else self._work_order_kind(name), category),
+            "page": self._work_order_page(kind, category),
         }
 
     # --- which page a line belongs on -----------------------------------------
