@@ -1,6 +1,6 @@
 import re
 
-from odoo import models
+from odoo import fields, models
 
 # WHAT A LENGTH LOOKS LIKE IN A PRODUCT NAME. The catalogue writes a track as
 #
@@ -55,7 +55,7 @@ class StockPicking(models.Model):
         if not hit:
             return ""
 
-        return '%s"' % hit.group(1).strip()
+        return self._work_order_inches(hit.group(1).strip().replace(" ", ""))
 
     # THE DESCRIPTION IS THE RECORD, so it is parsed rather than duplicated.
     #
@@ -81,16 +81,65 @@ class StockPicking(models.Model):
         r"""^\s*Door:\s*([\d,]+)\s*lb,\s*(\d+)'\s*(\d+)",\s*([\d,]+)\s*cycles""",
         re.I)
 
-    def _work_order_inches(self, text):
-        """6.0 -> 6", 32.25 -> 32.25".
+    def _work_order_inches(self, text, fraction=True):
+        """32.25 -> 32 1/4", 6.0 -> 6", 0.2625 -> 0.2625".
 
-        The description carries Python's float formatting, so an inside
-        diameter of six arrives as "6.0". A shop sheet should read 6".
+        IN EIGHTHS, BECAUSE THAT IS WHAT A TAPE MEASURE READS. A length of
+        32.25" is correct and useless at a bench; the trade writes it 32 1/4",
+        and this project's own notes write inside diameters the same way -
+        3 3/4" inside 6", never 3.75.
+
+        WIRE IS THE EXCEPTION and passes fraction=False. A wire size is a
+        decimal gauge, not a measurement off a tape: 0.2625" snapped to the
+        nearest eighth would read 1/4", which is a different wire.
         """
         try:
-            return '%g"' % float(text)
+            value = float(text)
         except (TypeError, ValueError):
             return '%s"' % text
+
+        if not fraction:
+            return '%g"' % value
+
+        whole = int(value)
+        eighths = int(round((value - whole) * 8))
+
+        if eighths == 8:
+            whole += 1
+            eighths = 0
+
+        if not eighths:
+            return '%d"' % whole
+
+        numerator, denominator = eighths, 8
+
+        while numerator % 2 == 0:
+            numerator //= 2
+            denominator //= 2
+
+        return '%d %d/%d"' % (whole, numerator, denominator)
+
+    # --- 2. what the picker needs to know before walking to the shelf -------
+    AVAILABILITY = {
+        "assigned": "Ready",
+        "partially_available": "Part only",
+        "confirmed": "Not available",
+        "waiting": "Waiting",
+        "draft": "Draft",
+        "done": "Done",
+        "cancel": "Cancelled",
+    }
+
+    def _work_order_printed_at(self):
+        """When this sheet was printed, in the reader's own timezone.
+
+        A sheet lying on a bench is otherwise undateable, and an order that has
+        changed since it was printed looks exactly like one that has not.
+        """
+        self.ensure_one()
+        stamp = fields.Datetime.context_timestamp(self, fields.Datetime.now())
+
+        return stamp.strftime("%d %b %Y %H:%M")
 
     def _work_order_spring(self, move):
         """The assembly behind this line, read off its description, or None.
@@ -116,7 +165,7 @@ class StockPicking(models.Model):
             if hit:
                 springs.append({
                     "role": hit.group(1),
-                    "wire": self._work_order_inches(hit.group(2)),
+                    "wire": self._work_order_inches(hit.group(2), fraction=False),
                     "inside_diameter": self._work_order_inches(hit.group(3)),
                     "length": self._work_order_inches(hit.group(4)),
                 })
@@ -145,6 +194,51 @@ class StockPicking(models.Model):
 
         return {"parameters": parameters, "springs": springs}
 
+    def _work_order_component_length(self, moves):
+        """The cut length of a collapsed group, e.g. "17.5 ft".
+
+        A cable arrives as four moves - the reel and its sleeve, thimble and
+        stop - and only one of them is a measurement. The fittings are counted
+        in Units; the reel is consumed in feet, and that figure IS the cable
+        length. So the length is the component measured in anything other than
+        Units, rather than a part number this has to be told about.
+        """
+        for move in moves:
+            name = (move.product_uom.name or "").strip().lower()
+
+            if name and name not in ("units", "unit", "each", "pc", "pcs"):
+                return "%g %s" % (move.product_uom_qty, move.product_uom.name)
+
+        return ""
+
+    def _work_order_groups(self):
+        """The moves, gathered back into the things a customer bought.
+
+        ONE CART LINE IS ONE THING, however many moves it explodes into. A
+        cable is sold as a cable and picked as four moves - reel, sleeve,
+        thimble, stop - and a sheet listing all four asks the floor to read a
+        bill of materials to find out that somebody bought one cable.
+
+        Grouped by the sale line rather than by a list of part numbers, so a
+        box of sleeves bought on its own is still a box of sleeves: it has a
+        sale line of its own and nothing to group with.
+        """
+        self.ensure_one()
+        groups = []
+        index = {}
+
+        for move in self.move_ids:
+            key = move.sale_line_id.id if move.sale_line_id else ("move", move.id)
+            position = index.get(key)
+
+            if position is None:
+                index[key] = len(groups)
+                groups.append([move])
+            else:
+                groups[position].append(move)
+
+        return groups
+
     def _work_order_lines(self):
         """Every product on this work order, in the order it appears.
 
@@ -155,17 +249,66 @@ class StockPicking(models.Model):
         self.ensure_one()
         lines = []
 
-        for move in self.move_ids:
-            product = move.product_id
+        for moves in self._work_order_groups():
+            move = moves[0]
+            sale_line = move.sale_line_id
+            collapsed = len(moves) > 1 and sale_line
+
+            # What the CUSTOMER bought, when several moves are one purchase.
+            product = sale_line.product_id if collapsed else move.product_id
             name = product.display_name or ""
+            spring = self._work_order_spring(move)
+            length = self._work_order_length(name)
+
+            if collapsed:
+                length = self._work_order_component_length(moves) or length
+
+            states = [m.state for m in moves]
+            short = [st for st in states
+                     if st in ("confirmed", "waiting", "partially_available")]
+            state = short[0] if short else states[0]
+
             lines.append({
                 "code": product.default_code or "",
                 "name": product.name or name,
-                "quantity": move.product_uom_qty,
-                "uom": move.product_uom.name or "",
-                "kind": self._work_order_kind(name),
-                "length": self._work_order_length(name),
-                "spring": self._work_order_spring(move),
+                "quantity": sale_line.product_uom_qty if collapsed
+                            else move.product_uom_qty,
+                "uom": (sale_line.product_uom_id.name if collapsed
+                        and "product_uom_id" in sale_line._fields
+                        else move.product_uom.name) or "",
+                "kind": "spring" if spring else self._work_order_kind(name),
+                "length": length,
+                "spring": spring,
+                "availability": self.AVAILABILITY.get(state, state or ""),
+                "short": bool(short),
+                "parts": len(moves),
             })
 
         return lines
+
+    # The order a door gets built in, and the order the sections print in.
+    SECTIONS = (
+        ("spring", "Springs"),
+        ("track", "Tracks"),
+        ("cable", "Cables"),
+        ("", "Hardware and Other"),
+    )
+
+    def _work_order_sections(self):
+        """The same lines, grouped so the sheet can be split between people.
+
+        A winder and a track cutter do not want to read each other's rows to
+        find their own. Only sections with something in them are printed, so a
+        tracks-only order is still one short list rather than four headings.
+        """
+        self.ensure_one()
+        lines = self._work_order_lines()
+        out = []
+
+        for kind, title in self.SECTIONS:
+            rows = [line for line in lines if line["kind"] == kind]
+
+            if rows:
+                out.append({"title": title, "lines": rows})
+
+        return out
