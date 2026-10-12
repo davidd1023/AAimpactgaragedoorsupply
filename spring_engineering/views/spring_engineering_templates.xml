@@ -35,7 +35,13 @@
                      without the builder ever holding the calculator itself. -->
                 <div class="oe_structure" id="oe_structure_spring_before"/>
 
-                <owl-component name="spring_engineering.calculator"/>
+                <div class="container py-5 aa-se-page">
+                    <h1 class="mb-1">Engineer a Spring</h1>
+                    <p class="lead text-muted mb-4">
+                        Enter your door's size, weight and lift and we'll engineer the right torsion springs for it.
+                    </p>
+                    <owl-component name="spring_engineering.calculator"/>
+                </div>
 
                 <div class="oe_structure" id="oe_structure_spring_after"/>
             </div>

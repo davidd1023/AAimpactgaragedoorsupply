@@ -1,0 +1,212 @@
+/* Website look for the Spring Calculator page.
+ *
+ * The calculator component is shared with the backend, so nothing here touches
+ * spring_engineering.css: every rule is scoped to .aa-se-page, the wrapper the
+ * public page (calculator_page) puts around it. The goal is the same look as the
+ * Custom Torsion Spring page - site font, a title and intro, the calculator in a
+ * rounded card, and the theme's primary colour instead of the backend red.
+ */
+
+.aa-se-page {
+    max-width: 820px;
+}
+
+.aa-se-page .spring-engineering {
+    --aa-se-primary: var(--bs-primary, #714b67);
+    --aa-se-border: var(--bs-border-color, #dee2e6);
+    --aa-se-muted: var(--bs-secondary-color, #6c757d);
+    --aa-se-light: var(--bs-tertiary-bg, #f8f9fa);
+
+    min-height: 0;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #212529);
+    font-family: inherit;
+    border: 1px solid var(--aa-se-border);
+    border-radius: var(--bs-border-radius-lg, 0.5rem);
+    box-shadow: var(--bs-box-shadow-sm, 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075));
+    overflow: hidden;
+}
+
+/* Section headings: quiet labels instead of big grey bands. */
+.aa-se-page .se-section-title {
+    height: auto;
+    justify-content: flex-start;
+    padding: 1.25rem 1.5rem 0.5rem;
+    background: transparent;
+    color: var(--aa-se-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.aa-se-page .se-divider {
+    height: 0.5rem;
+    background: transparent;
+    border-top: 1px solid var(--aa-se-border);
+}
+
+/* Rows */
+.aa-se-page .se-row,
+.aa-se-page .se-rowR {
+    min-height: 60px;
+    padding: 0 1.5rem;
+    background: transparent;
+    border-bottom: 1px solid var(--aa-se-border);
+}
+
+.aa-se-page .se-row > span,
+.aa-se-page .se-rowR > span,
+.aa-se-page .se-measurement span {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--bs-body-color, #212529);
+}
+
+.aa-se-page .se-select,
+.aa-se-page .se-select-sizer,
+.aa-se-page .se-input,
+.aa-se-page .se-number-input,
+.aa-se-page .se-rowR .se-value {
+    color: var(--bs-body-color, #212529);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.aa-se-page .se-input,
+.aa-se-page .se-number-input {
+    border: 1px solid var(--aa-se-border);
+    border-radius: var(--bs-border-radius, 0.375rem);
+    background: var(--bs-body-bg, #fff);
+    padding: 0.25rem 0.5rem;
+}
+
+.aa-se-page .se-input:focus,
+.aa-se-page .se-number-input:focus {
+    outline: none;
+    border-color: var(--aa-se-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb, 113, 75, 103), 0.25);
+}
+
+/* Option buttons (spring count, radius...) as one segmented control. */
+.aa-se-page .se-buttons {
+    display: flex;
+    align-self: center;
+    height: 38px;
+    border: 1px solid var(--aa-se-border);
+    border-radius: var(--bs-border-radius, 0.375rem);
+    overflow: hidden;
+}
+
+.aa-se-page .se-buttons button {
+    height: 100%;
+    min-width: 48px;
+    padding: 0 0.75rem;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #212529);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.aa-se-page .se-buttons button + button {
+    border-left: 1px solid var(--aa-se-border);
+}
+
+.aa-se-page .se-buttons button:hover {
+    background: var(--aa-se-light);
+}
+
+.aa-se-page .se-buttons button.selected,
+.aa-se-page .se-buttons button.selected:hover {
+    background: var(--aa-se-primary);
+    color: #fff;
+}
+
+/* Pitch Yes / No */
+.aa-se-page .se-pitch {
+    border: 1px solid var(--aa-se-primary);
+    border-radius: var(--bs-border-radius, 0.375rem);
+}
+
+.aa-se-page .se-pitch button {
+    width: 90px;
+    height: 40px;
+    color: var(--aa-se-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.aa-se-page .se-pitch button.selected {
+    background: var(--aa-se-primary);
+    color: #fff;
+}
+
+/* Results heading ("Price"): same quiet label as the section titles. */
+.aa-se-page .se-rowR-header {
+    height: auto;
+    justify-content: flex-start;
+    padding: 1.25rem 1.5rem 0.5rem;
+    background: transparent;
+    color: var(--aa-se-muted);
+    border-top: 1px solid var(--aa-se-border);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* Result total */
+.aa-se-page .se-rowR-total {
+    border-top: 1px solid var(--aa-se-border);
+    background: var(--aa-se-light);
+}
+
+.aa-se-page .se-rowR.se-rowR-total .se-value,
+.aa-se-page .se-rowR-total > span {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+/* Action buttons, same as the site's primary / outline buttons. */
+.aa-se-page .se-clear,
+.aa-se-page .se-add-cart {
+    min-height: 48px;
+    border-radius: var(--bs-border-radius-pill, 50rem);
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
+.aa-se-page .se-add-cart {
+    background: var(--aa-se-primary);
+    color: #fff;
+}
+
+.aa-se-page .se-add-cart:hover {
+    filter: brightness(0.92);
+}
+
+.aa-se-page .se-clear {
+    background: transparent;
+    color: var(--aa-se-primary);
+    border: 1px solid var(--aa-se-primary);
+}
+
+.aa-se-page .se-clear:hover {
+    background: var(--aa-se-light);
+}
+
+@media (max-width: 576px) {
+    .aa-se-page .se-row,
+    .aa-se-page .se-rowR {
+        padding: 0 1rem;
+    }
+
+    .aa-se-page .se-section-title {
+        padding: 1rem 1rem 0.5rem;
+    }
+}
