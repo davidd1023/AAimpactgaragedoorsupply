@@ -189,6 +189,49 @@ class StockPicking(models.Model):
     DOOR_HILIFT = re.compile(r"""([\d.]+)"\s*hi-?lift""", re.I)
     DOOR_CYCLES = re.compile(r"([\d,]+)\s*cycles", re.I)
 
+    def _work_order_sale_order(self):
+        """The order this transfer is for, however it is attached to it.
+
+        A TRANSFER DOES NOT ALWAYS CARRY THE LINK. When it is created straight
+        from a sale order it has sale_id and its moves have sale_line_id, and
+        everything here reads those. When it is made by a route or by hand it
+        has only the Source Document - the plain text "S00003" in the corner of
+        the form - and all of it came back empty: no springs, no door, no
+        specification, because every one of those is written on an order line
+        this could not reach.
+        """
+        if "sale_id" in self._fields and self.sale_id:
+            return self.sale_id
+
+        origin = (self.origin or "").strip()
+
+        if not origin:
+            return self.env["sale.order"].browse()
+
+        # An origin can carry more than the order name, so the first word is
+        # tried as well as the whole of it.
+        for candidate in (origin, origin.split()[0], origin.split(",")[0]):
+            found = self.env["sale.order"].search(
+                [("name", "=", candidate.strip())], limit=1)
+
+            if found:
+                return found
+
+        return self.env["sale.order"].browse()
+
+    def _work_order_order_line(self, move):
+        """The order line behind a move, by link or by product."""
+        if "sale_line_id" in move._fields and move.sale_line_id:
+            return move.sale_line_id
+
+        order = self._work_order_sale_order()
+
+        if not order:
+            return self.env["sale.order.line"].browse()
+
+        return order.order_line.filtered(
+            lambda l: l.product_id == move.product_id and not l.display_type)[:1]
+
     def _work_order_spring(self, move):
         """The assembly behind this line, read off its description, or None.
 
@@ -197,7 +240,7 @@ class StockPicking(models.Model):
         calculator writes and prints what it finds, so it works on a database
         without the calculator and needs no bridge module.
         """
-        line = move.sale_line_id if "sale_line_id" in move._fields else False
+        line = self._work_order_order_line(move)
 
         return self._work_order_spring_from_text((line.name or "") if line else "")
 
@@ -387,13 +430,25 @@ class StockPicking(models.Model):
         # describes the door.
         best = {}
 
+        texts = []
+
         for move in self.move_ids:
-            sale_line = move.sale_line_id
+            line = self._work_order_order_line(move)
 
-            if not sale_line:
-                continue
+            if line:
+                texts.append(line.name or "")
 
-            facts = self._work_order_dealer_door(sale_line.name or "")
+        # AND THE ORDER'S OWN LINES, for a door written on something that is
+        # not on this transfer at all - a spring that moves no stock, or a kit
+        # line whose move is on another step of the route.
+        order = self._work_order_sale_order()
+
+        if order:
+            texts.extend(order.order_line.filtered(
+                lambda l: not l.display_type).mapped("name"))
+
+        for text in texts:
+            facts = self._work_order_dealer_door(text or "")
 
             if len(facts) > len(best):
                 best = facts
@@ -561,7 +616,7 @@ class StockPicking(models.Model):
         the ones that produced no move on this transfer are listed too.
         """
         self.ensure_one()
-        order = self.sale_id if "sale_id" in self._fields else False
+        order = self._work_order_sale_order()
 
         if not order:
             return []
@@ -578,6 +633,11 @@ class StockPicking(models.Model):
         for picking in order.picking_ids:
             moved |= picking.move_ids.mapped("sale_line_id")
 
+        # A move with no link still covers its line, matched by product, or the
+        # same thing would print twice.
+        for move in self.move_ids:
+            moved |= self._work_order_order_line(move)
+
         lines = []
 
         for sale_line in order.order_line:
@@ -585,6 +645,16 @@ class StockPicking(models.Model):
                 continue
 
             if not sale_line.product_id or not sale_line.product_uom_qty:
+                continue
+
+            # ONLY WHAT CANNOT MOVE STOCK. A service never gets a move, so it
+            # would otherwise never be seen. A GOOD that is simply not on this
+            # transfer is a different matter - it is on another step, or not
+            # delivered yet - and listing it here would put things on the sheet
+            # that nobody is picking today. The first version of this listed
+            # every line of any order whose name matched the Source Document,
+            # which on a partial delivery is most of it.
+            if sale_line.product_id.type != "service":
                 continue
 
             lines.append(self._work_order_sale_line(sale_line))
