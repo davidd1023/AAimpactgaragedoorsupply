@@ -1286,3 +1286,36 @@ class TestWorkOrderSheetOriginOnly(TestWorkOrderSheet):
         names = [l["name"] for l in picking._work_order_lines()]
         self.assertEqual(names.count("AA-1200 Hardware Kit"), 1,
                          "the kit was listed as a move and as an order line")
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderSheetServiceLines(TestWorkOrderSheet):
+    """Not every service on an order is something to make."""
+
+    def test_a_delivery_method_is_not_a_thing_to_build(self):
+        """IT APPEARED ON A REAL SHEET as "Pickup - Medley Warehouse",
+        filed under Hardware and marked "Made to order" - which is exactly
+        what it reads like to somebody holding the paper.
+
+        It is a shipping line. So is a deposit. Neither is picked or made.
+        """
+        shipping = self.env["product.product"].create({
+            "name": "Pickup - Medley Warehouse", "default_code": "Delivery_007",
+            "type": "service"})
+        spring = self.env.ref("spring_engineering.product_custom_spring")
+        spring.type = "service"
+        order = self.env["sale.order"].create({"partner_id": self.partner.id})
+        self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": spring.product_variant_id.id,
+            "product_uom_qty": 1, "name": TestWorkOrderSheetDoor.FULL})
+        delivery_line = self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": shipping.id,
+            "product_uom_qty": 1, "name": "Pickup - Medley Warehouse"})
+        delivery_line.is_delivery = True
+
+        kit = self._product("AA-1200 Hardware Kit", "AA-1200")
+        picking = self._picking([(kit, 1)], origin=order.name)
+        names = [l["name"] for l in picking._work_order_lines()]
+
+        self.assertIn("Custom Torsion Spring Assembly", names)
+        self.assertNotIn("Pickup - Medley Warehouse", names)
