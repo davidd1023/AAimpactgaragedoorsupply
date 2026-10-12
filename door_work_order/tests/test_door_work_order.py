@@ -684,3 +684,60 @@ class TestDoorWorkOrderResend(DoorWorkOrderCommon):
         second, reused = self.Production._door_wo_create(order(spec(mark="A")))
         self.assertFalse(reused)
         self.assertNotEqual(first, second)
+
+
+@tagged("post_install", "-at_install")
+class TestDoorWorkOrderCompany(DoorWorkOrderCommon):
+    """A cut list is as company-private as the order it hangs off."""
+
+    def test_another_companys_cut_list_is_not_readable(self):
+        """The parent being protected is not protection.
+
+        mrp.production already carries a multi-company rule. These two models
+        hang off it and carried none, so a manufacturing user in one company
+        could read another company's marks and lengths by querying the child
+        models directly - never through a form, which is why it would not have
+        been noticed by using the feature.
+        """
+        other = self.env["res.company"].create({"name": "Other Door Co"})
+        job = self.env.ref("door_work_order.product_door_work_order")
+        foreign = self.env["mrp.production"].sudo().create({
+            "product_id": job.id, "product_qty": 1.0,
+            "company_id": other.id,
+            "door_wo_reference": "W-OTHER",
+        })
+        mark = self.env["door.work.order.mark"].sudo().create({
+            "production_id": foreign.id, "label": "A", "door_qty": 1})
+        item = self.env["door.work.order.item"].sudo().create({
+            "production_id": foreign.id, "mark_id": mark.id,
+            "role": "track_vertical", "length_inches": 76, "quantity": 2})
+        self.assertEqual(item.company_id, other, "company did not follow the order")
+
+        insider = self.env["res.users"].sudo().create({
+            "name": "Ours", "login": "door-wo-ours",
+            "company_id": self.env.company.id,
+            "company_ids": [(6, 0, [self.env.company.id])],
+            "group_ids": [(4, self.env.ref("mrp.group_mrp_user").id)],
+        })
+        visible = self.env["door.work.order.item"].with_user(insider).search(
+            [("id", "=", item.id)])
+        self.assertFalse(
+            visible, "another company's cut item was readable")
+        self.assertFalse(
+            self.env["door.work.order.mark"].with_user(insider).search(
+                [("id", "=", mark.id)]),
+            "another company's mark was readable")
+
+    def test_our_own_cut_list_is_still_readable(self):
+        """The rule must not lock people out of their own work."""
+        production, _r = self.Production._door_wo_create(spec())
+        insider = self.env["res.users"].sudo().create({
+            "name": "Ours Too", "login": "door-wo-ours-2",
+            "company_id": self.env.company.id,
+            "company_ids": [(6, 0, [self.env.company.id])],
+            "group_ids": [(4, self.env.ref("mrp.group_mrp_user").id)],
+        })
+        self.assertTrue(
+            self.env["door.work.order.item"].with_user(insider).search(
+                [("production_id", "=", production.id)]),
+            "the rule hid the user's own cut list")

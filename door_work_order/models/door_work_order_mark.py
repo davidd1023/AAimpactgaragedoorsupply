@@ -19,6 +19,14 @@ class DoorWorkOrderMark(models.Model):
 
     production_id = fields.Many2one(
         "mrp.production", required=True, ondelete="cascade", index=True)
+    # FOLLOWS THE ORDER'S COMPANY, so the record rule below can scope these
+    # the way mrp.production is already scoped. Without it these rows are
+    # reachable by any manufacturing user in any company - the parent order is
+    # protected and its cut list was not, which is the usual shape of this
+    # mistake.
+    company_id = fields.Many2one(
+        "res.company", related="production_id.company_id",
+        store=True, index=True, readonly=True)
     sequence = fields.Integer(default=10)
     label = fields.Char(string="Mark", required=True)
     door_qty = fields.Integer(
