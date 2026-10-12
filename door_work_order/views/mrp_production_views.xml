@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_mrp_production_door_wo_form" model="ir.ui.view">
+        <field name="name">mrp.production.form.door.work.order</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <!-- THE CUT LIST GETS ITS OWN PAGE, next to the components. It is
+                 what the shop floor actually works from, so it must be
+                 readable without opening anything, and it must be obvious that
+                 the lengths are per piece rather than totals. -->
+            <xpath expr="//notebook" position="inside">
+                <page name="door_work_order" string="Cut List"
+                      invisible="door_wo_item_count == 0">
+                    <field name="door_wo_item_count" invisible="1"/>
+                    <group>
+                        <group>
+                            <field name="door_wo_reference"/>
+                            <field name="door_wo_mark"/>
+                        </group>
+                        <group>
+                            <field name="door_wo_summary" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="door_wo_item_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="role"/>
+                            <field name="length_label" string="As Calculated"/>
+                            <field name="length_inches"/>
+                            <field name="quantity"/>
+                            <field name="product_id"/>
+                            <field name="note"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

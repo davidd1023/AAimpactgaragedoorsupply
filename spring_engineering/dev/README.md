@@ -3049,3 +3049,48 @@ in the direction theory predicts, and it is better measured than assumed.
 **Within an inch is 100.0% of 228 orderable readings** on the fresh draw, which
 is the figure that matters for a customer who can live with a quarter turn of
 adjustment.
+
+## The floor campaign hits a reachability ceiling (2026-10-09)
+
+The rung-volume campaign stopped at a traffic heuristic rather than because the
+dose-response flattened, so the obvious continuation was a FLOOR: no rung a
+real door visits should sit at 18 or 47 readings, where the curve is steepest.
+Ten visited rungs were below 160.
+
+Chosen blind, on reading counts alone. Three of the six remaining misses on the
+newest draw sit on rungs with 320+ readings - saturated, and more data cannot
+help them - and aiming at the rungs where misses ARE would have turned the only
+clean yardstick into training data.
+
+**It bought almost nothing and then ran out of road.**
+
+| | |
+|---|---|
+| readings added | 287, over two batches |
+| never-tuned draw | 97.4% -> 97.8% orderable |
+| paired | 2 fixed, 1 broken, net +1 of 185 |
+| batch yield | 400, then 174, then 113 |
+
+And two of the ten target rungs did not move at all:
+
+| rung | before | after |
+|---|---|---|
+| 0.3125/0.2625 | 18 | **18** |
+| 0.3938/0.3195 | 123 | **123** |
+| 0.3065/0.25 | 22 | 58 |
+| 0.283/0.2343 | 47 | 112 |
+| 0.3625/0.295 | 77 | 119 |
+| 0.4305/0.3437 | 105 | 165 |
+
+THE REASON IS THE REASON THEY ARE THIN. A rung is a region of door geometry,
+and a thin rung is one few real doors reach. The targeting samples geometries
+and keeps those landing on a wanted rung; when it has already found every
+distinct door that lands there, more sampling returns duplicates, which the
+generator correctly discards. The collapsing yield - 400, 174, 113 - is that
+ceiling arriving.
+
+So per-rung volume remains causal, and remains the only lever that ever moved
+this model, but it is now spent: the rungs with headroom are saturated and the
+rungs with room have no more doors to ask about. **~98% orderable is where this
+lands**, and the remaining misses are one apiece on six different rungs, half
+of them already holding 320+ readings.

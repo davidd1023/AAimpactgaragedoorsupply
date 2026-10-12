@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Standalone pages rather than website ones. This module depends on mrp
+         alone, so it cannot assume the website's layout exists, and these are
+         for staff rather than for the shop front. The colours are the door
+         calculator's own, so arriving here does not feel like leaving it. -->
+    <template id="layout" name="Door Work Order">&lt;!DOCTYPE html&gt;
+        <html lang="en">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <title><t t-esc="title or 'Door Work Order'"/></title>
+                <style>
+                    :root { --blue:#1B2A6B; --red:#C0272D; --line:#dfe3ec; }
+                    * { box-sizing:border-box; }
+                    body { margin:0; padding:24px 16px; background:#f4f6fb;
+                           font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;
+                           color:#111; }
+                    .wrap { max-width:720px; margin:0 auto; }
+                    .card { background:#fff; border:1px solid var(--line);
+                            border-radius:12px; padding:20px; margin-bottom:16px; }
+                    h1 { font-size:21px; margin:0 0 4px; color:var(--blue); }
+                    h2 { font-size:14px; text-transform:uppercase;
+                         letter-spacing:.06em; color:#667; margin:0 0 12px; }
+                    .sub { color:#667; margin:0 0 20px; }
+                    table { width:100%; border-collapse:collapse; }
+                    th { text-align:left; font-size:12px; text-transform:uppercase;
+                         letter-spacing:.05em; color:#667; padding:0 8px 8px 0;
+                         border-bottom:1px solid var(--line); }
+                    td { padding:10px 8px 10px 0; border-bottom:1px solid #f0f2f7;
+                         vertical-align:top; }
+                    td.len { font-weight:700; font-size:17px; white-space:nowrap; }
+                    .pieces { color:#667; }
+                    pre { margin:0; font:inherit; white-space:pre-wrap; color:#334; }
+                    .btn { display:inline-block; border:0; border-radius:10px;
+                           padding:13px 22px; font-size:16px; font-weight:700;
+                           cursor:pointer; text-decoration:none; }
+                    .go { background:var(--blue); color:#fff; }
+                    .back { background:#fff; color:#334; border:1px solid var(--line); }
+                    .warn { background:#fff8e6; border-color:#f0d99b; }
+                    .bad { background:#fdeceb; border-color:#f3c0bc; }
+                    .warn h1, .bad h1 { color:var(--red); }
+                    ul { margin:8px 0 0; padding-left:20px; }
+                    .ok { color:#1a7f4b; font-weight:700; }
+                    @media (prefers-color-scheme: dark) {
+                        body { background:#15171c; color:#e8eaf0; }
+                        .card { background:#1d2026; border-color:#2c3038; }
+                        h1 { color:#8ea2ff; }
+                        td { border-bottom-color:#262a31; }
+                        th { border-bottom-color:#2c3038; }
+                        pre { color:#c6cbd6; }
+                        .back { background:#1d2026; color:#e8eaf0; border-color:#2c3038; }
+                        .warn { background:#2a2415; border-color:#5a4a1d; }
+                        .bad { background:#2b1a19; border-color:#5e2b28; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="wrap">
+                    <t t-out="0"/>
+                </div>
+            </body>
+        </html>
+    </template>
+
+    <template id="review" name="Review Door Work Order">
+        <t t-call="door_work_order.layout">
+            <t t-set="title">Send to manufacturing</t>
+            <div class="card">
+                <h1>Send this door to manufacturing</h1>
+                <p class="sub">
+                    Nothing has been created yet. Check the cut list, then send it.
+                </p>
+                <h2>Door</h2>
+                <pre t-esc="summary"/>
+            </div>
+
+            <div t-if="existing" class="card warn">
+                <h1>This door already has an order</h1>
+                <p class="sub">
+                    <strong t-esc="existing.name"/> was already raised for W/O
+                    <strong t-esc="parsed['reference']"/><t t-if="parsed['mark']">
+                    mark <strong t-esc="parsed['mark']"/></t>, and it is not
+                    finished. Sending again will open that one rather than
+                    building a second door.
+                </p>
+            </div>
+
+            <div t-if="missing" class="card bad">
+                <h1>Not set up yet</h1>
+                <p class="sub">This cannot be sent until these are configured:</p>
+                <ul>
+                    <li t-foreach="missing" t-as="item" t-esc="item"/>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Cut list</h2>
+                <table>
+                    <tr>
+                        <th>Part</th>
+                        <th>Length</th>
+                        <th>Pieces</th>
+                        <th>Cut from</th>
+                    </tr>
+                    <tr t-foreach="items" t-as="item">
+                        <td>
+                            <t t-esc="item['label']"/>
+                            <div class="pieces" t-if="item['note']" t-esc="item['note']"/>
+                        </td>
+                        <td class="len" t-esc="item['length_label']"/>
+                        <td class="pieces" t-esc="item['quantity']"/>
+                        <td>
+                            <t t-if="item['product']" t-esc="item['product'].display_name"/>
+                            <span t-else="" style="color:#C0272D">not configured</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <form action="/door-work-order/create" method="post" class="card">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <input type="hidden" name="spec" t-att-value="spec"/>
+                <button type="submit" class="btn go" t-if="not missing">
+                    <t t-if="existing">Open the existing order</t>
+                    <t t-else="">Send to manufacturing</t>
+                </button>
+                <span t-else="" class="pieces">
+                    Fill in the configuration above, then reload this page.
+                </span>
+            </form>
+        </t>
+    </template>
+
+    <template id="done" name="Door Work Order Raised">
+        <t t-call="door_work_order.layout">
+            <t t-set="title">Sent to manufacturing</t>
+            <div class="card">
+                <h1 t-if="reused">That door already had an order</h1>
+                <h1 t-else="">Sent to manufacturing</h1>
+                <p class="sub">
+                    <span class="ok" t-esc="production.name"/>
+                    <t t-if="reused"> was already open for this door, so no second
+                    order was raised.</t>
+                    <t t-else=""> has been raised with the cut list.</t>
+                </p>
+                <p>
+                    <a class="btn go" t-att-href="url">Open <t t-esc="production.name"/></a>
+                </p>
+            </div>
+        </t>
+    </template>
+
+    <template id="refused" name="Door Work Order Refused">
+        <t t-call="door_work_order.layout">
+            <t t-set="title">Not sent</t>
+            <div class="card bad">
+                <h1>Nothing was created</h1>
+                <pre t-esc="message"/>
+            </div>
+        </t>
+    </template>
+</odoo>

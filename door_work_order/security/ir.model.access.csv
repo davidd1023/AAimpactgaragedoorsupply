@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_door_work_order_item_user,door.work.order.item.user,model_door_work_order_item,mrp.group_mrp_user,1,1,1,1
+access_door_work_order_item_all,door.work.order.item.all,model_door_work_order_item,base.group_user,1,0,0,0
