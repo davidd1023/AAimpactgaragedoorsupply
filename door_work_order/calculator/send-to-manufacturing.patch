@@ -1,5 +1,5 @@
 diff --git a/index.html b/index.html
-index f577335..1eaa204 100644
+index f577335..8f9d421 100644
 --- a/index.html
 +++ b/index.html
 @@ -131,7 +131,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
@@ -8,7 +8,7 @@ index f577335..1eaa204 100644
          <input id="cfg-odoo" type="text" inputmode="url" placeholder="aaigd.com  or  https://aaigd.com/odoo/manufacturing" oninput="saveOdooUrl()" style="width:100%;padding:8px;border:1px solid var(--gray-border);border-radius:8px;font-size:14px"/>
 -        <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div></div>
 +        <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div>
-+        <div style="margin-top:6px;font-size:11px;color:#888">Send to Manufacturing build <strong>4</strong> &#183; 2026-10-09</div></div>
++        <div style="margin-top:6px;font-size:11px;color:#888">Send to Manufacturing build <strong>5</strong> &#183; 2026-10-09</div></div>
        </div>
        <div class="save-confirm" id="save-confirm">Saved</div>
      </div>
@@ -17,11 +17,77 @@ index f577335..1eaa204 100644
      <button class="print-all-btn" onclick="opPrintChoice()">&#128424; Print All</button>
      <button class="print-all-btn" style="display:none" onclick="doPrintAll()">&#128424; Print All (print server)</button>
 -    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff">&#128296; Send to Manufacturing</button>
-+    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff" title="Send to Manufacturing build 4">&#128296; Send to Manufacturing <span style="opacity:.55;font-size:11px">b4</span></button>
++    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff" title="Send to Manufacturing build 5">&#128296; Send to Manufacturing <span style="opacity:.55;font-size:11px">b5</span></button>
    </div>
    </div>
  </div>
-@@ -978,10 +979,29 @@ function sendToManufacturing(){
+@@ -500,6 +501,25 @@ function closePreview(){
+   document.body.style.overflow='';
+ }
+ 
++// HOW MANY OF THIS DOOR. The quantity box has always been there and nothing
++// printed from it, so a sheet on the bench never said whether it was for one
++// door or five.
++function markQtyFor(label){
++  var out=0;
++  document.querySelectorAll('#op-list .op-mk').forEach(function(m){
++    var l=(m.querySelector('.op-lbl')||{value:''}).value||'';
++    if(l===label) out=parseInt((m.querySelector('.op-q')||{textContent:'1'}).textContent)||0;
++  });
++  return out;
++}
++function markQtyLabel(info){
++  info=info||{};
++  var q=parseInt(info.qty||0)||(info.mark?markQtyFor(info.mark):0);
++  var out='';
++  if(info.mark) out+=' &nbsp;|&nbsp; Mark '+info.mark;
++  if(q) out+=' &nbsp;|&nbsp; <strong style="color:#C0272D">'+q+' door'+(q>1?'s':'')+'</strong>';
++  return out;
++}
+ function buildTracksPreviewHTML(d, info){
+   var td='border:1px solid #888;padding:8px 12px;';
+   var tdv='border:1px solid #888;padding:8px 12px;text-align:right;font-weight:700;color:#1B2A6B;';
+@@ -507,7 +527,7 @@ function buildTracksPreviewHTML(d, info){
+   var th='border:1px solid #888;padding:8px 12px;background:#1B2A6B;color:#fff;';
+   var h='<div style="font-family:Arial,sans-serif;">';
+   h+='<div style="background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;">TRACKS</div>';
+-  h+='<div style="text-align:center;margin:8px 0 12px;font-size:13px;color:#666;">W/O: '+(info.wo||'-')+' &nbsp;|&nbsp; '+info.width+'" x '+info.height+'" &nbsp;|&nbsp; '+info.trackType+'</div>';
++  h+='<div style="text-align:center;margin:8px 0 12px;font-size:13px;color:#666;">W/O: '+(info.wo||'-')+markQtyLabel(info)+' &nbsp;|&nbsp; '+info.width+'" x '+info.height+'" &nbsp;|&nbsp; '+info.trackType+'</div>';
+   h+='<table style="border-collapse:collapse;width:100%;max-width:480px;margin:0 auto 0 0;font-size:15px;">';
+   h+='<tr><th style="'+th+'text-align:left;">Measurement</th><th style="'+th+'text-align:right;">Value</th></tr>';
+   h+='<tr style="background:#f8f9fa;"><td style="'+td+'">Vertical (L &amp; R)</td><td style="'+tdhot+'">'+String(d.vertical).replace(/"/g,'')+'"</td></tr>';
+@@ -538,7 +558,7 @@ function buildCablesPreviewHTML(d, info){
+   var th='border:1px solid #888;padding:8px 12px;background:#1B2A6B;color:#fff;';
+   var h='<div style="font-family:Arial,sans-serif;">';
+   h+='<div style="background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;">CABLES</div>';
+-  h+='<div style="text-align:center;margin:8px 0 12px;font-size:13px;color:#666;">W/O: '+(info.wo||'-')+' &nbsp;|&nbsp; '+info.width+'" x '+info.height+'" &nbsp;|&nbsp; Door Weight: '+(info.weight||CD.wt||'-')+' lbs</div>';
++  h+='<div style="text-align:center;margin:8px 0 12px;font-size:13px;color:#666;">W/O: '+(info.wo||'-')+markQtyLabel(info)+' &nbsp;|&nbsp; '+info.width+'" x '+info.height+'" &nbsp;|&nbsp; Door Weight: '+(info.weight||CD.wt||'-')+' lbs</div>';
+   h+='<table style="border-collapse:collapse;width:100%;max-width:480px;margin:0 auto 0 0;font-size:15px;">';
+   h+='<tr><th style="'+th+'text-align:left;">Item</th><th style="'+th+'text-align:right;">Value</th></tr>';
+   h+='<tr style="background:#f8f9fa;"><td style="'+td+'">Drum</td><td style="'+tdv+'">'+d.drum+'</td></tr>';
+@@ -961,16 +981,11 @@ function odooBase(){
+ // a link that creates records can be triggered by anything that can make a
+ // browser fetch a URL, and a mistyped door should be read by someone before it
+ // becomes a job on the floor.
+-function sendToManufacturing(){
+-  var base=odooBase();
+-  if(!base){alert('Set your Odoo address first - the gear icon, under "Odoo Address".');try{openSettings();}catch(e){}return;}
+-  // typeof, NOT a plain truth test: CD is an implicit global created by
+-  // calculate(), so before the first door it is an undeclared name and
+-  // touching it throws instead of being falsy.
+-  if(typeof CD==='undefined'||!CD||!CD.vert||!CD.horiz){alert('Work out a door first.');return;}
+-  var el=function(id){var n=document.getElementById(id);return n?(n.value||'').trim():'';};
+-  var spec={
+-    wo:el('wo'),mark:el('mark'),
++// The door currently loaded in the form, as Odoo wants it. Read from CD, which
++// calculate() fills, so there is no second copy of any of this arithmetic.
++function doorSpecFromCD(){
++  if(typeof CD==='undefined'||!CD||!CD.vert||!CD.horiz) return null;
++  return {
+     width:CD.width,height:CD.height,
+     track:CD.tt,lift:CD.lt,hilift:CD.hl||0,
+     sections:CD.panels,
+@@ -978,10 +993,78 @@ function sendToManufacturing(){
      weight:CD.hasWeight?CD.wt:null,
      cable:CD.hasWeight?CD.cable:null,
      cable_type:CD.hasWeight?(CD.cableType||''):'',
@@ -44,10 +110,60 @@ index f577335..1eaa204 100644
 +    capacity:CD.hasWeight?CD.cap:null,
 +    ftsc:CD.hasWeight?CD.ftsc:null
    };
-   if(!spec.wo&&!confirm('This door has no W/O number. Without one, sending twice will raise two orders. Send anyway?'))return;
+-  if(!spec.wo&&!confirm('This door has no W/O number. Without one, sending twice will raise two orders. Send anyway?'))return;
 -  window.open(base+'/door-work-order/new?spec='+encodeURIComponent(JSON.stringify(spec)),'_blank','noopener');
++}
++
++// EVERY MARK ON THE ORDER, EACH WITH ITS OWN NUMBERS.
++//
++// Each mark is opened in turn so that calculate() works it out properly -
++// reusing the one calculation rather than writing a second copy of the drum,
++// cable and bracket rules that would be free to drift from it.
++//
++// THE GUARD IS THE IMPORTANT PART. If a mark's form is incomplete, calculate()
++// returns early and CD still holds the PREVIOUS mark's numbers, so a careless
++// loop sends the same door several times under different letters. That is a
++// real failure and not a hypothetical one: buildAllSections() has it, which is
++// why "Print All Marks" today prints whichever mark is open once per chip. So
++// every mark is checked against what it was supposed to load, and one that
++// does not match is left out and named rather than sent wrong.
++function collectDoors(){
++  var chips=document.querySelectorAll('#op-list .op-mk');
++  var prev=opCur, doors=[], skipped=[];
++  Array.prototype.forEach.call(chips,function(m){
++    var mid=m.getAttribute('data-mid');
++    var label=((m.querySelector('.op-lbl')||{value:''}).value||'?');
++    var qty=parseInt((m.querySelector('.op-q')||{textContent:'1'}).textContent)||1;
++    var want=(typeof opData!=='undefined'&&opData[mid])?opData[mid]:{};
++    try{opOpenMark(mid,label);}catch(e){skipped.push(label);return;}
++    var d=doorSpecFromCD();
++    if(!d){skipped.push(label);return;}
++    // did the form really load THIS mark?
++    if(parseFloat(want.width)!==d.width||parseFloat(want.height)!==d.height){
++      skipped.push(label);return;
++    }
++    d.mark=label; d.qty=qty;
++    doors.push(d);
++  });
++  if(prev){
++    var back=document.querySelector('#op-list .op-mk[data-mid="'+prev+'"]');
++    if(back){try{opOpenMark(prev,(back.querySelector('.op-lbl')||{value:'?'}).value||'?');}catch(e){}}
++  }
++  return {doors:doors,skipped:skipped};
++}
++
++function sendToManufacturing(){
++  var base=odooBase();
++  if(!base){alert('Set your Odoo address first - the gear icon, under "Odoo Address".');try{openSettings();}catch(e){}return;}
++  var el=function(id){var n=document.getElementById(id);return n?(n.value||'').trim():'';};
++  var collected=collectDoors();
++  if(!collected.doors.length){alert('Work out a door first.');return;}
++  if(collected.skipped.length&&!confirm('These marks have no complete door on them yet and will be left off:\n\n  '+collected.skipped.join(', ')+'\n\nSend the rest?'))return;
++  var spec={wo:el('wo'),doors:collected.doors};
++  var total=0; collected.doors.forEach(function(d){total+=(d.qty||1);});
++  if(!spec.wo&&!confirm('This order has no W/O number. Without one, sending twice will raise two orders. Send anyway?'))return;
 +  var target=base+'/door-work-order/new?spec='+encodeURIComponent(JSON.stringify(spec));
-+  try{console.log('Send to Manufacturing b4 ->',target);}catch(e){}
++  try{console.log('Send to Manufacturing b5 -> '+collected.doors.length+' mark(s), '+total+' door(s)',target);}catch(e){}
 +  var win=window.open(target,'_blank','noopener');
 +  if(!win)alert('Your browser blocked the new tab. Allow pop-ups for this page, or open this address:\n\n'+target);
  }

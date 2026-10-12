@@ -25,6 +25,27 @@ def spec(**overrides):
     return json.dumps(base)
 
 
+def visible_text(rendered):
+    """The paper as a PERSON reads it: no tags, no entities, single spaces.
+
+    Three assertions have now failed in this file against raw QWeb output -
+    an inch mark arrives as &#34;, prose wraps across source lines, and
+    "Mark <strong>A</strong>" does not contain the substring "Mark A". None of
+    those are defects in the report. Asserting on markup tests the template's
+    punctuation rather than the paper's contents, so this strips it once and
+    every assertion below reads like the sheet on the bench.
+    """
+    if isinstance(rendered, bytes):
+        rendered = rendered.decode()
+
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", rendered)))
+
+
+def order(*doors, wo="W-1001"):
+    """A whole W/O with its marks on it, as the calculator now sends it."""
+    return json.dumps({"wo": wo, "doors": [json.loads(d) for d in doors]})
+
+
 class DoorWorkOrderCommon(TransactionCase):
     def setUp(self):
         super().setUp()
@@ -136,7 +157,7 @@ class TestDoorWorkOrder(DoorWorkOrderCommon):
             spec(weight=None, cable=None, cable_type=""))
         self.assertEqual(
             set(self._items(production)), {"track_vertical", "track_horizontal"})
-        self.assertIn("No cable", production.door_wo_summary)
+        self.assertIn("no cable", production.door_wo_summary)
 
     def test_pressing_the_button_twice_does_not_build_two_doors(self):
         first, reused = self.Production._door_wo_create(spec())
@@ -145,11 +166,18 @@ class TestDoorWorkOrder(DoorWorkOrderCommon):
         self.assertTrue(reused)
         self.assertEqual(first, second)
 
-    def test_a_different_mark_is_a_different_door(self):
+    def test_one_order_per_wo_whatever_the_mark(self):
+        """CHANGED DELIBERATELY: the order is now the W/O, not the door.
+
+        This used to raise a second order for a second mark, from when one
+        order meant one door. With every mark on a single order, keeping the
+        mark in the key would raise a duplicate job the moment a different mark
+        happened to be open when the button was pressed.
+        """
         first, _r = self.Production._door_wo_create(spec(mark="A"))
         second, reused = self.Production._door_wo_create(spec(mark="B"))
-        self.assertFalse(reused)
-        self.assertNotEqual(first, second)
+        self.assertTrue(reused)
+        self.assertEqual(first, second)
 
     def test_a_finished_order_does_not_block_a_new_one(self):
         first, _r = self.Production._door_wo_create(spec())
@@ -336,23 +364,20 @@ class TestDoorWorkOrderPapers(DoorWorkOrderCommon):
         rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
             "door_work_order.report_info_papers", production.ids)
 
-        if isinstance(rendered, bytes):
-            rendered = rendered.decode()
-
-        return re.sub(r"\s+", " ", html.unescape(rendered))
+        return visible_text(rendered)
 
     def test_the_papers_carry_what_the_calculator_showed(self):
         production, _r = self.Production._door_wo_create(spec())
-        self.assertEqual(production.door_wo_projection, 6.5)
-        self.assertEqual(production.door_wo_ebf, "EBP 3 3/8in")
-        self.assertEqual(production.door_wo_capacity, 375)
-        self.assertEqual(production.door_wo_ftsc, 85.125)
-        self.assertEqual(production.door_wo_config, "3in 15R - Standard Lift")
-        self.assertEqual(production.door_wo_cable_type, '5/32"')
+        mark = production.door_wo_mark_ids
+        self.assertEqual(len(mark), 1)
+        self.assertEqual(mark.projection, 6.5)
+        self.assertEqual(mark.ebf, "EBP 3 3/8in")
+        self.assertEqual(mark.capacity, 375)
+        self.assertEqual(mark.ftsc, 85.125)
+        self.assertEqual(mark.config, "3in 15R - Standard Lift")
+        self.assertEqual(mark.cable_type, '5/32"')
         self.assertEqual(
-            (production.door_wo_jb_10, production.door_wo_jb_12,
-             production.door_wo_jb_14, production.door_wo_jb_16),
-            (4, 4, 4, 0),
+            (mark.jb_10, mark.jb_12, mark.jb_14, mark.jb_16), (4, 4, 4, 0),
             "#16 is not called for on this door, so it must read as absent")
 
     def test_an_overridden_bracket_count_reaches_the_paper(self):
@@ -366,9 +391,10 @@ class TestDoorWorkOrderPapers(DoorWorkOrderCommon):
         payload = json.loads(spec())
         payload["jb"] = {"j10": 4, "j12": 9, "j14": 4, "j16": 2}
         production, _r = self.Production._door_wo_create(json.dumps(payload))
-        self.assertEqual(production.door_wo_jb_12, 9)
-        self.assertEqual(production.door_wo_jb_16, 2)
-        self.assertIn(">9<", self._html(production).replace(" ", ""))
+        self.assertEqual(production.door_wo_mark_ids.jb_12, 9)
+        self.assertEqual(production.door_wo_mark_ids.jb_16, 2)
+        # the jamb row on the paper, in order: J-10 J-12 J-14 J-16
+        self.assertIn("4 9 4 2", self._html(production))
 
     def test_both_papers_print_with_their_numbers(self):
         production, _r = self.Production._door_wo_create(spec())
@@ -420,3 +446,90 @@ class TestDoorWorkOrderPapers(DoorWorkOrderCommon):
         html = self._html(other)
         self.assertIn("did not come from the door calculator", html)
         self.assertNotIn("TRACKS", html)
+
+
+@tagged("post_install", "-at_install")
+class TestDoorWorkOrderQuantity(DoorWorkOrderCommon):
+    """The quantity box, which until now changed nothing downstream."""
+
+    def _html(self, production):
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "door_work_order.report_info_papers", production.ids)
+
+        return visible_text(rendered)
+
+    def test_three_of_one_door_is_three_doors_of_everything(self):
+        production, _r = self.Production._door_wo_create(
+            order(spec(mark="A", qty=3)))
+        self.assertEqual(production.product_qty, 3)
+        self.assertEqual(production.door_wo_mark_ids.door_qty, 3)
+        # two pieces per door, three doors
+        for item in production.door_wo_item_ids:
+            self.assertEqual(item.quantity, 6, item.role)
+
+    def test_several_marks_land_on_one_order(self):
+        production, _r = self.Production._door_wo_create(order(
+            spec(mark="A", qty=3),
+            spec(mark="B", qty=2, height=96, vertical=88, horizontal=108),
+        ))
+        self.assertEqual(len(production.door_wo_mark_ids), 2)
+        self.assertEqual(production.product_qty, 5, "3 of A and 2 of B is 5 doors")
+        marks = {m.label: m for m in production.door_wo_mark_ids}
+        self.assertEqual(marks["A"].height, 84)
+        self.assertEqual(marks["B"].height, 96)
+        self.assertEqual(
+            marks["B"]._door_wo_item_length("track_vertical"), '88"',
+            "mark B must carry its own measurements, not mark A's")
+
+    def test_each_marks_cuts_are_its_own(self):
+        production, _r = self.Production._door_wo_create(order(
+            spec(mark="A", qty=1),
+            spec(mark="B", qty=4, vertical=88),
+        ))
+        by_mark = {}
+
+        for item in production.door_wo_item_ids:
+            by_mark.setdefault(item.mark_id.label, []).append(item)
+
+        self.assertEqual(len(by_mark["A"]), 3)
+        vertical_b = [i for i in by_mark["B"] if i.role == "track_vertical"][0]
+        self.assertEqual(vertical_b.length_inches, 88)
+        self.assertEqual(vertical_b.quantity, 8, "2 pieces x 4 doors")
+
+    def test_the_papers_say_how_many_doors(self):
+        production, _r = self.Production._door_wo_create(order(
+            spec(mark="A", qty=3),
+            spec(mark="B", qty=1, vertical=88),
+        ))
+        paper = self._html(production)
+        self.assertIn("Mark A", paper)
+        self.assertIn("3 doors", paper)
+        self.assertIn("Mark B", paper)
+        self.assertIn("1 door", paper)
+        # two marks means two track sheets and two cable sheets
+        self.assertEqual(paper.count("TRACKS"), 2)
+        self.assertEqual(paper.count("CABLES"), 2)
+        self.assertIn('88"', paper, "mark B's own vertical length is missing")
+
+    def test_one_door_still_reads_as_one_door(self):
+        production, _r = self.Production._door_wo_create(order(spec(mark="A")))
+        self.assertEqual(production.product_qty, 1)
+        paper = self._html(production)
+        self.assertIn("1 door", paper)
+        self.assertNotIn("1 doors", paper)
+
+    def test_a_single_door_payload_still_works(self):
+        """An older calculator sends one door and no marks list.
+
+        It must not be refused by a newer server - the shop updates the page by
+        uploading a file, so the two halves are never in step for long.
+        """
+        production, _r = self.Production._door_wo_create(spec())
+        self.assertEqual(len(production.door_wo_mark_ids), 1)
+        self.assertEqual(production.product_qty, 1)
+        self.assertIn("TRACKS", self._html(production))
+
+    def test_an_absurd_number_of_marks_is_refused(self):
+        many = [spec(mark=str(i)) for i in range(60)]
+        with self.assertRaises(UserError):
+            self.Production._door_wo_create(order(*many))
