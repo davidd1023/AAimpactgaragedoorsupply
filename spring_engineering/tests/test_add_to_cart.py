@@ -33,6 +33,8 @@ class TestSpringAddToCart(HttpCase):
             ],
             "doorWeight": 355,
             "doorHeight": "7' 0\"",
+            "doorWidth": "9' 0\"",
+            "hiLift": 0,
             "cycles": 25000,
         }
         spec.update(overrides)
@@ -64,8 +66,14 @@ class TestSpringAddToCart(HttpCase):
         self.assertRegex(rows[1], r"^\w+, \d+ spring")
         self.assertRegex(
             rows[2], r'^\w+: [\d.]+" wire, [\d.]+" ID, [\d.]+" long')
-        self.assertRegex(
-            rows[-1], r"""^Door: [\d,]+ lb, \d+' \d+", [\d,]+ cycles""")
+        # The door line now leads with the size and carries a hi-lift when
+        # there is one. The sheet reads each fact on its own rather than
+        # matching the whole line, so this asserts the facts are present and
+        # spelled the way it looks for - not their order.
+        self.assertRegex(rows[-1], r"""^Door: .*\d+' \d+" wide""")
+        self.assertRegex(rows[-1], r"""\d+' \d+" high""")
+        self.assertRegex(rows[-1], r"[\d,]+ lb")
+        self.assertRegex(rows[-1], r"[\d,]+ cycles")
 
     def test_both_springs_appear_with_their_own_figures(self):
         """An outer spring wound to the inner spring's wire is scrap."""
@@ -90,10 +98,43 @@ class TestSpringAddToCart(HttpCase):
 
     def test_the_door_is_described(self):
         self._call(self._spec())
-        self.assertIn("Door: 355 lb, 7' 0\", 25,000 cycles", self._line().name)
+        self.assertIn(
+            "Door: 9' 0\" wide, 7' 0\" high, 355 lb, 25,000 cycles",
+            self._line().name)
 
     def test_a_refused_spec_books_nothing(self):
         before = self.env["sale.order.line"].search_count([])
         result = self._call(self._spec(springs=99))
         self.assertIn("error", result)
         self.assertEqual(self.env["sale.order.line"].search_count([]), before)
+
+    def test_the_door_line_carries_width_and_hi_lift(self):
+        """The work order sheet heads every page with the door.
+
+        Width and hi-lift were known to the calculator and never sent, so the
+        sheet could only ever show weight and height.
+        """
+        self._call(self._spec(hiLift=12))
+        text = self._line().name
+        self.assertIn('9\' 0" wide', text)
+        self.assertIn('7\' 0" high', text)
+        self.assertIn("355 lb", text)
+        self.assertIn('12" hi-lift', text)
+
+    def test_a_door_with_no_hi_lift_says_nothing_about_it(self):
+        """A zero is a number somebody has to interpret; silence is not."""
+        self._call(self._spec())
+        text = self._line().name
+        self.assertIn('9\' 0" wide', text)
+        self.assertNotIn("hi-lift", text)
+
+    def test_an_unreadable_width_does_not_stop_the_sale(self):
+        """Neither width nor hi-lift touches the price, so neither may refuse.
+
+        The line simply leaves off what it could not read.
+        """
+        result = self._call(self._spec(doorWidth="nonsense"))
+        self.assertNotIn("error", result, result)
+        text = self._line().name
+        self.assertNotIn("wide", text)
+        self.assertIn('7\' 0" high', text)

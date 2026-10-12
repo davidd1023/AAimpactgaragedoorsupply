@@ -260,6 +260,34 @@ ALIASES = [
 ]
 
 
+def _door_line(width, height, weight, hi_lift, cycles):
+    """The door, as one line of the order description.
+
+    EACH PART ONLY IF IT IS KNOWN. A door with no hi-lift says nothing about
+    hi-lift rather than saying zero, and a width that could not be read is left
+    off - the line describes what the customer gave, and a blank is not a
+    measurement.
+
+    THE WORK ORDER SHEET PARSES THIS, so the wording is an interface. It reads
+    each fact on its own rather than matching the line as a whole, which is
+    what lets an order placed before width and hi-lift existed still print.
+    """
+    parts = []
+
+    if width:
+        parts.append('%d\' %d" wide' % (width[0], width[1]))
+
+    parts.append('%d\' %d" high' % (height[0], height[1]))
+    parts.append("%s lb" % weight)
+
+    if hi_lift:
+        parts.append('%s" hi-lift' % hi_lift)
+
+    parts.append("{:,} cycles".format(cycles))
+
+    return "Door: " + ", ".join(parts)
+
+
 def quote_assembly(spec, factor=None):
     """Validate a specification and price it, without touching any order.
 
@@ -310,6 +338,12 @@ def quote_assembly(spec, factor=None):
 
     if cycles is None:
         return {"error": "That cycle target is not one we build to."}
+
+    # THE REST OF THE DOOR, for the work order sheet. Neither affects the
+    # price, so neither may stop a sale: a width that cannot be read and a
+    # hi-lift that is absent are both simply left off the line.
+    width = _door_height(spec.get("doorWidth"))
+    hi_lift = _as_int(spec.get("hiLift"), 0, 240) or 0
 
     cone_total = 0.0
     steel_weight = 0.0
@@ -392,7 +426,7 @@ def quote_assembly(spec, factor=None):
         #
         # Every value here has been through a parser above, so the line is
         # built from integers and words this file chose.
-        f'Door: {weight} lb, {height[0]}\' {height[1]}", {cycles:,} cycles',
+        _door_line(width, height, weight, hi_lift, cycles),
     ])
 
     return {

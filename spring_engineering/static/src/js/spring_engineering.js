@@ -4248,6 +4248,13 @@ closeDrumInfo() {
             cycles: this.state.cycles,
             doorWeight: this.state.weight,
             doorHeight: `${this.state.doorHeightFeet}' ${this.state.doorHeightInches || 0}"`,
+            // THE WHOLE DOOR, not only what the price needs. The work order
+            // sheet heads every page with the door it is for, and width and
+            // hi-lift were known here and simply never sent. Hi-lift is sent
+            // as 0 unless the lift is actually hi-lift, so the sheet can tell
+            // "not a hi-lift door" from "nobody said".
+            doorWidth: `${this.state.doorWidthFeet}' ${this.state.doorWidthInches || 0}"`,
+            hiLift: this.state.liftType === "Hi-Lift" ? this.hiLiftInches : 0,
             springsSpec: springs,
         };
     }
