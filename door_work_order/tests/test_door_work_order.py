@@ -287,6 +287,56 @@ class TestDoorWorkOrderHttp(HttpCase):
         return self.env["mrp.production"].search_count(
             [("door_wo_reference", "=", "W-HTTP")])
 
+    def test_the_review_page_reads_a_whole_order(self):
+        """THE BUG THIS CLASS MISSED ONCE ALREADY.
+
+        The creating path moved to the multi-mark payload and the review page
+        was left reading the single-door one, so a real order was refused on
+        the top-level "track" that a multi-mark payload does not have - and
+        every HTTP test here passed, because they all sent the old shape. A
+        payload the browser actually produces is now the one under test.
+        """
+        self.authenticate("admin", "admin")
+        payload = order(
+            spec(mark="A", qty=3, wo="W-HTTP"),
+            spec(mark="B", qty=2, height=96, vertical=88, horizontal=108,
+                 wo="W-HTTP"),
+            wo="W-HTTP")
+        page = self.url_open(
+            "/door-work-order/new?spec=%s" % http_quote(payload))
+        self.assertEqual(page.status_code, 200)
+        body = visible_text(page.text)
+        self.assertNotIn("is not a track type", body)
+        self.assertIn("Mark A", body)
+        self.assertIn("Mark B", body)
+        self.assertIn("5 doors", body)
+        self.assertIn('88"', body, "mark B's own measurement is missing")
+        self.env.invalidate_all()
+        self.assertEqual(self._count(), 0, "a GET created an order")
+
+    def test_the_post_raises_a_multi_mark_order(self):
+        self.authenticate("admin", "admin")
+        payload = order(
+            spec(mark="A", qty=3, wo="W-HTTP"),
+            spec(mark="B", qty=2, height=96, vertical=88, horizontal=108,
+                 wo="W-HTTP"),
+            wo="W-HTTP")
+        page = self.url_open(
+            "/door-work-order/new?spec=%s" % http_quote(payload))
+        token = re.search(r'name="csrf_token"\s+value="([^"]+)"', page.text)
+        self.assertTrue(token, "the review page carried no csrf token")
+        done = self.url_open(
+            "/door-work-order/create",
+            data={"spec": payload, "csrf_token": token.group(1)})
+        self.assertEqual(done.status_code, 200)
+        self.assertIn("Sent to manufacturing", visible_text(done.text))
+        self.env.invalidate_all()
+        orders = self.env["mrp.production"].search(
+            [("door_wo_reference", "=", "W-HTTP")])
+        self.assertEqual(len(orders), 1, "one order per W/O")
+        self.assertEqual(len(orders.door_wo_mark_ids), 2)
+        self.assertEqual(orders.product_qty, 5)
+
     def test_the_review_page_creates_nothing(self):
         """A LINK MUST NOT CHANGE ANYTHING.
 
@@ -304,8 +354,8 @@ class TestDoorWorkOrderHttp(HttpCase):
         # UNESCAPED, because the page is HTML and an inch mark arrives as
         # &#34;. Asserting on the escaped form would pass for the wrong reason
         # the day the template stops escaping.
-        body = html.unescape(page.text)
-        self.assertIn("Send this door to manufacturing", body)
+        body = visible_text(page.text)
+        self.assertIn("Send this order to manufacturing", body)
         self.assertIn('76"', body)
         self.assertIn('123"', body)
         self.assertIn("Vertical track", body)

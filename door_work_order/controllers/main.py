@@ -58,20 +58,38 @@ class DoorWorkOrder(http.Controller):
         Production = request.env["mrp.production"]
 
         try:
-            parsed = Production._door_wo_parse(spec)
+            # THE WHOLE ORDER, not one door. This read _door_wo_parse while the
+            # creating path had already moved to _door_wo_parse_order, so an
+            # order carrying marks was refused here - on the top-level "track"
+            # that a multi-mark payload does not have - and never reached the
+            # button at all. The two must read the same shape, which is why
+            # there is now an HTTP test on the multi-mark payload.
+            order = Production._door_wo_parse_order(spec)
         except UserError as error:
             return self._render("refused", {"message": str(error)})
 
-        items, missing = Production._door_wo_plan(parsed)
-        existing = Production._door_wo_existing(parsed)
+        doors = []
+        missing = []
+
+        for parsed in order["doors"]:
+            items, gaps = Production._door_wo_plan(parsed)
+            doors.append({
+                "parsed": parsed,
+                "items": items,
+                "summary": Production._door_wo_summary_text(parsed),
+            })
+
+            for gap in gaps:
+                if gap not in missing:
+                    missing.append(gap)
 
         return self._render("review", {
             "spec": spec,
-            "parsed": parsed,
-            "items": items,
+            "order": order,
+            "doors": doors,
+            "total_doors": sum(d["parsed"]["door_qty"] for d in doors),
             "missing": missing,
-            "existing": existing,
-            "summary": Production._door_wo_summary_text(parsed),
+            "existing": Production._door_wo_existing(order),
         })
 
     # --- step two: raise it ---------------------------------------------------

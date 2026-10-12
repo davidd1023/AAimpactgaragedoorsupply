@@ -67,22 +67,26 @@
         <t t-call="door_work_order.layout">
             <t t-set="title">Send to manufacturing</t>
             <div class="card">
-                <h1>Send this door to manufacturing</h1>
+                <h1>Send this order to manufacturing</h1>
                 <p class="sub">
                     Nothing has been created yet. Check the cut list, then send it.
                 </p>
-                <h2>Door</h2>
-                <pre t-esc="summary"/>
+                <h2>W/O <t t-esc="order['reference'] or '-'"/></h2>
+                <p class="sub" style="margin:0">
+                    <strong><t t-esc="len(doors)"/></strong>
+                    mark<t t-if="len(doors) != 1">s</t>,
+                    <strong><t t-esc="total_doors"/></strong>
+                    door<t t-if="total_doors != 1">s</t> in all.
+                </p>
             </div>
 
             <div t-if="existing" class="card warn">
-                <h1>This door already has an order</h1>
+                <h1>This W/O already has an order</h1>
                 <p class="sub">
-                    <strong t-esc="existing.name"/> was already raised for W/O
-                    <strong t-esc="parsed['reference']"/><t t-if="parsed['mark']">
-                    mark <strong t-esc="parsed['mark']"/></t>, and it is not
-                    finished. Sending again will open that one rather than
-                    building a second door.
+                    <strong t-esc="existing.name"/> was already raised for
+                    <strong t-esc="order['reference']"/> and is not finished.
+                    Sending again will open that one rather than building the
+                    job twice.
                 </p>
             </div>
 
@@ -94,22 +98,35 @@
                 </ul>
             </div>
 
-            <div class="card">
-                <h2>Cut list</h2>
-                <table>
+            <div class="card" t-foreach="doors" t-as="door">
+                <h2>
+                    Mark <t t-esc="door['parsed']['mark'] or '-'"/>
+                    &amp;middot;
+                    <t t-esc="door['parsed']['door_qty']"/>
+                    door<t t-if="door['parsed']['door_qty'] != 1">s</t>
+                </h2>
+                <pre t-esc="door['summary']"/>
+                <table style="margin-top:14px">
                     <tr>
                         <th>Part</th>
                         <th>Length</th>
                         <th>Pieces</th>
                         <th>Cut from</th>
                     </tr>
-                    <tr t-foreach="items" t-as="item">
+                    <tr t-foreach="door['items']" t-as="item">
                         <td>
                             <t t-esc="item['label']"/>
                             <div class="pieces" t-if="item['note']" t-esc="item['note']"/>
                         </td>
                         <td class="len" t-esc="item['length_label']"/>
-                        <td class="pieces" t-esc="item['quantity']"/>
+                        <td class="pieces">
+                            <t t-esc="item['quantity'] * door['parsed']['door_qty']"/>
+                            <t t-if="door['parsed']['door_qty'] != 1">
+                                <span style="opacity:.6">
+                                    (<t t-esc="item['quantity']"/> x <t t-esc="door['parsed']['door_qty']"/>)
+                                </span>
+                            </t>
+                        </td>
                         <td>
                             <t t-if="item['product']" t-esc="item['product'].display_name"/>
                             <span t-else="" style="color:#C0272D">not configured</span>
