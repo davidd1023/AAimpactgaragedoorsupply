@@ -360,6 +360,29 @@ class StockPicking(models.Model):
     DEALER_MARK = re.compile(r"\b(?:Track|Lift|Drum)\s*:", re.I)
     SPRING_WARNING = re.compile(r"SPRING\s+WARNING", re.I)
 
+    # A WEIGHT THAT IS A RATING IS NOT A DOOR.
+    #
+    # THE 530 lb BUG, and it was never the door at all. The kit's Drum option
+    # is labelled with what the drum can carry - "D400-96 (up to 530 lb)",
+    # "D575-120 (high lift up to 120", up to 1,000 lb)" - and Odoo lists the
+    # chosen options in the order line's description, above the door note. The
+    # first weight in that text won, so a 355 lb door printed as 530 lb: the
+    # drum's rating, read off the drum's own name.
+    #
+    # Both places such a figure can hide are removed before the weight is
+    # read, and either would do on its own: the Drum segment, and anything in
+    # brackets. The door note writes neither - "Drum: D400-96" carries the code
+    # alone and the weight is never bracketed - so nothing real is lost.
+    DRUM_SEGMENT = re.compile(r"(?:^|\|)\s*Drum\s*:[^|\n]*", re.I | re.M)
+    BRACKETED = re.compile(r"\([^)]*\)")
+
+    def _work_order_door_weight(self, text):
+        """The door's own weight in a note, ignoring anything's rating."""
+        text = self.BRACKETED.sub(" ", self.DRUM_SEGMENT.sub(" ", text or ""))
+        hit = self.DOOR_WEIGHT.search(text)
+
+        return ("%s lb" % hit.group(1)) if hit else ""
+
     def _work_order_dealer_door(self, text):
         """The door facts a dealer kit order carries, or {}."""
         facts = {}
@@ -393,10 +416,10 @@ class StockPicking(models.Model):
         if height and height.group(1).strip():
             facts["height"] = height.group(1).strip()
 
-        weight = self.DOOR_WEIGHT.search(text)
+        weight = self._work_order_door_weight(text)
 
         if weight:
-            facts["weight"] = "%s lb" % weight.group(1)
+            facts["weight"] = weight
 
         hilift = self.DEALER_HILIFT.search(text)
 
@@ -404,6 +427,66 @@ class StockPicking(models.Model):
             facts["hilift"] = '%s"' % hilift.group(1)
 
         return facts
+
+    def _work_order_feet(self, inches):
+        """108 -> 9' 0", for a figure that was collected in inches."""
+        if not inches:
+            return ""
+
+        feet, over = divmod(int(round(float(inches))), 12)
+
+        return "%d' %d\"" % (feet, over)
+
+    def _work_order_stored_door(self, line):
+        """The door RECORDED on an order line, as the fields hold it, or {}.
+
+        PREFERRED OVER EVERY READING OF THE DESCRIPTION, because this is the
+        figure the customer typed rather than something that looked like it in
+        a sentence. The fields belong to spring_engineering, so their absence
+        is normal and means only that this database has no calculator - the
+        prose is still read for an order placed before they existed.
+        """
+        if not line or "aa_door_weight_lb" not in line._fields:
+            return {}
+
+        facts = {}
+        width = self._work_order_feet(line.aa_door_width_in)
+        height = self._work_order_feet(line.aa_door_height_in)
+
+        if width:
+            facts["width"] = width
+
+        if height:
+            facts["height"] = height
+
+        if line.aa_door_weight_lb:
+            facts["weight"] = "%g lb" % line.aa_door_weight_lb
+
+        if line.aa_door_hi_lift_in:
+            facts["hilift"] = '%g"' % line.aa_door_hi_lift_in
+
+        if line.aa_door_cycles:
+            facts["cycles"] = line.aa_door_cycles
+
+        return facts
+
+    def _work_order_door_lines(self):
+        """Every order line that could describe the door, once each."""
+        self.ensure_one()
+        lines = self.env["sale.order.line"].browse()
+
+        for move in self.move_ids:
+            lines |= self._work_order_order_line(move)
+
+        # AND THE ORDER'S OWN LINES, for a door written on something that is
+        # not on this transfer at all - a spring that moves no stock, or a kit
+        # line whose move is on another step of the route.
+        order = self._work_order_sale_order()
+
+        if order:
+            lines |= order.order_line.filtered(lambda l: not l.display_type)
+
+        return lines
 
     def _work_order_door(self):
         """The door this whole order is for, if anything on it says.
@@ -413,6 +496,22 @@ class StockPicking(models.Model):
         cutter holding the tracks page is cutting for that same door.
         """
         self.ensure_one()
+        order_lines = self._work_order_door_lines()
+
+        # WHAT WAS STORED, FIRST. Both the calculator and the kit page record
+        # the door as numbers on the line they create, and a number cannot be
+        # misread. The fullest record wins, so a kit line carrying a size and a
+        # weight beats a spring line carrying only what the price needed.
+        best = {}
+
+        for line in order_lines:
+            facts = self._work_order_stored_door(line)
+
+            if len(facts) > len(best):
+                best = facts
+
+        if best:
+            return best
 
         for line in self._work_order_lines():
             spring = line.get("spring")
@@ -430,24 +529,7 @@ class StockPicking(models.Model):
         # describes the door.
         best = {}
 
-        texts = []
-
-        for move in self.move_ids:
-            line = self._work_order_order_line(move)
-
-            if line:
-                texts.append(line.name or "")
-
-        # AND THE ORDER'S OWN LINES, for a door written on something that is
-        # not on this transfer at all - a spring that moves no stock, or a kit
-        # line whose move is on another step of the route.
-        order = self._work_order_sale_order()
-
-        if order:
-            texts.extend(order.order_line.filtered(
-                lambda l: not l.display_type).mapped("name"))
-
-        for text in texts:
+        for text in order_lines.mapped("name"):
             facts = self._work_order_dealer_door(text or "")
 
             if len(facts) > len(best):

@@ -537,11 +537,48 @@ class AAKitCart(AAOptionPricing, Cart):
         if not info:
             return
 
-        head = (line.name or "").split("\n")[0]
-        wanted = f"{head}\n{info}"
+        self._aa_store_door(line, door, info)
 
-        if line.name != wanted:
-            line.name = wanted
+    @staticmethod
+    def _aa_door_numbers(door):
+        """The door as numbers, in the units the kit page collects them."""
+        def number(value):
+            try:
+                return float(value or 0)
+            except (TypeError, ValueError):
+                return 0.0
+
+        return {
+            "width_in": number(door.get("width_in")),
+            "height_in": number(door.get("height_in")),
+            "weight_lb": number(door.get("weight")),
+            "hi_lift_in": number(door.get("high_lift")),
+        }
+
+    def _aa_store_door(self, line, door, info):
+        """Record the door on the kit line, as numbers AND as the note.
+
+        WRITTEN TO A FIELD, NOT TO THE DESCRIPTION. `name` is a stored
+        computed field: core rebuilds it from the product whenever
+        linked_line_ids changes, and attaching the extras to the kit line
+        changes exactly that - so a note appended here was thrown away by the
+        next line this controller created. It survived only by accident, when
+        the page happened to price the door once more after the kit was
+        already in the cart, which is why the door came and went between
+        orders. aa_spec_note is put back onto the description by
+        sale_order_line._compute_name every time, so there is no race left.
+        """
+        if "aa_spec_note" not in line._fields:
+            # spring_engineering not installed: the old behaviour, which is
+            # still better than nothing.
+            head = (line.name or "").split("\n")[0]
+
+            if line.name != f"{head}\n{info}":
+                line.name = f"{head}\n{info}"
+
+            return
+
+        line.aa_write_door(self._aa_door_numbers(door), note=info)
 
     def _aa_add_extras(self, variant, door, qty, extras, notes):
         order = request.cart
@@ -549,8 +586,8 @@ class AAKitCart(AAOptionPricing, Cart):
             return
         kit_line = order.order_line.filtered(lambda l: l.product_id == variant).sorted('id')[-1:]
         info = " | ".join(filter(None, [self._line_note(door)] + notes))
-        if kit_line and info and info not in (kit_line.name or ''):
-            kit_line.name = f"{kit_line.name}\n{info}"
+        if kit_line and info:
+            self._aa_store_door(kit_line, door, info)
         for extra in extras:
             if extra.get('quote'):
                 before = order.order_line

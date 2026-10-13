@@ -433,6 +433,19 @@ def quote_assembly(spec, factor=None):
         "springs": springs,
         "assembly": assembly,
         "description": description,
+        # THE DOOR AS NUMBERS, alongside the line of prose above it. The work
+        # order sheet reads this rather than parsing the description back:
+        # prose has to be interpreted, and anything else in the text that
+        # looks like a door - the Drum option is labelled "(up to 530 lb)" -
+        # gets interpreted too. A width that could not be read is 0, which is
+        # "nobody said" and prints as nothing.
+        "door": {
+            "width_in": (width[0] * 12 + width[1]) if width else 0,
+            "height_in": height[0] * 12 + height[1],
+            "weight_lb": weight,
+            "hi_lift_in": hi_lift,
+            "cycles": "{:,}".format(cycles),
+        },
         "assembly_total": assembly_total,
         "total": total,
         "cones": cones,
@@ -467,12 +480,25 @@ def add_assembly_lines(order, quote, qty=1, note=""):
     # something to browse to, only something the calculator configures.
     variant = product.sudo().product_variant_id
 
+    # THE SPECIFICATION IS STORED, NOT ONLY DESCRIBED.
+    #
+    # `name` is a stored computed field and Odoo rebuilds it from the product
+    # whenever the line is linked to another one - which is exactly what
+    # happens to a spring ordered as a kit option. The whole specification was
+    # thrown away a line later, leaving the floor a spring with no wire, no
+    # length and no door. Everything below the heading is kept in a field of
+    # its own instead, and sale_order_line._compute_name puts it back on every
+    # recompute.
+    spec_note = "\n".join(description.splitlines()[1:]).strip()
+
     line = request.env["sale.order.line"].sudo().create({
         "order_id": order.id,
         "product_id": variant.id,
         "name": description,
+        "aa_spec_note": spec_note,
         "product_uom_qty": qty,
     })
+    line.aa_write_door(quote.get("door") or {})
     # Written after creation: price_unit is computed from the product and
     # the pricelist on create, and the product deliberately lists at zero.
     line.write({"price_unit": assembly_total})
