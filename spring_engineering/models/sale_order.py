@@ -71,6 +71,11 @@ class SaleOrder(models.Model):
         )
 
     def _track_prep_door_height_feet(self, line):
+        """The door height a cart line's track is for, in FEET."""
+        return self._track_prep_height_from_name(
+            line.product_id.display_name or "")
+
+    def _track_prep_height_from_name(self, name):
         """The door height this track is for, in FEET, or 0 if unreadable.
 
         READ FROM THE PRODUCT NAME, because that is where it lives: the
@@ -83,7 +88,6 @@ class SaleOrder(models.Model):
         wrong number of brackets. If the naming ever changes, the warning says
         so on the first order rather than after fifty.
         """
-        name = line.product_id.display_name or ""
         # THE FOOT MARK IS THE POINT. The live products are named
         #
         #   [CH-VT-2"] 2" Vertical Track 76" - 7' Door Height Black
@@ -291,6 +295,11 @@ class SaleOrder(models.Model):
     COLOURS = ("Black", "White")
 
     def _track_prep_colour(self, line):
+        """The finish of a cart line's track."""
+        return self._track_prep_colour_from_name(
+            line.product_id.display_name or "")
+
+    def _track_prep_colour_from_name(self, name):
         """The track's finish, as the flag angle products spell it, or None.
 
         The flag angle has to MATCH THE TRACK: the products are "Flag Angle
@@ -299,10 +308,8 @@ class SaleOrder(models.Model):
         a return - so an unrecognised finish adds nothing and says so, the same
         as an unreadable height.
         """
-        name = line.product_id.display_name or ""
-
         for colour in self.COLOURS:
-            if re.search(r"\b%s\b" % colour, name, re.I):
+            if re.search(r"\b%s\b" % colour, name or "", re.I):
                 return colour
 
         return None
@@ -322,6 +329,10 @@ class SaleOrder(models.Model):
             return self.env["product.product"]
 
     def _track_prep_flag_product(self, line):
+        """The flag angle matching a cart line's track."""
+        return self._track_prep_flag_for_colour(self._track_prep_colour(line))
+
+    def _track_prep_flag_for_colour(self, colour):
         """The flag angle in the track's own finish.
 
         Looked up BY NAME rather than configured, because there is one per
@@ -329,8 +340,6 @@ class SaleOrder(models.Model):
         The setting stays as a fallback for a track whose finish is a colour
         these products do not cover.
         """
-        colour = self._track_prep_colour(line)
-
         if colour:
             Product = self.env["product.product"].sudo()
             exact = Product.search(
@@ -355,45 +364,42 @@ class SaleOrder(models.Model):
 
     # --- keeping the parts in step with the track -----------------------------
 
-    def _track_prep_sync(self, line):
-        """Create, update or remove the parts belonging to one track line."""
-        self.ensure_one()
+    def _track_prep_requirements(self, product, qty=1.0):
+        """({role: (part, quantity)}, warning): what preparing this track needs.
 
-        existing = self.order_line.filtered(lambda l: l.track_prep_parent_id == line)
+        ONE PLACE WORKS IT OUT, so the price the shop page shows and the lines
+        the cart books cannot disagree. The cart calls this to create the
+        lines; product_template calls it to price the Prepared option before
+        anything is in a cart.
 
-        if not line.exists() or not self._track_prep_is_prepared(line):
-            existing.unlink()
-            return None
-
-        height_feet = self._track_prep_door_height_feet(line)
+        A warning means nothing is added - every part or none, because a
+        prepared track missing its brackets is not a thing the owner sells.
+        """
+        height_feet = self._track_prep_height_from_name(
+            product.display_name or "")
 
         if not height_feet:
-            existing.unlink()
-            return _(
+            return {}, _(
                 "We could not read the door height from “%s”, so the jamb"
                 " brackets and flag angle were not added. Please call us and we"
                 " will prepare it for you.",
-                line.product_id.display_name,
+                product.display_name,
             )
 
-        colour = self._track_prep_colour(line)
+        colour = self._track_prep_colour_from_name(product.display_name or "")
 
         if not colour:
-            existing.unlink()
-
-            return _(
+            return {}, _(
                 "We could not tell what finish “%s” is, so the flag angle was"
                 " not added - it has to match the track. Please call us and we"
                 " will prepare it for you.",
-                line.product_id.display_name,
+                product.display_name,
             )
 
         mix = self._track_prep_bracket_mix(height_feet)
 
         if not mix:
-            existing.unlink()
-
-            return _(
+            return {}, _(
                 "A %s ft door is outside the sizes we prepare tracks for, so"
                 " the parts were not added. Please call us and we will prepare"
                 " it for you.",
@@ -402,22 +408,20 @@ class SaleOrder(models.Model):
 
         wanted = {
             "flag": (
-                self._track_prep_flag_product(line),
-                self.FLAG_ANGLES_PER_TRACK * line.product_uom_qty,
+                self._track_prep_flag_for_colour(colour),
+                self.FLAG_ANGLES_PER_TRACK * qty,
             ),
         }
 
-        for size, qty in mix.items():
+        for size, count in mix.items():
             wanted["jamb_%s" % size] = (
                 self._track_prep_bracket_product(size, colour),
-                qty * line.product_uom_qty,
+                count * qty,
             )
 
         missing = [k for k, (p, _q) in wanted.items() if not p]
 
         if missing:
-            existing.unlink()
-
             # NAME WHAT IS MISSING, THE WAY THE OWNER NAMES IT. The first
             # version of this said "the parts are not configured yet", which
             # sent someone looking for a setting that does not exist. The
@@ -432,11 +436,31 @@ class SaleOrder(models.Model):
                 for key in missing
             ))
 
-            return _(
+            return {}, _(
                 "We are missing a part needed to prepare this track (%s), so it"
                 " was not added. Please call us and we will prepare it for you.",
                 wants,
             )
+
+        return wanted, None
+
+    def _track_prep_sync(self, line):
+        """Create, update or remove the parts belonging to one track line."""
+        self.ensure_one()
+
+        existing = self.order_line.filtered(lambda l: l.track_prep_parent_id == line)
+
+        if not line.exists() or not self._track_prep_is_prepared(line):
+            existing.unlink()
+            return None
+
+        wanted, warning = self._track_prep_requirements(
+            line.product_id, line.product_uom_qty)
+
+        if warning:
+            existing.unlink()
+
+            return warning
 
         for role, (product, qty) in wanted.items():
             part = existing.filtered(lambda l: l.track_prep_role == role)[:1]
