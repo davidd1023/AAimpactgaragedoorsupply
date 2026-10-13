@@ -1239,8 +1239,16 @@ class StockPicking(models.Model):
             ))
 
         refused = self._work_station_finish()
+        reason = refused.get(self.id, "")
 
-        return refused.get(self.id, "")
+        if not reason:
+            self.sudo().message_post(
+                body=self.env._(
+                    "Dispatch confirmed this order as complete, and the "
+                    "transfer was validated."),
+                subtype_xmlid="mail.mt_note")
+
+        return reason
 
     def _work_station_finish(self):
         """Validate the transfers whose work is all done.
@@ -1310,12 +1318,14 @@ class StockPicking(models.Model):
             reason = refused.get(picking.id)
 
             if reason:
-                picking.sudo().message_post(body=self.env._(
-                    "Dispatch confirmed this order as finished, but the "
-                    "transfer could not be validated automatically: "
-                    "%(reason)s",
-                    reason=reason,
-                ))
+                picking.sudo().message_post(
+                    body=self.env._(
+                        "Dispatch confirmed this order as finished, but the "
+                        "transfer could not be validated automatically: "
+                        "%(reason)s",
+                        reason=reason,
+                    ),
+                    subtype_xmlid="mail.mt_note")
 
         return refused
 
