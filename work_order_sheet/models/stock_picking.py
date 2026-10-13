@@ -1192,6 +1192,26 @@ class StockPicking(models.Model):
     # ask anybody to do the same job twice.
     work_station_released = fields.Boolean(
         string="On the work stations", copy=False, index=True)
+
+    # THE SAME FACT, IN WORDS. The switch above is a boolean because that is
+    # what it is - on or off, and what every domain and filter asks about -
+    # but a boolean has no good way to read in a list: a badge widget cannot
+    # render one at all, and prints its own markup into the cell if asked to.
+    # So the column shows this instead, and says nothing for a transfer with
+    # no bench work on it rather than labelling it "Not sent", which would
+    # suggest somebody ought to send it.
+    work_station_shown = fields.Selection(
+        [("no", "Not sent"), ("yes", "On the stations")],
+        string="Stations", compute="_compute_work_station_shown")
+
+    @api.depends("work_station_released", "work_station_item_ids")
+    def _compute_work_station_shown(self):
+        for picking in self:
+            if not picking.work_station_item_ids:
+                picking.work_station_shown = False
+            else:
+                picking.work_station_shown = (
+                    "yes" if picking.work_station_released else "no")
     work_station_springs = fields.Selection(
         WORK_STATION_STATES, string="Springs", default="none",
         compute="_compute_work_station_states", store=True)
