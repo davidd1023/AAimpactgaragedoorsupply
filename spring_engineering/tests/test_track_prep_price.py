@@ -1,5 +1,7 @@
+import json
+
 from odoo.addons.website_sale.tests.common import MockRequest
-from odoo.tests.common import TransactionCase, tagged
+from odoo.tests.common import HttpCase, TransactionCase, tagged
 
 
 @tagged("post_install", "-at_install")
@@ -145,7 +147,11 @@ class TestPreparedTrackPrice(TransactionCase):
         order._cart_add(
             tmpl.product_variant_id.id, 2,
             no_variant_attribute_value_ids=[self._ptav(tmpl, "Prepared").id])
-        self.assertAlmostEqual(order.amount_total, one * 2, places=2)
+        # WITHIN A CENT, and it cannot be better than that: a unit price is
+        # rounded to the cent and an order total rounds the whole sum, so
+        # doubling the one does not always land on the other. The parts for two
+        # tracks are one line of eight brackets, not two lines of four.
+        self.assertAlmostEqual(order.amount_total, one * 2, delta=0.02)
 
     def test_a_taller_door_costs_more_to_prepare(self):
         """The mix is graduated, so the price has to follow the door."""
@@ -188,3 +194,116 @@ class TestPreparedTrackPrice(TransactionCase):
                     product_id=plain.product_variant_id.id)["price"],
                 plain.with_context(track_prep_no_extra=True)._get_combination_info(
                     product_id=plain.product_variant_id.id)["price"])
+
+
+@tagged("post_install", "-at_install")
+class TestPreparedTrackNotification(HttpCase):
+    """The "added to your cart" popup quotes what the product page quoted.
+
+    THE BUG: the popup lists the line the customer clicked, and a prepared
+    track's brackets and flag angle are lines of their own - so it showed the
+    bare track's price while the page right behind it showed the prepared one.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.website = self.env["website"].search([], limit=1)
+        self.attr = self.env.ref("spring_engineering.attribute_track_preparation")
+        self.v_unprepared = self.env.ref(
+            "spring_engineering.attribute_value_track_unprepared")
+        self.v_prepared = self.env.ref(
+            "spring_engineering.attribute_value_track_prepared")
+
+        parts = self.env["product.product"]
+
+        for code in ("ATL-610J10JBBR", "ATL-614J12JBBR", "ATL-616J14JBBR",
+                     "ATL-616J16JBBR"):
+            found = self.env["product.product"].search(
+                [("default_code", "=", code)], limit=1)
+            self.assertTrue(found, "catalogue bracket %s is missing" % code)
+            parts |= found
+
+        flag = self.env["product.product"].search(
+            [("name", "=ilike", "Flag Angle Black")], limit=1)
+
+        if not flag:
+            flag = self.env["product.template"].create({
+                "name": "Flag Angle Black", "type": "consu", "list_price": 7.5,
+            }).product_variant_id
+
+        parts |= flag
+        parts.product_tmpl_id.write({"taxes_id": [(5,)]})
+
+        self.track = self.env["product.template"].create({
+            "name": "CH-VT-2-2 Vertical Track 76-7 door height black",
+            "type": "consu", "list_price": 42.0, "is_published": True,
+            "taxes_id": [(5,)],
+        })
+        self.env["product.template.attribute.line"].create({
+            "product_tmpl_id": self.track.id, "attribute_id": self.attr.id,
+            "value_ids": [(6, 0, [self.v_unprepared.id, self.v_prepared.id])]})
+        self.track.invalidate_recordset()
+
+    def _ptav(self, name):
+        return self.track.attribute_line_ids.filtered(
+            lambda l: l.attribute_id == self.attr
+        ).product_template_value_ids.filtered(lambda p: p.name == name)
+
+    def _add(self, choice, qty=1):
+        """Add the track to a visitor's cart, and return what the popup says."""
+        response = self.url_open(
+            "/shop/cart/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call", "params": {
+                "product_template_id": self.track.id,
+                "product_id": self.track.product_variant_id.id,
+                "quantity": qty,
+                "no_variant_attribute_value_ids": [self._ptav(choice).id],
+            }}),
+            headers={"Content-Type": "application/json"})
+        self.assertEqual(response.status_code, 200)
+        result = response.json().get("result") or {}
+        self.assertTrue(result.get("notification_info", {}).get("lines"),
+                        "the popup said nothing: %s" % (result,))
+
+        return result["notification_info"]["lines"]
+
+    def _page_price(self, choice, qty=1):
+        with MockRequest(self.env, website=self.website):
+            return self.track._get_combination_info(
+                combination=self._ptav(choice),
+                product_id=self.track.product_variant_id.id,
+                add_qty=qty)["price"]
+
+    def _cart(self):
+        return self.env["sale.order"].search(
+            [("order_line.product_id", "=", self.track.product_variant_id.id)],
+            order="id desc", limit=1)
+
+    def test_the_popup_quotes_the_prepared_price(self):
+        lines = self._add("Prepared")
+        self.assertEqual(len(lines), 1, "the parts were listed as rows of their own")
+        self.assertAlmostEqual(lines[0]["price_total"], self._page_price("Prepared"),
+                               places=2)
+        self.assertGreater(lines[0]["price_total"], self._page_price("Unprepared"))
+
+        # AND IT IS THE TRUTH, not merely consistent with the page: the popup's
+        # figure is what the cart now holds, to the cent that global tax
+        # rounding can move.
+        self.assertAlmostEqual(lines[0]["price_total"],
+                               self._cart().amount_total, delta=0.02)
+
+    def test_an_unprepared_track_is_unchanged(self):
+        lines = self._add("Unprepared")
+        self.assertAlmostEqual(lines[0]["price_total"],
+                               self._page_price("Unprepared"), places=2)
+
+    def test_two_prepared_tracks_quote_twice_the_price(self):
+        """The popup's figure is for the quantity added, not for one."""
+        lines = self._add("Prepared", qty=2)
+        self.assertAlmostEqual(lines[0]["price_total"],
+                               self._cart().amount_total, delta=0.02)
+        # Within a cent of twice the page price: a unit price shown to the cent
+        # cannot always double exactly into a rounded line total.
+        self.assertAlmostEqual(lines[0]["price_total"],
+                               self._page_price("Prepared", qty=2) * 2, delta=0.02)
+

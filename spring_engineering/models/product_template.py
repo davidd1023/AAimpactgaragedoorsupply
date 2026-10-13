@@ -142,7 +142,15 @@ class ProductTemplate(models.Model):
             )._get_combination_info(
                 product_id=part.id, add_qty=count * (add_qty or 1.0)
             )
-            extra += info["price"] * count
+            # ROUNDED PER PART, THE WAY A CART LINE IS. Each part becomes one
+            # order line and Odoo rounds that line's subtotal to the currency,
+            # so a part priced at 1.368 by a percentage pricelist bills 5.47
+            # for four and not 5.472. Summing the unrounded figures put the
+            # page two cents under the cart on a 7 ft door - small, and
+            # exactly the kind of small that makes a customer count.
+            total = info["price"] * count
+            currency = info.get("currency")
+            extra += currency.round(total) if currency else total
 
         return extra
 
