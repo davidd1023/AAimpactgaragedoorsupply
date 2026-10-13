@@ -135,7 +135,8 @@
             }
             const qtyInput = scope.querySelector("input[name='add_qty']");
             const my = ++seq;
-            rpc("/aa/kit/extras", { template_id: Number(root.dataset.templateId), ptav_ids: ids, door, qty: Number(qtyInput && qtyInput.value) || 1 })
+            // RETURNED, so the Add to Cart handler below can wait for it.
+            return rpc("/aa/kit/extras", { template_id: Number(root.dataset.templateId), ptav_ids: ids, door, qty: Number(qtyInput && qtyInput.value) || 1 })
                 .then((r) => {
                     if (my !== seq) return;
                     out.innerHTML = "";
@@ -150,7 +151,42 @@
         }
 
         [wFt, wIn, hFt, hIn, weight, hl, track, lift].forEach((i) => i.addEventListener("change", refresh));
+        // "input" as well as "change": change only fires when a field loses
+        // focus, so a door typed and then sent straight to the cart was still
+        // unsent when the cart request went out.
+        [wFt, wIn, hFt, hIn, weight, hl].forEach((i) => i.addEventListener("input", refresh));
         scope.addEventListener("change", (ev) => { if (!root.contains(ev.target)) refresh(); });
+
+        // THE DOOR HAS TO REACH THE SERVER BEFORE THE CART DOES.
+        //
+        // This page prices the extras on a 250ms debounce and the server
+        // remembers the door from that same call, for when the kit is added.
+        // Add to Cart does not wait for it: the cart request went out first,
+        // so the kit line was written with whatever door the session happened
+        // to hold - nothing on a first order, and the PREVIOUS door on the
+        // next one. That is why the work order sheet showed no size, and why
+        // it once showed a weight nobody had entered.
+        //
+        // So the click is held, the door is sent, and only then is the button
+        // allowed to do what it was going to do.
+        let flushing = false;
+        scope.addEventListener("click", function (ev) {
+            const btn = ev.target.closest(
+                "#add_to_cart, [name='add_to_cart'], .js_check_product, button[type='submit']");
+            if (!btn || flushing) return;
+            if (!tickedExtras().length && !trimsPicked()) return;
+            ev.preventDefault();
+            ev.stopImmediatePropagation();
+            flushing = true;
+            clearTimeout(timer);
+            Promise.resolve(update())
+                .catch(() => {})
+                .then(() => {
+                    btn.click();
+                    setTimeout(() => { flushing = false; }, 0);
+                });
+        }, true);
+
         update();
     }
 
