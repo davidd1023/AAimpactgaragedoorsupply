@@ -39,8 +39,9 @@
         <group string="Work stations" name="work_stations"
                invisible="work_station_springs == 'none' and work_station_tracks == 'none' and work_station_cables == 'none' and work_station_dispatch == 'none'">
           <group>
-            <field name="work_station_released" widget="boolean_toggle"
-                   readonly="1"/>
+            <field name="work_station_shown" widget="badge"
+                   decoration-success="work_station_shown == 'yes'"
+                   decoration-warning="work_station_shown == 'no'"/>
             <field name="work_station_springs" widget="badge"
                    invisible="work_station_springs == 'none'"
                    decoration-success="work_station_springs == 'done'"
@@ -93,10 +94,9 @@
       </xpath>
 
       <xpath expr="//field[@name='state']" position="before">
-        <field name="work_station_released" optional="show" widget="badge"
-               string="Stations"
-               decoration-success="work_station_released"
-               decoration-muted="not work_station_released"/>
+        <field name="work_station_shown" optional="show" widget="badge"
+               decoration-success="work_station_shown == 'yes'"
+               decoration-warning="work_station_shown == 'no'"/>
         <field name="work_station_springs" optional="hide" widget="badge"
                decoration-success="work_station_springs == 'done'"
                decoration-warning="work_station_springs == 'partial'"

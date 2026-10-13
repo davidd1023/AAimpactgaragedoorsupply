@@ -1090,3 +1090,29 @@ class TestReleasingToTheStations(StationCase):
 
         self.assertEqual(pickings.mapped("work_station_released"),
                          [True, True])
+
+    def test_the_column_reads_as_words(self):
+        """A badge cannot render a boolean - asked to, it prints its own
+        markup into the cell - so the column shows a selection instead."""
+        order, picking = self._confirmed()
+        self.assertEqual(picking.work_station_shown, "no")
+
+        picking.action_work_station_release()
+        self.assertEqual(picking.work_station_shown, "yes")
+
+        picking.action_work_station_withdraw()
+        self.assertEqual(picking.work_station_shown, "no")
+
+    def test_a_transfer_with_no_bench_work_says_nothing_at_all(self):
+        """"Not sent" against a transfer nobody would ever send is a column
+        full of things to worry about."""
+        picking = self.env["stock.picking"].create({
+            "picking_type_id": self.env["stock.picking.type"].search(
+                [("code", "=", "internal")], limit=1).id,
+            "location_id": self.env.ref("stock.stock_location_stock").id,
+            "location_dest_id": self.env.ref("stock.stock_location_output").id,
+        })
+        picking.action_confirm()
+
+        self.assertFalse(picking.work_station_item_ids)
+        self.assertFalse(picking.work_station_shown)
