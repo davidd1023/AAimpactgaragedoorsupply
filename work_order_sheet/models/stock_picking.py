@@ -1176,6 +1176,22 @@ class StockPicking(models.Model):
 
     work_station_item_ids = fields.One2many(
         "work.station.item", "picking_id", string="Station work")
+
+    # PUT ON THE BENCHES BY HAND, NOT BY CONFIRMING AN ORDER.
+    #
+    # The work is sorted as soon as a transfer is confirmed - that part has not
+    # changed - but a bench screen showing every confirmed order is a bench
+    # screen showing work the office has not finished thinking about: an order
+    # still being edited, one waiting on a part, one that is not this week's.
+    # So the sorting and the SHOWING are now two different things, and the
+    # second one is a decision somebody makes in the Work Orders list.
+    #
+    # A FLAG RATHER THAN DELETING THE ROWS. Taking an order back off the
+    # benches has to be as safe as putting it there - it hides the work and
+    # keeps every tick already made, so an order put back a day later does not
+    # ask anybody to do the same job twice.
+    work_station_released = fields.Boolean(
+        string="On the work stations", copy=False, index=True)
     work_station_springs = fields.Selection(
         WORK_STATION_STATES, string="Springs", default="none",
         compute="_compute_work_station_states", store=True)
@@ -1227,6 +1243,39 @@ class StockPicking(models.Model):
 
             picking.work_station_todo_count = sum(
                 1 for state in sum(states.values(), []) if state != "done")
+
+    def action_work_station_release(self):
+        """Show these orders on the benches that do their work.
+
+        RE-SORTED AS IT GOES, because an order confirmed last week and edited
+        since must reach the bench as it is now, not as it was when it was
+        confirmed.
+        """
+        self._work_station_sync()
+
+        for picking in self:
+            if picking.work_station_released:
+                continue
+
+            picking.work_station_released = True
+            picking.message_post(
+                body=self.env._("Sent to the work stations."),
+                subtype_xmlid="mail.mt_note")
+
+        return True
+
+    def action_work_station_withdraw(self):
+        """Take them off the benches again, keeping every tick already made."""
+        for picking in self:
+            if not picking.work_station_released:
+                continue
+
+            picking.work_station_released = False
+            picking.message_post(
+                body=self.env._("Taken off the work stations."),
+                subtype_xmlid="mail.mt_note")
+
+        return True
 
     def action_open_work_station_items(self):
         """The station rows behind those three words."""

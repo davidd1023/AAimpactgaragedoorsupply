@@ -13,6 +13,19 @@
     <field name="inherit_id" ref="stock.view_picking_form"/>
     <field name="arch" type="xml">
 
+      <!-- SAID WHERE IT MATTERS. An order whose work is sorted but which no
+           bench can see looks, on this screen, exactly like one they are
+           working on. -->
+      <xpath expr="//notebook" position="before">
+        <div class="alert alert-info" role="status"
+             invisible="work_station_released or (work_station_springs == 'none' and work_station_tracks == 'none' and work_station_cables == 'none' and work_station_dispatch == 'none')">
+          This order is not on the work stations yet - the benches cannot see
+          it until it is sent to them.
+          <button name="action_work_station_release" type="object"
+                  string="Send to the work stations" class="btn-link"/>
+        </div>
+      </xpath>
+
       <xpath expr="//div[@name='button_box']" position="inside">
         <button name="action_open_work_station_items" type="object"
                 class="oe_stat_button" icon="fa-wrench"
@@ -26,6 +39,8 @@
         <group string="Work stations" name="work_stations"
                invisible="work_station_springs == 'none' and work_station_tracks == 'none' and work_station_cables == 'none' and work_station_dispatch == 'none'">
           <group>
+            <field name="work_station_released" widget="boolean_toggle"
+                   readonly="1"/>
             <field name="work_station_springs" widget="badge"
                    invisible="work_station_springs == 'none'"
                    decoration-success="work_station_springs == 'done'"
@@ -66,7 +81,22 @@
     <field name="model">stock.picking</field>
     <field name="inherit_id" ref="stock.vpicktree"/>
     <field name="arch" type="xml">
+      <!-- THE BUTTONS GO WHERE UNRESERVE AND CHECK AVAILABILITY ALREADY ARE:
+           the row that appears across the top once orders are ticked, which is
+           where somebody standing in this list looks for something to do to
+           the orders they have just chosen. -->
+      <xpath expr="//list/header" position="inside">
+        <button name="action_work_station_release" type="object"
+                string="Send to work stations"/>
+        <button name="action_work_station_withdraw" type="object"
+                string="Take off work stations"/>
+      </xpath>
+
       <xpath expr="//field[@name='state']" position="before">
+        <field name="work_station_released" optional="show" widget="badge"
+               string="Stations"
+               decoration-success="work_station_released"
+               decoration-muted="not work_station_released"/>
         <field name="work_station_springs" optional="hide" widget="badge"
                decoration-success="work_station_springs == 'done'"
                decoration-warning="work_station_springs == 'partial'"
@@ -97,6 +127,8 @@
     <field name="inherit_id" ref="stock.view_picking_internal_search"/>
     <field name="arch" type="xml">
       <xpath expr="//search" position="inside">
+        <filter name="work_station_released" string="On the work stations"
+                domain="[('work_station_released', '=', True)]"/>
         <filter name="work_station_unfinished" string="Benches unfinished"
                 domain="[('work_station_todo_count', '>', 0)]"/>
       </xpath>
