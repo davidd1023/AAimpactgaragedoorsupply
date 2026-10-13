@@ -39,8 +39,13 @@ class WorkStationKiosk(http.Controller):
     def _items(self, station):
         """What is waiting at this bench, and what it just finished."""
         Item = request.env["work.station.item"].sudo()
+        # ONLY WHAT THE OFFICE HAS PUT ON THE BENCHES. Sorting happens when a
+        # transfer is confirmed; showing it here is a separate decision, made
+        # in the Work Orders list. A bench screen listing every confirmed order
+        # would be listing work nobody has finished thinking about.
         base = [
             ("station_id", "=", station.id),
+            ("picking_id.work_station_released", "=", True),
             ("picking_id.state", "not in", ("done", "cancel")),
         ]
         todo = Item.search(base + [("state", "=", "todo")])
@@ -84,6 +89,7 @@ class WorkStationKiosk(http.Controller):
 
         return request.env["stock.picking"].sudo().search([
             ("state", "not in", ("done", "cancel")),
+            ("work_station_released", "=", True),
             ("work_station_item_ids", "!=", False),
             ("work_station_todo_count", "=", 0),
         ], order="id")

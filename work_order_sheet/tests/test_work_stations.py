@@ -56,6 +56,10 @@ class StationCase(HttpCase):
             ],
         })
         order.action_confirm()
+        # SENT TO THE BENCHES, because that is now a decision somebody makes.
+        # The tests that care about the decision itself make it for themselves;
+        # everything else is about what happens once it has been made.
+        order.picking_ids.action_work_station_release()
 
         return order
 
@@ -963,3 +967,126 @@ class TestSuppliedAsStock(StationCase):
         picking.action_work_station_sync()
 
         self.assertEqual(len(picking.message_ids), before)
+
+
+@tagged("post_install", "-at_install")
+class TestReleasingToTheStations(StationCase):
+    """A bench sees an order when the office sends it, not when it is
+    confirmed.
+
+    The owner's rule: work orders do not appear on the stations until they are
+    picked out of the Work Orders list and sent. A bench screen showing every
+    confirmed order is a screen showing work nobody has finished thinking
+    about - an order still being edited, one waiting on a part, one that is
+    not this week's.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.dispatch = self.env.ref("work_order_sheet.station_dispatch")
+
+    def _confirmed(self):
+        """An order confirmed and NOT sent to the benches."""
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "order_line": [
+                (0, 0, {"product_id": self.track.id, "product_uom_qty": 2}),
+                (0, 0, {"product_id": self.hinge.id, "product_uom_qty": 4}),
+            ],
+        })
+        order.action_confirm()
+
+        return order, order.picking_ids[:1]
+
+    def test_confirming_an_order_does_not_put_it_on_a_bench(self):
+        order, picking = self._confirmed()
+
+        self.assertFalse(picking.work_station_released)
+        self.assertTrue(picking.work_station_item_ids,
+                        "the work was not even sorted")
+        self.assertNotIn("Vertical Track", self._kiosk(self.tracks))
+
+    def test_sending_it_puts_it_there(self):
+        order, picking = self._confirmed()
+        picking.action_work_station_release()
+
+        self.assertTrue(picking.work_station_released)
+        self.assertIn("Vertical Track", self._kiosk(self.tracks))
+
+    def test_taking_it_back_hides_it_without_losing_a_single_tick(self):
+        """Putting an order back has to be as safe as sending it, or nobody
+        will ever use the button."""
+        order, picking = self._confirmed()
+        picking.action_work_station_release()
+        tracks = self._items(order, self.tracks)
+        tracks.action_done()
+
+        picking.action_work_station_withdraw()
+        self.assertFalse(picking.work_station_released)
+        self.assertNotIn("Vertical Track", self._kiosk(self.tracks))
+        self.assertEqual(tracks.state, "done", "the bench's work was lost")
+
+        picking.action_work_station_release()
+        self.assertEqual(tracks.state, "done",
+                         "it was asked for a second time")
+
+    def test_an_order_held_back_cannot_be_completed_from_a_bench(self):
+        order, picking = self._confirmed()
+        self._items(order).filtered(lambda i: not i.auto_done).action_done()
+
+        self.assertNotIn("Ready to send out", self._kiosk(self.dispatch))
+        self.assertEqual(self._complete(self.dispatch, picking).status_code,
+                         404)
+        picking.invalidate_recordset()
+        self.assertNotEqual(picking.state, "done")
+
+    def test_sending_it_sorts_it_again_first(self):
+        """An order confirmed last week and edited since has to reach the
+        bench as it is now, not as it was when it was confirmed."""
+        order, picking = self._confirmed()
+        self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": self.cable.id,
+            "product_uom_qty": 2})
+
+        picking.action_work_station_release()
+
+        self.assertIn("GAC", self._kiosk(self.cables),
+                      "the line added after confirmation never reached a bench")
+
+    def test_the_order_says_whether_the_benches_can_see_it(self):
+        order, picking = self._confirmed()
+        self.assertFalse(picking.work_station_released)
+
+        picking.action_work_station_release()
+        self.assertTrue(picking.work_station_released)
+
+        # And it can be found that way, which is the point of a column.
+        self.assertIn(picking, self.env["stock.picking"].search(
+            [("work_station_released", "=", True)]))
+
+    def test_sending_and_withdrawing_are_logged(self):
+        order, picking = self._confirmed()
+        picking.action_work_station_release()
+        picking.action_work_station_withdraw()
+
+        bodies = " ".join(picking.message_ids.mapped("body"))
+        self.assertIn("Sent to the work stations", bodies)
+        self.assertIn("Taken off the work stations", bodies)
+
+    def test_sending_one_that_is_already_there_says_nothing_twice(self):
+        order, picking = self._confirmed()
+        picking.action_work_station_release()
+        before = len(picking.message_ids)
+        picking.action_work_station_release()
+        self.assertEqual(len(picking.message_ids), before)
+
+    def test_several_orders_at_once(self):
+        """What the button in the list actually does: a selection, not one."""
+        first, first_picking = self._confirmed()
+        second, second_picking = self._confirmed()
+        pickings = first_picking | second_picking
+
+        pickings.action_work_station_release()
+
+        self.assertEqual(pickings.mapped("work_station_released"),
+                         [True, True])
