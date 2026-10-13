@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE BENCH TABLET.
+
+       A whole document rather than a page inside the website: this is not
+       somewhere a customer browses to, it is a screen bolted to a bench, and
+       it should carry no menu, no search, no cart and nothing else to tap by
+       accident. Everything is inline for the same reason - a kiosk that has to
+       fetch an asset bundle before it can show today's work is a kiosk that
+       shows a blank screen when the network hiccups.
+
+       BIG, because it is read standing up, at arm's length, in a workshop. -->
+  <template id="station_kiosk" name="Work station">&lt;!DOCTYPE html&gt;
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title><t t-esc="station.name"/> - Work station</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: Arial, Helvetica, sans-serif;
+             color: #111; background: #f4f5f7; font-size: 17px; }
+      header { position: sticky; top: 0; background: #1f2d3d; color: #fff;
+               padding: 14px 18px; display: flex; align-items: center;
+               justify-content: space-between; }
+      header h1 { font-size: 24px; margin: 0; }
+      header .count { font-size: 18px; opacity: .85; }
+      header a { color: #fff; text-decoration: none; border: 1px solid #fff;
+                 border-radius: 6px; padding: 8px 14px; font-size: 16px; }
+      main { padding: 14px; max-width: 980px; margin: 0 auto; }
+      .order { font-size: 15px; font-weight: bold; letter-spacing: .04em;
+               text-transform: uppercase; color: #5a6b7c;
+               margin: 18px 0 8px; }
+      .job { background: #fff; border: 1px solid #d6dbe1; border-radius: 10px;
+             padding: 14px; margin-bottom: 10px; display: flex; gap: 14px;
+             align-items: flex-start; }
+      .job .what { flex: 1 1 auto; }
+      .job .name { font-size: 20px; font-weight: bold; }
+      .job .meta { color: #5a6b7c; font-size: 15px; margin-top: 2px; }
+      .job .length { font-size: 30px; font-weight: bold; margin-top: 6px; }
+      .job .door { font-size: 16px; color: #1f2d3d; margin-top: 6px; }
+      .job pre { font-family: Arial, Helvetica, sans-serif; font-size: 18px;
+                 line-height: 1.45; margin: 8px 0 0; white-space: pre-wrap; }
+      .job form { flex: 0 0 auto; }
+      button { font-size: 18px; font-weight: bold; padding: 14px 22px;
+               min-height: 54px; border-radius: 8px; border: 0;
+               background: #1b8f4d; color: #fff; }
+      .done button { background: #fff; color: #5a6b7c; font-weight: normal;
+                     border: 1px solid #d6dbe1; min-height: 40px;
+                     font-size: 15px; padding: 8px 14px; }
+      .done .job { background: #eef0f3; padding: 10px 14px; }
+      .done .job .name { font-size: 17px; font-weight: normal;
+                         text-decoration: line-through; color: #5a6b7c; }
+      .empty { background: #fff; border: 1px dashed #d6dbe1; border-radius: 10px;
+               padding: 40px; text-align: center; color: #5a6b7c;
+               font-size: 20px; }
+      .section { margin-top: 26px; font-size: 15px; color: #5a6b7c;
+                 text-transform: uppercase; letter-spacing: .04em; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><t t-esc="station.name"/></h1>
+      <span class="count">
+        <t t-esc="len(todo)"/> to do
+      </span>
+      <a t-attf-href="/station/{{ token }}">Refresh</a>
+    </header>
+
+    <main>
+      <t t-if="not todo">
+        <div class="empty">Nothing waiting. New work appears here on its own.</div>
+      </t>
+
+      <!-- GROUPED BY ORDER, because that is what the floor calls a job and
+           because two doors on one order must not be mixed up. -->
+      <t t-set="order_name" t-value="None"/>
+      <t t-foreach="todo" t-as="item">
+        <t t-if="item.order_name != order_name">
+          <div class="order">Order <t t-esc="item.order_name or '-'"/></div>
+          <t t-set="order_name" t-value="item.order_name"/>
+        </t>
+
+        <div class="job">
+          <div class="what">
+            <div class="name">
+              <t t-if="item.quantity and item.quantity != 1">
+                <t t-esc="'%g' % item.quantity"/>
+                <t t-esc="item.uom_name"/> -
+              </t>
+              <t t-esc="item.name"/>
+            </div>
+            <div class="meta" t-if="item.code">
+              <t t-esc="item.code"/>
+            </div>
+            <div class="length" t-if="item.length">
+              <t t-esc="item.length"/>
+            </div>
+            <pre t-if="item.detail"><t t-esc="item.detail"/></pre>
+            <div class="door" t-if="item.door">
+              Door: <t t-esc="item.door"/>
+            </div>
+          </div>
+          <form t-attf-action="/station/{{ token }}/done/{{ item.id }}" method="post">
+            <button type="submit">Done</button>
+          </form>
+        </div>
+      </t>
+
+      <t t-if="done">
+        <div class="section">Finished today</div>
+        <div class="done">
+          <t t-foreach="done" t-as="item">
+            <div class="job">
+              <div class="what">
+                <div class="name">
+                  <t t-esc="item.order_name or '-'"/> - <t t-esc="item.name"/>
+                  <t t-if="item.length"> (<t t-esc="item.length"/>)</t>
+                </div>
+              </div>
+              <form t-attf-action="/station/{{ token }}/todo/{{ item.id }}" method="post">
+                <button type="submit">Undo</button>
+              </form>
+            </div>
+          </t>
+        </div>
+      </t>
+    </main>
+
+    <!-- RELOADS ONLY WHEN NOBODY IS USING IT. A page that refreshes on a
+         timer moves the list under somebody's thumb, and the one thing worse
+         than stale work on a bench screen is the wrong job ticked off. Any
+         touch or tap postpones the reload by another minute. -->
+    <script type="text/javascript">
+      (function () {
+          var idle = 0;
+          ["touchstart", "mousedown", "keydown", "scroll"].forEach(function (name) {
+              window.addEventListener(name, function () { idle = 0; }, true);
+          });
+          window.setInterval(function () {
+              idle += 10;
+              if (idle >= 60) { window.location.reload(); }
+          }, 10000);
+      })();
+    </script>
+  </body>
+</html>
+  </template>
+
+</odoo>

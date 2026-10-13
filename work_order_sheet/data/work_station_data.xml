@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- THE THREE BENCHES, created once.
+
+       noupdate because these are the owner's records from the moment they
+       exist: a station renamed on the live site, or given a fresh kiosk link
+       after a tablet went missing, must not be quietly put back the way it
+       shipped by the next module update. -->
+  <data noupdate="1">
+
+    <record id="station_springs" model="work.station">
+      <field name="name">Springs</field>
+      <field name="code">springs</field>
+      <field name="sequence">10</field>
+    </record>
+
+    <record id="station_tracks" model="work.station">
+      <field name="name">Tracks</field>
+      <field name="code">tracks</field>
+      <field name="sequence">20</field>
+    </record>
+
+    <record id="station_cables" model="work.station">
+      <field name="name">Cables</field>
+      <field name="code">cables</field>
+      <field name="sequence">30</field>
+    </record>
+
+  </data>
+</odoo>

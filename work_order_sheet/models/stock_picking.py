@@ -3,6 +3,8 @@ import re
 from odoo import fields, models
 from odoo.exceptions import UserError
 
+from .work_station import STATIONS
+
 # WHAT A LENGTH LOOKS LIKE IN A PRODUCT NAME. The catalogue writes a track as
 #
 #   [CH-VT-2"] 2" Vertical Track 76" - 7' Door Height Black
@@ -763,6 +765,13 @@ class StockPicking(models.Model):
         return {
             "code": product.default_code or "",
             "name": product.name or name,
+            # WHAT THIS ROW WAS MADE FROM. The printed sheet does not need
+            # either, but the work stations do: a row has to be recognisable
+            # as the same row when the same transfer is sorted again, or a
+            # re-sort would double the queue and lose what a bench had
+            # already ticked off.
+            "product": product,
+            "key": "sl%s" % sale_line.id,
             "quantity": sale_line.product_uom_qty,
             "uom": (sale_line.product_uom_id.name
                     if "product_uom_id" in sale_line._fields else "") or "",
@@ -815,6 +824,12 @@ class StockPicking(models.Model):
         return {
             "code": product.default_code or "",
             "name": product.name or name,
+            "product": product,
+            # A collapsed group is one purchase and keys on the line it came
+            # from; a single move keys on itself, which is the only identity a
+            # move with no order line behind it has.
+            "key": ("sl%s" % sale_line.id if collapsed and sale_line
+                    else "mv%s" % move.id),
             "quantity": (sale_line.product_uom_qty if collapsed
                          else move.product_uom_qty),
             "uom": ((sale_line.product_uom_id.name
@@ -927,3 +942,153 @@ class StockPicking(models.Model):
             "uncategorised": False,
             "lines": groups[page],
         } for page in self.PAGES if groups.get(page)]
+
+    # --- sorting the work onto the benches ------------------------------------
+    #
+    # THE SAME RULE THAT SORTS THE PRINTED SHEET, deliberately and without a
+    # second copy of it. _work_order_page already decides whether a line is a
+    # track, a spring or a cable - by what the product IS first and where the
+    # shop filed it second - and every one of those decisions is tested. A
+    # station is simply that page with a tablet in front of it, so the sort
+    # reads the sheet's own lines and files them by page name.
+    #
+    # Hardware is not a station: those parts come off a shelf against the
+    # transfer, which is what the transfer is for.
+
+    def _work_station_door_label(self, door):
+        """The door, on one line, for the bench that is building for it."""
+        door = door or {}
+        size = " x ".join(filter(None, [door.get("width"), door.get("height")]))
+
+        return " | ".join(filter(None, [
+            size,
+            door.get("weight"),
+            ('%s hi-lift' % door["hilift"]) if door.get("hilift") else "",
+        ]))
+
+    def _work_station_detail(self, line):
+        """The specification a bench has to work to, as plain text.
+
+        ONLY THE SPRINGS HAVE ONE. A track and a cable are a length, and the
+        length has a column of its own; an assembly is a cut list, and that is
+        what this is.
+        """
+        spring = line.get("spring")
+
+        if not spring:
+            return ""
+
+        facts = dict(spring.get("parameters") or [])
+        rows = []
+        head = []
+
+        if facts.get("Assembly"):
+            head.append(facts["Assembly"])
+
+        if facts.get("Springs"):
+            count = facts["Springs"]
+            head.append("%s spring%s" % (count, "" if count == "1" else "s"))
+
+        if head:
+            rows.append(", ".join(head))
+
+        for item in spring.get("springs") or []:
+            rows.append('%s: %s wire, %s ID, %s long' % (
+                item.get("role") or "Spring", item.get("wire") or "?",
+                item.get("inside_diameter") or "?", item.get("length") or "?"))
+
+        if facts.get("Cycle target"):
+            rows.append("%s cycles" % facts["Cycle target"])
+
+        return "\n".join(rows)
+
+    def _work_station_values(self):
+        """[(station code, values)] for everything on this transfer to build."""
+        self.ensure_one()
+        codes = dict(STATIONS)
+        door = self._work_station_door_label(self._work_order_door())
+        order = self._work_order_sale_order()
+        wanted = []
+        sequence = 10
+
+        for line in self._work_order_lines():
+            code = (line.get("page") or "").lower()
+
+            if code not in codes:
+                continue
+
+            product = line.get("product")
+            wanted.append((code, {
+                "picking_id": self.id,
+                "order_name": order.name if order else (self.origin or self.name),
+                "sequence": sequence,
+                "product_id": product.id if product else False,
+                "name": line.get("name") or "",
+                "code": line.get("code") or "",
+                "quantity": line.get("quantity") or 0.0,
+                "uom_name": line.get("uom") or "",
+                "length": line.get("length") or "",
+                "door": door,
+                "detail": self._work_station_detail(line),
+                "line_key": line.get("key") or "",
+            }))
+            sequence += 10
+
+        return wanted
+
+    def _work_station_sync(self):
+        """Put this transfer's work on the benches that do it.
+
+        IDEMPOTENT, because it runs again every time the transfer is
+        confirmed. A row already on a station is updated in place, so a bench
+        that has ticked something off does not see it come back; a row that is
+        no longer on the transfer is removed unless it is already done, since
+        deleting finished work would lose the only record that it happened.
+        """
+        Item = self.env["work.station.item"].sudo()
+        Station = self.env["work.station"].sudo()
+
+        for picking in self:
+            if picking.state in ("draft", "cancel"):
+                continue
+
+            existing = Item.search([("picking_id", "=", picking.id)])
+            by_key = {item.line_key: item for item in existing}
+            seen = set()
+
+            for code, values in picking._work_station_values():
+                station = Station._station_for_code(code)
+
+                if not station:
+                    continue
+
+                values["station_id"] = station.id
+                seen.add(values["line_key"])
+                item = by_key.get(values["line_key"])
+
+                if item:
+                    # NEVER THE STATE. A re-sort describes the work again; it
+                    # does not un-finish it.
+                    item.write(values)
+                else:
+                    Item.create(values)
+
+            stale = existing.filtered(
+                lambda i: i.line_key not in seen and i.state == "todo")
+            stale.unlink()
+
+        return True
+
+    def action_confirm(self):
+        """Confirming a transfer is what puts its work on the benches."""
+        result = super().action_confirm()
+        self._work_station_sync()
+
+        return result
+
+    def action_work_station_sync(self):
+        """The Actions menu entry, for a transfer confirmed before this
+        existed - or one whose products were corrected afterwards."""
+        self._work_station_sync()
+
+        return True
