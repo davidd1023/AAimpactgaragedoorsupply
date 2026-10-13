@@ -1,9 +1,9 @@
 import re
 
 from odoo import api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
-from .work_station import STATIONS
+from .work_station import DISPATCH, MAKERS, STATIONS
 
 # WHAT A LENGTH LOOKS LIKE IN A PRODUCT NAME. The catalogue writes a track as
 #
@@ -1002,19 +1002,29 @@ class StockPicking(models.Model):
 
         return "\n".join(rows)
 
+    # WHICH BENCH EACH PAGE FEEDS. Three of them are the same word twice;
+    # Hardware feeds Dispatch, because a hinge is not made, it is gathered and
+    # sent. The page is what a part IS and the station is who handles it, which
+    # is why this is a mapping and not a lowercase().
+    PAGE_TO_STATION = {
+        "springs": "springs",
+        "tracks": "tracks",
+        "cables": "cables",
+        "hardware": DISPATCH,
+    }
+
     def _work_station_values(self):
-        """[(station code, values)] for everything on this transfer to build."""
+        """[(station code, values)] for everything on this transfer to do."""
         self.ensure_one()
-        codes = dict(STATIONS)
         door = self._work_station_door_label(self._work_order_door())
         order = self._work_order_sale_order()
         wanted = []
         sequence = 10
 
         for line in self._work_order_lines():
-            code = (line.get("page") or "").lower()
+            code = self.PAGE_TO_STATION.get((line.get("page") or "").lower())
 
-            if code not in codes:
+            if not code:
                 continue
 
             product = line.get("product")
@@ -1122,6 +1132,9 @@ class StockPicking(models.Model):
     work_station_cables = fields.Selection(
         WORK_STATION_STATES, string="Cables", default="none",
         compute="_compute_work_station_states", store=True)
+    work_station_dispatch = fields.Selection(
+        WORK_STATION_STATES, string="Dispatch", default="none",
+        compute="_compute_work_station_states", store=True)
     work_station_todo_count = fields.Integer(
         string="Still to make", compute="_compute_work_station_states",
         store=True)
@@ -1131,6 +1144,7 @@ class StockPicking(models.Model):
         ("springs", "work_station_springs"),
         ("tracks", "work_station_tracks"),
         ("cables", "work_station_cables"),
+        (DISPATCH, "work_station_dispatch"),
     )
 
     @api.depends("work_station_item_ids.state",
@@ -1173,3 +1187,116 @@ class StockPicking(models.Model):
             "domain": [("picking_id", "=", self.id)],
             "context": {"search_default_by_station": 1},
         }
+
+    # --- dispatch goes last, and finishes the job -----------------------------
+
+    @api.depends("work_station_springs", "work_station_tracks",
+                 "work_station_cables")
+    def _compute_work_station_ready_to_dispatch(self):
+        """Have the three making benches finished with this order?
+
+        A BENCH WITH NOTHING TO MAKE IS NOT IN THE WAY. An order of hardware
+        alone has no springs, tracks or cables on it, so it is ready to go out
+        the moment it is picked - waiting for three benches that were never
+        given anything would be a transfer that could never leave.
+        """
+        for picking in self:
+            waiting = [
+                self.env["work.station"]._station_label(code)
+                for code, field in self.WORK_STATION_FIELDS
+                if code in MAKERS and picking[field] not in ("none", "done")
+            ]
+            picking.work_station_waiting_for = ", ".join(waiting)
+            picking.work_station_ready_to_dispatch = not waiting
+
+    work_station_ready_to_dispatch = fields.Boolean(
+        string="Ready to dispatch",
+        compute="_compute_work_station_ready_to_dispatch")
+    work_station_waiting_for = fields.Char(
+        string="Waiting for", compute="_compute_work_station_ready_to_dispatch")
+
+    def _work_station_finish(self):
+        """Dispatch is done, so the work order is done.
+
+        THE FLOOR FINISHING IS THE ORDER FINISHING, which is what the owner
+        asked for: dispatch is the last thing anybody does, so when it is
+        ticked off the transfer is validated and the order reads Done without
+        somebody in the office repeating the same decision.
+
+        BUT IT IS ATTEMPTED, NOT ASSUMED. Validating a transfer moves stock,
+        and Odoo quite rightly refuses some of them unattended - nothing
+        reserved, a lot or serial number still to give, a backorder to decide
+        about. A refusal must not lose the fact that the work was done or leave
+        an error on a screen bolted to a bench, so the work stays ticked off,
+        the reason is written in the transfer's own chatter for the office to
+        pick up, and the floor is told in one line. Everything the bench did is
+        recorded either way.
+        """
+        finished = self.env["stock.picking"]
+        waiting = []
+
+        for picking in self:
+            if picking.state in ("done", "cancel"):
+                continue
+
+            # Every bench, dispatch included. A transfer is not finished while
+            # anything on it is still to make.
+            if picking.work_station_todo_count:
+                continue
+
+            try:
+                # WHAT DISPATCH TICKING OFF MEANS: the goods have left the
+                # building. So a move with no quantity on it is filled from
+                # what was ordered and marked picked, because the alternative
+                # is a transfer that can never close - Odoo refuses to validate
+                # one with nothing on it, and an order sitting at Confirmed
+                # forever is exactly what the owner asked to be rid of.
+                #
+                # THIS CAN DRIVE STOCK NEGATIVE, and that is the honest
+                # outcome: if the hardware went out and the system thought
+                # there was none, the count was already wrong and now says so.
+                # It is not this code's place to hide that by refusing to
+                # record the dispatch.
+                moves = picking.sudo().move_ids.filtered(
+                    lambda move: move.state not in ("done", "cancel"))
+
+                for move in moves:
+                    if not move.quantity:
+                        move.quantity = move.product_uom_qty
+
+                moves.picked = True
+
+                # skip_backorder, because a wizard asking what to do about the
+                # rest of the order is a question for the office, not for a
+                # tablet. Anything left undelivered stays on the transfer.
+                result = picking.sudo().with_context(
+                    skip_backorder=True, skip_sms=True,
+                ).button_validate()
+            except (UserError, ValidationError) as error:
+                waiting.append((picking, str(error)))
+                continue
+
+            picking.invalidate_recordset(["state"])
+
+            if picking.state == "done":
+                finished |= picking
+            else:
+                # button_validate answered with a wizard or a report instead of
+                # finishing. Nothing is broken; it simply needs a person.
+                waiting.append((picking, self._work_station_office_message(result)))
+
+        for picking, reason in waiting:
+            picking.sudo().message_post(body=self.env._(
+                "The floor finished every station on this order, so this "
+                "transfer could not be validated automatically: %(reason)s",
+                reason=reason,
+            ))
+
+        return finished
+
+    def _work_station_office_message(self, result):
+        """Why a validation that raised nothing still did not finish."""
+        if isinstance(result, dict):
+            return self.env._("it needs to be confirmed in the back office")
+
+        return self.env._("it is not in a state that can be validated")

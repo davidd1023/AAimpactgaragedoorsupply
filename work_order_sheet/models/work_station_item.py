@@ -1,4 +1,7 @@
 from odoo import api, fields, models
+from odoo.exceptions import UserError
+
+from .work_station import DISPATCH
 
 
 class WorkStationItem(models.Model):
@@ -60,10 +63,66 @@ class WorkStationItem(models.Model):
         for item in self:
             item.display_name = "%s - %s" % (item.order_name or "", item.name)
 
+    # --- dispatch cannot go before the benches it waits for --------------
+
+    @api.depends("station_id.code", "picking_id.work_station_ready_to_dispatch",
+                 "picking_id.work_station_waiting_for")
+    def _compute_is_ready(self):
+        """Can this be worked on yet?
+
+        Only dispatch can be too early, and only dispatch has anything to
+        wait for: the springs, tracks and cables on the same order.
+        """
+        for item in self:
+            if item.station_id.code != DISPATCH:
+                item.is_ready = True
+                item.waiting_for = ""
+                continue
+
+            item.is_ready = item.picking_id.work_station_ready_to_dispatch
+            item.waiting_for = item.picking_id.work_station_waiting_for
+
+    is_ready = fields.Boolean(compute="_compute_is_ready")
+    waiting_for = fields.Char(compute="_compute_is_ready")
+
     def action_done(self):
-        self.write({"state": "done", "done_at": fields.Datetime.now()})
+        """Tick work off, dispatch last.
+
+        THE ORDER OF THE WRITES IS THE RULE. Dispatch is the last thing
+        anybody does, so marking a whole order done in one go has to finish
+        the making benches first and dispatch after them - otherwise the gate
+        below would refuse a dispatch row because of work being ticked off in
+        the very same call.
+
+        A dispatch row on its own, with a bench still working, is refused and
+        says which bench. That is the rule a kiosk cannot be trusted to keep
+        on its own: the Done button is hidden there, and this is what makes
+        hiding it true.
+        """
+        dispatch = self.filtered(lambda i: i.station_id.code == DISPATCH)
+        making = self - dispatch
+        making._work_station_mark_done()
+
+        blocked = dispatch.filtered(lambda item: not item.is_ready)
+
+        if blocked:
+            raise UserError(self.env._(
+                "Dispatch is the last step: %(waiting)s still have work on "
+                "this order.",
+                waiting=blocked[0].waiting_for or self.env._("other stations"),
+            ))
+
+        dispatch._work_station_mark_done()
+
+        # EVERY STATION DONE MEANS THE ORDER IS DONE, which is the whole point
+        # of dispatch being last.
+        self.picking_id._work_station_finish()
 
         return True
+
+    def _work_station_mark_done(self):
+        if self:
+            self.write({"state": "done", "done_at": fields.Datetime.now()})
 
     def action_todo(self):
         """Undo, which a bench tablet needs more than a desk does."""

@@ -1,4 +1,4 @@
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests.common import HttpCase, tagged
 
 from .test_work_order_sheet import visible_text
@@ -113,12 +113,16 @@ class TestWorkStations(StationCase):
         self.assertIn("cables", by_station)
         self.assertEqual(len(by_station["springs"]), 1)
 
-    def test_hardware_is_not_a_station(self):
-        """Hinges come off a shelf against the transfer, as they always did."""
+    def test_hardware_does_not_reach_a_making_bench(self):
+        """It goes to Dispatch, which gathers and sends it - see
+        TestDispatchIsLast. What it must never do is turn up at a bench that
+        winds springs or cuts track."""
         order = self._order()
-        names = self._items(order).mapped("name")
-        self.assertFalse([n for n in names if "Hinge" in n],
-                         "hardware reached a bench: %s" % names)
+
+        for station in (self.springs, self.tracks, self.cables):
+            names = self._items(order, station).mapped("name")
+            self.assertFalse([n for n in names if "Hinge" in n],
+                             "hardware reached %s: %s" % (station.name, names))
 
     def test_the_spring_carries_its_cut_list_and_its_door(self):
         item = self._items(self._order(), self.springs)
@@ -357,13 +361,14 @@ class TestStationStatusOnTheOrder(StationCase):
         self.assertEqual(picking.work_station_cables, "todo")
 
     def test_the_count_of_what_is_left_to_make(self):
+        """A spring, a track, a cable and the hardware for dispatch."""
         order = self._order()
         picking = order.picking_ids[:1]
-        self.assertEqual(picking.work_station_todo_count, 3)
+        self.assertEqual(picking.work_station_todo_count, 4)
 
         self._items(order, self.springs).action_done()
         picking.invalidate_recordset()
-        self.assertEqual(picking.work_station_todo_count, 2)
+        self.assertEqual(picking.work_station_todo_count, 3)
 
     def test_the_status_can_be_searched_rather_than_opened(self):
         """Stored, so the office can filter a list of orders by it."""
@@ -384,3 +389,130 @@ class TestStationStatusOnTheOrder(StationCase):
         found = self.env["work.station.item"].search(action["domain"])
         self.assertEqual(found, self._items(first))
         self.assertFalse(found & self._items(second))
+
+
+@tagged("post_install", "-at_install")
+class TestDispatchIsLast(StationCase):
+    """Dispatch gathers the hardware, goes last, and finishes the order.
+
+    The owner's rule: "dispatch will be the last thing workers do after the
+    other three are done", and when it is done the work order is done. Both
+    halves are enforced here rather than left to how people happen to work.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.dispatch = self.env.ref("work_order_sheet.station_dispatch")
+
+    def test_the_hardware_goes_to_dispatch(self):
+        """What used to be nobody's job is now the last bench's."""
+        order = self._order()
+        items = self._items(order, self.dispatch)
+        self.assertEqual(items.mapped("name"), ["No 2 Hinge Galvanized"])
+
+    def test_dispatch_waits_for_the_making_benches(self):
+        order = self._order()
+        item = self._items(order, self.dispatch)
+        self.assertFalse(item.is_ready)
+        self.assertIn("Springs", item.waiting_for)
+        self.assertIn("Tracks", item.waiting_for)
+        self.assertIn("Cables", item.waiting_for)
+
+    def test_dispatch_cannot_be_ticked_off_early(self):
+        order = self._order()
+        item = self._items(order, self.dispatch)
+
+        with self.assertRaises(UserError):
+            item.action_done()
+
+        self.assertEqual(item.state, "todo")
+
+    def test_the_kiosk_shows_what_it_is_waiting_for_instead_of_a_button(self):
+        self._order()
+        page = self._kiosk(self.dispatch)
+        self.assertIn("No 2 Hinge", page)
+        self.assertIn("Waiting for", page)
+        self.assertNotIn("Done", page,
+                         "dispatch was offered a button it must not have yet")
+
+    def test_tapping_done_too_early_explains_itself_instead_of_breaking(self):
+        """A bench tablet must never show a traceback."""
+        order = self._order()
+        item = self._items(order, self.dispatch)
+        response = self.url_open(
+            "/station/%s/done/%s" % (self.dispatch.access_token, item.id),
+            data={"tap": "1"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Dispatch is the last step", visible_text(response.text))
+        self.assertEqual(item.state, "todo")
+
+    def test_dispatch_opens_once_the_others_are_finished(self):
+        order = self._order()
+        making = self._items(order) - self._items(order, self.dispatch)
+        making.action_done()
+
+        item = self._items(order, self.dispatch)
+        self.assertTrue(item.is_ready)
+        self.assertFalse(item.waiting_for)
+        self.assertIn("Done", self._kiosk(self.dispatch))
+
+    def test_hardware_alone_is_ready_at_once(self):
+        """A bench with nothing to make is not in the way: an order of
+        hardware alone could otherwise never leave."""
+        order = self._order([(self.hinge, 4, None)])
+        item = self._items(order, self.dispatch)
+        self.assertTrue(item.is_ready)
+
+    # --- and then the order is done -------------------------------------------
+
+    def test_finishing_dispatch_finishes_the_work_order(self):
+        order = self._order([(self.hinge, 4, None)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self._items(order).action_done()
+        picking.invalidate_recordset()
+
+        self.assertEqual(picking.work_station_dispatch, "done")
+        self.assertEqual(picking.state, "done",
+                         "the floor finished but the order did not")
+
+    def test_the_whole_order_through_every_bench_in_turn(self):
+        """The flow as it actually happens, one bench at a time."""
+        order = self._order()
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+
+        for station in (self.springs, self.tracks, self.cables):
+            self._items(order, station).action_done()
+            picking.invalidate_recordset()
+            self.assertNotEqual(picking.state, "done",
+                                "the order finished before dispatch did")
+
+        self._items(order, self.dispatch).action_done()
+        picking.invalidate_recordset()
+        self.assertEqual(picking.state, "done")
+
+    def test_an_order_that_cannot_be_validated_keeps_the_work_and_says_why(self):
+        """A transfer Odoo refuses unattended must not lose the bench's work
+        or put an error on the screen at the bench.
+
+        A lot-tracked product is the honest example: Odoo will not invent a
+        serial number, and nor should this.
+        """
+        tracked = self.env["product.product"].create({
+            "name": "Tracked Hinge", "type": "consu", "is_storable": True,
+            "tracking": "serial", "list_price": 10.0,
+        })
+        order = self._order([(tracked, 2, None)])
+        picking = order.picking_ids[:1]
+
+        self._items(order).action_done()
+        picking.invalidate_recordset()
+
+        self.assertEqual(self._items(order).mapped("state"), ["done"],
+                         "the bench's work was lost")
+        self.assertNotEqual(picking.state, "done")
+        self.assertTrue(
+            picking.message_ids.filtered(
+                lambda m: "could not be validated automatically" in (m.body or "")),
+            "nobody in the office was told")
