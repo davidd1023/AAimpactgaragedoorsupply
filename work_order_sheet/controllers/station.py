@@ -67,17 +67,26 @@ class WorkStationKiosk(http.Controller):
         DISPATCH ONLY. Every station can finish its own work; only the last one
         says the order is finished, so no other kiosk is offered the button -
         and the route checks the same thing, since a page is not a permission.
+
+        ANY FINISHED ORDER, NOT ONLY ONE DISPATCH HAD A ROW ON. This asked for
+        dispatch's own items first, which meant an order of nothing but tracks
+        - cut, ticked off, finished - never appeared here and could not be
+        completed by anybody on the floor at all. Dispatch is the step that
+        SENDS AN ORDER OUT; having nothing to gather for it does not make it
+        somebody else's to close.
+
+        An order with no station work of any kind is still none of its
+        business, which is what keeps every unrelated transfer in the
+        warehouse off this screen.
         """
         if station.code != DISPATCH:
             return request.env["stock.picking"].sudo().browse()
 
-        items = request.env["work.station.item"].sudo().search([
-            ("station_id", "=", station.id),
-            ("picking_id.state", "not in", ("done", "cancel")),
-        ])
-
-        return items.picking_id.filtered(
-            lambda picking: not picking.work_station_todo_count)
+        return request.env["stock.picking"].sudo().search([
+            ("state", "not in", ("done", "cancel")),
+            ("work_station_item_ids", "!=", False),
+            ("work_station_todo_count", "=", 0),
+        ], order="id")
 
     def _render(self, station, message=""):
         todo, done, supplied = self._items(station)

@@ -1,6 +1,6 @@
 {
     'name': "Work Order Sheet",
-    'version': '19.0.1.23.0',
+    'version': '19.0.1.24.0',
     'summary': "Print a work order, and sort its work onto the benches",
     'description': """
 Adds a printable sheet to a work order - the transfer the shop sees under

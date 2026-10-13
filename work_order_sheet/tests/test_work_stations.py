@@ -603,7 +603,8 @@ class TestDispatchIsLast(StationCase):
         picking.invalidate_recordset()
         self.assertNotEqual(picking.state, "done")
 
-    def test_dispatch_cannot_complete_an_order_it_has_no_work_on(self):
+    def test_dispatch_cannot_complete_an_unfinished_order(self):
+        """Finishing one order must not offer up the next one."""
         mine = self._order([(self.hinge, 1, None)])
         theirs = self._order([(self.hinge, 1, None)])
         self._items(mine).action_done()
@@ -612,6 +613,53 @@ class TestDispatchIsLast(StationCase):
         self.assertEqual(self._complete(self.dispatch, other).status_code, 404)
         other.invalidate_recordset()
         self.assertNotEqual(other.state, "done")
+
+    def test_an_order_with_nothing_for_dispatch_can_still_be_completed(self):
+        """THE BUG: an order of nothing but tracks - cut, ticked off,
+        finished - never reached this screen, so nobody on the floor could
+        close it. Dispatch is the step that sends an order out; having nothing
+        to gather for it does not make it somebody else's to close."""
+        order = self._order([(self.track, 2, None), (self.cable, 2, None)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self.assertEqual(picking.work_station_dispatch, "none",
+                         "the fixture put something on dispatch")
+
+        self._items(order).action_done()
+
+        page = self._kiosk(self.dispatch)
+        self.assertIn("Ready to send out", page)
+        self.assertIn("Nothing here to gather", page)
+
+        self._complete(self.dispatch, picking)
+        picking.invalidate_recordset()
+        self.assertEqual(picking.state, "done")
+
+    def test_an_order_of_springs_alone_can_be_completed(self):
+        order = self._order([(self.spring, 1, SPRING_DESCRIPTION)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self._items(order).action_done()
+
+        self._complete(self.dispatch, picking)
+        picking.invalidate_recordset()
+        self.assertEqual(picking.state, "done")
+
+    def test_a_transfer_with_no_bench_work_is_none_of_dispatchs_business(self):
+        """What keeps every unrelated transfer in the warehouse off the
+        screen."""
+        picking = self.env["stock.picking"].create({
+            "picking_type_id": self.env["stock.picking.type"].search(
+                [("code", "=", "internal")], limit=1).id,
+            "location_id": self.env.ref("stock.stock_location_stock").id,
+            "location_dest_id": self.env.ref("stock.stock_location_output").id,
+        })
+        picking.action_confirm()
+
+        self.assertFalse(picking.work_station_item_ids)
+        self.assertEqual(self._complete(self.dispatch, picking).status_code,
+                         404)
+        self.assertNotIn(picking.name, self._kiosk(self.dispatch))
 
     def test_pressing_it_too_early_is_refused_over_the_wire_too(self):
         """The page hides the button; the route does not rely on that."""
