@@ -3,6 +3,8 @@ from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.tools import consteq
 
+from ..models.work_station import DISPATCH
+
 
 class WorkStationKiosk(http.Controller):
     """The bench tablet.
@@ -52,6 +54,24 @@ class WorkStationKiosk(http.Controller):
 
         return todo, done
 
+    def _ready_orders(self, station):
+        """Orders whose work is all made and which dispatch can now send out.
+
+        DISPATCH ONLY. Every station can finish its own work; only the last one
+        says the order is finished, so no other kiosk is offered the button -
+        and the route checks the same thing, since a page is not a permission.
+        """
+        if station.code != DISPATCH:
+            return request.env["stock.picking"].sudo().browse()
+
+        items = request.env["work.station.item"].sudo().search([
+            ("station_id", "=", station.id),
+            ("picking_id.state", "not in", ("done", "cancel")),
+        ])
+
+        return items.picking_id.filtered(
+            lambda picking: not picking.work_station_todo_count)
+
     def _render(self, station, message=""):
         todo, done = self._items(station)
 
@@ -59,19 +79,70 @@ class WorkStationKiosk(http.Controller):
             "station": station,
             "todo": todo,
             "done": done,
+            "ready": self._ready_orders(station),
             "message": message,
             "token": station.access_token,
         })
 
     @http.route("/station/<string:token>", type="http", auth="public",
                 methods=["GET"], website=False, sitemap=False)
-    def kiosk(self, token, **kwargs):
+    def kiosk(self, token, completed=None, **kwargs):
         station = self._station(token)
 
         if not station:
             return request.not_found()
 
-        return self._render(station)
+        # SAID ONCE, AFTER A REDIRECT. The order that was just sent out has
+        # left this screen by the time it reloads, so without this the only
+        # sign that the button worked is a row disappearing. The id is looked
+        # up rather than the name echoed back, so nothing a visitor types
+        # reaches the page.
+        message = ""
+
+        if completed and str(completed).isdigit():
+            picking = request.env["stock.picking"].sudo().browse(
+                int(completed)).exists()
+
+            if picking and picking.state == "done":
+                message = request.env._(
+                    "Order %(name)s is complete and on its way.",
+                    name=picking.origin or picking.name)
+
+        return self._render(station, message=message)
+
+    @http.route("/station/<string:token>/complete/<int:picking_id>",
+                type="http", auth="public", methods=["POST"], website=False,
+                sitemap=False, csrf=False)
+    def complete(self, token, picking_id, **kwargs):
+        """The final confirmation: dispatch says the order is finished.
+
+        CHECKED THREE WAYS, because this one closes an order rather than
+        ticking off a row: the link has to be dispatch's, the order has to be
+        one dispatch actually has work on, and every station on it has to be
+        done. The model enforces the last of those whatever the page shows.
+        """
+        station = self._station(token)
+
+        if not station or station.code != DISPATCH:
+            return request.not_found()
+
+        picking = request.env["stock.picking"].sudo().browse(picking_id).exists()
+
+        if not picking or picking not in self._ready_orders(station):
+            return request.not_found()
+
+        try:
+            reason = picking._work_station_complete()
+        except UserError as error:
+            return self._render(station, message=str(error))
+
+        if reason:
+            return self._render(station, message=request.env._(
+                "The work is recorded, but this order needs the office to "
+                "finish it: %(reason)s", reason=reason))
+
+        return request.redirect(
+            "/station/%s?completed=%s" % (station.access_token, picking.id))
 
     @http.route("/station/<string:token>/<string:action>/<int:item_id>",
                 type="http", auth="public", methods=["POST"], website=False,

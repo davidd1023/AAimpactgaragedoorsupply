@@ -465,7 +465,9 @@ class TestDispatchIsLast(StationCase):
 
     # --- and then the order is done -------------------------------------------
 
-    def test_finishing_dispatch_finishes_the_work_order(self):
+    def test_ticking_off_the_last_box_does_not_send_the_order_out(self):
+        """It used to. A button that fires by itself confirms nothing, and the
+        last tap on a tablet is a clumsy place for an irreversible step."""
         order = self._order([(self.hinge, 4, None)])
         picking = order.picking_ids[:1]
         picking.action_assign()
@@ -473,8 +475,28 @@ class TestDispatchIsLast(StationCase):
         picking.invalidate_recordset()
 
         self.assertEqual(picking.work_station_dispatch, "done")
-        self.assertEqual(picking.state, "done",
-                         "the floor finished but the order did not")
+        self.assertNotEqual(picking.state, "done",
+                            "the order closed without anybody confirming it")
+
+    def test_completing_it_finishes_the_work_order(self):
+        order = self._order([(self.hinge, 4, None)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self._items(order).action_done()
+
+        self.assertEqual(picking._work_station_complete(), "")
+        picking.invalidate_recordset()
+        self.assertEqual(picking.state, "done")
+
+    def test_an_unfinished_order_cannot_be_completed(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+
+        with self.assertRaises(UserError):
+            picking._work_station_complete()
+
+        picking.invalidate_recordset()
+        self.assertNotEqual(picking.state, "done")
 
     def test_the_whole_order_through_every_bench_in_turn(self):
         """The flow as it actually happens, one bench at a time."""
@@ -489,6 +511,11 @@ class TestDispatchIsLast(StationCase):
                                 "the order finished before dispatch did")
 
         self._items(order, self.dispatch).action_done()
+        picking.invalidate_recordset()
+        self.assertNotEqual(picking.state, "done",
+                            "dispatch has not confirmed it yet")
+
+        picking._work_station_complete()
         picking.invalidate_recordset()
         self.assertEqual(picking.state, "done")
 
@@ -507,7 +534,10 @@ class TestDispatchIsLast(StationCase):
         picking = order.picking_ids[:1]
 
         self._items(order).action_done()
+        reason = picking._work_station_complete()
         picking.invalidate_recordset()
+
+        self.assertTrue(reason, "the bench was told nothing")
 
         self.assertEqual(self._items(order).mapped("state"), ["done"],
                          "the bench's work was lost")
@@ -516,3 +546,226 @@ class TestDispatchIsLast(StationCase):
             picking.message_ids.filtered(
                 lambda m: "could not be validated automatically" in (m.body or "")),
             "nobody in the office was told")
+
+    # --- the final confirmation, from the bench -------------------------------
+
+    def _complete(self, station, picking):
+        return self.url_open(
+            "/station/%s/complete/%s" % (station.access_token, picking.id),
+            data={"tap": "1"})
+
+    def test_the_button_appears_only_when_everything_is_done(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+
+        self.assertNotIn("Complete order", self._kiosk(self.dispatch),
+                         "offered before the work was finished")
+
+        self._items(order).action_done()
+
+        page = self._kiosk(self.dispatch)
+        self.assertIn("Ready to send out", page)
+        self.assertIn("Complete order", page)
+
+    def test_pressing_it_completes_the_order_and_says_so(self):
+        order = self._order([(self.hinge, 4, None)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self._items(order).action_done()
+
+        response = self._complete(self.dispatch, picking)
+        self.assertEqual(response.status_code, 200)
+        picking.invalidate_recordset()
+        self.assertEqual(picking.state, "done")
+
+        text = visible_text(response.text)
+        self.assertIn("is complete and on its way", text)
+        # And it has left the screen, rather than sitting there to be pressed
+        # again.
+        self.assertNotIn("Complete order", text)
+
+    def test_only_dispatch_is_offered_the_button(self):
+        """Every bench finishes its own work; one says the order is finished."""
+        order = self._order()
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self._items(order).action_done()
+
+        for station in (self.springs, self.tracks, self.cables):
+            self.assertNotIn("Complete order", self._kiosk(station),
+                             "%s was offered it" % station.name)
+            self.assertEqual(
+                self._complete(station, picking).status_code, 404,
+                "%s could complete an order" % station.name)
+
+        picking.invalidate_recordset()
+        self.assertNotEqual(picking.state, "done")
+
+    def test_dispatch_cannot_complete_an_order_it_has_no_work_on(self):
+        mine = self._order([(self.hinge, 1, None)])
+        theirs = self._order([(self.hinge, 1, None)])
+        self._items(mine).action_done()
+
+        other = theirs.picking_ids[:1]
+        self.assertEqual(self._complete(self.dispatch, other).status_code, 404)
+        other.invalidate_recordset()
+        self.assertNotEqual(other.state, "done")
+
+    def test_pressing_it_too_early_is_refused_over_the_wire_too(self):
+        """The page hides the button; the route does not rely on that."""
+        order = self._order()
+        picking = order.picking_ids[:1]
+        self.assertEqual(self._complete(self.dispatch, picking).status_code, 404)
+        picking.invalidate_recordset()
+        self.assertNotEqual(picking.state, "done")
+
+    def test_a_completed_order_leaves_every_bench_screen(self):
+        order = self._order([(self.hinge, 1, None)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self._items(order).action_done()
+        self._complete(self.dispatch, picking)
+
+        self.assertIn("Nothing waiting", self._kiosk(self.dispatch))
+
+
+@tagged("post_install", "-at_install")
+class TestTheOrdersLog(StationCase):
+    """When a section of the order was finished, written where it is kept.
+
+    The statuses say where each bench has got to; they cannot say the springs
+    were done at 10:42 and the tracks at 14:05. That is a question about a
+    day's work, and the answer belongs in the order's own log.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.dispatch = self.env.ref("work_order_sheet.station_dispatch")
+
+    def _log(self, picking):
+        return [m.body or "" for m in picking.message_ids]
+
+    def _notes(self, picking):
+        note = self.env.ref("mail.mt_note")
+
+        return picking.message_ids.filtered(lambda m: m.subtype_id == note)
+
+    def test_finishing_a_job_is_written_into_the_order(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+        self._items(order, self.springs).action_done()
+
+        entry = self._log(picking)[0]
+        self.assertIn("Springs", entry)
+        self.assertIn("Custom Torsion Spring Assembly", entry)
+
+    def test_the_entry_is_dated_by_the_log_itself(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+        item = self._items(order, self.tracks)
+        item.action_done()
+
+        entry = picking.message_ids[0]
+        self.assertTrue(entry.date)
+        # The same moment the row records, so the two cannot disagree.
+        self.assertAlmostEqual(
+            (entry.date - item.done_at).total_seconds(), 0, delta=5)
+
+    def test_it_says_when_a_bench_has_finished_the_whole_section(self):
+        """The line somebody looking for "when were the springs done" wants."""
+        order = self._order()
+        picking = order.picking_ids[:1]
+        self._items(order, self.springs).action_done()
+        self.assertIn("has finished every job on this order",
+                      self._log(picking)[0])
+
+    def test_a_bench_with_more_to_do_does_not_claim_to_be_finished(self):
+        order = self._order([(self.track, 1, None)])
+        second = self.env["product.product"].create({
+            "name": '3" Vertical Track 92" - 8\' Door Height Black',
+            "type": "consu", "is_storable": True, "list_price": 10.0})
+        self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": second.id,
+            "product_uom_qty": 1})
+        order.picking_ids.action_work_station_sync()
+        picking = order.picking_ids[:1]
+
+        tracks = self._items(order, self.tracks)
+        tracks[0].action_done()
+        self.assertNotIn("has finished every job", self._log(picking)[0])
+
+        tracks[1].action_done()
+        self.assertIn("has finished every job", self._log(picking)[0])
+
+    def test_four_jobs_ticked_at_once_leave_one_entry(self):
+        """A day's log should read as a sequence of events, not a list of
+        rows."""
+        order = self._order([(self.hinge, 1, None)])
+        extra = self.env["product.product"].create({
+            "name": "No 3 Hinge Galvanized", "type": "consu",
+            "is_storable": True, "list_price": 10.0})
+        self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": extra.id,
+            "product_uom_qty": 1})
+        order.picking_ids.action_work_station_sync()
+        picking = order.picking_ids[:1]
+        before = len(self._notes(picking))
+
+        self._items(order, self.dispatch).action_done()
+
+        self.assertEqual(len(self._notes(picking)) - before, 1)
+        self.assertIn("No 2 Hinge", self._log(picking)[0])
+        self.assertIn("No 3 Hinge", self._log(picking)[0])
+
+    def test_undoing_is_logged_too(self):
+        """A log that recorded only the ticking off would show work finished
+        that is being done again."""
+        order = self._order()
+        picking = order.picking_ids[:1]
+        item = self._items(order, self.cables)
+        item.action_done()
+        item.action_todo()
+
+        self.assertIn("put back", self._log(picking)[0])
+        self.assertIn("Cables", self._log(picking)[0])
+
+    def test_the_log_is_internal_and_never_mailed_to_the_customer(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+        self._items(order, self.springs).action_done()
+
+        note = self.env.ref("mail.mt_note")
+        self.assertEqual(picking.message_ids[0].subtype_id, note,
+                         "the customer was sent a bench update")
+
+    def test_completing_the_order_is_logged(self):
+        order = self._order([(self.hinge, 1, None)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self._items(order).action_done()
+        picking._work_station_complete()
+
+        self.assertIn("Dispatch confirmed this order as complete",
+                      self._log(picking)[0])
+
+    def test_a_tap_at_the_bench_reaches_the_log(self):
+        """End to end: the tablet, not the model."""
+        order = self._order()
+        picking = order.picking_ids[:1]
+        item = self._items(order, self.tracks)
+
+        self._tap(self.tracks, "done", item)
+
+        self.assertTrue(
+            picking.message_ids.filtered(
+                lambda m: "Tracks" in (m.body or "")),
+            "the tablet's tap was not written down")
+
+    def test_the_log_quotes_the_length_that_was_cut(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+        self._items(order, self.tracks).action_done()
+        self.assertIn('76"', self._log(picking)[0])
+
+

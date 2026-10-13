@@ -1,3 +1,5 @@
+from markupsafe import Markup
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
@@ -114,18 +116,85 @@ class WorkStationItem(models.Model):
 
         dispatch._work_station_mark_done()
 
-        # EVERY STATION DONE MEANS THE ORDER IS DONE, which is the whole point
-        # of dispatch being last.
-        self.picking_id._work_station_finish()
-
+        # TICKING OFF THE LAST BOX DOES NOT SEND THE ORDER OUT. It used to:
+        # the transfer validated itself the moment nothing was left to make.
+        # The owner asked for a Complete Order button instead, and that is the
+        # better rule - a button that fires by itself is not a confirmation of
+        # anything, and the last tap on a tablet is a clumsy place to put an
+        # irreversible step. See stock_picking._work_station_complete.
         return True
 
     def _work_station_mark_done(self):
         if self:
             self.write({"state": "done", "done_at": fields.Datetime.now()})
+            self._work_station_log(True)
+
+    # --- the order's own log --------------------------------------------------
+    #
+    # WHEN, NOT JUST WHETHER. The statuses on the work order say where each
+    # bench has got to; they cannot say that the springs were finished at
+    # 10:42 and the tracks at 14:05. That is a question about a day's work -
+    # which order held the floor up, how long a job really took - and the
+    # answer belongs in the transfer's own log, where it is kept, dated and
+    # attributed without anybody writing it down.
+    #
+    # AN INTERNAL NOTE, never a message to the customer: mt_note does not mail
+    # the followers of the order. A customer does not need to hear that a
+    # bench ticked a box.
+
+    def _work_station_log_label(self, item):
+        """One line of the log: what was done, as the bench sees it."""
+        name = item.name or ""
+
+        if item.quantity and item.quantity != 1:
+            name = "%g x %s" % (item.quantity, name)
+
+        if item.length:
+            name = "%s (%s)" % (name, item.length)
+
+        return name
+
+    def _work_station_log(self, done):
+        """Write what just happened into the log of each order it happened to.
+
+        GROUPED BY ORDER AND BENCH, so a bench ticking four things off in one
+        go leaves one entry rather than four, and a day's log reads as a
+        sequence of events instead of a list of rows.
+        """
+        for picking in self.picking_id:
+            for station in self.filtered(
+                    lambda item: item.picking_id == picking).station_id:
+                items = self.filtered(
+                    lambda item: item.picking_id == picking
+                    and item.station_id == station)
+                rows = Markup("").join(
+                    Markup("<li>%s</li>") % self._work_station_log_label(item)
+                    for item in items
+                )
+                body = Markup("<p><b>%s</b> %s:</p><ul>%s</ul>") % (
+                    station.name,
+                    self.env._("finished") if done else self.env._("put back"),
+                    rows,
+                )
+
+                # AND WHETHER THAT WAS THE LAST OF IT, which is the line
+                # somebody looking for "when were the springs done" wants.
+                if done and picking[dict(picking.WORK_STATION_FIELDS)[
+                        station.code]] == "done":
+                    body += Markup("<p>%s</p>") % self.env._(
+                        "%(station)s has finished every job on this order.",
+                        station=station.name)
+
+                picking.sudo().message_post(
+                    body=body, subtype_xmlid="mail.mt_note")
 
     def action_todo(self):
-        """Undo, which a bench tablet needs more than a desk does."""
+        """Undo, which a bench tablet needs more than a desk does.
+
+        LOGGED LIKE EVERYTHING ELSE. A log that records only the ticking off
+        would show work finished that is being done again.
+        """
         self.write({"state": "todo", "done_at": False})
+        self._work_station_log(False)
 
         return True

@@ -1215,13 +1215,45 @@ class StockPicking(models.Model):
     work_station_waiting_for = fields.Char(
         string="Waiting for", compute="_compute_work_station_ready_to_dispatch")
 
-    def _work_station_finish(self):
-        """Dispatch is done, so the work order is done.
+    def _work_station_complete(self):
+        """Dispatch's final confirmation: this order is finished, send it.
 
-        THE FLOOR FINISHING IS THE ORDER FINISHING, which is what the owner
-        asked for: dispatch is the last thing anybody does, so when it is
-        ticked off the transfer is validated and the order reads Done without
-        somebody in the office repeating the same decision.
+        THE BUTTON IS THE CONFIRMATION, not the last tick. Every station being
+        done means the work is made; it does not mean the order has left. One
+        deliberate press says that, which is why validating the transfer hangs
+        off this and not off the last box being ticked.
+
+        Returns "" when the order closed, or the reason it could not - which
+        the bench is shown rather than left to guess at.
+        """
+        self.ensure_one()
+
+        if self.state in ("done", "cancel"):
+            return ""
+
+        if self.work_station_todo_count:
+            raise UserError(self.env._(
+                "This order is not finished yet: %(count)s things on it are "
+                "still to do.",
+                count=self.work_station_todo_count,
+            ))
+
+        refused = self._work_station_finish()
+        reason = refused.get(self.id, "")
+
+        if not reason:
+            self.sudo().message_post(
+                body=self.env._(
+                    "Dispatch confirmed this order as complete, and the "
+                    "transfer was validated."),
+                subtype_xmlid="mail.mt_note")
+
+        return reason
+
+    def _work_station_finish(self):
+        """Validate the transfers whose work is all done.
+
+        Returns {picking id: reason} for any that could not be closed.
 
         BUT IT IS ATTEMPTED, NOT ASSUMED. Validating a transfer moves stock,
         and Odoo quite rightly refuses some of them unattended - nothing
@@ -1232,8 +1264,7 @@ class StockPicking(models.Model):
         pick up, and the floor is told in one line. Everything the bench did is
         recorded either way.
         """
-        finished = self.env["stock.picking"]
-        waiting = []
+        refused = {}
 
         for picking in self:
             if picking.state in ("done", "cancel"):
@@ -1273,26 +1304,30 @@ class StockPicking(models.Model):
                     skip_backorder=True, skip_sms=True,
                 ).button_validate()
             except (UserError, ValidationError) as error:
-                waiting.append((picking, str(error)))
+                refused[picking.id] = str(error)
                 continue
 
             picking.invalidate_recordset(["state"])
 
-            if picking.state == "done":
-                finished |= picking
-            else:
+            if picking.state != "done":
                 # button_validate answered with a wizard or a report instead of
                 # finishing. Nothing is broken; it simply needs a person.
-                waiting.append((picking, self._work_station_office_message(result)))
+                refused[picking.id] = self._work_station_office_message(result)
 
-        for picking, reason in waiting:
-            picking.sudo().message_post(body=self.env._(
-                "The floor finished every station on this order, so this "
-                "transfer could not be validated automatically: %(reason)s",
-                reason=reason,
-            ))
+        for picking in self:
+            reason = refused.get(picking.id)
 
-        return finished
+            if reason:
+                picking.sudo().message_post(
+                    body=self.env._(
+                        "Dispatch confirmed this order as finished, but the "
+                        "transfer could not be validated automatically: "
+                        "%(reason)s",
+                        reason=reason,
+                    ),
+                    subtype_xmlid="mail.mt_note")
+
+        return refused
 
     def _work_station_office_message(self, result):
         """Why a validation that raised nothing still did not finish."""

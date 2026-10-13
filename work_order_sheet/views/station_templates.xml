@@ -66,6 +66,12 @@
       .waiting { color: #8a5a00; font-size: 16px; font-weight: bold;
                  text-align: right; max-width: 190px; }
       .job.blocked { background: #faf6ee; border-color: #e0b980; }
+      /* READY TO SEND OUT. The last thing anybody does to an order, so it
+         gets its own section at the top and a button that does not look like
+         the one next to a single job. */
+      .ready .job { border-color: #1b8f4d; border-width: 2px; }
+      .ready button { background: #1f2d3d; font-size: 20px; padding: 16px 26px; }
+      .ready .name { font-size: 22px; }
     </style>
   </head>
   <body>
@@ -82,10 +88,32 @@
     </t>
 
     <main>
-      <t t-if="not todo">
+      <t t-if="ready">
+        <div class="section">Ready to send out</div>
+        <div class="ready">
+          <t t-foreach="ready" t-as="picking">
+            <div class="job">
+              <div class="what">
+                <div class="name">
+                  Order <t t-esc="picking.origin or picking.name"/>
+                </div>
+                <div class="meta">
+                  Everything on it is made and gathered.
+                </div>
+              </div>
+              <form t-attf-action="/station/{{ token }}/complete/{{ picking.id }}"
+                    method="post">
+                <button type="submit">Complete order</button>
+              </form>
+            </div>
+          </t>
+        </div>
+      </t>
+
+      <t t-if="not todo and not ready">
         <div class="empty">Nothing waiting. New work appears here on its own.</div>
       </t>
-      <t t-if="todo and not any(item.is_ready for item in todo)">
+      <t t-if="todo and not ready and not any(item.is_ready for item in todo)">
         <div class="message" style="border: 1px solid #e0b980; border-radius: 10px;">
           Everything below is waiting on another station. It will be ready to
           send once they are finished.
