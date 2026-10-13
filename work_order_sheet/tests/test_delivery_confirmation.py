@@ -265,3 +265,13 @@ class TestDeliveryConfirmation(HttpCase):
         self.assertTrue(shown.endswith(("UTC", "EST", "EDT", "CET", "CEST")),
                         "the time does not say what clock it is on: %r" % shown)
         self.assertIn(shown, visible_text(self._page(picking).text))
+
+    def test_nothing_is_ticked_before_the_customer_ticks_it(self):
+        """A receipt that arrives pre-ticked is one somebody confirms without
+        reading it."""
+        picking = self._delivery()
+        page = self._page(picking).text
+
+        self.assertIn('type="checkbox"', page)
+        self.assertNotIn("checked", page,
+                         "the form confirmed the delivery for them")

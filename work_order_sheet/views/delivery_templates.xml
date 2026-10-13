@@ -130,8 +130,11 @@
             <h2>Tick what you received</h2>
             <t t-foreach="lines" t-as="move">
               <label class="item">
-                <input type="checkbox" t-attf-name="item_{{ move.id }}" value="1"
-                       checked="checked"/>
+                <!-- EMPTY TO BEGIN WITH. A receipt that arrives pre-ticked
+                     is one somebody confirms without reading it, and the
+                     whole point of the list is that each line was looked at.
+                     Ticking four boxes is the work being asked for. -->
+                <input type="checkbox" t-attf-name="item_{{ move.id }}" value="1"/>
                 <span>
                   <span class="qty"><t t-esc="'%g' % move.product_uom_qty"/></span>
                   <t t-esc="move.product_uom.name"/>
