@@ -1,0 +1,267 @@
+import base64
+import re
+
+from odoo.exceptions import AccessError
+from odoo.tests.common import HttpCase, tagged
+
+from .test_work_order_sheet import visible_text
+
+# The smallest valid PNG, which is what the pad posts a bigger version of.
+PNG = ("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKm"
+       "MIQAAAABJRU5ErkJggg==")
+SIGNATURE = "data:image/png;base64," + PNG
+
+
+@tagged("post_install", "-at_install")
+class TestDeliveryConfirmation(HttpCase):
+    """The customer's receipt: what they were handed, and their name on it.
+
+    A delivery note that signs itself back. What comes back today is a piece
+    of paper nobody can find, or nothing at all.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.partner = self.env["res.partner"].create({"name": "A Customer"})
+        self.hinge = self.env["product.product"].create({
+            "name": "No 2 Hinge Galvanized", "type": "consu",
+            "is_storable": True, "list_price": 10.0})
+        self.track = self.env["product.product"].create({
+            "name": '2" Vertical Track 76" - 7\' Door Height Black',
+            "type": "consu", "is_storable": True, "list_price": 42.0})
+
+    def _delivery(self):
+        """The transfer that leaves the building.
+
+        BUILT DIRECTLY, not through a sale order. This warehouse delivers in
+        two steps - a pick, then the delivery - so confirming an order does
+        not produce the outgoing transfer until the pick is done, and what is
+        being tested here is the delivery, not the route that makes one.
+        """
+        picking_type = self.env["stock.picking.type"].search(
+            [("code", "=", "outgoing")], limit=1)
+        self.assertTrue(picking_type, "this database delivers nothing")
+        picking = self.env["stock.picking"].create({
+            "picking_type_id": picking_type.id,
+            "partner_id": self.partner.id,
+            "origin": "S00123",
+            "location_id": picking_type.default_location_src_id.id
+                           or self.env.ref("stock.stock_location_stock").id,
+            "location_dest_id": picking_type.default_location_dest_id.id
+                                or self.env.ref("stock.stock_location_customers").id,
+            "move_ids": [
+                (0, 0, {"product_id": product.id, "product_uom_qty": qty,
+                        "location_id": picking_type.default_location_src_id.id
+                                       or self.env.ref("stock.stock_location_stock").id,
+                        "location_dest_id": picking_type.default_location_dest_id.id
+                                            or self.env.ref("stock.stock_location_customers").id})
+                for product, qty in ((self.hinge, 4), (self.track, 2))
+            ],
+        })
+        picking.action_confirm()
+
+        return picking
+
+    def _page(self, picking, token=None):
+        response = self.url_open(
+            "/delivery/%s" % (token or picking.dispatch_access_token))
+        self.assertEqual(response.status_code, 200)
+
+        return response
+
+    def _sign(self, picking, name="Jane Customer", signature=SIGNATURE,
+              items=None):
+        lines = picking._dispatch_lines()
+        data = {"signed_by": name, "signature": signature}
+
+        for move in (lines if items is None else items):
+            data["item_%s" % move.id] = "1"
+
+        return self.url_open(
+            "/delivery/%s/sign" % picking.dispatch_access_token, data=data)
+
+    # --- the form exists without anybody making it ---------------------------
+
+    def test_a_delivery_gets_its_form_when_it_is_confirmed(self):
+        """The link has to be ON the order when somebody looks for it - one
+        made only by pressing a button is one the driver cannot find."""
+        picking = self._delivery()
+        self.assertTrue(picking.dispatch_access_token)
+        self.assertTrue(picking.dispatch_form_date)
+        self.assertEqual(picking.dispatch_state, "open")
+        self.assertIn("/delivery/", picking.dispatch_url)
+
+    def test_an_internal_transfer_gets_none(self):
+        """Nobody signs for a move between two of our own shelves."""
+        picking = self.env["stock.picking"].create({
+            "picking_type_id": self.env["stock.picking.type"].search(
+                [("code", "=", "internal")], limit=1).id,
+            "location_id": self.env.ref("stock.stock_location_stock").id,
+            "location_dest_id": self.env.ref("stock.stock_location_output").id,
+        })
+        picking.action_confirm()
+        self.assertFalse(picking.dispatch_access_token)
+        self.assertFalse(picking.dispatch_state)
+
+    def test_a_wrong_link_shows_nothing(self):
+        self._delivery()
+        self.assertEqual(self.url_open("/delivery/nope").status_code, 404)
+        self.assertEqual(
+            self.url_open("/delivery/%s" % ("f" * 64)).status_code, 404)
+
+    # --- what the customer sees ----------------------------------------------
+
+    def test_the_form_lists_everything_being_delivered(self):
+        picking = self._delivery()
+        text = visible_text(self._page(picking).text)
+
+        self.assertIn("No 2 Hinge Galvanized", text)
+        self.assertIn("Vertical Track", text)
+        self.assertIn("Tick what you received", text)
+        self.assertIn("Signature", text)
+
+    def test_the_form_shows_the_day_it_was_made(self):
+        picking = self._delivery()
+        text = visible_text(self._page(picking).text)
+        self.assertIn(picking._dispatch_date(picking.dispatch_form_date), text)
+        self.assertIn("Not yet", text, "it claims to be signed already")
+
+    # --- signing it -----------------------------------------------------------
+
+    def test_signing_records_the_name_the_time_and_the_drawing(self):
+        picking = self._delivery()
+        self._sign(picking)
+        picking.invalidate_recordset()
+
+        self.assertEqual(picking.dispatch_signed_by, "Jane Customer")
+        self.assertTrue(picking.dispatch_signed_on)
+        self.assertEqual(picking.dispatch_state, "signed")
+        self.assertEqual(base64.b64decode(picking.dispatch_signature),
+                         base64.b64decode(PNG))
+
+    def test_both_dates_are_on_the_signed_form(self):
+        """The two the owner asked for: when it was made, and when it was
+        signed. The gap between them is the only honest answer to when the
+        customer actually got it."""
+        picking = self._delivery()
+        self._sign(picking)
+        picking.invalidate_recordset()
+        text = visible_text(self._page(picking).text)
+
+        self.assertIn(picking._dispatch_date(picking.dispatch_form_date), text)
+        self.assertIn(picking._dispatch_date(picking.dispatch_signed_on), text)
+        self.assertIn("Jane Customer", text)
+
+    def test_each_item_is_confirmed_one_at_a_time(self):
+        picking = self._delivery()
+        lines = picking._dispatch_lines()
+        self._sign(picking, items=lines[:1])
+
+        self.assertTrue(lines[0].dispatch_received)
+        self.assertFalse(lines[1].dispatch_received,
+                         "an item nobody ticked was recorded as received")
+
+    def test_what_was_not_received_is_named_in_the_order_log(self):
+        """The line somebody has to deal with tomorrow."""
+        picking = self._delivery()
+        lines = picking._dispatch_lines()
+        self._sign(picking, items=lines[:1])
+
+        log = " ".join(picking.message_ids.mapped("body"))
+        self.assertIn("Delivery confirmed and signed by Jane Customer", log)
+        self.assertIn("Not confirmed by the customer", log)
+        self.assertIn(lines[1].product_id.name, log)
+
+    def test_the_signature_can_be_seen_through_the_same_link(self):
+        picking = self._delivery()
+        self._sign(picking)
+        response = self.url_open(
+            "/delivery/%s/signature.png" % picking.dispatch_access_token)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers.get("Content-Type"), "image/png")
+        self.assertEqual(response.content, base64.b64decode(PNG))
+
+    # --- and what it refuses --------------------------------------------------
+
+    def test_it_will_not_be_signed_without_a_name(self):
+        picking = self._delivery()
+        response = self._sign(picking, name="   ")
+        picking.invalidate_recordset()
+
+        self.assertFalse(picking.dispatch_signed_on)
+        self.assertIn("type your name", visible_text(response.text))
+
+    def test_it_will_not_be_signed_without_a_signature(self):
+        picking = self._delivery()
+        response = self._sign(picking, signature="")
+        picking.invalidate_recordset()
+
+        self.assertFalse(picking.dispatch_signed_on)
+        self.assertIn("sign in the box", visible_text(response.text))
+
+    def test_it_will_not_take_anything_but_a_drawing(self):
+        """A public route that stores what it is given is a public route that
+        stores anything."""
+        picking = self._delivery()
+
+        for bad in ("data:text/html;base64,%s" % PNG,
+                    "javascript:alert(1)",
+                    "data:image/png;base64,<script>"):
+            self._sign(picking, signature=bad)
+            picking.invalidate_recordset()
+            self.assertFalse(picking.dispatch_signed_on, bad)
+
+    def test_nothing_ticked_is_not_a_delivery(self):
+        picking = self._delivery()
+        response = self._sign(picking, items=picking.browse())
+        picking.invalidate_recordset()
+
+        self.assertFalse(picking.dispatch_signed_on)
+        self.assertIn("tick the items", visible_text(response.text))
+
+    def test_it_cannot_be_signed_twice(self):
+        """A receipt that can be rewritten is not a receipt."""
+        picking = self._delivery()
+        self._sign(picking, name="Jane Customer")
+        picking.invalidate_recordset()
+        first = picking.dispatch_signed_on
+
+        self._sign(picking, name="Somebody Else")
+        picking.invalidate_recordset()
+
+        self.assertEqual(picking.dispatch_signed_by, "Jane Customer")
+        self.assertEqual(picking.dispatch_signed_on, first)
+
+    def test_a_signed_form_offers_nothing_to_press(self):
+        picking = self._delivery()
+        self._sign(picking)
+        text = visible_text(self._page(picking).text)
+
+        self.assertIn("Received", text)
+        self.assertNotIn("Confirm this delivery", text)
+
+    def test_the_link_is_kept_from_people_the_secret_is_kept_from(self):
+        picking = self._delivery()
+        nobody = self.env["res.users"].create({
+            "name": "Accounts", "login": "delivery-accounts",
+            "group_ids": [(6, 0, [self.env.ref("base.group_user").id])],
+        })
+
+        with self.assertRaises(AccessError):
+            picking.with_user(nobody).dispatch_access_token
+
+        with self.assertRaises(AccessError):
+            picking.with_user(nobody).dispatch_url
+
+        # Not asserted: that the same user can still read the rest of the
+        # order. They cannot read a transfer at all - stock keeps its own
+        # records to its own people - so there is nothing here to prove.
+
+    def test_the_times_are_the_shops_and_say_which_clock_they_are(self):
+        picking = self._delivery()
+        shown = picking._dispatch_date(picking.dispatch_form_date)
+
+        self.assertTrue(shown.endswith(("UTC", "EST", "EDT", "CET", "CEST")),
+                        "the time does not say what clock it is on: %r" % shown)
+        self.assertIn(shown, visible_text(self._page(picking).text))

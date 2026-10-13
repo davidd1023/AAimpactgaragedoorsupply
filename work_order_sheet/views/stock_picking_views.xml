@@ -35,6 +35,34 @@
         </button>
       </xpath>
 
+      <!-- THE DELIVERY NOTE THAT SIGNS ITSELF BACK, on the order it belongs
+           to: the link to hand the driver, when the form was made, and what
+           came back. -->
+      <xpath expr="//notebook" position="before">
+        <group string="Delivery confirmation" name="dispatch_confirmation"
+               invisible="picking_type_code != 'outgoing'">
+          <group>
+            <field name="dispatch_state" widget="badge"
+                   decoration-success="dispatch_state == 'signed'"
+                   decoration-warning="dispatch_state == 'open'"
+                   invisible="not dispatch_state"/>
+            <field name="dispatch_form_date" invisible="not dispatch_form_date"/>
+            <field name="dispatch_signed_by" invisible="not dispatch_signed_on"/>
+            <field name="dispatch_signed_on" invisible="not dispatch_signed_on"/>
+            <button name="action_dispatch_form" type="object" class="btn-link"
+                    string="Make the confirmation form"
+                    invisible="dispatch_state"/>
+          </group>
+          <group>
+            <field name="dispatch_url" widget="CopyClipboardChar"
+                   invisible="not dispatch_state"/>
+            <field name="dispatch_signature" widget="image"
+                   options="{'size': [0, 90]}"
+                   invisible="not dispatch_signed_on"/>
+          </group>
+        </group>
+      </xpath>
+
       <xpath expr="//notebook" position="before">
         <group string="Work stations" name="work_stations"
                invisible="work_station_springs == 'none' and work_station_tracks == 'none' and work_station_cables == 'none' and work_station_dispatch == 'none'">
@@ -95,6 +123,9 @@
       </xpath>
 
       <xpath expr="//field[@name='state']" position="before">
+        <field name="dispatch_state" optional="show" widget="badge"
+               decoration-success="dispatch_state == 'signed'"
+               decoration-warning="dispatch_state == 'open'"/>
         <field name="work_station_shown" optional="show" widget="badge"
                decoration-success="work_station_shown == 'yes'"
                decoration-warning="work_station_shown == 'no'"
@@ -129,6 +160,8 @@
     <field name="inherit_id" ref="stock.view_picking_internal_search"/>
     <field name="arch" type="xml">
       <xpath expr="//search" position="inside">
+        <filter name="dispatch_unsigned" string="Not signed for"
+                domain="[('dispatch_state', '=', 'open')]"/>
         <filter name="work_station_released" string="On the work stations"
                 domain="[('work_station_released', '=', True)]"/>
         <filter name="work_station_unfinished" string="Benches unfinished"
