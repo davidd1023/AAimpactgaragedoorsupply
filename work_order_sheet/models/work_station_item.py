@@ -117,8 +117,9 @@ class WorkStationItem(models.Model):
 
         if blocked:
             raise UserError(self.env._(
-                "Dispatch is the last step: %(waiting)s still have work on "
+                "%(station)s is the last step: %(waiting)s still have work on "
                 "this order.",
+                station=blocked[0].station_id.name,
                 waiting=blocked[0].waiting_for or self.env._("other stations"),
             ))
 

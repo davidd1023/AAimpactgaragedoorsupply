@@ -4,9 +4,9 @@ from odoo import api, fields, models
 
 # THE BENCHES, IN THE ORDER THE WORK GOES THROUGH THEM.
 #
-# Three make something - springs, tracks, cables - and DISPATCH is the last
-# one: it gathers the hardware and sends the order out, so it cannot start
-# until the other three have finished. That order is the sequence here, and it
+# Three make something - springs, tracks, cables - and the last one, Hardware,
+# gathers what is left and sends the order out, so it cannot start until the
+# other three have finished. That order is the sequence here, and it
 # is also a rule the code enforces rather than a hope about how people work:
 # see work_station_item.action_done.
 #
@@ -17,7 +17,11 @@ STATIONS = [
     ("springs", "Springs"),
     ("tracks", "Tracks"),
     ("cables", "Cables"),
-    ("dispatch", "Dispatch"),
+    # CALLED HARDWARE, and the code stays "dispatch". The word is what the
+    # bench is called - the owner renamed it - and the code is what the
+    # software calls the last step; renaming a stored value to follow a label
+    # buys nothing and breaks every row that points at it.
+    ("dispatch", "Hardware"),
 ]
 
 # The station that finishes an order, and the ones it waits for.

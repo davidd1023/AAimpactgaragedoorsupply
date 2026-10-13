@@ -1,6 +1,6 @@
 {
     'name': "Work Order Sheet",
-    'version': '19.0.1.24.0',
+    'version': '19.0.1.25.0',
     'summary': "Print a work order, and sort its work onto the benches",
     'description': """
 Adds a printable sheet to a work order - the transfer the shop sees under
@@ -8,12 +8,17 @@ Operations > Work Orders (Pedidos) - listing every product on it, with the
 length read out of the name for the ones that have one.
 
 WORK STATIONS, under Manufacturing. The same rule that splits the sheet into
-pages - Tracks, Springs, Cables and Hardware - also sorts the work onto three
+pages - Tracks, Springs, Cables and Hardware - also sorts the work onto four
 benches when a transfer is confirmed. Each bench has a kiosk link of its own
 showing only its own queue, with the cut lengths and the door it is building
-for, and a Done button. Hardware is not a station: those parts come off a
-shelf against the transfer, which is also why the benches live under
-Manufacturing while the printed sheet stays on the transfer.
+for, and a Done button.
+
+Three of them make something. The fourth, Hardware, gathers what is left and
+sends the order out: it cannot start until the other three have finished, and
+its Complete Order button is what validates the transfer. Perforated angles,
+shafts and trims reach it already complete, because they are supplied as they
+come. The printed sheet stays on the transfer, which is the record it
+describes.
 
 SEPARATE FROM door_work_order ON PURPOSE. That module exists to receive a door
 from the external calculator and raise a manufacturing order; this one prints

@@ -1186,7 +1186,7 @@ class StockPicking(models.Model):
         WORK_STATION_STATES, string="Cables", default="none",
         compute="_compute_work_station_states", store=True)
     work_station_dispatch = fields.Selection(
-        WORK_STATION_STATES, string="Dispatch", default="none",
+        WORK_STATION_STATES, string="Hardware", default="none",
         compute="_compute_work_station_states", store=True)
     work_station_todo_count = fields.Integer(
         string="Still to make", compute="_compute_work_station_states",
@@ -1295,10 +1295,15 @@ class StockPicking(models.Model):
         reason = refused.get(self.id, "")
 
         if not reason:
+            # NAMED FROM THE RECORD, not written out here: the owner renamed
+            # this bench once and may again, and a log that still says
+            # Dispatch when the screen says Hardware is a log somebody has to
+            # translate in their head.
             self.sudo().message_post(
                 body=self.env._(
-                    "Dispatch confirmed this order as complete, and the "
-                    "transfer was validated."),
+                    "%(station)s confirmed this order as complete, and the "
+                    "transfer was validated.",
+                    station=self.env["work.station"]._station_label(DISPATCH)),
                 subtype_xmlid="mail.mt_note")
 
         return reason
@@ -1373,9 +1378,11 @@ class StockPicking(models.Model):
             if reason:
                 picking.sudo().message_post(
                     body=self.env._(
-                        "Dispatch confirmed this order as finished, but the "
-                        "transfer could not be validated automatically: "
+                        "%(station)s confirmed this order as finished, but "
+                        "the transfer could not be validated automatically: "
                         "%(reason)s",
+                        station=self.env["work.station"]._station_label(
+                            DISPATCH),
                         reason=reason,
                     ),
                     subtype_xmlid="mail.mt_note")

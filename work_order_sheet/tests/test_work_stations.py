@@ -449,7 +449,8 @@ class TestDispatchIsLast(StationCase):
             "/station/%s/done/%s" % (self.dispatch.access_token, item.id),
             data={"tap": "1"})
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Dispatch is the last step", visible_text(response.text))
+        self.assertIn("is the last step", visible_text(response.text))
+        self.assertIn(self.dispatch.name, visible_text(response.text))
         self.assertEqual(item.state, "todo")
 
     def test_dispatch_opens_once_the_others_are_finished(self):
@@ -795,8 +796,8 @@ class TestTheOrdersLog(StationCase):
         self._items(order).action_done()
         picking._work_station_complete()
 
-        self.assertIn("Dispatch confirmed this order as complete",
-                      self._log(picking)[0])
+        self.assertIn("confirmed this order as complete", self._log(picking)[0])
+        self.assertIn(self.dispatch.name, self._log(picking)[0])
 
     def test_a_tap_at_the_bench_reaches_the_log(self):
         """End to end: the tablet, not the model."""
