@@ -41,7 +41,8 @@
           <group>
             <field name="work_station_shown" widget="badge"
                    decoration-success="work_station_shown == 'yes'"
-                   decoration-warning="work_station_shown == 'no'"/>
+                   decoration-warning="work_station_shown == 'no'"
+                   decoration-muted="work_station_shown == 'done'"/>
             <field name="work_station_springs" widget="badge"
                    invisible="work_station_springs == 'none'"
                    decoration-success="work_station_springs == 'done'"
@@ -96,7 +97,8 @@
       <xpath expr="//field[@name='state']" position="before">
         <field name="work_station_shown" optional="show" widget="badge"
                decoration-success="work_station_shown == 'yes'"
-               decoration-warning="work_station_shown == 'no'"/>
+               decoration-warning="work_station_shown == 'no'"
+               decoration-muted="work_station_shown == 'done'"/>
         <field name="work_station_springs" optional="hide" widget="badge"
                decoration-success="work_station_springs == 'done'"
                decoration-warning="work_station_springs == 'partial'"

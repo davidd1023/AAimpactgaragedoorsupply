@@ -1201,14 +1201,29 @@ class StockPicking(models.Model):
     # no bench work on it rather than labelling it "Not sent", which would
     # suggest somebody ought to send it.
     work_station_shown = fields.Selection(
-        [("no", "Not sent"), ("yes", "On the stations")],
+        [("no", "Not sent"), ("yes", "On the stations"),
+         ("done", "Completed")],
         string="Stations", compute="_compute_work_station_shown")
 
-    @api.depends("work_station_released", "work_station_item_ids")
+    @api.depends("work_station_released", "work_station_item_ids", "state")
     def _compute_work_station_shown(self):
+        """What this column is for: whether a bench can see this order NOW.
+
+        A FINISHED ORDER IS NOT ON THE BENCHES, whatever the switch still
+        says. The kiosks drop a transfer the moment it is validated, so an
+        order that read "On the stations" after it had gone out was describing
+        a screen it was no longer on. It says Completed instead - the switch
+        is left alone, because it is a record of having been sent and the
+        order's log says when.
+
+        A cancelled one says nothing. There is no state of the benches worth
+        reporting for an order nobody will ever make.
+        """
         for picking in self:
-            if not picking.work_station_item_ids:
+            if not picking.work_station_item_ids or picking.state == "cancel":
                 picking.work_station_shown = False
+            elif picking.state == "done":
+                picking.work_station_shown = "done"
             else:
                 picking.work_station_shown = (
                     "yes" if picking.work_station_released else "no")

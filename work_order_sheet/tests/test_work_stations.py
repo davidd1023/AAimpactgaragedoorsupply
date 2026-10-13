@@ -1116,3 +1116,30 @@ class TestReleasingToTheStations(StationCase):
 
         self.assertFalse(picking.work_station_item_ids)
         self.assertFalse(picking.work_station_shown)
+
+    def test_a_finished_order_says_completed_rather_than_on_the_stations(self):
+        """The kiosks drop a transfer the moment it is validated, so "On the
+        stations" after it has gone out describes a screen it is not on."""
+        order = self._order([(self.hinge, 1, None)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self.assertEqual(picking.work_station_shown, "yes")
+
+        self._items(order).action_done()
+        picking._work_station_complete()
+        picking.invalidate_recordset()
+
+        self.assertEqual(picking.state, "done")
+        self.assertEqual(picking.work_station_shown, "done")
+        # The switch is left alone: it records that the order WAS sent, and
+        # the order's log says when.
+        self.assertTrue(picking.work_station_released)
+
+    def test_a_cancelled_order_says_nothing(self):
+        order = self._order([(self.hinge, 1, None)])
+        picking = order.picking_ids[:1]
+        picking.action_cancel()
+        picking.invalidate_recordset()
+
+        self.assertEqual(picking.state, "cancel")
+        self.assertFalse(picking.work_station_shown)
