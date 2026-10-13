@@ -98,7 +98,12 @@
                   Order <t t-esc="picking.origin or picking.name"/>
                 </div>
                 <div class="meta">
-                  Everything on it is made and gathered.
+                  <t t-if="picking.work_station_dispatch == 'none'">
+                    Made and finished at the benches. Nothing here to gather.
+                  </t>
+                  <t t-else="">
+                    Everything on it is made and gathered.
+                  </t>
                 </div>
               </div>
               <form t-attf-action="/station/{{ token }}/complete/{{ picking.id }}"
