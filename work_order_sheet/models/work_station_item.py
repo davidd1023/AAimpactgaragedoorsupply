@@ -49,6 +49,14 @@ class WorkStationItem(models.Model):
     # so each row carries the key it was made from and is matched on it.
     line_key = fields.Char(required=True, index=True)
 
+    # SUPPLIED AS IT COMES, so it reached dispatch complete and no bench ever
+    # ticked it off. Kept as a field rather than worked out from the name again
+    # at every read: the name on the row is a snapshot, and whether anybody was
+    # ever asked to do something to it is a fact about what happened, not a
+    # pattern to re-run.
+    auto_done = fields.Boolean(string="No work needed", readonly=True)
+    auto_done_kind = fields.Char(readonly=True)
+
     state = fields.Selection(
         [("todo", "To do"), ("done", "Done")],
         default="todo", required=True, index=True)
@@ -154,6 +162,24 @@ class WorkStationItem(models.Model):
 
         return name
 
+    def _work_station_log_auto_done(self):
+        """Say in the order's log why nobody will ever tick these off."""
+        for picking in self.picking_id:
+            items = self.filtered(lambda item: item.picking_id == picking)
+            rows = Markup("").join(
+                Markup("<li>%s</li>") % self._work_station_log_label(item)
+                for item in items
+            )
+            picking.sudo().message_post(
+                body=Markup("<p>%s</p><ul>%s</ul>") % (
+                    self.env._(
+                        "Complete on arrival at %(station)s - supplied as "
+                        "stock, with no work to do:",
+                        station=items[0].station_id.name),
+                    rows,
+                ),
+                subtype_xmlid="mail.mt_note")
+
     def _work_station_log(self, done):
         """Write what just happened into the log of each order it happened to.
 
@@ -191,9 +217,23 @@ class WorkStationItem(models.Model):
     def action_todo(self):
         """Undo, which a bench tablet needs more than a desk does.
 
+        EXCEPT FOR WHAT WAS NEVER DONE. A perforated angle, a shaft or a trim
+        arrives complete because there is no work to do to it, so there is
+        nothing to put back - the owner's rule, and the kiosk offers no button
+        for them either. This is what makes that true rather than merely
+        displayed.
+
         LOGGED LIKE EVERYTHING ELSE. A log that records only the ticking off
         would show work finished that is being done again.
         """
+        supplied = self.filtered("auto_done")
+
+        if supplied:
+            raise UserError(self.env._(
+                "%(name)s needs no work, so there is nothing to put back.",
+                name=supplied[0].name,
+            ))
+
         self.write({"state": "todo", "done_at": False})
         self._work_station_log(False)
 

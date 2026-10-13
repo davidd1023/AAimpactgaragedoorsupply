@@ -110,7 +110,7 @@
         </div>
       </t>
 
-      <t t-if="not todo and not ready">
+      <t t-if="not todo and not ready and not supplied">
         <div class="empty">Nothing waiting. New work appears here on its own.</div>
       </t>
       <t t-if="todo and not ready and not any(item.is_ready for item in todo)">
@@ -158,6 +158,30 @@
             <div class="waiting">
               Waiting for<br/>
               <t t-esc="item.waiting_for"/>
+            </div>
+          </t>
+        </div>
+      </t>
+
+      <!-- SHOWN, NEVER TICKABLE. The dispatcher should see that the trims are
+           part of this order and that nothing is expected of them; an order
+           ready to send with no sign of half its contents invites somebody to
+           go looking for the rest. No button, because there is no work to
+           undo. -->
+      <t t-if="supplied">
+        <div class="section">Already complete - supplied as stock</div>
+        <div class="done">
+          <t t-foreach="supplied" t-as="item">
+            <div class="job">
+              <div class="what">
+                <div class="name">
+                  <t t-esc="item.order_name or '-'"/> -
+                  <t t-if="item.quantity and item.quantity != 1">
+                    <t t-esc="'%g' % item.quantity"/> x
+                  </t>
+                  <t t-esc="item.name"/>
+                </div>
+              </div>
             </div>
           </t>
         </div>
