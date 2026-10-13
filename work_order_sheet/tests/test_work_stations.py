@@ -79,6 +79,12 @@ class StationCase(HttpCase):
             "/station/%s/%s/%s" % (station.access_token, action, item.id),
             data={"tap": "1"})
 
+    def _complete(self, station, picking):
+        """Dispatch's final confirmation, as the tablet sends it."""
+        return self.url_open(
+            "/station/%s/complete/%s" % (station.access_token, picking.id),
+            data={"tap": "1"})
+
     def _kiosk(self, station):
         response = self.url_open("/station/%s" % station.access_token)
         self.assertEqual(response.status_code, 200)
@@ -549,11 +555,6 @@ class TestDispatchIsLast(StationCase):
 
     # --- the final confirmation, from the bench -------------------------------
 
-    def _complete(self, station, picking):
-        return self.url_open(
-            "/station/%s/complete/%s" % (station.access_token, picking.id),
-            data={"tap": "1"})
-
     def test_the_button_appears_only_when_everything_is_done(self):
         order = self._order()
         picking = order.picking_ids[:1]
@@ -769,3 +770,147 @@ class TestTheOrdersLog(StationCase):
         self.assertIn('76"', self._log(picking)[0])
 
 
+
+
+@tagged("post_install", "-at_install")
+class TestSuppliedAsStock(StationCase):
+    """Perforated angles, shafts and trims arrive complete.
+
+    The owner's rule: they are supplied as they come, so dispatch has no work
+    to do on them, nobody ticks them off - and because nothing was done, there
+    is nothing to put back.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.dispatch = self.env.ref("work_order_sheet.station_dispatch")
+
+    def _product(self, name):
+        return self.env["product.product"].create({
+            "name": name, "type": "consu", "is_storable": True,
+            "list_price": 10.0})
+
+    def _one(self, name):
+        order = self._order([(self._product(name), 2, None)])
+
+        return order, self._items(order, self.dispatch)
+
+    # --- what counts ----------------------------------------------------------
+
+    def test_the_three_kinds_arrive_complete(self):
+        for name in ('2" x 2" Perforated Angle 10ft Galvanized',
+                     'Perforated Angle, 14 Gauge',
+                     '1" Torsion Shaft 8ft',
+                     'Shafts, Keyed 1 Inch',
+                     "White Trims",
+                     'Plastic Trim 18ft Almond'):
+            _order, item = self._one(name)
+            self.assertEqual(item.state, "done", name)
+            self.assertTrue(item.auto_done, name)
+            self.assertTrue(item.done_at, name)
+
+    def test_a_flag_angle_is_not_a_perforated_angle(self):
+        """THE ONE MISTAKE THIS MUST NOT MAKE. A flag angle is real work on a
+        prepared track - the calculator adds one per track - so matching on
+        "angle" alone would have marked them complete and sent somebody a door
+        with no flag angle fitted."""
+        for name in ("Flag Angle Black", "Flag Angle White",
+                     'Angle Bracket 2"'):
+            _order, item = self._one(name)
+            self.assertFalse(item.auto_done, name)
+            self.assertEqual(item.state, "todo", name)
+
+    def test_ordinary_hardware_still_has_to_be_gathered(self):
+        _order, item = self._one("No 2 Hinge Galvanized")
+        self.assertFalse(item.auto_done)
+        self.assertEqual(item.state, "todo")
+
+    def test_only_dispatch_hands_out_free_passes(self):
+        """A property of a part that is gathered, not of one that is made: if
+        a name like this ever sorts to a making bench, that bench is doing
+        something to it and still says when it is done."""
+        order = self._order([(self._product('2" Track Shaft Assembly'), 1, None)])
+        item = self._items(order, self.tracks)
+        self.assertTrue(item, "the fixture did not reach the tracks bench")
+        self.assertFalse(item.auto_done)
+        self.assertEqual(item.state, "todo")
+
+    # --- and they cannot be undone -------------------------------------------
+
+    def test_they_cannot_be_put_back(self):
+        _order, item = self._one("White Trims")
+
+        with self.assertRaises(UserError):
+            item.action_todo()
+
+        self.assertEqual(item.state, "done")
+
+    def test_the_kiosk_offers_no_button_for_them(self):
+        self._one("White Trims")
+        page = self._kiosk(self.dispatch)
+        self.assertIn("Already complete", page)
+        self.assertIn("White Trims", page)
+        self.assertNotIn("Undo", page)
+
+    def test_the_route_refuses_to_put_one_back(self):
+        """The page offers no button; the route does not rely on that."""
+        _order, item = self._one("White Trims")
+        response = self.url_open(
+            "/station/%s/todo/%s" % (self.dispatch.access_token, item.id),
+            data={"tap": "1"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("nothing to put back", visible_text(response.text))
+        self.assertEqual(item.state, "done")
+
+    # --- the order they are on ------------------------------------------------
+
+    def test_the_order_still_waits_for_the_complete_button(self):
+        """The owner's note: an order of nothing but these still has to be
+        completed by hand at dispatch. Arriving complete is not the same as
+        being sent out."""
+        order = self._order([(self._product("White Trims"), 2, None)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+
+        self.assertEqual(picking.work_station_dispatch, "done")
+        self.assertNotEqual(picking.state, "done",
+                            "the order sent itself out")
+
+        page = self._kiosk(self.dispatch)
+        self.assertIn("Ready to send out", page)
+        self.assertIn("Complete order", page)
+
+        self._complete(self.dispatch, picking)
+        picking.invalidate_recordset()
+        self.assertEqual(picking.state, "done")
+
+    def test_they_do_not_hold_up_the_rest_of_the_order(self):
+        order = self._order([
+            (self._product("White Trims"), 2, None),
+            (self.hinge, 4, None),
+        ])
+        picking = order.picking_ids[:1]
+        self.assertEqual(picking.work_station_dispatch, "partial",
+                         "a free pass counted as the whole section")
+
+        self._items(order, self.dispatch).filtered(
+            lambda item: not item.auto_done).action_done()
+        picking.invalidate_recordset()
+        self.assertEqual(picking.work_station_dispatch, "done")
+
+    def test_the_log_says_why_nobody_ticked_them_off(self):
+        order, _item = self._one("White Trims")
+        picking = order.picking_ids[:1]
+        entry = picking.message_ids.filtered(
+            lambda m: "Complete on arrival" in (m.body or ""))
+        self.assertTrue(entry, "the log does not explain itself")
+        self.assertIn("White Trims", entry[0].body)
+
+    def test_sorting_again_does_not_say_it_twice(self):
+        order, _item = self._one("White Trims")
+        picking = order.picking_ids[:1]
+        before = len(picking.message_ids)
+
+        picking.action_work_station_sync()
+
+        self.assertEqual(len(picking.message_ids), before)

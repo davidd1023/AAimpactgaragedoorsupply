@@ -47,12 +47,19 @@ class WorkStationKiosk(http.Controller):
         # A SHORT TAIL OF FINISHED WORK, so a mis-tap can be undone. Only
         # today's, and only a few: this is an undo button, not a history.
         done = Item.search(
-            base + [("state", "=", "done"),
+            base + [("state", "=", "done"), ("auto_done", "=", False),
                     ("done_at", ">=", fields.Datetime.start_of(
                         fields.Datetime.now(), "day"))],
             order="done_at desc", limit=12)
+        # AND WHAT NEEDED NOTHING. Shown, because the dispatcher should see
+        # that the trims are part of this order and that nothing is expected
+        # of them - an order that is ready to send with no sign of half its
+        # contents invites somebody to go looking. Never with a button: there
+        # is no work to undo.
+        supplied = Item.search(
+            base + [("auto_done", "=", True)], order="order_name, id")
 
-        return todo, done
+        return todo, done, supplied
 
     def _ready_orders(self, station):
         """Orders whose work is all made and which dispatch can now send out.
@@ -73,12 +80,13 @@ class WorkStationKiosk(http.Controller):
             lambda picking: not picking.work_station_todo_count)
 
     def _render(self, station, message=""):
-        todo, done = self._items(station)
+        todo, done, supplied = self._items(station)
 
         return request.render("work_order_sheet.station_kiosk", {
             "station": station,
             "todo": todo,
             "done": done,
+            "supplied": supplied,
             "ready": self._ready_orders(station),
             "message": message,
             "token": station.access_token,
@@ -165,12 +173,12 @@ class WorkStationKiosk(http.Controller):
         if not item or item.station_id != station:
             return request.not_found()
 
-        if action == "todo":
-            item.action_todo()
-
-            return request.redirect("/station/%s" % station.access_token)
-
         try:
+            if action == "todo":
+                item.action_todo()
+
+                return request.redirect("/station/%s" % station.access_token)
+
             item.action_done()
         except UserError as error:
             # DISPATCH TOO EARLY, almost certainly: the model refuses it and

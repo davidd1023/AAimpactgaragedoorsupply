@@ -1002,6 +1002,40 @@ class StockPicking(models.Model):
 
         return "\n".join(rows)
 
+    # WHAT DISPATCH HAS NO WORK TO DO ON.
+    #
+    # Perforated angles, shafts and trims are supplied as they come, so they
+    # arrive at dispatch already complete and there is nothing for anybody to
+    # tick off - which is also why they cannot be put back: there is no work to
+    # undo. The owner's rule, 2026-10-13.
+    #
+    # A FLAG ANGLE IS NOT A PERFORATED ANGLE, and that is the one mistake this
+    # must not make. Flag angles are real work on a prepared track - the
+    # calculator adds one per track - so "angle" on its own would have quietly
+    # marked them complete and sent somebody a door with no flag angle fitted.
+    # The word perforated is required, in either order, and nothing matches on
+    # "angle" alone.
+    #
+    # ONLY AT DISPATCH. These are properties of a part that is gathered, not of
+    # one that is made: if a product named for a shaft ever sorts to a making
+    # bench, that bench is doing something to it and still says when it is
+    # done.
+    AUTO_DONE = (
+        ("perforated angle", re.compile(
+            r"\bperf(?:orated)?\w*\b.*\bangles?\b"
+            r"|\bangles?\b.*\bperf(?:orated)?\w*\b", re.I)),
+        ("shaft", re.compile(r"\bshafts?\b", re.I)),
+        ("trim", re.compile(r"\btrims?\b", re.I)),
+    )
+
+    def _work_station_auto_done(self, name):
+        """The kind of thing this is, when it needs no work, or ""."""
+        for kind, pattern in self.AUTO_DONE:
+            if pattern.search(name or ""):
+                return kind
+
+        return ""
+
     # WHICH BENCH EACH PAGE FEEDS. Three of them are the same word twice;
     # Hardware feeds Dispatch, because a hinge is not made, it is gathered and
     # sent. The page is what a part IS and the station is who handles it, which
@@ -1028,7 +1062,13 @@ class StockPicking(models.Model):
                 continue
 
             product = line.get("product")
+            # Named by what was BOUGHT, which is the name the floor reads and
+            # the one the sheet prints.
+            auto = (self._work_station_auto_done(line.get("name") or "")
+                    if code == DISPATCH else "")
             wanted.append((code, {
+                "auto_done": bool(auto),
+                "auto_done_kind": auto,
                 "picking_id": self.id,
                 "order_name": order.name if order else (self.origin or self.name),
                 "sequence": sequence,
@@ -1065,6 +1105,7 @@ class StockPicking(models.Model):
             existing = Item.search([("picking_id", "=", picking.id)])
             by_key = {item.line_key: item for item in existing}
             seen = set()
+            created = Item.browse()
 
             for code, values in picking._work_station_values():
                 station = Station._station_for_code(code)
@@ -1081,7 +1122,19 @@ class StockPicking(models.Model):
                     # does not un-finish it.
                     item.write(values)
                 else:
-                    Item.create(values)
+                    if values.get("auto_done"):
+                        # Complete the moment it is sorted: there is nothing
+                        # for a bench to do to it.
+                        values = dict(values, state="done",
+                                      done_at=fields.Datetime.now())
+
+                    created |= Item.create(values)
+
+            # LOGGED ONCE, WHEN THEY ARRIVE. Otherwise the order's log would
+            # show a dispatch that finished work nobody remembers doing, and a
+            # re-sort would say it again - only newly created rows are listed,
+            # and an existing row is updated rather than made.
+            created.filtered("auto_done")._work_station_log_auto_done()
 
             stale = existing.filtered(
                 lambda i: i.line_key not in seen and i.state == "todo")
