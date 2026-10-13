@@ -1,6 +1,6 @@
 {
     'name': "Work Order Sheet",
-    'version': '19.0.1.19.0',
+    'version': '19.0.1.20.0',
     'summary': "Print a work order, and sort its work onto the benches",
     'description': """
 Adds a printable sheet to a work order - the transfer the shop sees under
@@ -29,6 +29,7 @@ machinery it does not use.
         'report/work_order_sheet_reports.xml',
         'views/station_templates.xml',
         'views/work_station_views.xml',
+        'views/stock_picking_views.xml',
         'data/work_station_data.xml',
     ],
     'installable': True,

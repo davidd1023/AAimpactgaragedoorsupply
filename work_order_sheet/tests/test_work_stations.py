@@ -12,15 +12,12 @@ SPRING_DESCRIPTION = (
 )
 
 
-@tagged("post_install", "-at_install")
-class TestWorkStations(HttpCase):
-    """Confirming an order puts its work on the bench that does it.
+class StationCase(HttpCase):
+    """An order with a spring, a track, a cable and a hinge on it.
 
-    THE SORT IS THE SHEET'S OWN. _work_order_page already decides whether a
-    line is a track, a spring or a cable, and every one of those decisions is
-    tested; a station is that page with a tablet in front of it. What is tested
-    here is the sorting, the separation between benches, and that a bench can
-    tick its work off without being able to touch anybody else's.
+    Shared by the tests below rather than inherited from one of them: a test
+    class that inherits another runs all of its tests again under a second
+    name, which costs time and reports every failure twice.
     """
 
     def setUp(self):
@@ -69,6 +66,36 @@ class TestWorkStations(HttpCase):
             domain.append(("station_id", "=", station.id))
 
         return self.env["work.station.item"].search(domain)
+
+    def _tap(self, station, action, item):
+        """What a bench tablet does when somebody presses a button.
+
+        A BODY, BECAUSE AN EMPTY ONE IS A GET. url_open posts only when there
+        is something to post, so data={} goes out as a GET and the route
+        refuses it with a 405 - which looks exactly like a passing security
+        test and is not one.
+        """
+        return self.url_open(
+            "/station/%s/%s/%s" % (station.access_token, action, item.id),
+            data={"tap": "1"})
+
+    def _kiosk(self, station):
+        response = self.url_open("/station/%s" % station.access_token)
+        self.assertEqual(response.status_code, 200)
+
+        return visible_text(response.text)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkStations(StationCase):
+    """Confirming an order puts its work on the bench that does it.
+
+    THE SORT IS THE SHEET'S OWN. _work_order_page already decides whether a
+    line is a track, a spring or a cable, and every one of those decisions is
+    tested; a station is that page with a tablet in front of it. What is tested
+    here is the sorting, the separation between benches, and that a bench can
+    tick its work off without being able to touch anybody else's.
+    """
 
     # --- the sort -------------------------------------------------------------
 
@@ -120,24 +147,6 @@ class TestWorkStations(HttpCase):
             "a re-sort un-finished work that was already done")
 
     # --- one bench cannot see another ----------------------------------------
-
-    def _tap(self, station, action, item):
-        """What a bench tablet does when somebody presses a button.
-
-        A BODY, BECAUSE AN EMPTY ONE IS A GET. url_open posts only when there
-        is something to post, so data={} goes out as a GET and the route
-        refuses it with a 405 - which looks exactly like a passing security
-        test and is not one.
-        """
-        return self.url_open(
-            "/station/%s/%s/%s" % (station.access_token, action, item.id),
-            data={"tap": "1"})
-
-    def _kiosk(self, station):
-        response = self.url_open("/station/%s" % station.access_token)
-        self.assertEqual(response.status_code, 200)
-
-        return visible_text(response.text)
 
     def test_a_bench_sees_its_own_work_and_nobody_elses(self):
         self._order()
@@ -270,3 +279,108 @@ class TestWhereTheStationsLive(HttpCase):
 
         # The station itself is still readable - a picker may see the name.
         self.assertEqual(station.name, "Springs")
+
+
+@tagged("post_install", "-at_install")
+class TestStationStatusOnTheOrder(StationCase):
+    """The work order says where each bench has got to.
+
+    "Are the springs done?" was answerable only by opening the station queues
+    or walking to the bench. The order itself now carries one line per station.
+    """
+
+    def test_every_bench_starts_unfinished(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+        self.assertEqual(picking.work_station_springs, "todo")
+        self.assertEqual(picking.work_station_tracks, "todo")
+        self.assertEqual(picking.work_station_cables, "todo")
+
+    def test_a_bench_with_no_part_in_the_order_says_nothing(self):
+        """Not "To do", which would be a job somebody goes looking for."""
+        order = self._order([(self.track, 1, None)])
+        picking = order.picking_ids[:1]
+        self.assertEqual(picking.work_station_tracks, "todo")
+        self.assertEqual(picking.work_station_springs, "none")
+        self.assertEqual(picking.work_station_cables, "none")
+
+    def test_finishing_a_bench_shows_on_the_order(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+        item = self._items(order, self.springs)
+
+        self._tap(self.springs, "done", item)
+        picking.invalidate_recordset()
+
+        self.assertEqual(picking.work_station_springs, "done")
+        self.assertEqual(picking.work_station_tracks, "todo",
+                         "one bench finishing finished them all")
+
+    def test_half_a_bench_reads_in_progress(self):
+        """Two of three tracks cut is neither done nor untouched."""
+        order = self._order([
+            (self.track, 1, None),
+            (self.cable, 1, None),
+        ])
+        # A second track line, so the bench has two jobs on one order.
+        second = self.env["product.product"].create({
+            "name": '3" Vertical Track 92" - 8\' Door Height Black',
+            "type": "consu", "is_storable": True, "list_price": 10.0})
+        self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": second.id,
+            "product_uom_qty": 1})
+        order.picking_ids.action_work_station_sync()
+
+        tracks = self._items(order, self.tracks)
+        self.assertEqual(len(tracks), 2, "the bench has only one job")
+
+        tracks[0].action_done()
+        picking = order.picking_ids[:1]
+        picking.invalidate_recordset()
+        self.assertEqual(picking.work_station_tracks, "partial")
+
+        tracks[1].action_done()
+        picking.invalidate_recordset()
+        self.assertEqual(picking.work_station_tracks, "done")
+
+    def test_undoing_at_the_bench_shows_on_the_order_too(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+        item = self._items(order, self.cables)
+
+        self._tap(self.cables, "done", item)
+        picking.invalidate_recordset()
+        self.assertEqual(picking.work_station_cables, "done")
+
+        self._tap(self.cables, "todo", item)
+        picking.invalidate_recordset()
+        self.assertEqual(picking.work_station_cables, "todo")
+
+    def test_the_count_of_what_is_left_to_make(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+        self.assertEqual(picking.work_station_todo_count, 3)
+
+        self._items(order, self.springs).action_done()
+        picking.invalidate_recordset()
+        self.assertEqual(picking.work_station_todo_count, 2)
+
+    def test_the_status_can_be_searched_rather_than_opened(self):
+        """Stored, so the office can filter a list of orders by it."""
+        order = self._order()
+        picking = order.picking_ids[:1]
+        self.assertIn(picking, self.env["stock.picking"].search(
+            [("work_station_springs", "=", "todo")]))
+
+        self._items(order).action_done()
+        picking.invalidate_recordset()
+        self.assertIn(picking, self.env["stock.picking"].search(
+            [("work_station_todo_count", "=", 0)]))
+
+    def test_the_stat_button_opens_this_orders_rows_only(self):
+        first = self._order()
+        second = self._order()
+        action = first.picking_ids[:1].action_open_work_station_items()
+        found = self.env["work.station.item"].search(action["domain"])
+        self.assertEqual(found, self._items(first))
+        self.assertFalse(found & self._items(second))
