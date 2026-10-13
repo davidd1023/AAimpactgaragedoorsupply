@@ -1,3 +1,4 @@
+from odoo.exceptions import AccessError
 from odoo.tests.common import HttpCase, tagged
 
 from .test_work_order_sheet import visible_text
@@ -211,3 +212,61 @@ class TestWorkStations(HttpCase):
         self.assertEqual(
             self.url_open("/station/%s" % self.springs.access_token).status_code,
             200)
+
+
+@tagged("post_install", "-at_install")
+class TestWhereTheStationsLive(HttpCase):
+    """The benches are under Manufacturing, and the people who run the floor
+    can reach them.
+
+    A MANUFACTURING ADMINISTRATOR IS NOT AN INVENTORY ONE. mrp.group_mrp_user
+    implies stock.group_stock_user and nothing more, so permissions granted
+    only to the Inventory groups would have hidden the kiosk links from
+    exactly the person whose floor this is.
+    """
+
+    def test_the_menus_hang_under_manufacturing(self):
+        for menu, parent in (
+            ("work_order_sheet.menu_work_station_item",
+             "mrp.menu_mrp_manufacturing"),
+            ("work_order_sheet.menu_work_station",
+             "mrp.menu_mrp_configuration"),
+        ):
+            self.assertEqual(self.env.ref(menu).parent_id,
+                             self.env.ref(parent), menu)
+
+    def test_a_manufacturing_user_can_read_the_queue(self):
+        user = self.env["res.users"].create({
+            "name": "Bench Supervisor", "login": "bench-supervisor",
+            "group_ids": [(6, 0, [self.env.ref("mrp.group_mrp_user").id])],
+        })
+        items = self.env["work.station.item"].with_user(user)
+        self.assertEqual(items.search_count([]), items.sudo().search_count([]))
+
+    def test_a_manufacturing_administrator_can_replace_a_kiosk_link(self):
+        user = self.env["res.users"].create({
+            "name": "Floor Manager", "login": "floor-manager",
+            "group_ids": [(6, 0, [self.env.ref("mrp.group_mrp_manager").id])],
+        })
+        station = self.env.ref("work_order_sheet.station_springs").with_user(user)
+        before = station.access_token
+        station.action_regenerate_token()
+        self.assertNotEqual(station.access_token, before)
+
+    def test_an_ordinary_user_cannot_read_a_kiosk_link(self):
+        """It is the key to a bench, so it is not something to leave lying in
+        a list view for everybody with stock access."""
+        user = self.env["res.users"].create({
+            "name": "Picker", "login": "bench-picker",
+            "group_ids": [(6, 0, [self.env.ref("stock.group_stock_user").id])],
+        })
+        station = self.env.ref("work_order_sheet.station_springs").with_user(user)
+
+        with self.assertRaises(AccessError):
+            station.access_token
+
+        with self.assertRaises(AccessError):
+            station.kiosk_url
+
+        # The station itself is still readable - a picker may see the name.
+        self.assertEqual(station.name, "Springs")

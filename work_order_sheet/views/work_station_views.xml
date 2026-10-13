@@ -130,13 +130,26 @@
     <field name="code">records.action_work_station_sync()</field>
   </record>
 
+  <!-- UNDER MANUFACTURING, NOT INVENTORY. A bench WINDS a spring and CUTS a
+       track; Inventory is where the result gets shipped. Hardware is not a
+       station for exactly that reason - hinges and rollers come off a shelf -
+       so the three stations are the part of this that is genuinely making
+       something, and shop-floor progress is a Manufacturing question.
+
+       The printed sheet stays on the transfer, because that is the record it
+       describes.
+
+       BOTH SETS OF GROUPS ON PURPOSE. A Manufacturing administrator is not
+       automatically an Inventory one - mrp.group_mrp_manager implies only
+       stock.group_stock_user - so gating this on the Inventory group alone
+       would hide the kiosk links from exactly the person who runs the floor. -->
   <menuitem id="menu_work_station_item" name="Station Work"
-            parent="stock.menu_stock_warehouse_mgmt"
+            parent="mrp.menu_mrp_manufacturing"
             action="work_station_item_action" sequence="25"/>
 
   <menuitem id="menu_work_station" name="Work Stations"
-            parent="stock.menu_warehouse_config"
+            parent="mrp.menu_mrp_configuration"
             action="work_station_action" sequence="25"
-            groups="stock.group_stock_manager"/>
+            groups="stock.group_stock_manager,mrp.group_mrp_manager"/>
 
 </odoo>
