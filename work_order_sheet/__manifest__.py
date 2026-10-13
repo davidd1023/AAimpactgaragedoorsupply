@@ -1,6 +1,6 @@
 {
     'name': "Work Order Sheet",
-    'version': '19.0.1.26.2',
+    'version': '19.0.1.27.0',
     'summary': "Print a work order, and sort its work onto the benches",
     'description': """
 Adds a printable sheet to a work order - the transfer the shop sees under
@@ -12,6 +12,12 @@ pages - Tracks, Springs, Cables and Hardware - also sorts the work onto four
 benches when a transfer is confirmed. Each bench has a kiosk link of its own
 showing only its own queue, with the cut lengths and the door it is building
 for, and a Done button.
+
+DELIVERY CONFIRMATION. Every delivery carries a link of its own: the customer
+opens it on their phone, ticks what they were handed, types their name and
+signs at the bottom. The form says when it was made and when it was signed,
+both on the shop's clock, and what the customer did NOT tick goes into the
+order's log for somebody to deal with.
 
 Three of them make something. The fourth, Hardware, gathers what is left and
 sends the order out: it cannot start until the other three have finished, and
@@ -33,6 +39,7 @@ machinery it does not use.
         'security/ir.model.access.csv',
         'report/work_order_sheet_reports.xml',
         'views/station_templates.xml',
+        'views/delivery_templates.xml',
         'views/work_station_views.xml',
         'views/stock_picking_views.xml',
         'data/work_station_data.xml',
