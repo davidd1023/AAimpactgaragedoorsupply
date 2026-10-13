@@ -1,5 +1,9 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_work_station_user,work.station user,model_work_station,stock.group_stock_user,1,0,0,0
 access_work_station_manager,work.station manager,model_work_station,stock.group_stock_manager,1,1,1,1
+access_work_station_mrp_user,work.station mrp user,model_work_station,mrp.group_mrp_user,1,0,0,0
+access_work_station_mrp_manager,work.station mrp manager,model_work_station,mrp.group_mrp_manager,1,1,1,1
 access_work_station_item_user,work.station.item user,model_work_station_item,stock.group_stock_user,1,1,0,0
 access_work_station_item_manager,work.station.item manager,model_work_station_item,stock.group_stock_manager,1,1,1,1
+access_work_station_item_mrp_user,work.station.item mrp user,model_work_station_item,mrp.group_mrp_user,1,1,0,0
+access_work_station_item_mrp_manager,work.station.item mrp manager,model_work_station_item,mrp.group_mrp_manager,1,1,1,1

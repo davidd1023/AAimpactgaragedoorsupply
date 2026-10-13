@@ -40,11 +40,22 @@ class WorkStation(models.Model):
     # never printed on anything that leaves the building, and it can be
     # replaced in one click if a tablet goes missing - which is what
     # action_regenerate_token is for.
+    # KEPT FROM ORDINARY USERS, and from both kinds of administrator it is not.
+    # A Manufacturing administrator runs the floor and must be able to replace
+    # a link; mrp.group_mrp_manager implies only stock.group_stock_user, so
+    # naming the Inventory group alone locked out exactly the right person.
+    #
+    # The computed link carries the same groups as the secret inside it, or it
+    # would hand the secret to anybody who can read the station.
+    SECRET_GROUPS = "stock.group_stock_manager,mrp.group_mrp_manager"
+
     access_token = fields.Char(
         string="Link secret", default=_token, copy=False, required=True,
-        groups="stock.group_stock_manager",
+        groups=SECRET_GROUPS,
     )
-    kiosk_url = fields.Char(compute="_compute_kiosk_url", string="Kiosk link")
+    kiosk_url = fields.Char(
+        compute="_compute_kiosk_url", string="Kiosk link",
+        groups=SECRET_GROUPS)
     item_ids = fields.One2many("work.station.item", "station_id")
     todo_count = fields.Integer(compute="_compute_todo_count", string="To do")
 
@@ -56,8 +67,13 @@ class WorkStation(models.Model):
         base = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
 
         for station in self:
+            # SUDO FOR ITS OWN READ. Whoever is allowed to read kiosk_url is
+            # allowed to read the token - they are the same groups - but the
+            # compute also runs on behalf of whatever triggered it, and a
+            # recompute that raises on a field this very method is building
+            # would be a strange way to fail.
             station.kiosk_url = "%s/station/%s" % (
-                (base or "").rstrip("/"), station.access_token or "")
+                (base or "").rstrip("/"), station.sudo().access_token or "")
 
     def _compute_todo_count(self):
         counts = dict(self.env["work.station.item"]._read_group(
