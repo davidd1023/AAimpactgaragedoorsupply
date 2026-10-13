@@ -2,17 +2,27 @@ import uuid
 
 from odoo import api, fields, models
 
-# THE THREE BENCHES. Hardware is deliberately not one of them: hinges,
-# rollers, drums and shafts are picked off a shelf against the transfer, the
-# way they always were. A station is for something somebody BUILDS.
+# THE BENCHES, IN THE ORDER THE WORK GOES THROUGH THEM.
 #
-# The codes match the sheet's page names, lowercased, because the sheet's
-# page rule is what sorts the work - see stock_picking._work_station_sync.
+# Three make something - springs, tracks, cables - and DISPATCH is the last
+# one: it gathers the hardware and sends the order out, so it cannot start
+# until the other three have finished. That order is the sequence here, and it
+# is also a rule the code enforces rather than a hope about how people work:
+# see work_station_item.action_done.
+#
+# The sheet's own page rule is what sorts the work, so each station is the
+# page that feeds it - and Hardware feeds Dispatch, which is the one place the
+# two names differ. The page is what a part IS; the station is who handles it.
 STATIONS = [
     ("springs", "Springs"),
     ("tracks", "Tracks"),
     ("cables", "Cables"),
+    ("dispatch", "Dispatch"),
 ]
+
+# The station that finishes an order, and the ones it waits for.
+DISPATCH = "dispatch"
+MAKERS = ("springs", "tracks", "cables")
 
 
 def _token(record=None):
@@ -89,6 +99,19 @@ class WorkStation(models.Model):
             station.access_token = _token()
 
         return True
+
+    @api.model
+    def _station_label(self, code):
+        """What this station is CALLED, which the owner may have changed.
+
+        A bench renamed on the live site should be named that way in the line
+        telling dispatch who it is waiting for, so the record is asked first
+        and the shipped label is only the fallback.
+        """
+        station = self.sudo().with_context(active_test=False).search(
+            [("code", "=", code)], limit=1)
+
+        return station.name or dict(STATIONS).get(code, code)
 
     @api.model
     def _station_for_code(self, code):

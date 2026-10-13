@@ -1,4 +1,5 @@
 from odoo import fields, http
+from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.tools import consteq
 
@@ -93,10 +94,19 @@ class WorkStationKiosk(http.Controller):
         if not item or item.station_id != station:
             return request.not_found()
 
-        if action == "done":
-            item.action_done()
-        else:
+        if action == "todo":
             item.action_todo()
+
+            return request.redirect("/station/%s" % station.access_token)
+
+        try:
+            item.action_done()
+        except UserError as error:
+            # DISPATCH TOO EARLY, almost certainly: the model refuses it and
+            # says which bench is still working. A bench tablet must never show
+            # a traceback, so the reason is shown as a line at the top of its
+            # own page.
+            return self._render(station, message=str(error))
 
         # REDIRECTED RATHER THAN RENDERED, so a tablet that reloads does not
         # tick the same job off twice.

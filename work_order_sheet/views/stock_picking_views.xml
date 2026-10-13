@@ -16,7 +16,7 @@
       <xpath expr="//div[@name='button_box']" position="inside">
         <button name="action_open_work_station_items" type="object"
                 class="oe_stat_button" icon="fa-wrench"
-                invisible="work_station_springs == 'none' and work_station_tracks == 'none' and work_station_cables == 'none'">
+                invisible="work_station_springs == 'none' and work_station_tracks == 'none' and work_station_cables == 'none' and work_station_dispatch == 'none'">
           <field name="work_station_todo_count" widget="statinfo"
                  string="To make"/>
         </button>
@@ -24,7 +24,7 @@
 
       <xpath expr="//notebook" position="before">
         <group string="Work stations" name="work_stations"
-               invisible="work_station_springs == 'none' and work_station_tracks == 'none' and work_station_cables == 'none'">
+               invisible="work_station_springs == 'none' and work_station_tracks == 'none' and work_station_cables == 'none' and work_station_dispatch == 'none'">
           <group>
             <field name="work_station_springs" widget="badge"
                    invisible="work_station_springs == 'none'"
@@ -41,6 +41,16 @@
                    decoration-success="work_station_cables == 'done'"
                    decoration-warning="work_station_cables == 'partial'"
                    decoration-info="work_station_cables == 'todo'"/>
+            <!-- LAST, AND SHOWN AS WAITING UNTIL THE OTHERS ARE DONE, which
+                 is the one thing the office asks about an order that looks
+                 finished but has not gone out. -->
+            <field name="work_station_dispatch" widget="badge"
+                   invisible="work_station_dispatch == 'none'"
+                   decoration-success="work_station_dispatch == 'done'"
+                   decoration-warning="work_station_dispatch == 'partial'"
+                   decoration-info="work_station_dispatch == 'todo'"/>
+            <field name="work_station_waiting_for"
+                   invisible="work_station_dispatch in ('none', 'done') or not work_station_waiting_for"/>
           </group>
         </group>
       </xpath>
@@ -72,6 +82,11 @@
                decoration-warning="work_station_cables == 'partial'"
                decoration-info="work_station_cables == 'todo'"
                decoration-muted="work_station_cables == 'none'"/>
+        <field name="work_station_dispatch" optional="hide" widget="badge"
+               decoration-success="work_station_dispatch == 'done'"
+               decoration-warning="work_station_dispatch == 'partial'"
+               decoration-info="work_station_dispatch == 'todo'"
+               decoration-muted="work_station_dispatch == 'none'"/>
       </xpath>
     </field>
   </record>

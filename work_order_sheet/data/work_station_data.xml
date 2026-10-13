@@ -26,5 +26,13 @@
       <field name="sequence">30</field>
     </record>
 
+    <!-- THE LAST BENCH. Added after the first three shipped, so a database
+         that already had them picks it up on the next update. -->
+    <record id="station_dispatch" model="work.station">
+      <field name="name">Dispatch</field>
+      <field name="code">dispatch</field>
+      <field name="sequence">40</field>
+    </record>
+
   </data>
 </odoo>

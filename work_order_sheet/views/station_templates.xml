@@ -57,6 +57,15 @@
                font-size: 20px; }
       .section { margin-top: 26px; font-size: 15px; color: #5a6b7c;
                  text-transform: uppercase; letter-spacing: .04em; }
+      .message { background: #fde8c8; border-bottom: 1px solid #e0b980;
+                 padding: 14px 18px; font-size: 18px; }
+      /* WAITING IS NOT THE SAME AS NOTHING TO DO. Dispatch can see what is
+         coming and get it together; what it cannot do is send the order out
+         before the benches have finished, so the row is shown and the button
+         is not. */
+      .waiting { color: #8a5a00; font-size: 16px; font-weight: bold;
+                 text-align: right; max-width: 190px; }
+      .job.blocked { background: #faf6ee; border-color: #e0b980; }
     </style>
   </head>
   <body>
@@ -68,9 +77,19 @@
       <a t-attf-href="/station/{{ token }}">Refresh</a>
     </header>
 
+    <t t-if="message">
+      <div class="message"><t t-esc="message"/></div>
+    </t>
+
     <main>
       <t t-if="not todo">
         <div class="empty">Nothing waiting. New work appears here on its own.</div>
+      </t>
+      <t t-if="todo and not any(item.is_ready for item in todo)">
+        <div class="message" style="border: 1px solid #e0b980; border-radius: 10px;">
+          Everything below is waiting on another station. It will be ready to
+          send once they are finished.
+        </div>
       </t>
 
       <!-- GROUPED BY ORDER, because that is what the floor calls a job and
@@ -82,7 +101,7 @@
           <t t-set="order_name" t-value="item.order_name"/>
         </t>
 
-        <div class="job">
+        <div class="job" t-attf-class="job {{ '' if item.is_ready else 'blocked' }}">
           <div class="what">
             <div class="name">
               <t t-if="item.quantity and item.quantity != 1">
@@ -102,9 +121,17 @@
               Door: <t t-esc="item.door"/>
             </div>
           </div>
-          <form t-attf-action="/station/{{ token }}/done/{{ item.id }}" method="post">
-            <button type="submit">Done</button>
-          </form>
+          <t t-if="item.is_ready">
+            <form t-attf-action="/station/{{ token }}/done/{{ item.id }}" method="post">
+              <button type="submit">Done</button>
+            </form>
+          </t>
+          <t t-else="">
+            <div class="waiting">
+              Waiting for<br/>
+              <t t-esc="item.waiting_for"/>
+            </div>
+          </t>
         </div>
       </t>
 
