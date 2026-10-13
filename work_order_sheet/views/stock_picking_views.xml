@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE ANSWER TO "ARE THE SPRINGS DONE?" ON THE ORDER ITSELF.
+
+       One line per bench, on the work order the office already has open, so
+       nobody has to open a station queue or walk to a bench to find out. A
+       station with no part in this order says nothing rather than saying
+       "To do", which would be a job somebody goes looking for. -->
+  <record id="view_picking_form_work_stations" model="ir.ui.view">
+    <field name="name">stock.picking.form.work.stations</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_form"/>
+    <field name="arch" type="xml">
+
+      <xpath expr="//div[@name='button_box']" position="inside">
+        <button name="action_open_work_station_items" type="object"
+                class="oe_stat_button" icon="fa-wrench"
+                invisible="work_station_springs == 'none' and work_station_tracks == 'none' and work_station_cables == 'none'">
+          <field name="work_station_todo_count" widget="statinfo"
+                 string="To make"/>
+        </button>
+      </xpath>
+
+      <xpath expr="//notebook" position="before">
+        <group string="Work stations" name="work_stations"
+               invisible="work_station_springs == 'none' and work_station_tracks == 'none' and work_station_cables == 'none'">
+          <group>
+            <field name="work_station_springs" widget="badge"
+                   invisible="work_station_springs == 'none'"
+                   decoration-success="work_station_springs == 'done'"
+                   decoration-warning="work_station_springs == 'partial'"
+                   decoration-info="work_station_springs == 'todo'"/>
+            <field name="work_station_tracks" widget="badge"
+                   invisible="work_station_tracks == 'none'"
+                   decoration-success="work_station_tracks == 'done'"
+                   decoration-warning="work_station_tracks == 'partial'"
+                   decoration-info="work_station_tracks == 'todo'"/>
+            <field name="work_station_cables" widget="badge"
+                   invisible="work_station_cables == 'none'"
+                   decoration-success="work_station_cables == 'done'"
+                   decoration-warning="work_station_cables == 'partial'"
+                   decoration-info="work_station_cables == 'todo'"/>
+          </group>
+        </group>
+      </xpath>
+
+    </field>
+  </record>
+
+  <!-- AND IN THE LIST, so the one order the floor is still working on can be
+       found without opening any of them. Optional columns: this is the shop's
+       own question, not every warehouse's. -->
+  <record id="vpicktree_work_stations" model="ir.ui.view">
+    <field name="name">stock.picking.list.work.stations</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.vpicktree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='state']" position="before">
+        <field name="work_station_springs" optional="hide" widget="badge"
+               decoration-success="work_station_springs == 'done'"
+               decoration-warning="work_station_springs == 'partial'"
+               decoration-info="work_station_springs == 'todo'"
+               decoration-muted="work_station_springs == 'none'"/>
+        <field name="work_station_tracks" optional="hide" widget="badge"
+               decoration-success="work_station_tracks == 'done'"
+               decoration-warning="work_station_tracks == 'partial'"
+               decoration-info="work_station_tracks == 'todo'"
+               decoration-muted="work_station_tracks == 'none'"/>
+        <field name="work_station_cables" optional="hide" widget="badge"
+               decoration-success="work_station_cables == 'done'"
+               decoration-warning="work_station_cables == 'partial'"
+               decoration-info="work_station_cables == 'todo'"
+               decoration-muted="work_station_cables == 'none'"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_picking_internal_search_work_stations" model="ir.ui.view">
+    <field name="name">stock.picking.search.work.stations</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+    <field name="arch" type="xml">
+      <xpath expr="//search" position="inside">
+        <filter name="work_station_unfinished" string="Benches unfinished"
+                domain="[('work_station_todo_count', '>', 0)]"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

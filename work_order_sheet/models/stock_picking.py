@@ -1,6 +1,6 @@
 import re
 
-from odoo import fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 from .work_station import STATIONS
@@ -1092,3 +1092,84 @@ class StockPicking(models.Model):
         self._work_station_sync()
 
         return True
+
+    # --- what the benches have finished, on the order itself -------------------
+    #
+    # THE OFFICE ASKS THIS ALL DAY. "Are the springs done?" was answerable only
+    # by opening the station queues or walking to the bench, so the work order
+    # itself now carries one line per station: Done, In progress, To do, or
+    # nothing at all when that bench has no part in this order.
+    #
+    # IN PROGRESS IS WORTH ITS OWN WORD. Two of three tracks cut is neither
+    # done nor untouched, and an order that reads "To do" when a bench is half
+    # way through it sends somebody to ask the question this is meant to
+    # answer.
+    WORK_STATION_STATES = [
+        ("none", "Not needed"),
+        ("todo", "To do"),
+        ("partial", "In progress"),
+        ("done", "Done"),
+    ]
+
+    work_station_item_ids = fields.One2many(
+        "work.station.item", "picking_id", string="Station work")
+    work_station_springs = fields.Selection(
+        WORK_STATION_STATES, string="Springs", default="none",
+        compute="_compute_work_station_states", store=True)
+    work_station_tracks = fields.Selection(
+        WORK_STATION_STATES, string="Tracks", default="none",
+        compute="_compute_work_station_states", store=True)
+    work_station_cables = fields.Selection(
+        WORK_STATION_STATES, string="Cables", default="none",
+        compute="_compute_work_station_states", store=True)
+    work_station_todo_count = fields.Integer(
+        string="Still to make", compute="_compute_work_station_states",
+        store=True)
+
+    # The code each field holds, so the compute and the form stay in step.
+    WORK_STATION_FIELDS = (
+        ("springs", "work_station_springs"),
+        ("tracks", "work_station_tracks"),
+        ("cables", "work_station_cables"),
+    )
+
+    @api.depends("work_station_item_ids.state",
+                 "work_station_item_ids.station_id")
+    def _compute_work_station_states(self):
+        """STORED, so the office can filter a list by it rather than open
+        every order to find the one the floor is waiting on."""
+        for picking in self:
+            states = {}
+
+            for item in picking.work_station_item_ids:
+                states.setdefault(item.station_id.code, []).append(item.state)
+
+            for code, field in self.WORK_STATION_FIELDS:
+                here = states.get(code) or []
+
+                if not here:
+                    value = "none"
+                elif all(state == "done" for state in here):
+                    value = "done"
+                elif any(state == "done" for state in here):
+                    value = "partial"
+                else:
+                    value = "todo"
+
+                picking[field] = value
+
+            picking.work_station_todo_count = sum(
+                1 for state in sum(states.values(), []) if state != "done")
+
+    def action_open_work_station_items(self):
+        """The station rows behind those three words."""
+        self.ensure_one()
+
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Station work",
+            "res_model": "work.station.item",
+            "view_mode": "list",
+            "domain": [("picking_id", "=", self.id)],
+            "context": {"search_default_by_station": 1},
+        }
