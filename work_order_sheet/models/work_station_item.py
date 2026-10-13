@@ -114,10 +114,12 @@ class WorkStationItem(models.Model):
 
         dispatch._work_station_mark_done()
 
-        # EVERY STATION DONE MEANS THE ORDER IS DONE, which is the whole point
-        # of dispatch being last.
-        self.picking_id._work_station_finish()
-
+        # TICKING OFF THE LAST BOX DOES NOT SEND THE ORDER OUT. It used to:
+        # the transfer validated itself the moment nothing was left to make.
+        # The owner asked for a Complete Order button instead, and that is the
+        # better rule - a button that fires by itself is not a confirmation of
+        # anything, and the last tap on a tablet is a clumsy place to put an
+        # irreversible step. See stock_picking._work_station_complete.
         return True
 
     def _work_station_mark_done(self):

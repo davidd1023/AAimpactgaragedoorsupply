@@ -465,7 +465,9 @@ class TestDispatchIsLast(StationCase):
 
     # --- and then the order is done -------------------------------------------
 
-    def test_finishing_dispatch_finishes_the_work_order(self):
+    def test_ticking_off_the_last_box_does_not_send_the_order_out(self):
+        """It used to. A button that fires by itself confirms nothing, and the
+        last tap on a tablet is a clumsy place for an irreversible step."""
         order = self._order([(self.hinge, 4, None)])
         picking = order.picking_ids[:1]
         picking.action_assign()
@@ -473,8 +475,28 @@ class TestDispatchIsLast(StationCase):
         picking.invalidate_recordset()
 
         self.assertEqual(picking.work_station_dispatch, "done")
-        self.assertEqual(picking.state, "done",
-                         "the floor finished but the order did not")
+        self.assertNotEqual(picking.state, "done",
+                            "the order closed without anybody confirming it")
+
+    def test_completing_it_finishes_the_work_order(self):
+        order = self._order([(self.hinge, 4, None)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self._items(order).action_done()
+
+        self.assertEqual(picking._work_station_complete(), "")
+        picking.invalidate_recordset()
+        self.assertEqual(picking.state, "done")
+
+    def test_an_unfinished_order_cannot_be_completed(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+
+        with self.assertRaises(UserError):
+            picking._work_station_complete()
+
+        picking.invalidate_recordset()
+        self.assertNotEqual(picking.state, "done")
 
     def test_the_whole_order_through_every_bench_in_turn(self):
         """The flow as it actually happens, one bench at a time."""
@@ -489,6 +511,11 @@ class TestDispatchIsLast(StationCase):
                                 "the order finished before dispatch did")
 
         self._items(order, self.dispatch).action_done()
+        picking.invalidate_recordset()
+        self.assertNotEqual(picking.state, "done",
+                            "dispatch has not confirmed it yet")
+
+        picking._work_station_complete()
         picking.invalidate_recordset()
         self.assertEqual(picking.state, "done")
 
@@ -507,7 +534,10 @@ class TestDispatchIsLast(StationCase):
         picking = order.picking_ids[:1]
 
         self._items(order).action_done()
+        reason = picking._work_station_complete()
         picking.invalidate_recordset()
+
+        self.assertTrue(reason, "the bench was told nothing")
 
         self.assertEqual(self._items(order).mapped("state"), ["done"],
                          "the bench's work was lost")
@@ -516,3 +546,85 @@ class TestDispatchIsLast(StationCase):
             picking.message_ids.filtered(
                 lambda m: "could not be validated automatically" in (m.body or "")),
             "nobody in the office was told")
+
+    # --- the final confirmation, from the bench -------------------------------
+
+    def _complete(self, station, picking):
+        return self.url_open(
+            "/station/%s/complete/%s" % (station.access_token, picking.id),
+            data={"tap": "1"})
+
+    def test_the_button_appears_only_when_everything_is_done(self):
+        order = self._order()
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+
+        self.assertNotIn("Complete order", self._kiosk(self.dispatch),
+                         "offered before the work was finished")
+
+        self._items(order).action_done()
+
+        page = self._kiosk(self.dispatch)
+        self.assertIn("Ready to send out", page)
+        self.assertIn("Complete order", page)
+
+    def test_pressing_it_completes_the_order_and_says_so(self):
+        order = self._order([(self.hinge, 4, None)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self._items(order).action_done()
+
+        response = self._complete(self.dispatch, picking)
+        self.assertEqual(response.status_code, 200)
+        picking.invalidate_recordset()
+        self.assertEqual(picking.state, "done")
+
+        text = visible_text(response.text)
+        self.assertIn("is complete and on its way", text)
+        # And it has left the screen, rather than sitting there to be pressed
+        # again.
+        self.assertNotIn("Complete order", text)
+
+    def test_only_dispatch_is_offered_the_button(self):
+        """Every bench finishes its own work; one says the order is finished."""
+        order = self._order()
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self._items(order).action_done()
+
+        for station in (self.springs, self.tracks, self.cables):
+            self.assertNotIn("Complete order", self._kiosk(station),
+                             "%s was offered it" % station.name)
+            self.assertEqual(
+                self._complete(station, picking).status_code, 404,
+                "%s could complete an order" % station.name)
+
+        picking.invalidate_recordset()
+        self.assertNotEqual(picking.state, "done")
+
+    def test_dispatch_cannot_complete_an_order_it_has_no_work_on(self):
+        mine = self._order([(self.hinge, 1, None)])
+        theirs = self._order([(self.hinge, 1, None)])
+        self._items(mine).action_done()
+
+        other = theirs.picking_ids[:1]
+        self.assertEqual(self._complete(self.dispatch, other).status_code, 404)
+        other.invalidate_recordset()
+        self.assertNotEqual(other.state, "done")
+
+    def test_pressing_it_too_early_is_refused_over_the_wire_too(self):
+        """The page hides the button; the route does not rely on that."""
+        order = self._order()
+        picking = order.picking_ids[:1]
+        self.assertEqual(self._complete(self.dispatch, picking).status_code, 404)
+        picking.invalidate_recordset()
+        self.assertNotEqual(picking.state, "done")
+
+    def test_a_completed_order_leaves_every_bench_screen(self):
+        order = self._order([(self.hinge, 1, None)])
+        picking = order.picking_ids[:1]
+        picking.action_assign()
+        self._items(order).action_done()
+        self._complete(self.dispatch, picking)
+
+        self.assertIn("Nothing waiting", self._kiosk(self.dispatch))
