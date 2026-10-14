@@ -36,28 +36,17 @@
                 <div t-if="aaBoardData.received" class="o_aa_received text-muted small mt-1">
                     <i class="fa fa-clock-o me-1"/>Received <t t-esc="aaBoardData.received"/>
                 </div>
-                <div t-if="aaBoardData.can_assign and aaBoardData.wos and aaBoardData.wos.length"
-                     class="o_aa_assign border rounded p-2 mt-2">
-                    <div class="fw-bold text-uppercase mb-1">Assign to station</div>
-                    <t t-foreach="aaBoardData.wos" t-as="aaWo" t-key="aaWo.id">
-                        <div class="o_aa_assign_row py-1">
-                            <div class="d-flex justify-content-between align-items-center gap-2">
-                                <span t-esc="aaWo.name"/>
-                                <span t-if="aaWo.pending" class="badge text-bg-warning">Pending</span>
-                            </div>
-                            <div class="d-flex flex-wrap gap-1 mt-1">
-                                <t t-foreach="aaBoardData.stations" t-as="aaSt" t-key="aaSt.id">
-                                    <button type="button" class="btn btn-sm"
-                                            t-att-class="aaSt.id === aaWo.wc ? 'btn-primary' : (aaSt.id === aaWo.suggested ? 'btn-outline-primary' : 'btn-outline-secondary')"
-                                            t-att-disabled="aaWo.locked or aaSt.id === aaWo.wc"
-                                            t-att-title="aaSt.id === aaWo.suggested ? 'Suggested station' : ''"
-                                            t-on-click.stop="() => this.aaAssign(aaWo.id, aaSt.id)">
-                                        <t t-esc="aaSt.name"/>
-                                    </button>
-                                </t>
-                            </div>
-                        </div>
-                    </t>
+                <div t-if="aaBoardData.can_assign and (aaBoardData.can_send or aaBoardData.can_remove)"
+                     class="o_aa_assign d-flex flex-wrap align-items-center gap-2 mt-2">
+                    <span t-if="aaBoardData.can_send" class="badge text-bg-warning">Pending</span>
+                    <button t-if="aaBoardData.can_send" type="button" class="btn btn-primary"
+                            t-on-click.stop="() => this.aaRelease('aa_send_to_station')">
+                        <i class="fa fa-arrow-right me-1"/>Send to <t t-esc="aaBoardData.station"/>
+                    </button>
+                    <button t-if="aaBoardData.can_remove" type="button" class="btn btn-outline-secondary"
+                            t-on-click.stop="() => this.aaRelease('aa_remove_from_station')">
+                        <i class="fa fa-undo me-1"/>Remove from <t t-esc="aaBoardData.station"/>
+                    </button>
                 </div>
             </t>
         </xpath>

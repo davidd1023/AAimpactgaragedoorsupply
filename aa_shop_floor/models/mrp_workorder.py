@@ -3,10 +3,11 @@ import json
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
 
-# New work orders wait here until the manager picks their station from the
-# Shop Floor Overview (owner, 2026-10-14): "las ordenes las quiero asignar yo
-# en overview". Workers only see their own station tabs, so a pending order is
-# invisible to them until it is assigned.
+# The manager decides which orders the stations work on today (owner,
+# 2026-10-14). The station itself never changes - track work is always Track
+# Prep, springs always Springs - the manager only puts an order on its station
+# or takes it back off. New work orders wait at "Pending Assignment" until the
+# manager sends them, so workers only see what was released to them.
 PENDING_XMLID = "aa_shop_floor.workcenter_pending"
 MANAGER_GROUP = "mrp.group_mrp_manager"
 LOCKED_STATES = ("progress", "done", "cancel")
@@ -19,19 +20,14 @@ class MrpWorkcenter(models.Model):
     def _aa_pending(self):
         return self.env.ref(PENDING_XMLID, raise_if_not_found=False) or self.browse()
 
-    @api.model
-    def _aa_stations(self):
-        """The stations the manager can send work to: every work center but Pending."""
-        return self.search([("id", "!=", self._aa_pending().id)], order="sequence, id")
-
 
 class MrpWorkorder(models.Model):
     _inherit = "mrp.workorder"
 
     aa_suggested_workcenter_id = fields.Many2one(
-        "mrp.workcenter", string="Suggested Station", copy=False, readonly=True,
-        help="The station this work order's routing points to. The manager decides "
-             "where it really goes from the Shop Floor Overview.")
+        "mrp.workcenter", string="Own Station", copy=False, readonly=True,
+        help="The station this work order belongs to (from its routing). While it "
+             "waits at Pending Assignment, this is where the manager will send it.")
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -46,57 +42,75 @@ class MrpWorkorder(models.Model):
                     vals["workcenter_id"] = pending.id
         return super().create(vals_list)
 
-    def aa_assign_workcenter(self, workcenter_id):
-        """Send these work orders to a station. Shop Floor managers only."""
-        if not self.env.user.has_group(MANAGER_GROUP):
-            raise AccessError(_("Only a Manufacturing manager can assign work orders to a station."))
-        workcenter = self.env["mrp.workcenter"].browse(int(workcenter_id)).exists()
-        if not workcenter or workcenter == workcenter._aa_pending():
-            raise UserError(_("Pick a station for this work order."))
-        locked = self.filtered(lambda wo: wo.state in LOCKED_STATES)
-        if locked:
-            raise UserError(_("%s is already started or finished; it can't change station.",
-                              ", ".join(locked.mapped("name"))))
-        self.write({"workcenter_id": workcenter.id})
-        return True
+    def _aa_own_station(self):
+        self.ensure_one()
+        if self.aa_suggested_workcenter_id:
+            return self.aa_suggested_workcenter_id
+        return self.operation_id.workcenter_id
 
 
 class MrpProduction(models.Model):
     _inherit = "mrp.production"
 
     aa_station_board = fields.Text(
-        string="Station Assignment (data)", compute="_compute_aa_station_board",
-        help="What the Shop Floor Overview needs to let the manager assign each work order.")
+        string="Station Release (data)", compute="_compute_aa_station_board",
+        help="What the Shop Floor Overview needs to let the manager send this "
+             "order to its station or take it back.")
 
     @api.depends("workorder_ids.workcenter_id", "workorder_ids.state", "create_date")
     @api.depends_context("uid")
     def _compute_aa_station_board(self):
-        Workcenter = self.env["mrp.workcenter"].sudo()
-        pending = Workcenter._aa_pending()
+        pending = self.env["mrp.workcenter"].sudo()._aa_pending()
         can_assign = self.env.user.has_group(MANAGER_GROUP)
-        stations = [{"id": wc.id, "name": wc.name} for wc in Workcenter._aa_stations()] \
-            if can_assign else []
         for production in self:
             received = ""
             if production.create_date:
                 received = fields.Datetime.context_timestamp(
                     production, production.create_date).strftime("%b %d, %I:%M %p")
-            wos = [{
-                "id": wo.id,
-                "name": wo.name,
-                "wc": wo.workcenter_id.id,
-                "suggested": wo.aa_suggested_workcenter_id.id or False,
-                "pending": bool(pending) and wo.workcenter_id == pending,
-                "locked": wo.state in LOCKED_STATES,
-            } for wo in production.workorder_ids if wo.state != "cancel"]
+            wos = production.workorder_ids.filtered(lambda wo: wo.state not in ("done", "cancel"))
+            waiting = wos.filtered(lambda wo: wo.workcenter_id == pending)
+            released = (wos - waiting).filtered(lambda wo: wo.state not in LOCKED_STATES)
+            stations = (waiting.mapped(lambda wo: wo._aa_own_station())
+                        | (wos - waiting).workcenter_id)
             production.aa_station_board = json.dumps({
                 "can_assign": can_assign,
                 "received": received,
-                "stations": stations,
-                "wos": wos,
+                "station": ", ".join(stations.mapped("name")),
+                "can_send": bool(waiting),
+                "can_remove": bool(released),
             })
 
+    def _aa_check_manager(self):
+        if not self.env.user.has_group(MANAGER_GROUP):
+            raise AccessError(_("Only a Manufacturing manager can send orders to the stations."))
+
+    def aa_send_to_station(self):
+        """Put the waiting work orders on their own station."""
+        self._aa_check_manager()
+        pending = self.env["mrp.workcenter"].sudo()._aa_pending()
+        for wo in self.workorder_ids.filtered(lambda w: w.workcenter_id == pending
+                                              and w.state not in ("done", "cancel")):
+            station = wo._aa_own_station()
+            if not station or station == pending:
+                raise UserError(_("%s has no station to go to.", wo.display_name))
+            wo.workcenter_id = station
+        return True
+
+    def aa_remove_from_station(self):
+        """Take the not-started work orders back off their station."""
+        self._aa_check_manager()
+        pending = self.env["mrp.workcenter"].sudo()._aa_pending()
+        if not pending:
+            raise UserError(_("The Pending Assignment work center is missing."))
+        for wo in self.workorder_ids.filtered(lambda w: w.workcenter_id != pending
+                                              and w.state not in LOCKED_STATES):
+            wo.write({
+                "aa_suggested_workcenter_id": wo.workcenter_id.id,
+                "workcenter_id": pending.id,
+            })
+        return True
+
     def _split_productions(self, *args, **kwargs):
-        # A backorder's work orders stay at the station their order was given.
+        # A backorder's work orders stay where their order already is.
         return super(MrpProduction, self.with_context(aa_keep_workcenter=True)) \
             ._split_productions(*args, **kwargs)
