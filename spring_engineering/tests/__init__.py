@@ -4,3 +4,4 @@ from . import test_spec_note
 from . import test_track_prep
 from . import test_track_prep_price
 from . import test_trim_colour
+from . import test_wishlist_diagnosis
