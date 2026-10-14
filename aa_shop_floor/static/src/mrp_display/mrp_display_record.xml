@@ -15,7 +15,7 @@
                     </div>
                     <div t-elif="!aaParts[1]" class="o_aa_shop_spec_section d-flex justify-content-between fw-bold text-uppercase border-top mt-2 pt-1">
                         <span t-esc="aaParts[0]"/>
-                        <span t-if="aaParts[0] === 'Box contents'" class="text-muted" t-esc="aaPackedCount(aaRows)"/>
+                        <span t-if="aaParts[0] === 'Box contents' or aaParts[0] === 'Parts'" class="text-muted" t-esc="aaPackedCount(aaRows)"/>
                     </div>
                     <div t-elif="aaParts[2] === 'c'"
                          class="o_aa_check d-flex align-items-center gap-2 cursor-pointer"

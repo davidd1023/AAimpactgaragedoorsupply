@@ -9,6 +9,14 @@ ID_LABELS = {2.625: '2 5/8"', 3.75: '3 3/4"', 5.25: '5 1/4"', 6.0: '6"'}
 FILLER_ID = 5.25
 
 # Finished stock springs: SPR-262-2.625-R
+# Prepared track products, as named in the catalogue:
+#   3" Horizontal Track - 108" White
+#   3" Vertical Track 88" - 8' Door Height White
+HORIZONTAL_TRACK = re.compile(r'^(\d)" Horizontal Track -\s+(\d+)" (White|Black)$')
+VERTICAL_TRACK = re.compile(r'^(\d)" Vertical Track (\d+)" - (\d+)\' Door Height (White|Black)$')
+# The raw stock they are cut from: 3" Horizontal Track RAW - 9'6" White
+RAW_LENGTH = re.compile(r"RAW\s*-\s*(\d+)'\s*(?:(\d+)\")?")
+
 STOCK_SPRING_CODE = re.compile(r"^SPR-(\d{3,4})-(\d+(?:\.\d+)?)-([LR])$")
 
 
@@ -65,7 +73,8 @@ class MrpProduction(models.Model):
     aa_shop_spec = fields.Text(
         string="Shop Floor Instructions", compute="_compute_aa_shop_spec", store=True)
 
-    @api.depends("aa_spring_spec_json", "aa_station_kind", "aa_sale_line_id", "aa_cable_line_ids", "product_id", "product_qty")
+    @api.depends("aa_spring_spec_json", "aa_station_kind", "aa_sale_line_id", "aa_cable_line_ids",
+                 "product_id", "product_qty", "move_raw_ids.product_id", "move_raw_ids.product_uom_qty")
     def _compute_aa_shop_spec(self):
         for production in self:
             if production.aa_station_kind == "kit":
@@ -73,7 +82,7 @@ class MrpProduction(models.Model):
             elif production.aa_station_kind == "cable":
                 rows = production._aa_cable_rows()
             else:
-                rows = production._aa_spring_rows()
+                rows = production._aa_track_rows() or production._aa_spring_rows()
             production.aa_shop_spec = "\n".join("|".join(str(x) for x in row) for row in rows) or False
 
     def aa_toggle_packed(self, key):
@@ -152,6 +161,42 @@ class MrpProduction(models.Model):
             ("LH", qty if hand == "L" else "0"),
             ("RH", qty if hand == "R" else "0"),
         ]
+
+    # --- track prep ---------------------------------------------------------------
+    # Prepared tracks come from Odoo's own Manufacture route with the owner's
+    # BoMs (RAW track x2, and for verticals the flag angles, jamb brackets and
+    # lag screws). Each MO unit is one LH + RH pair.
+
+    def _aa_track_rows(self):
+        name = (self.product_id.with_context(display_default_code=False).display_name or "").strip()
+        horizontal = HORIZONTAL_TRACK.match(name)
+        vertical = VERTICAL_TRACK.match(name)
+        if not (horizontal or vertical):
+            return []
+        pairs = self.product_qty or 1.0
+        if horizontal:
+            size, length, colour = horizontal.groups()
+            rows = [("Track", '%s" Horizontal · %s' % (size, colour))]
+        else:
+            size, length, door, colour = vertical.groups()
+            rows = [("Track", '%s" Vertical · %s' % (size, colour)), ("Door height", "%s'" % door)]
+        length = float(length)
+
+        raw = self.move_raw_ids.filtered(lambda m: "RAW" in (m.product_id.name or ""))[:1]
+        hit = raw and RAW_LENGTH.search(raw.product_id.name or "")
+        raw_inches = (int(hit.group(1)) * 12 + int(hit.group(2) or 0)) if hit else 0
+        if not raw_inches or raw_inches > length:
+            rows.append(("Cut to", "%s (LH + RH)" % inches_label(length)))
+        else:
+            rows.append(("Length", "%s (LH + RH), no cut" % inches_label(length)))
+        rows.append(("Pairs", qty_label(pairs)))
+
+        if self.move_raw_ids:
+            rows.append(("Parts", ""))
+            for move in self.move_raw_ids:
+                part = move.product_id.with_context(display_default_code=False).display_name
+                rows.append((part, qty_label(move.product_uom_qty), "c"))
+        return rows
 
     # --- hardware ---------------------------------------------------------------
     # Hardware rows never carry spring specs: only the kit, its drum and the lift
