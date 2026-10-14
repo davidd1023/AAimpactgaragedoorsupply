@@ -50,14 +50,22 @@ class MrpProduction(models.Model):
     aa_sale_line_id = fields.Many2one(
         "sale.order.line", string="Sale Order Line", copy=False, index=True, readonly=True)
     aa_spring_spec_json = fields.Text(string="Spring Spec (data)", copy=False, readonly=True)
+    aa_station_kind = fields.Selection(
+        [("spring", "Spring"), ("kit", "Hardware Kit"), ("cable", "Lift Cables")],
+        string="Station Job", copy=False, readonly=True)
     # "Label|Value" rows, one per line. Read by the Shop Floor card.
     aa_shop_spec = fields.Text(
         string="Shop Floor Instructions", compute="_compute_aa_shop_spec", store=True)
 
-    @api.depends("aa_spring_spec_json", "product_id", "product_qty")
+    @api.depends("aa_spring_spec_json", "aa_station_kind", "aa_sale_line_id", "product_id", "product_qty")
     def _compute_aa_shop_spec(self):
         for production in self:
-            rows = production._aa_spring_rows()
+            if production.aa_station_kind == "kit":
+                rows = production._aa_kit_rows()
+            elif production.aa_station_kind == "cable":
+                rows = production._aa_cable_rows()
+            else:
+                rows = production._aa_spring_rows()
             production.aa_shop_spec = "\n".join("%s|%s" % row for row in rows) or False
 
     # --- springs ----------------------------------------------------------------
@@ -125,6 +133,79 @@ class MrpProduction(models.Model):
             ("LH", qty if hand == "L" else "0"),
             ("RH", qty if hand == "R" else "0"),
         ]
+
+    # --- hardware ---------------------------------------------------------------
+    # Hardware rows never carry spring specs: only the kit, its drum and the lift
+    # cables (owner, 2026-10-14).
+
+    def _aa_line_notes(self):
+        """The extra lines of the sale line description, e.g.
+        'Track: 3" 15R | Lift: Standard | Drum: D400-144 | W 16' 0" x H 8' 0" | 650 lb'
+        or 'Cables for Door 1', as (label, value) rows."""
+        line = self.aa_sale_line_id
+        rows = []
+        for text in (line.name or "").split("\n")[1:]:
+            text = text.strip()
+            if not text or text.lower().startswith("kit contents"):
+                continue
+            for part in text.split(" | "):
+                part = part.strip()
+                if not part:
+                    continue
+                if part.startswith("Add to Your Order:"):
+                    rows.append(("Extras", part.split(":", 1)[1].strip()))
+                elif re.match(r"^W [\d' \"]+x H ", part):
+                    rows.append(("Door", part[2:].replace(" x H ", " x ")))
+                elif re.match(r"^\d[\d,.]* lb$", part):
+                    rows.append(("Weight", part))
+                elif ": " in part:
+                    rows.append(tuple(x.strip() for x in part.split(": ", 1)))
+                else:
+                    rows.append(("Note", part))
+        return rows
+
+    def _aa_kit_rows(self):
+        product = self.product_id
+        rows = [("Kit", (product.product_tmpl_id.name or "").replace(" Hardware Kit", ""))]
+        labels = {"Finish Color": "Color", "Roller Size": "Rollers"}
+        drum = self.aa_sale_line_id.aa_drum if "aa_drum" in self.aa_sale_line_id._fields else False
+        for ptav in product.product_template_attribute_value_ids:
+            attribute = ptav.attribute_id.name or ""
+            if attribute == "Drum":
+                rows.append(("Drum", drum or (ptav.name or "").split(" ")[0]))
+            else:
+                rows.append((labels.get(attribute, attribute), ptav.name))
+        for ptav in self.aa_sale_line_id.product_no_variant_attribute_value_ids:
+            attribute = ptav.attribute_id.name or ""
+            if attribute in ("Trims", "Plastic Trims") and not (ptav.name or "").startswith("No "):
+                rows.append(("Trims", ptav.name))
+        seen = {label for label, _value in rows}
+        rows += [row for row in self._aa_line_notes() if row[0] not in seen]
+        return rows
+
+    def _aa_cable_rows(self):
+        """A prepared lift cable pair. The cut length comes from its kit BoM:
+        the reel feet are for the PAIR, so one cable is half."""
+        product = self.product_id
+        size = re.search(r'Lift Cable (\S+)', product.product_tmpl_id.name or "")
+        pairs = self.product_qty or 1.0
+        rows = [("Cable", size.group(1) if size else product.display_name)]
+
+        bom = self.env["mrp.bom"].sudo()._bom_find(product, bom_type="phantom").get(product)
+        reel = bom and bom.bom_line_ids.filtered(lambda l: "reel" in (l.product_id.name or "").lower())[:1]
+        if reel:
+            uom = (reel.product_uom_id.name or "").lower()
+            inches_per_unit = 1.0 if uom in ("in", "inch", "inches") else 12.0
+            feet = reel.product_qty * inches_per_unit / 12.0
+            each = feet * 12.0 / 2.0 / (bom.product_qty or 1.0)
+            rows.append(("Cut", "%s x %s" % (qty_label(2 * pairs), inches_label(each))))
+        else:
+            rows.append(("Cut", "%s cables - length not set on the product" % qty_label(2 * pairs)))
+        rows.append(("Each cable", "1 oval sleeve, 1 thimble, 1 aluminum stop"))
+        for ptav in product.product_template_attribute_value_ids:
+            rows.append((ptav.attribute_id.name or "For", ptav.name))
+        rows += self._aa_line_notes()
+        return rows
 
 
 class MrpWorkorder(models.Model):
