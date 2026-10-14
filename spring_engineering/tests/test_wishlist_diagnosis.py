@@ -507,3 +507,151 @@ class TestTheCardKnowsItsVariant(HttpCase):
 
         self.assertIn('data-product-product-id="%s"' % second.id,
                       card.group(0) if card else "")
+
+
+@tagged("post_install", "-at_install")
+class TestWishlistOnTheProductPage(HttpCase):
+    """The heart on a product's OWN page, which was never a switch.
+
+    The owner found it from the other side: pressing the button on a product
+    page put the product on the list and then there was no way to take it off,
+    and the shop page sometimes did not show it as wishlisted at all. Two
+    different causes, and neither is about the shop card this module already
+    fixed.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.attribute = self.env["product.attribute"].create({
+            "name": "Probe Size",
+            "value_ids": [(0, 0, {"name": "Small"}), (0, 0, {"name": "Large"})],
+        })
+        self.tmpl = self.env["product.template"].create({
+            "name": "Page Probe Roller", "type": "consu", "list_price": 9.0,
+            "is_published": True, "sale_ok": True,
+            "attribute_line_ids": [(0, 0, {
+                "attribute_id": self.attribute.id,
+                "value_ids": [(6, 0, self.attribute.value_ids.ids)],
+            })],
+        })
+        self.first = self.env["product.product"].browse(
+            self.tmpl._get_first_possible_variant_id())
+        self.other = self.tmpl.product_variant_ids - self.first
+        self.assertTrue(self.other, "the fixture wants two variants")
+
+    def _call(self, route, params):
+        return self.url_open(
+            route,
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": params}),
+            headers={"Content-Type": "application/json"}).json()
+
+    def _add(self, product):
+        return self._call("/shop/wishlist/add", {"product_id": product.id})
+
+    def _button(self):
+        """The product page's own wishlist button, as served."""
+        page = self.url_open(self.tmpl.website_url).text
+        hit = re.search(r"<a[^>]*data-action=\"o_wishlist\"[^>]*>", page)
+
+        return hit.group(0) if hit else ""
+
+    # --- it has to be pressable a second time --------------------------------
+
+    def test_the_button_is_served_clickable_when_the_product_is_on_the_list(self):
+        """DISABLED IS THE WHOLE BUG. Odoo disables it - which is also how it
+        colours the heart in - and a disabled .btn is pointer-events: none, so
+        the second press raises no event at all."""
+        self.authenticate("admin", "admin")
+        self._add(self.first)
+        button = self._button()
+
+        self.assertTrue(button, "the product page has no wishlist button")
+        self.assertNotIn("disabled", button, button)
+        self.assertIn("o_in_wishlist", button, button)
+        self.assertIn('data-product-product-id="%s"' % self.first.id, button)
+
+    def test_it_offers_to_remove_rather_than_to_add(self):
+        self.authenticate("admin", "admin")
+        self._add(self.first)
+        page = self.url_open(self.tmpl.website_url).text
+        button = self._button()
+        here = page.find(button)
+
+        self.assertIn("Remove from wishlist", button, button)
+        self.assertIn("fa-heart", page[here:here + 400])
+        self.assertNotIn("fa-heart-o", page[here:here + 400],
+                         "an outline heart over a wishlisted product")
+
+    def test_an_untouched_product_still_offers_to_add(self):
+        self.authenticate("admin", "admin")
+        button = self._button()
+
+        self.assertIn("Add to wishlist", button, button)
+        self.assertNotIn("o_in_wishlist", button, button)
+
+    # --- and the shop page has to agree with it ------------------------------
+
+    def test_the_state_route_says_which_variant_is_on_the_list(self):
+        """A CARD CANNOT GUESS. It stands for the template and offers the
+        first variant; the row may be for another, and comparing the two
+        numbers is what left the heart empty next to a wishlist holding the
+        product."""
+        self.authenticate("admin", "admin")
+        self._add(self.other)
+        state = self._call("/shop/wishlist/state", {})["result"]
+
+        self.assertIn(self.other.id, state["ids"])
+        self.assertEqual(state["variants"][str(self.tmpl.id)], self.other.id)
+        self.assertNotEqual(self.other.id, self.first.id, "fixture")
+
+    def test_the_shop_card_points_at_the_variant_that_is_on_the_list(self):
+        self.authenticate("admin", "admin")
+        self._add(self.other)
+        page = self.url_open("/shop?search=Page+Probe").text
+        card = re.search(r"<button[^>]*o_add_wishlist[^>]*>", page)
+
+        self.assertTrue(card, "no card heart on the shop page")
+        self.assertIn('data-product-product-id="%s"' % self.other.id,
+                      card.group(0), card.group(0))
+        self.assertIn("o_in_wishlist", card.group(0))
+
+    def test_the_state_route_is_empty_for_a_visitor_who_wished_nothing(self):
+        state = self._call("/shop/wishlist/state", {})["result"]
+
+        self.assertEqual(state["ids"], [])
+        self.assertEqual(state["variants"], {})
+
+    # --- removing the row a card can only half identify ----------------------
+
+    def test_a_card_may_name_its_template_to_find_the_row(self):
+        """A card drawn outside the shop page is reddened by Odoo for the
+        TEMPLATE while still offering the first variant's id. Asked by that id
+        alone nothing is found, the heart empties and the row stays - which is
+        "removing does not work" all over again."""
+        self.authenticate("admin", "admin")
+        self._add(self.other)
+        rows = self.env["product.wishlist"].sudo().with_context(
+            active_test=False)
+
+        self._call("/shop/wishlist/remove_product", {
+            "product_id": self.first.id, "product_tmpl_id": self.tmpl.id})
+
+        self.assertFalse(
+            rows.search([("product_id", "in", self.tmpl.product_variant_ids.ids)]),
+            "the row survived a removal aimed at its template")
+
+    def test_without_a_template_a_wrong_variant_removes_nothing(self):
+        """The product page's half of the same rule: it is showing one variant,
+        so it must not reach a row belonging to another."""
+        self.authenticate("admin", "admin")
+        self._add(self.other)
+        rows = self.env["product.wishlist"].sudo().with_context(
+            active_test=False)
+
+        self._call("/shop/wishlist/remove_product", {"product_id": self.first.id})
+
+        self.assertTrue(
+            rows.search([("product_id", "=", self.other.id)]),
+            "a variant nobody asked about was taken off the list")

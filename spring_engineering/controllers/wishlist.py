@@ -60,7 +60,8 @@ class Wishlist(WebsiteSaleWishlist):
 
     @http.route("/shop/wishlist/remove_product", type="jsonrpc", auth="public",
                 website=True)
-    def remove_product_from_wishlist(self, product_id, **kw):
+    def remove_product_from_wishlist(self, product_id, product_tmpl_id=None,
+                                     **kw):
         """Take a product off the wishlist, found by the product.
 
         A PRODUCT CARD KNOWS NO ROW ID. Odoo removes a wish by its own id,
@@ -72,25 +73,64 @@ class Wishlist(WebsiteSaleWishlist):
         ARCHIVED ROWS INCLUDED. A row the page cannot reach is exactly the one
         somebody needs to clear, and refusing to look at it would leave the
         heart stuck red with no way back.
+
+        AND THE TEMPLATE AS A SECOND CHANCE. One card is one heart for a whole
+        product, and Odoo reddens it when ANY of its variants is on the list
+        while still offering the first variant's id. Asked by that id alone
+        the search finds nothing, so the heart would empty itself and the row
+        would stay - the very "removing does not work" this route exists to
+        end. A card may therefore name its template as well, and the row is
+        found by it when the variant does not match. A product page may not:
+        it is showing one variant, and the row it offers to take off is that
+        variant's or none at all.
         """
         Wish = request.env["product.wishlist"].sudo().with_context(
             active_test=False)
 
         if request.website.is_public_user():
-            wish = Wish.search([
-                ("id", "in", request.session.get("wishlist_ids") or []),
-                ("product_id", "=", product_id),
-            ], limit=1)
+            whose = [("id", "in", request.session.get("wishlist_ids") or [])]
         else:
-            wish = Wish.search([
-                ("partner_id", "=", request.env.user.partner_id.id),
-                ("product_id", "=", product_id),
-            ], limit=1)
+            whose = [("partner_id", "=", request.env.user.partner_id.id)]
+
+        wish = Wish.search(whose + [("product_id", "=", product_id)], limit=1)
+
+        if not wish and product_tmpl_id:
+            wish = Wish.search(
+                whose + [("product_id.product_tmpl_id", "=", product_tmpl_id)],
+                limit=1)
 
         if not wish:
             return True
 
         return self.remove_from_wishlist(wish.id)
+
+    @http.route("/shop/wishlist/state", type="jsonrpc", auth="public",
+                website=True)
+    def wishlist_state(self, **kw):
+        """Everything the browser needs to draw a heart, in one answer.
+
+        TWO QUESTIONS, NOT ONE. Odoo's own route answers "which products are
+        on the list", which is all its buttons need because they are never
+        clicked twice. A heart that toggles has to answer a second one: WHICH
+        VARIANT of this product is the one on the list - because a shop card
+        stands for the whole template and offers the first variant, while the
+        row on the wishlist may well be for another. Without the mapping the
+        card compares its own variant against a list that holds a different
+        one, finds nothing, and draws itself empty next to a wishlist that has
+        the product in it.
+        """
+        state = {"ids": [], "variants": {}}
+
+        for wish in request.env["product.wishlist"].current():
+            state["ids"].append(wish.product_id.id)
+            # One per template: a card is one heart, so it can only offer to
+            # take one row off. Two variants of the same product on the list
+            # leaves the card red until both are gone, which is the same thing
+            # Odoo's own card says by being red for the template at all.
+            state["variants"].setdefault(
+                str(wish.product_id.product_tmpl_id.id), wish.product_id.id)
+
+        return state
 
 
 class ShopCardsKnowTheirVariant(WebsiteSale):

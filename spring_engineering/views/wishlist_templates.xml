@@ -39,4 +39,47 @@
 
   </template>
 
+  <!-- AND THE SAME BUTTON ON THE PRODUCT'S OWN PAGE.
+
+       This one was left in Odoo's hands and behaved exactly as Odoo intends:
+       it added the product and then disabled ITSELF, so a customer who
+       changed their mind had no way back. A disabled .btn is also
+       pointer-events: none, so the second press raised no event at all -
+       there was nothing for the script to intercept.
+
+       Served clickable and already coloured, the same way the card is, so the
+       state is right before any script runs. Note Odoo colours this one from
+       the `disabled` CLASS rather than from [disabled] - a different rule for
+       the same idea - and this module's stylesheet now keys both on
+       o_in_wishlist. -->
+  <template id="product_page_wishlist_button_is_a_toggle"
+            inherit_id="website_sale_wishlist.product_add_to_wishlist">
+
+    <xpath expr="//a[@data-action='o_wishlist']" position="before">
+      <t t-set="aa_wish_add">Add to wishlist</t>
+      <t t-set="aa_wish_remove">Remove from wishlist</t>
+      <t t-set="_button_classes"
+         t-value="_button_classes + (in_wish and ' o_in_wishlist' or '')"/>
+    </xpath>
+
+    <xpath expr="//a[@data-action='o_wishlist']" position="attributes">
+      <attribute name="t-att-disabled"/>
+      <attribute name="title"/>
+      <attribute name="t-att-title">in_wish and aa_wish_remove or aa_wish_add</attribute>
+    </xpath>
+
+    <xpath expr="//a[@data-action='o_wishlist']/i" position="attributes">
+      <attribute name="class"/>
+      <attribute name="t-attf-class">fa #{in_wish and 'fa-heart' or 'fa-heart-o'} me-2 me-lg-0</attribute>
+      <attribute name="aria-label"/>
+      <attribute name="t-att-aria-label">in_wish and aa_wish_remove or aa_wish_add</attribute>
+    </xpath>
+
+    <xpath expr="//a[@data-action='o_wishlist']/span" position="replace">
+      <span t-att-class="_span_classes"
+            t-out="in_wish and aa_wish_remove or aa_wish_add"/>
+    </xpath>
+
+  </template>
+
 </odoo>
