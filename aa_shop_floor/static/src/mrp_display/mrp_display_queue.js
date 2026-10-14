@@ -8,8 +8,19 @@ const WO_STATE_RANK = { progress: 0, ready: 1, pending: 2, waiting: 3, blocked: 
 
 patch(MrpDisplay.prototype, {
     defineRelevantRecords() {
-        const records = super.defineRelevantRecords(...arguments) || [];
         const showMOs = this.state.activeResModel === "mrp.production";
+        let records = super.defineRelevantRecords(...arguments) || [];
+        if (showMOs) {
+            // One card per sale order: only the order's first open MO is shown.
+            records = records.filter((rec) => {
+                try {
+                    const board = JSON.parse(rec.data.aa_order_board || "{}");
+                    return !board.grouped || board.leader;
+                } catch {
+                    return true;
+                }
+            });
+        }
         const moId = (rec) => (showMOs ? rec.resId : rec.data.production_id?.id || 0);
         const sorted = [...records].sort((a, b) => {
             const pa = Number(a.data.priority || 0);

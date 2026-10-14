@@ -108,6 +108,100 @@ class MrpProduction(models.Model):
                 "workcenter_id": pending.id,
             })
 
+    # ---- One card per sale order in the Overview (owner, 2026-10-14) ----
+    # A sale order still makes one manufacturing order per thing to prepare
+    # (the track orders consume the RAW track, so they must stay real), but the
+    # Overview shows them as ONE card for the order: every job with its own
+    # Send / Remove, plus Send all / Remove all.
+
+    aa_order_board = fields.Text(
+        string="Order Card (data)", compute="_compute_aa_order_board",
+        help="Everything the Overview's one-card-per-order view needs.")
+
+    def _aa_order_siblings(self):
+        """The open and finished manufacturing orders of the same sale order."""
+        self.ensure_one()
+        if not self.origin:
+            return self.browse()
+        if not self.env["sale.order"].sudo().search_count([("name", "=", self.origin)]):
+            return self.browse()
+        return self.sudo().search([("origin", "=", self.origin), ("state", "!=", "cancel")], order="id")
+
+    @staticmethod
+    def _aa_spec_summary(spec):
+        rows = (spec or "").split("\n") if spec else []
+        summary, more, items = [], "", 0
+        for index, row in enumerate(rows):
+            parts = row.split("|")
+            if len(parts) < 2 or not parts[1]:
+                more = parts[0]
+                items = sum(1 for r in rows[index:] if r.split("|")[2:3] == ["c"])
+                break
+            summary.append([parts[0], parts[1]])
+        if more and items:
+            more = "%s: %d %s" % (more, items, "item" if items == 1 else "items")
+        return summary, more
+
+    @api.depends("origin", "state", "workorder_ids.workcenter_id", "workorder_ids.state")
+    @api.depends_context("uid")
+    def _compute_aa_order_board(self):
+        pending = self.env["mrp.workcenter"].sudo()._aa_pending()
+        can_assign = self.env.user.has_group(MANAGER_GROUP)
+        for production in self:
+            siblings = production._aa_order_siblings() if production.id else production.browse()
+            if len(siblings) < 2:
+                production.aa_order_board = json.dumps({"grouped": False})
+                continue
+            open_ones = siblings.filtered(lambda p: p.state not in ("done", "cancel"))
+            leader = open_ones[:1]
+            jobs = []
+            for mo in siblings:
+                wos = mo.workorder_ids.filtered(lambda w: w.state != "cancel")
+                open_wos = wos.filtered(lambda w: w.state != "done")
+                waiting = open_wos.filtered(lambda w: w.workcenter_id == pending)
+                stations = (open_wos - waiting).workcenter_id
+                for wo in waiting:
+                    stations |= wo._aa_own_station()
+                if not stations:
+                    stations = wos.workcenter_id - pending
+                if mo.state == "done":
+                    status = "done"
+                elif not wos:
+                    status = "none"
+                elif open_wos.filtered(lambda w: w.state == "progress"):
+                    status = "progress"
+                elif waiting:
+                    status = "pending"
+                else:
+                    status = "station"
+                summary, more = self._aa_spec_summary(mo.aa_shop_spec)
+                jobs.append({
+                    "id": mo.id,
+                    "name": mo.name,
+                    "product": mo.product_id.name,
+                    "station": ", ".join(stations.mapped("name")),
+                    "status": status,
+                    "summary": summary,
+                    "more": more,
+                    "can_send": bool(waiting) and mo.state != "done",
+                    "can_remove": bool((open_wos - waiting).filtered(
+                        lambda w: w.state not in LOCKED_STATES)),
+                })
+            order = self.env["sale.order"].sudo().search([("name", "=", production.origin)], limit=1)
+            received = fields.Datetime.context_timestamp(
+                production, min(siblings.mapped("create_date"))).strftime("%b %d, %I:%M %p")
+            production.aa_order_board = json.dumps({
+                "grouped": True,
+                "leader": production == leader,
+                "order": production.origin,
+                "customer": order.partner_id.display_name or "",
+                "received": received,
+                "can_assign": can_assign,
+                "send_ids": [j["id"] for j in jobs if j["can_send"]],
+                "remove_ids": [j["id"] for j in jobs if j["can_remove"]],
+                "jobs": jobs,
+            })
+
     def _aa_check_manager(self):
         if not self.env.user.has_group(MANAGER_GROUP):
             raise AccessError(_("Only a Manufacturing manager can send orders to the stations."))

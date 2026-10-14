@@ -19,3 +19,18 @@
 .o_mrp_display_record .o_aa_assign .btn {
     min-height: 2.75rem;
 }
+
+// One card per sale order: the order block replaces the leader order's own header,
+// work order list and footer.
+.o_mrp_display_record:has(.o_aa_order) {
+    .o_mrp_display_record_title,
+    .o_finished_product,
+    .o_quantity,
+    .list-group,
+    .card-footer {
+        display: none !important;
+    }
+    .o_aa_job .btn {
+        min-height: 2.5rem;
+    }
+}

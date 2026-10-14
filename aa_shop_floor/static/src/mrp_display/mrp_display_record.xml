@@ -2,7 +2,54 @@
 <templates xml:space="preserve">
     <t t-inherit="mrp_workorder.MrpDisplayRecord" t-inherit-mode="extension">
         <xpath expr="//span[@class='o_finished_product mt-auto mb-0']" position="after">
-            <div t-if="record.aa_shop_spec" class="o_aa_shop_spec border rounded p-2 bg-100">
+            <!-- One card per sale order in the Overview: every job of the order,
+                 each with its own Send / Remove, plus Send all / Remove all. -->
+            <t t-set="aaOrderData" t-value="aaOrder()"/>
+            <div t-if="aaOrderData.grouped" class="o_aa_order">
+                <div class="d-flex justify-content-between align-items-baseline gap-2">
+                    <span class="fs-4 fw-bold" t-esc="aaOrderData.order"/>
+                    <span class="text-muted text-end" t-esc="aaOrderData.customer"/>
+                </div>
+                <div class="text-muted small"><i class="fa fa-clock-o me-1"/>Received <t t-esc="aaOrderData.received"/></div>
+                <div t-if="aaOrderData.can_assign and (aaOrderData.send_ids.length or aaOrderData.remove_ids.length)"
+                     class="d-flex flex-wrap gap-2 mt-2">
+                    <button t-if="aaOrderData.send_ids.length" type="button" class="btn btn-primary"
+                            t-on-click.stop="() => this.aaOrderAction('aa_send_to_station', aaOrderData.send_ids)">
+                        <i class="fa fa-arrow-right me-1"/>Send all
+                    </button>
+                    <button t-if="aaOrderData.remove_ids.length" type="button" class="btn btn-outline-secondary"
+                            t-on-click.stop="() => this.aaOrderAction('aa_remove_from_station', aaOrderData.remove_ids)">
+                        <i class="fa fa-undo me-1"/>Remove all
+                    </button>
+                </div>
+                <t t-foreach="aaOrderData.jobs" t-as="aaJob" t-key="aaJob.id">
+                    <t t-set="aaBadge" t-value="aaJobBadge(aaJob)"/>
+                    <div class="o_aa_job border rounded p-2 mt-2" t-att-class="{'opacity-50': aaJob.status === 'done'}">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <span class="fw-bold" t-esc="aaJob.product"/>
+                            <span class="badge text-nowrap" t-att-class="aaBadge.cls" t-esc="aaBadge.text"/>
+                        </div>
+                        <t t-foreach="aaJob.summary" t-as="aaSum" t-key="aaSum_index">
+                            <div class="d-flex justify-content-between gap-3">
+                                <span class="text-muted" t-esc="aaSum[0]"/>
+                                <span class="fw-bold text-end" t-esc="aaSum[1]"/>
+                            </div>
+                        </t>
+                        <div t-if="aaJob.more" class="text-muted small" t-esc="aaJob.more"/>
+                        <div t-if="aaOrderData.can_assign and (aaJob.can_send or aaJob.can_remove)" class="d-flex flex-wrap gap-2 mt-1">
+                            <button t-if="aaJob.can_send" type="button" class="btn btn-sm btn-primary"
+                                    t-on-click.stop="() => this.aaOrderAction('aa_send_to_station', [aaJob.id])">
+                                <i class="fa fa-arrow-right me-1"/>Send to <t t-esc="aaJob.station"/>
+                            </button>
+                            <button t-if="aaJob.can_remove" type="button" class="btn btn-sm btn-outline-secondary"
+                                    t-on-click.stop="() => this.aaOrderAction('aa_remove_from_station', [aaJob.id])">
+                                <i class="fa fa-undo me-1"/>Remove from <t t-esc="aaJob.station"/>
+                            </button>
+                        </div>
+                    </div>
+                </t>
+            </div>
+            <div t-if="record.aa_shop_spec and !aaOrderData.grouped" class="o_aa_shop_spec border rounded p-2 bg-100">
                 <t t-set="aaRows" t-value="record.aa_shop_spec.split('\n')"/>
                 <!-- Overview shows only the summary; the full list is at the station. -->
                 <t t-set="aaLimit" t-value="aaSpecLimit(aaRows)"/>
@@ -37,7 +84,7 @@
                     <span t-esc="aaPackedCount(aaRows)"/>
                 </div>
             </div>
-            <t t-if="record.aa_station_board">
+            <t t-if="record.aa_station_board and !aaOrderData.grouped">
                 <t t-set="aaBoardData" t-value="aaBoard()"/>
                 <div t-if="aaBoardData.received" class="o_aa_received text-muted small mt-1">
                     <i class="fa fa-clock-o me-1"/>Received <t t-esc="aaBoardData.received"/>

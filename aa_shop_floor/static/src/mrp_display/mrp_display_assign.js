@@ -28,6 +28,34 @@ patch(MrpDisplayRecord.prototype, {
         return items ? `${title}: ${items} ${items === 1 ? "item" : "items"}` : title;
     },
 
+    aaOrder() {
+        try {
+            return JSON.parse(this.props.record.data.aa_order_board || "{}");
+        } catch {
+            return {};
+        }
+    },
+
+    aaJobBadge(job) {
+        switch (job.status) {
+            case "pending":
+                return { cls: "text-bg-warning", text: "Pending" };
+            case "progress":
+                return { cls: "text-bg-primary", text: `In progress · ${job.station}` };
+            case "done":
+                return { cls: "text-bg-success", text: "Done" };
+            case "none":
+                return { cls: "text-bg-secondary", text: "No work orders" };
+            default:
+                return { cls: "text-bg-info", text: job.station };
+        }
+    },
+
+    async aaOrderAction(method, productionIds) {
+        await this.model.orm.call("mrp.production", method, [productionIds]);
+        await this.env.reload();
+    },
+
     async aaRelease(method) {
         const record = this.props.record;
         await this.model.orm.call("mrp.production", method, [[record.resId]]);
