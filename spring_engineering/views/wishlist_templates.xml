@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE HEART ON A PRODUCT CARD IS A SWITCH, NOT A STAMP.
+
+       Odoo renders it DISABLED once the product is on the wishlist, which is
+       how it colours it red: the stylesheet keys the filled glyph on
+       [disabled]. The cost is that there is no way to take a product off the
+       list from the shop - the one button that knows about it refuses to be
+       clicked - and with the "show on hover" option on, a heart that is not
+       disabled fades out entirely when the pointer leaves the card.
+
+       So the attribute goes, this module's stylesheet colours o_in_wishlist
+       instead, and the click toggles. The title says which way it will go. -->
+  <template id="wishlist_button_is_a_toggle"
+            inherit_id="website_sale_wishlist.add_to_wishlist">
+
+    <xpath expr="//button[@data-action='o_wishlist']" position="attributes">
+      <attribute name="t-att-disabled"/>
+      <attribute name="t-att-title">in_wish and btnTitleRemove or btnTitle</attribute>
+    </xpath>
+
+    <xpath expr="//t[@t-set='btnTitleActive']" position="after">
+      <t t-set="btnTitleRemove">Remove from wishlist</t>
+    </xpath>
+
+    <xpath expr="//span[@t-else='']" position="replace">
+      <span class="o_label small ms-2">Remove from wishlist</span>
+    </xpath>
+
+  </template>
+
+</odoo>

@@ -11,13 +11,16 @@
     # product is missing", because the route was there and the record was not.
     # Higher than either side: a JS asset changed, and Odoo.sh rebuilds a
     # bundle only for a module it actually updates.
-    'version': '19.0.2.14.0',
+    'version': '19.0.2.15.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
     'author': 'AA Impact Garage Door Supply',
     'depends': [
-        'sale_management','base', 'web', 'website', 'website_sale'],
+        'sale_management', 'base', 'web', 'website', 'website_sale',
+        # The wishlist heart on a product card is turned into a toggle, which
+        # patches that module's own interaction - so it has to be there.
+        'website_sale_wishlist'],
     'data': [
         'data/track_prep_data.xml',
         'data/website_wishlist_data.xml',
@@ -26,6 +29,7 @@
         'views/spring_engineering_templates.xml',
         'views/custom_torsion_spring_templates.xml',
         'views/spring_engineering_product.xml',
+        'views/wishlist_templates.xml',
         'views/spring_engineering_settings.xml',
         'views/spring_engineering_config_settings.xml',
     ],
@@ -43,6 +47,12 @@
             'spring_engineering/static/src/xml/spring_engineering.xml',
             'spring_engineering/static/src/css/spring_engineering.css',
             'spring_engineering/static/src/css/spring_engineering_site.css',
+            # The wishlist heart, turned from a stamp into a switch.
+            'spring_engineering/static/src/js/wishlist_toggle.js',
+            'spring_engineering/static/src/css/wishlist_toggle.css',
+        ],
+        'web.assets_tests': [
+            'spring_engineering/static/tests/tours/wishlist_toggle_tour.js',
         ],
     },
     'installable': True,
