@@ -25,24 +25,29 @@
                 <t t-foreach="aaOrderData.jobs" t-as="aaJob" t-key="aaJob.id">
                     <t t-set="aaBadge" t-value="aaJobBadge(aaJob)"/>
                     <div class="o_aa_job border rounded p-2 mt-2" t-att-class="{'opacity-50': aaJob.status === 'done'}">
-                        <div class="d-flex justify-content-between align-items-start gap-2">
-                            <span class="fw-bold" t-esc="aaJob.product"/>
+                        <div class="d-flex justify-content-between align-items-center gap-2">
+                            <span class="fw-bold text-uppercase" t-esc="aaJob.station"/>
                             <span class="badge text-nowrap" t-att-class="aaBadge.cls" t-esc="aaBadge.text"/>
                         </div>
-                        <t t-foreach="aaJob.summary" t-as="aaSum" t-key="aaSum_index">
-                            <div class="d-flex justify-content-between gap-3">
-                                <span class="text-muted" t-esc="aaSum[0]"/>
-                                <span class="fw-bold text-end" t-esc="aaSum[1]"/>
+                        <t t-foreach="aaJob.items" t-as="aaItem" t-key="aaItem.id">
+                            <div class="o_aa_job_item mt-1">
+                                <div class="fw-bold" t-esc="aaItem.product"/>
+                                <t t-foreach="aaItem.summary" t-as="aaSum" t-key="aaSum_index">
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <span class="text-muted" t-esc="aaSum[0]"/>
+                                        <span class="fw-bold text-end" t-esc="aaSum[1]"/>
+                                    </div>
+                                </t>
+                                <div t-if="aaItem.more" class="text-muted small" t-esc="aaItem.more"/>
                             </div>
                         </t>
-                        <div t-if="aaJob.more" class="text-muted small" t-esc="aaJob.more"/>
-                        <div t-if="aaOrderData.can_assign and (aaJob.can_send or aaJob.can_remove)" class="d-flex flex-wrap gap-2 mt-1">
-                            <button t-if="aaJob.can_send" type="button" class="btn btn-sm btn-primary"
-                                    t-on-click.stop="() => this.aaOrderAction('aa_send_to_station', [aaJob.id])">
+                        <div t-if="aaOrderData.can_assign and (aaJob.send_ids.length or aaJob.remove_ids.length)" class="d-flex flex-wrap gap-2 mt-2">
+                            <button t-if="aaJob.send_ids.length" type="button" class="btn btn-sm btn-primary"
+                                    t-on-click.stop="() => this.aaOrderAction('aa_send_to_station', aaJob.send_ids)">
                                 <i class="fa fa-arrow-right me-1"/>Send to <t t-esc="aaJob.station"/>
                             </button>
-                            <button t-if="aaJob.can_remove" type="button" class="btn btn-sm btn-outline-secondary"
-                                    t-on-click.stop="() => this.aaOrderAction('aa_remove_from_station', [aaJob.id])">
+                            <button t-if="aaJob.remove_ids.length" type="button" class="btn btn-sm btn-outline-secondary"
+                                    t-on-click.stop="() => this.aaOrderAction('aa_remove_from_station', aaJob.remove_ids)">
                                 <i class="fa fa-undo me-1"/>Remove from <t t-esc="aaJob.station"/>
                             </button>
                         </div>

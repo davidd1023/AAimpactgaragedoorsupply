@@ -187,6 +187,34 @@ class MrpProduction(models.Model):
                     "can_remove": bool((open_wos - waiting).filtered(
                         lambda w: w.state not in LOCKED_STATES)),
                 })
+            # One section per station (owner, 2026-10-14): vertical and horizontal
+            # tracks are one Track Prep task, not two.
+            groups = []
+            for job in jobs:
+                group = next((g for g in groups if g["station"] == job["station"]), None)
+                if not group:
+                    group = {"id": job["id"], "station": job["station"], "items": [],
+                             "send_ids": [], "remove_ids": [], "statuses": []}
+                    groups.append(group)
+                group["items"].append({"id": job["id"], "product": job["product"],
+                                       "summary": job["summary"], "more": job["more"]})
+                group["statuses"].append(job["status"])
+                if job["can_send"]:
+                    group["send_ids"].append(job["id"])
+                if job["can_remove"]:
+                    group["remove_ids"].append(job["id"])
+            for group in groups:
+                statuses = set(group.pop("statuses"))
+                if statuses == {"done"}:
+                    group["status"] = "done"
+                elif "progress" in statuses:
+                    group["status"] = "progress"
+                elif "pending" in statuses:
+                    group["status"] = "pending"
+                elif statuses <= {"none"}:
+                    group["status"] = "none"
+                else:
+                    group["status"] = "station"
             order = self.env["sale.order"].sudo().search([("name", "=", production.origin)], limit=1)
             received = fields.Datetime.context_timestamp(
                 production, min(siblings.mapped("create_date"))).strftime("%b %d, %I:%M %p")
@@ -199,7 +227,7 @@ class MrpProduction(models.Model):
                 "can_assign": can_assign,
                 "send_ids": [j["id"] for j in jobs if j["can_send"]],
                 "remove_ids": [j["id"] for j in jobs if j["can_remove"]],
-                "jobs": jobs,
+                "jobs": groups,
             })
 
     def _aa_check_manager(self):
