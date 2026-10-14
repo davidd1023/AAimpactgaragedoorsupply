@@ -1,17 +1,18 @@
 {
     'name': "Work Order Sheet",
-    'version': '19.0.1.28.1',
+    'version': '19.0.1.29.0',
     'summary': "Print a work order, and sort its work onto the benches",
     'description': """
 Adds a printable sheet to a work order - the transfer the shop sees under
 Operations > Work Orders (Pedidos) - listing every product on it, with the
 length read out of the name for the ones that have one.
 
-WORK STATIONS, under Manufacturing. The same rule that splits the sheet into
-pages - Tracks, Springs, Cables and Hardware - also sorts the work onto four
-benches when a transfer is confirmed. Each bench has a kiosk link of its own
-showing only its own queue, with the cut lengths and the door it is building
-for, and a Done button.
+WORK STATIONS - PUT AWAY FOR NOW. Four bench kiosks sorted the work by the
+same rule that splits the sheet into pages, and the owner has replaced them
+with the shop floor module. Nothing is deleted: the files are no longer listed
+in this manifest, a migration archived what an installed database already had,
+and putting them back is four lines here and those records unarchived. See
+views/work_station_picking_views.xml.
 
 DELIVERY CONFIRMATION. Every delivery carries a link of its own: the customer
 opens it on their phone, ticks what they were handed, types their name and
@@ -19,12 +20,9 @@ signs at the bottom. The form says when it was made and when it was signed,
 both on the shop's clock, and what the customer did NOT tick goes into the
 order's log for somebody to deal with.
 
-Three of them make something. The fourth, Hardware, gathers what is left and
-sends the order out: it cannot start until the other three have finished, and
-its Complete Order button is what validates the transfer. Perforated angles,
-shafts and trims reach it already complete, because they are supplied as they
-come. The printed sheet stays on the transfer, which is the record it
-describes.
+The printed sheet stays on the transfer, which is the record it describes, and
+the delivery confirmation never had anything to do with the benches - it hangs
+off the outgoing transfer and the customer's own link.
 
 SEPARATE FROM door_work_order ON PURPOSE. That module exists to receive a door
 from the external calculator and raise a manufacturing order; this one prints
@@ -38,11 +36,18 @@ machinery it does not use.
     'data': [
         'security/ir.model.access.csv',
         'report/work_order_sheet_reports.xml',
-        'views/station_templates.xml',
         'views/delivery_templates.xml',
-        'views/work_station_views.xml',
         'views/stock_picking_views.xml',
-        'data/work_station_data.xml',
+        # THE WORK STATIONS, PUT AWAY FOR NOW - the owner's instruction,
+        # 2026-10-14: the shop floor module does the same job. Nothing is
+        # deleted; these three simply do not load, and a migration archives
+        # what an installed database already has. Putting the benches back is
+        # these three lines and unarchiving those records.
+        #
+        #   'views/station_templates.xml',
+        #   'views/work_station_views.xml',
+        #   'views/work_station_picking_views.xml',
+        #   'data/work_station_data.xml',
     ],
     'installable': True,
     'application': False,
