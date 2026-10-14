@@ -425,3 +425,85 @@ class TestUnpublishedWishesForTheOwner(HttpCase):
         self._add(shown)
 
         self.assertIn(shown.id, self._ids() or [])
+
+
+@tagged("post_install", "-at_install")
+class TestTheCardKnowsItsVariant(HttpCase):
+    """THE BUG BEHIND EVERY DEAD HEART.
+
+    Odoo's card template picks the variant with
+
+        t-value="in_wish or product._get_first_possible_variant_id()"
+
+    and in_wish is a BOOLEAN, so a product already on the wishlist renders
+    data-product-product-id="True". parseInt gives NaN and no handler can act
+    on it. It never mattered to Odoo, whose button is disabled in exactly that
+    state; making the heart clickable is what exposed it.
+
+    It accounts for the whole of the report: adding worked, removing worked
+    right after adding - the page still held the real id - and any re-render,
+    another page or another category, brought the word back and the heart died.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.product = self.env["product.product"].create({
+            "name": "Variant Probe Roller", "type": "consu", "list_price": 5.0,
+            "is_published": True, "sale_ok": True})
+
+    def _card(self):
+        page = self.url_open("/shop?search=Variant+Probe").text
+        hit = re.search(r"<button[^>]*o_add_wishlist.*?</button>", page, re.S)
+
+        return hit.group(0) if hit else ""
+
+    def _add(self):
+        self.url_open(
+            "/shop/wishlist/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"product_id": self.product.id}}),
+            headers={"Content-Type": "application/json"})
+
+    def test_a_wishlisted_card_carries_the_variant_and_not_a_boolean(self):
+        self.authenticate("admin", "admin")
+        self._add()
+        card = self._card()
+
+        self.assertIn("o_in_wishlist", card, "the fixture is not wishlisted")
+        self.assertNotIn('data-product-product-id="True"', card, card)
+        self.assertIn('data-product-product-id="%s"' % self.product.id, card, card)
+
+    def test_an_unwishlisted_card_is_unchanged(self):
+        self.authenticate("admin", "admin")
+        card = self._card()
+
+        self.assertIn('data-product-product-id="%s"' % self.product.id, card, card)
+
+    def test_it_is_the_variant_that_was_wishlisted(self):
+        """Not merely the first one Odoo would have offered: a product with
+        several variants has to lose the one that is on the list."""
+        attribute = self.env["product.attribute"].create({
+            "name": "Probe Colour", "create_variant": "always",
+            "value_ids": [(0, 0, {"name": "Black"}), (0, 0, {"name": "White"})],
+        })
+        template = self.env["product.template"].create({
+            "name": "Variant Probe Track", "type": "consu", "list_price": 9.0,
+            "is_published": True, "sale_ok": True,
+            "attribute_line_ids": [(0, 0, {
+                "attribute_id": attribute.id,
+                "value_ids": [(6, 0, attribute.value_ids.ids)]})],
+        })
+        second = template.product_variant_ids[1]
+        self.authenticate("admin", "admin")
+        self.url_open(
+            "/shop/wishlist/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"product_id": second.id}}),
+            headers={"Content-Type": "application/json"})
+
+        page = self.url_open("/shop?search=Variant+Probe+Track").text
+        card = re.search(r"<button[^>]*o_add_wishlist.*?</button>", page, re.S)
+
+        self.assertIn('data-product-product-id="%s"' % second.id,
+                      card.group(0) if card else "")
