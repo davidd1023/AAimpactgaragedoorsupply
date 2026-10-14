@@ -1,5 +1,10 @@
 from odoo import api, fields, models
 
+# The two parts every jamb bracket is fitted with. Named here because this is
+# where the roles are declared, and read from here by sale_order so the two
+# cannot drift apart.
+FASTENER_ROLES = ("stud", "nut")
+
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
@@ -19,6 +24,53 @@ class SaleOrderLine(models.Model):
         index=True,
         copy=False,
     )
+
+    # WHAT COMES WITH THIS LINE, for the cart to show underneath it.
+    #
+    # A jamb bracket is one thing to buy and three things to pick: the bracket,
+    # a knurled stud and a flange nut. Listed as three rows the cart reads like
+    # a parts bin; listed as one row with the other two folded under it, it
+    # reads like what the customer chose.
+    #
+    # THE LINK IS WHAT DELETES THEM, as well as what nests them:
+    # track_prep_parent_id cascades, so taking the bracket out takes its own
+    # fasteners with it without anybody remembering to.
+    aa_included_line_ids = fields.One2many(
+        "sale.order.line",
+        "track_prep_parent_id",
+        domain=[("track_prep_role", "in", list(FASTENER_ROLES))],
+        string="Comes with",
+    )
+
+    def _show_in_cart(self):
+        """A fastener is not a row of its own: it is part of the bracket.
+
+        It is still a line, still priced and still picked - what changes is
+        that the cart shows it inside the thing it belongs to, and counts the
+        brackets rather than the brackets plus their screws.
+        """
+        self.ensure_one()
+
+        if self.track_prep_role in FASTENER_ROLES and self.track_prep_parent_id:
+            return False
+
+        return super()._show_in_cart()
+
+    def _get_lines_with_price(self):
+        """The bracket's price in the cart includes what comes with it.
+
+        Odoo uses this to let a combo's price be the sum of its items; the same
+        hook lets a bracket's price be the sum of the bracket, its stud and its
+        nut. Nothing about what is CHARGED changes - every line is still its
+        own line on the order - only what the cart shows against the row the
+        customer recognises.
+        """
+        lines = super()._get_lines_with_price()
+
+        if self.track_prep_role in FASTENER_ROLES:
+            return lines
+
+        return lines | self.aa_included_line_ids
 
     # What the part is for, so the sync knows how to recompute its quantity -
     # brackets scale with the door height, the flag angle is one per track.

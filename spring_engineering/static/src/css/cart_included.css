@@ -1,0 +1,10 @@
+/* The caret turns to say which way the fold goes. Bootstrap sets
+   aria-expanded on the button it controls, so the state is already in the
+   markup and nothing has to be kept in step by hand. */
+.o_aa_included .fa-caret-right {
+    transition: transform 0.15s ease-out;
+}
+
+.o_aa_included [aria-expanded="true"] .fa-caret-right {
+    transform: rotate(90deg);
+}

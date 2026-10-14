@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- WHAT COMES WITH A LINE, FOLDED UNDER IT.
+
+       A jamb bracket is one thing to buy and three things to pick: the
+       bracket, a knurled stud and a flange nut. Listed as three rows the cart
+       reads like a parts bin; folded into the row the customer recognises, it
+       reads like what they chose - and the price on that row is the price of
+       all three, because that is what the line costs them.
+
+       Collapsed by default and opened by the caret. Bootstrap's own collapse
+       does the work, so there is no script here to go wrong. -->
+  <template id="cart_lines_included_parts" inherit_id="website_sale.cart_lines">
+
+    <xpath expr="//t[@t-call='website_sale.cart_line_description_following_lines']"
+           position="after">
+
+      <t t-set="aa_parts" t-value="line.aa_included_line_ids"/>
+
+      <div t-if="aa_parts" class="o_aa_included small mt-1">
+        <button type="button"
+                class="btn btn-link btn-sm p-0 text-muted text-decoration-none"
+                data-bs-toggle="collapse"
+                t-attf-data-bs-target="#aa_included_{{ line.id }}"
+                t-attf-aria-controls="aa_included_{{ line.id }}"
+                aria-expanded="false">
+          <i class="fa fa-caret-right me-1"/>
+          Comes with <t t-esc="len(aa_parts)"/>
+          <t t-if="len(aa_parts) == 1">item</t>
+          <t t-else="">items</t>
+        </button>
+
+        <ul t-attf-id="aa_included_{{ line.id }}"
+            class="collapse list-unstyled ms-3 mb-0 text-muted">
+          <li t-foreach="aa_parts" t-as="aa_part">
+            <t t-esc="'%g' % aa_part.product_uom_qty"/>
+            x
+            <t t-esc="aa_part.product_id.display_name"/>
+          </li>
+        </ul>
+      </div>
+
+    </xpath>
+
+  </template>
+
+</odoo>
