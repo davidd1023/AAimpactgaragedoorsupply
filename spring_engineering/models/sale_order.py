@@ -4,6 +4,8 @@ import re
 from odoo import _, models
 from odoo.http import request
 
+from .sale_order_line import FASTENER_ROLES
+
 # The attribute value that means "send it ready to fit". Matched on the VALUE's
 # name rather than on an xml id, so the owner can attach the attribute to track
 # products by hand - which is how the other product options on these pages are
@@ -583,7 +585,7 @@ class SaleOrder(models.Model):
     # and the quantity of either can change afterwards. Counting what the cart
     # holds and making the fasteners match is one rule that cannot disagree
     # with itself; a step bolted onto each path is two rules that can.
-    FASTENER_ROLES = ("stud", "nut")
+    FASTENER_ROLES = FASTENER_ROLES
 
     # THE OWNER'S OWN SPELLINGS FIRST - "1/4 X 3/4 KNURLEL STUD 18-8" and
     # "Flage Nuts 1/4 20" - then a tolerant read, because a name typed twice is
@@ -654,51 +656,73 @@ class SaleOrder(models.Model):
             request.session["website_sale_cart_quantity"] = self.cart_quantity
 
     def _fastener_sync(self):
-        """One stud and one nut for every jamb bracket in the cart."""
+        """One stud and one nut for every jamb bracket, under each bracket.
+
+        PER BRACKET LINE, not per cart. They used to be one stud line and one
+        nut line counted across everything, which was simpler and wrong in two
+        ways the owner asked about: the cart could not show them under the
+        bracket they belong to, and a prepared track - which brings three
+        bracket lines of different sizes - had no way to say which pair went
+        with which. Hanging each pair off its own bracket also means the link
+        deletes them: track_prep_parent_id cascades, so taking a bracket out
+        takes its fasteners with it.
+        """
         self.ensure_one()
-        brackets = sum(
-            line.product_uom_qty
-            for line in self.order_line
-            if self._fastener_is_bracket(line)
-        )
-        existing = self.order_line.filtered(
-            lambda line: line.track_prep_role in self.FASTENER_ROLES)
+        brackets = self.order_line.filtered(self._fastener_is_bracket)
+        changed = False
 
-        if not brackets:
-            if existing:
-                existing.unlink()
-                self._fastener_count_in_the_header()
+        # Anything left pointing at a line that is no longer a bracket - or at
+        # nothing at all, which is what the cart-wide version left behind.
+        orphans = self.order_line.filtered(
+            lambda line: line.track_prep_role in self.FASTENER_ROLES
+            and line.track_prep_parent_id not in brackets)
 
-            return None
+        if orphans:
+            orphans.unlink()
+            changed = True
 
         missing = []
 
-        for role in self.FASTENER_ROLES:
-            product = self._fastener_product(role)
-            line = existing.filtered(
-                lambda l, role=role: l.track_prep_role == role)[:1]
+        for bracket in brackets:
+            for role in self.FASTENER_ROLES:
+                product = self._fastener_product(role)
+                line = bracket.aa_included_line_ids.filtered(
+                    lambda l, role=role: l.track_prep_role == role)[:1]
 
-            if not product:
-                # NAMED, NOT COUNTED. "A part is missing" sends somebody
-                # looking through a catalogue; the name can be searched for.
-                missing.append("%s (%s)" % (
-                    self.FASTENER_LABELS[role], self.FASTENER_NAMES[role]))
-                line.unlink()
-                continue
+                if not product:
+                    # NAMED, NOT COUNTED. "A part is missing" sends somebody
+                    # looking through a catalogue; the name can be searched
+                    # for. Said once however many brackets are in the cart.
+                    label = "%s (%s)" % (
+                        self.FASTENER_LABELS[role], self.FASTENER_NAMES[role])
 
-            if line:
-                if line.product_uom_qty != brackets:
-                    line.product_uom_qty = brackets
-                continue
+                    if label not in missing:
+                        missing.append(label)
 
-            self.env["sale.order.line"].create({
-                "order_id": self.id,
-                "product_id": product.id,
-                "product_uom_qty": brackets,
-                "track_prep_role": role,
-            })
+                    if line:
+                        line.unlink()
+                        changed = True
 
-        self._fastener_count_in_the_header()
+                    continue
+
+                if line:
+                    if line.product_uom_qty != bracket.product_uom_qty:
+                        line.product_uom_qty = bracket.product_uom_qty
+                        changed = True
+
+                    continue
+
+                self.env["sale.order.line"].create({
+                    "order_id": self.id,
+                    "product_id": product.id,
+                    "product_uom_qty": bracket.product_uom_qty,
+                    "track_prep_parent_id": bracket.id,
+                    "track_prep_role": role,
+                })
+                changed = True
+
+        if changed:
+            self._fastener_count_in_the_header()
 
         if missing:
             return _(

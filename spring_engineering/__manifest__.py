@@ -11,7 +11,7 @@
     # product is missing", because the route was there and the record was not.
     # Higher than either side: a JS asset changed, and Odoo.sh rebuilds a
     # bundle only for a module it actually updates.
-    'version': '19.0.2.25.0',
+    'version': '19.0.2.26.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
@@ -31,6 +31,7 @@
         'views/spring_engineering_product.xml',
         'views/wishlist_templates.xml',
         'views/reorder_templates.xml',
+        'views/cart_included_parts.xml',
         'views/spring_engineering_settings.xml',
         'views/spring_engineering_config_settings.xml',
     ],
@@ -54,6 +55,7 @@
             # Reordering a whole previous order from the cart.
             'spring_engineering/static/src/js/reorder_orders.js',
             'spring_engineering/static/src/js/reorder_panel.js',
+            'spring_engineering/static/src/css/cart_included.css',
         ],
         'web.assets_tests': [
             'spring_engineering/static/tests/tours/wishlist_toggle_tour.js',
