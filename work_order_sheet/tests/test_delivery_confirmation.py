@@ -29,8 +29,19 @@ class TestDeliveryConfirmation(HttpCase):
         self.track = self.env["product.product"].create({
             "name": '2" Vertical Track 76" - 7\' Door Height Black',
             "type": "consu", "is_storable": True, "list_price": 42.0})
+        self.cable = self.env["product.product"].create({
+            "name": '1/8" 7X19 GAC Lift Cable 110" Black',
+            "type": "consu", "is_storable": True, "list_price": 12.0})
+        # A spring is recognised from its order line where there is one, and
+        # from where the shop filed it otherwise - which is how the live
+        # catalogue is set up.
+        self.spring = self.env["product.product"].create({
+            "name": "Custom Torsion Spring Assembly",
+            "type": "consu", "is_storable": True, "list_price": 300.0,
+            "categ_id": self.env["product.category"].create(
+                {"name": "Springs"}).id})
 
-    def _delivery(self):
+    def _delivery(self, products=None):
         """The transfer that leaves the building.
 
         BUILT DIRECTLY, not through a sale order. This warehouse delivers in
@@ -38,6 +49,7 @@ class TestDeliveryConfirmation(HttpCase):
         not produce the outgoing transfer until the pick is done, and what is
         being tested here is the delivery, not the route that makes one.
         """
+        products = products or ((self.hinge, 4), (self.track, 2))
         picking_type = self.env["stock.picking.type"].search(
             [("code", "=", "outgoing")], limit=1)
         self.assertTrue(picking_type, "this database delivers nothing")
@@ -55,7 +67,7 @@ class TestDeliveryConfirmation(HttpCase):
                                        or self.env.ref("stock.stock_location_stock").id,
                         "location_dest_id": picking_type.default_location_dest_id.id
                                             or self.env.ref("stock.stock_location_customers").id})
-                for product, qty in ((self.hinge, 4), (self.track, 2))
+                for product, qty in products
             ],
         })
         picking.action_confirm()
@@ -266,12 +278,78 @@ class TestDeliveryConfirmation(HttpCase):
                         "the time does not say what clock it is on: %r" % shown)
         self.assertIn(shown, visible_text(self._page(picking).text))
 
+    def _boxes(self, page):
+        """The checkbox tags on the page, as written."""
+        return re.findall(r"<input[^>]*type=.checkbox[^>]*>", page)
+
+    def _buttons(self, page):
+        """The per-group Confirm all buttons, by their own markup.
+
+        NOT A SUBSTRING COUNT OF THE WHOLE PAGE: it carries a stylesheet and a
+        script that both name confirm-all, so counting the word measures the
+        page's source rather than what it offers anybody.
+        """
+        return re.findall(r'class="clear confirm-all"', page)
+
     def test_nothing_is_ticked_before_the_customer_ticks_it(self):
         """A receipt that arrives pre-ticked is one somebody confirms without
         reading it."""
         picking = self._delivery()
+        boxes = self._boxes(self._page(picking).text)
+
+        self.assertTrue(boxes, "the form offers nothing to tick")
+        self.assertFalse([box for box in boxes if "checked" in box],
+                         "the form confirmed the delivery for them")
+
+    # --- one button per kind of thing ----------------------------------------
+
+    def _everything(self):
+        return self._delivery(((self.hinge, 4), (self.track, 2),
+                               (self.cable, 2), (self.spring, 1)))
+
+    def test_the_list_is_split_the_way_the_floor_splits_it(self):
+        picking = self._everything()
+        groups = dict(picking._dispatch_groups())
+
+        self.assertEqual(list(groups), ["Tracks", "Springs", "Cables",
+                                        "Hardware"])
+        self.assertEqual(groups["Tracks"].product_id, self.track)
+        self.assertEqual(groups["Springs"].product_id, self.spring)
+        self.assertEqual(groups["Cables"].product_id, self.cable)
+        self.assertEqual(groups["Hardware"].product_id, self.hinge)
+
+    def test_every_group_gets_a_button_of_its_own(self):
+        """Eleven lengths of track are one answer, not eleven."""
+        picking = self._everything()
         page = self._page(picking).text
 
-        self.assertIn('type="checkbox"', page)
-        self.assertNotIn("checked", page,
-                         "the form confirmed the delivery for them")
+        self.assertEqual(len(self._buttons(page)), 4)
+
+        for heading in ("Tracks", "Springs", "Cables", "Hardware"):
+            self.assertIn("<h2>%s</h2>" % heading, page)
+
+    def test_a_delivery_of_one_kind_has_one_group(self):
+        picking = self._delivery(((self.track, 2),))
+        self.assertEqual([group[0] for group in picking._dispatch_groups()],
+                         ["Tracks"])
+        self.assertEqual(len(self._buttons(self._page(picking).text)), 1)
+
+    def test_the_buttons_tick_nothing_on_their_own(self):
+        """They are a convenience for the customer, not a default."""
+        picking = self._everything()
+        boxes = self._boxes(self._page(picking).text)
+
+        self.assertEqual(len(boxes), 4)
+        self.assertFalse([box for box in boxes if "checked" in box])
+
+    def test_signing_still_records_each_item_one_at_a_time(self):
+        """Whatever the buttons do in the browser, the server is told about
+        boxes and nothing else."""
+        picking = self._everything()
+        lines = picking._dispatch_lines()
+        tracks = lines.filtered(lambda move: move.product_id == self.track)
+
+        self._sign(picking, items=tracks)
+
+        self.assertTrue(tracks.dispatch_received)
+        self.assertFalse((lines - tracks).filtered("dispatch_received"))
