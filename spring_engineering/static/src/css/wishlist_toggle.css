@@ -58,3 +58,17 @@
     content: "\f08a";
     color: inherit;
 }
+
+/* ADDING POPS TOO. Odoo's own feedback for adding - a copy of the product
+   flying up to the navbar - belongs to the handler this file now steps in
+   front of, so the heart says it itself. Same shape as the removal, the other
+   way round. */
+@keyframes o_aa_wish_added {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+
+.o_add_wishlist.o_aa_wish_added .fa {
+    animation: o_aa_wish_added 0.3s ease-out;
+}
