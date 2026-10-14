@@ -2,6 +2,7 @@ import math
 import re
 
 from odoo import _, models
+from odoo.http import request
 
 # The attribute value that means "send it ready to fit". Matched on the VALUE's
 # name rather than on an xml id, so the owner can attach the attribute to track
@@ -636,6 +637,22 @@ class SaleOrder(models.Model):
         # names these something this cannot read.
         return self._track_prep_configured_part(role)
 
+    def _fastener_count_in_the_header(self):
+        """Tell the navbar what the cart now holds.
+
+        THE BADGE IS A SESSION VALUE, NOT A QUERY. website_sale caches
+        cart_quantity in the session - _verify_cart_after_update writes it, and
+        a page rendered afterwards reads it rather than counting the lines - so
+        changing lines underneath it leaves the number stale. That is why the
+        header kept saying 24 over an empty cart until something else was
+        added: the next add wrote the figure again.
+
+        This runs after the fasteners have moved, which is after the update
+        that triggered it has already written its own.
+        """
+        if request:
+            request.session["website_sale_cart_quantity"] = self.cart_quantity
+
     def _fastener_sync(self):
         """One stud and one nut for every jamb bracket in the cart."""
         self.ensure_one()
@@ -648,7 +665,9 @@ class SaleOrder(models.Model):
             lambda line: line.track_prep_role in self.FASTENER_ROLES)
 
         if not brackets:
-            existing.unlink()
+            if existing:
+                existing.unlink()
+                self._fastener_count_in_the_header()
 
             return None
 
@@ -678,6 +697,8 @@ class SaleOrder(models.Model):
                 "product_uom_qty": brackets,
                 "track_prep_role": role,
             })
+
+        self._fastener_count_in_the_header()
 
         if missing:
             return _(
