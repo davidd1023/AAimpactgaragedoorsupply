@@ -2,144 +2,178 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { registry } from "@web/core/registry";
 
-import { AddProductToWishlistButton } from "@website_sale_wishlist/interactions/add_product_to_wishlist_button";
 import wishlistUtils from "@website_sale_wishlist/js/website_sale_wishlist_utils";
 
-// THE HEART IS A SWITCH: red when the product is on the list, and a click on a
-// red one takes it off.
+// THE HEART IS A SWITCH, AND IT DOES NOT DEPEND ON WHEN ANYTHING ELSE LOADED.
 //
-// REPLACED RATHER THAN PATCHED, and the difference is the bug the owner hit.
-// Odoo's interaction binds its click handler like this:
+// Two attempts at this failed in the same way, and both failed for reasons of
+// ORDER rather than of logic:
 //
-//     dynamicContent = { _root: { 't-on-click': this.addProduct } };
+//   patching the prototype  Odoo binds its handler with a class FIELD -
+//                           dynamicContent = { _root: { 't-on-click':
+//                           this.addProduct } } - which reads the function
+//                           once, when the button is wired up. A patch that
+//                           lands afterwards is simply not the function that
+//                           button is holding.
 //
-// That is a class FIELD: it reads `this.addProduct` once, when the instance is
-// built, and keeps the function it found. Patching the prototype afterwards
-// changes nothing for an instance that already exists - it is still holding
-// the original. So whether a heart could be un-clicked came down to whether
-// this file happened to run before the buttons on that page were wired up,
-// which is exactly the shape of the report: it worked, then after walking to
-// another page and back the same hearts were stuck red, because Odoo's own
-// handler was the one listening and it returns early for a product already on
-// the list.
+//   replacing the registry  the public.interactions service reads the registry
+//                           ONCE, in its start(), and keeps the list:
+//                           `this.Interactions = Interactions`. Nothing
+//                           re-reads it. A swap that happens after that start
+//                           changes nothing on that page.
 //
-// Taking Odoo's registration out and putting this subclass in its place leaves
-// exactly one handler on the button, and it is this one, every time.
-export class WishlistHeart extends AddProductToWishlistButton {
+// Both are races this file cannot win by trying harder, and the symptom was
+// the same each time: hearts that worked, then after walking to another page
+// and back were stuck red, because Odoo's own handler was the one listening -
+// and it returns early for a product already on the list.
+//
+// So this listens on the DOCUMENT, in the CAPTURE phase. A capture listener on
+// the document runs before any listener on the button itself, whoever bound it
+// and whenever: the click is handled here and stopped before it reaches
+// Odoo's. There is no registration to be late for and no instance to be
+// holding the wrong function.
+const BUTTON = ".o_add_wishlist";
 
-    start() {
-        const result = super.start?.(...arguments);
-        this.paintHeart(this.isWishlisted());
+function productOf(el) {
+    return parseInt(el.dataset.productProductId) || 0;
+}
 
-        return result;
+/**
+ * Is this card's product on the wishlist?
+ *
+ * TWO OPINIONS, EITHER OF WHICH IS ENOUGH. The server marks the button when it
+ * renders the page, and the browser keeps its own list of product ids. A page
+ * from a cache has the first out of date; a tab that never loaded the wishlist
+ * has the second empty. Reading both means being wrong only when both are.
+ */
+function isWishlisted(el) {
+    const productId = productOf(el);
+
+    return Boolean(
+        el.classList.contains("o_in_wishlist")
+        || (productId && wishlistUtils.getWishlistProductIds().includes(productId))
+    );
+}
+
+function paint(el, wishlisted) {
+    el.classList.toggle("o_in_wishlist", wishlisted);
+    // NEVER DISABLED. Odoo disables the button once the product is on the list
+    // - which is also how it colours it red - and a disabled button swallows
+    // the very click that would take the product off again.
+    el.disabled = false;
+    el.classList.remove("disabled");
+
+    const icon = el.querySelector(".fa");
+
+    if (icon) {
+        icon.classList.toggle("fa-heart", wishlisted);
+        icon.classList.toggle("fa-heart-o", !wishlisted);
     }
 
-    /**
-     * Is this card's product on the wishlist?
-     *
-     * TWO OPINIONS, EITHER OF WHICH IS ENOUGH. The server marks the button
-     * when it renders the page, and the browser keeps its own list of product
-     * ids. A page served from a cache has the first out of date; a tab that
-     * has never loaded the wishlist has the second empty. Trusting both means
-     * being wrong only when both are.
-     */
-    isWishlisted() {
-        const productId = parseInt(this.el.dataset.productProductId);
+    const title = wishlisted ? _t("Remove from wishlist") : _t("Add to wishlist");
+    const label = el.querySelector(".o_label");
 
-        return Boolean(
-            this.el.classList.contains("o_in_wishlist")
-            || (productId && wishlistUtils.getWishlistProductIds().includes(productId))
-        );
+    if (label) {
+        label.textContent = title;
     }
 
-    paintHeart(isWishlisted) {
-        const el = this.el;
-        el.classList.toggle("o_in_wishlist", isWishlisted);
-        // NEVER DISABLED. Odoo disables the button once the product is on the
-        // list - which is also how it colours it red - and a disabled button
-        // swallows the click that would take the product off again.
-        wishlistUtils.updateDisabled(el, false);
+    el.title = title;
+}
 
-        const icon = el.querySelector(".fa");
+function paintAll() {
+    document.querySelectorAll(BUTTON).forEach((el) => paint(el, isWishlisted(el)));
+}
 
-        if (icon) {
-            icon.classList.toggle("fa-heart", isWishlisted);
-            icon.classList.toggle("fa-heart-o", !isWishlisted);
-        }
+/**
+ * Say, visibly, that something happened.
+ *
+ * ADDING ANIMATED AND REMOVING DID NOT, and the pointer is still ON the heart
+ * when the click lands - where the hover rule fills an empty heart red to
+ * preview the next add. So a removal left a red heart under the cursor,
+ * looking exactly like a click that had not worked. The class drives the
+ * shrink and suppresses that preview until the pointer leaves.
+ */
+function flash(el, className) {
+    el.classList.add(className);
 
-        const label = el.querySelector(".o_label");
-        const title = isWishlisted ? _t("Remove from wishlist") : _t("Add to wishlist");
+    const clear = () => {
+        el.classList.remove(className);
+        el.removeEventListener("mouseleave", clear);
+    };
 
-        if (label) {
-            label.textContent = title;
-        }
+    el.addEventListener("mouseleave", clear);
+    setTimeout(() => el.classList.remove("o_aa_wish_added"), 600);
+}
 
-        el.title = title;
+async function onClick(ev) {
+    const el = ev.target.closest?.(BUTTON);
+
+    if (!el) {
+        return;
     }
 
-    async addProduct(ev) {
-        if (!this.isWishlisted()) {
-            await super.addProduct(...arguments);
-            // Core disables the button here; this paints the state instead.
-            this.paintHeart(true);
+    const productId = productOf(el);
 
-            return;
+    if (!productId) {
+        // A button that does not know its variant yet - the product page picks
+        // one from the options first. That is Odoo's path and it still works;
+        // this one steps aside rather than guessing.
+        return;
+    }
+
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    if (el.dataset.aaBusy) {
+        return;
+    }
+
+    el.dataset.aaBusy = "1";
+
+    try {
+        if (isWishlisted(el)) {
+            await rpc("/shop/wishlist/remove_product", { product_id: productId });
+            wishlistUtils.removeWishlistProduct(productId);
+            paint(el, false);
+            flash(el, "o_aa_wish_removed");
+        } else {
+            await rpc("/shop/wishlist/add", { product_id: productId });
+            wishlistUtils.addWishlistProduct(productId);
+            paint(el, true);
+            flash(el, "o_aa_wish_added");
         }
 
-        const productId = parseInt(this.el.dataset.productProductId);
-
-        if (!productId) {
-            return;
-        }
-
-        // REMOVED BY PRODUCT, not by the row's id, which a product card has no
-        // way of knowing. The route finds the row the same way the page that
-        // lists it does.
-        await this.waitFor(rpc("/shop/wishlist/remove_product", {
-            product_id: productId,
-        }));
-        wishlistUtils.removeWishlistProduct(productId);
         wishlistUtils.updateWishlistNavBar();
-        this.paintHeart(false);
-        this.showRemoved();
-    }
-
-    /**
-     * Say, visibly, that the product came off the list.
-     *
-     * ADDING ANIMATES AND REMOVING DID NOT - Odoo flies a copy of the product
-     * up to the navbar when something goes on the list, and taking it off
-     * changed nothing a pointer could see. Worse, the pointer is still ON the
-     * heart when the click lands, and the hover rule fills an empty heart red
-     * to show what clicking WOULD do: so a removal left a red heart under the
-     * cursor, looking exactly like a click that had not worked.
-     *
-     * The class drives both the shrink and the suppression of that preview,
-     * and it is dropped when the pointer leaves, so the next hover previews
-     * normally.
-     */
-    showRemoved() {
-        const el = this.el;
-        el.classList.add("o_aa_wish_removed");
-
-        const clear = () => {
-            el.classList.remove("o_aa_wish_removed");
-            el.removeEventListener("mouseleave", clear);
-        };
-
-        el.addEventListener("mouseleave", clear);
+    } finally {
+        delete el.dataset.aaBusy;
     }
 }
 
-const interactions = registry.category("public.interactions");
-const CORE = "website_sale_wishlist.add_product_to_wishlist_button";
+document.addEventListener("click", onClick, true);
 
-// Guarded: if Odoo ever renames or drops that registration, this still
-// installs a working heart rather than throwing on the way in.
-if (interactions.contains(CORE)) {
-    interactions.remove(CORE);
+// WHAT THE PAGE KNOWS BEFORE ANYBODY CLICKS. The server marks what it can; the
+// ids fill in the rest, and are fetched here if this tab has never asked for
+// them - without that, a heart on a page served from a cache sits empty next
+// to a wishlist that has the product in it.
+async function paintOnArrival() {
+    paintAll();
+
+    if (!wishlistUtils.getWishlistProductIds().length) {
+        try {
+            wishlistUtils.setWishlistProductIds(
+                await rpc("/shop/wishlist/get_product_ids")
+            );
+        } catch {
+            return;
+        }
+
+        paintAll();
+    }
 }
 
-interactions.add("spring_engineering.wishlist_heart", WishlistHeart);
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", paintOnArrival);
+} else {
+    paintOnArrival();
+}
