@@ -82,6 +82,32 @@ class MrpProduction(models.Model):
                 "can_remove": bool(released),
             })
 
+    def action_confirm(self):
+        result = super().action_confirm()
+        self._aa_hold_new_workorders()
+        return result
+
+    def _aa_hold_new_workorders(self):
+        """Every order that just came in waits at Pending Assignment.
+
+        create() already parks most of them, but some flows (the track orders
+        made by the stock rules) put the routing's work center back afterwards,
+        so this runs once more when the order is confirmed. Nothing here has
+        been released by the manager yet, so nothing released is undone.
+        """
+        if self.env.context.get("aa_keep_workcenter"):
+            return
+        pending = self.env["mrp.workcenter"].sudo()._aa_pending()
+        if not pending:
+            return
+        for wo in self.workorder_ids.filtered(lambda w: w.operation_id
+                                              and w.workcenter_id != pending
+                                              and w.state not in LOCKED_STATES):
+            wo.write({
+                "aa_suggested_workcenter_id": wo.workcenter_id.id,
+                "workcenter_id": pending.id,
+            })
+
     def _aa_check_manager(self):
         if not self.env.user.has_group(MANAGER_GROUP):
             raise AccessError(_("Only a Manufacturing manager can send orders to the stations."))
