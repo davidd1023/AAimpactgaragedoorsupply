@@ -1,4 +1,17 @@
 .o_mrp_display_record .o_aa_shop_spec {
     font-size: 1.1rem;
     line-height: 1.6;
+
+    .o_aa_check {
+        padding: 0.15rem 0;
+        .fa {
+            font-size: 1.35rem;
+        }
+    }
+
+    .o_aa_packed .o_aa_label,
+    .o_aa_packed .fw-bold {
+        text-decoration: line-through;
+        opacity: 0.55;
+    }
 }

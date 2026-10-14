@@ -58,6 +58,9 @@ class MrpProduction(models.Model):
     aa_cable_line_ids = fields.Many2many(
         "sale.order.line", "aa_mrp_production_cable_line_rel", "production_id", "line_id",
         string="Lift Cables in the Box", copy=False, readonly=True)
+    # Which checkable rows of the card the worker has ticked (JSON list of row
+    # numbers). "Put it in the box, tick it" (owner, 2026-10-14).
+    aa_packed = fields.Text(string="Packed Rows", copy=False)
     # "Label|Value" rows, one per line. Read by the Shop Floor card.
     aa_shop_spec = fields.Text(
         string="Shop Floor Instructions", compute="_compute_aa_shop_spec", store=True)
@@ -71,7 +74,18 @@ class MrpProduction(models.Model):
                 rows = production._aa_cable_rows()
             else:
                 rows = production._aa_spring_rows()
-            production.aa_shop_spec = "\n".join("%s|%s" % row for row in rows) or False
+            production.aa_shop_spec = "\n".join("|".join(str(x) for x in row) for row in rows) or False
+
+    def aa_toggle_packed(self, key):
+        """Tick / untick one row of the Shop Floor card. Returns the ticked rows."""
+        self.ensure_one()
+        try:
+            keys = set(json.loads(self.aa_packed or "[]"))
+        except ValueError:
+            keys = set()
+        keys ^= {str(key)}
+        self.aa_packed = json.dumps(sorted(keys, key=lambda k: int(k) if k.isdigit() else 0))
+        return sorted(keys)
 
     # --- springs ----------------------------------------------------------------
 
@@ -196,7 +210,7 @@ class MrpProduction(models.Model):
             rows.append(("Box contents", ""))
             for part, amount in pieces.items():
                 name = part.with_context(display_default_code=False).display_name
-                rows.append((name, qty_label(amount)))
+                rows.append((name, qty_label(amount), "c"))
 
         for cable in self.aa_cable_line_ids:
             rows.append(("Lift cable", ""))
@@ -218,10 +232,10 @@ class MrpProduction(models.Model):
             inches_per_unit = 1.0 if uom in ("in", "inch", "inches") else 12.0
             feet = reel.product_qty * inches_per_unit / 12.0
             each = feet * 12.0 / 2.0 / (bom.product_qty or 1.0)
-            rows.append(("Cut", "%s x %s" % (qty_label(2 * pairs), inches_label(each))))
+            rows.append(("Cut", "%s x %s" % (qty_label(2 * pairs), inches_label(each)), "c"))
         else:
             rows.append(("Cut", "%s cables - length not set on the product" % qty_label(2 * pairs)))
-        rows.append(("Each cable", "1 oval sleeve, 1 thimble, 1 aluminum stop"))
+        rows.append(("Each cable", "1 oval sleeve, 1 thimble, 1 aluminum stop", "c"))
         for ptav in product.product_template_attribute_value_ids:
             rows.append((ptav.attribute_id.name or "For", ptav.name))
         if notes:
@@ -233,3 +247,4 @@ class MrpWorkorder(models.Model):
     _inherit = "mrp.workorder"
 
     aa_shop_spec = fields.Text(related="production_id.aa_shop_spec", string="Shop Floor Instructions")
+    aa_packed = fields.Text(related="production_id.aa_packed", string="Packed Rows")

@@ -3,13 +3,24 @@
     <t t-inherit="mrp_workorder.MrpDisplayRecord" t-inherit-mode="extension">
         <xpath expr="//span[@class='o_finished_product mt-auto mb-0']" position="after">
             <div t-if="record.aa_shop_spec" class="o_aa_shop_spec border rounded p-2 bg-100">
-                <t t-foreach="record.aa_shop_spec.split('\n')" t-as="aaRow" t-key="aaRow_index">
-                    <t t-set="aaLabel" t-value="aaRow.split('|')[0]"/>
-                    <t t-set="aaValue" t-value="aaRow.split('|').slice(1).join('|')"/>
-                    <div t-if="!aaValue" class="o_aa_shop_spec_section fw-bold text-uppercase border-top mt-2 pt-1" t-esc="aaLabel"/>
+                <t t-set="aaRows" t-value="record.aa_shop_spec.split('\n')"/>
+                <t t-foreach="aaRows" t-as="aaRow" t-key="aaRow_index">
+                    <t t-set="aaParts" t-value="aaRow.split('|')"/>
+                    <div t-if="!aaParts[1]" class="o_aa_shop_spec_section d-flex justify-content-between fw-bold text-uppercase border-top mt-2 pt-1">
+                        <span t-esc="aaParts[0]"/>
+                        <span t-if="aaParts[0] === 'Box contents'" class="text-muted" t-esc="aaPackedCount(aaRows)"/>
+                    </div>
+                    <div t-elif="aaParts[2] === 'c'"
+                         class="o_aa_check d-flex align-items-center gap-2 cursor-pointer"
+                         t-att-class="{'o_aa_packed': aaIsPacked(aaRow_index)}"
+                         t-on-click.stop="() => this.aaTogglePacked(aaRow_index)">
+                        <i class="fa fa-fw" t-att-class="aaIsPacked(aaRow_index) ? 'fa-check-square text-success' : 'fa-square-o text-muted'"/>
+                        <span class="o_aa_label flex-grow-1" t-esc="aaParts[0]"/>
+                        <span class="fw-bold text-end" t-esc="aaParts[1]"/>
+                    </div>
                     <div t-else="" class="d-flex justify-content-between gap-3">
-                        <span class="text-muted" t-esc="aaLabel"/>
-                        <span class="fw-bold text-end" t-esc="aaValue"/>
+                        <span class="text-muted" t-esc="aaParts[0]"/>
+                        <span class="fw-bold text-end" t-esc="aaParts[1]"/>
                     </div>
                 </t>
             </div>
