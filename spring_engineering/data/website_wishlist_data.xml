@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE WISHLIST BUTTON STAYS IN THE HEADER, EMPTY OR NOT.
+
+       website_sale_wishlist ships an optional view, header_hide_empty_wishlist_link,
+       which hides the heart whenever the count is zero. That is why the owner
+       sees the button appear when something is added and vanish on the next
+       page: the icon is not a link to a page, it is a notification that there
+       is something in a list.
+
+       A customer cannot find a wishlist that is only visible once they have
+       used it. Worse here, every product in this shop is unpublished, so the
+       count is zero on every page and the button was never there at all.
+
+       Odoo does not expose this view in the website editor - it carries no
+       name, so it is in no Customize list - which is why this is a record
+       rather than a setting. It is applied on every update on purpose: it is a
+       decision this repository makes, not a switch somebody might flip in the
+       back office and find reverted.
+
+       To put the old behaviour back, delete this record and update the module. -->
+  <record id="website_sale_wishlist.header_hide_empty_wishlist_link" model="ir.ui.view">
+    <field name="active" eval="False"/>
+  </record>
+
+</odoo>

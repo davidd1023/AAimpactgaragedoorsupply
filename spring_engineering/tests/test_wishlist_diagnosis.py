@@ -161,3 +161,28 @@ class TestWishlistStuckRow(HttpCase):
         page = self.url_open("/shop/wishlist/diagnose").text
         self.assertNotIn("cannot be reached", page,
                          "a healthy wish was offered for deletion")
+
+
+@tagged("post_install", "-at_install")
+class TestWishlistButtonAlwaysThere(HttpCase):
+    """A customer cannot find a wishlist that only appears once they have used
+    it. Odoo hides the header heart when the count is zero; this shop does not.
+    """
+
+    def test_the_header_keeps_the_wishlist_link_when_it_is_empty(self):
+        self.assertFalse(
+            self.env.ref(
+                "website_sale_wishlist.header_hide_empty_wishlist_link"
+            ).active,
+            "the hide-when-empty view is back on")
+
+        page = self.url_open("/shop").text
+        self.assertIn("/shop/wishlist", page,
+                      "a visitor with an empty wishlist has no way to reach it")
+
+    def test_the_count_itself_is_still_hidden_at_zero(self):
+        """The BUTTON stays; the little number on it does not sit there
+        reading zero."""
+        page = self.url_open("/shop").text
+        self.assertIn("my_wish_quantity", page)
+        self.assertIn("d-none", page)
