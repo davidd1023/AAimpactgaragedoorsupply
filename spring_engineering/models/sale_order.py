@@ -523,18 +523,27 @@ class SaleOrder(models.Model):
         if line.exists() and line.track_prep_role in self.FASTENER_ROLES:
             self._fastener_sync()
 
-            return {"quantity": line.product_uom_qty, "line_id": line.id}
+            return self._fastener_answer(line_id, line)
 
         if line.exists() and line.track_prep_parent_id:
             parent = line.track_prep_parent_id
 
             if quantity <= 0:
                 # Removing a part means the track is no longer prepared.
-                return super()._cart_update_line_quantity(parent.id, 0, **kwargs)
+                result = super()._cart_update_line_quantity(parent.id, 0, **kwargs)
+            else:
+                self._track_prep_sync(parent)
+                result = self._fastener_answer(line_id, line)
 
-            self._track_prep_sync(parent)
+            # EVERY WAY OUT OF THIS METHOD COUNTS THE BRACKETS AGAIN. These two
+            # returned without doing so, and that is what left a cart holding
+            # nothing but studs and nuts: taking a prepared track away by
+            # removing one of ITS OWN parts goes down this branch, the track
+            # and its brackets went, and the fasteners stayed behind with the
+            # quantity the brackets used to have.
+            self._fastener_sync()
 
-            return {"quantity": line.product_uom_qty, "line_id": line.id}
+            return result
 
         result = super()._cart_update_line_quantity(line_id, quantity, **kwargs)
 
@@ -544,6 +553,22 @@ class SaleOrder(models.Model):
         self._fastener_sync()
 
         return result
+
+    def _fastener_answer(self, line_id, line):
+        """What to tell the page about a line the sync may have just removed.
+
+        READ AFTER THE SYNC, NOT BEFORE. Asking a deleted record for its
+        quantity is what produced "Missing Record. Record does not exist or has
+        been deleted" when somebody pressed Remove on the last stud in a cart
+        with no brackets left: the rule quite correctly took the line away, and
+        then this went looking for it.
+        """
+        line = line.exists()
+
+        return {
+            "quantity": line.product_uom_qty if line else 0,
+            "line_id": line_id,
+        }
 
     # --- what every jamb bracket is fitted with -------------------------------
     #
