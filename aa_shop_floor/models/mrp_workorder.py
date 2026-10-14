@@ -186,6 +186,7 @@ class MrpProduction(models.Model):
                     "can_send": bool(waiting) and mo.state != "done",
                     "can_remove": bool((open_wos - waiting).filtered(
                         lambda w: w.state not in LOCKED_STATES)),
+                    "can_done": mo.state not in ("done", "cancel"),
                 })
             # One section per station (owner, 2026-10-14): vertical and horizontal
             # tracks are one Track Prep task, not two.
@@ -194,7 +195,7 @@ class MrpProduction(models.Model):
                 group = next((g for g in groups if g["station"] == job["station"]), None)
                 if not group:
                     group = {"id": job["id"], "station": job["station"], "items": [],
-                             "send_ids": [], "remove_ids": [], "statuses": []}
+                             "send_ids": [], "remove_ids": [], "done_ids": [], "statuses": []}
                     groups.append(group)
                 group["items"].append({"id": job["id"], "product": job["product"],
                                        "summary": job["summary"], "more": job["more"]})
@@ -203,6 +204,8 @@ class MrpProduction(models.Model):
                     group["send_ids"].append(job["id"])
                 if job["can_remove"]:
                     group["remove_ids"].append(job["id"])
+                if job["can_done"]:
+                    group["done_ids"].append(job["id"])
             for group in groups:
                 statuses = set(group.pop("statuses"))
                 if statuses == {"done"}:
@@ -229,6 +232,33 @@ class MrpProduction(models.Model):
                 "remove_ids": [j["id"] for j in jobs if j["can_remove"]],
                 "jobs": groups,
             })
+
+    def aa_mark_done_jobs(self):
+        """Manager closes a job from the Overview, sent to its station or still
+        pending (owner, 2026-10-14). Same as the station's Mark as Done: the
+        work orders finish and the order is produced (a track order consumes
+        its RAW and puts the cut track in stock)."""
+        self._aa_check_manager()
+        pending = self.env["mrp.workcenter"].sudo()._aa_pending()
+        todo = self.filtered(lambda p: p.state not in ("done", "cancel"))
+        for production in todo:
+            # A pending job goes to its own station first, so the record of who
+            # made it and where stays right.
+            for wo in production.workorder_ids.filtered(
+                    lambda w: w.workcenter_id == pending and w.state not in ("done", "cancel")):
+                station = wo._aa_own_station()
+                if station and station != pending:
+                    wo.workcenter_id = station
+            if not production.qty_producing:
+                production._set_quantities()
+        for production in todo:
+            result = production.with_context(
+                skip_consumption=True, skip_backorder=True, mo_ids_to_backorder=[],
+            ).button_mark_done()
+            if production.state != "done":
+                raise UserError(_("%s could not be closed from here; open it at its station.",
+                                  production.name))
+        return True
 
     def _aa_check_manager(self):
         if not self.env.user.has_group(MANAGER_GROUP):

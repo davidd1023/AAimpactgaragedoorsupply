@@ -41,7 +41,7 @@
                                 <div t-if="aaItem.more" class="text-muted small" t-esc="aaItem.more"/>
                             </div>
                         </t>
-                        <div t-if="aaOrderData.can_assign and (aaJob.send_ids.length or aaJob.remove_ids.length)" class="d-flex flex-wrap gap-2 mt-2">
+                        <div t-if="aaOrderData.can_assign and (aaJob.send_ids.length or aaJob.remove_ids.length or aaJob.done_ids.length)" class="d-flex flex-wrap gap-2 mt-2">
                             <button t-if="aaJob.send_ids.length" type="button" class="btn btn-sm btn-primary"
                                     t-on-click.stop="() => this.aaOrderAction('aa_send_to_station', aaJob.send_ids)">
                                 <i class="fa fa-arrow-right me-1"/>Send to <t t-esc="aaJob.station"/>
@@ -49,6 +49,10 @@
                             <button t-if="aaJob.remove_ids.length" type="button" class="btn btn-sm btn-outline-secondary"
                                     t-on-click.stop="() => this.aaOrderAction('aa_remove_from_station', aaJob.remove_ids)">
                                 <i class="fa fa-undo me-1"/>Remove from <t t-esc="aaJob.station"/>
+                            </button>
+                            <button t-if="aaJob.done_ids.length" type="button" class="btn btn-sm btn-success ms-auto"
+                                    t-on-click.stop="() => this.aaOrderAction('aa_mark_done_jobs', aaJob.done_ids)">
+                                <i class="fa fa-check me-1"/>Mark as Done
                             </button>
                         </div>
                     </div>
