@@ -29,6 +29,7 @@
       <div t-if="aa_reorder_orders" class="o_aa_reorder_orders mt-4">
         <h6 class="text-muted text-uppercase small mb-2">Order it all again</h6>
 
+        <div class="o_aa_reorder_scroll">
         <div t-foreach="aa_reorder_orders" t-as="aa_order"
              class="d-flex justify-content-between align-items-center border-top py-2">
           <div class="me-3">
@@ -52,6 +53,7 @@
                   t-att-data-order-id="aa_order.id">
             Reorder
           </button>
+        </div>
         </div>
       </div>
     </xpath>

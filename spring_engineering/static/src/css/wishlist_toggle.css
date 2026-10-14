@@ -21,3 +21,12 @@
 .o_add_wishlist.o_in_wishlist {
     opacity: 1;
 }
+
+/* THE REORDER PANEL SCROLLS, so the list can be as long as the account is old
+   without pushing its own heading off the screen. The offcanvas body scrolls
+   too; this keeps the orders in their own window inside it, which is what
+   makes "scroll down to see the rest" mean the orders rather than the page. */
+.o_aa_reorder_scroll {
+    max-height: 55vh;
+    overflow-y: auto;
+}
