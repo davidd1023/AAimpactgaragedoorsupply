@@ -1,4 +1,7 @@
-from odoo.tests.common import TransactionCase, tagged
+import json
+import re
+
+from odoo.tests.common import HttpCase, TransactionCase, tagged
 
 
 @tagged("post_install", "-at_install")
@@ -240,3 +243,77 @@ class TestBracketFasteners(TransactionCase):
 
         self.assertEqual(answer["quantity"], 3)
         self.assertEqual(self._qty(order, self.stud), 3)
+
+
+@tagged("post_install", "-at_install")
+class TestTheHeaderCount(HttpCase):
+    """The number on the cart icon has to mean the cart.
+
+    website_sale caches cart_quantity in the SESSION - a page rendered
+    afterwards reads that rather than counting the lines - so moving lines
+    underneath it leaves the number stale. The owner saw 24 over an empty cart,
+    and it only corrected itself when something else was added.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.stud = self.env["product.product"].create({
+            "name": "1/4 X 3/4 KNURLEL STUD 18-8", "type": "consu",
+            "list_price": 0.35, "sale_ok": True, "is_published": True})
+        self.nut = self.env["product.product"].create({
+            "name": "Flage Nuts 1/4 20", "type": "consu",
+            "list_price": 0.2, "sale_ok": True, "is_published": True})
+        self.bracket = self.env["product.product"].search(
+            [("default_code", "=", "ATL-610J10JBBR")], limit=1)
+        self.bracket.product_tmpl_id.write({"is_published": True})
+
+    def _json(self, route, params):
+        return self.url_open(
+            route,
+            data=json.dumps({"jsonrpc": "2.0", "method": "call", "params": params}),
+            headers={"Content-Type": "application/json"}).json()
+
+    def _cart(self):
+        return self.env["sale.order"].search(
+            [("partner_id", "=", self.env["res.users"].browse(2).partner_id.id),
+             ("state", "=", "draft")], order="id desc", limit=1)
+
+    def test_the_header_number_follows_the_fasteners_out(self):
+        self.authenticate("admin", "admin")
+        self._json("/shop/cart/add", {
+            "product_template_id": self.bracket.product_tmpl_id.id,
+            "product_id": self.bracket.id, "quantity": 4})
+        cart = self._cart()
+        self.assertEqual(cart.cart_quantity, 12, "4 brackets, 4 studs, 4 nuts")
+
+        bracket_line = cart.order_line.filtered(
+            lambda line: line.product_id == self.bracket)[:1]
+        answer = self._json("/shop/cart/update",
+                            {"line_id": bracket_line.id, "quantity": 0})
+
+        cart.invalidate_recordset()
+        self.assertEqual(cart.cart_quantity, 0, "the cart still holds something")
+        self.assertEqual(answer["result"]["cart_quantity"], 0,
+                         "the page was told the old number")
+
+    def test_the_cart_page_agrees_with_itself(self):
+        """The page renders its own header from the cached figure, so the two
+        halves of the same screen have to say the same thing."""
+        self.authenticate("admin", "admin")
+        self._json("/shop/cart/add", {
+            "product_template_id": self.bracket.product_tmpl_id.id,
+            "product_id": self.bracket.id, "quantity": 2})
+        cart = self._cart()
+        bracket_line = cart.order_line.filtered(
+            lambda line: line.product_id == self.bracket)[:1]
+        self._json("/shop/cart/update",
+                   {"line_id": bracket_line.id, "quantity": 0})
+
+        page = self.url_open("/shop/cart").text
+        badge = re.search(r"<sup[^>]*my_cart_quantity[^>]*>\s*([0-9]+)", page)
+
+        self.assertIn("Your cart is empty", page)
+        self.assertTrue(badge, "the header carries no count at all")
+        self.assertEqual(badge.group(1), "0",
+                         "the header counts what the page says is not there")
