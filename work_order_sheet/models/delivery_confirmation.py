@@ -167,6 +167,32 @@ class StockPicking(models.Model):
 
         self.message_post(body=body, subtype_xmlid="mail.mt_note")
 
+    def _dispatch_groups(self):
+        """[(heading, moves)] - the delivery split the way the floor splits it.
+
+        THE SAME FOUR GROUPS THE SHEET PRINTS, and for a different reason. On
+        the sheet they decide who makes a thing; here they decide how many
+        boxes a customer has to tick. Somebody handed eleven lengths of track
+        should be able to say so once.
+
+        A spring is recognised from its order line rather than its name, the
+        way the sheet does it, so a configured assembly groups with the
+        springs instead of falling into the hardware at the bottom.
+        """
+        self.ensure_one()
+        groups = {}
+
+        for move in self._dispatch_lines():
+            name = move.product_id.display_name or ""
+            kind = ("spring" if self._work_order_spring(move)
+                    else self._work_order_kind(name))
+            category, _source = self._work_order_category(move.product_id)
+            page = self._work_order_page(kind, category)
+            groups.setdefault(page, self.env["stock.move"])
+            groups[page] |= move
+
+        return [(page, groups[page]) for page in self.PAGES if groups.get(page)]
+
     def _dispatch_date(self, value):
         """A moment on the SHOP'S clock, named so nobody has to guess.
 

@@ -56,6 +56,10 @@
                  border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; }
       .signed { background: #e7f5ec; border-color: #1b8f4d; }
       .signed img { max-width: 100%; border-bottom: 1px solid #d6dbe1; }
+      .section-group .head { display: flex; align-items: center;
+                             justify-content: space-between; gap: 12px; }
+      .section-group .head h2 { margin: 0 0 8px; }
+      .confirm-all { white-space: nowrap; }
       .ticked { color: #1b8f4d; font-weight: bold; }
       .missed { color: #b03030; font-weight: bold; }
     </style>
@@ -126,27 +130,44 @@
 
       <t t-else="">
         <form t-attf-action="/delivery/{{ token }}/sign" method="post">
+          <!-- SAID BEFORE THE LIST, not after it. The groups replaced a
+               single heading, and with the instruction left at the bottom the
+               page went straight from a date to "Tracks - Confirm all" with
+               nothing telling anybody what was being asked of them. -->
           <div class="card">
             <h2>Tick what you received</h2>
-            <t t-foreach="lines" t-as="move">
-              <label class="item">
-                <!-- EMPTY TO BEGIN WITH. A receipt that arrives pre-ticked
-                     is one somebody confirms without reading it, and the
-                     whole point of the list is that each line was looked at.
-                     Ticking four boxes is the work being asked for. -->
-                <input type="checkbox" t-attf-name="item_{{ move.id }}" value="1"/>
-                <span>
-                  <span class="qty"><t t-esc="'%g' % move.product_uom_qty"/></span>
-                  <t t-esc="move.product_uom.name"/>
-                  -
-                  <t t-esc="move.product_id.display_name"/>
-                </span>
-              </label>
-            </t>
-            <div class="muted" style="margin-top: 10px;">
+            <div class="muted">
               Leave anything you did not receive unticked. We will be told.
             </div>
           </div>
+
+          <!-- ONE CARD PER KIND OF THING, each with a button that ticks its
+               own. Eleven lengths of track are one answer, not eleven. -->
+          <t t-foreach="groups" t-as="group">
+            <div class="card section-group">
+              <div class="head">
+                <h2><t t-esc="group[0]"/></h2>
+                <button type="button" class="clear confirm-all">
+                  Confirm all
+                </button>
+              </div>
+              <t t-foreach="group[1]" t-as="move">
+                <label class="item">
+                  <!-- EMPTY TO BEGIN WITH. A receipt that arrives pre-ticked
+                       is one somebody confirms without reading it, and the
+                       whole point of the list is that each line was looked
+                       at. Ticking the boxes is the work being asked for. -->
+                  <input type="checkbox" t-attf-name="item_{{ move.id }}" value="1"/>
+                  <span>
+                    <span class="qty"><t t-esc="'%g' % move.product_uom_qty"/></span>
+                    <t t-esc="move.product_uom.name"/>
+                    -
+                    <t t-esc="move.product_id.display_name"/>
+                  </span>
+                </label>
+              </t>
+            </div>
+          </t>
 
           <div class="card">
             <h2>Your name</h2>
@@ -168,6 +189,34 @@
         </form>
 
         <script type="text/javascript">
+          (function () {
+              // CONFIRM ALL, PER GROUP, and the same button clears them again:
+              // a one-way button leaves somebody who pressed it by mistake
+              // unticking eleven boxes by hand, which is the very thing it is
+              // here to save.
+              document.querySelectorAll(".section-group").forEach(function (card) {
+                  var button = card.querySelector(".confirm-all");
+                  var boxes = card.querySelectorAll("input[type=checkbox]");
+
+                  function refresh() {
+                      var all = true;
+                      boxes.forEach(function (box) { all = all &amp;&amp; box.checked; });
+                      button.textContent = all ? "Clear all" : "Confirm all";
+                  }
+
+                  button.addEventListener("click", function () {
+                      var all = true;
+                      boxes.forEach(function (box) { all = all &amp;&amp; box.checked; });
+                      boxes.forEach(function (box) { box.checked = !all; });
+                      refresh();
+                  });
+                  boxes.forEach(function (box) {
+                      box.addEventListener("change", refresh);
+                  });
+                  refresh();
+              });
+          })();
+
           (function () {
               var canvas = document.getElementById("pad");
               var field = document.getElementById("signature");

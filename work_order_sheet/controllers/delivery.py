@@ -44,6 +44,7 @@ class DeliveryConfirmation(http.Controller):
         return request.render("work_order_sheet.delivery_confirmation", {
             "picking": picking,
             "lines": picking._dispatch_lines(),
+            "groups": picking._dispatch_groups(),
             "company": picking.company_id,
             "message": message,
             "token": picking.dispatch_access_token,
