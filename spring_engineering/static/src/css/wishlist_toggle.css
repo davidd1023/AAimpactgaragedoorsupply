@@ -30,3 +30,31 @@
     max-height: 55vh;
     overflow-y: auto;
 }
+
+/* TAKING SOMETHING OFF HAS TO LOOK LIKE SOMETHING HAPPENED.
+
+   Adding animates - Odoo flies a copy of the product up to the navbar - and
+   removing did nothing at all. Worse, the pointer is still over the heart
+   when the click lands, and the hover rule fills an EMPTY heart red to show
+   what clicking would do. So a removal left a red heart under the cursor and
+   looked exactly like a click that had not worked.
+  
+   Two rules, and both are needed: the heart shrinks and comes back, and while
+   the pointer stays on the one just emptied it is drawn as an outline rather
+   than previewing the next add. Moving the pointer away clears that, so the
+   preview works normally the next time. */
+@keyframes o_aa_wish_removed {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(0.65); }
+    70%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+.o_add_wishlist.o_aa_wish_removed .fa {
+    animation: o_aa_wish_removed 0.35s ease-out;
+}
+
+.o_add_wishlist.o_aa_wish_removed:hover .fa-heart-o:before {
+    content: "\f08a";
+    color: inherit;
+}

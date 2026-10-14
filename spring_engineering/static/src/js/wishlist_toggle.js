@@ -89,5 +89,32 @@ patch(AddProductToWishlistButton.prototype, {
         wishlistUtils.removeWishlistProduct(productId);
         wishlistUtils.updateWishlistNavBar();
         this.aaPaintHeart(false);
+        this.aaShowRemoved();
+    },
+
+    /**
+     * Say, visibly, that the product came off the list.
+     *
+     * ADDING ANIMATES AND REMOVING DID NOT - Odoo flies a copy of the product
+     * up to the navbar when something goes on the list, and taking it off
+     * changed nothing a pointer could see. Worse, the pointer is still ON the
+     * heart when the click lands, and the hover rule fills an empty heart red
+     * to show what clicking WOULD do: so a removal left a red heart under the
+     * cursor, looking exactly like a click that had not worked.
+     *
+     * The class drives both the shrink and the suppression of that preview,
+     * and it is dropped when the pointer leaves, so the next hover previews
+     * normally.
+     */
+    aaShowRemoved() {
+        const el = this.el;
+        el.classList.add("o_aa_wish_removed");
+
+        const clear = () => {
+            el.classList.remove("o_aa_wish_removed");
+            el.removeEventListener("mouseleave", clear);
+        };
+
+        el.addEventListener("mouseleave", clear);
     },
 });
