@@ -152,3 +152,163 @@ class TestReorderAPreviousOrder(HttpCase):
         self.assertEqual(
             {line.product_id: line.product_uom_qty for line in cart.order_line},
             {self.hinge: 8.0, self.roller: 4.0})
+
+
+@tagged("post_install", "-at_install")
+class TestReorderKeepsWhatWasConfigured(HttpCase):
+    """A custom spring has to come back as a spring, not as a bare product.
+
+    Odoo reorders by product: it adds each one to the cart as if somebody had
+    clicked it in the shop. For a configured assembly that loses both things
+    that make it one - the specification, which is written on the line, and the
+    price, which was worked out from cone, steel, labour and markup rather
+    than looked up.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.admin = self.env["res.users"].browse(2)
+        self.website = self.env["website"].search([], limit=1)
+        self.spring = self.env.ref(
+            "spring_engineering.product_custom_spring").product_variant_id
+        self.kit = self.env["product.product"].create({
+            "name": "Reorder Kit AA-1200", "type": "consu", "list_price": 290.0,
+            "is_published": True, "sale_ok": True})
+        self.spec = (
+            "Custom Torsion Spring Assembly\n"
+            "Duplex, 2 springs\n"
+            'Outer: 0.2625" wire, 6" ID, 32.5" long\n'
+            'Inner: 0.2253" wire, 3.75" ID, 31.25" long\n'
+            "Door: 9' 0\" wide, 7' 0\" high, 355 lb, 10,000 cycles")
+
+    def _order_with_a_spring(self):
+        order = self.env["sale.order"].create({
+            "partner_id": self.admin.partner_id.id,
+            "website_id": self.website.id,
+        })
+        kit_line = self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": self.kit.id,
+            "product_uom_qty": 1,
+            "aa_spec_note": 'Track: 3" 15R | W 108" x H 84" | 355 lb',
+            "aa_door_width_in": 108, "aa_door_height_in": 84,
+            "aa_door_weight_lb": 355,
+        })
+        spring_line = self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": self.spring.id,
+            "product_uom_qty": 1, "name": self.spec,
+            "aa_spec_note": "\n".join(self.spec.splitlines()[1:]),
+            "aa_door_weight_lb": 355, "linked_line_id": kit_line.id,
+        })
+        spring_line.write({"price_unit": 342.56})
+        order.action_confirm()
+
+        return order, kit_line, spring_line
+
+    def _cart(self):
+        return self.env["sale.order"].search(
+            [("partner_id", "=", self.admin.partner_id.id),
+             ("state", "=", "draft")], order="id desc", limit=1)
+
+    def _reorder(self, order):
+        return self.url_open(
+            "/my/orders/reorder",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"order_id": order.id}}),
+            headers={"Content-Type": "application/json"}).json()
+
+    def _spring_in_cart(self):
+        return self._cart().order_line.filtered(
+            lambda line: line.product_id == self.spring)
+
+    def test_the_spring_comes_back_with_its_specification(self):
+        order, _kit, _spring = self._order_with_a_spring()
+        self.authenticate("admin", "admin")
+
+        self._reorder(order)
+        line = self._spring_in_cart()
+
+        self.assertEqual(len(line), 1, "the spring did not come back")
+        self.assertIn('0.2625" wire', line.name)
+        self.assertIn("355 lb", line.name)
+        self.assertIn('0.2625" wire', line.aa_spec_note)
+
+    def test_the_spring_comes_back_at_its_price(self):
+        """THE BUG: added as a product it reorders at the catalogue price,
+        which this product deliberately sets to nothing."""
+        order, _kit, _spring = self._order_with_a_spring()
+        self.authenticate("admin", "admin")
+
+        self._reorder(order)
+
+        self.assertEqual(self._spring_in_cart().price_unit, 342.56)
+
+    def test_the_kit_comes_back_with_its_door(self):
+        order, _kit, _spring = self._order_with_a_spring()
+        self.authenticate("admin", "admin")
+
+        self._reorder(order)
+        line = self._cart().order_line.filtered(
+            lambda l: l.product_id == self.kit)
+
+        self.assertEqual(line.aa_door_weight_lb, 355)
+        self.assertIn('W 108"', line.aa_spec_note or "")
+
+    def test_the_spring_is_still_attached_to_its_kit(self):
+        order, _kit, _spring = self._order_with_a_spring()
+        self.authenticate("admin", "admin")
+
+        self._reorder(order)
+        cart = self._cart()
+        kit_line = cart.order_line.filtered(lambda l: l.product_id == self.kit)
+
+        self.assertEqual(self._spring_in_cart().linked_line_id, kit_line)
+
+    def test_a_prepared_tracks_parts_are_not_doubled(self):
+        """The cart adds the jamb brackets itself when the track goes in, so
+        carrying the old ones over would ship two sets."""
+        bracket = self.env["product.product"].create({
+            "name": "Jamb Bracket # 10 Black", "type": "consu",
+            "list_price": 1.2, "is_published": True, "sale_ok": True})
+        track = self.env["product.product"].create({
+            "name": 'CH-VT-2-2 Vertical Track 76-7 door height black',
+            "type": "consu", "list_price": 42.0, "is_published": True,
+            "sale_ok": True})
+        order = self.env["sale.order"].create({
+            "partner_id": self.admin.partner_id.id,
+            "website_id": self.website.id,
+        })
+        track_line = self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": track.id, "product_uom_qty": 1})
+        self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": bracket.id,
+            "product_uom_qty": 4, "track_prep_parent_id": track_line.id,
+            "track_prep_role": "jamb_10"})
+        order.action_confirm()
+        self.authenticate("admin", "admin")
+
+        self._reorder(order)
+        brackets = self._cart().order_line.filtered(
+            lambda line: line.product_id == bracket)
+
+        self.assertLessEqual(sum(brackets.mapped("product_uom_qty")), 4.0,
+                             "the preparation parts were added twice")
+
+    def test_adding_the_spring_as_a_product_is_what_was_wrong(self):
+        """WHY THE OVERRIDE EXISTS, shown rather than asserted about.
+
+        This is what Odoo's reorder does to a configured line: it adds the
+        product to the cart. The result is the bug the owner met - no
+        specification, and the catalogue price, which this product sets to
+        nothing on purpose.
+        """
+        cart = self.env["sale.order"].create({
+            "partner_id": self.admin.partner_id.id,
+            "website_id": self.website.id,
+        })
+        cart._cart_add(product_id=self.spring.id, quantity=1)
+        line = cart.order_line.filtered(
+            lambda l: l.product_id == self.spring)
+
+        self.assertEqual(line.price_unit, 0.0)
+        self.assertNotIn('0.2625" wire', line.name or "")

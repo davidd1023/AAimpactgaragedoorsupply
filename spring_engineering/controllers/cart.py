@@ -91,7 +91,12 @@ class TrackPreparationCart(Cart):
     # and have everything on it in the cart. The adding already exists -
     # /my/orders/reorder walks an order's lines and adds each one - so this is
     # the half that was missing: which orders to offer.
-    AA_REORDER_LIMIT = 10
+    # EVERY ORDER, NOT THE LAST TEN. Odoo's own history stops at ten and the
+    # owner asked to see the rest; the panel scrolls, so the list can be as
+    # long as the account is old. The cap is a guard against a page that never
+    # finishes rendering for somebody with thousands, not a limit anybody is
+    # expected to meet - and the panel says so when it bites.
+    AA_REORDER_LIMIT = 250
 
     def _aa_previous_orders(self):
         """The customer's own finished orders, newest first."""
