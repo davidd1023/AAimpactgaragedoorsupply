@@ -125,14 +125,72 @@ class StockPicking(models.Model):
         return result
 
     def _dispatch_lines(self):
-        """What the customer is being asked to confirm, in printed order."""
+        """Every move the customer is being handed, cancelled ones aside."""
         self.ensure_one()
 
         return self.move_ids.filtered(
             lambda move: move.state != "cancel" and move.product_id
         ).sorted(lambda move: (move.product_id.display_name or "", move.id))
 
+    def _dispatch_items(self):
+        """One row per THING HANDED OVER, which is not one row per move.
+
+        A CABLE IS ONE THING. It leaves the shop as a reel, an oval sleeve, a
+        thimble and a stop - four moves against one line on the order - and a
+        customer handed one made-up cable should be asked about one made-up
+        cable. Asking them to tick a thimble is asking them to reassemble a
+        bill of materials on the kerb to work out what they were given.
+
+        THE SHEET'S OWN RULE, not a second one: _work_order_collapses already
+        decides when a group of moves is one thing bought and when it is a set
+        of parts somebody has to pick, and a hardware kit is deliberately the
+        second. The customer's list and the floor's list therefore say the same
+        thing about the same delivery.
+        """
+        self.ensure_one()
+        items = []
+
+        for group in self._work_order_groups():
+            moves = [move for move in group
+                     if move.state != "cancel" and move.product_id]
+
+            if not moves:
+                continue
+
+            sale_line = moves[0].sale_line_id
+
+            if self._work_order_collapses(sale_line, moves):
+                items.append(self._dispatch_item(
+                    sale_line.product_id, sale_line.product_uom_qty,
+                    sale_line.product_uom_id.name
+                    if "product_uom_id" in sale_line._fields else "",
+                    moves))
+                continue
+
+            for move in moves:
+                items.append(self._dispatch_item(
+                    move.product_id, move.product_uom_qty,
+                    move.product_uom.name, [move]))
+
+        return sorted(items, key=lambda item: item["name"])
+
+    def _dispatch_item(self, product, quantity, uom, moves):
+        """One row of the customer's list, and the moves behind it."""
+        records = self.env["stock.move"].browse([move.id for move in moves])
+
+        return {
+            # The row is ticked as one, so it is named for one of its moves and
+            # answered for all of them.
+            "key": records[0].id,
+            "name": product.display_name or "",
+            "quantity": quantity,
+            "uom": uom or "",
+            "moves": records,
+            "received": all(move.dispatch_received for move in records),
+        }
+
     def _dispatch_log_signature(self, confirmed, missing):
+        """`confirmed` and `missing` are rows of _dispatch_items, not moves."""
         """Write the receipt into the order's own log.
 
         THE ORDER IS WHERE PEOPLE LOOK, and a signature that lives only on a
@@ -142,10 +200,8 @@ class StockPicking(models.Model):
         """
         self.ensure_one()
         rows = Markup("").join(
-            Markup("<li>%s</li>") % (
-                "%g x %s" % (move.product_uom_qty,
-                             move.product_id.display_name or ""))
-            for move in confirmed
+            Markup("<li>%s</li>") % ("%g x %s" % (item["quantity"], item["name"]))
+            for item in confirmed
         )
         body = Markup("<p>%s</p><ul>%s</ul>") % (
             self.env._(
@@ -159,9 +215,8 @@ class StockPicking(models.Model):
                 self.env._("Not confirmed by the customer:"),
                 Markup("").join(
                     Markup("<li>%s</li>") % (
-                        "%g x %s" % (move.product_uom_qty,
-                                     move.product_id.display_name or ""))
-                    for move in missing
+                        "%g x %s" % (item["quantity"], item["name"]))
+                    for item in missing
                 ),
             )
 
@@ -182,14 +237,27 @@ class StockPicking(models.Model):
         self.ensure_one()
         groups = {}
 
-        for move in self._dispatch_lines():
-            name = move.product_id.display_name or ""
+        for item in self._dispatch_items():
+            move = item["moves"][0]
             kind = ("spring" if self._work_order_spring(move)
-                    else self._work_order_kind(name))
+                    else self._work_order_kind(item["name"]))
+
+            # A SUMMARISED GROUP TAKES ITS KIND FROM WHAT IT IS MADE OF, the
+            # same way the sheet does: a made-up cable may be named for the
+            # track it suits, while a GAC reel and a thimble say plainly what
+            # they are.
+            if not kind and len(item["moves"]) > 1:
+                for part in item["moves"]:
+                    found = self._work_order_kind(
+                        part.product_id.display_name or "")
+
+                    if found:
+                        kind = found
+                        break
+
             category, _source = self._work_order_category(move.product_id)
-            page = self._work_order_page(kind, category)
-            groups.setdefault(page, self.env["stock.move"])
-            groups[page] |= move
+            groups.setdefault(self._work_order_page(kind, category), []).append(
+                item)
 
         return [(page, groups[page]) for page in self.PAGES if groups.get(page)]
 

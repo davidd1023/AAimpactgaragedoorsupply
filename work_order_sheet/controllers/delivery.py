@@ -43,7 +43,6 @@ class DeliveryConfirmation(http.Controller):
     def _render(self, picking, message=""):
         return request.render("work_order_sheet.delivery_confirmation", {
             "picking": picking,
-            "lines": picking._dispatch_lines(),
             "groups": picking._dispatch_groups(),
             "company": picking.company_id,
             "message": message,
@@ -128,16 +127,25 @@ class DeliveryConfirmation(http.Controller):
             return self._render(picking, request.env._(
                 "Please tick the items you received."))
 
-        lines = picking._dispatch_lines()
-        confirmed = lines.filtered(lambda move: move.id in ticked)
-        confirmed.sudo().write({"dispatch_received": True})
-        (lines - confirmed).sudo().write({"dispatch_received": False})
+        # TICKED BY ROW, WRITTEN BY MOVE. A made-up cable is one row and four
+        # moves; the customer answers for the cable and all four are recorded.
+        items = picking._dispatch_items()
+        confirmed = [item for item in items if item["key"] in ticked]
+        missing = [item for item in items if item["key"] not in ticked]
+        received = picking.env["stock.move"].browse()
+
+        for item in confirmed:
+            received |= item["moves"]
+
+        received.sudo().write({"dispatch_received": True})
+        (picking._dispatch_lines() - received).sudo().write(
+            {"dispatch_received": False})
 
         picking.sudo().write({
             "dispatch_signed_by": name,
             "dispatch_signature": image,
             "dispatch_signed_on": fields.Datetime.now(),
         })
-        picking.sudo()._dispatch_log_signature(confirmed, lines - confirmed)
+        picking.sudo()._dispatch_log_signature(confirmed, missing)
 
         return request.redirect("/delivery/%s" % token)

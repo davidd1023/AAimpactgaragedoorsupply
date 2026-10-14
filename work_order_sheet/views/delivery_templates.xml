@@ -105,17 +105,19 @@
       <t t-if="picking.dispatch_signed_on">
         <div class="card signed">
           <h2>Received</h2>
-          <t t-foreach="lines" t-as="move">
-            <div class="item" style="padding: 10px 0; border-bottom: 1px solid #eef0f3;">
-              <span t-attf-class="{{ 'ticked' if move.dispatch_received else 'missed' }}">
-                <t t-if="move.dispatch_received">Confirmed</t>
-                <t t-else="">Not confirmed</t>
-              </span>
-              -
-              <span class="qty"><t t-esc="'%g' % move.product_uom_qty"/></span>
-              <t t-esc="move.product_uom.name"/>
-              <t t-esc="move.product_id.display_name"/>
-            </div>
+          <t t-foreach="groups" t-as="group">
+            <t t-foreach="group[1]" t-as="item">
+              <div class="item" style="padding: 10px 0; border-bottom: 1px solid #eef0f3;">
+                <span t-attf-class="{{ 'ticked' if item['received'] else 'missed' }}">
+                  <t t-if="item['received']">Confirmed</t>
+                  <t t-else="">Not confirmed</t>
+                </span>
+                -
+                <span class="qty"><t t-esc="'%g' % item['quantity']"/></span>
+                <t t-esc="item['uom']"/>
+                <t t-esc="item['name']"/>
+              </div>
+            </t>
           </t>
           <div style="margin-top: 14px;">
             <img t-if="picking.dispatch_signature"
@@ -151,18 +153,19 @@
                   Confirm all
                 </button>
               </div>
-              <t t-foreach="group[1]" t-as="move">
+              <t t-foreach="group[1]" t-as="item">
                 <label class="item">
                   <!-- EMPTY TO BEGIN WITH. A receipt that arrives pre-ticked
                        is one somebody confirms without reading it, and the
                        whole point of the list is that each line was looked
                        at. Ticking the boxes is the work being asked for. -->
-                  <input type="checkbox" t-attf-name="item_{{ move.id }}" value="1"/>
+                  <input type="checkbox" t-attf-name="item_{{ item['key'] }}"
+                         value="1"/>
                   <span>
-                    <span class="qty"><t t-esc="'%g' % move.product_uom_qty"/></span>
-                    <t t-esc="move.product_uom.name"/>
+                    <span class="qty"><t t-esc="'%g' % item['quantity']"/></span>
+                    <t t-esc="item['uom']"/>
                     -
-                    <t t-esc="move.product_id.display_name"/>
+                    <t t-esc="item['name']"/>
                   </span>
                 </label>
               </t>
