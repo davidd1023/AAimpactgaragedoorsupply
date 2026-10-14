@@ -139,12 +139,19 @@ class TestWishlistStuckRow(HttpCase):
         page = self.url_open("/shop/wishlist").text
         self.assertIn(self.product.name, page)
 
-    def test_an_unpublished_product_can_be_cleared_from_the_page(self):
-        """It can never be reached - that is Odoo's rule - so it has to be
-        removable from somewhere."""
+    def test_a_row_that_cannot_be_reached_can_be_cleared_from_the_page(self):
+        """A row nobody can delete has to be removable from somewhere.
+
+        ARCHIVED, NOT UNPUBLISHED. This used to archive nothing and simply
+        unpublish the product, which was unreachable at the time and is not
+        any more: an internal user now keeps unpublished products on their
+        wishlist, deliberately, so that the heart stops contradicting a shop
+        that shows them. A row on another website is stuck for everybody.
+        """
         self.authenticate("admin", "admin")
         self._add(self.product)
-        self.product.product_tmpl_id.write({"is_published": False})
+        other = self.env["website"].create({"name": "Somewhere Else Entirely"})
+        self._rows(self.product).write({"website_id": other.id})
 
         page = self.url_open("/shop/wishlist/diagnose").text
         self.assertIn("cannot be reached", page)
@@ -345,3 +352,76 @@ class TestWishlistToggleServerSide(HttpCase):
 
         self._remove(self.product)
         self.assertFalse(self._rows(self.product))
+
+
+@tagged("post_install", "-at_install")
+class TestUnpublishedWishesForTheOwner(HttpCase):
+    """The heart that would not stay red.
+
+    Odoo drops an unpublished product from the wishlist page, from the ids the
+    browser keeps and from the marks on the shop's cards - while showing that
+    product to an internal user, letting them cart it and letting them
+    wishlist it. The heart filled on the click and was empty on the next page,
+    for some products and not others, which is how it was reported: sometimes
+    they stay, sometimes they go back. It tracked publication, not luck.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.hidden = self.env["product.product"].create({
+            "name": "Unpublished Probe Roller", "type": "consu",
+            "list_price": 5.0, "is_published": False, "sale_ok": True})
+
+    def _add(self, product):
+        return self.url_open(
+            "/shop/wishlist/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"product_id": product.id}}),
+            headers={"Content-Type": "application/json"}).json()
+
+    def _ids(self):
+        return self.url_open(
+            "/shop/wishlist/get_product_ids",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call", "params": {}}),
+            headers={"Content-Type": "application/json"}).json().get("result")
+
+    def test_an_internal_user_keeps_an_unpublished_product_on_the_list(self):
+        self.authenticate("admin", "admin")
+        self._add(self.hidden)
+
+        self.assertIn(self.hidden.id, self._ids() or [],
+                      "the browser is not told, so the heart empties")
+        self.assertIn(self.hidden.name,
+                      self.url_open("/shop/wishlist").text)
+
+    def test_the_shop_still_marks_the_card_on_a_fresh_page(self):
+        self.authenticate("admin", "admin")
+        self._add(self.hidden)
+        page = self.url_open("/shop?search=Unpublished+Probe").text
+
+        self.assertIn("o_in_wishlist", page)
+
+    def test_a_customer_sees_no_such_thing(self):
+        """Odoo's rule is kept for everybody else: you cannot buy what is not
+        for sale, and a wishlist full of those is worse than a short one."""
+        portal = self.env["res.users"].create({
+            "name": "A Customer", "login": "wish-customer",
+            "password": "wish-customer",
+            "group_ids": [(6, 0, [self.env.ref("base.group_portal").id])]})
+        self.assertFalse(portal._is_internal())
+
+        self.authenticate("wish-customer", "wish-customer")
+        self._add(self.hidden)
+
+        self.assertNotIn(self.hidden.id, self._ids() or [])
+        self.assertNotIn(self.hidden.name, self.url_open("/shop/wishlist").text)
+
+    def test_a_published_product_is_unaffected(self):
+        shown = self.env["product.product"].create({
+            "name": "Published Probe Roller", "type": "consu",
+            "list_price": 5.0, "is_published": True, "sale_ok": True})
+        self.authenticate("admin", "admin")
+        self._add(shown)
+
+        self.assertIn(shown.id, self._ids() or [])
