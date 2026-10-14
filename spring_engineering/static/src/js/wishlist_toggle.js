@@ -3,6 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 
+import wSaleUtils from "@website_sale/js/website_sale_utils";
 import wishlistUtils from "@website_sale_wishlist/js/website_sale_wishlist_utils";
 
 // THE HEART IS A SWITCH, AND IT DOES NOT DEPEND ON WHEN ANYTHING ELSE LOADED.
@@ -33,36 +34,142 @@ import wishlistUtils from "@website_sale_wishlist/js/website_sale_wishlist_utils
 // and whenever: the click is handled here and stopped before it reaches
 // Odoo's. There is no registration to be late for and no instance to be
 // holding the wrong function.
-const BUTTON = ".o_add_wishlist";
+
+// TWO BUTTONS, AND THE DIFFERENCE BETWEEN THEM MATTERS.
+//
+//   a shop card (.o_add_wishlist)      one heart for a whole template, which
+//                                      offers the first variant it can find
+//   a product page (.o_add_wishlist_dyn)  one button for the ONE variant the
+//                                      options currently select
+//
+// Odoo's interaction covers both, so leaving the second one out left it in
+// Odoo's hands: it added, disabled itself, and the customer could not press it
+// again to take the product off. Worse, a disabled .btn is pointer-events:
+// none, so the second click raised no event at all - there was nothing for
+// this file to intercept even if it had been listening.
+//
+// AND ONE THAT ONLY LOOKS LIKE THE FIRST. The cart's "Save for Later" link
+// carries o_add_wishlist too, with a real variant id - but it is not a toggle:
+// it puts the product on the list AND takes the line out of the cart, and that
+// second half is bound on an ancestor, so stopping the click here stopped it
+// as well. It saved the product and left it in the cart. Odoo's own handlers
+// do that one properly between them, so it is left alone.
+const CARD = ".o_add_wishlist:not(.js_delete_product)";
+const DYN = ".o_add_wishlist_dyn";
+const BUTTON = `${CARD}, ${DYN}`;
+
+// Which variant of each template is the one on the list. Odoo keeps the ids in
+// the session and that is not enough on its own - see /shop/wishlist/state.
+const MAP_KEY = "aa_wishlist_variants";
 
 function productOf(el) {
     return parseInt(el.dataset.productProductId) || 0;
 }
 
-/**
- * Is this card's product on the wishlist?
- *
- * TWO OPINIONS, EITHER OF WHICH IS ENOUGH. The server marks the button when it
- * renders the page, and the browser keeps its own list of product ids. A page
- * from a cache has the first out of date; a tab that never loaded the wishlist
- * has the second empty. Reading both means being wrong only when both are.
- */
-function isWishlisted(el) {
-    const productId = productOf(el);
+function templateOf(el) {
+    return parseInt(el.dataset.productTemplateId) || 0;
+}
 
-    return Boolean(
-        el.classList.contains("o_in_wishlist")
-        || (productId && wishlistUtils.getWishlistProductIds().includes(productId))
-    );
+function variantMap() {
+    try {
+        return JSON.parse(sessionStorage.getItem(MAP_KEY) || "{}");
+    } catch {
+        return {};
+    }
+}
+
+function rememberVariant(templateId, productId, wishlisted) {
+    if (!templateId) {
+        return;
+    }
+
+    const map = variantMap();
+
+    if (wishlisted) {
+        map[templateId] = productId;
+    } else {
+        delete map[templateId];
+    }
+
+    try {
+        sessionStorage.setItem(MAP_KEY, JSON.stringify(map));
+    } catch {
+        // A browser refusing storage still gets working hearts on the page it
+        // is looking at; only the memory of them across pages is lost.
+    }
+}
+
+/**
+ * What the page itself says, as the server drew it.
+ *
+ * Read BEFORE painting, because painting clears the very attribute this looks
+ * at. The card says it with a class; the product page button says it by being
+ * disabled, which is also how Odoo colours that one in.
+ */
+function serverSaysWishlisted(el) {
+    return el.classList.contains("o_in_wishlist")
+        || el.classList.contains("disabled")
+        || el.hasAttribute("disabled");
+}
+
+/**
+ * The variant this button could take off the list, or 0 if there is none.
+ *
+ * A CARD STANDS FOR THE TEMPLATE, A PRODUCT PAGE FOR ONE VARIANT. So the card
+ * may answer with a variant that is not the one it offers - that is the whole
+ * point of the mapping, and it is what was wrong when a product wishlisted
+ * from its own page left the shop card looking untouched: the card held the
+ * first variant, the list held the one that was chosen, and the two numbers
+ * were never going to match.
+ *
+ * The product page gets no such latitude. It is showing one variant and must
+ * tell the truth about that one, or the button would offer to remove a row
+ * the customer is not looking at.
+ */
+function wishlistedVariant(el) {
+    const ids = wishlistUtils.getWishlistProductIds();
+    const own = productOf(el);
+
+    if (own && ids.includes(own)) {
+        return own;
+    }
+
+    if (el.matches(DYN)) {
+        return 0;
+    }
+
+    const mapped = parseInt(variantMap()[templateOf(el)]) || 0;
+
+    return mapped && ids.includes(mapped) ? mapped : 0;
+}
+
+function isWishlisted(el) {
+    // TWO OPINIONS, EITHER OF WHICH IS ENOUGH. The browser's list answers
+    // first; the page's own markup answers for a tab that has never asked the
+    // server for the list, and for a card drawn somewhere the shop page's
+    // variant mapping does not reach.
+    //
+    // THE MARKUP IS BELIEVED ABOUT THE PRODUCT, NOT ABOUT THE VARIANT. Odoo
+    // marks a card from the template - any variant on the list reddens it -
+    // so its id cannot be taken as the row's id, and writing it into the
+    // browser's list would plant a number that is wrong and sticks. Which
+    // variant it really is comes from the server, in the one fetch below, or
+    // is left to the server to work out when the heart is pressed.
+    return Boolean(wishlistedVariant(el)) || serverSaysWishlisted(el);
 }
 
 function paint(el, wishlisted) {
     el.classList.toggle("o_in_wishlist", wishlisted);
+
     // NEVER DISABLED. Odoo disables the button once the product is on the list
     // - which is also how it colours it red - and a disabled button swallows
-    // the very click that would take the product off again.
+    // the very click that would take the product off again. The ATTRIBUTE has
+    // to go as well as the property: the product page button is an <a>, where
+    // setting .disabled is a property no browser acts on and the attribute the
+    // server wrote would have stayed behind.
     el.disabled = false;
     el.classList.remove("disabled");
+    el.removeAttribute("disabled");
 
     const icon = el.querySelector(".fa");
 
@@ -72,10 +179,17 @@ function paint(el, wishlisted) {
     }
 
     const title = wishlisted ? _t("Remove from wishlist") : _t("Add to wishlist");
-    const label = el.querySelector(".o_label");
+    // The card labels its text .o_label; the product page just puts a span
+    // after the icon. The icon itself is the only other span on the card, so
+    // skipping it finds the words on both.
+    const label = el.querySelector(".o_label") || el.querySelector("span:not(.fa)");
 
     if (label) {
         label.textContent = title;
+    }
+
+    if (icon && icon.hasAttribute("aria-label")) {
+        icon.setAttribute("aria-label", title);
     }
 
     el.title = title;
@@ -106,6 +220,57 @@ function flash(el, className) {
     setTimeout(() => el.classList.remove("o_aa_wish_added"), 600);
 }
 
+/**
+ * The variant to put on the list when the button is pressed.
+ *
+ * A product sold with dynamic options has no variant until somebody asks for
+ * one, which is why the button can carry no id at all. Odoo creates it from
+ * the options on screen; so does this, by the same route.
+ */
+async function variantToAdd(el) {
+    const own = productOf(el);
+
+    if (own) {
+        return own;
+    }
+
+    const form = wSaleUtils.getClosestProductForm(el);
+    const templateId = templateOf(el);
+
+    if (!form || !templateId) {
+        return 0;
+    }
+
+    return parseInt(await rpc("/sale/create_product_variant", {
+        product_template_id: templateId,
+        product_template_attribute_value_ids:
+            wSaleUtils.getSelectedAttributeValues(form),
+    })) || 0;
+}
+
+/**
+ * What to ask the server to take off the list.
+ *
+ * A CARD IS ONE HEART FOR A WHOLE TEMPLATE, so it is allowed to say "whichever
+ * variant of this product is on the list" - and it has to be, because a card
+ * drawn outside the shop page (a product snippet on the home page, say) is
+ * marked as wishlisted by Odoo while still offering the FIRST variant's id.
+ * Asking by that id alone would find no row, the heart would go quiet, and the
+ * product would still be on the list.
+ *
+ * A product page says nothing of the sort: it is showing one variant, and the
+ * row it offers to remove is that variant's or none.
+ */
+function removalTarget(el, productId) {
+    const target = { product_id: productId };
+
+    if (!el.matches(DYN)) {
+        target.product_tmpl_id = templateOf(el);
+    }
+
+    return target;
+}
+
 async function onClick(ev) {
     const el = ev.target.closest?.(BUTTON);
 
@@ -113,12 +278,12 @@ async function onClick(ev) {
         return;
     }
 
-    const productId = productOf(el);
-
-    if (!productId) {
-        // A button that does not know its variant yet - the product page picks
-        // one from the options first. That is Odoo's path and it still works;
-        // this one steps aside rather than guessing.
+    // STEP ASIDE BEFORE STOPPING THE CLICK, not after. Everything below is
+    // asynchronous, and by the time an await comes back the click has long
+    // since finished travelling - so the decision to let Odoo's own handler
+    // have it has to be made here, synchronously, or not at all. A button with
+    // neither a variant nor a form to work one out from is Odoo's problem.
+    if (!productOf(el) && !wSaleUtils.getClosestProductForm(el)) {
         return;
     }
 
@@ -132,14 +297,27 @@ async function onClick(ev) {
     el.dataset.aaBusy = "1";
 
     try {
-        if (isWishlisted(el)) {
-            await rpc("/shop/wishlist/remove_product", { product_id: productId });
-            wishlistUtils.removeWishlistProduct(productId);
+        const onTheList = wishlistedVariant(el);
+
+        if (onTheList) {
+            await rpc("/shop/wishlist/remove_product", removalTarget(el, onTheList));
+            wishlistUtils.removeWishlistProduct(onTheList);
+            rememberVariant(templateOf(el), onTheList, false);
             paint(el, false);
             flash(el, "o_aa_wish_removed");
         } else {
+            const productId = await variantToAdd(el);
+
+            if (!productId) {
+                return;
+            }
+
             await rpc("/shop/wishlist/add", { product_id: productId });
             wishlistUtils.addWishlistProduct(productId);
+            rememberVariant(templateOf(el), productId, true);
+            // So a second press on THIS button knows what it just added, even
+            // on a card that was offering a different variant a moment ago.
+            el.dataset.productProductId = productId;
             paint(el, true);
             flash(el, "o_aa_wish_added");
         }
@@ -152,6 +330,18 @@ async function onClick(ev) {
 
 document.addEventListener("click", onClick, true);
 
+// CHOOSING A DIFFERENT OPTION CHOOSES A DIFFERENT PRODUCT. The wishlist is per
+// variant, so the heart on a product page has to follow the options: Odoo's
+// own handler writes the new variant id onto the button, and this - listening
+// where the event bubbles up, which is after that - repaints from it. Without
+// this the button would also keep the "disabled" class Odoo puts back on, and
+// be unclickable again.
+document.addEventListener("change", (ev) => {
+    if (ev.target?.matches?.("input.product_id, input[name='product_id']")) {
+        paintAll();
+    }
+});
+
 // WHAT THE PAGE KNOWS BEFORE ANYBODY CLICKS. The server marks what it can; the
 // ids fill in the rest, and are fetched here if this tab has never asked for
 // them - without that, a heart on a page served from a cache sits empty next
@@ -161,9 +351,16 @@ async function paintOnArrival() {
 
     if (!wishlistUtils.getWishlistProductIds().length) {
         try {
-            wishlistUtils.setWishlistProductIds(
-                await rpc("/shop/wishlist/get_product_ids")
-            );
+            const state = await rpc("/shop/wishlist/state");
+
+            wishlistUtils.setWishlistProductIds(state.ids || []);
+
+            try {
+                sessionStorage.setItem(
+                    MAP_KEY, JSON.stringify(state.variants || {}));
+            } catch {
+                // see rememberVariant
+            }
         } catch {
             return;
         }
@@ -177,3 +374,14 @@ if (document.readyState === "loading") {
 } else {
     paintOnArrival();
 }
+
+// A PAGE COMING BACK FROM THE BROWSER'S CACHE RUNS NO SCRIPT. Pressing Back
+// after wishlisting something restores the shop exactly as it was drawn before
+// the add, hearts and all. Nothing above fires for that, which is the other
+// half of "sometimes it doesn't show": repainting here reads the list this tab
+// has kept and puts the hearts right.
+window.addEventListener("pageshow", (ev) => {
+    if (ev.persisted) {
+        paintAll();
+    }
+});
