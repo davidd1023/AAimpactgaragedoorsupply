@@ -108,6 +108,8 @@
             const kitSel = el("select", { class: "form-select" },
                 products.map((p) => el("option", { value: p.id, text: p.name })));
             const attrsBox = el("div", { class: "row g-2" });
+            // Shop name for the option (owner, 2026-10-14: "Cables" reads "Drum Cables").
+            const aaLabel = (name) => (name === "Cables" ? "Drum Cables" : name);
             const optsBox = el("div", { class: "aa-opts" });
             const tag = el("input", { type: "text", class: "form-control", maxlength: "80", placeholder: "e.g. Smith - 16x8" });
             const wFt = el("input", { type: "number", min: "0", class: "form-control", placeholder: "ft" });
@@ -228,7 +230,7 @@
                             line.checks[v.id] = { cb, name: v.name };
                             cb.checked = keepChecked.includes(v.name);
                             const extra = v.price_extra ? " (+" + money(v.price_extra) + ")" : "";
-                            optsBox.appendChild(el("label", { class: "form-check-label" }, [cb, document.createTextNode(v.name + extra)]));
+                            optsBox.appendChild(el("label", { class: "form-check-label" }, [cb, document.createTextNode(aaLabel(v.name) + extra)]));
                         });
                         return;
                     }
@@ -395,7 +397,7 @@
                             if ((r.extras || []).length || (r.notes || []).length) {
                                 breakdown.appendChild(el("div", { text: "Kit: " + money(r.kit_price) + " each" }));
                                 (r.extras || []).forEach((x) => breakdown.appendChild(
-                                    el("div", { text: x.label + ": " + x.name + (x.qty > 1 ? " x" + x.qty : "") + " - " + money(x.unit_price) })));
+                                    el("div", { text: aaLabel(x.label) + ": " + x.name + (x.qty > 1 ? " x" + x.qty : "") + " - " + money(x.unit_price) })));
                                 (r.notes || []).forEach((n) => breakdown.appendChild(el("div", { class: "text-warning-emphasis", text: n })));
                             }
                         }
