@@ -3722,23 +3722,46 @@ get warnings() {
         }
 
         // --- Cycle life --------------------------------------------------
-        // Exclusive by construction: a count over the ceiling cannot also be
-        // under the target unless the target itself is over the ceiling, and
-        // there the out-of-bounds message is the one worth showing.
+        //
+        // NO OVER-THE-CEILING WARNING ON SINGLE, and this is measured rather
+        // than assumed. The owner met it first: hi-lift doors that the
+        // reference passes without a word came back from this page with a red
+        // "out of bounds cycle count". dev/warn-check-single.mjs put numbers
+        // on it across 1,256 Single readings:
+        //
+        //     computed life over 350,000          59 readings
+        //     of those, the reference was quiet   59
+        //     highest life it said nothing about  599,000
+        //     times it raised the message         2, on doors already refused
+        //                                         three other ways (a 1,739"
+        //                                         spring against a 120" limit)
+        //
+        // Put the other way round, on the 558 of those readings this code can
+        // be run against directly: the rule removed here would have fired on
+        // 29 of them and the reference agreed with 1.
+        //
+        // So the reference does not compare the life it REPORTS against this
+        // ceiling - it reports 599,000 happily. Its own message quotes the
+        // same 350,000 we hold, which is what made this look right: the number
+        // is correct and the quantity tested is not. The two readings it does
+        // flag cannot be reproduced from the final answer, only from the
+        // reference's own walk up the wire ladder - the same conclusion the
+        // 96-inch message reached (see DUPLEX_MAX_SPRING_LENGTH), and the same
+        // decision follows: a rule that fires on 59 doors to catch none of the
+        // two is not a rule.
+        //
+        // DUPLEX KEEPS ITS COPY, deliberately. The identical test agrees with
+        // the reference 498 times there against one disagreement, so the
+        // ceiling is real on that path and absent on this one. Two paths, two
+        // measurements, and the evidence says they differ - see
+        // dev/warn-check.mjs for the Duplex figures.
+        //
+        // The branches below were an if/else chain for that reason; with the
+        // ceiling gone the low-cycle test stands on its own.
 
         const cycles = this.cyclesForWire(wire);
 
-        if (cycles > CYCLE_MAX) {
-            found.push({
-                id: "cycles-over-max",
-                severity: "red",
-                message:
-                    "Calculations for this wire size result in an out of bounds " +
-                    "cycle count, Cycle Calculation Maximum (" +
-                    CYCLE_MAX.toLocaleString("en-US") +
-                    ") Exceeded",
-            });
-        } else if (cycles && this.cycleTarget && cycles < this.cycleTarget) {
+        if (cycles && this.cycleTarget && cycles < this.cycleTarget) {
             // LEFT ON THE TARGET, DELIBERATELY, unlike the Duplex warning.
             //
             // The Duplex version of this was changed to a constant 10,000

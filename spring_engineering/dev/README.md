@@ -8,7 +8,36 @@ node dev/replay.mjs                   # everything
 node dev/replay.mjs --only=single     # just the Single golden
 node dev/replay.mjs --only=invariants # just the Duplex laws
 node dev/worklist.mjs [drum]          # what to measure next
+
+# Warnings, against the messages the reference actually returned:
+node dev/warn-check.mjs eval-*.json            # Duplex
+node dev/warn-check-single.mjs eval-single*.json          # Single, our wire
+node dev/warn-check-single.mjs eval-single*.json --ref-wire   # Single, its wire
 ```
+
+## Warnings are not in the accuracy score
+
+A warning cannot be checked by a snapshot of our own past behaviour, and it
+does not move the reading score at all - Duplex once raised five warnings
+where the reference raised eleven and every number still matched. The two
+`warn-check` tools are the only honest test of one, and the Single half of
+that pair did not exist until a hi-lift door came back from the shop page
+with a red warning the reference had never given. On 558 Single readings the
+ceiling warning fired 29 times and the reference agreed with 1; the same test
+on Duplex agrees 498 times against 1 disagreement. Two paths, two
+measurements, two different answers - which is exactly why both are run.
+
+DEFAULT THE SPRING COUNT TO TWO when a reading does not carry one, as
+warn-check-single.mjs does. The reference defaults it to two; defaulting to
+one puts the whole door on a single spring, picks a thicker wire, and invents
+false alarms that belong to the tool. It has now caught two tools in this
+repository, including this one - eight wire-over-max "disagreements" that
+vanished the moment the default was right.
+
+RUN BOTH MODES. `--ref-wire` feeds the reference's own wire back in, so a
+disagreement there is the RULE being wrong; one that shows up only in the
+default mode is our WIRE being different, and the warning about it is
+probably right.
 
 No dependencies, no build step. `harness.mjs` imports the **same**
 `static/src/js/spring_engineering.js` the manifest ships, with OWL stubbed, so
