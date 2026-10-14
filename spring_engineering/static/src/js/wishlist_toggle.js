@@ -2,26 +2,39 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { patch } from "@web/core/utils/patch";
+import { registry } from "@web/core/registry";
 
 import { AddProductToWishlistButton } from "@website_sale_wishlist/interactions/add_product_to_wishlist_button";
 import wishlistUtils from "@website_sale_wishlist/js/website_sale_wishlist_utils";
 
-// THE HEART HAS TO SAY WHAT IT KNOWS, AND UNDO ITSELF.
+// THE HEART IS A SWITCH: red when the product is on the list, and a click on a
+// red one takes it off.
 //
-// Odoo's card button adds a product and then disables itself, so the only way
-// off a wishlist is the wishlist page - and the red colour comes from that
-// disabled attribute, which this shop drops to keep the button clickable. Two
-// things follow, and both are here: the state is painted from the class on
-// every page load, and a click on a filled heart removes the product.
-patch(AddProductToWishlistButton.prototype, {
+// REPLACED RATHER THAN PATCHED, and the difference is the bug the owner hit.
+// Odoo's interaction binds its click handler like this:
+//
+//     dynamicContent = { _root: { 't-on-click': this.addProduct } };
+//
+// That is a class FIELD: it reads `this.addProduct` once, when the instance is
+// built, and keeps the function it found. Patching the prototype afterwards
+// changes nothing for an instance that already exists - it is still holding
+// the original. So whether a heart could be un-clicked came down to whether
+// this file happened to run before the buttons on that page were wired up,
+// which is exactly the shape of the report: it worked, then after walking to
+// another page and back the same hearts were stuck red, because Odoo's own
+// handler was the one listening and it returns early for a product already on
+// the list.
+//
+// Taking Odoo's registration out and putting this subclass in its place leaves
+// exactly one handler on the button, and it is this one, every time.
+export class WishlistHeart extends AddProductToWishlistButton {
 
     start() {
         const result = super.start?.(...arguments);
-        this.aaPaintHeart(this.aaIsWishlisted());
+        this.paintHeart(this.isWishlisted());
 
         return result;
-    },
+    }
 
     /**
      * Is this card's product on the wishlist?
@@ -32,20 +45,21 @@ patch(AddProductToWishlistButton.prototype, {
      * has never loaded the wishlist has the second empty. Trusting both means
      * being wrong only when both are.
      */
-    aaIsWishlisted() {
+    isWishlisted() {
         const productId = parseInt(this.el.dataset.productProductId);
 
         return Boolean(
             this.el.classList.contains("o_in_wishlist")
             || (productId && wishlistUtils.getWishlistProductIds().includes(productId))
         );
-    },
+    }
 
-    aaPaintHeart(isWishlisted) {
+    paintHeart(isWishlisted) {
         const el = this.el;
         el.classList.toggle("o_in_wishlist", isWishlisted);
-        // NEVER DISABLED. It is a switch, and a switch that cannot be pressed
-        // a second time is a stamp.
+        // NEVER DISABLED. Odoo disables the button once the product is on the
+        // list - which is also how it colours it red - and a disabled button
+        // swallows the click that would take the product off again.
         wishlistUtils.updateDisabled(el, false);
 
         const icon = el.querySelector(".fa");
@@ -63,13 +77,13 @@ patch(AddProductToWishlistButton.prototype, {
         }
 
         el.title = title;
-    },
+    }
 
     async addProduct(ev) {
-        if (!this.aaIsWishlisted()) {
+        if (!this.isWishlisted()) {
             await super.addProduct(...arguments);
             // Core disables the button here; this paints the state instead.
-            this.aaPaintHeart(true);
+            this.paintHeart(true);
 
             return;
         }
@@ -88,9 +102,9 @@ patch(AddProductToWishlistButton.prototype, {
         }));
         wishlistUtils.removeWishlistProduct(productId);
         wishlistUtils.updateWishlistNavBar();
-        this.aaPaintHeart(false);
-        this.aaShowRemoved();
-    },
+        this.paintHeart(false);
+        this.showRemoved();
+    }
 
     /**
      * Say, visibly, that the product came off the list.
@@ -106,7 +120,7 @@ patch(AddProductToWishlistButton.prototype, {
      * and it is dropped when the pointer leaves, so the next hover previews
      * normally.
      */
-    aaShowRemoved() {
+    showRemoved() {
         const el = this.el;
         el.classList.add("o_aa_wish_removed");
 
@@ -116,5 +130,16 @@ patch(AddProductToWishlistButton.prototype, {
         };
 
         el.addEventListener("mouseleave", clear);
-    },
-});
+    }
+}
+
+const interactions = registry.category("public.interactions");
+const CORE = "website_sale_wishlist.add_product_to_wishlist_button";
+
+// Guarded: if Odoo ever renames or drops that registration, this still
+// installs a working heart rather than throwing on the way in.
+if (interactions.contains(CORE)) {
+    interactions.remove(CORE);
+}
+
+interactions.add("spring_engineering.wishlist_heart", WishlistHeart);
