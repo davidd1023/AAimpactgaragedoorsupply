@@ -15,3 +15,13 @@
         opacity: 0.55;
     }
 }
+
+.o_mrp_display_record .o_aa_assign {
+    .btn {
+        min-height: 2.5rem;
+        min-width: 6rem;
+    }
+    .o_aa_assign_row + .o_aa_assign_row {
+        border-top: 1px solid var(--border-color, #dee2e6);
+    }
+}

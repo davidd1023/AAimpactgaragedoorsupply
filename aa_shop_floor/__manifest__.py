@@ -1,6 +1,6 @@
 {
     'name': 'AA Shop Floor',
-    'version': '19.0.1.4.1',
+    'version': '19.0.1.5.0',
     'summary': 'Each Shop Floor station shows exactly what to make for the order',
     'description': """
 The Shop Floor card tells the worker what to make, without opening anything else.
@@ -19,6 +19,7 @@ block later, with only its own parts (kit, drum, lift cable).
     'depends': ['mrp_workorder', 'sale', 'spring_engineering'],
     'data': [
         'data/aa_shop_floor_data.xml',
+        'data/aa_pending_workcenter.xml',
         'views/mrp_production_views.xml',
     ],
     'assets': {
