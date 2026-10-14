@@ -208,7 +208,8 @@ class MrpProduction(models.Model):
                 rows.append((name, qty_label(amount), "c"))
 
         for cable in self.aa_cable_line_ids:
-            rows.append(("Lift cable", ""))
+            # ONE tick for the whole cable pair (owner, 2026-10-14).
+            rows.append(("Lift cable", "", "c"))
             rows += self._aa_cable_rows(cable.product_id, cable.product_uom_qty, notes=False)
         return rows
 
@@ -227,10 +228,10 @@ class MrpProduction(models.Model):
             inches_per_unit = 1.0 if uom in ("in", "inch", "inches") else 12.0
             feet = reel.product_qty * inches_per_unit / 12.0
             each = feet * 12.0 / 2.0 / (bom.product_qty or 1.0)
-            rows.append(("Cut", "%s x %s" % (qty_label(2 * pairs), inches_label(each)), "c"))
+            rows.append(("Cut", "%s x %s" % (qty_label(2 * pairs), inches_label(each))))
         else:
             rows.append(("Cut", "%s cables - length not set on the product" % qty_label(2 * pairs)))
-        rows.append(("Each cable", "1 oval sleeve, 1 thimble, 1 aluminum stop", "c"))
+        rows.append(("Each cable", "1 oval sleeve, 1 thimble, 1 aluminum stop"))
         for ptav in product.product_template_attribute_value_ids:
             rows.append((ptav.attribute_id.name or "For", ptav.name))
         if notes:

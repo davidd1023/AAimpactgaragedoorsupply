@@ -6,7 +6,14 @@
                 <t t-set="aaRows" t-value="record.aa_shop_spec.split('\n')"/>
                 <t t-foreach="aaRows" t-as="aaRow" t-key="aaRow_index">
                     <t t-set="aaParts" t-value="aaRow.split('|')"/>
-                    <div t-if="!aaParts[1]" class="o_aa_shop_spec_section d-flex justify-content-between fw-bold text-uppercase border-top mt-2 pt-1">
+                    <div t-if="!aaParts[1] and aaParts[2] === 'c'"
+                         class="o_aa_shop_spec_section o_aa_check d-flex align-items-center gap-2 fw-bold text-uppercase border-top mt-2 pt-1 cursor-pointer"
+                         t-att-class="{'o_aa_packed': aaIsPacked(aaRow_index)}"
+                         t-on-click.stop="() => this.aaTogglePacked(aaRow_index)">
+                        <i class="fa fa-fw" t-att-class="aaIsPacked(aaRow_index) ? 'fa-check-square text-success' : 'fa-square-o text-muted'"/>
+                        <span class="o_aa_label flex-grow-1" t-esc="aaParts[0]"/>
+                    </div>
+                    <div t-elif="!aaParts[1]" class="o_aa_shop_spec_section d-flex justify-content-between fw-bold text-uppercase border-top mt-2 pt-1">
                         <span t-esc="aaParts[0]"/>
                         <span t-if="aaParts[0] === 'Box contents'" class="text-muted" t-esc="aaPackedCount(aaRows)"/>
                     </div>
