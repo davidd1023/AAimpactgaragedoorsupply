@@ -170,3 +170,73 @@ class TestBracketFasteners(TransactionCase):
         self.assertIn("KNURLEL", warning)
         # The nut it CAN find still goes in - half a set beats none.
         self.assertEqual(self._qty(order, self.nut), 2)
+
+    # --- the ways a bracket can leave ----------------------------------------
+
+    def test_removing_a_tracks_own_bracket_takes_the_fasteners_too(self):
+        """THE BUG: taking a prepared track away by removing one of its parts
+        goes down a branch that returned early, so the studs and nuts stayed
+        behind with the quantity the brackets used to have - a cart holding
+        nothing but fasteners, and a counter still counting them."""
+        order = self._order()
+        tmpl = self._track()
+        order._cart_add(
+            product_id=tmpl.product_variant_id.id, quantity=1,
+            no_variant_attribute_value_ids=[self._ptav(tmpl, "Prepared").id])
+        self.assertEqual(self._qty(order, self.stud), 12)
+
+        bracket_line = order.order_line.filtered(
+            lambda line: order._fastener_is_bracket(line))[:1]
+        order._cart_update_line_quantity(bracket_line.id, 0)
+
+        self.assertEqual(self._qty(order, self.stud), 0)
+        self.assertEqual(self._qty(order, self.nut), 0)
+        self.assertFalse(order.order_line, "the cart kept something")
+        self.assertEqual(order.cart_quantity, 0,
+                         "the counter still counts what is not there")
+
+    def test_removing_the_track_itself_takes_them_too(self):
+        order = self._order()
+        tmpl = self._track()
+        order._cart_add(
+            product_id=tmpl.product_variant_id.id, quantity=1,
+            no_variant_attribute_value_ids=[self._ptav(tmpl, "Prepared").id])
+        track_line = order.order_line.filtered(
+            lambda line: line.product_id == tmpl.product_variant_id)[:1]
+
+        order._cart_update_line_quantity(track_line.id, 0)
+
+        self.assertEqual(order.cart_quantity, 0)
+        self.assertFalse(order.order_line)
+
+    def test_removing_the_last_fastener_says_zero_rather_than_failing(self):
+        """THE OTHER HALF: with no brackets left, pressing Remove on a stud
+        takes it away - and then the answer was read off the record that had
+        just been deleted, which is the "Missing Record" the owner saw."""
+        order = self._order()
+        order._cart_add(product_id=self.bracket.id, quantity=2)
+        bracket_line = order.order_line.filtered(
+            lambda line: line.product_id == self.bracket)[:1]
+        stud_line = order.order_line.filtered(
+            lambda line: line.product_id == self.stud)[:1]
+
+        # The brackets go first, by a path that leaves the stud behind in the
+        # recordset we are holding.
+        bracket_line.unlink()
+
+        answer = order._cart_update_line_quantity(stud_line.id, 0)
+
+        self.assertEqual(answer["quantity"], 0)
+        self.assertEqual(answer["line_id"], stud_line.id)
+        self.assertFalse(stud_line.exists())
+
+    def test_a_fastener_pressed_while_brackets_remain_comes_back(self):
+        order = self._order()
+        order._cart_add(product_id=self.bracket.id, quantity=3)
+        stud_line = order.order_line.filtered(
+            lambda line: line.product_id == self.stud)[:1]
+
+        answer = order._cart_update_line_quantity(stud_line.id, 0)
+
+        self.assertEqual(answer["quantity"], 3)
+        self.assertEqual(self._qty(order, self.stud), 3)
