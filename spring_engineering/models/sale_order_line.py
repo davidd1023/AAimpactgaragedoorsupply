@@ -34,6 +34,11 @@ class SaleOrderLine(models.Model):
             ("jamb_14", "Jamb brackets #14"),
             ("jamb_16", "Jamb brackets #16"),
             ("flag", "Flag angle"),
+            # EVERY JAMB BRACKET TAKES ONE OF EACH. Not per track and not per
+            # door: per bracket, wherever the bracket came from, which is why
+            # these two carry no parent - they answer to the whole cart.
+            ("stud", "Knurled studs"),
+            ("nut", "Flange nuts"),
         ],
         string="Preparation part",
         copy=False,
