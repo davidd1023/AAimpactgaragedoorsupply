@@ -1,6 +1,7 @@
 from odoo import http
 from odoo.http import request
 
+from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.website_sale_wishlist.controllers.main import WebsiteSaleWishlist
 
 
@@ -90,3 +91,40 @@ class Wishlist(WebsiteSaleWishlist):
             return True
 
         return self.remove_from_wishlist(wish.id)
+
+
+class ShopCardsKnowTheirVariant(WebsiteSale):
+    """Which variant each wishlisted card is for.
+
+    ODOO PUTS THE WORD "True" WHERE THE ID SHOULD BE. Its card template picks
+    the variant like this:
+
+        <t t-set="in_wish" t-value="product in products_in_wishlist"/>
+        <t t-set="product_variant_id"
+           t-value="in_wish or product._get_first_possible_variant_id()"/>
+
+    in_wish is a BOOLEAN, so a product already on the wishlist renders
+    data-product-product-id="True". Nothing can act on that: parseInt gives
+    NaN, and the handler - Odoo's or this module's - has no product to work
+    with.
+
+    It never mattered to Odoo, because its own button is disabled in exactly
+    that state, so the attribute is never read. Making the heart clickable is
+    what exposed it, and it is the whole of the bug the owner kept hitting:
+    adding worked and removing did not, removing worked right after adding
+    because the page still held the real id in the DOM, and any re-render -
+    another page, another category - brought the word "True" back and the
+    heart died again.
+
+    So the page is told which variant each wishlisted template is for, and the
+    template reads that instead of the boolean.
+    """
+
+    def _get_additional_shop_values(self, values, **kwargs):
+        vals = super()._get_additional_shop_values(values, **kwargs)
+        vals["aa_wishlisted_variants"] = {
+            wish.product_id.product_tmpl_id.id: wish.product_id.id
+            for wish in request.env["product.wishlist"].current()
+        }
+
+        return vals

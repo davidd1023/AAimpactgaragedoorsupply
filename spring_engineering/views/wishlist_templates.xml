@@ -15,6 +15,15 @@
   <template id="wishlist_button_is_a_toggle"
             inherit_id="website_sale_wishlist.add_to_wishlist">
 
+    <!-- THE VARIANT, RATHER THAN THE WORD "True". See the controller note:
+         in_wish is a boolean, and Odoo uses it as the variant id whenever the
+         product is already on the list - which no handler can act on. The
+         page now carries which variant each wishlisted template is for, and
+         falls back to Odoo's own choice for everything else. -->
+    <xpath expr="//t[@t-set='product_variant_id']" position="attributes">
+      <attribute name="t-value">(aa_wishlisted_variants or {}).get(product.id) or product._get_first_possible_variant_id()</attribute>
+    </xpath>
+
     <xpath expr="//button[@data-action='o_wishlist']" position="attributes">
       <attribute name="t-att-disabled"/>
       <attribute name="t-att-title">in_wish and btnTitleRemove or btnTitle</attribute>
