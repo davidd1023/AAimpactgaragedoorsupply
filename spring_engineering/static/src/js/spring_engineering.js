@@ -3736,6 +3736,10 @@ get warnings() {
         //                                         three other ways (a 1,739"
         //                                         spring against a 120" limit)
         //
+        // Put the other way round, on the 558 of those readings this code can
+        // be run against directly: the rule removed here would have fired on
+        // 29 of them and the reference agreed with 1.
+        //
         // So the reference does not compare the life it REPORTS against this
         // ceiling - it reports 599,000 happily. Its own message quotes the
         // same 350,000 we hold, which is what made this look right: the number

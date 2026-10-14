@@ -98,7 +98,15 @@ for (const file of files) {
             assembly: "Single",
             drum: i.drum,
             springId: ID_TEXT[sp.innerDiameter],
-            springs: i.springs ?? 1,
+            // TWO, NOT ONE, when the reading does not say. The Single
+            // readings carry no spring count and the reference defaults it to
+            // two; defaulting to one here puts the whole door on a single
+            // spring, which picks a thicker wire and invents warnings this
+            // code never raises. The source comment beside the cycles-low rule
+            // records the same trap catching the same kind of tool before -
+            // and it caught this one too, producing eight wire-over-max "false
+            // alarms" that were entirely my own.
+            springs: i.springs ?? 2,
             radius: REF_RADIUS[Number(i.radius)] ?? String(i.radius),
             ...(hi ? { liftType: "Hi-Lift", liftin: String(i.hiLift) } : {}),
             cycles: Number(i.cycles).toLocaleString("en-US"),

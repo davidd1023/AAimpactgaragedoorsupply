@@ -22,10 +22,17 @@ does not move the reading score at all - Duplex once raised five warnings
 where the reference raised eleven and every number still matched. The two
 `warn-check` tools are the only honest test of one, and the Single half of
 that pair did not exist until a hi-lift door came back from the shop page
-with a red warning the reference had never given. Across 1,256 Single
-readings the ceiling warning fired 59 times and the reference agreed on none
-of them; the same test on Duplex agreed 498 times. Two paths, two
+with a red warning the reference had never given. On 558 Single readings the
+ceiling warning fired 29 times and the reference agreed with 1; the same test
+on Duplex agrees 498 times against 1 disagreement. Two paths, two
 measurements, two different answers - which is exactly why both are run.
+
+DEFAULT THE SPRING COUNT TO TWO when a reading does not carry one, as
+warn-check-single.mjs does. The reference defaults it to two; defaulting to
+one puts the whole door on a single spring, picks a thicker wire, and invents
+false alarms that belong to the tool. It has now caught two tools in this
+repository, including this one - eight wire-over-max "disagreements" that
+vanished the moment the default was right.
 
 RUN BOTH MODES. `--ref-wire` feeds the reference's own wire back in, so a
 disagreement there is the RULE being wrong; one that shows up only in the
