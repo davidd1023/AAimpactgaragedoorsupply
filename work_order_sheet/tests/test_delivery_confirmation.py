@@ -83,11 +83,13 @@ class TestDeliveryConfirmation(HttpCase):
 
     def _sign(self, picking, name="Jane Customer", signature=SIGNATURE,
               items=None):
-        lines = picking._dispatch_lines()
+        """Tick rows the way the page does: one box per thing handed over."""
+        rows = picking._dispatch_items() if items is None else items
         data = {"signed_by": name, "signature": signature}
 
-        for move in (lines if items is None else items):
-            data["item_%s" % move.id] = "1"
+        for row in rows:
+            key = row["key"] if isinstance(row, dict) else row.id
+            data["item_%s" % key] = "1"
 
         return self.url_open(
             "/delivery/%s/sign" % picking.dispatch_access_token, data=data)
@@ -309,14 +311,15 @@ class TestDeliveryConfirmation(HttpCase):
 
     def test_the_list_is_split_the_way_the_floor_splits_it(self):
         picking = self._everything()
-        groups = dict(picking._dispatch_groups())
+        groups = {page: [item["name"] for item in items]
+                  for page, items in picking._dispatch_groups()}
 
         self.assertEqual(list(groups), ["Tracks", "Springs", "Cables",
                                         "Hardware"])
-        self.assertEqual(groups["Tracks"].product_id, self.track)
-        self.assertEqual(groups["Springs"].product_id, self.spring)
-        self.assertEqual(groups["Cables"].product_id, self.cable)
-        self.assertEqual(groups["Hardware"].product_id, self.hinge)
+        self.assertEqual(groups["Tracks"], [self.track.display_name])
+        self.assertEqual(groups["Springs"], [self.spring.display_name])
+        self.assertEqual(groups["Cables"], [self.cable.display_name])
+        self.assertEqual(groups["Hardware"], [self.hinge.display_name])
 
     def test_every_group_gets_a_button_of_its_own(self):
         """Eleven lengths of track are one answer, not eleven."""
@@ -353,3 +356,90 @@ class TestDeliveryConfirmation(HttpCase):
 
         self.assertTrue(tracks.dispatch_received)
         self.assertFalse((lines - tracks).filtered("dispatch_received"))
+
+    # --- a cable is one thing, however it is made ----------------------------
+
+    def _made_up_cable(self):
+        """A delivery carrying a cable the way a cable actually ships.
+
+        FOUR MOVES AGAINST ONE ORDER LINE - the reel, the sleeve, the thimble
+        and the stop - which is what a kit product explodes into. The customer
+        bought one made-up cable.
+        """
+        parts = [
+            self.env["product.product"].create({
+                "name": name, "type": "consu", "is_storable": True,
+                "list_price": 2.0})
+            for name in ('1/8" 7X19 GAC (500 FT REEL)', "Oval Sleeve 1/8",
+                         "Thimble 1/8", "Cable Stop 1/8")
+        ]
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "order_line": [(0, 0, {"product_id": self.cable.id,
+                                   "product_uom_qty": 2})],
+        })
+        sale_line = order.order_line[:1]
+        picking = self._delivery(((self.hinge, 4),))
+        source = picking.location_id
+        destination = picking.location_dest_id
+
+        for part in parts:
+            self.env["stock.move"].create({
+                "picking_id": picking.id,
+                "product_id": part.id,
+                "product_uom_qty": 2,
+                "sale_line_id": sale_line.id,
+                "location_id": source.id,
+                "location_dest_id": destination.id,
+            })
+
+        picking.action_confirm()
+
+        return picking
+
+    def test_a_made_up_cable_is_one_row_and_not_its_parts(self):
+        """THE BUG: the form asked the customer to tick a thimble."""
+        picking = self._made_up_cable()
+        names = [item["name"] for item in picking._dispatch_items()]
+
+        self.assertIn(self.cable.display_name, names)
+        self.assertNotIn("Thimble 1/8", names)
+        self.assertNotIn('1/8" 7X19 GAC (500 FT REEL)', names)
+        self.assertEqual(len(names), 2, names)
+
+    def test_the_cable_row_is_the_quantity_that_was_bought(self):
+        picking = self._made_up_cable()
+        cable = [item for item in picking._dispatch_items()
+                 if item["name"] == self.cable.display_name][0]
+
+        self.assertEqual(cable["quantity"], 2)
+        self.assertEqual(len(cable["moves"]), 4, "it lost its parts")
+
+    def test_the_cable_groups_with_the_cables(self):
+        picking = self._made_up_cable()
+        groups = {page: [item["name"] for item in items]
+                  for page, items in picking._dispatch_groups()}
+
+        self.assertEqual(groups.get("Cables"), [self.cable.display_name])
+
+    def test_one_tick_confirms_every_part_of_it(self):
+        picking = self._made_up_cable()
+        cable = [item for item in picking._dispatch_items()
+                 if item["name"] == self.cable.display_name][0]
+
+        self._sign(picking, items=[cable])
+
+        self.assertTrue(all(move.dispatch_received for move in cable["moves"]),
+                        "a part of the cable was left unconfirmed")
+        self.assertFalse(
+            picking._dispatch_lines().filtered(
+                lambda move: move.product_id == self.hinge
+            ).dispatch_received)
+
+    def test_the_log_names_the_cable_rather_than_its_parts(self):
+        picking = self._made_up_cable()
+        self._sign(picking)
+        log = " ".join(picking.message_ids.mapped("body"))
+
+        self.assertIn(self.cable.display_name, log)
+        self.assertNotIn("Thimble", log)
