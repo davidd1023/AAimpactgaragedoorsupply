@@ -184,19 +184,14 @@ class MrpProduction(models.Model):
         return rows
 
     def _aa_kit_rows(self):
-        """ONLY what goes in the hardware box (owner, 2026-10-14): the kit, its
-        drum, every piece of the kit, and the lift cables ordered with it. No
+        """ONLY what goes in the hardware box (owner, 2026-10-14): the kit, every
+        piece of the kit (drum included), and the lift cables ordered with it. No
         door size, track, lift or extras - those belong to other stations."""
         product = self.product_id
         qty = self.product_qty or 1.0
         rows = [("Kit", (product.product_tmpl_id.name or "").replace(" Hardware Kit", ""))]
-        drum = self.aa_sale_line_id.aa_drum if "aa_drum" in self.aa_sale_line_id._fields else False
-        if not drum:
-            ptav = product.product_template_attribute_value_ids.filtered(
-                lambda v: v.attribute_id.name == "Drum")[:1]
-            drum = (ptav.name or "").split(" ")[0] if ptav else False
-        if drum:
-            rows.append(("Drum", drum))
+        # No separate Drum row: the drum is already a piece in Box Contents
+        # (owner, 2026-10-14).
 
         bom = self.env["mrp.bom"].sudo()._bom_find(product, bom_type="phantom").get(product)
         if bom:
