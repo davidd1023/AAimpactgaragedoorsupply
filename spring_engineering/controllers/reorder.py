@@ -73,6 +73,13 @@ class ReorderWithItsSpecifications(CustomerPortal):
             lines = lines.filtered(lambda line: not line.track_prep_parent_id)
 
         cart_sudo = request.cart or request.website._create_cart()
+
+        # REORDERING REPLACES THE CART, which the owner asked for and which is
+        # the honest reading of the button: it says order THIS again, not add
+        # this to whatever is already here. The panel says so above the list,
+        # because a customer who has spent ten minutes filling a cart should
+        # not discover this by losing it.
+        cart_sudo.order_line.unlink()
         # Which new line each old one became, so a spring linked to its kit
         # comes back linked to the kit it arrived with.
         made = {}

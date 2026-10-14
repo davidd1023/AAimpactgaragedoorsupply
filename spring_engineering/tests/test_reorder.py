@@ -1,4 +1,5 @@
 import json
+import re
 
 from odoo.tests.common import HttpCase, tagged
 
@@ -139,9 +140,12 @@ class TestReorderAPreviousOrder(HttpCase):
             {(line.product_id, line.product_uom_qty) for line in cart.order_line},
             {(self.hinge, 4.0), (self.roller, 2.0)})
 
-    def test_reordering_twice_does_not_lose_the_first_one(self):
-        """Odoo adds to what is in the cart rather than replacing it, which is
-        what a customer building an order expects."""
+    def test_reordering_twice_leaves_one_copy_of_it(self):
+        """THE RULE CHANGED HERE, deliberately. This used to assert that a
+        second press ADDED a second copy, which is Odoo's behaviour and was
+        this module's until the owner asked for the other one: reordering says
+        order THIS again, not add this to whatever is in the cart. Pressing it
+        twice now leaves what the order had, once."""
         order = self._past_order()
         self.authenticate("admin", "admin")
 
@@ -151,7 +155,7 @@ class TestReorderAPreviousOrder(HttpCase):
 
         self.assertEqual(
             {line.product_id: line.product_uom_qty for line in cart.order_line},
-            {self.hinge: 8.0, self.roller: 4.0})
+            {self.hinge: 4.0, self.roller: 2.0})
 
 
 @tagged("post_install", "-at_install")
@@ -312,3 +316,92 @@ class TestReorderKeepsWhatWasConfigured(HttpCase):
 
         self.assertEqual(line.price_unit, 0.0)
         self.assertNotIn('0.2625" wire', line.name or "")
+
+
+@tagged("post_install", "-at_install")
+class TestReorderReplacesTheCart(HttpCase):
+    """Reordering says order THIS again, not add this to what is already here.
+
+    And the button that opens the panel has to stay alive while there is still
+    something to offer - Odoo greys it out whenever its own product history
+    comes back empty, which it does as soon as the cart holds the things the
+    customer usually buys.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.admin = self.env["res.users"].browse(2)
+        self.website = self.env["website"].search([], limit=1)
+        self.hinge = self.env["product.product"].create({
+            "name": "Replace Probe Hinge", "type": "consu", "list_price": 4.0,
+            "is_published": True, "sale_ok": True})
+        self.roller = self.env["product.product"].create({
+            "name": "Replace Probe Roller", "type": "consu", "list_price": 9.0,
+            "is_published": True, "sale_ok": True})
+
+    def _past_order(self):
+        order = self.env["sale.order"].create({
+            "partner_id": self.admin.partner_id.id,
+            "website_id": self.website.id,
+            "order_line": [(0, 0, {"product_id": self.hinge.id,
+                                   "product_uom_qty": 3})],
+        })
+        order.action_confirm()
+
+        return order
+
+    def _cart(self):
+        return self.env["sale.order"].search(
+            [("partner_id", "=", self.admin.partner_id.id),
+             ("state", "=", "draft")], order="id desc", limit=1)
+
+    def _add(self, product, qty=1):
+        return self.url_open(
+            "/shop/cart/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call", "params": {
+                "product_template_id": product.product_tmpl_id.id,
+                "product_id": product.id, "quantity": qty}}),
+            headers={"Content-Type": "application/json"})
+
+    def _reorder(self, order):
+        return self.url_open(
+            "/my/orders/reorder",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"order_id": order.id}}),
+            headers={"Content-Type": "application/json"}).json()
+
+    def test_what_was_in_the_cart_is_cleared_out(self):
+        order = self._past_order()
+        self.authenticate("admin", "admin")
+        self._add(self.roller, 5)
+        self.assertTrue(self._cart().order_line)
+
+        self._reorder(order)
+        cart = self._cart()
+
+        self.assertEqual(
+            {(line.product_id, line.product_uom_qty) for line in cart.order_line},
+            {(self.hinge, 3.0)},
+            "the old cart contents survived the reorder")
+
+    def test_the_panel_says_so_before_anybody_presses_it(self):
+        self._past_order()
+        self.authenticate("admin", "admin")
+        page = self.url_open("/shop/cart").text
+
+        self.assertIn("replacing what is in it", page)
+
+    def test_the_button_is_not_greyed_out_with_a_full_cart(self):
+        """Odoo leaves out of its history any product already in the cart, so
+        a cart holding what you usually buy disables the button. The orders
+        are still there to offer."""
+        self._past_order()
+        self.authenticate("admin", "admin")
+        self._add(self.hinge, 3)
+
+        page = self.url_open("/shop/cart").text
+        button = re.search(r"<button[^>]*id=\"quick_reorder_button\"[^>]*>", page)
+
+        self.assertTrue(button, "the quick reorder button is not on the page")
+        self.assertNotIn("disabled", button.group(0), button.group(0))

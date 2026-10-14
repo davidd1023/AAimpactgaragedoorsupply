@@ -27,7 +27,11 @@
 
     <xpath expr="//div[hasclass('offcanvas-body')]" position="inside">
       <div t-if="aa_reorder_orders" class="o_aa_reorder_orders mt-4">
-        <h6 class="text-muted text-uppercase small mb-2">Order it all again</h6>
+        <h6 class="text-muted text-uppercase small mb-1">Order it all again</h6>
+        <div class="small text-muted mb-2">
+          Puts everything from that order in your cart, replacing what is in it
+          now.
+        </div>
 
         <div class="o_aa_reorder_scroll">
         <div t-foreach="aa_reorder_orders" t-as="aa_order"
