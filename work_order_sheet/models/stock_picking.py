@@ -1143,11 +1143,15 @@ class StockPicking(models.Model):
         return True
 
     def action_confirm(self):
-        """Confirming a transfer is what puts its work on the benches."""
-        result = super().action_confirm()
-        self._work_station_sync()
+        """Confirming a transfer used to put its work on the benches.
 
-        return result
+        PUT AWAY FOR NOW, with the rest of the stations - sorting work onto
+        screens nobody is looking at would fill a table for nothing. The sort
+        itself is untouched and still reachable by hand through
+        action_work_station_sync, and the printed sheet uses the same page rule
+        as it always did, so none of this is lost.
+        """
+        return super().action_confirm()
 
     def action_work_station_sync(self):
         """The Actions menu entry, for a transfer confirmed before this
