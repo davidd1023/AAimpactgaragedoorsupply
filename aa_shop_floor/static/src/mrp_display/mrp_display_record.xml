@@ -4,7 +4,9 @@
         <xpath expr="//span[@class='o_finished_product mt-auto mb-0']" position="after">
             <div t-if="record.aa_shop_spec" class="o_aa_shop_spec border rounded p-2 bg-100">
                 <t t-set="aaRows" t-value="record.aa_shop_spec.split('\n')"/>
-                <t t-foreach="aaRows" t-as="aaRow" t-key="aaRow_index">
+                <!-- Overview shows only the summary; the full list is at the station. -->
+                <t t-set="aaLimit" t-value="aaSpecLimit(aaRows)"/>
+                <t t-foreach="aaRows.slice(0, aaLimit)" t-as="aaRow" t-key="aaRow_index">
                     <t t-set="aaParts" t-value="aaRow.split('|')"/>
                     <div t-if="!aaParts[1] and aaParts[2] === 'c'"
                          class="o_aa_shop_spec_section o_aa_check d-flex align-items-center gap-2 fw-bold text-uppercase border-top mt-2 pt-1 cursor-pointer"
@@ -30,6 +32,10 @@
                         <span class="fw-bold text-end" t-esc="aaParts[1]"/>
                     </div>
                 </t>
+                <div t-if="aaLimit &lt; aaRows.length" class="o_aa_spec_more d-flex justify-content-between text-muted border-top mt-2 pt-1">
+                    <span t-esc="aaSpecSummary(aaRows, aaLimit)"/>
+                    <span t-esc="aaPackedCount(aaRows)"/>
+                </div>
             </div>
             <t t-if="record.aa_station_board">
                 <t t-set="aaBoardData" t-value="aaBoard()"/>
