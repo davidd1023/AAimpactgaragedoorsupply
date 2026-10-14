@@ -108,8 +108,8 @@
             const kitSel = el("select", { class: "form-select" },
                 products.map((p) => el("option", { value: p.id, text: p.name })));
             const attrsBox = el("div", { class: "row g-2" });
-            // Shop name for the option (owner, 2026-10-14: "Cables" reads "Cable Drum").
-            const aaLabel = (name) => (name === "Cables" ? "Cable Drum" : name);
+            // Shop name for the option (owner, 2026-10-14: "Cables" reads "Cable Drums").
+            const aaLabel = (name) => (name === "Cables" ? "Cable Drums" : name);
             const optsBox = el("div", { class: "aa-opts" });
             const tag = el("input", { type: "text", class: "form-control", maxlength: "80", placeholder: "e.g. Smith - 16x8" });
             const wFt = el("input", { type: "number", min: "0", class: "form-control", placeholder: "ft" });
