@@ -25,7 +25,7 @@ patch(MrpDisplayRecord.prototype, {
     aaSpecSummary(rows, limit) {
         const title = rows[limit].split("|")[0];
         const items = rows.slice(limit).filter((row) => row.split("|")[2] === "c").length;
-        return items ? `${title}: ${items} items` : title;
+        return items ? `${title}: ${items} ${items === 1 ? "item" : "items"}` : title;
     },
 
     async aaRelease(method) {
