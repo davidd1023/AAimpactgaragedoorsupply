@@ -497,6 +497,13 @@ class SaleOrder(models.Model):
             if warning:
                 result["warning"] = "\n".join(filter(None, [result.get("warning"), warning]))
 
+        # AFTER the track's own parts, because those parts are brackets and
+        # the fasteners are counted from them.
+        warning = self._fastener_sync()
+
+        if warning:
+            result["warning"] = "\n".join(filter(None, [result.get("warning"), warning]))
+
         return result
 
     def _cart_update_line_quantity(self, line_id, quantity, **kwargs):
@@ -509,6 +516,14 @@ class SaleOrder(models.Model):
         ship exactly that.
         """
         line = self.env["sale.order.line"].browse(line_id)
+
+        # A FASTENER IS NOT OPTIONAL, so it is not editable on its own either.
+        # The cart owes one per bracket; changing that number by hand would
+        # ship brackets nobody can fit.
+        if line.exists() and line.track_prep_role in self.FASTENER_ROLES:
+            self._fastener_sync()
+
+            return {"quantity": line.product_uom_qty, "line_id": line.id}
 
         if line.exists() and line.track_prep_parent_id:
             parent = line.track_prep_parent_id
@@ -526,4 +541,125 @@ class SaleOrder(models.Model):
         if line.exists():
             self._track_prep_sync(line)
 
+        self._fastener_sync()
+
         return result
+
+    # --- what every jamb bracket is fitted with -------------------------------
+    #
+    # A BRACKET DOES NOT GO ON THE DOOR BY ITSELF. Each one takes a knurled
+    # stud and a flange nut, so the cart owes one of each per bracket - four
+    # brackets, four studs, four nuts.
+    #
+    # WRITTEN AS A RULE ABOUT THE CART, not as a step in the two places a
+    # bracket can arrive. It can come from the shop, bought on its own, or
+    # from a prepared track, which adds a graduated mix of sizes by itself -
+    # and the quantity of either can change afterwards. Counting what the cart
+    # holds and making the fasteners match is one rule that cannot disagree
+    # with itself; a step bolted onto each path is two rules that can.
+    FASTENER_ROLES = ("stud", "nut")
+
+    # THE OWNER'S OWN SPELLINGS FIRST - "1/4 X 3/4 KNURLEL STUD 18-8" and
+    # "Flage Nuts 1/4 20" - then a tolerant read, because a name typed twice is
+    # a name typed differently. The patterns allow the spelling with the n and
+    # the one without, which is the difference between flange and flage.
+    FASTENER_NAMES = {
+        "stud": "1/4 X 3/4 KNURLEL STUD 18-8",
+        "nut": "Flage Nuts 1/4 20",
+    }
+    FASTENER_PATTERNS = {
+        "stud": (r"\bstud\b", r"knurl"),
+        "nut": (r"\bnuts?\b", r"\bflan?ge\b"),
+    }
+    FASTENER_LABELS = {"stud": "knurled stud", "nut": "flange nut"}
+
+    def _fastener_is_bracket(self, line):
+        """Is this cart line a jamb bracket, however it got here?"""
+        product = line.product_id
+
+        if not product:
+            return False
+
+        if product.default_code and product.default_code in self.BRACKET_CODES.values():
+            return True
+
+        name = product.display_name or ""
+
+        return bool(
+            re.search(r"\bjamb\b", name, re.I)
+            and re.search(r"\bbracket\b", name, re.I)
+        )
+
+    def _fastener_product(self, role):
+        """The stud or the nut, found the way the brackets are found."""
+        Product = self.env["product.product"].sudo()
+        exact = Product.search(
+            [("name", "=ilike", self.FASTENER_NAMES[role])], limit=1)
+
+        if exact:
+            return exact
+
+        first, second = self.FASTENER_PATTERNS[role]
+
+        for product in Product.search([("name", "ilike", "/4")], order="name"):
+            name = product.name or ""
+
+            if re.search(first, name, re.I) and re.search(second, name, re.I):
+                return product
+
+        # The same settings fallback the flag angle has, for a catalogue that
+        # names these something this cannot read.
+        return self._track_prep_configured_part(role)
+
+    def _fastener_sync(self):
+        """One stud and one nut for every jamb bracket in the cart."""
+        self.ensure_one()
+        brackets = sum(
+            line.product_uom_qty
+            for line in self.order_line
+            if self._fastener_is_bracket(line)
+        )
+        existing = self.order_line.filtered(
+            lambda line: line.track_prep_role in self.FASTENER_ROLES)
+
+        if not brackets:
+            existing.unlink()
+
+            return None
+
+        missing = []
+
+        for role in self.FASTENER_ROLES:
+            product = self._fastener_product(role)
+            line = existing.filtered(
+                lambda l, role=role: l.track_prep_role == role)[:1]
+
+            if not product:
+                # NAMED, NOT COUNTED. "A part is missing" sends somebody
+                # looking through a catalogue; the name can be searched for.
+                missing.append("%s (%s)" % (
+                    self.FASTENER_LABELS[role], self.FASTENER_NAMES[role]))
+                line.unlink()
+                continue
+
+            if line:
+                if line.product_uom_qty != brackets:
+                    line.product_uom_qty = brackets
+                continue
+
+            self.env["sale.order.line"].create({
+                "order_id": self.id,
+                "product_id": product.id,
+                "product_uom_qty": brackets,
+                "track_prep_role": role,
+            })
+
+        if missing:
+            return _(
+                "We are missing a part that goes with the jamb brackets (%s),"
+                " so it was not added. Please call us and we will send it with"
+                " them.",
+                ", ".join(missing),
+            )
+
+        return None
