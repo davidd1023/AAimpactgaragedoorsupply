@@ -144,11 +144,11 @@ class Catalog:
         if door.get('cables'):
             size = cable_size(door.get('drum'), lift)
             if not height:
-                notes.append("Drum Cables: enter the door height")
+                notes.append("Cable Drum: enter the door height")
             elif lift == 'highlift':
-                notes.append(f"Drum Cables: high-lift {size} cables are cut by AA")
+                notes.append(f"Cable Drum: high-lift {size} cables are cut by AA")
             elif 'LHR' in track:
-                notes.append(f"Drum Cables: LHR {size} cables are cut by AA")
+                notes.append(f"Cable Drum: LHR {size} cables are cut by AA")
             else:
                 radius = '12' if track.endswith('12R') else '15'
                 feet = max(7, math.ceil(height / 12.0 - 1e-9))
@@ -156,7 +156,7 @@ class Catalog:
                 if p:
                     items.append((p, CABLE_QTY_PER_DOOR, 'Cables'))
                 else:
-                    notes.append(f"Drum Cables: no prepared {size} pair for a {feet}' door ({radius}R) - AA cuts it")
+                    notes.append(f"Cable Drum: no prepared {size} pair for a {feet}' door ({radius}R) - AA cuts it")
 
         trim = door.get('trims')
         if trim:
