@@ -11,14 +11,27 @@ patch(MrpDisplay.prototype, {
         const showMOs = this.state.activeResModel === "mrp.production";
         let records = super.defineRelevantRecords(...arguments) || [];
         if (showMOs) {
-            // One card per sale order: only the order's first open MO is shown.
-            records = records.filter((rec) => {
+            // One card per sale order: the order's first MO that passes the
+            // current filters carries the card (a filter such as "MO Ready" may
+            // hide the track orders, so it can't always be the first MO).
+            const orderOf = (rec) => {
                 try {
                     const board = JSON.parse(rec.data.aa_order_board || "{}");
-                    return !board.grouped || board.leader;
+                    return board.grouped ? board.order : false;
                 } catch {
-                    return true;
+                    return false;
                 }
+            };
+            const carrier = {};
+            for (const rec of records) {
+                const order = orderOf(rec);
+                if (order && (!(order in carrier) || rec.resId < carrier[order])) {
+                    carrier[order] = rec.resId;
+                }
+            }
+            records = records.filter((rec) => {
+                const order = orderOf(rec);
+                return !order || carrier[order] === rec.resId;
             });
         }
         const moId = (rec) => (showMOs ? rec.resId : rec.data.production_id?.id || 0);
