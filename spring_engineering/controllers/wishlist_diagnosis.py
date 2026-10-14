@@ -78,7 +78,43 @@ class WishlistDiagnosis(http.Controller):
 
         body.append(Markup("</table>"))
 
+        # AND A WAY OUT. A row the page cannot reach is a row the website
+        # cannot delete, because removing one goes through the list it is
+        # missing from. Clicking the heart again now adopts such a row rather
+        # than failing, which is the ordinary way out - but a product that
+        # stays unpublished can never be reached at all, and those rows have to
+        # be clearable from somewhere.
+        unreachable = rows - visible
+
+        if unreachable:
+            body.append(Markup(
+                "<form method='post' action='/shop/wishlist/diagnose/clear'>"
+                "<input type='hidden' name='csrf_token' value='%s'/>"
+                "<p><button type='submit'>Remove the %s row(s) above that "
+                "cannot be reached</button> - yours only, and nobody else's."
+                "</p></form>") % (request.csrf_token(), len(unreachable)))
+
         return request.make_response(
             Markup("<html><body style='font-family: Arial, sans-serif'>%s"
                    "</body></html>") % Markup("").join(body),
             headers=[("Content-Type", "text/html; charset=utf-8")])
+
+    @http.route("/shop/wishlist/diagnose/clear", type="http", auth="user",
+                methods=["POST"], website=True, sitemap=False)
+    def clear(self, **kwargs):
+        """Delete the signed-in administrator's own unreachable rows.
+
+        ONLY THE ONES THE PAGE CANNOT REACH, and only this partner's. A wish
+        that is working is left alone, and nobody else's wishlist is touched -
+        this exists to undo a stuck row, not to tidy the database.
+        """
+        if not request.env.user.has_group("base.group_system"):
+            raise AccessError(request.env._("Administrators only."))
+
+        Wish = request.env["product.wishlist"].sudo().with_context(
+            active_test=False)
+        rows = Wish.search(
+            [("partner_id", "=", request.env.user.partner_id.id)])
+        (rows - request.env["product.wishlist"].current()).unlink()
+
+        return request.redirect("/shop/wishlist/diagnose")
