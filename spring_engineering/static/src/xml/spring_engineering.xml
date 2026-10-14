@@ -1249,6 +1249,21 @@
 
             <t t-if="wireSizeVisible">
 
+            <!-- A TITLE FOR THE BLOCK, in the class the Price label already
+                 uses rather than one of its own. The owner asked for it to
+                 look like that label, and the surest way to look like
+                 something is to be it: whatever the stylesheet does to
+                 se-rowR-header - a black bar here, a small grey word on the
+                 shop - this follows without being told.
+
+                 INSIDE THE SAME GATE AS THE ROW BELOW IT, so a title never
+                 appears over an empty space: the wire size and everything
+                 under it show once there is something to calculate, and so
+                 does this. The Duplex results have their own headers - Outer,
+                 Inner, Other - and are left alone. -->
+
+            <div class="se-rowR-header">Results</div>
+
             <div class="se-row">
 
                 <span>Wire Size</span>
