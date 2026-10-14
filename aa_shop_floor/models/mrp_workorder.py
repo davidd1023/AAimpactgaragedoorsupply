@@ -70,8 +70,10 @@ class MrpProduction(models.Model):
             wos = production.workorder_ids.filtered(lambda wo: wo.state not in ("done", "cancel"))
             waiting = wos.filtered(lambda wo: wo.workcenter_id == pending)
             released = (wos - waiting).filtered(lambda wo: wo.state not in LOCKED_STATES)
-            stations = (waiting.mapped(lambda wo: wo._aa_own_station())
-                        | (wos - waiting).workcenter_id)
+            # A loop, not mapped(): mapped() calls the function once on an empty set.
+            stations = (wos - waiting).workcenter_id
+            for wo in waiting:
+                stations |= wo._aa_own_station()
             production.aa_station_board = json.dumps({
                 "can_assign": can_assign,
                 "received": received,
