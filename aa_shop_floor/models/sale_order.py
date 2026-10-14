@@ -36,6 +36,27 @@ class SaleOrder(models.Model):
             return "cable"
         return None
 
+    def _aa_cables_by_kit(self, kinds):
+        """{kit line: [cable lines]} - the lift cables that go in each kit's box.
+
+        A dealer order lists each door's kit and then that door's extras, so a
+        cable belongs to the closest kit line above it (or the first kit when
+        it comes before all of them). Cables bought without a kit are not
+        boxed and keep a card of their own.
+        """
+        ordered = sorted(kinds, key=lambda l: (l.sequence, l.id))
+        kits = [l for l in ordered if kinds[l] == "kit"]
+        result = {}
+        if not kits:
+            return result
+        current = kits[0]
+        for line in ordered:
+            if kinds[line] == "kit":
+                current = line
+            elif kinds[line] == "cable":
+                result.setdefault(current, []).append(line)
+        return result
+
     def _aa_create_station_productions(self):
         """One manufacturing order per line that a station has to prepare.
 
@@ -51,9 +72,13 @@ class SaleOrder(models.Model):
         Production = self.env["mrp.production"].sudo()
         Bom = self.env["mrp.bom"].sudo()
         for order in self:
+            kinds = {line: self._aa_station_kind(line, spring_tmpl) for line in order.order_line}
+            cables_by_kit = self._aa_cables_by_kit(kinds)
+            boxed = set().union(*cables_by_kit.values()) if cables_by_kit else set()
             for line in order.order_line:
-                kind = self._aa_station_kind(line, spring_tmpl)
-                if not kind or Production.search_count([("aa_sale_line_id", "=", line.id)]):
+                kind = kinds[line]
+                if not kind or line in boxed \
+                        or Production.search_count([("aa_sale_line_id", "=", line.id)]):
                     continue
                 if kind == "spring":
                     bom = Bom._aa_custom_spring_bom()
@@ -70,6 +95,7 @@ class SaleOrder(models.Model):
                     "aa_sale_line_id": line.id,
                     "aa_station_kind": kind,
                     "aa_spring_spec_json": line.spring_spec_json if kind == "spring" else False,
+                    "aa_cable_line_ids": [(6, 0, [c.id for c in cables_by_kit.get(line, [])])],
                 }
                 picking_type = order.warehouse_id.manu_type_id
                 if picking_type:
