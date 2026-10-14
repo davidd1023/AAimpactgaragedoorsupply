@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="mrp_workorder.MrpDisplayRecord" t-inherit-mode="extension">
+        <xpath expr="//span[@class='o_finished_product mt-auto mb-0']" position="after">
+            <div t-if="record.aa_shop_spec" class="o_aa_shop_spec border rounded p-2 bg-100">
+                <t t-foreach="record.aa_shop_spec.split('\n')" t-as="aaRow" t-key="aaRow_index">
+                    <div class="d-flex justify-content-between gap-3">
+                        <span class="text-muted text-nowrap" t-esc="aaRow.split('|')[0]"/>
+                        <span class="fw-bold text-end" t-esc="aaRow.split('|').slice(1).join('|')"/>
+                    </div>
+                </t>
+            </div>
+        </xpath>
+    </t>
+</templates>

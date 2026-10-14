@@ -38,3 +38,12 @@ class SaleOrderLine(models.Model):
         string="Preparation part",
         copy=False,
     )
+
+    # THE SPRING AS DATA (JSON): assembly, LH/RH count and each spring's wire,
+    # I.D. and length. Written by add_assembly_lines; aa_shop_floor turns it
+    # into the Springs work order when the order is confirmed.
+    spring_spec_json = fields.Text(
+        string="Spring Spec (data)",
+        copy=False,
+        readonly=True,
+    )

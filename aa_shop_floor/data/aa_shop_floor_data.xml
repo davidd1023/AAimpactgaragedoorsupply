@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Runs on install AND on every update: makes sure the custom spring has a
+         bill of materials with one operation at the Springs work center, so its
+         manufacturing orders land on the Springs station. Only adds, never removes. -->
+    <function model="mrp.bom" name="_aa_custom_spring_bom"/>
+</odoo>

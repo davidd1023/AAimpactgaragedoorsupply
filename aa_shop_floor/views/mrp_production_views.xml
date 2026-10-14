@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_production_form_aa_shop_floor" model="ir.ui.view">
+        <field name="name">mrp.production.form.aa.shop.floor</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Shop Floor" name="aa_shop_floor" invisible="not aa_shop_spec">
+                    <group>
+                        <field name="aa_sale_line_id" readonly="1"/>
+                        <field name="aa_shop_spec" readonly="1"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

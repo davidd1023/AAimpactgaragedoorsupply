@@ -395,10 +395,37 @@ def quote_assembly(spec, factor=None):
         f'Door: {weight} lb, {height[0]}\' {height[1]}", {cycles:,} cycles',
     ])
 
+
+    # THE SPRING AS DATA, for the shop floor (aa_shop_floor). The description
+    # above is for people; the Springs work order is built from this.
+    # Hand: half LH, half RH, an odd one goes LH (owner, 2026-10-14). A Duplex
+    # inner spring is the same hand as its outer.
+    lh = (springs + 1) // 2
+    spec_data = {
+        "assembly": assembly,
+        "springs": springs,
+        "lh": lh,
+        "rh": springs - lh,
+        "items": [
+            {
+                "role": item.get("role", "Spring"),
+                "wire": float(item["wire"]),
+                "id": float(item["id"]),
+                "length": float(item["length"]),
+            }
+            for item in items
+        ],
+        "door": {
+            "weight": weight,
+            "height": "%s' %s\"" % (height[0], height[1]),
+            "cycles": cycles,
+        },
+    }
     return {
         "springs": springs,
         "assembly": assembly,
         "description": description,
+        "spec": spec_data,
         "assembly_total": assembly_total,
         "total": total,
         "cones": cones,
@@ -441,7 +468,12 @@ def add_assembly_lines(order, quote, qty=1, note=""):
     })
     # Written after creation: price_unit is computed from the product and
     # the pricelist on create, and the product deliberately lists at zero.
-    line.write({"price_unit": assembly_total})
+    # The spec travels with the line so a confirmed order can build its
+    # Springs work order from data instead of from this description.
+    line_values = {"price_unit": assembly_total}
+    if quote.get("spec"):
+        line_values["spring_spec_json"] = json.dumps(quote["spec"])
+    line.write(line_values)
     target = round(assembly_total * qty, 2)
 
     # WHAT WE RECEIVE HAS TO BE THE PRICE WE COMPUTED, WHATEVER THE TAXES

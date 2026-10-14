@@ -71,6 +71,30 @@ charge, but not secret - it is a commodity price. Default $1.46/lb, in
   receives rates with it already applied.
 - The labour charge is flat per assembly and added AFTER the markup.
 
+## Shop Floor (`aa_shop_floor`)
+
+### Each station shows only its own work
+
+Stated by the owner, 2026-10-14: the worker opens Shop Floor and knows what to do
+without going anywhere else. **Spring specs never go on Hardware.** The "cable" of
+a spring is its WIRE size (.250, .262...), not the lift cable on the drums - the
+lift cable belongs to Hardware.
+
+### Spring hand (LH / RH)
+
+Stated by the owner, 2026-10-14:
+
+- 2 or 4 springs: half LH, half RH.
+- 1 spring is LH; an odd count gives the extra one to LH (3 = 2 LH + 1 RH).
+- A Duplex inner spring is the SAME hand as its outer.
+
+### How a custom spring reaches the Springs station
+
+Spring Engineering writes `spring_spec_json` on the sale line (add_assembly_lines).
+On confirmation, `aa_shop_floor` makes ONE MO per line (not a route, which would
+merge different specs) with the custom spring BoM: no components, one operation at
+the Springs work center. The card shows `aa_shop_spec` ("Label|Value" rows).
+
 ## Git
 
 Never `git push`. Use `odoosh-push`.
