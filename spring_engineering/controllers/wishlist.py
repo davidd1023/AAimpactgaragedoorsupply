@@ -56,3 +56,37 @@ class Wishlist(WebsiteSaleWishlist):
         })
 
         return existing
+
+    @http.route("/shop/wishlist/remove_product", type="jsonrpc", auth="public",
+                website=True)
+    def remove_product_from_wishlist(self, product_id, **kw):
+        """Take a product off the wishlist, found by the product.
+
+        A PRODUCT CARD KNOWS NO ROW ID. Odoo removes a wish by its own id,
+        which the wishlist page has and the shop does not - so the shop could
+        add and never take away. This finds the row the same way the page that
+        lists it does, and then hands it to Odoo's own route so the session
+        bookkeeping a signed-out visitor depends on is done once, there.
+
+        ARCHIVED ROWS INCLUDED. A row the page cannot reach is exactly the one
+        somebody needs to clear, and refusing to look at it would leave the
+        heart stuck red with no way back.
+        """
+        Wish = request.env["product.wishlist"].sudo().with_context(
+            active_test=False)
+
+        if request.website.is_public_user():
+            wish = Wish.search([
+                ("id", "in", request.session.get("wishlist_ids") or []),
+                ("product_id", "=", product_id),
+            ], limit=1)
+        else:
+            wish = Wish.search([
+                ("partner_id", "=", request.env.user.partner_id.id),
+                ("product_id", "=", product_id),
+            ], limit=1)
+
+        if not wish:
+            return True
+
+        return self.remove_from_wishlist(wish.id)

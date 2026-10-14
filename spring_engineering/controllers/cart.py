@@ -1,3 +1,5 @@
+from odoo.http import request
+
 from odoo.addons.website_sale.controllers.cart import Cart
 
 
@@ -77,3 +79,48 @@ class TrackPreparationCart(Cart):
         # The parts' quantities already follow the track's, so dividing by it
         # is what turns four brackets for two tracks back into two for one.
         return total / line.product_uom_qty
+
+    # --- reordering a whole order from the cart -------------------------------
+    #
+    # ODOO'S QUICK REORDER OFFERS PRODUCTS, NOT ORDERS. Its panel lists the
+    # lines of the last ten confirmed orders, grouped by day, to be added one
+    # at a time - and the button that opens it is DISABLED when that list comes
+    # back empty, which is why it looked like it did nothing at all.
+    #
+    # What the owner asked for is the other shape: show the orders, pick one,
+    # and have everything on it in the cart. The adding already exists -
+    # /my/orders/reorder walks an order's lines and adds each one - so this is
+    # the half that was missing: which orders to offer.
+    AA_REORDER_LIMIT = 10
+
+    def _aa_previous_orders(self):
+        """The customer's own finished orders, newest first."""
+        if request.website.is_public_user():
+            return request.env["sale.order"].browse()
+
+        return request.env["sale.order"].sudo().search(
+            [
+                ("partner_id", "=", request.env.user.partner_id.id),
+                # CONFIRMED, WHICH IN THIS VERSION IS THE WHOLE STORY. An
+                # earlier draft of this also allowed 'done', on the assumption
+                # that a locked order sits in a state of its own - it does not.
+                # Odoo 19 keeps a locked order at 'sale' and records the lock
+                # in a separate flag, so asking for 'done' asks for a state no
+                # sale order can be in.
+                ("state", "=", "sale"),
+                # AND ONE TAKEN OVER THE PHONE IS STILL YOURS. Odoo filters the
+                # history to orders placed on this website, which hides every
+                # order the office entered in the back end - those carry no
+                # website at all.
+                ("website_id", "in", (False, request.website.id)),
+            ],
+            order="date_order desc, id desc",
+            limit=self.AA_REORDER_LIMIT,
+        )
+
+    def _cart_values(self, **post):
+        """The documented hook for extra values on the cart page."""
+        values = super()._cart_values(**post)
+        values["aa_reorder_orders"] = self._aa_previous_orders()
+
+        return values

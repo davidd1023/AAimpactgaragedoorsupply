@@ -1,0 +1,23 @@
+/* THE WISHLISTED STATE, COLOURED BY A CLASS RATHER THAN BY [disabled].
+
+   website_sale_wishlist draws the filled red heart with
+   `.o_add_wishlist[disabled] .fa:before`, and disables the button to get it.
+   This shop needs the button clickable - the heart is how a customer takes a
+   product OFF the list - so the same two rules are keyed on the class the
+   server already sets, o_in_wishlist.
+
+   The second rule matters as much as the first: with the "show on hover"
+   option, a heart that is not disabled is invisible until the card is
+   hovered, so dropping the attribute without this would have made a
+   wishlisted product look exactly like one that was not. */
+.o_wsale_products_opt_has_wishlist .o_add_wishlist.o_in_wishlist .fa:before,
+.o_add_wishlist.o_in_wishlist .fa:before {
+    content: "\f004";
+    color: var(--addWishlist-color-active, #ff3d3a);
+}
+
+.o_wsale_products_opt_wishlist_fixed.o_wsale_products_opt_wishlist_fixed_onhover
+.oe_product_cart:where(:not(:hover):not(:focus-visible):not(:focus-within))
+.o_add_wishlist.o_in_wishlist {
+    opacity: 1;
+}
