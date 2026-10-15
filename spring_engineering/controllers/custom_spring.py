@@ -49,8 +49,8 @@ def stocked_combos():
 def quote_custom(spec):
     """Price a matched spring. Returns {"error": ...} or a quote add_assembly_lines books.
 
-    Same formula as the calculator: (steel + cones + filler) x markup, then the
-    flat labour, once per order line.
+    Same formula as the calculator: weight x sell price per lb (labour
+    included), plus cones and filler at cost x markup.
     """
     spec = spec or {}
     wire_code, inner, wind = str(spec.get("wire", "")), str(spec.get("id", "")), str(spec.get("wind", ""))
@@ -88,7 +88,7 @@ def quote_custom(spec):
     filler_inches = length if diameter == FILLER_SPRING_ID else 0.0
 
     cones = round(springs * prices["cones"][diameter] * factor, 2)
-    steel = round(springs * weight_each * per_lb * factor, 2)
+    steel = round(springs * weight_each * per_lb, 2)  # sell price per lb, labour included
     filler_feet = round(springs * filler_inches / 12.0, 4)
     filler = round(filler_feet * FILLER_PRICE_PER_FOOT * factor, 2)
     assembly_total = round(cones + steel + labor, 2)
