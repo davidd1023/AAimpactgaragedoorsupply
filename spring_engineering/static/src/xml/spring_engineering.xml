@@ -23,7 +23,7 @@
 
                     <!-- Sizes the wrapper to the value on show, so the
                          select below covers that text and nothing more. -->
-                    <span class="se-select-sizer" t-esc="state.assembly"/>
+                    <span class="se-select-sizer" t-esc="assemblyLabel"/>
 
                 <select
                     t-model="state.assembly"
@@ -225,7 +225,7 @@
 
                     <!-- Sizes the wrapper to the value on show, so the
                          select below covers that text and nothing more. -->
-                    <span class="se-select-sizer" t-esc="state.liftType"/>
+                    <span class="se-select-sizer" t-esc="liftTypeLabel"/>
 
                 <select
                     t-model="state.liftType"
@@ -339,7 +339,7 @@
 
                     <!-- Sizes the wrapper to the value on show, so the
                          select below covers that text and nothing more. -->
-                    <span class="se-select-sizer" t-esc="state.drum || 'Select a Drum'"/>
+                    <span class="se-select-sizer" t-esc="drumLabel"/>
 
                 <select
                     t-model="state.drum"

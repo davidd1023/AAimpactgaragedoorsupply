@@ -3,6 +3,7 @@
 import { Component, onWillStart, useEffect, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
+import { _t } from "@web/core/l10n/translation";
 
 // --- Spring length constants ---------------------------------------------
 // Verified exactly (to the cent) against 11 reference results from the
@@ -885,34 +886,34 @@ function formatWire(wire) {
 // assumption held on the hi-lift drums as it had on the standard ones.
 const DRUM_INFO = {
     "CANIMEX/TF D400-96": [
-        ["Max Height", '96"'],
-        ["Max Weight", "530 lb"],
-        ["Max Cable Diameter", '1/8"'],
+        [_t("Max Height"), '96"'],
+        [_t("Max Weight"), "530 lb"],
+        [_t("Max Cable Diameter"), '1/8"'],
     ],
     "CANIMEX/TF D400-144": [
-        ["Max Height", '144"'],
-        ["Max Weight", "750 lb"],
-        ["Max Cable Diameter", '5/32"'],
+        [_t("Max Height"), '144"'],
+        [_t("Max Weight"), "750 lb"],
+        [_t("Max Cable Diameter"), '5/32"'],
     ],
     "CANIMEX/TF D525-216": [
-        ["Max Height", '216"'],
-        ["Max Weight", "1500 lb"],
-        ["Max Cable Diameter", '3/16"'],
+        [_t("Max Height"), '216"'],
+        [_t("Max Weight"), "1500 lb"],
+        [_t("Max Cable Diameter"), '3/16"'],
     ],
     "CANIMEX/TF 525-54HL": [
-        ["Max Height", '234"'],
-        ["Max Weight", "1000 lb"],
-        ["Max Cable Diameter", '3/16"'],
+        [_t("Max Height"), '234"'],
+        [_t("Max Weight"), "1000 lb"],
+        [_t("Max Cable Diameter"), '3/16"'],
     ],
     "CANIMEX/TF 575-120": [
-        ["Max Height", '264"'],
-        ["Max Weight", "1000 lb"],
-        ["Max Cable Diameter", '3/16"'],
+        [_t("Max Height"), '264"'],
+        [_t("Max Weight"), "1000 lb"],
+        [_t("Max Cable Diameter"), '3/16"'],
     ],
     "CANIMEX/TF D800-120": [
-        ["Max Height", '384"'],
-        ["Max Weight", "2200 lb"],
-        ["Max Cable Diameter", '1/4"'],
+        [_t("Max Height"), '384"'],
+        [_t("Max Weight"), "2200 lb"],
+        [_t("Max Cable Diameter"), '1/4"'],
     ],
 };
 
@@ -2143,8 +2144,8 @@ function asNumber(value) {
 }
 
 // Shown once, as its own message, whenever any warning is raised.
-const WARNING_NOTE =
-    "Use extreme caution when designing springs for use with this drum.";
+const WARNING_NOTE = _t(
+    "Use extreme caution when designing springs for use with this drum.");
 
 // The Spring ID each assembly opens on - the FIRST option its dropdown
 // offers, which matters because that is what a browser falls back to showing
@@ -3702,10 +3703,9 @@ get warnings() {
                 found.push({
                     id: "wire-over-max",
                     severity: "red",
-                    message:
-                        "Wire size exceeds " +
-                        wireLimits.maxText +
-                        " maximum for this I.D.",
+                    message: _t(
+                        "Wire size exceeds %s maximum for this I.D.",
+                        wireLimits.maxText),
                 });
             }
 
@@ -3713,10 +3713,9 @@ get warnings() {
                 found.push({
                     id: "wire-under-min",
                     severity: "red",
-                    message:
-                        "Wire size is less than the minimum of " +
-                        wireLimits.minText +
-                        " for this I.D.",
+                    message: _t(
+                        "Wire size is less than the minimum of %s for this I.D.",
+                        wireLimits.minText),
                 });
             }
         }
@@ -3782,10 +3781,9 @@ get warnings() {
             found.push({
                 id: "cycles-low",
                 severity: "red",
-                message:
-                    "This wire size computes to " +
-                    this.cycleLife +
-                    ". Low Cycle Life",
+                message: _t(
+                    "This wire size computes to %s. Low Cycle Life",
+                    this.cycleLife),
             });
         }
     }
@@ -3814,18 +3812,16 @@ get warnings() {
             found.push({
                 id: "hilift-over-max",
                 severity: "red",
-                message:
-                    "The value you entered (" +
-                    hiLift +
-                    ") is greater than the maximum allowed(" +
-                    maxHiLift +
-                    ")",
+                message: _t(
+                    "The value you entered (%s) is greater than the maximum"
+                    + " allowed(%s)",
+                    hiLift, maxHiLift),
             });
         } else if (hiLift < HILIFT_MIN) {
             found.push({
                 id: "hilift-under-min",
                 severity: "yellow",
-                message: "Must be " + HILIFT_MIN + " or more",
+                message: _t("Must be %s or more", HILIFT_MIN),
             });
         }
     }
@@ -3869,12 +3865,10 @@ get warnings() {
                     id: "duplex-mip-over-max",
                     // 175 single-message responses, all warning.
                     severity: "yellow",
-                    message:
-                        "Assembly MIP (" +
-                        mip.toFixed(4) +
-                        ") is over max MIP (" +
-                        DUPLEX_MAX_MIP +
-                        ") - exceeds cone capacity.",
+                    message: _t(
+                        "Assembly MIP (%s) is over max MIP (%s) - exceeds cone"
+                        + " capacity.",
+                        mip.toFixed(4), DUPLEX_MAX_MIP),
                 });
             }
 
@@ -3886,12 +3880,12 @@ get warnings() {
                     id: "duplex-inner-wire-unsold",
                     // 28 responses where every other message was a known warning, all warning.
                     severity: "yellow",
-                    message:
-                        "Wire size exceeds " +
-                        innerMax +
-                        " maximum for the inner spring inside diameter. " +
-                        "Service Spring Corporation will not sell springs and " +
-                        "Canimex style cones for this combination.",
+                    message: _t(
+                        "Wire size exceeds %s maximum for the inner spring"
+                        + " inside diameter. Service Spring Corporation will"
+                        + " not sell springs and Canimex style cones for this"
+                        + " combination.",
+                        innerMax),
                 });
             }
 
@@ -3900,12 +3894,12 @@ get warnings() {
                     id: "duplex-outer-wire-unsold",
                     // 155 single-message responses, all warning.
                     severity: "yellow",
-                    message:
-                        "Wire size exceeds " +
-                        outerMax +
-                        " maximum for the outer spring inside diameter. " +
-                        "Service Spring Corporation will not sell springs and " +
-                        "Canimex style cones for this combination.",
+                    message: _t(
+                        "Wire size exceeds %s maximum for the outer spring"
+                        + " inside diameter. Service Spring Corporation will"
+                        + " not sell springs and Canimex style cones for this"
+                        + " combination.",
+                        outerMax),
                 });
             }
 
@@ -3928,12 +3922,11 @@ get warnings() {
                     id: "duplex-cycles-over-max",
                     // 154 single-message responses, all warning.
                     severity: "yellow",
-                    message:
-                        "This combination computes to " +
-                        Math.round(cycles).toLocaleString("en-US") +
-                        " cycles, over the " +
-                        CYCLE_MAX.toLocaleString("en-US") +
-                        " calculation maximum.",
+                    message: _t(
+                        "This combination computes to %s cycles, over the %s"
+                        + " calculation maximum.",
+                        Math.round(cycles).toLocaleString("en-US"),
+                        CYCLE_MAX.toLocaleString("en-US")),
                 });
             } else if (this.duplexCyclesExact && this.duplexCyclesExact < CYCLE_MIN) {
                 // A CONSTANT FLOOR, NOT A FRACTION OF THE TARGET - and the
@@ -3984,14 +3977,12 @@ get warnings() {
                 found.push({
                     id: "duplex-cycles-low",
                     severity: "yellow",
-                    message:
-                        "Computed cycle life of " +
-                        cycles.toLocaleString("en-US") +
-                        " is below the " +
-                        CYCLE_MIN.toLocaleString("en-US") +
-                        " cycle minimum. Service Spring's own calculator is " +
-                        "likely to reject this pairing - confirm before " +
-                        "ordering.",
+                    message: _t(
+                        "Computed cycle life of %s is below the %s cycle"
+                        + " minimum. Service Spring's own calculator is likely"
+                        + " to reject this pairing - confirm before ordering.",
+                        cycles.toLocaleString("en-US"),
+                        CYCLE_MIN.toLocaleString("en-US")),
                 });
             }
 
@@ -4048,12 +4039,10 @@ get warnings() {
                 found.push({
                     id: "duplex-length-unsupported",
                     severity: "red",
-                    message:
-                        "Only spring lengths between 0 and " +
-                        DUPLEX_MAX_SPRING_LENGTH +
-                        '" are supported. This assembly needs ' +
-                        this.duplexOuterLength +
-                        '".',
+                    message: _t(
+                        'Only spring lengths between 0 and %s" are supported.'
+                        + ' This assembly needs %s".',
+                        DUPLEX_MAX_SPRING_LENGTH, this.duplexOuterLength),
                 });
             }
         }
@@ -4063,10 +4052,10 @@ get warnings() {
         found.push({
             id: "duplex-extrapolated",
             severity: "yellow",
-            message:
-                "This wire combination has not been checked against the " +
-                "reference calculator. Lengths, weights and cycles are " +
-                "estimated and may be off by a size.",
+            message: _t(
+                "This wire combination has not been checked against the"
+                + " reference calculator. Lengths, weights and cycles are"
+                + " estimated and may be off by a size."),
         });
     }
 
@@ -4093,10 +4082,9 @@ get warnings() {
         found.push({
             id: "assembly-too-long",
             severity: "red",
-            message:
-                "Torsion assembly will be too long for a " +
-                width +
-                ' " wide door!',
+            message: _t(
+                'Torsion assembly will be too long for a %s " wide door!',
+                width),
         });
     }
 
@@ -4119,11 +4107,10 @@ get warnings() {
         found.push({
             id: "weight-over-max",
             severity: "yellow",
-            message:
-                "The current weight entered is heavier than this drum " +
-                "will allow! The maximum weight of this drum is " +
-                effectiveLimits.maxWeight +
-                " lb.",
+            message: _t(
+                "The current weight entered is heavier than this drum will"
+                + " allow! The maximum weight of this drum is %s lb.",
+                effectiveLimits.maxWeight),
         });
     }
 
@@ -4137,11 +4124,10 @@ get warnings() {
                 // treats a door taller than the drum as a hard stop, not a
                 // caution, and it clamps the height to build anything at all.
                 severity: "red",
-                message:
-                    "The current height entered is greater than this drum " +
-                    "will allow! The maximum height of this drum is " +
-                    limits.maxHeight +
-                    '".',
+                message: _t(
+                    "The current height entered is greater than this drum will"
+                    + ' allow! The maximum height of this drum is %s".',
+                    limits.maxHeight),
             });
         }
 
@@ -4187,6 +4173,29 @@ closeWarnings() {
     this.state.showWarnings = false;
 }
 
+// --- what the SIZER behind each select has to say ------------------------
+//
+// Each select is laid over a hidden span holding the same text, and that span
+// is what gives the wrapper its width (see .se-select-sizer). The span used to
+// print the raw state value - "Duplex", "Hi-Lift" - which is the ENGLISH one,
+// because a state value is a key and is never translated. On a Spanish page
+// that sized the box to the English word and clipped the Spanish one.
+//
+// So the sizer asks for the label instead. The terms come from this template's
+// own <option> text, so they are already in the translation file; _t finds
+// them by the same key the option was translated under.
+get assemblyLabel() {
+    return _t(this.state.assembly);
+}
+
+get liftTypeLabel() {
+    return _t(this.state.liftType);
+}
+
+get drumLabel() {
+    return this.state.drum || _t("Select a Drum");
+}
+
 get drumInfo() {
     return DRUM_INFO[this.state.drum] || null;
 }
@@ -4194,22 +4203,22 @@ get drumInfo() {
 // The panel opens whether or not a drum is chosen, so it can say what it
 // wants from the user instead of the symbol simply not being there.
 get drumInfoTitle() {
-    return this.state.drum || "No drum selected!";
+    return this.state.drum || _t("No drum selected!");
 }
 
 // Only used when there are no specification rows to show.
 get drumInfoMessage() {
     if (!this.state.drum) {
-        return "Please select a drum on the right and tap this again to " +
-               "see details about the selected drum.";
+        return _t("Please select a drum on the right and tap this again"
+                  + " to see details about the selected drum.");
     }
-    return "No specifications are available for this drum yet.";
+    return _t("No specifications are available for this drum yet.");
 }
 
 get drumInfoLabel() {
     return this.state.drum
-        ? "Specifications for " + this.state.drum
-        : "No drum selected";
+        ? _t("Specifications for %s", this.state.drum)
+        : _t("No drum selected");
 }
 
 toggleDrumInfo() {
@@ -4305,8 +4314,9 @@ closeDrumInfo() {
 
             window.location = "/shop/cart";
         } catch {
-            this.state.cartError =
-                "Could not reach the cart just now. Please try again, or call us to order.";
+            this.state.cartError = _t(
+                "Could not reach the cart just now. Please try again, or call"
+                + " us to order.");
         } finally {
             this.state.cartBusy = false;
         }
