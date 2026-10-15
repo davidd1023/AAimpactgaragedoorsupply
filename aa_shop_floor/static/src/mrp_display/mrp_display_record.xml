@@ -29,6 +29,18 @@
                             <span class="fw-bold text-uppercase" t-esc="aaJob.station"/>
                             <span class="badge text-nowrap" t-att-class="aaBadge.cls" t-esc="aaBadge.text"/>
                         </div>
+                        <!-- Station timer (owner, 2026-10-15): from Start at the
+                             station to Mark as Done; counts up while running. -->
+                        <div t-if="aaJobHasTime(aaJob)" class="o_aa_job_time d-flex justify-content-between gap-2 small mt-1"
+                             t-att-class="aaJob.running_since ? 'text-primary fw-bold' : 'text-muted'">
+                            <span>
+                                <i class="fa me-1" t-att-class="aaJob.running_since ? 'fa-play-circle' : 'fa-clock-o'"/>
+                                <t t-esc="aaJobTime(aaJob)"/>
+                            </span>
+                            <span t-if="aaJob.started" class="text-end">
+                                <t t-esc="aaJob.started"/><t t-if="aaJob.finished"> → <t t-esc="aaJob.finished.split(', ')[1]"/></t>
+                            </span>
+                        </div>
                         <t t-foreach="aaJob.items" t-as="aaItem" t-key="aaItem.id">
                             <div class="o_aa_job_item mt-1">
                                 <div class="fw-bold" t-esc="aaItem.product"/>

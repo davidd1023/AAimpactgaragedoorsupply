@@ -1,8 +1,36 @@
+import { onWillUnmount, useState } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { MrpDisplayRecord } from "@mrp_workorder/mrp_display/mrp_display_record";
 
 // Overview: the manager puts an order on its own station, or takes it back off.
 patch(MrpDisplayRecord.prototype, {
+    setup() {
+        super.setup(...arguments);
+        // The station timer on the Overview card counts up while the job runs.
+        this.aaClock = useState({ now: Date.now() });
+        const tick = setInterval(() => (this.aaClock.now = Date.now()), 15000);
+        onWillUnmount(() => clearInterval(tick));
+    },
+
+    aaJobMinutes(job) {
+        let minutes = job.minutes || 0;
+        if (job.running_since) {
+            minutes += Math.max(0, (this.aaClock.now - Date.parse(job.running_since)) / 60000);
+        }
+        return minutes;
+    },
+
+    aaJobTime(job) {
+        const total = Math.floor(this.aaJobMinutes(job));
+        const hours = Math.floor(total / 60);
+        const minutes = total % 60;
+        return hours ? `${hours} h ${String(minutes).padStart(2, "0")} min` : `${minutes} min`;
+    },
+
+    aaJobHasTime(job) {
+        return Boolean(job.running_since || job.minutes);
+    },
+
     aaBoard() {
         try {
             return JSON.parse(this.props.record.data.aa_station_board || "{}");
