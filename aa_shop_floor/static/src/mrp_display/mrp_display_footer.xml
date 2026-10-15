@@ -7,6 +7,17 @@
         <xpath expr="//t[@t-if='_close_production']" position="replace">
             <t t-if="_close_production">Mark as Done</t>
         </xpath>
+        <!-- A Start button beside Mark as Done (owner, 2026-10-15): the worker
+             taps Start when he begins and Mark as Done when he finishes. It does
+             what tapping the card header does - starts the work order and the
+             station timer for the operator who is signed in. -->
+        <xpath expr="//button[@t-on-click='validate']" position="before">
+            <button t-if="!active and !disabled and !['done', 'cancel'].includes(props.record.data.state)"
+                    type="button" class="btn btn-success o_aa_start_btn"
+                    t-on-click.stop="onClickHeader">
+                <i class="fa fa-play me-1"/>Start
+            </button>
+        </xpath>
     </t>
     <t t-inherit="mrp_workorder.MrpDisplayProductionFooter" t-inherit-mode="extension">
         <xpath expr="//button[@t-on-click='validate']/t" position="replace">

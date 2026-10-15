@@ -24,6 +24,11 @@ class MrpWorkcenter(models.Model):
 class MrpWorkorder(models.Model):
     _inherit = "mrp.workorder"
 
+    # The sale order the job came from, so the Shop Floor History can show and
+    # group every job by order (owner, 2026-10-15).
+    aa_sale_order = fields.Char(
+        related="production_id.origin", string="Sale Order", store=True, index=True)
+
     aa_suggested_workcenter_id = fields.Many2one(
         "mrp.workcenter", string="Own Station", copy=False, readonly=True,
         help="The station this work order belongs to (from its routing). While it "
@@ -142,7 +147,8 @@ class MrpProduction(models.Model):
             more = "%s: %d %s" % (more, items, "item" if items == 1 else "items")
         return summary, more
 
-    @api.depends("origin", "state", "workorder_ids.workcenter_id", "workorder_ids.state")
+    @api.depends("origin", "state", "workorder_ids.workcenter_id", "workorder_ids.state",
+                 "workorder_ids.duration", "workorder_ids.time_ids.date_end")
     @api.depends_context("uid")
     def _compute_aa_order_board(self):
         pending = self.env["mrp.workcenter"].sudo()._aa_pending()
@@ -175,6 +181,7 @@ class MrpProduction(models.Model):
                 else:
                     status = "station"
                 summary, more = self._aa_spec_summary(mo.aa_shop_spec)
+                timing = mo._aa_job_timing(wos)
                 jobs.append({
                     "id": mo.id,
                     "name": mo.name,
@@ -187,6 +194,7 @@ class MrpProduction(models.Model):
                     "can_remove": bool((open_wos - waiting).filtered(
                         lambda w: w.state not in LOCKED_STATES)),
                     "can_done": mo.state not in ("done", "cancel"),
+                    **timing,
                 })
             # One section per station (owner, 2026-10-14): vertical and horizontal
             # tracks are one Track Prep task, not two.
@@ -195,8 +203,15 @@ class MrpProduction(models.Model):
                 group = next((g for g in groups if g["station"] == job["station"]), None)
                 if not group:
                     group = {"id": job["id"], "station": job["station"], "items": [],
-                             "send_ids": [], "remove_ids": [], "done_ids": [], "statuses": []}
+                             "send_ids": [], "remove_ids": [], "done_ids": [], "statuses": [],
+                             "minutes": 0.0, "running_since": False,
+                             "started_utc": False, "finished_utc": False}
                     groups.append(group)
+                # Time at the station: closed time plus the clock still running.
+                group["minutes"] += job["minutes"]
+                for key, pick in (("running_since", min), ("started_utc", min), ("finished_utc", max)):
+                    if job[key]:
+                        group[key] = pick(group[key], job[key]) if group[key] else job[key]
                 group["items"].append({"id": job["id"], "product": job["product"],
                                        "summary": job["summary"], "more": job["more"]})
                 group["statuses"].append(job["status"])
@@ -218,6 +233,12 @@ class MrpProduction(models.Model):
                     group["status"] = "none"
                 else:
                     group["status"] = "station"
+                if group["status"] != "done":
+                    group["finished_utc"] = False
+                # The card shows these in the tablet's own time zone; the
+                # server-side text is only a fallback.
+                group["started"] = self._aa_clock(group["started_utc"])
+                group["finished"] = self._aa_clock(group["finished_utc"])
             order = self.env["sale.order"].sudo().search([("name", "=", production.origin)], limit=1)
             received = fields.Datetime.context_timestamp(
                 production, min(siblings.mapped("create_date"))).strftime("%b %d, %I:%M %p")
@@ -232,6 +253,32 @@ class MrpProduction(models.Model):
                 "remove_ids": [j["id"] for j in jobs if j["can_remove"]],
                 "jobs": groups,
             })
+
+    # ---- Station timer (owner, 2026-10-15) ----
+    # The worker starts the job at the station (Odoo's own work order clock) and
+    # Mark as Done stops it. Odoo keeps every start / pause / finish in the work
+    # order's time log, which is the history; here the Overview card only reads it.
+
+    def _aa_job_timing(self, workorders):
+        """Minutes already logged, when the clock started, when the job ended."""
+        logs = workorders.time_ids
+        running = logs.filtered(lambda t: not t.date_end)
+        started = [d for d in workorders.mapped("date_start") + logs.mapped("date_start") if d]
+        finished = [d for d in workorders.mapped("date_finished") if d]
+        iso = lambda d: d and fields.Datetime.to_string(d).replace(" ", "T") + "Z"
+        return {
+            "minutes": sum(workorders.mapped("duration")),
+            "running_since": iso(min(running.mapped("date_start"))) if running else False,
+            "started_utc": iso(min(started)) if started else False,
+            "finished_utc": iso(max(finished)) if finished else False,
+        }
+
+    def _aa_clock(self, iso_utc):
+        """'2026-10-15T13:05:00Z' -> 'Oct 15, 09:05 AM' in the user's time zone."""
+        if not iso_utc:
+            return ""
+        value = fields.Datetime.to_datetime(iso_utc[:-1].replace("T", " "))
+        return fields.Datetime.context_timestamp(self, value).strftime("%b %d, %I:%M %p")
 
     def aa_mark_done_jobs(self):
         """Manager closes a job from the Overview, sent to its station or still

@@ -1,8 +1,49 @@
+import { onWillUnmount, useState } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { MrpDisplayRecord } from "@mrp_workorder/mrp_display/mrp_display_record";
 
 // Overview: the manager puts an order on its own station, or takes it back off.
 patch(MrpDisplayRecord.prototype, {
+    setup() {
+        super.setup(...arguments);
+        // The station timer on the Overview card counts up while the job runs.
+        this.aaClock = useState({ now: Date.now() });
+        const tick = setInterval(() => (this.aaClock.now = Date.now()), 15000);
+        onWillUnmount(() => clearInterval(tick));
+    },
+
+    aaJobMinutes(job) {
+        let minutes = job.minutes || 0;
+        if (job.running_since) {
+            minutes += Math.max(0, (this.aaClock.now - Date.parse(job.running_since)) / 60000);
+        }
+        return minutes;
+    },
+
+    aaJobTime(job) {
+        const total = Math.floor(this.aaJobMinutes(job));
+        const hours = Math.floor(total / 60);
+        const minutes = total % 60;
+        return hours ? `${hours} h ${String(minutes).padStart(2, "0")} min` : `${minutes} min`;
+    },
+
+    // Start / finish in the tablet's own time zone (the user's Odoo time zone
+    // may be set to somewhere else).
+    aaJobClock(iso, withDay = true) {
+        if (!iso) {
+            return "";
+        }
+        const options = { hour: "2-digit", minute: "2-digit" };
+        if (withDay) {
+            Object.assign(options, { month: "short", day: "2-digit" });
+        }
+        return new Date(iso).toLocaleString("en-US", options);
+    },
+
+    aaJobHasTime(job) {
+        return Boolean(job.running_since || job.minutes);
+    },
+
     aaBoard() {
         try {
             return JSON.parse(this.props.record.data.aa_station_board || "{}");
