@@ -9,3 +9,4 @@ from . import test_trim_colour
 from . import test_wishlist_diagnosis
 from . import test_minimum_order
 from . import test_spanish
+from . import test_quantity_limits

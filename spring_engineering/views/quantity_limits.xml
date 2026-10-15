@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE QUANTITY BOX, TOLD WHAT A QUANTITY IS.
+
+       Odoo renders both of these as <input type="text"> with a data-min its
+       own script reads. A text box accepts letters, accepts minus one, and
+       accepts a thousand thousand, and the only thing standing behind it is
+       the server.
+
+       The server is where this is settled - see _aa_bounded_quantity - and
+       these attributes are the courtesy: a numeric keypad on a phone, a
+       browser that refuses letters, and a box that already knows the ceiling
+       so the customer meets it while typing rather than after pressing Add.
+
+       max comes from the website's own setting, and is left off entirely when
+       that setting is zero, which means no limit. -->
+
+  <template id="product_quantity_is_a_number"
+            inherit_id="website_sale.product_quantity">
+    <xpath expr="//input[@name='add_qty']" position="attributes">
+      <attribute name="type">number</attribute>
+      <attribute name="min">1</attribute>
+      <attribute name="step">1</attribute>
+      <attribute name="inputmode">numeric</attribute>
+      <attribute name="t-att-max">website.aa_maximum_line_quantity or None</attribute>
+    </xpath>
+  </template>
+
+  <!-- The same box on the cart page. The read-only one next to it is left
+       alone: nothing can be typed into it. -->
+  <template id="cart_quantity_is_a_number"
+            inherit_id="website_sale.cart_lines_quantity">
+    <xpath expr="//input[hasclass('js_quantity')][not(@readonly)]"
+           position="attributes">
+      <attribute name="type">number</attribute>
+      <attribute name="min">1</attribute>
+      <attribute name="step">1</attribute>
+      <attribute name="inputmode">numeric</attribute>
+      <attribute name="t-att-max">website.aa_maximum_line_quantity or None</attribute>
+    </xpath>
+  </template>
+
+</odoo>

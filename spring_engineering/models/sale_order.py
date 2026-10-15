@@ -595,6 +595,73 @@ class SaleOrder(models.Model):
 
     # --- hooks ----------------------------------------------------------------
 
+    # --- how much of one thing a cart may hold --------------------------------
+
+    def _aa_quantity_limit(self):
+        """The most of one product this website will take, 0 for no limit."""
+        self.ensure_one()
+
+        return self.website_id.aa_maximum_line_quantity or 0
+
+    def _aa_bounded_quantity(self, wanted):
+        """A quantity the shop can actually sell, and why it was changed.
+
+        THE BOX ON THE PRODUCT PAGE IS A TEXT FIELD. Odoo renders it as
+        <input type="text" data-min="1">, and data-min is a hint its own
+        script reads - not a rule any browser keeps. So what reaches here is
+        whatever was typed: a thousand thousand, minus one, or nothing that is
+        a number at all. The page can be tidied up and should be, but the page
+        is not where this can be settled: anybody can post to the route
+        without it.
+
+        Returns the quantity to use and a note for the customer, which is
+        empty when nothing was changed.
+        """
+        self.ensure_one()
+
+        try:
+            quantity = float(wanted)
+        except (TypeError, ValueError):
+            quantity = float("nan")
+
+        if not math.isfinite(quantity):
+            return 1.0, _(
+                "That is not a number we can order, so we put one in the cart."
+            )
+
+        if quantity < 1:
+            return 1.0, _(
+                "An order cannot hold less than one of something, so we put"
+                " one in the cart."
+            )
+
+        limit = self._aa_quantity_limit()
+
+        if limit and quantity > limit:
+            return float(limit), _(
+                "We can take up to %(limit)s of any one item in an order, so"
+                " that is what was added. Please call us if you need more.",
+                limit=limit,
+            )
+
+        return quantity, ""
+
+    def _verify_updated_quantity(self, order_line, product_id, new_qty, uom_id,
+                                 **kwargs):
+        """Odoo's own hook for exactly this, used by BOTH ways in.
+
+        The add route and the cart's own quantity box both come through here,
+        so the rule is written once and there is no second door. Odoo skips
+        this entirely for a quantity of zero or less on an UPDATE, which is
+        how a line is removed - so nothing here can stop a customer emptying
+        their cart.
+        """
+        new_qty, warning = super()._verify_updated_quantity(
+            order_line, product_id, new_qty, uom_id, **kwargs)
+        quantity, note = self._aa_bounded_quantity(new_qty)
+
+        return quantity, "\n".join(filter(None, [warning, note]))
+
     def _cart_find_product_line(self, *args, **kwargs):
         """A PART THE SYNC OWNS IS NOT THE CUSTOMER'S LINE.
 
@@ -622,7 +689,17 @@ class SaleOrder(models.Model):
 
     def _cart_add(self, product_id, quantity=1.0, *, uom_id=None, **kwargs):
         """Add a track, then add what preparing it needs."""
+        # BOUNDED BEFORE super(), not only inside the hook. Odoo adds to an
+        # EXISTING line by asking for "what it holds plus what you asked for",
+        # and it does that arithmetic before the hook sees anything: adding
+        # minus one of something already in the cart came to zero, and zero
+        # means remove. A customer typing -1 deleted the line instead.
+        quantity, note = self._aa_bounded_quantity(quantity)
         result = super()._cart_add(product_id, quantity, uom_id=uom_id, **kwargs)
+
+        if note:
+            result["warning"] = "\n".join(
+                filter(None, [result.get("warning"), note]))
         line = self.env["sale.order.line"].browse(result.get("line_id"))
 
         if line.exists():
