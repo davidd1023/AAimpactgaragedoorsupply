@@ -15,4 +15,17 @@
             </xpath>
         </field>
     </record>
+
+    <!-- The order's transfer shows where each part (Tracks / Springs / Hardware)
+         is in the Shop Floor, under Destination Location. -->
+    <record id="view_picking_form_aa_order_status" model="ir.ui.view">
+        <field name="name">stock.picking.form.aa.order.status</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='location_dest_id']" position="after">
+                <field name="aa_order_status" invisible="not aa_order_status" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>
