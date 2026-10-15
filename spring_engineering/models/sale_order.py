@@ -595,6 +595,31 @@ class SaleOrder(models.Model):
 
     # --- hooks ----------------------------------------------------------------
 
+    def _cart_find_product_line(self, *args, **kwargs):
+        """A PART THE SYNC OWNS IS NOT THE CUSTOMER'S LINE.
+
+        Odoo adds to the cart by looking for a line that already holds the
+        product and, if it finds one, updating THAT line instead of making a
+        new one. A prepared vertical track brings its own jamb brackets, so a
+        customer who then bought loose brackets of the same size was handed
+        the track's line - which this module refuses to let anybody edit
+        directly, because a prepared track with the wrong number of brackets
+        is not a thing the owner sells.
+
+        That refusal answers in the shape the cart page reads, and the add
+        route wanted another, so the page died on a KeyError before the
+        customer could be told anything at all.
+
+        Two wrongs, and this is the one that matters: the customer asked for
+        brackets of their own and there was never a reason to touch the
+        track's. Lines the sync owns - every part with a role: bracket, flag
+        angle, stud or nut - are kept out of the search, so an add makes the
+        customer a line of their own and the sync keeps its hands on its own.
+        """
+        lines = super()._cart_find_product_line(*args, **kwargs)
+
+        return lines.filtered(lambda line: not line.track_prep_role)
+
     def _cart_add(self, product_id, quantity=1.0, *, uom_id=None, **kwargs):
         """Add a track, then add what preparing it needs."""
         result = super()._cart_add(product_id, quantity, uom_id=uom_id, **kwargs)
@@ -674,9 +699,16 @@ class SaleOrder(models.Model):
         """
         line = line.exists()
 
+        # THE WHOLE SHAPE, NOT THE TWO KEYS THE CART PAGE READS. Odoo's add
+        # route reads added_qty off whatever comes back, because an add whose
+        # product is already in the cart is served by the UPDATE method - so a
+        # short answer here is not a smaller answer, it is a crash on a page
+        # that was only trying to put a bracket in a basket.
         return {
-            "quantity": line.product_uom_qty if line else 0,
+            "added_qty": 0,
             "line_id": line_id,
+            "quantity": line.product_uom_qty if line else 0,
+            "warning": "",
         }
 
     # --- what every jamb bracket is fitted with -------------------------------
