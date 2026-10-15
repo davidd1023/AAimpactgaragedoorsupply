@@ -19,8 +19,8 @@
     # nothing to compare against. Nothing is upgraded: new data files never
     # load, and a field declared in Python has no column behind it. That is
     # exactly how main and Prod both reached 19.0.2.28.0 carrying different
-    # code, which is why this is 2.29.0.
-    'version': '19.0.2.29.0',
+    # code. Every number since is deliberately ahead of what Prod holds.
+    'version': '19.0.2.30.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
