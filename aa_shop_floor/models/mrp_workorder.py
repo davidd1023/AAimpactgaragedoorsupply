@@ -235,8 +235,10 @@ class MrpProduction(models.Model):
                     group["status"] = "station"
                 if group["status"] != "done":
                     group["finished_utc"] = False
-                group["started"] = self._aa_clock(group.pop("started_utc"))
-                group["finished"] = self._aa_clock(group.pop("finished_utc"))
+                # The card shows these in the tablet's own time zone; the
+                # server-side text is only a fallback.
+                group["started"] = self._aa_clock(group["started_utc"])
+                group["finished"] = self._aa_clock(group["finished_utc"])
             order = self.env["sale.order"].sudo().search([("name", "=", production.origin)], limit=1)
             received = fields.Datetime.context_timestamp(
                 production, min(siblings.mapped("create_date"))).strftime("%b %d, %I:%M %p")
