@@ -27,6 +27,19 @@ patch(MrpDisplayRecord.prototype, {
         return hours ? `${hours} h ${String(minutes).padStart(2, "0")} min` : `${minutes} min`;
     },
 
+    // Start / finish in the tablet's own time zone (the user's Odoo time zone
+    // may be set to somewhere else).
+    aaJobClock(iso, withDay = true) {
+        if (!iso) {
+            return "";
+        }
+        const options = { hour: "2-digit", minute: "2-digit" };
+        if (withDay) {
+            Object.assign(options, { month: "short", day: "2-digit" });
+        }
+        return new Date(iso).toLocaleString("en-US", options);
+    },
+
     aaJobHasTime(job) {
         return Boolean(job.running_since || job.minutes);
     },

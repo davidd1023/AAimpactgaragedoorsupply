@@ -37,8 +37,8 @@
                                 <i class="fa me-1" t-att-class="aaJob.running_since ? 'fa-play-circle' : 'fa-clock-o'"/>
                                 <t t-esc="aaJobTime(aaJob)"/>
                             </span>
-                            <span t-if="aaJob.started" class="text-end">
-                                <t t-esc="aaJob.started"/><t t-if="aaJob.finished"> → <t t-esc="aaJob.finished.split(', ')[1]"/></t>
+                            <span t-if="aaJob.started_utc" class="text-end">
+                                <t t-esc="aaJobClock(aaJob.started_utc)"/><t t-if="aaJob.finished_utc"> → <t t-esc="aaJobClock(aaJob.finished_utc, false)"/></t>
                             </span>
                         </div>
                         <t t-foreach="aaJob.items" t-as="aaItem" t-key="aaItem.id">
