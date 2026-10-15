@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- One button label everywhere: "Mark as Done" (owner, 2026-10-14).
+         Only the words change: on the last work order it still closes the
+         whole manufacturing order, exactly as "Close Production" did. -->
+    <t t-inherit="mrp_workorder.MrpDisplayWorkorderFooter" t-inherit-mode="extension">
+        <xpath expr="//t[@t-if='_close_production']" position="replace">
+            <t t-if="_close_production">Mark as Done</t>
+        </xpath>
+    </t>
+    <t t-inherit="mrp_workorder.MrpDisplayProductionFooter" t-inherit-mode="extension">
+        <xpath expr="//button[@t-on-click='validate']/t" position="replace">
+            <t>Mark as Done</t>
+        </xpath>
+    </t>
+</templates>

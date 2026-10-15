@@ -38,8 +38,12 @@
                     invisible="dispatch_state"/>
           </group>
           <group>
-            <field name="dispatch_url" widget="CopyClipboardChar"
-                   invisible="not dispatch_state"/>
+            <!-- The link itself stays on the record but off the form: the button
+                 below opens it (owner, 2026-10-14). -->
+            <field name="dispatch_url" invisible="1"/>
+            <button name="action_open_dispatch_form" type="object" class="btn btn-primary"
+                    icon="fa-external-link" string="Open the confirmation form"
+                    invisible="not dispatch_state" colspan="2"/>
             <field name="dispatch_signature" widget="image"
                    options="{'size': [0, 90]}"
                    invisible="not dispatch_signed_on"/>
