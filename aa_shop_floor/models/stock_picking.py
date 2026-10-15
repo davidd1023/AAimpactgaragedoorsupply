@@ -1,6 +1,6 @@
 from markupsafe import Markup, escape
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 # Under Destination Location on the order's transfer (owner, 2026-10-14): one
 # status per thing the order carries - Tracks, Springs, Hardware - and nothing
@@ -77,3 +77,24 @@ class StockPicking(models.Model):
                 for label, status in statuses
             )
             picking.aa_order_status = Markup('<div class="d-flex flex-wrap">%s</div>') % badges
+
+
+class StockMove(models.Model):
+    _inherit = "stock.move"
+
+    @api.depends("sale_line_id", "bom_line_id")
+    def _compute_description_picking(self):
+        """A kit's pieces don't repeat the kit's options (owner, 2026-10-14).
+
+        Odoo writes the sale line's options (Plastic Trims, Add to Your Order...)
+        on top of every piece of a kit in the Work Order; they belong to the kit,
+        not to each hinge and bolt. The "kit - n/total" line stays."""
+        super()._compute_description_picking()
+        for move in self:
+            if not (move.bom_line_id and move.sale_line_id) or move.description_picking_manual:
+                continue
+            line = move.sale_line_id.with_context(lang=move.sale_line_id.order_id.partner_id.lang)
+            options = line._get_sale_order_line_multiline_description_variants().strip()
+            text = move.description_picking or ""
+            if options and text.startswith(options):
+                move.description_picking = text[len(options):].strip()
