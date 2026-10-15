@@ -1,6 +1,6 @@
 {
     'name': "Work Order Sheet",
-    'version': '19.0.1.29.0',
+    'version': '19.0.1.30.0',
     'summary': "Print a work order, and sort its work onto the benches",
     'description': """
 Adds a printable sheet to a work order - the transfer the shop sees under
@@ -32,6 +32,7 @@ machinery it does not use.
 """,
     'category': 'Inventory/Inventory',
     'license': 'LGPL-3',
+    'author': 'AA Impact Garage Door Supply',
     'depends': ['stock', 'sale_stock', 'mrp'],
     'data': [
         'security/ir.model.access.csv',
