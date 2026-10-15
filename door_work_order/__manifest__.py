@@ -14,6 +14,7 @@ source of numbers and nothing else.
 """,
     'category': 'Manufacturing',
     'license': 'LGPL-3',
+    'author': 'AA Impact Garage Door Supply',
     'depends': ['mrp'],
     'data': [
         'security/ir.model.access.csv',

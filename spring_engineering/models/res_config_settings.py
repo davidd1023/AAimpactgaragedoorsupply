@@ -86,6 +86,15 @@ class ResConfigSettings(models.TransientModel):
              "calculator shows.",
     )
 
+    # THE MINIMUM ORDER, which is a rule of the SITE rather than a number used
+    # in a calculation - so it is stored on the website record and only
+    # surfaced here. That also keeps a deliberate zero safe: see the note on
+    # the field itself and the set_values docstring below.
+    aa_minimum_order_amount = fields.Float(
+        related="website_id.aa_minimum_order_amount",
+        readonly=False,
+    )
+
     # ONLY THE FLAG ANGLE FALLBACK IS A SETTING.
     #
     # The jamb brackets were a setting while the rule was thought to be "one

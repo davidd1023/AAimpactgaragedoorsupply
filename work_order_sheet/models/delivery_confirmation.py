@@ -46,7 +46,7 @@ class StockPicking(models.Model):
     dispatch_signed_by = fields.Char(
         string="Signed by", copy=False, readonly=True)
     dispatch_signature = fields.Binary(
-        string="Signature", copy=False, readonly=True, attachment=True)
+        string="Dispatch Signature", copy=False, readonly=True, attachment=True)
     # The link carries the secret, so it is kept from anybody the secret is
     # kept from - a lesson already learnt on the bench kiosks.
     dispatch_url = fields.Char(
