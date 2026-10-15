@@ -40,6 +40,23 @@
                         </div>
                     </setting>
                 </block>
+                <!-- A RULE OF THE SHOP, so it gets its own block rather than
+                     sitting under the calculator's heading. Per website, which
+                     is why it is hidden until one is selected: the field is
+                     stored on the website record and there would be nothing
+                     to write to. -->
+                <block title="Shop Rules" id="aa_shop_rules"
+                       invisible="not website_id">
+                    <setting string="Minimum order"
+                             help="The smallest order this website will accept. A cart worth less can still be filled and changed, but the checkout button stays disabled and the cart shows how much more is needed. Counts the goods before tax and ignores delivery. Zero means no minimum.">
+                        <div class="content-group">
+                            <div class="mt16">
+                                <field name="aa_minimum_order_amount" class="oe_inline"/>
+                                <span class="ms-1">before tax, excluding delivery</span>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
             </xpath>
         </field>
     </record>

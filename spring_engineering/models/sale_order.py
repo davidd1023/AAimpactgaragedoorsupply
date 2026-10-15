@@ -2,7 +2,9 @@ import math
 import re
 
 from odoo import _, models
+from odoo.exceptions import ValidationError
 from odoo.http import request
+from odoo.tools.misc import formatLang
 
 from .sale_order_line import FASTENER_ROLES
 
@@ -15,6 +17,110 @@ PREPARED = "prepared"
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
+
+    # --- the least this shop will take as an order ----------------------------
+    #
+    # SAID ONCE, WHERE EVERY WAY OUT OF THE CART ALREADY ASKS. Odoo's own
+    # question is _is_cart_ready, and it is asked in three places that matter:
+    # the checkout button keys its `disabled` on it, the payment routes call
+    # _check_cart_is_ready_to_be_paid which calls it, and the cart page passes
+    # it to the template. Answering it is therefore the whole of the rule -
+    # there is no fourth door to bolt, and nothing to keep in step.
+    #
+    # The amount is a WEBSITE setting, so an order with no website - anything
+    # raised in the back office - has no minimum and is never held up by this.
+
+    def _aa_amount_for_minimum(self):
+        """What counts towards the minimum: the goods, before tax.
+
+        DELIVERY DOES NOT COUNT, and neither does tax. A minimum order is about
+        how much is being bought, and letting the shipping charge make up the
+        difference would mean a far-away customer qualifies with a smaller
+        order than one next door. This is the Subtotal the cart page shows, so
+        the figure the customer is asked to reach is the figure in front of
+        them.
+        """
+        self.ensure_one()
+
+        return sum(
+            line.price_subtotal
+            for line in self.order_line
+            if not line.is_delivery and not line.display_type
+        )
+
+    def _aa_minimum_shortfall(self):
+        """How much this cart is short, or 0 when it may be checked out.
+
+        AN EMPTY CART IS NOT "SHORT". It cannot be checked out either, but Odoo
+        says that for itself and the cart page says so in plain words; adding
+        "spend another $500" to an empty cart would be two messages about the
+        same nothing.
+        """
+        self.ensure_one()
+
+        minimum = self.website_id.aa_minimum_order_amount or 0.0
+
+        if minimum <= 0 or not self.order_line:
+            return 0.0
+
+        goods = self._aa_amount_for_minimum()
+        currency = self.currency_id or self.website_id.currency_id
+
+        # COMPARED IN MONEY, NOT IN FLOATING POINT. A cart of exactly the
+        # minimum can land a hundredth of a cent under it once a few lines
+        # have been added up, and refusing that order - with a message asking
+        # for $0.00 more - is indefensible.
+        if currency and currency.compare_amounts(goods, minimum) >= 0:
+            return 0.0
+
+        if not currency and goods >= minimum:
+            return 0.0
+
+        return minimum - goods
+
+    def _is_cart_ready(self):
+        return super()._is_cart_ready() and not self._aa_minimum_shortfall()
+
+    def _check_cart_is_ready_to_be_paid(self):
+        """Say which rule stopped it, rather than "verify previous steps".
+
+        Odoo's message for a cart that is not ready has to cover every reason
+        at once, so it names none of them. A customer who cannot pay because
+        of a rule nobody has told them about has no way to work out what to do
+        next, and the honest answer is short.
+        """
+        shortfall = self._aa_minimum_shortfall()
+
+        if shortfall:
+            raise ValidationError(_(
+                "Orders start at %(minimum)s. Your cart comes to %(total)s,"
+                " so please add %(short)s more before checking out.",
+                minimum=self._aa_money(
+                    self.website_id.aa_minimum_order_amount),
+                total=self._aa_money(self._aa_amount_for_minimum()),
+                short=self._aa_money(shortfall),
+            ))
+
+        return super()._check_cart_is_ready_to_be_paid()
+
+    def _allow_express_checkout(self):
+        """The express buttons are a door of their own.
+
+        Apple Pay and the like skip the cart's own button entirely, so a
+        minimum that only disabled that button would be no minimum at all for
+        anybody who used them.
+        """
+        return (super()._allow_express_checkout()
+                and not self._aa_minimum_shortfall())
+
+    def _aa_money(self, amount):
+        """An amount as the customer reads it, for a message."""
+        self.ensure_one()
+        currency = self.currency_id or self.website_id.currency_id
+
+        return formatLang(self.env, amount or 0.0,
+                          currency_obj=currency) if currency else "%.2f" % (
+            amount or 0.0)
 
     # THE PRODUCTS WHOSE PRICE IS CONFIGURED, NOT LISTED. Both deliberately
     # list at zero: what they cost is worked out by the calculator from cone,

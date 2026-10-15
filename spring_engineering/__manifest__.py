@@ -11,7 +11,7 @@
     # product is missing", because the route was there and the record was not.
     # Higher than either side: a JS asset changed, and Odoo.sh rebuilds a
     # bundle only for a module it actually updates.
-    'version': '19.0.2.27.0',
+    'version': '19.0.2.28.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
@@ -32,6 +32,7 @@
         'views/wishlist_templates.xml',
         'views/reorder_templates.xml',
         'views/cart_included_parts.xml',
+        'views/minimum_order.xml',
         'views/spring_engineering_settings.xml',
         'views/spring_engineering_config_settings.xml',
     ],
