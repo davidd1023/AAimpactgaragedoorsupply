@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- WHY THE BUTTON IS GREY.
+
+       Odoo already disables the checkout button for a cart that is not ready
+       - this module answers that question - but a disabled button on its own
+       is a dead end: nothing on the page says what is wrong or what would fix
+       it, and the customer's reasonable conclusion is that the shop is
+       broken.
+
+       So the shortfall is spelled out right above the button, in the same
+       place for every step of the checkout, naming the three numbers that
+       matter: what orders start at, what this cart comes to, and the
+       difference. The last one is the only one the customer can act on. -->
+  <template id="minimum_order_notice" inherit_id="website_sale.navigation_buttons">
+
+    <!-- ABOVE THE BUTTON, not after it. The container is a flex column, so
+         "inside" would have dropped the explanation underneath the thing it
+         explains - and on the payment step, underneath the fold. -->
+    <xpath expr="//t[@t-if='website_sale_order and website_sale_order.website_order_line']"
+           position="before">
+      <t t-set="aa_short"
+         t-value="website_sale_order and website_sale_order._aa_minimum_shortfall()"/>
+
+      <div t-if="aa_short" class="alert alert-warning mb-0 small"
+           role="alert" name="aa_minimum_order_notice">
+        <i class="fa fa-exclamation-triangle me-1" role="img"
+           aria-label="Warning"/>
+        Orders start at
+        <strong t-out="website_sale_order.website_id.aa_minimum_order_amount"
+                t-options="{'widget': 'monetary',
+                            'display_currency': website_sale_order.currency_id}"/>.
+        Please add
+        <strong t-out="aa_short"
+                t-options="{'widget': 'monetary',
+                            'display_currency': website_sale_order.currency_id}"/>
+        more to check out.
+      </div>
+    </xpath>
+
+  </template>
+
+</odoo>

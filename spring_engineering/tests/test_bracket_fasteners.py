@@ -462,3 +462,115 @@ class TestFastenersStackUnderTheBracket(HttpCase):
         # Folded away, not hidden from the customer: the list is in the page,
         # inside a collapse the caret opens.
         self.assertIn("collapse list-unstyled", page)
+
+
+@tagged("post_install", "-at_install")
+class TestBuyingABracketBesideAPreparedTrack(TransactionCase):
+    """The owner's cart, 2026-10-15: a prepared track in it, then a jamb
+    bracket added from the shop - and the page died on a server error.
+
+    Odoo adds by looking for a line that already holds that product, and the
+    prepared track had made one. The add was handed the TRACK's bracket line,
+    which this module refuses to let anybody edit on its own, and the refusal
+    answered in the shape the cart page reads rather than the one the add
+    route reads: KeyError: 'added_qty'.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.partner = self.env["res.partner"].create({"name": "Bracket Buyer"})
+        self.stud = self.env["product.product"].create({
+            "name": "1/4 X 3/4 KNURLEL STUD 18-8", "type": "consu",
+            "list_price": 0.35, "sale_ok": True, "is_published": True})
+        self.nut = self.env["product.product"].create({
+            "name": "Flage Nuts 1/4 20", "type": "consu",
+            "list_price": 0.2, "sale_ok": True, "is_published": True})
+        self.attr = self.env.ref("spring_engineering.attribute_track_preparation")
+        self.prepared = self.env.ref(
+            "spring_engineering.attribute_value_track_prepared")
+        self.unprepared = self.env.ref(
+            "spring_engineering.attribute_value_track_unprepared")
+
+    def _cart_with_a_prepared_track(self):
+        order = self.env["sale.order"].create({"partner_id": self.partner.id})
+        tmpl = self.env["product.template"].create({
+            "name": "CH-VT-2-2 Vertical Track 76-7 door height black",
+            "type": "consu", "list_price": 42.0})
+        self.env["product.template.attribute.line"].create({
+            "product_tmpl_id": tmpl.id, "attribute_id": self.attr.id,
+            "value_ids": [(6, 0, [self.unprepared.id, self.prepared.id])]})
+        tmpl.invalidate_recordset()
+        ptav = tmpl.attribute_line_ids.filtered(
+            lambda l: l.attribute_id == self.attr
+        ).product_template_value_ids.filtered(lambda p: p.name == "Prepared")
+        order._cart_add(product_id=tmpl.product_variant_id.id, quantity=1,
+                        no_variant_attribute_value_ids=[ptav.id])
+
+        return order
+
+    def _a_bracket_the_track_brought(self, order):
+        return order.order_line.filtered(
+            lambda line: order._fastener_is_bracket(line)
+            and line.track_prep_role)[:1]
+
+    def test_adding_a_bracket_the_track_already_brought_answers_properly(self):
+        """THE CRASH ITSELF. Whatever else is decided, the answer has to carry
+        the keys Odoo's add route reads off it."""
+        order = self._cart_with_a_prepared_track()
+        bracket = self._a_bracket_the_track_brought(order)
+        self.assertTrue(bracket, "the fixture brought no brackets")
+
+        answer = order._cart_add(product_id=bracket.product_id.id, quantity=2)
+
+        for key in ("added_qty", "line_id", "quantity", "warning"):
+            self.assertIn(key, answer, f"the add route reads {key}")
+
+    def test_the_customer_gets_a_line_of_their_own(self):
+        """AND THE POINT OF IT. The brackets the track owns are the track's;
+        brackets the customer asks for are theirs, on their own line, which
+        the sync has no business touching."""
+        order = self._cart_with_a_prepared_track()
+        bracket = self._a_bracket_the_track_brought(order)
+        owned_before = bracket.product_uom_qty
+
+        order._cart_add(product_id=bracket.product_id.id, quantity=2)
+
+        mine = order.order_line.filtered(
+            lambda line: line.product_id == bracket.product_id
+            and not line.track_prep_role)
+
+        self.assertEqual(len(mine), 1, "no line of the customer's own")
+        self.assertEqual(mine.product_uom_qty, 2)
+        self.assertEqual(bracket.product_uom_qty, owned_before,
+                         "the track's own brackets were changed")
+
+    def test_the_loose_brackets_bring_their_own_fasteners(self):
+        order = self._cart_with_a_prepared_track()
+        bracket = self._a_bracket_the_track_brought(order)
+        studs_before = sum(order.order_line.filtered(
+            lambda line: line.product_id == self.stud).mapped("product_uom_qty"))
+
+        order._cart_add(product_id=bracket.product_id.id, quantity=2)
+
+        studs_after = sum(order.order_line.filtered(
+            lambda line: line.product_id == self.stud).mapped("product_uom_qty"))
+
+        self.assertEqual(studs_after, studs_before + 2,
+                         "a bracket still never ships without its stud")
+
+    def test_the_track_can_still_be_found_by_its_own_add(self):
+        """THE FILTER MUST NOT HIDE ORDINARY LINES. Adding the same track
+        twice still has to find the first one rather than make a second."""
+        order = self._cart_with_a_prepared_track()
+        track = order.order_line.filtered(
+            lambda line: not line.track_prep_role)[:1]
+
+        order._cart_add(product_id=track.product_id.id, quantity=1,
+                        no_variant_attribute_value_ids=track
+                        .product_no_variant_attribute_value_ids.ids)
+
+        tracks = order.order_line.filtered(
+            lambda line: line.product_id == track.product_id
+            and not line.track_prep_role)
+
+        self.assertEqual(len(tracks), 1, "the track was added twice")

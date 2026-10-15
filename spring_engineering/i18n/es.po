@@ -1,0 +1,1262 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* spring_engineering
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-15 15:31+0000\n"
+"PO-Revision-Date: 2026-10-15 15:34+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/models/sale_order.py:0
+msgid "%g"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.minimum_order_notice
+msgid ""
+".\n"
+"        Please add"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "3 3/4\" inside 6\""
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.cart_lines_included_parts
+msgid ""
+"<i class=\"fa fa-caret-right me-1\"/>\n"
+"          Comes with"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.minimum_order_notice
+msgid ""
+"<i class=\"fa fa-exclamation-triangle me-1\" role=\"img\" aria-label=\"Warning\"/>\n"
+"        Orders start at"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid ""
+"<select class=\"form-select\" id=\"aa_cts_wind\">\n"
+"                                    <option value=\"PAIR\">Pair (1 LH + 1 RH)</option>\n"
+"                                    <option value=\"LH\">Left hand (LH)</option>\n"
+"                                    <option value=\"RH\">Right hand (RH)</option>\n"
+"                                </select>"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "<span class=\"ms-1\">%</span>"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "<span class=\"ms-1\">before tax, excluding delivery</span>"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "<span class=\"ms-1\">per assembly</span>"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "<span class=\"ms-1\">per lb</span>"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.wishlist_button_is_a_toggle
+msgid "<span class=\"o_label small ms-2\">Remove from wishlist</span>"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid "<span>Price</span><span id=\"aa_cts_total\"/>"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid "<span>Springs</span><span id=\"aa_cts_springs\"/>"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid "<span>Steel weight</span><span id=\"aa_cts_weight\"/>"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/models/sale_order.py:0
+msgid ""
+"A %s ft door is outside the sizes we prepare tracks for, so the parts were "
+"not added. Please call us and we will prepare it for you."
+msgstr ""
+"Una puerta de %s pies está fuera de las medidas para las que preparamos "
+"rieles, así que las piezas no se agregaron. Llámenos y la prepararemos para "
+"usted."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "APCO 1100-18"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "APCO 1350-28"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "APCO 850-11"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Add to Cart"
+msgstr "Agregar al carrito"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid "Add to cart"
+msgstr "Agregar al carrito"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/wishlist_toggle.js:0
+#: model_terms:ir.ui.view,arch_db:spring_engineering.product_page_wishlist_button_is_a_toggle
+msgid "Add to wishlist"
+msgstr "Agregar a la lista de deseos"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid ""
+"Added to the supplier cost of a custom spring assembly to reach the price "
+"quoted on the calculator and charged in the cart. The visitor is never shown"
+" this figure."
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Adding..."
+msgstr "Agregando..."
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/controllers/wishlist_diagnosis.py:0
+msgid "Administrators only."
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Assembly"
+msgstr "Conjunto"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "Assembly MIP (%s) is over max MIP (%s) - exceeds cone capacity."
+msgstr ""
+"El MIP del conjunto (%s) supera el MIP máximo (%s): excede la capacidad del "
+"cono."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "Assembly labour"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "Assembly markup"
+msgstr ""
+
+#. module: spring_engineering
+#: model:product.attribute.value,name:spring_engineering.attribute_value_trim_black
+msgid "Black"
+msgstr "Negro"
+
+#. module: spring_engineering
+#: model:product.attribute.value,name:spring_engineering.attribute_value_trim_bronze
+msgid "Bronze"
+msgstr "Bronce"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "CANIMEX/TF 1100-216VL"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "CANIMEX/TF 1350-336VL"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "CANIMEX/TF 525-54HL"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "CANIMEX/TF 575-120"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "CANIMEX/TF 850-132VL"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "CANIMEX/TF D400-144"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "CANIMEX/TF D400-96"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "CANIMEX/TF D525-216"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "CANIMEX/TF D800-120"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "CRAWFORD A76D-2 & 3"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "CURRENT SETUP"
+msgstr "CONFIGURACIÓN ACTUAL"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Clear"
+msgstr "Borrar"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__aa_included_line_ids
+msgid "Comes with"
+msgstr "Incluye"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid ""
+"Computed cycle life of %s is below the %s cycle minimum. Service Spring's "
+"own calculator is likely to reject this pairing - confirm before ordering."
+msgstr ""
+"La vida útil calculada de %s ciclos está por debajo del mínimo de %s ciclos."
+" Es probable que la calculadora de Service Spring rechace esta combinación: "
+"confirme antes de ordenar."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Cones"
+msgstr "Conos"
+
+#. module: spring_engineering
+#: model:ir.model,name:spring_engineering.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid ""
+"Could not reach the cart just now. Please try again, or call us to order."
+msgstr ""
+"No se pudo acceder al carrito en este momento. Vuelva a intentarlo o "
+"llámenos para ordenar."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid "Custom Torsion Spring"
+msgstr "Resorte de torsión a medida"
+
+#. module: spring_engineering
+#: model:product.template,name:spring_engineering.product_custom_spring
+msgid "Custom Torsion Spring Assembly"
+msgstr "Conjunto de resortes de torsión a medida"
+
+#. module: spring_engineering
+#: model:product.template,description_sale:spring_engineering.product_custom_filler
+msgid "Cut to the length of the spring it ships with."
+msgstr "Cortado a la longitud del resorte con el que se envía."
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__aa_door_cycles
+msgid "Cycle target"
+msgstr "Ciclos objetivo"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Cycles"
+msgstr "Ciclos"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "DNS DNS 143-11"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "DNS DNS 236-18"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_ir_config_parameter__display_name
+#: model:ir.model.fields,field_description:spring_engineering.field_product_template__display_name
+#: model:ir.model.fields,field_description:spring_engineering.field_product_wishlist__display_name
+#: model:ir.model.fields,field_description:spring_engineering.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order__display_name
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__display_name
+#: model:ir.model.fields,field_description:spring_engineering.field_website__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Door Height (in)"
+msgstr "Altura de la puerta (pulg)"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Door Width (in)"
+msgstr "Ancho de la puerta (pulg)"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__aa_door_height_in
+msgid "Door height (in)"
+msgstr "Altura de la puerta (pulg)"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__aa_door_weight_lb
+msgid "Door weight (lb)"
+msgstr "Peso de la puerta (lb)"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__aa_door_width_in
+msgid "Door width (in)"
+msgstr "Ancho de la puerta (pulg)"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Drum"
+msgstr "Tambor"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Duplex"
+msgstr "Dúplex"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.calculator_page
+msgid "Engineer a Spring"
+msgstr "Diseñar un resorte"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.calculator_page
+msgid ""
+"Enter your door's size, weight and lift and we'll engineer the right torsion"
+" springs for it."
+msgstr ""
+"Ingrese el tamaño, peso y elevación de su puerta y diseñaremos los resortes "
+"de torsión adecuados para ella."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Error Manager"
+msgstr "Gestor de errores"
+
+#. module: spring_engineering
+#: model:ir.model.fields.selection,name:spring_engineering.selection__sale_order_line__track_prep_role__flag
+msgid "Flag angle"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_res_config_settings__track_prep_flag_product_id
+msgid "Flag angle for prepared tracks"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields.selection,name:spring_engineering.selection__sale_order_line__track_prep_role__nut
+msgid "Flange nuts"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid ""
+"Flat charge added to every assembly for building it, on top of the marked-up"
+" materials. Per assembly, not per spring, and added after the markup. It is "
+"not shown to the visitor as a line of its own."
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,help:spring_engineering.field_res_config_settings__spring_labor_flat
+msgid ""
+"Flat charge added to every custom spring assembly for the work of building "
+"it, on top of the marked-up materials. Per assembly, not per spring. Zero "
+"charges nothing for labour."
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Hi-Lift"
+msgstr "Alta elevación"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Hi-Lift (in)"
+msgstr "Alta elevación (pulg)"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__aa_door_hi_lift_in
+msgid "Hi-lift (in)"
+msgstr "Alta elevación (pulg)"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_ir_config_parameter__id
+#: model:ir.model.fields,field_description:spring_engineering.field_product_template__id
+#: model:ir.model.fields,field_description:spring_engineering.field_product_wishlist__id
+#: model:ir.model.fields,field_description:spring_engineering.field_res_config_settings__id
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order__id
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__id
+#: model:ir.model.fields,field_description:spring_engineering.field_website__id
+msgid "ID"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Inner"
+msgstr "Interior"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid "Inside diameter (I.D.)"
+msgstr "Diámetro interior (D.I.)"
+
+#. module: spring_engineering
+#: model:ir.model.fields.selection,name:spring_engineering.selection__sale_order_line__track_prep_role__jamb_10
+msgid "Jamb brackets #10"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields.selection,name:spring_engineering.selection__sale_order_line__track_prep_role__jamb_12
+msgid "Jamb brackets #12"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields.selection,name:spring_engineering.selection__sale_order_line__track_prep_role__jamb_14
+msgid "Jamb brackets #14"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields.selection,name:spring_engineering.selection__sale_order_line__track_prep_role__jamb_16
+msgid "Jamb brackets #16"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,help:spring_engineering.field_sale_order_line__aa_spec_note
+msgid ""
+"Kept out of the description so a recompute cannot lose it; appended to the "
+"description every time one happens."
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields.selection,name:spring_engineering.selection__sale_order_line__track_prep_role__stud
+msgid "Knurled studs"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "LHR"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid "Length (inches)"
+msgstr "Longitud (pulgadas)"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Lift Type"
+msgstr "Tipo de elevación"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid ""
+"Matching a broken spring? Enter its specs and we'll wind an exact replacement.\n"
+"                        Cones and labor included."
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "Max Cable Diameter"
+msgstr "Diámetro máx. del cable"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "Max Height"
+msgstr "Altura máx."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "Max Weight"
+msgstr "Peso máx."
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_res_config_settings__aa_minimum_order_amount
+#: model:ir.model.fields,field_description:spring_engineering.field_website__aa_minimum_order_amount
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "Minimum order"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Multiplier"
+msgstr "Multiplicador"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "Must be %s or more"
+msgstr "Debe ser %s o más"
+
+#. module: spring_engineering
+#: model:product.attribute.value,name:spring_engineering.attribute_value_trim_none
+msgid "No Trims"
+msgstr "Sin molduras"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "No drum selected"
+msgstr "Ningún tambor seleccionado"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "No drum selected!"
+msgstr "¡Ningún tambor seleccionado!"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/reorder_panel.js:0
+msgid "No previous products available for reorder."
+msgstr "No hay productos anteriores disponibles para volver a pedir."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "No specifications are available for this drum yet."
+msgstr "Todavía no hay especificaciones disponibles para este tambor."
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/controllers/reorder.py:0
+msgid "Nothing can be reordered in this order"
+msgstr "No hay nada que se pueda volver a pedir en este pedido"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "OMI 11VL"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "OMI 18VL"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "OMI 28VL"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "OVERHEAD TD-21"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "OVERHEAD TD-23"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid ""
+"Only spring lengths between 0 and %s\" are supported. This assembly needs "
+"%s\"."
+msgstr ""
+"Solo se admiten longitudes de resorte entre 0 y %s\". Este conjunto necesita"
+" %s\"."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.quick_reorder_previous_orders
+msgid "Order it all again"
+msgstr "Pedir todo de nuevo"
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/models/sale_order.py:0
+msgid ""
+"Orders start at %(minimum)s. Your cart comes to %(total)s, so please add "
+"%(short)s more before checking out."
+msgstr ""
+"Los pedidos comienzan en %(minimum)s. Su carrito suma %(total)s, así que "
+"agregue %(short)s más antes de finalizar la compra."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Other"
+msgstr "Otro"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Outer"
+msgstr "Exterior"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "PACIFIC PS-1075-204"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,help:spring_engineering.field_res_config_settings__spring_markup_percent
+msgid ""
+"Percentage added to the supplier cost of a custom spring assembly to reach "
+"the price quoted and charged. 80 means a $100 assembly is sold for $180. "
+"Zero sells at cost."
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Pitch Amount"
+msgstr "Cantidad de paso"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Plastic Filler"
+msgstr "Relleno de plástico"
+
+#. module: spring_engineering
+#: model:product.template,name:spring_engineering.product_custom_filler
+msgid "Plastic Filler, cut to length (5 1/4\" spring)"
+msgstr ""
+
+#. module: spring_engineering
+#: model:product.attribute,name:spring_engineering.attribute_trim_colour
+msgid "Plastic Trims"
+msgstr "Molduras de plástico"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid ""
+"Please select a drum on the right and tap this again to see details about "
+"the selected drum."
+msgstr ""
+"Seleccione un tambor a la derecha y toque esto de nuevo para ver los "
+"detalles del tambor seleccionado."
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__track_prep_role
+msgid "Preparation part"
+msgstr ""
+
+#. module: spring_engineering
+#: model:product.attribute.value,name:spring_engineering.attribute_value_track_prepared
+msgid "Prepared"
+msgstr "Preparado"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__track_prep_parent_id
+msgid "Prepared track this part is for"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Price"
+msgstr "Precio"
+
+#. module: spring_engineering
+#: model:ir.model,name:spring_engineering.model_product_template
+msgid "Product"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model,name:spring_engineering.model_product_wishlist
+msgid "Product Wishlist"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.quick_reorder_previous_orders
+msgid ""
+"Puts everything from that order in your cart, replacing what is in it\n"
+"          now."
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid "Quantity"
+msgstr "Cantidad"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "RAYNOR 1022 & 23"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "RAYNOR 1366 & 67"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "RAYNOR 1368 & 69"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "RAYNOR 1384 & 85"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "RAYNOR 1770 & 71"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "RAYNOR 1774 & 75"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "RAYNOR 4080107 & 8"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Radius"
+msgstr "Radio"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/wishlist_toggle.js:0
+#: model_terms:ir.ui.view,arch_db:spring_engineering.product_page_wishlist_button_is_a_toggle
+#: model_terms:ir.ui.view,arch_db:spring_engineering.wishlist_button_is_a_toggle
+msgid "Remove from wishlist"
+msgstr "Quitar de la lista de deseos"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.quick_reorder_previous_orders
+msgid "Reorder"
+msgstr "Volver a pedir"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Results"
+msgstr "Resultados"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "SSC 1 VL"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "SSC 2 VL"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "SSC 3 VL"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model,name:spring_engineering.model_sale_order
+msgid "Sales Order"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model,name:spring_engineering.model_sale_order_line
+msgid "Sales Order Line"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Select a Drum"
+msgstr "Seleccione un tambor"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "Shop Rules"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Single"
+msgstr "Simple"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__aa_spec_note
+msgid "Specification"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "Specifications for %s"
+msgstr "Especificaciones de %s"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.calculator_page
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "Spring Calculator"
+msgstr "Calculadora de resortes"
+
+#. module: spring_engineering
+#: model:ir.actions.client,name:spring_engineering.action_spring_engineering
+#: model:ir.ui.menu,name:spring_engineering.menu_spring_engineering
+msgid "Spring Engineering"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Spring ID"
+msgstr "D.I. del resorte"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Spring Length"
+msgstr "Longitud del resorte"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_sale_order_line__spring_spec_json
+msgid "Spring Spec (data)"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Spring Steel"
+msgstr "Acero del resorte"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Spring Weight"
+msgstr "Peso del resorte"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_res_config_settings__spring_labor_flat
+msgid "Spring assembly labour"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_res_config_settings__spring_markup_percent
+msgid "Spring assembly markup"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Springs"
+msgstr "Resortes"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Standard"
+msgstr "Estándar"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_res_config_settings__spring_steel_per_lb
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "Steel cost per pound"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model,name:spring_engineering.model_ir_config_parameter
+msgid "System Parameter"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "TIPPT"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid ""
+"The current height entered is greater than this drum will allow! The maximum"
+" height of this drum is %s\"."
+msgstr ""
+"¡La altura ingresada es mayor de lo que permite este tambor! La altura "
+"máxima de este tambor es %s\"."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid ""
+"The current weight entered is heavier than this drum will allow! The maximum"
+" weight of this drum is %s lb."
+msgstr ""
+"¡El peso ingresado es mayor de lo que permite este tambor! El peso máximo de"
+" este tambor es %s lb."
+
+#. module: spring_engineering
+#: model:ir.model.fields,help:spring_engineering.field_res_config_settings__track_prep_flag_product_id
+msgid ""
+"The flag angle added when a vertical track is ordered prepared. Two per "
+"pair, one at each top corner. Found by name from the track's own finish - "
+"Flag Angle Black or Flag Angle White - so this is only the fallback."
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid ""
+"The smallest order this website will accept. A cart worth less can still be "
+"filled and changed, but the checkout button stays disabled and the cart "
+"shows how much more is needed. Counts the goods before tax and ignores "
+"delivery. Zero means no minimum."
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,help:spring_engineering.field_res_config_settings__aa_minimum_order_amount
+#: model:ir.model.fields,help:spring_engineering.field_website__aa_minimum_order_amount
+msgid ""
+"The smallest order this website will accept. A cart worth less than this can"
+" be filled and changed, but not checked out, and the shortfall is shown on "
+"the cart. Zero means no minimum."
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "The value you entered (%s) is greater than the maximum allowed(%s)"
+msgstr "El valor que ingresó (%s) es mayor que el máximo permitido (%s)"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid ""
+"This combination computes to %s cycles, over the %s calculation maximum."
+msgstr ""
+"Esta combinación resulta en %s ciclos, por encima del máximo de cálculo de "
+"%s."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid ""
+"This wire combination has not been checked against the reference calculator."
+" Lengths, weights and cycles are estimated and may be off by a size."
+msgstr ""
+"Esta combinación de alambre no se ha verificado con la calculadora de "
+"referencia. Las longitudes, los pesos y los ciclos son estimados y pueden "
+"variar en una medida."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "This wire size computes to %s. Low Cycle Life"
+msgstr "Este calibre de alambre resulta en %s. Vida útil de ciclos baja"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "Torsion assembly will be too long for a %s \" wide door!"
+msgstr ""
+"¡El conjunto de torsión será demasiado largo para una puerta de %s \" de "
+"ancho!"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Total"
+msgstr ""
+
+#. module: spring_engineering
+#: model:product.attribute,name:spring_engineering.attribute_track_preparation
+msgid "Track Preparation"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Turns"
+msgstr "Vueltas"
+
+#. module: spring_engineering
+#: model:product.attribute.value,name:spring_engineering.attribute_value_track_unprepared
+msgid "Unprepared"
+msgstr "Sin preparar"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "Use extreme caution when designing springs for use with this drum."
+msgstr "Tenga mucha precaución al diseñar resortes para usar con este tambor."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "WESTERN WD-132"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "WESTERN WD5-3"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/models/sale_order.py:0
+msgid ""
+"We are missing a part needed to prepare this track (%s), so it was not "
+"added. Please call us and we will prepare it for you."
+msgstr ""
+"Nos falta una pieza necesaria para preparar este riel (%s), así que no se "
+"agregó. Llámenos y lo prepararemos para usted."
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/models/sale_order.py:0
+msgid ""
+"We are missing a part that goes with the jamb brackets (%s), so it was not "
+"added. Please call us and we will send it with them."
+msgstr ""
+"Nos falta una pieza que acompaña a los soportes de marco (%s), así que no se"
+" agregó. Llámenos y la enviaremos con ellos."
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/models/sale_order.py:0
+msgid ""
+"We could not read the door height from “%s”, so the jamb brackets and flag "
+"angle were not added. Please call us and we will prepare it for you."
+msgstr ""
+"No pudimos leer la altura de la puerta en “%s”, así que no se agregaron los "
+"soportes de marco ni el ángulo de bandera. Llámenos y lo prepararemos para "
+"usted."
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/models/sale_order.py:0
+msgid ""
+"We could not tell what finish “%s” is, so the flag angle was not added - it "
+"has to match the track. Please call us and we will prepare it for you."
+msgstr ""
+"No pudimos determinar cuál es el acabado “%s”, así que no se agregó el "
+"ángulo de bandera: tiene que coincidir con el riel. Llámenos y lo "
+"prepararemos para usted."
+
+#. module: spring_engineering
+#: model:ir.model,name:spring_engineering.model_website
+msgid "Website"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Weight"
+msgstr "Peso"
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Weight (lb)"
+msgstr "Peso (lb)"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid ""
+"What a pound of finished spring costs us, before the markup. Charged on "
+"every spring in the assembly, from the weights the calculator shows."
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,help:spring_engineering.field_res_config_settings__spring_steel_per_lb
+msgid ""
+"What a pound of finished spring costs us, before the markup. Charged on "
+"every spring in the assembly, using the weights the calculator shows."
+msgstr ""
+
+#. module: spring_engineering
+#: model:product.attribute.value,name:spring_engineering.attribute_value_trim_white
+msgid "White"
+msgstr "Blanco"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid "Wind"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
+msgid "Wire Size"
+msgstr "Calibre del alambre"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid "Wire size"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid ""
+"Wire size exceeds %s maximum for the inner spring inside diameter. Service "
+"Spring Corporation will not sell springs and Canimex style cones for this "
+"combination."
+msgstr ""
+"El calibre del alambre excede el máximo de %s para el diámetro interior del "
+"resorte interior. Service Spring Corporation no vende resortes ni conos tipo"
+" Canimex para esta combinación."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid ""
+"Wire size exceeds %s maximum for the outer spring inside diameter. Service "
+"Spring Corporation will not sell springs and Canimex style cones for this "
+"combination."
+msgstr ""
+"El calibre del alambre excede el máximo de %s para el diámetro interior del "
+"resorte exterior. Service Spring Corporation no vende resortes ni conos tipo"
+" Canimex para esta combinación."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "Wire size exceeds %s maximum for this I.D."
+msgstr "El calibre del alambre excede el máximo de %s para este D.I."
+
+#. module: spring_engineering
+#. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid "Wire size is less than the minimum of %s for this I.D."
+msgstr "El calibre del alambre es menor que el mínimo de %s para este D.I."
+
+#. module: spring_engineering
+#: model:product.template,description_sale:spring_engineering.product_custom_spring
+msgid "Wound to the specification on the order line."
+msgstr "Enrollado según la especificación de la línea del pedido."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.custom_torsion_spring_page
+msgid "e.g. 28.5"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.cart_lines_included_parts
+#: model_terms:ir.ui.view,arch_db:spring_engineering.quick_reorder_previous_orders
+msgid "item"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.cart_lines_included_parts
+#: model_terms:ir.ui.view,arch_db:spring_engineering.quick_reorder_previous_orders
+msgid "items"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.minimum_order_notice
+msgid "more to check out."
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.cart_lines_included_parts
+msgid "x"
+msgstr ""

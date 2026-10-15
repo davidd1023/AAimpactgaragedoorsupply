@@ -4,3 +4,4 @@ from . import cart
 from . import reorder
 from . import wishlist
 from . import wishlist_diagnosis
+from . import minimum_order

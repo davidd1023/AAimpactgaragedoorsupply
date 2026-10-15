@@ -11,7 +11,16 @@
     # product is missing", because the route was there and the record was not.
     # Higher than either side: a JS asset changed, and Odoo.sh rebuilds a
     # bundle only for a module it actually updates.
-    'version': '19.0.2.28.0',
+    #
+    # WHEN MERGING, CHECK THIS AGAINST THE BRANCH BEING MERGED INTO, not just
+    # against the base. Two branches bumping to the SAME number is a conflict
+    # git cannot see - the line is identical, so it merges without a word - and
+    # the module then arrives on a database already holding that number, with
+    # nothing to compare against. Nothing is upgraded: new data files never
+    # load, and a field declared in Python has no column behind it. That is
+    # exactly how main and Prod both reached 19.0.2.28.0 carrying different
+    # code. Every number since is deliberately ahead of what Prod holds.
+    'version': '19.0.2.34.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
@@ -32,6 +41,8 @@
         'views/wishlist_templates.xml',
         'views/reorder_templates.xml',
         'views/cart_included_parts.xml',
+        'views/minimum_order.xml',
+        'views/quantity_limits.xml',
         'views/spring_engineering_settings.xml',
         'views/spring_engineering_config_settings.xml',
     ],
@@ -56,6 +67,8 @@
             'spring_engineering/static/src/js/reorder_orders.js',
             'spring_engineering/static/src/js/reorder_panel.js',
             'spring_engineering/static/src/css/cart_included.css',
+            # A quantity box that holds only quantities.
+            'spring_engineering/static/src/js/quantity_limits.js',
         ],
         'web.assets_tests': [
             'spring_engineering/static/tests/tours/wishlist_toggle_tour.js',

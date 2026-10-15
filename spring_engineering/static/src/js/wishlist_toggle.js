@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
+import { _t, translationIsReady } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 
 import wSaleUtils from "@website_sale/js/website_sale_utils";
@@ -178,21 +178,49 @@ function paint(el, wishlisted) {
         icon.classList.toggle("fa-heart-o", !wishlisted);
     }
 
-    const title = wishlisted ? _t("Remove from wishlist") : _t("Add to wishlist");
-    // The card labels its text .o_label; the product page just puts a span
-    // after the icon. The icon itself is the only other span on the card, so
-    // skipping it finds the words on both.
-    const label = el.querySelector(".o_label") || el.querySelector("span:not(.fa)");
+    // THE WORDS COME LAST, AND MAY NOT TAKE THE COLOUR WITH THEM.
+    //
+    // _t DOES NOT RETURN A STRING. It returns a lazy TranslatedString which
+    // THROWS the moment it is turned into one, if the translation file has not
+    // arrived yet:
+    //
+    //     throw new Error(`Cannot translate string: translations have not
+    //                      been loaded`)                 - translation.js:168
+    //
+    // and it is turned into one by the assignments below, not by _t itself.
+    // This function runs from paintOnArrival, on DOMContentLoaded, which is
+    // sometimes earlier than the translations - and once a second language was
+    // installed on the site, regularly earlier. The throw landed in the MIDDLE
+    // of painting, so the heart lost its colour as well as its tooltip, every
+    // page logged an uncaught error, and the hearts "went back to default" at
+    // random - which is the intermittent half of the wishlist bug.
+    //
+    // So the state is painted first and the words are attempted after, where
+    // failing to translate costs only a tooltip. paintOnArrival paints again
+    // as soon as the translations land.
+    try {
+        const title = wishlisted
+            ? _t("Remove from wishlist")
+            : _t("Add to wishlist");
+        // The card labels its text .o_label; the product page just puts a span
+        // after the icon. The icon itself is the only other span on the card,
+        // so skipping it finds the words on both.
+        const label = el.querySelector(".o_label")
+            || el.querySelector("span:not(.fa)");
 
-    if (label) {
-        label.textContent = title;
+        if (label) {
+            label.textContent = title;
+        }
+
+        if (icon && icon.hasAttribute("aria-label")) {
+            icon.setAttribute("aria-label", title);
+        }
+
+        el.title = title;
+    } catch {
+        // Painted again from paintOnArrival once the translations exist. The
+        // heart is already the right colour, which is the part that matters.
     }
-
-    if (icon && icon.hasAttribute("aria-label")) {
-        icon.setAttribute("aria-label", title);
-    }
-
-    el.title = title;
 }
 
 function paintAll() {
@@ -362,11 +390,20 @@ async function paintOnArrival() {
                 // see rememberVariant
             }
         } catch {
-            return;
+            // The hearts the server marked are already painted; nothing else
+            // can be known without the server, so stop asking.
         }
 
         paintAll();
     }
+
+    // AND AGAIN WHEN THE WORDS EXIST. The first pass above gets the colour
+    // right, which is what a customer reads; the tooltip and the label come
+    // from _t, which refuses to be read before the translation file lands.
+    // This is the only paint that can be sure of them.
+    await translationIsReady;
+
+    paintAll();
 }
 
 if (document.readyState === "loading") {

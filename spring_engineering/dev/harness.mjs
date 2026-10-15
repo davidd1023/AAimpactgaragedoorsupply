@@ -55,6 +55,18 @@ const STUB_TABLE = {
     "@web/core/network/rpc": {
         rpc: "(...args) => __test.rpc(...args)",
     },
+    // THE ENGLISH SOURCE, WITH ITS SUBSTITUTIONS FILLED IN.
+    //
+    // The real _t returns a lazy object that resolves against whichever
+    // translation file the browser loaded. Out here there is no Odoo and no
+    // translation file, so this reproduces what an English visitor is shown -
+    // which is what the reference comparisons are written against. It is a
+    // plain string too, so .slice() and friends work the way invariants.mjs
+    // expects.
+    "@web/core/l10n/translation": {
+        _t: "(source, ...subs) => { let i = 0; "
+            + "return String(source).replace(/%s/g, () => String(subs[i++])); }",
+    },
 };
 
 // What a test can reach into: the collected lifecycle callbacks, and the rpc

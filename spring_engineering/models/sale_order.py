@@ -2,7 +2,9 @@ import math
 import re
 
 from odoo import _, models
+from odoo.exceptions import ValidationError
 from odoo.http import request
+from odoo.tools.misc import formatLang
 
 from .sale_order_line import FASTENER_ROLES
 
@@ -15,6 +17,110 @@ PREPARED = "prepared"
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
+
+    # --- the least this shop will take as an order ----------------------------
+    #
+    # SAID ONCE, WHERE EVERY WAY OUT OF THE CART ALREADY ASKS. Odoo's own
+    # question is _is_cart_ready, and it is asked in three places that matter:
+    # the checkout button keys its `disabled` on it, the payment routes call
+    # _check_cart_is_ready_to_be_paid which calls it, and the cart page passes
+    # it to the template. Answering it is therefore the whole of the rule -
+    # there is no fourth door to bolt, and nothing to keep in step.
+    #
+    # The amount is a WEBSITE setting, so an order with no website - anything
+    # raised in the back office - has no minimum and is never held up by this.
+
+    def _aa_amount_for_minimum(self):
+        """What counts towards the minimum: the goods, before tax.
+
+        DELIVERY DOES NOT COUNT, and neither does tax. A minimum order is about
+        how much is being bought, and letting the shipping charge make up the
+        difference would mean a far-away customer qualifies with a smaller
+        order than one next door. This is the Subtotal the cart page shows, so
+        the figure the customer is asked to reach is the figure in front of
+        them.
+        """
+        self.ensure_one()
+
+        return sum(
+            line.price_subtotal
+            for line in self.order_line
+            if not line.is_delivery and not line.display_type
+        )
+
+    def _aa_minimum_shortfall(self):
+        """How much this cart is short, or 0 when it may be checked out.
+
+        AN EMPTY CART IS NOT "SHORT". It cannot be checked out either, but Odoo
+        says that for itself and the cart page says so in plain words; adding
+        "spend another $500" to an empty cart would be two messages about the
+        same nothing.
+        """
+        self.ensure_one()
+
+        minimum = self.website_id.aa_minimum_order_amount or 0.0
+
+        if minimum <= 0 or not self.order_line:
+            return 0.0
+
+        goods = self._aa_amount_for_minimum()
+        currency = self.currency_id or self.website_id.currency_id
+
+        # COMPARED IN MONEY, NOT IN FLOATING POINT. A cart of exactly the
+        # minimum can land a hundredth of a cent under it once a few lines
+        # have been added up, and refusing that order - with a message asking
+        # for $0.00 more - is indefensible.
+        if currency and currency.compare_amounts(goods, minimum) >= 0:
+            return 0.0
+
+        if not currency and goods >= minimum:
+            return 0.0
+
+        return minimum - goods
+
+    def _is_cart_ready(self):
+        return super()._is_cart_ready() and not self._aa_minimum_shortfall()
+
+    def _check_cart_is_ready_to_be_paid(self):
+        """Say which rule stopped it, rather than "verify previous steps".
+
+        Odoo's message for a cart that is not ready has to cover every reason
+        at once, so it names none of them. A customer who cannot pay because
+        of a rule nobody has told them about has no way to work out what to do
+        next, and the honest answer is short.
+        """
+        shortfall = self._aa_minimum_shortfall()
+
+        if shortfall:
+            raise ValidationError(_(
+                "Orders start at %(minimum)s. Your cart comes to %(total)s,"
+                " so please add %(short)s more before checking out.",
+                minimum=self._aa_money(
+                    self.website_id.aa_minimum_order_amount),
+                total=self._aa_money(self._aa_amount_for_minimum()),
+                short=self._aa_money(shortfall),
+            ))
+
+        return super()._check_cart_is_ready_to_be_paid()
+
+    def _allow_express_checkout(self):
+        """The express buttons are a door of their own.
+
+        Apple Pay and the like skip the cart's own button entirely, so a
+        minimum that only disabled that button would be no minimum at all for
+        anybody who used them.
+        """
+        return (super()._allow_express_checkout()
+                and not self._aa_minimum_shortfall())
+
+    def _aa_money(self, amount):
+        """An amount as the customer reads it, for a message."""
+        self.ensure_one()
+        currency = self.currency_id or self.website_id.currency_id
+
+        return formatLang(self.env, amount or 0.0,
+                          currency_obj=currency) if currency else "%.2f" % (
+            amount or 0.0)
 
     # THE PRODUCTS WHOSE PRICE IS CONFIGURED, NOT LISTED. Both deliberately
     # list at zero: what they cost is worked out by the calculator from cone,
@@ -489,9 +595,111 @@ class SaleOrder(models.Model):
 
     # --- hooks ----------------------------------------------------------------
 
+    # --- how much of one thing a cart may hold --------------------------------
+
+    def _aa_quantity_limit(self):
+        """The most of one product this website will take, 0 for no limit."""
+        self.ensure_one()
+
+        return self.website_id.aa_maximum_line_quantity or 0
+
+    def _aa_bounded_quantity(self, wanted):
+        """A quantity the shop can actually sell, and why it was changed.
+
+        THE BOX ON THE PRODUCT PAGE IS A TEXT FIELD. Odoo renders it as
+        <input type="text" data-min="1">, and data-min is a hint its own
+        script reads - not a rule any browser keeps. So what reaches here is
+        whatever was typed: a thousand thousand, minus one, or nothing that is
+        a number at all. The page can be tidied up and should be, but the page
+        is not where this can be settled: anybody can post to the route
+        without it.
+
+        Returns the quantity to use and a note for the customer, which is
+        empty when nothing was changed.
+        """
+        self.ensure_one()
+
+        try:
+            quantity = float(wanted)
+        except (TypeError, ValueError):
+            quantity = float("nan")
+
+        if not math.isfinite(quantity):
+            return 1.0, _(
+                "That is not a number we can order, so we put one in the cart."
+            )
+
+        if quantity < 1:
+            return 1.0, _(
+                "An order cannot hold less than one of something, so we put"
+                " one in the cart."
+            )
+
+        limit = self._aa_quantity_limit()
+
+        if limit and quantity > limit:
+            return float(limit), _(
+                "We can take up to %(limit)s of any one item in an order, so"
+                " that is what was added. Please call us if you need more.",
+                limit=limit,
+            )
+
+        return quantity, ""
+
+    def _verify_updated_quantity(self, order_line, product_id, new_qty, uom_id,
+                                 **kwargs):
+        """Odoo's own hook for exactly this, used by BOTH ways in.
+
+        The add route and the cart's own quantity box both come through here,
+        so the rule is written once and there is no second door. Odoo skips
+        this entirely for a quantity of zero or less on an UPDATE, which is
+        how a line is removed - so nothing here can stop a customer emptying
+        their cart.
+        """
+        new_qty, warning = super()._verify_updated_quantity(
+            order_line, product_id, new_qty, uom_id, **kwargs)
+        quantity, note = self._aa_bounded_quantity(new_qty)
+
+        return quantity, "\n".join(filter(None, [warning, note]))
+
+    def _cart_find_product_line(self, *args, **kwargs):
+        """A PART THE SYNC OWNS IS NOT THE CUSTOMER'S LINE.
+
+        Odoo adds to the cart by looking for a line that already holds the
+        product and, if it finds one, updating THAT line instead of making a
+        new one. A prepared vertical track brings its own jamb brackets, so a
+        customer who then bought loose brackets of the same size was handed
+        the track's line - which this module refuses to let anybody edit
+        directly, because a prepared track with the wrong number of brackets
+        is not a thing the owner sells.
+
+        That refusal answers in the shape the cart page reads, and the add
+        route wanted another, so the page died on a KeyError before the
+        customer could be told anything at all.
+
+        Two wrongs, and this is the one that matters: the customer asked for
+        brackets of their own and there was never a reason to touch the
+        track's. Lines the sync owns - every part with a role: bracket, flag
+        angle, stud or nut - are kept out of the search, so an add makes the
+        customer a line of their own and the sync keeps its hands on its own.
+        """
+        lines = super()._cart_find_product_line(*args, **kwargs)
+
+        return lines.filtered(lambda line: not line.track_prep_role)
+
     def _cart_add(self, product_id, quantity=1.0, *, uom_id=None, **kwargs):
         """Add a track, then add what preparing it needs."""
+        # BOUNDED BEFORE super(), not only inside the hook. Odoo adds to an
+        # EXISTING line by asking for "what it holds plus what you asked for",
+        # and it does that arithmetic before the hook sees anything: adding
+        # minus one of something already in the cart came to zero, and zero
+        # means remove. A customer typing -1 deleted the line instead.
+        quantity, note = self._aa_bounded_quantity(quantity)
         result = super()._cart_add(product_id, quantity, uom_id=uom_id, **kwargs)
+
+        if note:
+            result["warning"] = "\n".join(
+                filter(None, [result.get("warning"), note]))
         line = self.env["sale.order.line"].browse(result.get("line_id"))
 
         if line.exists():
@@ -568,9 +776,16 @@ class SaleOrder(models.Model):
         """
         line = line.exists()
 
+        # THE WHOLE SHAPE, NOT THE TWO KEYS THE CART PAGE READS. Odoo's add
+        # route reads added_qty off whatever comes back, because an add whose
+        # product is already in the cart is served by the UPDATE method - so a
+        # short answer here is not a smaller answer, it is a crash on a page
+        # that was only trying to put a bracket in a basket.
         return {
-            "quantity": line.product_uom_qty if line else 0,
+            "added_qty": 0,
             "line_id": line_id,
+            "quantity": line.product_uom_qty if line else 0,
+            "warning": "",
         }
 
     # --- what every jamb bracket is fitted with -------------------------------
