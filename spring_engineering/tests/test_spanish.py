@@ -1,6 +1,6 @@
 import re
 
-from odoo.tests.common import TransactionCase, tagged
+from odoo.tests.common import HttpCase, TransactionCase, tagged
 from odoo.tools.misc import file_path
 from odoo.tools.translate import code_translations
 
@@ -171,3 +171,26 @@ class TestTheCalculatorSpeaksSpanish(TransactionCase):
             "these are shown by the calculator but are not in i18n/es.po - "
             "re-export the terms and translate them:\n  "
             + "\n  ".join(missing))
+
+
+@tagged("post_install", "-at_install")
+class TestTheShopIsSentTheSpanish(HttpCase):
+    """What /website/translations actually puts on the wire.
+
+    Everything else in here reads files and registries. This asks the running
+    website the same question the browser asks it, which is the only check
+    that would have caught the module being absent from the frontend list.
+    """
+
+    def test_the_calculators_terms_are_in_the_frontend_payload(self):
+        self.env["res.lang"]._activate_lang("es_ES")
+
+        body = self.url_open(
+            "/website/translations?lang=es_ES", timeout=60).text
+
+        self.assertIn("Conjunto", body, "the shop is not sent 'Assembly'")
+        self.assertIn("Calibre del alambre", body, "nor 'Wire Size'")
+        self.assertIn("Tambor", body, "nor 'Drum'")
+        # The one the global pool gets wrong when this module is missing:
+        # website's own file translates "Single" as the marital status.
+        self.assertIn("Simple", body, "'Single' is not coming from this module")
