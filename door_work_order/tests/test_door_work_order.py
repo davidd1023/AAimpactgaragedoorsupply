@@ -1,6 +1,7 @@
 import html
 import json
 import re
+import urllib.parse
 
 from odoo.exceptions import UserError
 from odoo.tests.common import HttpCase, TransactionCase, tagged
@@ -23,6 +24,27 @@ def spec(**overrides):
     base.update(overrides)
 
     return json.dumps(base)
+
+
+def visible_text(rendered):
+    """The paper as a PERSON reads it: no tags, no entities, single spaces.
+
+    Three assertions have now failed in this file against raw QWeb output -
+    an inch mark arrives as &#34;, prose wraps across source lines, and
+    "Mark <strong>A</strong>" does not contain the substring "Mark A". None of
+    those are defects in the report. Asserting on markup tests the template's
+    punctuation rather than the paper's contents, so this strips it once and
+    every assertion below reads like the sheet on the bench.
+    """
+    if isinstance(rendered, bytes):
+        rendered = rendered.decode()
+
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", rendered)))
+
+
+def order(*doors, wo="W-1001"):
+    """A whole W/O with its marks on it, as the calculator now sends it."""
+    return json.dumps({"wo": wo, "doors": [json.loads(d) for d in doors]})
 
 
 class DoorWorkOrderCommon(TransactionCase):
@@ -136,7 +158,7 @@ class TestDoorWorkOrder(DoorWorkOrderCommon):
             spec(weight=None, cable=None, cable_type=""))
         self.assertEqual(
             set(self._items(production)), {"track_vertical", "track_horizontal"})
-        self.assertIn("No cable", production.door_wo_summary)
+        self.assertIn("no cable", production.door_wo_summary)
 
     def test_pressing_the_button_twice_does_not_build_two_doors(self):
         first, reused = self.Production._door_wo_create(spec())
@@ -145,11 +167,18 @@ class TestDoorWorkOrder(DoorWorkOrderCommon):
         self.assertTrue(reused)
         self.assertEqual(first, second)
 
-    def test_a_different_mark_is_a_different_door(self):
+    def test_one_order_per_wo_whatever_the_mark(self):
+        """CHANGED DELIBERATELY: the order is now the W/O, not the door.
+
+        This used to raise a second order for a second mark, from when one
+        order meant one door. With every mark on a single order, keeping the
+        mark in the key would raise a duplicate job the moment a different mark
+        happened to be open when the button was pressed.
+        """
         first, _r = self.Production._door_wo_create(spec(mark="A"))
         second, reused = self.Production._door_wo_create(spec(mark="B"))
-        self.assertFalse(reused)
-        self.assertNotEqual(first, second)
+        self.assertTrue(reused)
+        self.assertEqual(first, second)
 
     def test_a_finished_order_does_not_block_a_new_one(self):
         first, _r = self.Production._door_wo_create(spec())
@@ -259,6 +288,56 @@ class TestDoorWorkOrderHttp(HttpCase):
         return self.env["mrp.production"].search_count(
             [("door_wo_reference", "=", "W-HTTP")])
 
+    def test_the_review_page_reads_a_whole_order(self):
+        """THE BUG THIS CLASS MISSED ONCE ALREADY.
+
+        The creating path moved to the multi-mark payload and the review page
+        was left reading the single-door one, so a real order was refused on
+        the top-level "track" that a multi-mark payload does not have - and
+        every HTTP test here passed, because they all sent the old shape. A
+        payload the browser actually produces is now the one under test.
+        """
+        self.authenticate("admin", "admin")
+        payload = order(
+            spec(mark="A", qty=3, wo="W-HTTP"),
+            spec(mark="B", qty=2, height=96, vertical=88, horizontal=108,
+                 wo="W-HTTP"),
+            wo="W-HTTP")
+        page = self.url_open(
+            "/door-work-order/new?spec=%s" % http_quote(payload))
+        self.assertEqual(page.status_code, 200)
+        body = visible_text(page.text)
+        self.assertNotIn("is not a track type", body)
+        self.assertIn("Mark A", body)
+        self.assertIn("Mark B", body)
+        self.assertIn("5 doors", body)
+        self.assertIn('88"', body, "mark B's own measurement is missing")
+        self.env.invalidate_all()
+        self.assertEqual(self._count(), 0, "a GET created an order")
+
+    def test_the_post_raises_a_multi_mark_order(self):
+        self.authenticate("admin", "admin")
+        payload = order(
+            spec(mark="A", qty=3, wo="W-HTTP"),
+            spec(mark="B", qty=2, height=96, vertical=88, horizontal=108,
+                 wo="W-HTTP"),
+            wo="W-HTTP")
+        page = self.url_open(
+            "/door-work-order/new?spec=%s" % http_quote(payload))
+        token = re.search(r'name="csrf_token"\s+value="([^"]+)"', page.text)
+        self.assertTrue(token, "the review page carried no csrf token")
+        done = self.url_open(
+            "/door-work-order/create",
+            data={"spec": payload, "csrf_token": token.group(1)})
+        self.assertEqual(done.status_code, 200)
+        self.assertIn("Sent to manufacturing", visible_text(done.text))
+        self.env.invalidate_all()
+        orders = self.env["mrp.production"].search(
+            [("door_wo_reference", "=", "W-HTTP")])
+        self.assertEqual(len(orders), 1, "one order per W/O")
+        self.assertEqual(len(orders.door_wo_mark_ids), 2)
+        self.assertEqual(orders.product_qty, 5)
+
     def test_the_review_page_creates_nothing(self):
         """A LINK MUST NOT CHANGE ANYTHING.
 
@@ -276,8 +355,8 @@ class TestDoorWorkOrderHttp(HttpCase):
         # UNESCAPED, because the page is HTML and an inch mark arrives as
         # &#34;. Asserting on the escaped form would pass for the wrong reason
         # the day the template stops escaping.
-        body = html.unescape(page.text)
-        self.assertIn("Send this door to manufacturing", body)
+        body = visible_text(page.text)
+        self.assertIn("Send this order to manufacturing", body)
         self.assertIn('76"', body)
         self.assertIn('123"', body)
         self.assertIn("Vertical track", body)
@@ -299,6 +378,84 @@ class TestDoorWorkOrderHttp(HttpCase):
         self.assertIn("Sent to manufacturing", done.text)
         self.env.invalidate_all()
         self.assertEqual(self._count(), 1)
+
+    def test_the_spec_can_arrive_in_the_body(self):
+        """A long order does not fit in a URL.
+
+        A mark is about 500 bytes encoded, so a fifteen-mark order runs past
+        the request-line limit most proxies allow and comes back as a bare 414
+        from something in front of Odoo rather than this module's own page.
+        """
+        self.authenticate("admin", "admin")
+        payload = order(
+            spec(mark="A", qty=3, wo="W-HTTP"),
+            spec(mark="B", qty=2, vertical=88, wo="W-HTTP"), wo="W-HTTP")
+        page = self.url_open("/door-work-order/new", data={"spec": payload})
+        self.assertEqual(page.status_code, 200)
+        body = visible_text(page.text)
+        self.assertIn("Mark A", body)
+        self.assertIn("Mark B", body)
+        self.assertEqual(self._count(), 0, "a review POST created an order")
+
+    def test_the_page_says_when_a_mark_was_added(self):
+        """"reused" alone could not tell "nothing changed" from "mark B added".
+
+        The feature whose whole point is that a later mark reaches the floor
+        was telling the person nothing had happened.
+        """
+        self.authenticate("admin", "admin")
+        one = order(spec(mark="A", qty=1, wo="W-HTTP"), wo="W-HTTP")
+        two = order(spec(mark="A", qty=1, wo="W-HTTP"),
+                    spec(mark="B", qty=1, vertical=88, wo="W-HTTP"), wo="W-HTTP")
+
+        def send(payload):
+            page = self.url_open("/door-work-order/new", data={"spec": payload})
+            token = re.search(r'name="csrf_token"\s+value="([^"]+)"', page.text)
+            done = self.url_open("/door-work-order/create",
+                                 data={"spec": payload,
+                                       "csrf_token": token.group(1)})
+
+            return visible_text(done.text)
+
+        self.assertIn("Sent to manufacturing", send(one))
+        added = send(two)
+        self.assertIn("Added to the existing order", added)
+        self.assertIn("mark B", added.replace("Mark B", "mark B"))
+        unchanged = send(two)
+        self.assertIn("nothing was changed", unchanged)
+
+    def test_an_empty_request_explains_itself(self):
+        """What the owner actually hit.
+
+        auth="user" bounces a signed-out request to /web/login and comes back
+        with a GET, so a POSTed order is gone and the page renders with no
+        spec. "The door calculator sent no door" is true and tells the person
+        nothing they can act on - least of all that pressing Send again now
+        works, because by then they are signed in.
+        """
+        self.authenticate("admin", "admin")
+        page = self.url_open("/door-work-order/new")
+        self.assertEqual(page.status_code, 200)
+        body = visible_text(page.text)
+        self.assertIn("sign in", body)
+        self.assertIn("press Send to Manufacturing again", body)
+
+    def test_the_sign_in_redirect_keeps_the_order(self):
+        """A URL survives the login round trip; a POST body does not.
+
+        This is why the button sends the order in the query string whenever it
+        fits. Losing it here is invisible until somebody is standing at the
+        review page wondering where their order went.
+        """
+        payload = order(spec(mark="A", qty=2, wo="W-HTTP"), wo="W-HTTP")
+        page = self.url_open(
+            "/door-work-order/new?spec=%s" % http_quote(payload),
+            allow_redirects=False)
+        self.assertIn(page.status_code, (302, 303))
+        location = page.headers.get("Location", "")
+        self.assertIn("/web/login", location)
+        self.assertIn(
+            "W-HTTP", urllib.parse.unquote(urllib.parse.unquote(location)))
 
     def test_a_stranger_gets_the_login_page(self):
         """auth="user" IS the security model, so it is asserted.
@@ -336,23 +493,20 @@ class TestDoorWorkOrderPapers(DoorWorkOrderCommon):
         rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
             "door_work_order.report_info_papers", production.ids)
 
-        if isinstance(rendered, bytes):
-            rendered = rendered.decode()
-
-        return re.sub(r"\s+", " ", html.unescape(rendered))
+        return visible_text(rendered)
 
     def test_the_papers_carry_what_the_calculator_showed(self):
         production, _r = self.Production._door_wo_create(spec())
-        self.assertEqual(production.door_wo_projection, 6.5)
-        self.assertEqual(production.door_wo_ebf, "EBP 3 3/8in")
-        self.assertEqual(production.door_wo_capacity, 375)
-        self.assertEqual(production.door_wo_ftsc, 85.125)
-        self.assertEqual(production.door_wo_config, "3in 15R - Standard Lift")
-        self.assertEqual(production.door_wo_cable_type, '5/32"')
+        mark = production.door_wo_mark_ids
+        self.assertEqual(len(mark), 1)
+        self.assertEqual(mark.projection, 6.5)
+        self.assertEqual(mark.ebf, "EBP 3 3/8in")
+        self.assertEqual(mark.capacity, 375)
+        self.assertEqual(mark.ftsc, 85.125)
+        self.assertEqual(mark.config, "3in 15R - Standard Lift")
+        self.assertEqual(mark.cable_type, '5/32"')
         self.assertEqual(
-            (production.door_wo_jb_10, production.door_wo_jb_12,
-             production.door_wo_jb_14, production.door_wo_jb_16),
-            (4, 4, 4, 0),
+            (mark.jb_10, mark.jb_12, mark.jb_14, mark.jb_16), (4, 4, 4, 0),
             "#16 is not called for on this door, so it must read as absent")
 
     def test_an_overridden_bracket_count_reaches_the_paper(self):
@@ -366,9 +520,10 @@ class TestDoorWorkOrderPapers(DoorWorkOrderCommon):
         payload = json.loads(spec())
         payload["jb"] = {"j10": 4, "j12": 9, "j14": 4, "j16": 2}
         production, _r = self.Production._door_wo_create(json.dumps(payload))
-        self.assertEqual(production.door_wo_jb_12, 9)
-        self.assertEqual(production.door_wo_jb_16, 2)
-        self.assertIn(">9<", self._html(production).replace(" ", ""))
+        self.assertEqual(production.door_wo_mark_ids.jb_12, 9)
+        self.assertEqual(production.door_wo_mark_ids.jb_16, 2)
+        # the jamb row on the paper, in order: J-10 J-12 J-14 J-16
+        self.assertIn("4 9 4 2", self._html(production))
 
     def test_both_papers_print_with_their_numbers(self):
         production, _r = self.Production._door_wo_create(spec())
@@ -413,6 +568,32 @@ class TestDoorWorkOrderPapers(DoorWorkOrderCommon):
         self.assertNotIn("2x2 Projection", html)
         self.assertNotIn("EBF", html)
 
+    def test_the_papers_are_plain_ascii(self):
+        """wkhtmltopdf RENDERS THIS PAGE AS LATIN-1 WHATEVER THE CHARSET SAYS.
+
+        A non-breaking space is two bytes in UTF-8 and printed as "Â "; an em
+        dash printed as "â€”". The owner read a header of
+        "W/O: 7 Â |Â Mark A Â |Â 2 doors" off a real sheet.
+
+        Declaring the charset did not help and arguing with the PDF engine is
+        not worth it, because neither character earned anything a pipe and a
+        hyphen do not. So the rule is that these papers are ASCII, and this
+        asserts the rule rather than the symptom - any future em dash, curly
+        quote or non-breaking space fails here instead of on paper.
+        """
+        production, _r = self.Production._door_wo_create(spec())
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "door_work_order.report_info_papers", production.ids)
+
+        if isinstance(rendered, bytes):
+            rendered = rendered.decode()
+
+        body = rendered[rendered.find("<main>"):]
+        offenders = sorted({c for c in html.unescape(body) if ord(c) > 127})
+        self.assertFalse(
+            offenders,
+            "the papers carry characters wkhtmltopdf will mangle: %r" % offenders)
+
     def test_an_ordinary_manufacturing_order_says_it_has_no_papers(self):
         """The Print entry shows on every MO, so the others must read sensibly."""
         other = self.env["mrp.production"].create({
@@ -420,3 +601,343 @@ class TestDoorWorkOrderPapers(DoorWorkOrderCommon):
         html = self._html(other)
         self.assertIn("did not come from the door calculator", html)
         self.assertNotIn("TRACKS", html)
+
+
+@tagged("post_install", "-at_install")
+class TestDoorWorkOrderQuantity(DoorWorkOrderCommon):
+    """The quantity box, which until now changed nothing downstream."""
+
+    def _html(self, production):
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "door_work_order.report_info_papers", production.ids)
+
+        return visible_text(rendered)
+
+    def test_three_of_one_door_is_three_doors_of_everything(self):
+        production, _r = self.Production._door_wo_create(
+            order(spec(mark="A", qty=3)))
+        self.assertEqual(production.product_qty, 3)
+        self.assertEqual(production.door_wo_mark_ids.door_qty, 3)
+        # two pieces per door, three doors
+        for item in production.door_wo_item_ids:
+            self.assertEqual(item.quantity, 6, item.role)
+
+    def test_several_marks_land_on_one_order(self):
+        production, _r = self.Production._door_wo_create(order(
+            spec(mark="A", qty=3),
+            spec(mark="B", qty=2, height=96, vertical=88, horizontal=108),
+        ))
+        self.assertEqual(len(production.door_wo_mark_ids), 2)
+        self.assertEqual(production.product_qty, 5, "3 of A and 2 of B is 5 doors")
+        marks = {m.label: m for m in production.door_wo_mark_ids}
+        self.assertEqual(marks["A"].height, 84)
+        self.assertEqual(marks["B"].height, 96)
+        self.assertEqual(
+            marks["B"]._door_wo_item_length("track_vertical"), '88"',
+            "mark B must carry its own measurements, not mark A's")
+
+    def test_each_marks_cuts_are_its_own(self):
+        production, _r = self.Production._door_wo_create(order(
+            spec(mark="A", qty=1),
+            spec(mark="B", qty=4, vertical=88),
+        ))
+        by_mark = {}
+
+        for item in production.door_wo_item_ids:
+            by_mark.setdefault(item.mark_id.label, []).append(item)
+
+        self.assertEqual(len(by_mark["A"]), 3)
+        vertical_b = [i for i in by_mark["B"] if i.role == "track_vertical"][0]
+        self.assertEqual(vertical_b.length_inches, 88)
+        self.assertEqual(vertical_b.quantity, 8, "2 pieces x 4 doors")
+
+    def test_the_papers_say_how_many_doors(self):
+        production, _r = self.Production._door_wo_create(order(
+            spec(mark="A", qty=3),
+            spec(mark="B", qty=1, vertical=88),
+        ))
+        paper = self._html(production)
+        self.assertIn("Mark A", paper)
+        self.assertIn("3 doors", paper)
+        self.assertIn("Mark B", paper)
+        self.assertIn("1 door", paper)
+        # two marks means two track sheets and two cable sheets
+        self.assertEqual(paper.count("TRACKS"), 2)
+        self.assertEqual(paper.count("CABLES"), 2)
+        self.assertIn('88"', paper, "mark B's own vertical length is missing")
+
+    def test_one_door_still_reads_as_one_door(self):
+        production, _r = self.Production._door_wo_create(order(spec(mark="A")))
+        self.assertEqual(production.product_qty, 1)
+        paper = self._html(production)
+        self.assertIn("1 door", paper)
+        self.assertNotIn("1 doors", paper)
+
+    def test_a_single_door_payload_still_works(self):
+        """An older calculator sends one door and no marks list.
+
+        It must not be refused by a newer server - the shop updates the page by
+        uploading a file, so the two halves are never in step for long.
+        """
+        production, _r = self.Production._door_wo_create(spec())
+        self.assertEqual(len(production.door_wo_mark_ids), 1)
+        self.assertEqual(production.product_qty, 1)
+        self.assertIn("TRACKS", self._html(production))
+
+    def test_an_absurd_number_of_marks_is_refused(self):
+        many = [spec(mark=str(i)) for i in range(60)]
+        with self.assertRaises(UserError):
+            self.Production._door_wo_create(order(*many))
+
+
+@tagged("post_install", "-at_install")
+class TestDoorWorkOrderResend(DoorWorkOrderCommon):
+    """Pressing Send again after adding a door to the order."""
+
+    def test_a_mark_added_later_is_not_silently_dropped(self):
+        """THE BUG: a door added after the first send never reached the floor.
+
+        The order was returned the moment the W/O matched, before the new marks
+        were even looked at, so the person saw "that order already exists",
+        pressed nothing more, and manufacturing never heard about mark B. It
+        cost nothing to notice and everything to miss.
+        """
+        first, reused = self.Production._door_wo_create(
+            order(spec(mark="A", qty=2)))
+        self.assertFalse(reused)
+        self.assertEqual(first.product_qty, 2)
+
+        second, reused = self.Production._door_wo_create(order(
+            spec(mark="A", qty=2),
+            spec(mark="B", qty=3, height=96, vertical=88, horizontal=108),
+        ))
+        self.assertTrue(reused, "it must still be the same order")
+        self.assertEqual(first, second)
+        self.assertEqual(
+            sorted(second.door_wo_mark_ids.mapped("label")), ["A", "B"],
+            "mark B was dropped")
+        self.assertEqual(second.product_qty, 5, "2 doors of A plus 3 of B")
+
+        mark_b = second.door_wo_mark_ids.filtered(lambda m: m.label == "B")
+        self.assertEqual(mark_b._door_wo_item_length("track_vertical"), '88"')
+        self.assertEqual(
+            sum(mark_b.item_ids.filtered(
+                lambda i: i.role == "track_vertical").mapped("quantity")), 6,
+            "2 pieces x 3 doors")
+
+    def test_a_mark_already_on_the_order_is_left_alone(self):
+        """Not rewritten, deliberately: the job may already be part cut.
+
+        Quietly changing a length somebody is working to is worse than the
+        problem being solved here, so a mark that is already on the order keeps
+        the measurements it was raised with and the review page says so.
+        """
+        first, _r = self.Production._door_wo_create(order(spec(mark="A", qty=2)))
+        # the same mark, re-sent with a different size and quantity
+        second, reused = self.Production._door_wo_create(
+            order(spec(mark="A", qty=9, height=96, vertical=88)))
+        self.assertTrue(reused)
+        mark = second.door_wo_mark_ids
+        self.assertEqual(len(mark), 1)
+        self.assertEqual(mark.door_qty, 2, "the quantity was rewritten")
+        self.assertEqual(mark.height, 84, "the measurements were rewritten")
+        self.assertEqual(second.product_qty, 2)
+
+    def test_resending_an_unchanged_order_changes_nothing(self):
+        first, _r = self.Production._door_wo_create(order(
+            spec(mark="A", qty=2), spec(mark="B", qty=1, vertical=88)))
+        before = (len(first.door_wo_mark_ids), len(first.door_wo_item_ids),
+                  first.product_qty)
+        second, reused = self.Production._door_wo_create(order(
+            spec(mark="A", qty=2), spec(mark="B", qty=1, vertical=88)))
+        self.assertTrue(reused)
+        self.assertEqual(
+            (len(second.door_wo_mark_ids), len(second.door_wo_item_ids),
+             second.product_qty), before,
+            "re-sending the same order duplicated something")
+
+    def test_a_finished_order_does_not_absorb_a_new_job(self):
+        """A W/O number reused on a later job must not join a closed order."""
+        first, _r = self.Production._door_wo_create(order(spec(mark="A")))
+        first.state = "cancel"
+        second, reused = self.Production._door_wo_create(order(spec(mark="A")))
+        self.assertFalse(reused)
+        self.assertNotEqual(first, second)
+
+
+@tagged("post_install", "-at_install")
+class TestDoorWorkOrderCompany(DoorWorkOrderCommon):
+    """A cut list is as company-private as the order it hangs off."""
+
+    def test_another_companys_cut_list_is_not_readable(self):
+        """The parent being protected is not protection.
+
+        mrp.production already carries a multi-company rule. These two models
+        hang off it and carried none, so a manufacturing user in one company
+        could read another company's marks and lengths by querying the child
+        models directly - never through a form, which is why it would not have
+        been noticed by using the feature.
+        """
+        other = self.env["res.company"].create({"name": "Other Door Co"})
+        job = self.env.ref("door_work_order.product_door_work_order")
+        foreign = self.env["mrp.production"].sudo().create({
+            "product_id": job.id, "product_qty": 1.0,
+            "company_id": other.id,
+            "door_wo_reference": "W-OTHER",
+        })
+        mark = self.env["door.work.order.mark"].sudo().create({
+            "production_id": foreign.id, "label": "A", "door_qty": 1})
+        item = self.env["door.work.order.item"].sudo().create({
+            "production_id": foreign.id, "mark_id": mark.id,
+            "role": "track_vertical", "length_inches": 76, "quantity": 2})
+        self.assertEqual(item.company_id, other, "company did not follow the order")
+
+        insider = self.env["res.users"].sudo().create({
+            "name": "Ours", "login": "door-wo-ours",
+            "company_id": self.env.company.id,
+            "company_ids": [(6, 0, [self.env.company.id])],
+            "group_ids": [(4, self.env.ref("mrp.group_mrp_user").id)],
+        })
+        visible = self.env["door.work.order.item"].with_user(insider).search(
+            [("id", "=", item.id)])
+        self.assertFalse(
+            visible, "another company's cut item was readable")
+        self.assertFalse(
+            self.env["door.work.order.mark"].with_user(insider).search(
+                [("id", "=", mark.id)]),
+            "another company's mark was readable")
+
+    def test_our_own_cut_list_is_still_readable(self):
+        """The rule must not lock people out of their own work."""
+        production, _r = self.Production._door_wo_create(spec())
+        insider = self.env["res.users"].sudo().create({
+            "name": "Ours Too", "login": "door-wo-ours-2",
+            "company_id": self.env.company.id,
+            "company_ids": [(6, 0, [self.env.company.id])],
+            "group_ids": [(4, self.env.ref("mrp.group_mrp_user").id)],
+        })
+        self.assertTrue(
+            self.env["door.work.order.item"].with_user(insider).search(
+                [("production_id", "=", production.id)]),
+            "the rule hid the user's own cut list")
+
+
+@tagged("post_install", "-at_install")
+class TestDoorWorkOrderReviewFindings(DoorWorkOrderCommon):
+    """Everything the review turned up, held down by a test each."""
+
+    def test_a_payload_with_no_mark_does_not_invent_a_door_each_send(self):
+        """An older calculator sends no mark at all.
+
+        The blank was STORED as "A" and COMPARED as "", so the resend check
+        asked whether "" was on the order, found it was not, and added another
+        door - ['A'], then ['A','B'], then ['A','B','C'], with the quantity
+        climbing behind it. Three presses of a button, three doors.
+        """
+        payload = json.loads(spec())
+        payload.pop("mark")
+        payload = json.dumps(payload)
+        first, _r = self.Production._door_wo_create(payload)
+
+        for _attempt in range(3):
+            again, reused = self.Production._door_wo_create(payload)
+            self.assertTrue(reused)
+            self.assertEqual(again, first)
+
+        self.assertEqual(len(first.door_wo_mark_ids), 1)
+        self.assertEqual(first.product_qty, 1)
+        self.assertEqual(len(first.door_wo_item_ids), 3)
+
+    def test_adding_a_mark_to_a_confirmed_order_keeps_its_moves_in_step(self):
+        """A plain write to product_qty leaves the finished move behind.
+
+        Odoo keeps that move in step through a wizard. Writing the field
+        directly gave an order claiming five doors that would only ever book
+        two into stock - and confirmed orders are exactly the ones a resend
+        lands on, so this is the normal path.
+        """
+        production, _r = self.Production._door_wo_create(
+            order(spec(mark="A", qty=2)))
+        production.action_confirm()
+        self.assertEqual(production.state, "confirmed")
+
+        self.Production._door_wo_create(order(
+            spec(mark="A", qty=2),
+            spec(mark="B", qty=3, height=96, vertical=88, horizontal=108)))
+        production.invalidate_recordset()
+
+        self.assertEqual(production.product_qty, 5)
+        finished = production.move_finished_ids.filtered(
+            lambda m: m.product_id == production.product_id)
+        self.assertEqual(
+            sum(finished.mapped("product_uom_qty")), 5,
+            "the order says 5 doors and the finished move says something else")
+
+    def test_material_added_to_a_confirmed_order_is_not_left_in_draft(self):
+        """A draft raw move on a confirmed order is never reserved.
+
+        It sits there looking like material was booked, and the production flow
+        ignores it, so the mark added later quietly had nothing allocated.
+        """
+        self.params.set_param("door_work_order.consume_components", "True")
+        self._reel('5/32" 7x19 Cable 500ft Reel')
+        production, _r = self.Production._door_wo_create(
+            order(spec(mark="A", qty=1)))
+        production.action_confirm()
+
+        self.Production._door_wo_create(order(
+            spec(mark="A", qty=1),
+            spec(mark="B", qty=1, vertical=88)))
+        production.invalidate_recordset()
+
+        self.assertTrue(production.move_raw_ids)
+        self.assertFalse(
+            production.move_raw_ids.filtered(lambda m: m.state == "draft"),
+            "material for the added mark was left in draft and never reserved")
+
+    def test_a_bad_section_count_is_refused_not_crashed(self):
+        """The one number that skipped validation.
+
+        A bare int() raised ValueError on text and TypeError on a list, and
+        neither is a UserError, so both escaped the controller and became a 500
+        traceback instead of the refusal page.
+        """
+        for bad in ["four", [1], {"a": 1}, 10 ** 12, -3]:
+            with self.assertRaises(UserError, msg=repr(bad)):
+                self.Production._door_wo_create(spec(sections=bad))
+
+    def test_two_marks_cannot_share_a_letter(self):
+        """Two sheets headed "Mark A" with different measurements.
+
+        The only way to tell them apart on the bench is to measure, which is
+        the thing the sheet exists to save. Refused at the door instead.
+        """
+        with self.assertRaises(UserError):
+            self.Production._door_wo_create(order(
+                spec(mark="A", qty=1),
+                spec(mark="A", qty=1, height=96, vertical=88)))
+
+        # and the same order with distinct letters is fine
+        production, _r = self.Production._door_wo_create(order(
+            spec(mark="A", qty=1),
+            spec(mark="B", qty=1, height=96, vertical=88)))
+        self.assertEqual(
+            sorted(production.door_wo_mark_ids.mapped("label")), ["A", "B"])
+
+    def test_several_orders_print_as_several_documents(self):
+        """Without an article wrapper Odoo merges them into one body.
+
+        Selecting two orders in the list and printing put the second order's
+        TRACKS sheet underneath the first order's CABLES sheet.
+        """
+        first, _r = self.Production._door_wo_create(order(spec(mark="A"), wo="W-1"))
+        second, _r = self.Production._door_wo_create(order(spec(mark="A"), wo="W-2"))
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "door_work_order.report_info_papers", (first | second).ids)
+
+        if isinstance(rendered, bytes):
+            rendered = rendered.decode()
+
+        self.assertEqual(
+            rendered.count('class="article"'), 2,
+            "two orders did not produce two documents")

@@ -1,0 +1,80 @@
+/* THE WISHLISTED STATE, COLOURED BY A CLASS RATHER THAN BY [disabled].
+
+   website_sale_wishlist draws the filled red heart with
+   `.o_add_wishlist[disabled] .fa:before`, and disables the button to get it.
+   This shop needs the button clickable - the heart is how a customer takes a
+   product OFF the list - so the same two rules are keyed on the class the
+   server already sets, o_in_wishlist.
+
+   THE PRODUCT PAGE BUTTON IS COLOURED THE SAME WAY, for the same reason.
+   Odoo draws that one with `.o_add_wishlist_dyn.disabled i::before` - the
+   class it adds after an add - and this file takes that class off so the
+   button stays clickable, so the colour has to come from o_in_wishlist there
+   too or a wishlisted product would show an empty outline on its own page.
+
+   The second rule matters as much as the first: with the "show on hover"
+   option, a heart that is not disabled is invisible until the card is
+   hovered, so dropping the attribute without this would have made a
+   wishlisted product look exactly like one that was not. */
+.o_wsale_products_opt_has_wishlist .o_add_wishlist.o_in_wishlist .fa:before,
+:is(.o_add_wishlist, .o_add_wishlist_dyn).o_in_wishlist .fa:before {
+    content: "\f004";
+    color: var(--addWishlist-color-active, #ff3d3a);
+}
+
+.o_wsale_products_opt_wishlist_fixed.o_wsale_products_opt_wishlist_fixed_onhover
+.oe_product_cart:where(:not(:hover):not(:focus-visible):not(:focus-within))
+.o_add_wishlist.o_in_wishlist {
+    opacity: 1;
+}
+
+/* THE REORDER PANEL SCROLLS, so the list can be as long as the account is old
+   without pushing its own heading off the screen. The offcanvas body scrolls
+   too; this keeps the orders in their own window inside it, which is what
+   makes "scroll down to see the rest" mean the orders rather than the page. */
+.o_aa_reorder_scroll {
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+/* TAKING SOMETHING OFF HAS TO LOOK LIKE SOMETHING HAPPENED.
+
+   Adding animates - Odoo flies a copy of the product up to the navbar - and
+   removing did nothing at all. Worse, the pointer is still over the heart
+   when the click lands, and the hover rule fills an EMPTY heart red to show
+   what clicking would do. So a removal left a red heart under the cursor and
+   looked exactly like a click that had not worked.
+  
+   Two rules, and both are needed: the heart shrinks and comes back, and while
+   the pointer stays on the one just emptied it is drawn as an outline rather
+   than previewing the next add. Moving the pointer away clears that, so the
+   preview works normally the next time. */
+@keyframes o_aa_wish_removed {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(0.65); }
+    70%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+:is(.o_add_wishlist, .o_add_wishlist_dyn).o_aa_wish_removed .fa {
+    animation: o_aa_wish_removed 0.35s ease-out;
+}
+
+:is(.o_add_wishlist, .o_add_wishlist_dyn).o_aa_wish_removed:hover .fa-heart-o:before {
+    content: "\f08a";
+    color: inherit;
+}
+
+/* ADDING POPS TOO. Odoo's own feedback for adding - a copy of the product
+   flying up to the navbar - belongs to the handler this file now steps in
+   front of, so the heart says it itself. Same shape as the removal, the other
+   way round. */
+@keyframes o_aa_wish_added {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+
+:is(.o_add_wishlist, .o_add_wishlist_dyn).o_aa_wish_added .fa {
+    animation: o_aa_wish_added 0.3s ease-out;
+}

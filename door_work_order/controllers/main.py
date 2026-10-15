@@ -41,11 +41,21 @@ class DoorWorkOrder(http.Controller):
     # manufacturing orders by loading an image. It would equally mean a
     # mistyped door becomes a record before anyone reads it. So the link shows
     # the cut list and asks; the creating is a POST with the session's token.
+    # POST IS ACCEPTED BECAUSE A LONG ORDER DOES NOT FIT IN A URL. A mark is
+    # about 500 bytes once encoded, so fifteen of them pass the 8 kB request
+    # line most proxies allow and the person gets a bare 414 from something in
+    # front of Odoo rather than this module's own refusal page. The body has no
+    # such limit.
+    #
+    # csrf=False is safe HERE and only here: this route reads and renders, it
+    # creates nothing. The route that creates keeps its token. A cross-site
+    # POST to this one can at worst show a signed-in employee a page.
     @http.route(
         "/door-work-order/new",
         type="http",
         auth="user",
-        methods=["GET"],
+        methods=["GET", "POST"],
+        csrf=False,
         website=False,
         sitemap=False,
     )
@@ -57,21 +67,60 @@ class DoorWorkOrder(http.Controller):
 
         Production = request.env["mrp.production"]
 
+        # NO SPEC AT ALL IS ALMOST ALWAYS THE LOGIN REDIRECT. auth="user" sends
+        # a signed-out request to /web/login and comes back with a GET, so a
+        # POSTed body is gone by the time this runs and the order arrives
+        # empty. "The door calculator sent no door" is true and useless; the
+        # person needs to know their sign-in ate it and that pressing Send
+        # again now works.
+        if not spec:
+            return self._render("refused", {"message": _(
+                "No door reached this page.\n\n"
+                "If you were asked to sign in just now, that is why: signing in"
+                " loses what was being sent. Go back to the calculator and"
+                " press Send to Manufacturing again - you are signed in now, so"
+                " it will come straight through.")})
+
         try:
-            parsed = Production._door_wo_parse(spec)
+            # THE WHOLE ORDER, not one door. This read _door_wo_parse while the
+            # creating path had already moved to _door_wo_parse_order, so an
+            # order carrying marks was refused here - on the top-level "track"
+            # that a multi-mark payload does not have - and never reached the
+            # button at all. The two must read the same shape, which is why
+            # there is now an HTTP test on the multi-mark payload.
+            order = Production._door_wo_parse_order(spec)
         except UserError as error:
             return self._render("refused", {"message": str(error)})
 
-        items, missing = Production._door_wo_plan(parsed)
-        existing = Production._door_wo_existing(parsed)
+        doors = []
+        missing = []
+
+        for parsed in order["doors"]:
+            items, gaps = Production._door_wo_plan(parsed)
+            doors.append({
+                "parsed": parsed,
+                "items": items,
+                "summary": Production._door_wo_summary_text(parsed),
+            })
+
+            for gap in gaps:
+                if gap not in missing:
+                    missing.append(gap)
+
+        existing = Production._door_wo_existing(order)
+        on_order = set(existing.door_wo_mark_ids.mapped("label")) if existing else set()
 
         return self._render("review", {
             "spec": spec,
-            "parsed": parsed,
-            "items": items,
+            "order": order,
+            "doors": doors,
+            "total_doors": sum(d["parsed"]["door_qty"] for d in doors),
             "missing": missing,
             "existing": existing,
-            "summary": Production._door_wo_summary_text(parsed),
+            # WHAT SENDING AGAIN WILL ACTUALLY DO, named rather than implied.
+            "new_marks": [d["parsed"]["mark"] for d in doors
+                          if d["parsed"]["mark"] not in on_order],
+            "kept_marks": sorted(on_order),
         })
 
     # --- step two: raise it ---------------------------------------------------
@@ -89,10 +138,23 @@ class DoorWorkOrder(http.Controller):
         except AccessError as error:
             return self._render("refused", {"message": str(error)})
 
+        Production = request.env["mrp.production"]
+
+        # WHAT WAS ON THE ORDER BEFORE, so the page afterwards can say what
+        # actually happened. "reused" alone cannot tell "this order already
+        # existed and nothing changed" from "this order already existed and
+        # mark B was just added to it" - and the whole point of the second case
+        # is that the mark reaches the floor, which the page was not confirming.
         try:
-            production, reused = request.env["mrp.production"]._door_wo_create(spec)
+            order = Production._door_wo_parse_order(spec)
+            existing = Production._door_wo_existing(order)
+            before = set(existing.door_wo_mark_ids.mapped("label")) if existing else set()
+            production, reused = Production._door_wo_create(spec)
         except UserError as error:
             return self._render("refused", {"message": str(error)})
+
+        added = [label for label in production.door_wo_mark_ids.mapped("label")
+                 if label and label not in before]
 
         action = request.env.ref(PRODUCTION_ACTION, raise_if_not_found=False)
         url = "/odoo/m-%s" % production.id
@@ -103,5 +165,6 @@ class DoorWorkOrder(http.Controller):
         return self._render("done", {
             "production": production,
             "reused": reused,
+            "added": added if reused else [],
             "url": url,
         })

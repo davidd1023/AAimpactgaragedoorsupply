@@ -23,6 +23,19 @@ class DoorWorkOrderItem(models.Model):
         ondelete="cascade",
         index=True,
     )
+    # OPTIONAL ON PURPOSE. Orders raised before marks existed have items with
+    # no mark, and they must keep printing rather than be migrated into a shape
+    # that did not exist when they were made. New items always carry one.
+    mark_id = fields.Many2one(
+        "door.work.order.mark", string="Mark", ondelete="cascade", index=True)
+    # FOLLOWS THE ORDER'S COMPANY, so the record rule below can scope these
+    # the way mrp.production is already scoped. Without it these rows are
+    # reachable by any manufacturing user in any company - the parent order is
+    # protected and its cut list was not, which is the usual shape of this
+    # mistake.
+    company_id = fields.Many2one(
+        "res.company", related="production_id.company_id",
+        store=True, index=True, readonly=True)
     sequence = fields.Integer(default=10)
     role = fields.Selection(
         [

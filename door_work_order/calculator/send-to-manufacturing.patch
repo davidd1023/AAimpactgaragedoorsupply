@@ -1,55 +1,44 @@
 diff --git a/index.html b/index.html
-index f577335..1eaa204 100644
+index 32fd6ab..f05e3ae 100644
 --- a/index.html
 +++ b/index.html
-@@ -131,7 +131,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
-       <div class="settings-section" style="margin-top:14px"><div class="settings-section-title">Odoo Address</div>
+@@ -132,7 +132,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
          <div class="printer-item"><label>Paste any page of your Odoo - only the address is used</label>
          <input id="cfg-odoo" type="text" inputmode="url" placeholder="aaigd.com  or  https://aaigd.com/odoo/manufacturing" oninput="saveOdooUrl()" style="width:100%;padding:8px;border:1px solid var(--gray-border);border-radius:8px;font-size:14px"/>
--        <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div></div>
-+        <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div>
-+        <div style="margin-top:6px;font-size:11px;color:#888">Send to Manufacturing build <strong>4</strong> &#183; 2026-10-09</div></div>
+         <div class="printer-status"><div class="status-dot" id="dot-odoo"></div><span id="lbl-odoo">--</span></div>
+-        <div style="margin-top:6px;font-size:11px;color:#888">Send to Manufacturing build <strong>8</strong> &#183; 2026-10-09</div></div>
++        <div style="margin-top:6px;font-size:11px;color:#888">Send to Manufacturing build <strong>9</strong> &#183; 2026-10-09</div></div>
        </div>
        <div class="save-confirm" id="save-confirm">Saved</div>
      </div>
-@@ -420,7 +421,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
+@@ -421,7 +421,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
    <div class="results" id="print-all-wrap" style="margin-top:4px">
      <button class="print-all-btn" onclick="opPrintChoice()">&#128424; Print All</button>
      <button class="print-all-btn" style="display:none" onclick="doPrintAll()">&#128424; Print All (print server)</button>
--    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff">&#128296; Send to Manufacturing</button>
-+    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff" title="Send to Manufacturing build 4">&#128296; Send to Manufacturing <span style="opacity:.55;font-size:11px">b4</span></button>
+-    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff" title="Send to Manufacturing build 8">&#128296; Send to Manufacturing <span style="opacity:.55;font-size:11px">b8</span></button>
++    <button class="print-all-btn" id="send-mfg-btn" onclick="sendToManufacturing()" style="background:#1B2A6B;color:#fff" title="Send to Manufacturing build 9">&#128296; Send to Manufacturing <span style="opacity:.55;font-size:11px">b9</span></button>
    </div>
    </div>
  </div>
-@@ -978,10 +979,29 @@ function sendToManufacturing(){
-     weight:CD.hasWeight?CD.wt:null,
-     cable:CD.hasWeight?CD.cable:null,
-     cable_type:CD.hasWeight?(CD.cableType||''):'',
--    drum:CD.hasWeight?(CD.drum||''):''
-+    drum:CD.hasWeight?(CD.drum||''):'',
-+    // WHAT THE TWO PREVIEW SHEETS SHOW, so Odoo can print the same papers
-+    // without recomputing any of it. The jamb counts go through
-+    // getJBOverride, which is the whole point: a shop that has overridden a
-+    // bracket quantity in Settings must see its own number on the printed
-+    // paper, not the number the table would have given.
-+    projection:CD.x2,
-+    config:(CD.tlbl&&CD.llbl)?((CD.tlbl[CD.tt]||'')+' - '+(CD.llbl[CD.lt]||'')):'',
-+    jb:CD.jb?{
-+      j10:getJBOverride('j10',CD.jb.j10),
-+      j12:getJBOverride('j12',CD.jb.j12),
-+      j14:getJBOverride('j14',CD.jb.j14),
-+      j16:getJBOverride('j16',CD.jb.j16)
-+    }:null,
-+    ebf:CD.hasWeight?(CD.ebf||''):'',
-+    capacity:CD.hasWeight?CD.cap:null,
-+    ftsc:CD.hasWeight?CD.ftsc:null
-   };
-   if(!spec.wo&&!confirm('This door has no W/O number. Without one, sending twice will raise two orders. Send anyway?'))return;
--  window.open(base+'/door-work-order/new?spec='+encodeURIComponent(JSON.stringify(spec)),'_blank','noopener');
-+  var target=base+'/door-work-order/new?spec='+encodeURIComponent(JSON.stringify(spec));
-+  try{console.log('Send to Manufacturing b4 ->',target);}catch(e){}
-+  var win=window.open(target,'_blank','noopener');
-+  if(!win)alert('Your browser blocked the new tab. Allow pop-ups for this page, or open this address:\n\n'+target);
- }
- function savePrinters(){save({pTracks:document.getElementById('cfg-tracks').value,pCables:document.getElementById('cfg-cables').value,pSmall:document.getElementById('cfg-small').value,pBig:document.getElementById('cfg-big').value});var c=document.getElementById('save-confirm');c.classList.add('show');setTimeout(function(){c.classList.remove('show');},2000);}
- function setRotation(deg){
+@@ -1106,7 +1106,20 @@ function sendToManufacturing(){
+   if(!spec.wo&&!confirm('This order has no W/O number. Without one, sending twice will raise two orders. Send anyway?'))return;
+   var target=base+'/door-work-order/new';
+   var body=JSON.stringify(spec);
+-  try{console.log('Send to Manufacturing b8 -> '+collected.doors.length+' mark(s), '+total+' door(s), '+body.length+' bytes',target);}catch(e){}
++  // A URL SURVIVES THE SIGN-IN, A POST BODY DOES NOT. auth="user" bounces a
++  // signed-out request to /web/login and returns with a GET, so a POSTed
++  // order is simply gone and the page says no door was sent. The query string
++  // is carried through the redirect intact, so it is used whenever the order
++  // fits in one - which is nearly always. POST is kept for the long orders
++  // that would otherwise overflow the request line, where losing the body to
++  // a sign-in is the lesser of the two failures and the page explains it.
++  var encoded=encodeURIComponent(body);
++  if((target.length+encoded.length+6)<6000){
++    var g=window.open(target+'?spec='+encoded,'_blank','noopener');
++    if(!g)alert('Your browser blocked the new tab. Allow pop-ups for this page, then press Send again.');
++    return;
++  }
++  try{console.log('Send to Manufacturing b9 -> '+collected.doors.length+' mark(s), '+total+' door(s), '+body.length+' bytes',target);}catch(e){}
+   // POSTED, NOT HUNG OFF THE URL. A mark is about 500 bytes once encoded, so a
+   // fifteen-mark order runs past the request-line limit most proxies allow and
+   // comes back as a bare 414 from something in front of Odoo. A form body has

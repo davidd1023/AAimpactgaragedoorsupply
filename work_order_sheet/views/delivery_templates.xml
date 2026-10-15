@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE CUSTOMER'S OWN PAGE, opened on a phone at the kerb.
+
+       A whole document rather than a page of the website: there is nothing
+       here to browse to, and a delivery note that arrives wrapped in a shop
+       is a delivery note somebody taps the wrong part of. Everything inline,
+       for the same reason the bench screens are - it has to come up on a
+       phone with one bar of signal.
+
+       THE SIGNATURE PAD IS WRITTEN OUT, not pulled from a library: it is
+       forty lines of canvas, it works with a finger and with a mouse, and
+       adding an asset bundle to a standalone page to avoid them would cost
+       more than it saves. -->
+  <template id="delivery_confirmation" name="Delivery confirmation">&lt;!DOCTYPE html&gt;
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Delivery <t t-esc="picking.name"/></title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #111;
+             background: #f4f5f7; font-size: 17px; }
+      header { background: #1f2d3d; color: #fff; padding: 18px; }
+      header h1 { margin: 0 0 4px; font-size: 22px; }
+      header .sub { opacity: .85; font-size: 15px; }
+      main { padding: 16px; max-width: 760px; margin: 0 auto; }
+      .card { background: #fff; border: 1px solid #d6dbe1; border-radius: 10px;
+              padding: 16px; margin-bottom: 14px; }
+      .dates { display: flex; flex-wrap: wrap; gap: 18px; font-size: 15px;
+               color: #5a6b7c; }
+      .dates b { color: #111; display: block; font-size: 16px; }
+      h2 { font-size: 17px; margin: 0 0 12px; text-transform: uppercase;
+           letter-spacing: .04em; color: #5a6b7c; }
+      label.item { display: flex; gap: 12px; align-items: flex-start;
+                   padding: 12px 0; border-bottom: 1px solid #eef0f3; }
+      label.item:last-child { border-bottom: 0; }
+      label.item input { width: 26px; height: 26px; margin: 2px 0 0; flex: 0 0 auto; }
+      .qty { font-weight: bold; }
+      .muted { color: #5a6b7c; font-size: 15px; }
+      input[type=text] { width: 100%; font-size: 18px; padding: 12px;
+                         border: 1px solid #d6dbe1; border-radius: 8px; }
+      canvas { width: 100%; height: 190px; border: 2px dashed #b9c2cc;
+               border-radius: 8px; background: #fff; touch-action: none; }
+      .row { display: flex; gap: 10px; align-items: center;
+             justify-content: space-between; margin-top: 8px; }
+      button { font-size: 19px; font-weight: bold; padding: 16px 24px;
+               border-radius: 8px; border: 0; background: #1b8f4d; color: #fff;
+               width: 100%; }
+      button.clear { background: #fff; color: #5a6b7c; border: 1px solid #d6dbe1;
+                     font-weight: normal; font-size: 15px; padding: 8px 14px;
+                     width: auto; }
+      .message { background: #fde8c8; border: 1px solid #e0b980;
+                 border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; }
+      .signed { background: #e7f5ec; border-color: #1b8f4d; }
+      .signed img { max-width: 100%; border-bottom: 1px solid #d6dbe1; }
+      .section-group .head { display: flex; align-items: center;
+                             justify-content: space-between; gap: 12px; }
+      .section-group .head h2 { margin: 0 0 8px; }
+      .confirm-all { white-space: nowrap; }
+      .ticked { color: #1b8f4d; font-weight: bold; }
+      .missed { color: #b03030; font-weight: bold; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><t t-esc="company.name"/></h1>
+      <div class="sub">
+        Delivery <t t-esc="picking.name"/>
+        <t t-if="picking.origin"> - order <t t-esc="picking.origin"/></t>
+      </div>
+    </header>
+
+    <main>
+      <t t-if="message">
+        <div class="message"><t t-esc="message"/></div>
+      </t>
+
+      <div class="card">
+        <div class="dates">
+          <div>
+            Form made
+            <b><t t-esc="picking._dispatch_date(picking.dispatch_form_date)"/></b>
+          </div>
+          <div>
+            Signed
+            <b>
+              <t t-if="picking.dispatch_signed_on">
+                <t t-esc="picking._dispatch_date(picking.dispatch_signed_on)"/>
+              </t>
+              <t t-else="">Not yet</t>
+            </b>
+          </div>
+          <div t-if="picking.partner_id">
+            Delivered to
+            <b><t t-esc="picking.partner_id.name"/></b>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALREADY SIGNED: the page becomes the receipt. A form that can be
+           signed twice is not a receipt, so there is nothing here to press. -->
+      <t t-if="picking.dispatch_signed_on">
+        <div class="card signed">
+          <h2>Received</h2>
+          <t t-foreach="groups" t-as="group">
+            <t t-foreach="group[1]" t-as="item">
+              <div class="item" style="padding: 10px 0; border-bottom: 1px solid #eef0f3;">
+                <span t-attf-class="{{ 'ticked' if item['received'] else 'missed' }}">
+                  <t t-if="item['received']">Confirmed</t>
+                  <t t-else="">Not confirmed</t>
+                </span>
+                -
+                <span class="qty"><t t-esc="'%g' % item['quantity']"/></span>
+                <t t-esc="item['uom']"/>
+                <t t-esc="item['name']"/>
+              </div>
+            </t>
+          </t>
+          <div style="margin-top: 14px;">
+            <img t-if="picking.dispatch_signature"
+                 t-attf-src="/delivery/{{ token }}/signature.png" alt="Signature"/>
+            <div class="muted">
+              Signed by <b><t t-esc="picking.dispatch_signed_by"/></b>
+              on <t t-esc="picking._dispatch_date(picking.dispatch_signed_on)"/>
+            </div>
+          </div>
+        </div>
+      </t>
+
+      <t t-else="">
+        <form t-attf-action="/delivery/{{ token }}/sign" method="post">
+          <!-- SAID BEFORE THE LIST, not after it. The groups replaced a
+               single heading, and with the instruction left at the bottom the
+               page went straight from a date to "Tracks - Confirm all" with
+               nothing telling anybody what was being asked of them. -->
+          <div class="card">
+            <h2>Tick what you received</h2>
+            <div class="muted">
+              Leave anything you did not receive unticked. We will be told.
+            </div>
+          </div>
+
+          <!-- ONE CARD PER KIND OF THING, each with a button that ticks its
+               own. Eleven lengths of track are one answer, not eleven. -->
+          <t t-foreach="groups" t-as="group">
+            <div class="card section-group">
+              <div class="head">
+                <h2><t t-esc="group[0]"/></h2>
+                <button type="button" class="clear confirm-all">
+                  Confirm all
+                </button>
+              </div>
+              <t t-foreach="group[1]" t-as="item">
+                <label class="item">
+                  <!-- EMPTY TO BEGIN WITH. A receipt that arrives pre-ticked
+                       is one somebody confirms without reading it, and the
+                       whole point of the list is that each line was looked
+                       at. Ticking the boxes is the work being asked for. -->
+                  <input type="checkbox" t-attf-name="item_{{ item['key'] }}"
+                         value="1"/>
+                  <span>
+                    <span class="qty"><t t-esc="'%g' % item['quantity']"/></span>
+                    <t t-esc="item['uom']"/>
+                    -
+                    <t t-esc="item['name']"/>
+                  </span>
+                </label>
+              </t>
+            </div>
+          </t>
+
+          <div class="card">
+            <h2>Your name</h2>
+            <input type="text" name="signed_by" placeholder="Full name"
+                   autocomplete="name"/>
+          </div>
+
+          <div class="card">
+            <h2>Signature</h2>
+            <canvas id="pad"></canvas>
+            <input type="hidden" name="signature" id="signature"/>
+            <div class="row">
+              <span class="muted">Sign with your finger or your mouse.</span>
+              <button type="button" class="clear" id="clear">Clear</button>
+            </div>
+          </div>
+
+          <button type="submit">Confirm this delivery</button>
+        </form>
+
+        <script type="text/javascript">
+          (function () {
+              // CONFIRM ALL, PER GROUP, and the same button clears them again:
+              // a one-way button leaves somebody who pressed it by mistake
+              // unticking eleven boxes by hand, which is the very thing it is
+              // here to save.
+              document.querySelectorAll(".section-group").forEach(function (card) {
+                  var button = card.querySelector(".confirm-all");
+                  var boxes = card.querySelectorAll("input[type=checkbox]");
+
+                  function refresh() {
+                      var all = true;
+                      boxes.forEach(function (box) { all = all &amp;&amp; box.checked; });
+                      button.textContent = all ? "Clear all" : "Confirm all";
+                  }
+
+                  button.addEventListener("click", function () {
+                      var all = true;
+                      boxes.forEach(function (box) { all = all &amp;&amp; box.checked; });
+                      boxes.forEach(function (box) { box.checked = !all; });
+                      refresh();
+                  });
+                  boxes.forEach(function (box) {
+                      box.addEventListener("change", refresh);
+                  });
+                  refresh();
+              });
+          })();
+
+          (function () {
+              var canvas = document.getElementById("pad");
+              var field = document.getElementById("signature");
+              var ctx = canvas.getContext("2d");
+              var drawing = false;
+              var used = false;
+
+              function size() {
+                  // A canvas drawn at CSS size on a phone is a blur, so it is
+                  // sized in device pixels and scaled back down.
+                  var ratio = window.devicePixelRatio || 1;
+                  var rect = canvas.getBoundingClientRect();
+                  canvas.width = rect.width * ratio;
+                  canvas.height = rect.height * ratio;
+                  ctx.scale(ratio, ratio);
+                  ctx.lineWidth = 2.5;
+                  ctx.lineCap = "round";
+                  ctx.lineJoin = "round";
+                  ctx.strokeStyle = "#111";
+              }
+              size();
+
+              function at(event) {
+                  var rect = canvas.getBoundingClientRect();
+                  return [event.clientX - rect.left, event.clientY - rect.top];
+              }
+              canvas.addEventListener("pointerdown", function (event) {
+                  drawing = true;
+                  used = true;
+                  canvas.setPointerCapture(event.pointerId);
+                  var point = at(event);
+                  ctx.beginPath();
+                  ctx.moveTo(point[0], point[1]);
+                  event.preventDefault();
+              });
+              canvas.addEventListener("pointermove", function (event) {
+                  if (!drawing) { return; }
+                  var point = at(event);
+                  ctx.lineTo(point[0], point[1]);
+                  ctx.stroke();
+                  event.preventDefault();
+              });
+              ["pointerup", "pointercancel", "pointerleave"].forEach(function (name) {
+                  canvas.addEventListener(name, function () { drawing = false; });
+              });
+              document.getElementById("clear").addEventListener("click", function () {
+                  ctx.clearRect(0, 0, canvas.width, canvas.height);
+                  used = false;
+                  field.value = "";
+              });
+              canvas.closest("form").addEventListener("submit", function () {
+                  field.value = used ? canvas.toDataURL("image/png") : "";
+              });
+          })();
+        </script>
+      </t>
+    </main>
+  </body>
+</html>
+  </template>
+
+</odoo>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="work_station_view_list" model="ir.ui.view">
+    <field name="name">work.station.list</field>
+    <field name="model">work.station</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="sequence" widget="handle"/>
+        <field name="name"/>
+        <field name="code"/>
+        <field name="todo_count"/>
+        <field name="kiosk_url" widget="CopyClipboardChar"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="work_station_view_form" model="ir.ui.view">
+    <field name="name">work.station.form</field>
+    <field name="model">work.station</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <div class="oe_title">
+            <h1><field name="name" placeholder="Springs"/></h1>
+          </div>
+          <group>
+            <group>
+              <field name="code"/>
+              <field name="sequence"/>
+              <field name="active" invisible="1"/>
+            </group>
+            <group>
+              <field name="todo_count"/>
+            </group>
+          </group>
+          <group string="Bench tablet">
+            <field name="kiosk_url" widget="CopyClipboardChar" nolabel="1"
+                   colspan="2"/>
+            <div colspan="2" class="text-muted">
+              Open this link on the tablet at the bench. It needs no login, so
+              treat it as the key to this station's work: anybody who has it
+              can see this queue and tick it off. If a tablet goes missing,
+              replace the link and the old one stops working at once.
+            </div>
+            <button name="action_regenerate_token" type="object" colspan="2"
+                    string="Replace this link"
+                    confirm="The tablets at this station will have to be given the new link. Continue?"
+                    class="btn-secondary"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="work_station_action" model="ir.actions.act_window">
+    <field name="name">Work Stations</field>
+    <field name="res_model">work.station</field>
+    <field name="view_mode">list,form</field>
+  </record>
+
+  <record id="work_station_item_view_list" model="ir.ui.view">
+    <field name="name">work.station.item.list</field>
+    <field name="model">work.station.item</field>
+    <field name="arch" type="xml">
+      <list create="false">
+        <field name="order_name"/>
+        <field name="station_id"/>
+        <field name="name"/>
+        <field name="code" optional="hide"/>
+        <field name="quantity"/>
+        <field name="uom_name" optional="hide"/>
+        <field name="length"/>
+        <field name="door" optional="hide"/>
+        <field name="picking_id"/>
+        <field name="done_at" optional="hide"/>
+        <field name="state" widget="badge"
+               decoration-success="state == 'done'"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="work_station_item_view_search" model="ir.ui.view">
+    <field name="name">work.station.item.search</field>
+    <field name="model">work.station.item</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="order_name"/>
+        <field name="name"/>
+        <field name="picking_id"/>
+        <filter name="todo" string="To do" domain="[('state', '=', 'todo')]"/>
+        <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
+        <separator/>
+        <filter name="released" string="On the work stations"
+                domain="[('picking_id.work_station_released', '=', True)]"/>
+        <filter name="open" string="Open transfers"
+                domain="[('picking_id.state', 'not in', ('done', 'cancel'))]"/>
+        <group>
+          <filter name="by_station" string="Station"
+                  context="{'group_by': 'station_id'}"/>
+          <filter name="by_order" string="Order"
+                  context="{'group_by': 'order_name'}"/>
+          <filter name="by_state" string="Status"
+                  context="{'group_by': 'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="work_station_item_action" model="ir.actions.act_window">
+    <field name="name">Station Work</field>
+    <field name="res_model">work.station.item</field>
+    <field name="view_mode">list</field>
+    <field name="context">{'search_default_todo': 1, 'search_default_open': 1,
+                           'search_default_by_station': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No work on the benches</p>
+      <p>Confirming a transfer sorts its springs, tracks and cables onto the
+         stations that make them.</p>
+    </field>
+  </record>
+
+  <!-- SORTING AN OLDER TRANSFER BY HAND. Work reaches the benches when a
+       transfer is confirmed, so anything confirmed before this existed - or
+       corrected afterwards - needs one nudge. -->
+  <record id="action_picking_station_withdraw" model="ir.actions.server">
+    <field name="name">Take off work stations</field>
+    <field name="model_id" ref="stock.model_stock_picking"/>
+    <field name="binding_model_id" ref="stock.model_stock_picking"/>
+    <field name="binding_view_types">list,form</field>
+    <field name="state">code</field>
+    <field name="code">records.action_work_station_withdraw()</field>
+  </record>
+
+  <record id="action_picking_station_sync" model="ir.actions.server">
+    <field name="name">Send to work stations</field>
+    <field name="model_id" ref="stock.model_stock_picking"/>
+    <field name="binding_model_id" ref="stock.model_stock_picking"/>
+    <field name="binding_view_types">list,form</field>
+    <field name="state">code</field>
+    <field name="code">records.action_work_station_release()</field>
+  </record>
+
+  <!-- UNDER MANUFACTURING, NOT INVENTORY. A bench WINDS a spring and CUTS a
+       track; Inventory is where the result gets shipped. Hardware is not a
+       station for exactly that reason - hinges and rollers come off a shelf -
+       so the three stations are the part of this that is genuinely making
+       something, and shop-floor progress is a Manufacturing question.
+
+       The printed sheet stays on the transfer, because that is the record it
+       describes.
+
+       BOTH SETS OF GROUPS ON PURPOSE. A Manufacturing administrator is not
+       automatically an Inventory one - mrp.group_mrp_manager implies only
+       stock.group_stock_user - so gating this on the Inventory group alone
+       would hide the kiosk links from exactly the person who runs the floor. -->
+  <menuitem id="menu_work_station_item" name="Station Work"
+            parent="mrp.menu_mrp_manufacturing"
+            action="work_station_item_action" sequence="25"/>
+
+  <menuitem id="menu_work_station" name="Work Stations"
+            parent="mrp.menu_mrp_configuration"
+            action="work_station_action" sequence="25"
+            groups="stock.group_stock_manager,mrp.group_mrp_manager"/>
+
+</odoo>

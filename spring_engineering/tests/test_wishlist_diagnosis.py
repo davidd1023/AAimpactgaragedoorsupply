@@ -1,0 +1,657 @@
+import json
+import re
+
+from odoo.tests.common import HttpCase, tagged
+
+
+@tagged("post_install", "-at_install")
+class TestWishlistDiagnosis(HttpCase):
+    """The page has to name the right reason, and only for an administrator.
+
+    Three different states of the data produce the same four symptoms on the
+    shop - the badge empties, the page lists nothing, and adding the product
+    again is refused as a duplicate - so a page that guessed between them
+    would be worse than no page at all.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.website = self.env["website"].search([], limit=1)
+        self.product = self.env["product.product"].create({
+            "name": "Diagnosis Roller", "type": "consu", "list_price": 5.0,
+            "is_published": True, "sale_ok": True})
+
+    def _wish(self, product):
+        self.url_open(
+            "/shop/wishlist/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"product_id": product.id}}),
+            headers={"Content-Type": "application/json"})
+
+        return self.env["product.wishlist"].sudo().search(
+            [("product_id", "=", product.id)], limit=1)
+
+    def _page(self):
+        response = self.url_open("/shop/wishlist/diagnose")
+        self.assertEqual(response.status_code, 200)
+
+        return response.text
+
+    def test_a_healthy_row_is_reported_as_healthy(self):
+        self.authenticate("admin", "admin")
+        self._wish(self.product)
+        page = self._page()
+        self.assertIn("Diagnosis Roller", page)
+        self.assertIn("it is on the page", page)
+
+    def test_an_archived_row_says_so(self):
+        self.authenticate("admin", "admin")
+        self._wish(self.product).write({"active": False})
+        self.assertIn("archived", self._page())
+
+    def test_a_row_from_another_website_says_so(self):
+        other = self.env["website"].create({"name": "Second Site"})
+        self.authenticate("admin", "admin")
+        self._wish(self.product).write({"website_id": other.id})
+        page = self._page()
+        self.assertIn("saved against website", page)
+        self.assertIn("Second Site", page)
+
+    def test_an_unpublished_product_says_so(self):
+        self.authenticate("admin", "admin")
+        wish = self._wish(self.product)
+        wish.product_id.product_tmpl_id.write({"is_published": False})
+        self.assertIn("not published", self._page())
+
+    def test_it_counts_what_signed_out_visitors_left_behind(self):
+        self.authenticate("admin", "admin")
+        self._wish(self.product)
+        self.assertIn("row(s) belong to signed-out visitors", self._page())
+
+    def test_an_ordinary_user_cannot_open_it(self):
+        """It lists what people have wishlisted, which is not everybody's
+        business."""
+        self.env["res.users"].create({
+            "name": "Shop Clerk", "login": "wishlist-clerk",
+            "password": "wishlist-clerk",
+            "group_ids": [(6, 0, [self.env.ref("base.group_user").id])]})
+        self.authenticate("wishlist-clerk", "wishlist-clerk")
+        self.assertNotEqual(
+            self.url_open("/shop/wishlist/diagnose").status_code, 200)
+
+
+@tagged("post_install", "-at_install")
+class TestWishlistStuckRow(HttpCase):
+    """The loop the owner was stuck in: a row the page cannot reach is a row
+    the website cannot delete, because removing one goes through the list it
+    is missing from."""
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.website = self.env["website"].search([], limit=1)
+        self.product = self.env["product.product"].create({
+            "name": "Stuck Roller", "type": "consu", "list_price": 5.0,
+            "is_published": True, "sale_ok": True})
+
+    def _add(self, product):
+        response = self.url_open(
+            "/shop/wishlist/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"product_id": product.id}}),
+            headers={"Content-Type": "application/json"})
+
+        return response.json()
+
+    def _rows(self, product):
+        return self.env["product.wishlist"].sudo().with_context(
+            active_test=False).search([("product_id", "=", product.id)])
+
+    def test_adding_the_same_product_twice_no_longer_errors(self):
+        self.authenticate("admin", "admin")
+        self._add(self.product)
+        again = self._add(self.product)
+
+        self.assertNotIn("error", again,
+                         "the customer was shown a duplicate error")
+        self.assertEqual(len(self._rows(self.product)), 1)
+
+    def test_an_unreachable_row_is_adopted_rather_than_refused(self):
+        """An archived row, or one left on another website, comes back to the
+        site being browsed instead of blocking it for ever."""
+        self.authenticate("admin", "admin")
+        self._add(self.product)
+        other = self.env["website"].create({"name": "Somewhere Else"})
+        self._rows(self.product).write({"active": False, "website_id": other.id})
+
+        again = self._add(self.product)
+        row = self._rows(self.product)
+
+        self.assertNotIn("error", again)
+        self.assertEqual(len(row), 1, "a second row was created")
+        self.assertTrue(row.active)
+        self.assertEqual(row.website_id, self.website)
+        # AND IT IS ON THE PAGE AGAIN, which is the only claim worth making:
+        # current() answers from the request, so calling it here would measure
+        # nothing. An earlier draft of this line asserted that the row was in
+        # itself, which is true of every row ever written.
+        page = self.url_open("/shop/wishlist").text
+        self.assertIn(self.product.name, page)
+
+    def test_a_row_that_cannot_be_reached_can_be_cleared_from_the_page(self):
+        """A row nobody can delete has to be removable from somewhere.
+
+        ARCHIVED, NOT UNPUBLISHED. This used to archive nothing and simply
+        unpublish the product, which was unreachable at the time and is not
+        any more: an internal user now keeps unpublished products on their
+        wishlist, deliberately, so that the heart stops contradicting a shop
+        that shows them. A row on another website is stuck for everybody.
+        """
+        self.authenticate("admin", "admin")
+        self._add(self.product)
+        other = self.env["website"].create({"name": "Somewhere Else Entirely"})
+        self._rows(self.product).write({"website_id": other.id})
+
+        page = self.url_open("/shop/wishlist/diagnose").text
+        self.assertIn("cannot be reached", page)
+
+        token = re.search(r"name='csrf_token' value='([^']+)'", page).group(1)
+        self.url_open("/shop/wishlist/diagnose/clear",
+                      data={"csrf_token": token})
+
+        self.assertFalse(self._rows(self.product), "the stuck row is still there")
+
+    def test_clearing_leaves_a_working_wish_alone(self):
+        self.authenticate("admin", "admin")
+        self._add(self.product)
+        page = self.url_open("/shop/wishlist/diagnose").text
+        self.assertNotIn("cannot be reached", page,
+                         "a healthy wish was offered for deletion")
+
+
+@tagged("post_install", "-at_install")
+class TestWishlistButtonAlwaysThere(HttpCase):
+    """A customer cannot find a wishlist that only appears once they have used
+    it. Odoo hides the header heart when the count is zero; this shop does not.
+    """
+
+    def test_the_header_keeps_the_wishlist_link_when_it_is_empty(self):
+        self.assertFalse(
+            self.env.ref(
+                "website_sale_wishlist.header_hide_empty_wishlist_link"
+            ).active,
+            "the hide-when-empty view is back on")
+
+        page = self.url_open("/shop").text
+        self.assertIn("/shop/wishlist", page,
+                      "a visitor with an empty wishlist has no way to reach it")
+
+    def test_the_count_itself_is_still_hidden_at_zero(self):
+        """The BUTTON stays; the little number on it does not sit there
+        reading zero."""
+        page = self.url_open("/shop").text
+        self.assertIn("my_wish_quantity", page)
+        self.assertIn("d-none", page)
+
+
+@tagged("post_install", "-at_install")
+class TestWishlistHeartOnTheCard(HttpCase):
+    """The heart on a product card has to say what it knows.
+
+    Odoo renders it filled for a product already wishlisted - and renders it
+    DISABLED, so there is no way to take the product off the list from the
+    shop. The owner wants a toggle: red when it is on the list, and clicking
+    it takes it off.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.product = self.env["product.product"].create({
+            "name": "Heart Probe Roller", "type": "consu", "list_price": 5.0,
+            "is_published": True, "sale_ok": True})
+
+    def _card(self, page):
+        """The product card's wishlist button, as served."""
+        hit = re.search(
+            r"<button[^>]*o_add_wishlist[^>]*data-product-product-id=\"%s\"[^>]*>"
+            % self.product.id, page)
+
+        if not hit:
+            hit = re.search(
+                r"<button[^>]*data-product-product-id=\"%s\"[^>]*o_add_wishlist[^>]*>"
+                % self.product.id, page)
+
+        return hit.group(0) if hit else ""
+
+    def test_the_heart_is_filled_on_a_fresh_page_load(self):
+        self.authenticate("admin", "admin")
+        self.url_open(
+            "/shop/wishlist/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"product_id": self.product.id}}),
+            headers={"Content-Type": "application/json"})
+
+        page = self.url_open("/shop?search=Heart Probe").text
+        print("\nPRODUCT ON THE PAGE:", self.product.name in page)
+        print("WISHLIST BUTTONS:", page.count("o_add_wishlist"))
+        here = page.find("Heart Probe Roller")
+        print("AROUND THE CARD:", " ".join(page[max(0, here - 1400):here].split())[-700:])
+        self.assertIn("o_in_wishlist", page)
+
+
+# OUT OF THE STANDARD RUN, ON PURPOSE. This container cannot keep a headless
+# browser alive - some runs cannot start the thread it talks over, others see
+# Chrome vanish mid-handshake - so in here the result says more about the
+# sandbox than about the code, and a test that fails at random teaches people
+# to ignore failures. It is kept and runnable where a browser works:
+#
+#     odoo-bin --test-tags aa_browser --stop-after-init
+@tagged("post_install", "-at_install", "-standard", "aa_browser")
+class TestWishlistToggleTour(HttpCase):
+    """The two things the owner asked for, in a real browser.
+
+    Both are about what happens between page loads and on a second click, and
+    no server-side test can see either.
+    """
+
+    def test_the_heart_stays_red_and_clicking_it_removes(self):
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.env["product.product"].create({
+            "name": "Heart Probe Roller", "type": "consu", "list_price": 5.0,
+            "is_published": True, "sale_ok": True})
+        self.env["product.wishlist"].sudo().search([]).unlink()
+
+        try:
+            self.start_tour("/shop?search=Heart+Probe+Roller",
+                            "aa_wishlist_toggle", login="admin")
+        except RuntimeError as error:
+            # THE SANDBOX, NOT THE TOUR. This container cannot spawn the
+            # thread the headless browser talks over - "can't start new
+            # thread" - so the tour cannot run HERE. It is kept, and skipped
+            # with the reason said out loud, because a test that quietly
+            # passes when it never ran is worse than one that is absent. Any
+            # other error is a real failure and is left to fail.
+            if "can't start new thread" not in str(error):
+                raise
+
+            self.skipTest("no browser available in this container: %s" % error)
+
+
+@tagged("post_install", "-at_install")
+class TestWishlistToggleServerSide(HttpCase):
+    """What the browser needs from the server for the heart to be a switch."""
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.product = self.env["product.product"].create({
+            "name": "Toggle Probe Roller", "type": "consu", "list_price": 5.0,
+            "is_published": True, "sale_ok": True})
+
+    def _add(self, product):
+        return self.url_open(
+            "/shop/wishlist/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"product_id": product.id}}),
+            headers={"Content-Type": "application/json"}).json()
+
+    def _remove(self, product):
+        return self.url_open(
+            "/shop/wishlist/remove_product",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"product_id": product.id}}),
+            headers={"Content-Type": "application/json"}).json()
+
+    def _rows(self, product):
+        return self.env["product.wishlist"].sudo().with_context(
+            active_test=False).search([("product_id", "=", product.id)])
+
+    def test_the_card_button_is_not_served_disabled(self):
+        """Odoo disables it once the product is on the list, which is also how
+        it colours it red. This shop colours it from the class instead, so the
+        button stays clickable - and that is the whole of the second half of
+        what was asked for."""
+        self.authenticate("admin", "admin")
+        self._add(self.product)
+        page = self.url_open("/shop?search=Toggle+Probe").text
+        card = re.search(r"<button[^>]*o_add_wishlist[^>]*>", page).group(0)
+
+        self.assertIn("o_in_wishlist", card, card)
+        self.assertNotIn("disabled", card, card)
+
+    def test_a_signed_in_customer_can_remove_by_product(self):
+        self.authenticate("admin", "admin")
+        self._add(self.product)
+        self.assertTrue(self._rows(self.product))
+
+        self._remove(self.product)
+        self.assertFalse(self._rows(self.product), "the row is still there")
+
+    def test_a_signed_out_visitor_can_remove_by_product(self):
+        """The session list a visitor's wishlist lives in has to be kept in
+        step, which is why this hands the row to Odoo's own route."""
+        self._add(self.product)
+        self.assertTrue(self._rows(self.product))
+
+        self._remove(self.product)
+        self.assertFalse(self._rows(self.product))
+
+    def test_removing_something_that_is_not_there_says_nothing(self):
+        self.authenticate("admin", "admin")
+        answer = self._remove(self.product)
+
+        self.assertNotIn("error", answer)
+
+    def test_a_stuck_row_can_be_removed_by_the_heart(self):
+        """An archived row is exactly the one somebody needs to clear."""
+        self.authenticate("admin", "admin")
+        self._add(self.product)
+        self._rows(self.product).write({"active": False})
+
+        self._remove(self.product)
+        self.assertFalse(self._rows(self.product))
+
+
+@tagged("post_install", "-at_install")
+class TestUnpublishedWishesForTheOwner(HttpCase):
+    """The heart that would not stay red.
+
+    Odoo drops an unpublished product from the wishlist page, from the ids the
+    browser keeps and from the marks on the shop's cards - while showing that
+    product to an internal user, letting them cart it and letting them
+    wishlist it. The heart filled on the click and was empty on the next page,
+    for some products and not others, which is how it was reported: sometimes
+    they stay, sometimes they go back. It tracked publication, not luck.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.hidden = self.env["product.product"].create({
+            "name": "Unpublished Probe Roller", "type": "consu",
+            "list_price": 5.0, "is_published": False, "sale_ok": True})
+
+    def _add(self, product):
+        return self.url_open(
+            "/shop/wishlist/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"product_id": product.id}}),
+            headers={"Content-Type": "application/json"}).json()
+
+    def _ids(self):
+        return self.url_open(
+            "/shop/wishlist/get_product_ids",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call", "params": {}}),
+            headers={"Content-Type": "application/json"}).json().get("result")
+
+    def test_an_internal_user_keeps_an_unpublished_product_on_the_list(self):
+        self.authenticate("admin", "admin")
+        self._add(self.hidden)
+
+        self.assertIn(self.hidden.id, self._ids() or [],
+                      "the browser is not told, so the heart empties")
+        self.assertIn(self.hidden.name,
+                      self.url_open("/shop/wishlist").text)
+
+    def test_the_shop_still_marks_the_card_on_a_fresh_page(self):
+        self.authenticate("admin", "admin")
+        self._add(self.hidden)
+        page = self.url_open("/shop?search=Unpublished+Probe").text
+
+        self.assertIn("o_in_wishlist", page)
+
+    def test_a_customer_sees_no_such_thing(self):
+        """Odoo's rule is kept for everybody else: you cannot buy what is not
+        for sale, and a wishlist full of those is worse than a short one."""
+        portal = self.env["res.users"].create({
+            "name": "A Customer", "login": "wish-customer",
+            "password": "wish-customer",
+            "group_ids": [(6, 0, [self.env.ref("base.group_portal").id])]})
+        self.assertFalse(portal._is_internal())
+
+        self.authenticate("wish-customer", "wish-customer")
+        self._add(self.hidden)
+
+        self.assertNotIn(self.hidden.id, self._ids() or [])
+        self.assertNotIn(self.hidden.name, self.url_open("/shop/wishlist").text)
+
+    def test_a_published_product_is_unaffected(self):
+        shown = self.env["product.product"].create({
+            "name": "Published Probe Roller", "type": "consu",
+            "list_price": 5.0, "is_published": True, "sale_ok": True})
+        self.authenticate("admin", "admin")
+        self._add(shown)
+
+        self.assertIn(shown.id, self._ids() or [])
+
+
+@tagged("post_install", "-at_install")
+class TestTheCardKnowsItsVariant(HttpCase):
+    """THE BUG BEHIND EVERY DEAD HEART.
+
+    Odoo's card template picks the variant with
+
+        t-value="in_wish or product._get_first_possible_variant_id()"
+
+    and in_wish is a BOOLEAN, so a product already on the wishlist renders
+    data-product-product-id="True". parseInt gives NaN and no handler can act
+    on it. It never mattered to Odoo, whose button is disabled in exactly that
+    state; making the heart clickable is what exposed it.
+
+    It accounts for the whole of the report: adding worked, removing worked
+    right after adding - the page still held the real id - and any re-render,
+    another page or another category, brought the word back and the heart died.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.product = self.env["product.product"].create({
+            "name": "Variant Probe Roller", "type": "consu", "list_price": 5.0,
+            "is_published": True, "sale_ok": True})
+
+    def _card(self):
+        page = self.url_open("/shop?search=Variant+Probe").text
+        hit = re.search(r"<button[^>]*o_add_wishlist.*?</button>", page, re.S)
+
+        return hit.group(0) if hit else ""
+
+    def _add(self):
+        self.url_open(
+            "/shop/wishlist/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"product_id": self.product.id}}),
+            headers={"Content-Type": "application/json"})
+
+    def test_a_wishlisted_card_carries_the_variant_and_not_a_boolean(self):
+        self.authenticate("admin", "admin")
+        self._add()
+        card = self._card()
+
+        self.assertIn("o_in_wishlist", card, "the fixture is not wishlisted")
+        self.assertNotIn('data-product-product-id="True"', card, card)
+        self.assertIn('data-product-product-id="%s"' % self.product.id, card, card)
+
+    def test_an_unwishlisted_card_is_unchanged(self):
+        self.authenticate("admin", "admin")
+        card = self._card()
+
+        self.assertIn('data-product-product-id="%s"' % self.product.id, card, card)
+
+    def test_it_is_the_variant_that_was_wishlisted(self):
+        """Not merely the first one Odoo would have offered: a product with
+        several variants has to lose the one that is on the list."""
+        attribute = self.env["product.attribute"].create({
+            "name": "Probe Colour", "create_variant": "always",
+            "value_ids": [(0, 0, {"name": "Black"}), (0, 0, {"name": "White"})],
+        })
+        template = self.env["product.template"].create({
+            "name": "Variant Probe Track", "type": "consu", "list_price": 9.0,
+            "is_published": True, "sale_ok": True,
+            "attribute_line_ids": [(0, 0, {
+                "attribute_id": attribute.id,
+                "value_ids": [(6, 0, attribute.value_ids.ids)]})],
+        })
+        second = template.product_variant_ids[1]
+        self.authenticate("admin", "admin")
+        self.url_open(
+            "/shop/wishlist/add",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"product_id": second.id}}),
+            headers={"Content-Type": "application/json"})
+
+        page = self.url_open("/shop?search=Variant+Probe+Track").text
+        card = re.search(r"<button[^>]*o_add_wishlist.*?</button>", page, re.S)
+
+        self.assertIn('data-product-product-id="%s"' % second.id,
+                      card.group(0) if card else "")
+
+
+@tagged("post_install", "-at_install")
+class TestWishlistOnTheProductPage(HttpCase):
+    """The heart on a product's OWN page, which was never a switch.
+
+    The owner found it from the other side: pressing the button on a product
+    page put the product on the list and then there was no way to take it off,
+    and the shop page sometimes did not show it as wishlisted at all. Two
+    different causes, and neither is about the shop card this module already
+    fixed.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.attribute = self.env["product.attribute"].create({
+            "name": "Probe Size",
+            "value_ids": [(0, 0, {"name": "Small"}), (0, 0, {"name": "Large"})],
+        })
+        self.tmpl = self.env["product.template"].create({
+            "name": "Page Probe Roller", "type": "consu", "list_price": 9.0,
+            "is_published": True, "sale_ok": True,
+            "attribute_line_ids": [(0, 0, {
+                "attribute_id": self.attribute.id,
+                "value_ids": [(6, 0, self.attribute.value_ids.ids)],
+            })],
+        })
+        self.first = self.env["product.product"].browse(
+            self.tmpl._get_first_possible_variant_id())
+        self.other = self.tmpl.product_variant_ids - self.first
+        self.assertTrue(self.other, "the fixture wants two variants")
+
+    def _call(self, route, params):
+        return self.url_open(
+            route,
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": params}),
+            headers={"Content-Type": "application/json"}).json()
+
+    def _add(self, product):
+        return self._call("/shop/wishlist/add", {"product_id": product.id})
+
+    def _button(self):
+        """The product page's own wishlist button, as served."""
+        page = self.url_open(self.tmpl.website_url).text
+        hit = re.search(r"<a[^>]*data-action=\"o_wishlist\"[^>]*>", page)
+
+        return hit.group(0) if hit else ""
+
+    # --- it has to be pressable a second time --------------------------------
+
+    def test_the_button_is_served_clickable_when_the_product_is_on_the_list(self):
+        """DISABLED IS THE WHOLE BUG. Odoo disables it - which is also how it
+        colours the heart in - and a disabled .btn is pointer-events: none, so
+        the second press raises no event at all."""
+        self.authenticate("admin", "admin")
+        self._add(self.first)
+        button = self._button()
+
+        self.assertTrue(button, "the product page has no wishlist button")
+        self.assertNotIn("disabled", button, button)
+        self.assertIn("o_in_wishlist", button, button)
+        self.assertIn('data-product-product-id="%s"' % self.first.id, button)
+
+    def test_it_offers_to_remove_rather_than_to_add(self):
+        self.authenticate("admin", "admin")
+        self._add(self.first)
+        page = self.url_open(self.tmpl.website_url).text
+        button = self._button()
+        here = page.find(button)
+
+        self.assertIn("Remove from wishlist", button, button)
+        self.assertIn("fa-heart", page[here:here + 400])
+        self.assertNotIn("fa-heart-o", page[here:here + 400],
+                         "an outline heart over a wishlisted product")
+
+    def test_an_untouched_product_still_offers_to_add(self):
+        self.authenticate("admin", "admin")
+        button = self._button()
+
+        self.assertIn("Add to wishlist", button, button)
+        self.assertNotIn("o_in_wishlist", button, button)
+
+    # --- and the shop page has to agree with it ------------------------------
+
+    def test_the_state_route_says_which_variant_is_on_the_list(self):
+        """A CARD CANNOT GUESS. It stands for the template and offers the
+        first variant; the row may be for another, and comparing the two
+        numbers is what left the heart empty next to a wishlist holding the
+        product."""
+        self.authenticate("admin", "admin")
+        self._add(self.other)
+        state = self._call("/shop/wishlist/state", {})["result"]
+
+        self.assertIn(self.other.id, state["ids"])
+        self.assertEqual(state["variants"][str(self.tmpl.id)], self.other.id)
+        self.assertNotEqual(self.other.id, self.first.id, "fixture")
+
+    def test_the_shop_card_points_at_the_variant_that_is_on_the_list(self):
+        self.authenticate("admin", "admin")
+        self._add(self.other)
+        page = self.url_open("/shop?search=Page+Probe").text
+        card = re.search(r"<button[^>]*o_add_wishlist[^>]*>", page)
+
+        self.assertTrue(card, "no card heart on the shop page")
+        self.assertIn('data-product-product-id="%s"' % self.other.id,
+                      card.group(0), card.group(0))
+        self.assertIn("o_in_wishlist", card.group(0))
+
+    def test_the_state_route_is_empty_for_a_visitor_who_wished_nothing(self):
+        state = self._call("/shop/wishlist/state", {})["result"]
+
+        self.assertEqual(state["ids"], [])
+        self.assertEqual(state["variants"], {})
+
+    # --- removing the row a card can only half identify ----------------------
+
+    def test_a_card_may_name_its_template_to_find_the_row(self):
+        """A card drawn outside the shop page is reddened by Odoo for the
+        TEMPLATE while still offering the first variant's id. Asked by that id
+        alone nothing is found, the heart empties and the row stays - which is
+        "removing does not work" all over again."""
+        self.authenticate("admin", "admin")
+        self._add(self.other)
+        rows = self.env["product.wishlist"].sudo().with_context(
+            active_test=False)
+
+        self._call("/shop/wishlist/remove_product", {
+            "product_id": self.first.id, "product_tmpl_id": self.tmpl.id})
+
+        self.assertFalse(
+            rows.search([("product_id", "in", self.tmpl.product_variant_ids.ids)]),
+            "the row survived a removal aimed at its template")
+
+    def test_without_a_template_a_wrong_variant_removes_nothing(self):
+        """The product page's half of the same rule: it is showing one variant,
+        so it must not reach a row belonging to another."""
+        self.authenticate("admin", "admin")
+        self._add(self.other)
+        rows = self.env["product.wishlist"].sudo().with_context(
+            active_test=False)
+
+        self._call("/shop/wishlist/remove_product", {"product_id": self.first.id})
+
+        self.assertTrue(
+            rows.search([("product_id", "=", self.other.id)]),
+            "a variant nobody asked about was taken off the list")

@@ -1,0 +1,77 @@
+[
+ {
+  "input": {
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 60,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "widthInches": 108,
+   "heightInches": 114,
+   "weight": 457,
+   "label": "owner 2sp 10k",
+   "springs": 2,
+   "cycles": 10000
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 108 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.7,
+   "totalInchPoundPerTurn": 164.4,
+   "multiplier": 0.359632,
+   "cycles": 20000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.3625,
+    "innerDiameter": 2.625,
+    "springLength": 76.75,
+    "springWeight": 58.1619
+   }
+  }
+ },
+ {
+  "input": {
+   "garageDoorLineId": "5a06c4b3-c798-459e-bba2-a6c857eebb0b",
+   "assembly": "Single",
+   "lift": "HiLift",
+   "hiLift": 60,
+   "radius": 15,
+   "innerDiameter": 2.625,
+   "drum": "CANIMEX/TF 575-120",
+   "widthInches": 108,
+   "heightInches": 114,
+   "weight": 457,
+   "label": "owner 1sp 10k",
+   "springs": 1,
+   "cycles": 10000
+  },
+  "status": "error",
+  "messages": [
+   "Torsion assembly will be too long for a 108 \" wide door!",
+   "Wire size exceeds 0.331 maximum for the outer spring inner diameter. Service Spring Corporation will not sell springs and Canimex style cones engineered to this specification!",
+   "Only spring lengths between 0 and 96\" are recommended",
+   "Please contact us at 833-772-3667 if you have any questions."
+  ],
+  "data": {
+   "turnsOnSprings": 10.7,
+   "totalInchPoundPerTurn": 164.4,
+   "multiplier": 0.359632,
+   "cycles": 14000,
+   "innerSpring": null,
+   "middleSpring": null,
+   "outerSpring": {
+    "wireSize": 0.4531,
+    "innerDiameter": 2.625,
+    "springLength": 113.25,
+    "springWeight": 110.5254
+   }
+  }
+ }
+]

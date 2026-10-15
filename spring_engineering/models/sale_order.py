@@ -2,6 +2,9 @@ import math
 import re
 
 from odoo import _, models
+from odoo.http import request
+
+from .sale_order_line import FASTENER_ROLES
 
 # The attribute value that means "send it ready to fit". Matched on the VALUE's
 # name rather than on an xml id, so the owner can attach the attribute to track
@@ -12,6 +15,53 @@ PREPARED = "prepared"
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
+
+    # THE PRODUCTS WHOSE PRICE IS CONFIGURED, NOT LISTED. Both deliberately
+    # list at zero: what they cost is worked out by the calculator from cone,
+    # steel, labour and markup, and written onto the line.
+    CONFIGURED_PRICE_PRODUCTS = (
+        "spring_engineering.product_custom_spring",
+        "spring_engineering.product_custom_filler",
+    )
+
+    def _door_configured_price_products(self):
+        products = self.env["product.product"]
+
+        for ref in self.CONFIGURED_PRICE_PRODUCTS:
+            template = self.env.ref(ref, raise_if_not_found=False)
+
+            if template:
+                products |= template.sudo().product_variant_ids
+
+        return products
+
+    def _get_update_prices_lines(self):
+        """Leave a configured assembly's price alone when prices are recomputed.
+
+        THE BUG THIS FIXES CHARGED NOTHING. A custom spring assembly priced at
+        342.56 reached the payment step and became 0.00, and stayed 0.00 on
+        every page after it - the customer could pay nothing for a made-to-order
+        assembly.
+
+        _recompute_prices runs whenever the pricelist changes, and the pricelist
+        resolves late in checkout, when the partner is finally known. It calls
+        _compute_price_unit with force_price_recomputation, which overrides even
+        a manually written price, and the product deliberately lists at zero, so
+        zero is what it computed. An ordinary quantity change never did this,
+        which is why the cart looked right until the last screen.
+
+        This hook exists for exactly this: Odoo documents it as excluding lines
+        that should not be updated from the pricelist. These lines never came
+        from a pricelist - the price is cone plus steel plus labour, times the
+        markup - so there is nothing for a pricelist to say about them.
+        """
+        lines = super()._get_update_prices_lines()
+        configured = self._door_configured_price_products()
+
+        if not configured:
+            return lines
+
+        return lines - lines.filtered(lambda l: l.product_id in configured)
 
     # --- what counts as a prepared vertical track -----------------------------
 
@@ -24,6 +74,11 @@ class SaleOrder(models.Model):
         )
 
     def _track_prep_door_height_feet(self, line):
+        """The door height a cart line's track is for, in FEET."""
+        return self._track_prep_height_from_name(
+            line.product_id.display_name or "")
+
+    def _track_prep_height_from_name(self, name):
         """The door height this track is for, in FEET, or 0 if unreadable.
 
         READ FROM THE PRODUCT NAME, because that is where it lives: the
@@ -36,7 +91,6 @@ class SaleOrder(models.Model):
         wrong number of brackets. If the naming ever changes, the warning says
         so on the first order rather than after fifty.
         """
-        name = line.product_id.display_name or ""
         # THE FOOT MARK IS THE POINT. The live products are named
         #
         #   [CH-VT-2"] 2" Vertical Track 76" - 7' Door Height Black
@@ -244,6 +298,11 @@ class SaleOrder(models.Model):
     COLOURS = ("Black", "White")
 
     def _track_prep_colour(self, line):
+        """The finish of a cart line's track."""
+        return self._track_prep_colour_from_name(
+            line.product_id.display_name or "")
+
+    def _track_prep_colour_from_name(self, name):
         """The track's finish, as the flag angle products spell it, or None.
 
         The flag angle has to MATCH THE TRACK: the products are "Flag Angle
@@ -252,10 +311,8 @@ class SaleOrder(models.Model):
         a return - so an unrecognised finish adds nothing and says so, the same
         as an unreadable height.
         """
-        name = line.product_id.display_name or ""
-
         for colour in self.COLOURS:
-            if re.search(r"\b%s\b" % colour, name, re.I):
+            if re.search(r"\b%s\b" % colour, name or "", re.I):
                 return colour
 
         return None
@@ -275,6 +332,10 @@ class SaleOrder(models.Model):
             return self.env["product.product"]
 
     def _track_prep_flag_product(self, line):
+        """The flag angle matching a cart line's track."""
+        return self._track_prep_flag_for_colour(self._track_prep_colour(line))
+
+    def _track_prep_flag_for_colour(self, colour):
         """The flag angle in the track's own finish.
 
         Looked up BY NAME rather than configured, because there is one per
@@ -282,8 +343,6 @@ class SaleOrder(models.Model):
         The setting stays as a fallback for a track whose finish is a colour
         these products do not cover.
         """
-        colour = self._track_prep_colour(line)
-
         if colour:
             Product = self.env["product.product"].sudo()
             exact = Product.search(
@@ -308,45 +367,42 @@ class SaleOrder(models.Model):
 
     # --- keeping the parts in step with the track -----------------------------
 
-    def _track_prep_sync(self, line):
-        """Create, update or remove the parts belonging to one track line."""
-        self.ensure_one()
+    def _track_prep_requirements(self, product, qty=1.0):
+        """({role: (part, quantity)}, warning): what preparing this track needs.
 
-        existing = self.order_line.filtered(lambda l: l.track_prep_parent_id == line)
+        ONE PLACE WORKS IT OUT, so the price the shop page shows and the lines
+        the cart books cannot disagree. The cart calls this to create the
+        lines; product_template calls it to price the Prepared option before
+        anything is in a cart.
 
-        if not line.exists() or not self._track_prep_is_prepared(line):
-            existing.unlink()
-            return None
-
-        height_feet = self._track_prep_door_height_feet(line)
+        A warning means nothing is added - every part or none, because a
+        prepared track missing its brackets is not a thing the owner sells.
+        """
+        height_feet = self._track_prep_height_from_name(
+            product.display_name or "")
 
         if not height_feet:
-            existing.unlink()
-            return _(
+            return {}, _(
                 "We could not read the door height from “%s”, so the jamb"
                 " brackets and flag angle were not added. Please call us and we"
                 " will prepare it for you.",
-                line.product_id.display_name,
+                product.display_name,
             )
 
-        colour = self._track_prep_colour(line)
+        colour = self._track_prep_colour_from_name(product.display_name or "")
 
         if not colour:
-            existing.unlink()
-
-            return _(
+            return {}, _(
                 "We could not tell what finish “%s” is, so the flag angle was"
                 " not added - it has to match the track. Please call us and we"
                 " will prepare it for you.",
-                line.product_id.display_name,
+                product.display_name,
             )
 
         mix = self._track_prep_bracket_mix(height_feet)
 
         if not mix:
-            existing.unlink()
-
-            return _(
+            return {}, _(
                 "A %s ft door is outside the sizes we prepare tracks for, so"
                 " the parts were not added. Please call us and we will prepare"
                 " it for you.",
@@ -355,22 +411,20 @@ class SaleOrder(models.Model):
 
         wanted = {
             "flag": (
-                self._track_prep_flag_product(line),
-                self.FLAG_ANGLES_PER_TRACK * line.product_uom_qty,
+                self._track_prep_flag_for_colour(colour),
+                self.FLAG_ANGLES_PER_TRACK * qty,
             ),
         }
 
-        for size, qty in mix.items():
+        for size, count in mix.items():
             wanted["jamb_%s" % size] = (
                 self._track_prep_bracket_product(size, colour),
-                qty * line.product_uom_qty,
+                count * qty,
             )
 
         missing = [k for k, (p, _q) in wanted.items() if not p]
 
         if missing:
-            existing.unlink()
-
             # NAME WHAT IS MISSING, THE WAY THE OWNER NAMES IT. The first
             # version of this said "the parts are not configured yet", which
             # sent someone looking for a setting that does not exist. The
@@ -385,11 +439,31 @@ class SaleOrder(models.Model):
                 for key in missing
             ))
 
-            return _(
+            return {}, _(
                 "We are missing a part needed to prepare this track (%s), so it"
                 " was not added. Please call us and we will prepare it for you.",
                 wants,
             )
+
+        return wanted, None
+
+    def _track_prep_sync(self, line):
+        """Create, update or remove the parts belonging to one track line."""
+        self.ensure_one()
+
+        existing = self.order_line.filtered(lambda l: l.track_prep_parent_id == line)
+
+        if not line.exists() or not self._track_prep_is_prepared(line):
+            existing.unlink()
+            return None
+
+        wanted, warning = self._track_prep_requirements(
+            line.product_id, line.product_uom_qty)
+
+        if warning:
+            existing.unlink()
+
+            return warning
 
         for role, (product, qty) in wanted.items():
             part = existing.filtered(lambda l: l.track_prep_role == role)[:1]
@@ -426,6 +500,13 @@ class SaleOrder(models.Model):
             if warning:
                 result["warning"] = "\n".join(filter(None, [result.get("warning"), warning]))
 
+        # AFTER the track's own parts, because those parts are brackets and
+        # the fasteners are counted from them.
+        warning = self._fastener_sync()
+
+        if warning:
+            result["warning"] = "\n".join(filter(None, [result.get("warning"), warning]))
+
         return result
 
     def _cart_update_line_quantity(self, line_id, quantity, **kwargs):
@@ -439,20 +520,216 @@ class SaleOrder(models.Model):
         """
         line = self.env["sale.order.line"].browse(line_id)
 
+        # A FASTENER IS NOT OPTIONAL, so it is not editable on its own either.
+        # The cart owes one per bracket; changing that number by hand would
+        # ship brackets nobody can fit.
+        if line.exists() and line.track_prep_role in self.FASTENER_ROLES:
+            self._fastener_sync()
+
+            return self._fastener_answer(line_id, line)
+
         if line.exists() and line.track_prep_parent_id:
             parent = line.track_prep_parent_id
 
             if quantity <= 0:
                 # Removing a part means the track is no longer prepared.
-                return super()._cart_update_line_quantity(parent.id, 0, **kwargs)
+                result = super()._cart_update_line_quantity(parent.id, 0, **kwargs)
+            else:
+                self._track_prep_sync(parent)
+                result = self._fastener_answer(line_id, line)
 
-            self._track_prep_sync(parent)
+            # EVERY WAY OUT OF THIS METHOD COUNTS THE BRACKETS AGAIN. These two
+            # returned without doing so, and that is what left a cart holding
+            # nothing but studs and nuts: taking a prepared track away by
+            # removing one of ITS OWN parts goes down this branch, the track
+            # and its brackets went, and the fasteners stayed behind with the
+            # quantity the brackets used to have.
+            self._fastener_sync()
 
-            return {"quantity": line.product_uom_qty, "line_id": line.id}
+            return result
 
         result = super()._cart_update_line_quantity(line_id, quantity, **kwargs)
 
         if line.exists():
             self._track_prep_sync(line)
 
+        self._fastener_sync()
+
         return result
+
+    def _fastener_answer(self, line_id, line):
+        """What to tell the page about a line the sync may have just removed.
+
+        READ AFTER THE SYNC, NOT BEFORE. Asking a deleted record for its
+        quantity is what produced "Missing Record. Record does not exist or has
+        been deleted" when somebody pressed Remove on the last stud in a cart
+        with no brackets left: the rule quite correctly took the line away, and
+        then this went looking for it.
+        """
+        line = line.exists()
+
+        return {
+            "quantity": line.product_uom_qty if line else 0,
+            "line_id": line_id,
+        }
+
+    # --- what every jamb bracket is fitted with -------------------------------
+    #
+    # A BRACKET DOES NOT GO ON THE DOOR BY ITSELF. Each one takes a knurled
+    # stud and a flange nut, so the cart owes one of each per bracket - four
+    # brackets, four studs, four nuts.
+    #
+    # WRITTEN AS A RULE ABOUT THE CART, not as a step in the two places a
+    # bracket can arrive. It can come from the shop, bought on its own, or
+    # from a prepared track, which adds a graduated mix of sizes by itself -
+    # and the quantity of either can change afterwards. Counting what the cart
+    # holds and making the fasteners match is one rule that cannot disagree
+    # with itself; a step bolted onto each path is two rules that can.
+    FASTENER_ROLES = FASTENER_ROLES
+
+    # THE OWNER'S OWN SPELLINGS FIRST - "1/4 X 3/4 KNURLEL STUD 18-8" and
+    # "Flage Nuts 1/4 20" - then a tolerant read, because a name typed twice is
+    # a name typed differently. The patterns allow the spelling with the n and
+    # the one without, which is the difference between flange and flage.
+    FASTENER_NAMES = {
+        "stud": "1/4 X 3/4 KNURLEL STUD 18-8",
+        "nut": "Flage Nuts 1/4 20",
+    }
+    FASTENER_PATTERNS = {
+        "stud": (r"\bstud\b", r"knurl"),
+        "nut": (r"\bnuts?\b", r"\bflan?ge\b"),
+    }
+    FASTENER_LABELS = {"stud": "knurled stud", "nut": "flange nut"}
+
+    def _fastener_is_bracket(self, line):
+        """Is this cart line a jamb bracket, however it got here?"""
+        product = line.product_id
+
+        if not product:
+            return False
+
+        if product.default_code and product.default_code in self.BRACKET_CODES.values():
+            return True
+
+        name = product.display_name or ""
+
+        return bool(
+            re.search(r"\bjamb\b", name, re.I)
+            and re.search(r"\bbracket\b", name, re.I)
+        )
+
+    def _fastener_product(self, role):
+        """The stud or the nut, found the way the brackets are found."""
+        Product = self.env["product.product"].sudo()
+        exact = Product.search(
+            [("name", "=ilike", self.FASTENER_NAMES[role])], limit=1)
+
+        if exact:
+            return exact
+
+        first, second = self.FASTENER_PATTERNS[role]
+
+        for product in Product.search([("name", "ilike", "/4")], order="name"):
+            name = product.name or ""
+
+            if re.search(first, name, re.I) and re.search(second, name, re.I):
+                return product
+
+        # The same settings fallback the flag angle has, for a catalogue that
+        # names these something this cannot read.
+        return self._track_prep_configured_part(role)
+
+    def _fastener_count_in_the_header(self):
+        """Tell the navbar what the cart now holds.
+
+        THE BADGE IS A SESSION VALUE, NOT A QUERY. website_sale caches
+        cart_quantity in the session - _verify_cart_after_update writes it, and
+        a page rendered afterwards reads it rather than counting the lines - so
+        changing lines underneath it leaves the number stale. That is why the
+        header kept saying 24 over an empty cart until something else was
+        added: the next add wrote the figure again.
+
+        This runs after the fasteners have moved, which is after the update
+        that triggered it has already written its own.
+        """
+        if request:
+            request.session["website_sale_cart_quantity"] = self.cart_quantity
+
+    def _fastener_sync(self):
+        """One stud and one nut for every jamb bracket, under each bracket.
+
+        PER BRACKET LINE, not per cart. They used to be one stud line and one
+        nut line counted across everything, which was simpler and wrong in two
+        ways the owner asked about: the cart could not show them under the
+        bracket they belong to, and a prepared track - which brings three
+        bracket lines of different sizes - had no way to say which pair went
+        with which. Hanging each pair off its own bracket also means the link
+        deletes them: track_prep_parent_id cascades, so taking a bracket out
+        takes its fasteners with it.
+        """
+        self.ensure_one()
+        brackets = self.order_line.filtered(self._fastener_is_bracket)
+        changed = False
+
+        # Anything left pointing at a line that is no longer a bracket - or at
+        # nothing at all, which is what the cart-wide version left behind.
+        orphans = self.order_line.filtered(
+            lambda line: line.track_prep_role in self.FASTENER_ROLES
+            and line.track_prep_parent_id not in brackets)
+
+        if orphans:
+            orphans.unlink()
+            changed = True
+
+        missing = []
+
+        for bracket in brackets:
+            for role in self.FASTENER_ROLES:
+                product = self._fastener_product(role)
+                line = bracket.aa_included_line_ids.filtered(
+                    lambda l, role=role: l.track_prep_role == role)[:1]
+
+                if not product:
+                    # NAMED, NOT COUNTED. "A part is missing" sends somebody
+                    # looking through a catalogue; the name can be searched
+                    # for. Said once however many brackets are in the cart.
+                    label = "%s (%s)" % (
+                        self.FASTENER_LABELS[role], self.FASTENER_NAMES[role])
+
+                    if label not in missing:
+                        missing.append(label)
+
+                    if line:
+                        line.unlink()
+                        changed = True
+
+                    continue
+
+                if line:
+                    if line.product_uom_qty != bracket.product_uom_qty:
+                        line.product_uom_qty = bracket.product_uom_qty
+                        changed = True
+
+                    continue
+
+                self.env["sale.order.line"].create({
+                    "order_id": self.id,
+                    "product_id": product.id,
+                    "product_uom_qty": bracket.product_uom_qty,
+                    "track_prep_parent_id": bracket.id,
+                    "track_prep_role": role,
+                })
+                changed = True
+
+        if changed:
+            self._fastener_count_in_the_header()
+
+        if missing:
+            return _(
+                "We are missing a part that goes with the jamb brackets (%s),"
+                " so it was not added. Please call us and we will send it with"
+                " them.",
+                ", ".join(missing),
+            )
+
+        return None

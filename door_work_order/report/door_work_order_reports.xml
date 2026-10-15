@@ -22,29 +22,45 @@
     <template id="report_info_papers">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
+                <!-- ONE ARTICLE PER ORDER. Without this wrapper Odoo cannot
+                     tell where one document's pages end, so selecting several
+                     orders in the list and printing hands the floor a single
+                     merged sheet with the second order's TRACKS page sitting
+                     under the first order's CABLES page. -->
+                <div class="article" t-att-data-oe-model="o._name" t-att-data-oe-id="o.id">
                 <t t-set="td" t-value="'border:1px solid #888;padding:8px 12px;'"/>
                 <t t-set="tdv" t-value="'border:1px solid #888;padding:8px 12px;text-align:right;font-weight:700;color:#1B2A6B;'"/>
                 <t t-set="tdhot" t-value="'border:1px solid #888;padding:8px 12px;text-align:right;font-weight:800;color:#C0272D;font-size:17px;background:#fff5f5;'"/>
                 <t t-set="th" t-value="'border:1px solid #888;padding:8px 12px;background:#1B2A6B;color:#fff;'"/>
+                <t t-set="banner" t-value="'background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;'"/>
+                <t t-set="sub" t-value="'text-align:center;margin:8px 0 12px;font-size:13px;color:#666;'"/>
+                <t t-set="marks" t-value="o._door_wo_marks_for_report()"/>
 
-                <div class="page" t-if="not o.door_wo_item_ids">
+                <div class="page" t-if="not marks">
                     <p style="font-family:Arial,sans-serif;font-size:15px;">
                         <strong t-field="o.name"/> did not come from the door
                         calculator, so there are no track or cable papers for it.
                     </p>
                 </div>
 
-                <t t-if="o.door_wo_item_ids">
-                    <!-- ============ TRACKS ============ -->
-                    <div class="page" style="font-family:Arial,sans-serif;">
-                        <div style="background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;">TRACKS</div>
-                        <div style="text-align:center;margin:8px 0 12px;font-size:13px;color:#666;">
+                <!-- ALL THE TRACKS SHEETS, THEN ALL THE CABLES SHEETS. An
+                     order with three marks is six papers, and they are grouped
+                     by trade because that is how they are handed out - every
+                     track sheet to the person cutting track. -->
+                <t t-foreach="marks" t-as="m">
+                    <div class="page" t-att-style="'font-family:Arial,sans-serif;' + ('page-break-before:always;' if m_index else '')">
+                        <div t-att-style="banner">TRACKS</div>
+                        <div t-att-style="sub">
                             W/O: <t t-esc="o.door_wo_reference or '-'"/>
-                            <t t-if="o.door_wo_mark"> / <t t-esc="o.door_wo_mark"/></t>
-                            &amp;nbsp;|&amp;nbsp;
-                            <t t-esc="o._door_wo_inches_label(o.door_wo_width)"/> x <t t-esc="o._door_wo_inches_label(o.door_wo_height)"/>
-                            &amp;nbsp;|&amp;nbsp;
-                            <t t-esc="o.door_wo_track_label or ''"/>
+                            <t t-if="m['label']">
+                                | Mark <strong t-esc="m['label']"/>
+                            </t>
+                            |
+                            <strong style="color:#C0272D;"><t t-esc="m['door_qty']"/> door<t t-if="m['door_qty'] != 1">s</t></strong>
+                            |
+                            <t t-esc="o._door_wo_inches_label(m['width'])"/> x <t t-esc="o._door_wo_inches_label(m['height'])"/>
+                            |
+                            <t t-esc="m['track_label'] or ''"/>
                         </div>
                         <table style="border-collapse:collapse;width:100%;max-width:480px;margin:0 auto 0 0;font-size:15px;">
                             <tr>
@@ -53,90 +69,92 @@
                             </tr>
                             <tr style="background:#f8f9fa;">
                                 <td t-att-style="td">Vertical (L &amp; R)</td>
-                                <td t-att-style="tdhot" t-esc="o._door_wo_item_length('track_vertical')"/>
+                                <td t-att-style="tdhot" t-esc="m['vertical']"/>
                             </tr>
                             <tr>
                                 <td t-att-style="td">Horizontal (L &amp; R)</td>
-                                <td t-att-style="tdhot" t-esc="o._door_wo_item_length('track_horizontal')"/>
+                                <td t-att-style="tdhot" t-esc="m['horizontal']"/>
                             </tr>
-                            <tr style="background:#f8f9fa;" t-if="o.door_wo_projection">
+                            <tr style="background:#f8f9fa;" t-if="m['projection']">
                                 <td t-att-style="td">2x2 Projection</td>
-                                <td t-att-style="tdv" t-esc="o._door_wo_inches_label(o.door_wo_projection)"/>
+                                <td t-att-style="tdv" t-esc="o._door_wo_inches_label(m['projection'])"/>
                             </tr>
-                            <tr t-if="o.door_wo_sections">
+                            <tr t-if="m['sections']">
                                 <td t-att-style="td">Sections</td>
-                                <td t-att-style="tdv" t-esc="o.door_wo_sections"/>
+                                <td t-att-style="tdv" t-esc="m['sections']"/>
                             </tr>
-                            <tr style="background:#f8f9fa;" t-if="o.door_wo_config">
+                            <tr style="background:#f8f9fa;" t-if="m['config']">
                                 <td t-att-style="td">Configuration</td>
-                                <td t-att-style="tdv" t-esc="o.door_wo_config"/>
+                                <td t-att-style="tdv" t-esc="m['config']"/>
                             </tr>
                         </table>
-
-                        <t t-set="jb" t-value="[('J-10', o.door_wo_jb_10), ('J-12', o.door_wo_jb_12), ('J-14', o.door_wo_jb_14), ('J-16', o.door_wo_jb_16)]"/>
-                        <t t-set="jb" t-value="[p for p in jb if p[1]]"/>
-                        <t t-if="jb">
-                            <div style="margin:14px 0 4px;font-weight:800;font-size:13px;color:#1B2A6B;">JAMB BRACKETS &amp;mdash; per side</div>
+                        <t t-if="m['jb']">
+                            <div style="margin:14px 0 4px;font-weight:800;font-size:13px;color:#1B2A6B;">JAMB BRACKETS - per side</div>
                             <table style="border-collapse:collapse;max-width:480px;margin:0 auto 0 0;font-size:14px;text-align:center;">
                                 <tr>
-                                    <th t-foreach="jb" t-as="pair" t-att-style="th + 'padding:6px 14px;'" t-esc="pair[0]"/>
+                                    <th t-foreach="m['jb']" t-as="pair" t-att-style="th + 'padding:6px 14px;'" t-esc="pair[0]"/>
                                 </tr>
                                 <tr>
-                                    <td t-foreach="jb" t-as="pair" style="border:1px solid #888;padding:6px 14px;font-weight:800;color:#C0272D;" t-esc="pair[1]"/>
+                                    <td t-foreach="m['jb']" t-as="pair" style="border:1px solid #888;padding:6px 14px;font-weight:800;color:#C0272D;" t-esc="pair[1]"/>
                                 </tr>
                             </table>
                         </t>
                     </div>
+                </t>
 
-                    <!-- ============ CABLES ============ -->
+                <t t-foreach="marks" t-as="m">
                     <div class="page" style="font-family:Arial,sans-serif;page-break-before:always;">
-                        <div style="background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;">CABLES</div>
-                        <div style="text-align:center;margin:8px 0 12px;font-size:13px;color:#666;">
+                        <div t-att-style="banner">CABLES</div>
+                        <div t-att-style="sub">
                             W/O: <t t-esc="o.door_wo_reference or '-'"/>
-                            <t t-if="o.door_wo_mark"> / <t t-esc="o.door_wo_mark"/></t>
-                            &amp;nbsp;|&amp;nbsp;
-                            <t t-esc="o._door_wo_inches_label(o.door_wo_width)"/> x <t t-esc="o._door_wo_inches_label(o.door_wo_height)"/>
-                            &amp;nbsp;|&amp;nbsp;
-                            Door Weight: <t t-esc="o.door_wo_weight and ('%g' % o.door_wo_weight) or '-'"/> lbs
+                            <t t-if="m['label']">
+                                | Mark <strong t-esc="m['label']"/>
+                            </t>
+                            |
+                            <strong style="color:#C0272D;"><t t-esc="m['door_qty']"/> door<t t-if="m['door_qty'] != 1">s</t></strong>
+                            |
+                            <t t-esc="o._door_wo_inches_label(m['width'])"/> x <t t-esc="o._door_wo_inches_label(m['height'])"/>
+                            |
+                            Door Weight: <t t-esc="m['weight'] and ('%g' % m['weight']) or '-'"/> lbs
                         </div>
-                        <t t-set="cable" t-value="o._door_wo_item_length('cable')"/>
-                        <p t-if="not cable" style="font-size:15px;">
+                        <p t-if="not m['cable']" style="font-size:15px;">
                             No cable was worked out for this door, because the
                             calculator was given no door weight. This order
                             covers the tracks only.
                         </p>
-                        <table t-if="cable" style="border-collapse:collapse;width:100%;max-width:480px;margin:0 auto 0 0;font-size:15px;">
+                        <table t-if="m['cable']" style="border-collapse:collapse;width:100%;max-width:480px;margin:0 auto 0 0;font-size:15px;">
                             <tr>
                                 <th t-att-style="th + 'text-align:left;'">Item</th>
                                 <th t-att-style="th + 'text-align:right;'">Value</th>
                             </tr>
-                            <tr style="background:#f8f9fa;" t-if="o.door_wo_drum">
+                            <tr style="background:#f8f9fa;" t-if="m['drum']">
                                 <td t-att-style="td">Drum</td>
-                                <td t-att-style="tdv" t-esc="o.door_wo_drum"/>
+                                <td t-att-style="tdv" t-esc="m['drum']"/>
                             </tr>
-                            <tr t-if="o.door_wo_ebf">
+                            <tr t-if="m['ebf']">
                                 <td t-att-style="td">EBF</td>
-                                <td t-att-style="tdv" t-esc="o.door_wo_ebf"/>
+                                <td t-att-style="tdv" t-esc="m['ebf']"/>
                             </tr>
-                            <tr style="background:#f8f9fa;" t-if="o.door_wo_capacity">
+                            <tr style="background:#f8f9fa;" t-if="m['capacity']">
                                 <td t-att-style="td">Capacity (per drum)</td>
-                                <td t-att-style="tdv"><t t-esc="'%g' % o.door_wo_capacity"/> lbs</td>
+                                <td t-att-style="tdv"><t t-esc="'%g' % m['capacity']"/> lbs</td>
                             </tr>
-                            <tr t-if="o.door_wo_ftsc">
+                            <tr t-if="m['ftsc']">
                                 <td t-att-style="td">FTSC</td>
-                                <td t-att-style="tdv" t-esc="o._door_wo_inches_label(o.door_wo_ftsc)"/>
+                                <td t-att-style="tdv" t-esc="o._door_wo_inches_label(m['ftsc'])"/>
                             </tr>
                             <tr style="background:#f8f9fa;">
                                 <td t-att-style="td + 'font-weight:700;'">Cable Length</td>
-                                <td t-att-style="tdhot" t-esc="cable"/>
+                                <td t-att-style="tdhot" t-esc="m['cable']"/>
                             </tr>
-                            <tr t-if="o.door_wo_cable_type">
+                            <tr t-if="m['cable_type']">
                                 <td t-att-style="td">Cable Type</td>
-                                <td t-att-style="tdv" t-esc="o.door_wo_cable_type"/>
+                                <td t-att-style="tdv" t-esc="m['cable_type']"/>
                             </tr>
                         </table>
                     </div>
                 </t>
+                </div>
             </t>
         </t>
     </template>

@@ -9,7 +9,7 @@ beside the endpoint it talks to so the two halves can be read together.
 
 - **`index.html`** - the finished file. Download it and upload it over
   `index.html` in the calculator repository. This is the one to use.
-- **`send-to-manufacturing.patch`** - the same change as a diff, 24 lines
+- **`send-to-manufacturing.patch`** - the same change as a diff, 180 lines
   added and none removed. For reading what changed, or for `git apply` if
   you would rather not replace the whole file.
 
@@ -89,13 +89,13 @@ is visible before it is relied on rather than after.
 ## Which build is running
 
 The settings panel and the button both show a build number - currently
-**build 4**. This page is delivered by uploading a file and has no cache
+**build 9**. This page is delivered by uploading a file and has no cache
 busting of its own, so a tab left open on the shop floor can keep running an
 older copy for as long as it stays open, and "it still does the same thing" is
 then indistinguishable from a real fault. The marker makes that answerable by
 looking at the screen.
 
-If the button does not say `b4`, the browser is running an older copy: reload
+If the button does not say `b9`, the browser is running an older copy: reload
 with a new query string (`?v=p3`) or hard-reload (Ctrl-Shift-R, Cmd-Shift-R).
 
 The button also logs the exact address it is about to open to the browser
@@ -121,3 +121,46 @@ free to drift from this file.
 An order raised by an older build is not refused and does not crash: the cut
 list is complete without these, so the papers print the rows they have and
 leave out the rows they do not.
+
+## Marks and quantities
+
+Build 5 sends the WHOLE ORDER rather than the door on screen. The payload is
+`{"wo": "...", "doors": [ {...door..., "mark": "A", "qty": 3}, ... ]}` and Odoo
+raises ONE manufacturing order for the W/O with a mark record for each entry,
+its own cut list, and the pieces multiplied by the quantity. Two of mark A and
+three of mark B is one order for five doors.
+
+The single-door shape is still accepted as one mark, so a page that has not
+been re-uploaded keeps working against the newer server.
+
+Each mark is opened in turn so the existing `calculate()` works it out, rather
+than a second copy of the drum, cable and bracket rules living here.
+
+### The guard, and a bug it does not fix
+
+If a mark's form is incomplete, `calculate()` returns early and `CD` still
+holds the PREVIOUS mark's numbers. A careless loop therefore sends the same
+door several times under different letters. `collectDoors()` checks each mark
+against what it was meant to load and leaves out - by name - any that does not
+match.
+
+**`buildAllSections()` has exactly this bug and this change does not fix it.**
+It calls `calculate()` on whatever is in the form and then reads the DOM, so
+"Print All Marks" prints whichever mark is open once per chip, varying only
+the header. If marks differ in size, those sheets are wrong. Fixing it means
+routing that loop through the same guard; it was out of scope here and is
+worth doing.
+
+## Print All Marks
+
+Build 8 fixes a bug that predates this work. `buildAllSections()` runs
+`calculate()` on whatever is in the form and then reads the result off the
+DOM, so printing all marks printed whichever mark was OPEN, once per chip -
+same lengths, same drum, same cable, only the header letter and quantity
+changing. Marks of different sizes produced sheets that were simply wrong and
+nothing on the page said so.
+
+Each mark is now loaded before its sheets are built, through the same guard
+the Send button uses, and a mark that will not load is named and left out
+rather than printed with another mark'''s numbers. The editor is put back on the
+mark you were on.

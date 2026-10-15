@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- noupdate="0" ON PURPOSE, against the usual habit for security rules.
+     noupdate="1" is conventional so an administrator can tailor a rule without
+     a module update undoing it. The cost is that a CORRECTION can never be
+     shipped either: the record is skipped on every update, and the flag lives
+     in the file rather than the database, so clearing ir_model_data by hand
+     does not help - the next update puts it straight back. That was discovered
+     the hard way while verifying this very rule, when a deliberately broken
+     domain could not be applied and the test went on passing against the good
+     one still in the database.
+     Nobody is expected to tailor this. It is a company boundary, not a
+     preference, so it is treated as code and reasserted on every update. A
+     security rule quietly stuck at a definition it has outgrown is a worse
+     failure than a customisation nobody made being overwritten. -->
+<odoo noupdate="0">
+    <!-- THE CUT LIST IS AS COMPANY-PRIVATE AS THE ORDER IT BELONGS TO.
+         mrp.production already carries a multi-company rule; these two models
+         hang off it and carried none, so a manufacturing user in one company
+         could read another company's marks and lengths by querying the child
+         models directly. The parent being protected is not protection. -->
+    <record id="door_work_order_mark_company_rule" model="ir.rule">
+        <field name="name">Door work order mark: multi-company</field>
+        <field name="model_id" ref="model_door_work_order_mark"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="door_work_order_item_company_rule" model="ir.rule">
+        <field name="name">Door work order cut item: multi-company</field>
+        <field name="model_id" ref="model_door_work_order_item"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>

@@ -160,9 +160,36 @@ class AAOptionPricing:
         tag = (line.get('tag') or '').strip()[:80]
         if tag:
             parts.append(f"Door: {tag}")
+        # THE KEYS THE FORM ACTUALLY POSTS. Both callers pass a dict holding
+        # width_in and height_in - _track_values reads them that way, and so
+        # does the validation above - while this read 'width' and 'height',
+        # which are in neither. The door size was therefore never written into
+        # the note, so it never reached the order line and never reached the
+        # work order sheet. The plain keys are still read second, in case
+        # something older passes them.
         dims = []
-        for key, label in (('width', 'W'), ('height', 'H')):
-            val = (line.get(key) or '').strip()[:20]
+        for keys, label in ((('width_in', 'width'), 'W'),
+                            (('height_in', 'height'), 'H')):
+            val = ''
+
+            for key in keys:
+                if line.get(key) not in (None, '', False):
+                    val = line.get(key)
+                    break
+
+            try:
+                number = float(val)
+            except (TypeError, ValueError):
+                number = None
+
+            if number:
+                # Inches, which is what the form collects.
+                val = f'{number:g}"'
+            elif number is not None:
+                val = ''
+            else:
+                val = str(val or '').strip()[:20]
+
             if val:
                 dims.append(f"{label} {val}")
         if dims:
@@ -425,6 +452,17 @@ class AAKitCart(AAOptionPricing, Cart):
         qty = max(1, min(int(qty or 1), MAX_QTY))
         kit = self._unit_price(partner, variant, no_variant, qty)
         extras, notes = self._priced_options(partner, variant, no_variant, door, qty, Catalog(request.env))
+        # AND ONTO THE LINE, IF THE KIT IS ALREADY IN THE CART.
+        #
+        # This page prices on a debounce and the door is only written to the
+        # order when the kit is ADDED. Add to Cart does not wait for the
+        # debounce, so the cart request could go out first and the line was
+        # written with whatever the session held - nothing at all on a first
+        # order, and the previous door on the next one. The page now holds the
+        # click until this call returns, and this is the other half of it: if
+        # the kit is already there, its note is brought up to date rather than
+        # left describing a door nobody ordered.
+        self._aa_sync_kit_note(variant, door, notes)
         unit = kit + sum(e['unit_price'] * e['qty'] for e in extras)
         return {
             'kit_price': kit,
@@ -477,14 +515,79 @@ class AAKitCart(AAOptionPricing, Cart):
             result['cart_quantity'] = order.cart_quantity
         return result
 
+    def _aa_sync_kit_note(self, variant, door, notes):
+        """Keep the kit line's door note in step with the page.
+
+        Writes the note onto the kit line already in the cart, replacing a note
+        put there by an earlier state of the page rather than adding a second.
+        """
+        order = request.cart
+
+        if not order:
+            return
+
+        line = order.order_line.filtered(
+            lambda l: l.product_id == variant).sorted('id')[-1:]
+
+        if not line:
+            return
+
+        info = " | ".join(filter(None, [self._line_note(door)] + (notes or [])))
+
+        if not info:
+            return
+
+        self._aa_store_door(line, door, info)
+
+    @staticmethod
+    def _aa_door_numbers(door):
+        """The door as numbers, in the units the kit page collects them."""
+        def number(value):
+            try:
+                return float(value or 0)
+            except (TypeError, ValueError):
+                return 0.0
+
+        return {
+            "width_in": number(door.get("width_in")),
+            "height_in": number(door.get("height_in")),
+            "weight_lb": number(door.get("weight")),
+            "hi_lift_in": number(door.get("high_lift")),
+        }
+
+    def _aa_store_door(self, line, door, info):
+        """Record the door on the kit line, as numbers AND as the note.
+
+        WRITTEN TO A FIELD, NOT TO THE DESCRIPTION. `name` is a stored
+        computed field: core rebuilds it from the product whenever
+        linked_line_ids changes, and attaching the extras to the kit line
+        changes exactly that - so a note appended here was thrown away by the
+        next line this controller created. It survived only by accident, when
+        the page happened to price the door once more after the kit was
+        already in the cart, which is why the door came and went between
+        orders. aa_spec_note is put back onto the description by
+        sale_order_line._compute_name every time, so there is no race left.
+        """
+        if "aa_spec_note" not in line._fields:
+            # spring_engineering not installed: the old behaviour, which is
+            # still better than nothing.
+            head = (line.name or "").split("\n")[0]
+
+            if line.name != f"{head}\n{info}":
+                line.name = f"{head}\n{info}"
+
+            return
+
+        line.aa_write_door(self._aa_door_numbers(door), note=info)
+
     def _aa_add_extras(self, variant, door, qty, extras, notes):
         order = request.cart
         if not order:
             return
         kit_line = order.order_line.filtered(lambda l: l.product_id == variant).sorted('id')[-1:]
         info = " | ".join(filter(None, [self._line_note(door)] + notes))
-        if kit_line and info and info not in (kit_line.name or ''):
-            kit_line.name = f"{kit_line.name}\n{info}"
+        if kit_line and info:
+            self._aa_store_door(kit_line, door, info)
         for extra in extras:
             if extra.get('quote'):
                 before = order.order_line

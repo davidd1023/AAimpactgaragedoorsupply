@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE HEART ON A PRODUCT CARD IS A SWITCH, NOT A STAMP.
+
+       Odoo renders it DISABLED once the product is on the wishlist, which is
+       how it colours it red: the stylesheet keys the filled glyph on
+       [disabled]. The cost is that there is no way to take a product off the
+       list from the shop - the one button that knows about it refuses to be
+       clicked - and with the "show on hover" option on, a heart that is not
+       disabled fades out entirely when the pointer leaves the card.
+
+       So the attribute goes, this module's stylesheet colours o_in_wishlist
+       instead, and the click toggles. The title says which way it will go. -->
+  <template id="wishlist_button_is_a_toggle"
+            inherit_id="website_sale_wishlist.add_to_wishlist">
+
+    <!-- THE VARIANT, RATHER THAN THE WORD "True". See the controller note:
+         in_wish is a boolean, and Odoo uses it as the variant id whenever the
+         product is already on the list - which no handler can act on. The
+         page now carries which variant each wishlisted template is for, and
+         falls back to Odoo's own choice for everything else. -->
+    <xpath expr="//t[@t-set='product_variant_id']" position="attributes">
+      <attribute name="t-value">(aa_wishlisted_variants or {}).get(product.id) or product._get_first_possible_variant_id()</attribute>
+    </xpath>
+
+    <xpath expr="//button[@data-action='o_wishlist']" position="attributes">
+      <attribute name="t-att-disabled"/>
+      <attribute name="t-att-title">in_wish and btnTitleRemove or btnTitle</attribute>
+    </xpath>
+
+    <xpath expr="//t[@t-set='btnTitleActive']" position="after">
+      <t t-set="btnTitleRemove">Remove from wishlist</t>
+    </xpath>
+
+    <xpath expr="//span[@t-else='']" position="replace">
+      <span class="o_label small ms-2">Remove from wishlist</span>
+    </xpath>
+
+  </template>
+
+  <!-- AND THE SAME BUTTON ON THE PRODUCT'S OWN PAGE.
+
+       This one was left in Odoo's hands and behaved exactly as Odoo intends:
+       it added the product and then disabled ITSELF, so a customer who
+       changed their mind had no way back. A disabled .btn is also
+       pointer-events: none, so the second press raised no event at all -
+       there was nothing for the script to intercept.
+
+       Served clickable and already coloured, the same way the card is, so the
+       state is right before any script runs. Note Odoo colours this one from
+       the `disabled` CLASS rather than from [disabled] - a different rule for
+       the same idea - and this module's stylesheet now keys both on
+       o_in_wishlist. -->
+  <template id="product_page_wishlist_button_is_a_toggle"
+            inherit_id="website_sale_wishlist.product_add_to_wishlist">
+
+    <xpath expr="//a[@data-action='o_wishlist']" position="before">
+      <t t-set="aa_wish_add">Add to wishlist</t>
+      <t t-set="aa_wish_remove">Remove from wishlist</t>
+      <t t-set="_button_classes"
+         t-value="_button_classes + (in_wish and ' o_in_wishlist' or '')"/>
+    </xpath>
+
+    <xpath expr="//a[@data-action='o_wishlist']" position="attributes">
+      <attribute name="t-att-disabled"/>
+      <attribute name="title"/>
+      <attribute name="t-att-title">in_wish and aa_wish_remove or aa_wish_add</attribute>
+    </xpath>
+
+    <xpath expr="//a[@data-action='o_wishlist']/i" position="attributes">
+      <attribute name="class"/>
+      <attribute name="t-attf-class">fa #{in_wish and 'fa-heart' or 'fa-heart-o'} me-2 me-lg-0</attribute>
+      <attribute name="aria-label"/>
+      <attribute name="t-att-aria-label">in_wish and aa_wish_remove or aa_wish_add</attribute>
+    </xpath>
+
+    <xpath expr="//a[@data-action='o_wishlist']/span" position="replace">
+      <span t-att-class="_span_classes"
+            t-out="in_wish and aa_wish_remove or aa_wish_add"/>
+    </xpath>
+
+  </template>
+
+</odoo>

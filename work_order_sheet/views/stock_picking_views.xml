@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE DELIVERY CONFIRMATION, ON THE ORDER IT BELONGS TO.
+
+       The work station blocks that used to live beside these moved to
+       work_station_picking_views.xml, which is not loaded: the owner put the
+       benches away in favour of the shop floor module, and asked for this form
+       to stay. It never depended on them - it hangs off the outgoing transfer
+       and the customer's own link.
+
+       The record ids still read work_stations because renaming an xml id
+       renames nothing in a database that already has it: the view would be
+       loaded twice, once under each name. They keep the name they were born
+       with. -->
+  <record id="view_picking_form_work_stations" model="ir.ui.view">
+    <field name="name">stock.picking.form.work.stations</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_form"/>
+    <field name="arch" type="xml">
+
+      <!-- THE DELIVERY NOTE THAT SIGNS ITSELF BACK, on the order it belongs
+           to: the link to hand the driver, when the form was made, and what
+           came back. -->
+      <xpath expr="//notebook" position="before">
+        <group string="Delivery confirmation" name="dispatch_confirmation"
+               invisible="picking_type_code != 'outgoing'">
+          <group>
+            <field name="dispatch_state" widget="badge"
+                   decoration-success="dispatch_state == 'signed'"
+                   decoration-warning="dispatch_state == 'open'"
+                   invisible="not dispatch_state"/>
+            <field name="dispatch_form_date" invisible="not dispatch_form_date"/>
+            <field name="dispatch_signed_by" invisible="not dispatch_signed_on"/>
+            <field name="dispatch_signed_on" invisible="not dispatch_signed_on"/>
+            <button name="action_dispatch_form" type="object" class="btn-link"
+                    string="Make the confirmation form"
+                    invisible="dispatch_state"/>
+          </group>
+          <group>
+            <field name="dispatch_url" widget="CopyClipboardChar"
+                   invisible="not dispatch_state"/>
+            <field name="dispatch_signature" widget="image"
+                   options="{'size': [0, 90]}"
+                   invisible="not dispatch_signed_on"/>
+          </group>
+        </group>
+      </xpath>
+
+    </field>
+  </record>
+
+  <!-- AND IN THE LIST, so the one order the floor is still working on can be
+       found without opening any of them. Optional columns: this is the shop's
+       own question, not every warehouse's. -->
+  <record id="vpicktree_work_stations" model="ir.ui.view">
+    <field name="name">stock.picking.list.work.stations</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.vpicktree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='state']" position="before">
+        <field name="dispatch_state" optional="show" widget="badge"
+               decoration-success="dispatch_state == 'signed'"
+               decoration-warning="dispatch_state == 'open'"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_picking_internal_search_work_stations" model="ir.ui.view">
+    <field name="name">stock.picking.search.work.stations</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+    <field name="arch" type="xml">
+      <xpath expr="//search" position="inside">
+        <filter name="dispatch_unsigned" string="Not signed for"
+                domain="[('dispatch_state', '=', 'open')]"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

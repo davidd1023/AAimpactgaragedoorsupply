@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- OFFER THE ORDERS, NOT ONLY THE PRODUCTS.
+
+       Odoo's Quick Reorder panel lists the LINES of recent orders to be added
+       one at a time, and its button is disabled whenever that list is empty -
+       which is why it read as a button that does nothing. The owner asked for
+       the other shape: show what was ordered before, pick one, and have the
+       whole thing in the cart. -->
+
+  <template id="quick_reorder_button_opens_for_orders"
+            inherit_id="website_sale.quick_reorder_button">
+
+    <xpath expr="//t[@t-elif='not order_history']" position="attributes">
+      <attribute name="t-elif">not order_history and not aa_reorder_orders</attribute>
+    </xpath>
+
+    <xpath expr="//button[@id='quick_reorder_button']" position="attributes">
+      <attribute name="t-att-disabled">not order_history and not aa_reorder_orders</attribute>
+    </xpath>
+
+  </template>
+
+  <template id="quick_reorder_previous_orders"
+            inherit_id="website_sale.quick_reorder_sidebar">
+
+    <xpath expr="//div[hasclass('offcanvas-body')]" position="inside">
+      <div t-if="aa_reorder_orders" class="o_aa_reorder_orders mt-4">
+        <h6 class="text-muted text-uppercase small mb-1">Order it all again</h6>
+        <div class="small text-muted mb-2">
+          Puts everything from that order in your cart, replacing what is in it
+          now.
+        </div>
+
+        <div class="o_aa_reorder_scroll">
+        <div t-foreach="aa_reorder_orders" t-as="aa_order"
+             class="d-flex justify-content-between align-items-center border-top py-2">
+          <div class="me-3">
+            <div class="fw-bold" t-esc="aa_order.name"/>
+            <div class="small text-muted">
+              <span t-field="aa_order.date_order" t-options="{'widget': 'date'}"/>
+              -
+              <t t-set="aa_items"
+                 t-value="len(aa_order.order_line.filtered(lambda line: not line.display_type))"/>
+              <t t-esc="aa_items"/>
+              <t t-if="aa_items == 1">item</t>
+              <t t-else="">items</t>
+              -
+              <span t-field="aa_order.amount_total"
+                    t-options="{'widget': 'monetary', 'display_currency': aa_order.currency_id}"/>
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn btn-sm btn-primary o_aa_reorder_order text-nowrap"
+                  t-att-data-order-id="aa_order.id">
+            Reorder
+          </button>
+        </div>
+        </div>
+      </div>
+    </xpath>
+
+  </template>
+
+</odoo>

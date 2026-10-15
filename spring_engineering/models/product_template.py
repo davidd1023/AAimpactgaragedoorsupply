@@ -1,5 +1,7 @@
 from odoo import api, models
 
+from .sale_order import PREPARED
+
 # A product is a vertical track if its name says so, and a hardware kit the
 # same way. The category would be a steadier signal, but the live products
 # were created by hand and their categories cannot be relied on, whereas the
@@ -94,3 +96,91 @@ class ProductTemplate(models.Model):
             ),
             HARDWARE_KIT,
         )
+
+    # --- what a prepared track costs, before anything is in a cart ----------
+
+    def _track_prep_extra(self, combination, product_id, add_qty=1.0):
+        """What preparing one of these tracks adds to its price, or 0.0.
+
+        THE SHOP PAGE HAS TO SAY THE SAME THING THE CART WILL CHARGE. Picking
+        Prepared adds a flag angle and a graduated set of jamb brackets to the
+        order - the attribute itself carries no price_extra, because the parts
+        are real products billed on their own lines - so the page went on
+        showing the bare track's price and the total only grew at the cart.
+        That reads as a surprise charge, which is the one thing a price on a
+        product page must never be.
+
+        PRICED THROUGH THE PARTS' OWN PAGE PRICE, not from their list price:
+        each part is asked for its combination info the same way the shop asks
+        for any product, so the dealer's pricelist, the fiscal position and the
+        tax display setting all apply exactly as they will when the lines are
+        booked. A quantity break on a part is honoured for the number of them
+        this many tracks need.
+        """
+        if self.env.context.get("track_prep_no_extra"):
+            return 0.0
+
+        if not combination or not any(
+            (value.name or "").strip().lower() == PREPARED for value in combination
+        ):
+            return 0.0
+
+        product = self.env["product.product"].browse(product_id) if product_id else self
+        wanted, warning = self.env["sale.order"]._track_prep_requirements(product)
+
+        # A track this cannot prepare adds nothing in the cart either, and the
+        # cart says why. Showing an inflated price for parts that will not be
+        # added would be worse than showing the bare one.
+        if warning:
+            return 0.0
+
+        extra = 0.0
+
+        for part, count in wanted.values():
+            info = part.product_tmpl_id.with_context(
+                track_prep_no_extra=True
+            )._get_combination_info(
+                product_id=part.id, add_qty=count * (add_qty or 1.0)
+            )
+            # ROUNDED PER PART, THE WAY A CART LINE IS. Each part becomes one
+            # order line and Odoo rounds that line's subtotal to the currency,
+            # so a part priced at 1.368 by a percentage pricelist bills 5.47
+            # for four and not 5.472. Summing the unrounded figures put the
+            # page two cents under the cart on a 7 ft door - small, and
+            # exactly the kind of small that makes a customer count.
+            total = info["price"] * count
+            currency = info.get("currency")
+            extra += currency.round(total) if currency else total
+
+        return extra
+
+    def _get_combination_info(
+        self, combination=False, product_id=False, add_qty=1.0, uom_id=False,
+        only_template=False,
+    ):
+        """The shop's price for a combination, with the preparation in it."""
+        info = super()._get_combination_info(
+            combination=combination, product_id=product_id, add_qty=add_qty,
+            uom_id=uom_id, only_template=only_template,
+        )
+
+        if only_template:
+            return info
+
+        extra = self._track_prep_extra(
+            info.get("combination"), info.get("product_id"), add_qty)
+
+        if not extra:
+            return info
+
+        for key in ("price", "list_price"):
+            if key in info:
+                info[key] += extra
+
+        # The comparison price is a figure the owner typed, shown as it is - but
+        # comparing a prepared track against an unprepared list price would
+        # overstate the saving, so it moves with the rest.
+        if info.get("compare_list_price"):
+            info["compare_list_price"] += extra
+
+        return info

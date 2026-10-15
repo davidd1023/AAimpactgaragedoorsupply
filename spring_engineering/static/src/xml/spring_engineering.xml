@@ -32,7 +32,13 @@
 
                     <option value="Single">Single</option>
                     <option value="Duplex">Duplex</option>
+<!-- TRIPLEX, PUT AWAY RATHER THAN DELETED. The owner's instruction,
+     2026-10-14: not needed for now, and wanted back later. Everything behind
+     it is untouched - the Triplex branches in this template, the assembly in
+     the model and the one the server accepts - so taking this comment out
+     brings the option back exactly as it was.
                     <option value="Triplex">Triplex</option>
+-->
 
                 </select>
 
@@ -227,7 +233,12 @@
                     class="se-select">
 
                     <option value="Standard">Standard</option>
+<!-- VERTICAL LIFT, AND WITH IT THE VERTICAL DRUMS. Put away on the same
+     instruction. The vertical drums are listed further down this file inside
+     a t-if on this lift type, so they cannot be reached while this option is
+     away and are left exactly where they are - they come back with it.
                     <option value="Vertical">Vertical</option>
+-->
                     <option value="Hi-Lift">Hi-Lift</option>
 
                 </select>
@@ -1128,7 +1139,14 @@
             </div>
 
 
-            <!-- PITCH -->
+            <!-- PITCH, put away on the same instruction.
+
+                 THE PITCH AMOUNT ROW BELOW IS LEFT AS IT IS, deliberately: it
+                 shows only when state.pitch is true, and with these two
+                 buttons away nothing can ever set it - the state starts false
+                 and togglePitch is the only thing that changes it. It could
+                 not be wrapped in a comment anyway, because it carries one of
+                 its own and XML will not nest them.
 
             <div class="se-row">
 
@@ -1153,6 +1171,7 @@
                 </div>
 
             </div>
+            -->
 
             <!-- Pitch Amount -->
 
@@ -1229,6 +1248,21 @@
                  on Duplex, which carries a wire size per spring instead. -->
 
             <t t-if="wireSizeVisible">
+
+            <!-- A TITLE FOR THE BLOCK, in the class the Price label already
+                 uses rather than one of its own. The owner asked for it to
+                 look like that label, and the surest way to look like
+                 something is to be it: whatever the stylesheet does to
+                 se-rowR-header - a black bar here, a small grey word on the
+                 shop - this follows without being told.
+
+                 INSIDE THE SAME GATE AS THE ROW BELOW IT, so a title never
+                 appears over an empty space: the wire size and everything
+                 under it show once there is something to calculate, and so
+                 does this. The Duplex results have their own headers - Outer,
+                 Inner, Other - and are left alone. -->
+
+            <div class="se-rowR-header">Results</div>
 
             <div class="se-row">
 
