@@ -283,3 +283,15 @@ class StockPicking(models.Model):
 
         return fields.Datetime.context_timestamp(
             self.with_context(tz=zone), value).strftime("%d %b %Y %H:%M %Z")
+
+
+class StockPickingOpenForm(models.Model):
+    _inherit = "stock.picking"
+
+    def action_open_dispatch_form(self):
+        """Open the customer's confirmation form in a new tab (owner, 2026-10-14):
+        a button instead of a link to copy and paste."""
+        self.ensure_one()
+        if not self.dispatch_url:
+            self.action_dispatch_form()
+        return {"type": "ir.actions.act_url", "url": self.dispatch_url, "target": "new"}
