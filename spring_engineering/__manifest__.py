@@ -20,7 +20,7 @@
     # load, and a field declared in Python has no column behind it. That is
     # exactly how main and Prod both reached 19.0.2.28.0 carrying different
     # code. Every number since is deliberately ahead of what Prod holds.
-    'version': '19.0.2.33.0',
+    'version': '19.0.2.34.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
@@ -42,6 +42,7 @@
         'views/reorder_templates.xml',
         'views/cart_included_parts.xml',
         'views/minimum_order.xml',
+        'views/quantity_limits.xml',
         'views/spring_engineering_settings.xml',
         'views/spring_engineering_config_settings.xml',
     ],
@@ -66,6 +67,8 @@
             'spring_engineering/static/src/js/reorder_orders.js',
             'spring_engineering/static/src/js/reorder_panel.js',
             'spring_engineering/static/src/css/cart_included.css',
+            # A quantity box that holds only quantities.
+            'spring_engineering/static/src/js/quantity_limits.js',
         ],
         'web.assets_tests': [
             'spring_engineering/static/tests/tours/wishlist_toggle_tour.js',
