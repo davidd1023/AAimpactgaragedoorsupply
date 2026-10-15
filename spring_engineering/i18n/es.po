@@ -399,7 +399,7 @@ msgstr "Dúplex"
 #. module: spring_engineering
 #: model_terms:ir.ui.view,arch_db:spring_engineering.calculator_page
 msgid "Engineer a Spring"
-msgstr "Diseñe un resorte"
+msgstr "Diseñar un resorte"
 
 #. module: spring_engineering
 #: model_terms:ir.ui.view,arch_db:spring_engineering.calculator_page
@@ -407,6 +407,8 @@ msgid ""
 "Enter your door's size, weight and lift and we'll engineer the right torsion"
 " springs for it."
 msgstr ""
+"Ingrese el tamaño, peso y elevación de su puerta y diseñaremos los resortes "
+"de torsión adecuados para ella."
 
 #. module: spring_engineering
 #. odoo-javascript
