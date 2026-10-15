@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Where new work orders wait until the manager assigns them a station
+         from the Shop Floor Overview. -->
+    <record id="workcenter_pending" model="mrp.workcenter">
+        <field name="name">Pending Assignment</field>
+        <field name="code">PEND</field>
+        <field name="sequence">0</field>
+    </record>
+</odoo>

@@ -71,6 +71,14 @@ charge, but not secret - it is a commodity price. Default $1.46/lb, in
   receives rates with it already applied.
 - The labour charge is flat per assembly and added AFTER the markup.
 
+### Hardware station
+
+Each hardware kit line gets a "Pack hardware kit" MO (kit, color, panels, rollers,
+drum, track, lift, door size, weight) and each prepared lift cable pair gets a
+"Cut lift cables" MO (size, cut length = the pair's reel feet / 2, sleeve, thimble,
+stop per cable). The station BoMs are NORMAL, template-level, with no components:
+the delivery still explodes the kits' and cables' own phantom BoMs.
+
 ## Git
 
 Never `git push`. Use `odoosh-push`.

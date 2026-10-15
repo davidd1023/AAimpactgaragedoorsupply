@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="mrp_workorder.MrpDisplayRecord" t-inherit-mode="extension">
+        <xpath expr="//span[@class='o_finished_product mt-auto mb-0']" position="after">
+            <!-- One card per sale order in the Overview: every job of the order,
+                 each with its own Send / Remove, plus Send all / Remove all. -->
+            <t t-set="aaOrderData" t-value="aaOrder()"/>
+            <div t-if="aaOrderData.grouped" class="o_aa_order">
+                <div class="d-flex justify-content-between align-items-baseline gap-2">
+                    <span class="fs-4 fw-bold" t-esc="aaOrderData.order"/>
+                    <span class="text-muted text-end" t-esc="aaOrderData.customer"/>
+                </div>
+                <div class="text-muted small"><i class="fa fa-clock-o me-1"/>Received <t t-esc="aaOrderData.received"/></div>
+                <div t-if="aaOrderData.can_assign and (aaOrderData.send_ids.length or aaOrderData.remove_ids.length)"
+                     class="d-flex flex-wrap gap-2 mt-2">
+                    <button t-if="aaOrderData.send_ids.length" type="button" class="btn btn-primary"
+                            t-on-click.stop="() => this.aaOrderAction('aa_send_to_station', aaOrderData.send_ids)">
+                        <i class="fa fa-arrow-right me-1"/>Send all
+                    </button>
+                    <button t-if="aaOrderData.remove_ids.length" type="button" class="btn btn-outline-secondary"
+                            t-on-click.stop="() => this.aaOrderAction('aa_remove_from_station', aaOrderData.remove_ids)">
+                        <i class="fa fa-undo me-1"/>Remove all
+                    </button>
+                </div>
+                <t t-foreach="aaOrderData.jobs" t-as="aaJob" t-key="aaJob.id">
+                    <t t-set="aaBadge" t-value="aaJobBadge(aaJob)"/>
+                    <div class="o_aa_job border rounded p-2 mt-2" t-att-class="{'opacity-50': aaJob.status === 'done'}">
+                        <div class="d-flex justify-content-between align-items-center gap-2">
+                            <span class="fw-bold text-uppercase" t-esc="aaJob.station"/>
+                            <span class="badge text-nowrap" t-att-class="aaBadge.cls" t-esc="aaBadge.text"/>
+                        </div>
+                        <t t-foreach="aaJob.items" t-as="aaItem" t-key="aaItem.id">
+                            <div class="o_aa_job_item mt-1">
+                                <div class="fw-bold" t-esc="aaItem.product"/>
+                                <t t-foreach="aaItem.summary" t-as="aaSum" t-key="aaSum_index">
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <span class="text-muted" t-esc="aaSum[0]"/>
+                                        <span class="fw-bold text-end" t-esc="aaSum[1]"/>
+                                    </div>
+                                </t>
+                                <div t-if="aaItem.more" class="text-muted small" t-esc="aaItem.more"/>
+                            </div>
+                        </t>
+                        <div t-if="aaOrderData.can_assign and (aaJob.send_ids.length or aaJob.remove_ids.length or aaJob.done_ids.length)" class="d-flex flex-wrap gap-2 mt-2">
+                            <button t-if="aaJob.send_ids.length" type="button" class="btn btn-sm btn-primary"
+                                    t-on-click.stop="() => this.aaOrderAction('aa_send_to_station', aaJob.send_ids)">
+                                <i class="fa fa-arrow-right me-1"/>Send to <t t-esc="aaJob.station"/>
+                            </button>
+                            <button t-if="aaJob.remove_ids.length" type="button" class="btn btn-sm btn-outline-secondary"
+                                    t-on-click.stop="() => this.aaOrderAction('aa_remove_from_station', aaJob.remove_ids)">
+                                <i class="fa fa-undo me-1"/>Remove from <t t-esc="aaJob.station"/>
+                            </button>
+                            <button t-if="aaJob.done_ids.length" type="button" class="btn btn-sm btn-success ms-auto"
+                                    t-on-click.stop="() => this.aaOrderAction('aa_mark_done_jobs', aaJob.done_ids)">
+                                <i class="fa fa-check me-1"/>Mark as Done
+                            </button>
+                        </div>
+                    </div>
+                </t>
+            </div>
+            <div t-if="record.aa_shop_spec and !aaOrderData.grouped" class="o_aa_shop_spec border rounded p-2 bg-100">
+                <t t-set="aaRows" t-value="record.aa_shop_spec.split('\n')"/>
+                <!-- Overview shows only the summary; the full list is at the station. -->
+                <t t-set="aaLimit" t-value="aaSpecLimit(aaRows)"/>
+                <t t-foreach="aaRows.slice(0, aaLimit)" t-as="aaRow" t-key="aaRow_index">
+                    <t t-set="aaParts" t-value="aaRow.split('|')"/>
+                    <div t-if="!aaParts[1] and aaParts[2] === 'c'"
+                         class="o_aa_shop_spec_section o_aa_check d-flex align-items-center gap-2 fw-bold text-uppercase border-top mt-2 pt-1 cursor-pointer"
+                         t-att-class="{'o_aa_packed': aaIsPacked(aaRow_index)}"
+                         t-on-click.stop="() => this.aaTogglePacked(aaRow_index)">
+                        <i class="fa fa-fw" t-att-class="aaIsPacked(aaRow_index) ? 'fa-check-square text-success' : 'fa-square-o text-muted'"/>
+                        <span class="o_aa_label flex-grow-1" t-esc="aaParts[0]"/>
+                    </div>
+                    <div t-elif="!aaParts[1]" class="o_aa_shop_spec_section d-flex justify-content-between fw-bold text-uppercase border-top mt-2 pt-1">
+                        <span t-esc="aaParts[0]"/>
+                        <span t-if="aaParts[0] === 'Box contents' or aaParts[0] === 'Parts'" class="text-muted" t-esc="aaPackedCount(aaRows)"/>
+                    </div>
+                    <div t-elif="aaParts[2] === 'c'"
+                         class="o_aa_check d-flex align-items-center gap-2 cursor-pointer"
+                         t-att-class="{'o_aa_packed': aaIsPacked(aaRow_index)}"
+                         t-on-click.stop="() => this.aaTogglePacked(aaRow_index)">
+                        <i class="fa fa-fw" t-att-class="aaIsPacked(aaRow_index) ? 'fa-check-square text-success' : 'fa-square-o text-muted'"/>
+                        <span class="o_aa_label flex-grow-1" t-esc="aaParts[0]"/>
+                        <span class="fw-bold text-end" t-esc="aaParts[1]"/>
+                    </div>
+                    <div t-else="" class="d-flex justify-content-between gap-3">
+                        <span class="text-muted" t-esc="aaParts[0]"/>
+                        <span class="fw-bold text-end" t-esc="aaParts[1]"/>
+                    </div>
+                </t>
+                <div t-if="aaLimit &lt; aaRows.length" class="o_aa_spec_more d-flex justify-content-between text-muted border-top mt-2 pt-1">
+                    <span t-esc="aaSpecSummary(aaRows, aaLimit)"/>
+                    <span t-esc="aaPackedCount(aaRows)"/>
+                </div>
+            </div>
+            <t t-if="record.aa_station_board and !aaOrderData.grouped">
+                <t t-set="aaBoardData" t-value="aaBoard()"/>
+                <div t-if="aaBoardData.received" class="o_aa_received text-muted small mt-1">
+                    <i class="fa fa-clock-o me-1"/>Received <t t-esc="aaBoardData.received"/>
+                </div>
+                <div t-if="aaBoardData.can_assign and (aaBoardData.can_send or aaBoardData.can_remove)"
+                     class="o_aa_assign d-flex flex-wrap align-items-center gap-2 mt-2">
+                    <span t-if="aaBoardData.can_send" class="badge text-bg-warning">Pending</span>
+                    <button t-if="aaBoardData.can_send" type="button" class="btn btn-primary"
+                            t-on-click.stop="() => this.aaRelease('aa_send_to_station')">
+                        <i class="fa fa-arrow-right me-1"/>Send to <t t-esc="aaBoardData.station"/>
+                    </button>
+                    <button t-if="aaBoardData.can_remove" type="button" class="btn btn-outline-secondary"
+                            t-on-click.stop="() => this.aaRelease('aa_remove_from_station')">
+                        <i class="fa fa-undo me-1"/>Remove from <t t-esc="aaBoardData.station"/>
+                    </button>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>

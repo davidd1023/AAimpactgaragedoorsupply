@@ -96,6 +96,14 @@ class SaleOrderLine(models.Model):
         copy=False,
     )
 
+    # THE SPRING AS DATA (JSON): assembly, LH/RH count and each spring's wire,
+    # I.D. and length. Written by add_assembly_lines; aa_shop_floor turns it
+    # into the Springs work order when the order is confirmed.
+    spring_spec_json = fields.Text(
+        string="Spring Spec (data)",
+        copy=False,
+        readonly=True,
+    )
     # --- what the customer SPECIFIED, as data rather than as prose -----------
     #
     # ODOO REWRITES THE DESCRIPTION, AND THAT IS WHAT WENT WRONG. `name` is a

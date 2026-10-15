@@ -101,9 +101,19 @@ def quote_custom(spec):
         f'{unit_txt} - {springs} spring{"s" if springs != 1 else ""}',
         f'.{wire_code} wire, {ID_LABELS[inner]} ID, {length_txt}" long',
     ])
+
+    # The spring as data, for the Springs work order (aa_shop_floor).
+    spec_data = {
+        "assembly": "Single",
+        "springs": springs,
+        "lh": qty if wind in ("LH", "PAIR") else 0,
+        "rh": qty if wind in ("RH", "PAIR") else 0,
+        "items": [{"role": "Spring", "wire": wire, "id": diameter, "length": length}],
+    }
     return {
         "springs": springs,
         "description": description,
+        "spec": spec_data,
         "assembly_total": assembly_total,
         "total": total,
         "cones": cones,
