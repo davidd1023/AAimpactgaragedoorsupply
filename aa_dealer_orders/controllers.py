@@ -103,10 +103,12 @@ class AAOptionPricing:
         return ''
 
     def _spring_factor(self, partner):
-        """Springs are priced like the rest of the dealer's order: cost + dealer margin.
-        No margin set -> the Spring Engineering website markup."""
-        margin = partner.commercial_partner_id.aa_dealer_margin
-        return (1.0 + margin / 100.0) if margin else None
+        """No dealer margin on springs (owner, 2026-10-16).
+
+        A spring sells at one price for everybody: the Spring Engineering
+        per-pound sale price plus cones and filler at cost. None keeps that.
+        """
+        return None
 
     def _spring_quote(self, partner, variant, no_variant, line):
         """(quote, note): the Spring Engineering quote for this door, or a note why not."""

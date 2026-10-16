@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- The markup lives in Website's settings because the calculator is a
+    <!-- The spring price lives in Website's settings because the calculator is a
          website page. Anchored after the Website app's own General block,
          which is where someone looking for a setting about the site would
          already be. -->
@@ -12,15 +12,6 @@
         <field name="arch" type="xml">
             <xpath expr="//block[@id='website_info_settings']" position="after">
                 <block title="Spring Calculator" id="spring_engineering_settings">
-                    <setting string="Cones &amp; filler markup"
-                             help="Added to the cost of the cones and the plastic filler on a custom spring. Does not apply to the price per pound. The visitor is never shown this figure.">
-                        <div class="content-group">
-                            <div class="mt16">
-                                <field name="spring_markup_percent" class="oe_inline"/>
-                                <span class="ms-1">%</span>
-                            </div>
-                        </div>
-                    </setting>
                     <setting string="Spring sell price per pound"
                              help="What a pound of finished spring is sold for, labor included. Not marked up. Charged on every spring, from the weights the calculator shows. Cones and filler are added on top at cost plus the markup.">
                         <div class="content-group">

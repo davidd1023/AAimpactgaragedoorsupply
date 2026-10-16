@@ -196,8 +196,17 @@ def _pricing_param(key):
 
 
 def _markup_factor():
-    """What the supplier cost is multiplied by to reach the selling price."""
-    return 1.0 + _pricing_param(MARKUP_KEY) / 100.0
+    """Cones and the plastic filler are charged at cost: the factor is 1.
+
+    Owner, 2026-10-16: the per-pound setting is the spring's sale price, with
+    the steel, the labour and the margin already in it. Cones and filler are
+    added on top at what they cost us, with no markup. The markup setting was
+    removed from Settings.
+
+    Kept as a function so the calculator, Custom Torsion Spring and the dealer
+    Quick Order still take the factor from one place.
+    """
+    return 1.0
 
 
 STEEL_KEY = "spring_engineering.steel_per_lb"
@@ -291,9 +300,8 @@ def quote_assembly(spec, factor=None):
 
     Returns {"error": ...} or the quote that add_assembly_lines books. Shared by
     the public calculator's add-to-cart and by other modules (the dealer Quick
-    Order) so a spring is priced and described one way only. `factor` replaces
-    the website markup when a caller prices for someone else (a dealer margin);
-    the labour charge is still added after it.
+    Order) so a spring is priced and described one way only. `factor` multiplies
+    the cones and filler; it defaults to 1 (at cost) and no caller changes it.
     """
     spec = spec or {}
 

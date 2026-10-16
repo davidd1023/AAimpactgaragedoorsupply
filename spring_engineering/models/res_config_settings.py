@@ -4,27 +4,8 @@ from odoo import fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
-    # THE MARGIN, AS A SETTING RATHER THAN A SYSTEM PARAMETER.
-    #
-    # It is stored as the ir.config_parameter the pricing code reads, so this
-    # adds a place to change it and no second source of truth. Settings is a
-    # back-office page: the website visitor never sees this field, and never
-    # sees the number either - the calculator is sent prices with the markup
-    # already in them, not the markup. See controllers/main.py.
-    #
-    # `config_parameter` also means a write here goes through set_param, which
-    # clears the cached value across every worker. Writing the parameter row
-    # directly in SQL does not, and the old margin keeps being charged.
-    spring_markup_percent = fields.Float(
-        string="Spring assembly markup",
-        config_parameter="spring_engineering.markup_percent",
-        help="Percentage added to the cost of the cones and the plastic "
-             "filler. 80 means $10 of cones is sold for $18. Zero sells them "
-             "at cost. Does not apply to the spring's price per pound.",
-    )
-
     def set_values(self):
-        """Write the two pricing parameters so that ZERO survives the trip.
+        """Write the pricing parameter so that ZERO survives the trip.
 
         Odoo stores a `config_parameter` field by handing its value to
         set_param, and a falsy value there does not store a zero - it DELETES
@@ -47,9 +28,6 @@ class ResConfigSettings(models.TransientModel):
 
         params = self.env["ir.config_parameter"].sudo()
 
-        params.set_param(
-            "spring_engineering.markup_percent", str(self.spring_markup_percent or 0.0)
-        )
         params.set_param(
             "spring_engineering.steel_per_lb", str(self.spring_steel_per_lb or 0.0)
         )
