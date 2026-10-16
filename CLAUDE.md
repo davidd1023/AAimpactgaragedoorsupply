@@ -51,9 +51,7 @@ It is a separate product (`product_custom_filler`), **not published**, so it can
 be bought on its own - it reaches a cart only when the calculator adds a spring
 whose ID calls for one. The order line's quantity is FEET.
 
-Treated as a supplier cost, so the markup applies to it, the same as the cones and
-the steel. Say so if it was meant as a finished price instead - that would put it
-beside the labour charge, which is added after the markup.
+Charged at cost, with no markup, the same as the cones (owner, 2026-10-16).
 
 ### The steel rate is an ordinary setting
 
@@ -61,15 +59,18 @@ Editable in Website > Configuration > Settings like the markup and the labour
 charge, but not secret - it is a commodity price. Default $1.46/lb, in
 `spring_engineering/pricing.py`.
 
-### How the pieces fit together
+### How the pieces fit together (owner, 2026-10-16)
 
-- Cone and steel COSTS live in `spring_engineering/pricing.py`, server side. They
-  were in the JavaScript and therefore in the public bundle, which also made the
-  markup a division away from any quote.
-- The markup and the flat labour charge are `ir.config_parameter` values, editable
-  in Website > Configuration > Settings. The browser is never told the markup; it
-  receives rates with it already applied.
-- The labour charge is flat per assembly and added AFTER the markup.
+- The per-pound setting ("Spring sell price per pound", key
+  `spring_engineering.steel_per_lb`) is the SALE price: the owner enters cost +
+  labour (and his margin) per pound. It is NOT marked up.
+- Cones and the plastic filler are added on top AT COST, with no markup.
+  `_markup_factor()` returns 1; the "Cones & filler markup" setting was removed
+  from Settings (the old `spring_engineering.markup_percent` row is ignored).
+- There is no separate labour charge; `_labor_flat()` returns 0.
+- No dealer margin on springs: `aa_dealer_orders` `_spring_factor()` returns None,
+  so a spring costs every customer the same.
+- Cone and filler COSTS live in `spring_engineering/pricing.py`, server side.
 
 ### Hardware station
 

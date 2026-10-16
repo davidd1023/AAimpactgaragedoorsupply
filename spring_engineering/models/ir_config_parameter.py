@@ -8,7 +8,6 @@ from ..pricing import STEEL_PRICE_PER_LB
 # sure a fresh database can quote at all, and not to hold the live values.
 DEFAULTS = {
     "spring_engineering.markup_percent": "80",
-    "spring_engineering.labor_flat": "100",
     # The steel rate's default comes from pricing.py so there is one place it is
     # written down, rather than a second copy here that could drift from it.
     "spring_engineering.steel_per_lb": str(STEEL_PRICE_PER_LB),

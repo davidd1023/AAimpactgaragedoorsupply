@@ -94,7 +94,6 @@ def _calculator_constants():
 # Read fresh on every request rather than cached, so changing the parameter
 # takes effect immediately instead of on the next restart.
 MARKUP_KEY = "spring_engineering.markup_percent"
-LABOR_KEY = "spring_engineering.labor_flat"
 
 # EVERY WORD ON THE ORDER LINE IS CHOSEN HERE, NOT BY THE CALLER.
 #
@@ -197,15 +196,27 @@ def _pricing_param(key):
 
 
 def _markup_factor():
-    """What the supplier cost is multiplied by to reach the selling price."""
-    return 1.0 + _pricing_param(MARKUP_KEY) / 100.0
+    """Cones and the plastic filler are charged at cost: the factor is 1.
+
+    Owner, 2026-10-16: the per-pound setting is the spring's sale price, with
+    the steel, the labour and the margin already in it. Cones and filler are
+    added on top at what they cost us, with no markup. The markup setting was
+    removed from Settings.
+
+    Kept as a function so the calculator, Custom Torsion Spring and the dealer
+    Quick Order still take the factor from one place.
+    """
+    return 1.0
 
 
 STEEL_KEY = "spring_engineering.steel_per_lb"
 
 
 def _steel_per_lb():
-    """What a pound of finished spring costs, before the markup.
+    """The SELL price of a pound of finished spring, labour included.
+
+    Owner, 2026-10-15: the markup no longer applies to it - it is already a
+    selling price. The markup still applies to the cones and the filler.
 
     A SETTING RATHER THAN A CONSTANT, because steel moves. pricing.py holds the
     default a fresh database starts with; this is the live figure, and like the
@@ -216,18 +227,14 @@ def _steel_per_lb():
 
 
 def _labor_flat():
-    """The labour charge on one assembly, in currency, already a selling price.
+    """No separate labour charge any more (owner, 2026-10-15).
 
-    FLAT PER ASSEMBLY, NOT PER SPRING. Fitting a set of springs is one job
-    whether it holds one spring or four, which is what "flat" means here and
-    what the figure it replaces always did.
-
-    ADDED AFTER THE MARKUP, not multiplied by it. The markup turns a supplier
-    cost into a price; this is already a price - what the labour is sold for -
-    so marking it up would be marking up a margin. If the intent is ever the
-    other way round, this is the one line that has to change.
+    The steel setting is now the SELL price per pound of finished spring, with
+    the labour already in it, so there is nothing to add per assembly. Kept as
+    a function returning 0 so the quotes, the page's rates and the dealer
+    Quick Order keep their shape.
     """
-    return round(_pricing_param(LABOR_KEY), 2)
+    return 0.0
 
 
 def _spec_weight(wire, diameter, length, density):
@@ -293,9 +300,8 @@ def quote_assembly(spec, factor=None):
 
     Returns {"error": ...} or the quote that add_assembly_lines books. Shared by
     the public calculator's add-to-cart and by other modules (the dealer Quick
-    Order) so a spring is priced and described one way only. `factor` replaces
-    the website markup when a caller prices for someone else (a dealer margin);
-    the labour charge is still added after it.
+    Order) so a spring is priced and described one way only. `factor` multiplies
+    the cones and filler; it defaults to 1 (at cost) and no caller changes it.
     """
     spec = spec or {}
 
@@ -385,7 +391,8 @@ def quote_assembly(spec, factor=None):
         )
 
     cones = round(springs * cone_total * factor, 2)
-    steel = round(springs * steel_weight * per_lb * factor, 2)
+    # Sell price per lb, labour included: NOT marked up (owner, 2026-10-15).
+    steel = round(springs * steel_weight * per_lb, 2)
 
     # PLASTIC FILLER, for the one spring ID that takes it.
     #
@@ -704,7 +711,8 @@ class SpringEngineeringWebsite(http.Controller):
         # quoting a price at all.
         return {
             "cones": {str(d): round(p * factor, 4) for d, p in prices["cones"].items()},
-            "perLb": round(per_lb * factor, 6),
+            # Already a sell price (labour included), so not marked up.
+            "perLb": round(per_lb, 6),
             "labor": labor,
             # Plastic filler, per foot, for the one spring ID that takes it. The
             # page needs it to quote a total the cart will honour; see the note
