@@ -33,7 +33,7 @@
     <xpath expr="//form" position="after">
       <div t-if="request.session.get('aa_unconfirmed_login')"
            class="text-center small mt-2">
-        <a href="/my/confirm-email/resend">Resend the confirmation email</a>
+        <a href="/my/email-confirmation/resend">Resend the confirmation email</a>
       </div>
     </xpath>
   </template>
@@ -57,10 +57,37 @@
               A confirmation link can only be used once, and it expires after
               three days. We can send you another one.
             </p>
-            <a class="btn btn-primary" href="/my/confirm-email/resend">
+            <a class="btn btn-primary" href="/my/email-confirmation/resend">
               Send me a new link
             </a>
           </t>
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <!-- WHERE A HELD SIGNUP LANDS. Not the login page: being bounced back to
+       a sign-in box after successfully creating an account reads as failure,
+       and reloading the result of the signup POST is what produced "oops,
+       something went wrong". -->
+  <template id="aa_email_confirm_pending" name="Please confirm your email">
+    <t t-call="website.layout">
+      <div id="wrap" class="oe_structure">
+        <div class="container py-5">
+          <h1>Please confirm your email to continue</h1>
+          <p class="lead">
+            Your account is made. We have sent a link to
+            <strong t-if="login" t-out="login"/><t t-else="">your email address</t>
+            - follow it and you can sign in.
+          </p>
+          <p class="text-muted">
+            The link works once and expires in three days. If it has not
+            arrived in a few minutes, check your spam folder.
+          </p>
+          <a class="btn btn-primary" href="/my/email-confirmation/resend">
+            Send it again
+          </a>
+          <a class="btn btn-link" href="/shop">Keep looking around</a>
         </div>
       </div>
     </t>
@@ -72,7 +99,7 @@
         <div class="container py-5">
           <h1>Send the confirmation again</h1>
           <p>Tell us the address you signed up with and we will send another link.</p>
-          <form action="/my/confirm-email/resend" method="post" class="mt-3"
+          <form action="/my/email-confirmation/resend" method="post" class="mt-3"
                 style="max-width: 24rem;">
             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
             <div class="mb-3">

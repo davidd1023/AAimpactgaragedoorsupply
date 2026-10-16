@@ -66,10 +66,21 @@ class ResUsers(models.Model):
             template.sudo().send_mail(self.id, force_send=True)
 
     def _aa_verification_url(self):
-        self.ensure_one()
+        """The link, on the host the customer is actually using.
 
-        return "%s/my/confirm-email/%s" % (
-            self.get_base_url(), self.sudo().aa_verify_token or "")
+        NOT get_base_url() ALONE. That reads web.base.url, a single stored
+        string for the whole database, and a link built from it lands on
+        whatever host that string names - which is the wrong server whenever
+        it has drifted, and a 404 even when the code is deployed, because the
+        token only exists in the database the customer signed up against.
+        The address they are standing on cannot be wrong, so it is used when
+        there is a request to read it from.
+        """
+        self.ensure_one()
+        base = (request.httprequest.url_root.rstrip("/")
+                if request else self.get_base_url())
+
+        return "%s/my/confirm-email/%s" % (base, self.sudo().aa_verify_token or "")
 
     def _aa_confirm_email(self, token):
         """Spend a confirmation link.

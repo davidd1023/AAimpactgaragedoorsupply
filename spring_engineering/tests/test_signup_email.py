@@ -141,7 +141,7 @@ class TestSigningUpOnTheWebsite(HttpCase):
             "auth_signup_uninvited": "b2c",
         })
 
-    def _signup(self, login):
+    def _signup(self, login, follow=True):
         page = self.url_open("/web/signup")
         token = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', page.text)
         self.assertTrue(token, "no signup form to post")
@@ -149,7 +149,7 @@ class TestSigningUpOnTheWebsite(HttpCase):
         return self.url_open("/web/signup", data={
             "csrf_token": token.group(1), "login": login,
             "name": "Website Customer", "password": "s3cret!pw",
-            "confirm_password": "s3cret!pw"})
+            "confirm_password": "s3cret!pw"}, allow_redirects=follow)
 
     def _user(self, login):
         return self.env["res.users"].sudo().with_context(
@@ -202,11 +202,63 @@ class TestSigningUpOnTheWebsite(HttpCase):
         answers = set()
 
         for login in ("nobody@example.com", "stranger2@example.com"):
-            answer = self.url_open("/my/confirm-email/resend", data={
+            answer = self.url_open("/my/email-confirmation/resend", data={
                 "csrf_token": token.group(1), "login": login})
             answers.add(re.sub(r"[\w.@]+@[\w.]+", "", answer.text))
 
         self.assertEqual(len(answers), 1, "the two answers differ")
+
+    # --- what the owner hit, one by one --------------------------------------
+
+    def test_a_held_signup_redirects_instead_of_rendering(self):
+        """ODOO ANSWERS A SIGNUP BY RENDERING THE LOGIN PAGE out of the POST,
+        so the browser sits on the result of a POST and reloading re-submits
+        it - which fails on a spent token and an address already taken, and
+        shows "something went wrong" for pressing F5."""
+        answer = self._signup("redirected@example.com", follow=False)
+
+        self.assertIn(answer.status_code, (301, 302, 303), answer.status_code)
+        self.assertIn("/my/email-confirmation",
+                      answer.headers.get("Location", ""))
+
+    def test_the_page_it_lands_on_says_what_is_waiting(self):
+        answer = self._signup("waiting@example.com")
+
+        self.assertIn("confirm your email", answer.text.lower())
+        self.assertIn("waiting@example.com", answer.text,
+                      "it does not say where the link went")
+
+    def test_that_page_can_be_reloaded(self):
+        """The whole point of the redirect."""
+        self._signup("reloads@example.com")
+
+        again = self.url_open(
+            "/my/email-confirmation?login=reloads@example.com")
+
+        self.assertEqual(again.status_code, 200)
+        self.assertIn("confirm your email", again.text.lower())
+
+    def test_only_one_letter_goes_out(self):
+        """Odoo sends its own "account created" mail from the signup route,
+        whose button confirms nothing - two emails at once, and the owner
+        pressed the wrong one."""
+        before = self.env["mail.mail"].sudo().search([])
+        self._signup("oneletter@example.com")
+        sent = self.env["mail.mail"].sudo().search([]) - before
+
+        self.assertEqual(len(sent), 1, sent.mapped("subject"))
+        self.assertIn("confirm", (sent.subject or "").lower())
+
+    def test_the_link_in_the_letter_points_at_this_host(self):
+        """A link built from web.base.url lands on whatever host that stored
+        string names, which is a 404 on any other build - and the token only
+        exists in the database they signed up against."""
+        self._signup("hosted@example.com")
+        user = self._user("hosted@example.com")
+
+        self.assertTrue(
+            user._aa_verification_url().startswith(self.base_url()),
+            user._aa_verification_url())
 
     def test_the_signup_box_asks_for_an_email(self):
         page = self.url_open("/web/signup").text

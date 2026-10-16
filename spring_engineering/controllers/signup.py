@@ -2,6 +2,8 @@ import logging
 
 from odoo import _, http
 from odoo.exceptions import UserError
+from werkzeug.urls import url_encode
+
 from odoo.http import request
 from odoo.tools.mail import email_normalize, single_email_re
 
@@ -85,12 +87,42 @@ class SignupNeedsARealAddress(AuthSignupHome):
             order=Users._get_login_order(), limit=1)
 
         if user:
+            # SET BEFORE THE LETTER GOES OUT. mail_template.py reads this to
+            # hold back Odoo's own "account created" email, which would
+            # otherwise arrive alongside ours offering a button that confirms
+            # nothing.
+            request.session["aa_pending_confirmation"] = user.login
             user._aa_start_email_verification()
 
     def _aa_confirmation_required(self):
         website = getattr(request, "website", None)
 
         return bool(website and website.aa_require_email_confirmation)
+
+    @http.route()
+    def web_auth_signup(self, *args, **kw):
+        """Finish a held signup on a page of its own.
+
+        ODOO ANSWERS A SIGNUP BY RENDERING, NOT REDIRECTING: it returns the
+        login page straight out of the POST. That is survivable when the
+        signup logged you in, because you are immediately sent on - but when
+        the account is held, the browser is left sitting on the RESULT OF A
+        POST. Reloading re-submits it, the second attempt fails on a token
+        that has been spent and an address already taken, and the customer is
+        shown "something went wrong" for doing nothing worse than pressing
+        F5. That is what the owner hit.
+
+        So a held signup answers with a redirect to a page that says what is
+        waiting for them, which a browser can reload all day.
+        """
+        response = super().web_auth_signup(*args, **kw)
+        pending = request.session.pop("aa_pending_confirmation", None)
+
+        if pending:
+            return request.redirect(
+                "/my/email-confirmation?" + url_encode({"login": pending}))
+
+        return response
 
     # --- spending the link ---------------------------------------------------
 
@@ -109,7 +141,15 @@ class SignupNeedsARealAddress(AuthSignupHome):
                      request.session.get("aa_unconfirmed_login", ""),
         })
 
-    @http.route("/my/confirm-email/resend", type="http", auth="public",
+    @http.route("/my/email-confirmation", type="http", auth="public",
+                website=True, sitemap=False)
+    def aa_email_confirmation_pending(self, **kw):
+        """Where a new customer lands: what is waiting, and how to chase it."""
+        return request.render("spring_engineering.aa_email_confirm_pending", {
+            "login": (kw.get("login") or "").strip(),
+        })
+
+    @http.route("/my/email-confirmation/resend", type="http", auth="public",
                 website=True, sitemap=False, methods=["GET", "POST"])
     def aa_resend_confirmation(self, **kw):
         """Send another link, without saying whether there was anyone to send to.
