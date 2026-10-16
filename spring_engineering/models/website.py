@@ -15,6 +15,22 @@ class Website(models.Model):
     # own. Keeping it here also means zero is simply zero - a config_parameter
     # set to a falsy value deletes its own row, which is the trap set_values
     # in res_config_settings.py has to work around for the other three.
+    # WHETHER A NEW ACCOUNT HAS TO PROVE ITS ADDRESS.
+    #
+    # A switch rather than a certainty, because this is the one rule here
+    # that can keep a real customer out: if the shop's mail ever stops going
+    # out, every new signup is stranded, and the owner needs a way to open
+    # the door again without a deploy. Turning it off stops NEW accounts
+    # being held; it does not confirm the ones already waiting, which is on
+    # purpose - those are set from the user form or by following the link.
+    aa_require_email_confirmation = fields.Boolean(
+        string="Confirm email addresses",
+        default=True,
+        help="A customer who signs up on the website is sent a link and"
+             " cannot sign in until they follow it. Invited customers are"
+             " unaffected: their address is proven by the invitation.",
+    )
+
     # THE MOST ONE LINE OF A CART MAY HOLD.
     #
     # The quantity box on a product page is a TEXT field with a data-min the

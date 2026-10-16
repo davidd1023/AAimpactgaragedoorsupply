@@ -47,6 +47,10 @@
                      to write to. -->
                 <block title="Shop Rules" id="aa_shop_rules"
                        invisible="not website_id">
+                    <setting string="Confirm email addresses"
+                             help="A customer who signs up on the website is sent a link and cannot sign in until they follow it. Customers you invite are unaffected - their address is proven by the invitation - and accounts that already existed are treated as confirmed.">
+                        <field name="aa_require_email_confirmation"/>
+                    </setting>
                     <setting string="Maximum per item"
                              help="The most of any one product a customer may put in an order. What they ask for beyond it is not added, and the page tells them why. Counts each product separately, so a cart may hold this many of several different things. Zero means no limit.">
                         <div class="content-group">
