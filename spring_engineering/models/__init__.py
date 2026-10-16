@@ -1,5 +1,6 @@
 from . import ir_config_parameter
 from . import ir_http
+from . import res_users
 from . import website
 from . import res_config_settings
 from . import product_template
