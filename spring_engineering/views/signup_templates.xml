@@ -79,6 +79,35 @@
     </t>
   </template>
 
+  <!-- WHAT THE LINK ITSELF OPENS: a question, not a deed.
+
+       Following the link only looks the account up; the button below is what
+       confirms it. That is deliberate - mail scanners and link previewers
+       fetch every address in an email before the customer sees it, and while
+       the fetch was enough to spend the token, the customer's own click was
+       met with "no longer good". Nothing automated presses buttons. -->
+  <template id="aa_email_confirm_ask" name="Confirm this email address">
+    <t t-call="website.layout">
+      <t t-set="additional_title">Confirm your email</t>
+      <div id="wrap" class="oe_structure">
+        <div class="container py-5">
+          <h1>Confirm your email address</h1>
+          <p class="lead">
+            Press the button to confirm <strong t-out="login"/> and finish
+            setting up your account.
+          </p>
+          <form t-attf-action="/my/confirm-email/{{ token }}" method="post">
+            <input type="hidden" name="csrf_token"
+                   t-att-value="request.csrf_token()"/>
+            <button type="submit" class="btn btn-primary btn-lg">
+              Confirm my email
+            </button>
+          </form>
+        </div>
+      </div>
+    </t>
+  </template>
+
   <!-- WHERE A HELD SIGNUP LANDS. Not the login page: being bounced back to
        a sign-in box after successfully creating an account reads as failure,
        and reloading the result of the signup POST is what produced "oops,

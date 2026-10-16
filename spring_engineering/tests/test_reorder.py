@@ -159,6 +159,59 @@ class TestReorderAPreviousOrder(HttpCase):
 
 
 @tagged("post_install", "-at_install")
+class TestReorderLeavesTheSyncsOwnParts(HttpCase):
+    """What the fastener and track-prep sync makes is not the customer's.
+
+    Those lines are recreated from the brackets as soon as the cart is
+    rebuilt, so re-adding them puts two of everything in it. Skipping them
+    by their PARENT link is not enough: the parent came later, and orders
+    placed before it hold studs and nuts with a role and no parent.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["res.users"].browse(2).write({"password": "admin"})
+        self.admin = self.env["res.users"].browse(2)
+        self.website = self.env["website"].search([], limit=1)
+        self.hinge = self.env["product.product"].create({
+            "name": "Legacy Probe Hinge", "type": "consu", "list_price": 4.0,
+            "is_published": True, "sale_ok": True})
+        self.stud = self.env["product.product"].create({
+            "name": "1/4 X 3/4 KNURLEL STUD 18-8", "type": "consu",
+            "list_price": 0.35, "is_published": True, "sale_ok": True})
+
+    def test_a_loose_fastener_from_an_old_order_is_not_reordered(self):
+        order = self.env["sale.order"].create({
+            "partner_id": self.admin.partner_id.id,
+            "website_id": self.website.id,
+            "order_line": [
+                (0, 0, {"product_id": self.hinge.id, "product_uom_qty": 2}),
+                # As the first version of the rule wrote them: a role, and no
+                # parent, because fasteners were then counted per CART.
+                (0, 0, {"product_id": self.stud.id, "product_uom_qty": 2,
+                        "track_prep_role": "stud"}),
+            ],
+        })
+        order.action_confirm()
+
+        self.authenticate("admin", "admin")
+        self.url_open("/my/orders/reorder", data=json.dumps({
+            "jsonrpc": "2.0", "method": "call",
+            "params": {"order_id": order.id}}),
+            headers={"Content-Type": "application/json"})
+
+        cart = self.env["sale.order"].search(
+            [("partner_id", "=", self.admin.partner_id.id),
+             ("state", "=", "draft")], order="id desc", limit=1)
+        loose = cart.order_line.filtered(
+            lambda line: line.product_id == self.stud
+            and not line.track_prep_parent_id)
+
+        self.assertTrue(cart.order_line, "nothing was reordered at all")
+        self.assertFalse(loose, "a part the sync owns was reordered as a product")
+
+
+@tagged("post_install", "-at_install")
 class TestReorderKeepsWhatWasConfigured(HttpCase):
     """A custom spring has to come back as a spring, not as a bare product.
 
