@@ -3,7 +3,7 @@ from odoo import api, fields, models
 # The two parts every jamb bracket is fitted with. Named here because this is
 # where the roles are declared, and read from here by sale_order so the two
 # cannot drift apart.
-FASTENER_ROLES = ("stud", "nut")
+FASTENER_ROLES = ("stud", "nut", "lag")
 
 
 class SaleOrderLine(models.Model):
@@ -91,6 +91,7 @@ class SaleOrderLine(models.Model):
             # these two carry no parent - they answer to the whole cart.
             ("stud", "Knurled studs"),
             ("nut", "Flange nuts"),
+            ("lag", "Lag screws"),
         ],
         string="Preparation part",
         copy=False,

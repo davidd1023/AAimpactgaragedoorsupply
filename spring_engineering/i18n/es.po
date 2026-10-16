@@ -1113,11 +1113,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/spring_engineering/models/sale_order.py:0
 msgid ""
-"We are missing a part that goes with the jamb brackets (%s), so it was not "
-"added. Please call us and we will send it with them."
+"We are missing a part that goes with something in your cart (%s), so it was "
+"not added. Please call us and we will send it with the rest."
 msgstr ""
-"Nos falta una pieza que acompaña a los soportes de marco (%s), así que no se"
-" agregó. Llámenos y la enviaremos con ellos."
+"Nos falta una pieza que acompaña a algo de su carrito (%s), así que no se "
+"agregó. Llámenos y la enviaremos con el resto."
 
 #. module: spring_engineering
 #. odoo-python

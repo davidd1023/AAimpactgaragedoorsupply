@@ -22,6 +22,9 @@ class TestBracketFasteners(TransactionCase):
         self.nut = self.env["product.product"].create({
             "name": "Flage Nuts 1/4 20", "type": "consu",
             "list_price": 0.2, "sale_ok": True, "is_published": True})
+        self.lag = self.env["product.product"].create({
+            "name": "Lag Screws", "type": "consu",
+            "list_price": 0.4, "sale_ok": True, "is_published": True})
         self.bracket = self.env["product.product"].search(
             [("default_code", "=", "ATL-610J10JBBR")], limit=1)
         self.assertTrue(self.bracket, "the catalogue bracket is missing")
@@ -98,8 +101,10 @@ class TestBracketFasteners(TransactionCase):
     # --- and a prepared track, which brings its own ---------------------------
 
     def test_a_prepared_track_counts_every_bracket_it_adds(self):
-        """A 7 ft door takes four each of three sizes - so twelve of each
-        fastener, not one set per track."""
+        """A 7 ft door takes four each of three sizes - twelve brackets, so
+        twelve studs - PLUS the flag angle's own four, which it has taken
+        since the owner's second list of companions. Sixteen is the whole
+        track's worth, not one set per track."""
         order = self._order()
         tmpl = self._track()
         order._cart_add(
@@ -112,8 +117,10 @@ class TestBracketFasteners(TransactionCase):
             if order._fastener_is_bracket(line))
 
         self.assertEqual(brackets, 12, "the fixture is not the mix expected")
-        self.assertEqual(self._qty(order, self.stud), 12)
-        self.assertEqual(self._qty(order, self.nut), 12)
+        self.assertEqual(self._qty(order, self.stud), 16, "12 brackets + 4 flag")
+        self.assertEqual(self._qty(order, self.nut), 16)
+        # One per bracket, three for the flag angle.
+        self.assertEqual(self._qty(order, self.lag), 15)
 
     def test_two_prepared_tracks_take_twice_as_many(self):
         order = self._order()
@@ -123,8 +130,9 @@ class TestBracketFasteners(TransactionCase):
             no_variant_attribute_value_ids=[
                 self._ptav(tmpl, "Prepared").id])
 
-        self.assertEqual(self._qty(order, self.stud), 24)
-        self.assertEqual(self._qty(order, self.nut), 24)
+        self.assertEqual(self._qty(order, self.stud), 32)
+        self.assertEqual(self._qty(order, self.nut), 32)
+        self.assertEqual(self._qty(order, self.lag), 30)
 
     def test_an_unprepared_track_brings_nothing(self):
         order = self._order()
@@ -186,7 +194,7 @@ class TestBracketFasteners(TransactionCase):
         order._cart_add(
             product_id=tmpl.product_variant_id.id, quantity=1,
             no_variant_attribute_value_ids=[self._ptav(tmpl, "Prepared").id])
-        self.assertEqual(self._qty(order, self.stud), 12)
+        self.assertEqual(self._qty(order, self.stud), 16)
 
         bracket_line = order.order_line.filtered(
             lambda line: order._fastener_is_bracket(line))[:1]
@@ -272,6 +280,9 @@ class TestTheHeaderCount(HttpCase):
         self.nut = self.env["product.product"].create({
             "name": "Flage Nuts 1/4 20", "type": "consu",
             "list_price": 0.2, "sale_ok": True, "is_published": True})
+        self.lag = self.env["product.product"].create({
+            "name": "Lag Screws", "type": "consu",
+            "list_price": 0.4, "sale_ok": True, "is_published": True})
         self.bracket = self.env["product.product"].search(
             [("default_code", "=", "ATL-610J10JBBR")], limit=1)
         self.bracket.product_tmpl_id.write({"is_published": True})
@@ -356,6 +367,9 @@ class TestFastenersStackUnderTheBracket(HttpCase):
         self.nut = self.env["product.product"].create({
             "name": "Flage Nuts 1/4 20", "type": "consu",
             "list_price": 0.25, "sale_ok": True, "is_published": True})
+        self.lag = self.env["product.product"].create({
+            "name": "Lag Screws", "type": "consu",
+            "list_price": 0.4, "sale_ok": True, "is_published": True})
         self.bracket = self.env["product.product"].search(
             [("default_code", "=", "ATL-610J10JBBR")], limit=1)
         self.bracket.product_tmpl_id.write({"is_published": True})
@@ -372,10 +386,11 @@ class TestFastenersStackUnderTheBracket(HttpCase):
         order._cart_add(product_id=self.bracket.id, quantity=4)
         bracket = self._bracket_line(order)
 
-        self.assertEqual(len(bracket.aa_included_line_ids), 2)
+        self.assertEqual(len(bracket.aa_included_line_ids), 3,
+                         "a stud, a nut and a lag screw")
         self.assertEqual(
             set(bracket.aa_included_line_ids.mapped("product_id")),
-            {self.stud, self.nut})
+            {self.stud, self.nut, self.lag})
         self.assertEqual(
             set(bracket.aa_included_line_ids.mapped("product_uom_qty")), {4.0})
 
@@ -401,7 +416,7 @@ class TestFastenersStackUnderTheBracket(HttpCase):
         self.assertEqual(len(brackets), 3, "the fixture is not the mix expected")
 
         for bracket in brackets:
-            self.assertEqual(len(bracket.aa_included_line_ids), 2,
+            self.assertEqual(len(bracket.aa_included_line_ids), 3,
                              bracket.product_id.display_name)
             self.assertEqual(
                 set(bracket.aa_included_line_ids.mapped("product_uom_qty")),
@@ -485,6 +500,9 @@ class TestBuyingABracketBesideAPreparedTrack(TransactionCase):
         self.nut = self.env["product.product"].create({
             "name": "Flage Nuts 1/4 20", "type": "consu",
             "list_price": 0.2, "sale_ok": True, "is_published": True})
+        self.lag = self.env["product.product"].create({
+            "name": "Lag Screws", "type": "consu",
+            "list_price": 0.4, "sale_ok": True, "is_published": True})
         self.attr = self.env.ref("spring_engineering.attribute_track_preparation")
         self.prepared = self.env.ref(
             "spring_engineering.attribute_value_track_prepared")
@@ -574,3 +592,106 @@ class TestBuyingABracketBesideAPreparedTrack(TransactionCase):
             and not line.track_prep_role)
 
         self.assertEqual(len(tracks), 1, "the track was added twice")
+
+
+@tagged("post_install", "-at_install")
+class TestWhatElseTakesCompanions(TransactionCase):
+    """The owner's second list, 2026-10-16.
+
+    A jamb bracket also takes a lag screw; a flag angle takes three lag
+    screws, four studs and four nuts; end bearing plates and spring anchor
+    brackets take two lag screws each. One table, because they are one rule:
+    something that cannot be fitted with what is in the box.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.partner = self.env["res.partner"].create({"name": "Fitter"})
+        self.stud = self._product("1/4 X 3/4 KNURLEL STUD 18-8")
+        self.nut = self._product("Flage Nuts 1/4 20")
+        self.lag = self._product("Lag Screws")
+
+    def _product(self, name):
+        return self.env["product.product"].create({
+            "name": name, "type": "consu", "list_price": 1.0,
+            "sale_ok": True, "is_published": True})
+
+    def _cart_with(self, product, quantity=1):
+        order = self.env["sale.order"].create({"partner_id": self.partner.id})
+        order._cart_add(product_id=product.id, quantity=quantity)
+
+        return order
+
+    def _qty(self, order, product):
+        return sum(order.order_line.filtered(
+            lambda line: line.product_id == product).mapped("product_uom_qty"))
+
+    # --- each of the four ----------------------------------------------------
+
+    def test_a_jamb_bracket_now_takes_a_lag_screw_as_well(self):
+        bracket = self.env["product.product"].search(
+            [("default_code", "=", "ATL-610J10JBBR")], limit=1)
+        order = self._cart_with(bracket, 4)
+
+        self.assertEqual(self._qty(order, self.lag), 4, "one per bracket")
+        self.assertEqual(self._qty(order, self.stud), 4, "and still a stud")
+        self.assertEqual(self._qty(order, self.nut), 4, "and still a nut")
+
+    def test_a_flag_angle_takes_three_lag_four_stud_four_nut(self):
+        order = self._cart_with(self._product("Flag Angle Black"))
+
+        self.assertEqual(self._qty(order, self.lag), 3)
+        self.assertEqual(self._qty(order, self.stud), 4)
+        self.assertEqual(self._qty(order, self.nut), 4)
+
+    def test_an_end_bearing_plate_takes_two_lag_screws(self):
+        order = self._cart_with(self._product("End Bearing Plate 8GA LH"))
+
+        self.assertEqual(self._qty(order, self.lag), 2)
+        self.assertFalse(self._qty(order, self.stud), "it takes no studs")
+
+    def test_a_spring_anchor_bracket_takes_two_lag_screws(self):
+        order = self._cart_with(self._product("Spring Anchor Bracket"))
+
+        self.assertEqual(self._qty(order, self.lag), 2)
+
+    # --- and the edges of the table -----------------------------------------
+
+    def test_a_pair_counts_as_one_line(self):
+        """The owner's instruction: two lag screws for the line, not two for
+        each plate the word Pair might mean."""
+        order = self._cart_with(
+            self._product("End Bearing Plate 3 3-8 Black ( Pair )"))
+
+        self.assertEqual(self._qty(order, self.lag), 2)
+
+    def test_the_count_follows_the_quantity(self):
+        order = self._cart_with(self._product("End Bearing Plate 8GA RH"), 3)
+
+        self.assertEqual(self._qty(order, self.lag), 6, "two for each ordered")
+
+    def test_things_that_take_nothing_still_take_nothing(self):
+        """A LOOSE SEARCH FOR THREE LETTERS FINDS EVERY FLAG ANGLE. The lag
+        screw is matched on a word boundary for exactly that reason, and
+        these are the names that would otherwise be caught by a careless
+        rule."""
+        for name in ("Center Bearing Bracket LH", "EBF-338 End Bearing Flange",
+                     "Torsion Solid Shaft 9'6\"", "3\" Lock Black"):
+            order = self._cart_with(self._product(name))
+
+            self.assertFalse(self._qty(order, self.lag), name)
+            self.assertFalse(self._qty(order, self.stud), name)
+
+    def test_a_lag_screw_does_not_breed_lag_screws(self):
+        """A companion is never a host. Nothing in the table matches one
+        today, and a rule that let it would not stop."""
+        bracket = self.env["product.product"].search(
+            [("default_code", "=", "ATL-610J10JBBR")], limit=1)
+        order = self._cart_with(bracket, 1)
+
+        self.assertEqual(self._qty(order, self.lag), 1)
+
+        order._fastener_sync()
+        order._fastener_sync()
+
+        self.assertEqual(self._qty(order, self.lag), 1, "it grew on its own")
