@@ -11,6 +11,110 @@
         <field name="print_report_name">'Work Order - %s' % (object.name)</field>
     </record>
 
+    <!-- THE SAME CONFIRMATION, ON PAPER, FROM THE OFFICE.
+         The customer's copy is the web form; this is the one the shop
+         prints from the dispatch page - Print > Delivery Confirmation -
+         when somebody wants it filed, posted, or carried out unsigned to be
+         signed by hand. It reads from the same _dispatch_groups the form
+         does, so the two cannot drift apart. -->
+    <record id="action_report_delivery_confirmation" model="ir.actions.report">
+        <field name="name">Delivery Confirmation</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">work_order_sheet.report_delivery_confirmation</field>
+        <field name="report_file">work_order_sheet.report_delivery_confirmation</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Delivery Confirmation - %s' % (object.name)</field>
+    </record>
+
+    <template id="report_delivery_confirmation">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="article" t-att-data-oe-model="o._name" t-att-data-oe-id="o.id">
+                    <t t-set="cell" t-value="'border-bottom:1px solid #ddd;padding:6px 8px;'"/>
+
+                    <div style="border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px;">
+                        <h2 style="margin:0;">
+                            <t t-esc="o.company_id.name"/>
+                        </h2>
+                        <div style="font-size:14px;">
+                            Delivery <b><t t-esc="o.name"/></b>
+                            <t t-if="o.origin"> - order <t t-esc="o.origin"/></t>
+                        </div>
+                    </div>
+
+                    <table style="width:100%;margin-bottom:12px;font-size:12px;">
+                        <tr>
+                            <td>Delivered to
+                                <b><t t-esc="o.partner_id.name or ''"/></b>
+                            </td>
+                            <td>Form made
+                                <b><t t-esc="o._dispatch_date(o.dispatch_form_date)"/></b>
+                            </td>
+                            <td>Signed
+                                <b>
+                                    <t t-if="o.dispatch_signed_on">
+                                        <t t-esc="o._dispatch_date(o.dispatch_signed_on)"/>
+                                    </t>
+                                    <t t-else="">Not yet</t>
+                                </b>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <t t-foreach="o._dispatch_groups()" t-as="group">
+                        <h4 style="margin:12px 0 4px;text-transform:uppercase;
+                                   font-size:12px;letter-spacing:.04em;">
+                            <t t-esc="group[0]"/>
+                        </h4>
+                        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                            <t t-foreach="group[1]" t-as="item">
+                                <tr>
+                                    <!-- UNSIGNED, IT IS A FORM: an empty box to
+                                         tick in the van. Signed, it is a record
+                                         of what was said at the door. -->
+                                    <td t-att-style="cell" style="width:90px;">
+                                        <t t-if="o.dispatch_signed_on">
+                                            <b t-if="item['received']">Confirmed</b>
+                                            <b t-else="">NOT CONFIRMED</b>
+                                        </t>
+                                        <t t-else="">
+                                            <span style="display:inline-block;width:14px;
+                                                         height:14px;border:1px solid #333;"/>
+                                        </t>
+                                    </td>
+                                    <td t-att-style="cell" style="width:70px;text-align:right;">
+                                        <b t-esc="'%g' % item['quantity']"/>
+                                        <t t-esc="item['uom']"/>
+                                    </td>
+                                    <td t-att-style="cell"><t t-esc="item['name']"/></td>
+                                </tr>
+                            </t>
+                        </table>
+                    </t>
+
+                    <div style="margin-top:18px;page-break-inside:avoid;">
+                        <t t-if="o.dispatch_signature">
+                            <img t-att-src="image_data_uri(o.dispatch_signature)"
+                                 style="max-height:110px;border-bottom:1px solid #888;"/>
+                        </t>
+                        <t t-else="">
+                            <div style="height:70px;border-bottom:1px solid #888;width:60%;"/>
+                        </t>
+                        <div style="font-size:12px;margin-top:4px;">
+                            <t t-if="o.dispatch_signed_by">
+                                Signed by <b><t t-esc="o.dispatch_signed_by"/></b>
+                                on <t t-esc="o._dispatch_date(o.dispatch_signed_on)"/>
+                            </t>
+                            <t t-else="">Signature and name</t>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
     <template id="report_work_order_sheet">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
