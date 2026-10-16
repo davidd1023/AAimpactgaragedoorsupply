@@ -195,6 +195,24 @@ class TestSigningUpOnTheWebsite(HttpCase):
 
         self.assertIn("no longer good", page.text.lower())
 
+    def test_each_outcome_has_its_own_title(self):
+        """THE TAB USED TO SAY "EMAIL CONFIRMED" EITHER WAY. A controller's
+        page has no record of its own, so the layout falls back to the view's
+        name - one string for both branches - and somebody turned away by a
+        dead link was told in the tab that it had worked."""
+        self._signup("titled@example.com")
+        user = self._user("titled@example.com")
+
+        def title_of(path):
+            found = re.search(r"<title>([^<]*)</title>",
+                              self.url_open(path).text)
+
+            return (found.group(1) if found else "").strip()
+
+        self.assertIn("no longer good", title_of("/my/confirm-email/nonsense"))
+        self.assertIn("confirmed",
+                      title_of("/my/confirm-email/%s" % user.aa_verify_token))
+
     def test_the_resend_page_never_says_who_has_an_account(self):
         """It would otherwise read the customer list one guess at a time."""
         page = self.url_open("/web/login")
