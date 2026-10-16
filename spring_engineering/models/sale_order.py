@@ -809,12 +809,76 @@ class SaleOrder(models.Model):
     FASTENER_NAMES = {
         "stud": "1/4 X 3/4 KNURLEL STUD 18-8",
         "nut": "Flage Nuts 1/4 20",
+        "lag": "Lag Screws",
     }
     FASTENER_PATTERNS = {
         "stud": (r"\bstud\b", r"knurl"),
         "nut": (r"\bnuts?\b", r"\bflan?ge\b"),
+        # \blag\b, NOT "lag": the catalogue is full of FLAG angles, and a
+        # loose search for those three letters finds every one of them.
+        "lag": (r"\blag\b", r"\bscrews?\b"),
     }
-    FASTENER_LABELS = {"stud": "knurled stud", "nut": "flange nut"}
+    FASTENER_LABELS = {
+        "stud": "knurled stud", "nut": "flange nut", "lag": "lag screw"}
+    # What to pull out of the catalogue before reading names closely. It used
+    # to be "/4", which every stud and nut name happens to contain and no lag
+    # screw need, so the search looked straight past them.
+    FASTENER_SEARCH = {"stud": "stud", "nut": "nut", "lag": "lag"}
+
+    # WHAT EACH PART BRINGS WITH IT, per one of them ordered.
+    #
+    # Stated by the owner, 2026-10-16. A table rather than four rules,
+    # because they are the same rule: something that cannot be fitted with
+    # what is in the box, and a cart that has to say so before it is paid
+    # for.
+    #
+    # A line of a product sold as a PAIR counts as one, on the owner's
+    # instruction - two lag screws for the line, not two for each plate in
+    # it.
+    FASTENER_RECIPES = {
+        "jamb": {"stud": 1, "nut": 1, "lag": 1},
+        "flag": {"lag": 3, "stud": 4, "nut": 4},
+        "bearing_plate": {"lag": 2},
+        "spring_anchor": {"lag": 2},
+    }
+
+    def _fastener_host_kind(self, line):
+        """Which recipe this line takes, if any.
+
+        The flag angle is recognised by the ROLE the track preparation gave
+        it as well as by its name, because the prepared track adds two of
+        them itself and they are the same part either way.
+        """
+        if self._fastener_is_bracket(line):
+            return "jamb"
+
+        if line.track_prep_role == "flag":
+            return "flag"
+
+        name = line.product_id.display_name or ""
+
+        def says(*words):
+            return all(re.search(w, name, re.I) for w in words)
+
+        if says(r"\bflag\b", r"\bangle\b"):
+            return "flag"
+
+        if says(r"\bbearing\b", r"\bplate\b"):
+            return "bearing_plate"
+
+        if says(r"\bspring\b", r"\banchor\b"):
+            return "spring_anchor"
+
+        return None
+
+    def _fastener_host_recipe(self, line):
+        """How many of each companion this line owes, or an empty dict."""
+        if line.track_prep_role in self.FASTENER_ROLES:
+            # A companion is never a host. Nothing in the table matches one
+            # today, and a lag screw that bred lag screws would not stop.
+            return {}
+
+        return self.FASTENER_RECIPES.get(self._fastener_host_kind(line), {})
 
     def _fastener_is_bracket(self, line):
         """Is this cart line a jamb bracket, however it got here?"""
@@ -843,8 +907,9 @@ class SaleOrder(models.Model):
             return exact
 
         first, second = self.FASTENER_PATTERNS[role]
+        search = self.FASTENER_SEARCH[role]
 
-        for product in Product.search([("name", "ilike", "/4")], order="name"):
+        for product in Product.search([("name", "ilike", search)], order="name"):
             name = product.name or ""
 
             if re.search(first, name, re.I) and re.search(second, name, re.I):
@@ -871,9 +936,15 @@ class SaleOrder(models.Model):
             request.session["website_sale_cart_quantity"] = self.cart_quantity
 
     def _fastener_sync(self):
-        """One stud and one nut for every jamb bracket, under each bracket.
+        """What each part brings with it, hung underneath that part.
 
-        PER BRACKET LINE, not per cart. They used to be one stud line and one
+        FOUR THINGS NOW TAKE COMPANIONS, not one - see FASTENER_RECIPES - so
+        this counts what the cart holds against that table rather than
+        knowing a rule about brackets. A flag angle is the interesting one:
+        the prepared track adds two of them itself, and each one brings
+        three lag screws, four studs and four nuts of its own.
+
+        PER HOST LINE, not per cart. They used to be one stud line and one
         nut line counted across everything, which was simpler and wrong in two
         ways the owner asked about: the cart could not show them under the
         bracket they belong to, and a prepared track - which brings three
@@ -883,14 +954,24 @@ class SaleOrder(models.Model):
         takes its fasteners with it.
         """
         self.ensure_one()
-        brackets = self.order_line.filtered(self._fastener_is_bracket)
+        recipes = {}
+
+        for line in self.order_line:
+            recipe = self._fastener_host_recipe(line)
+
+            if recipe:
+                recipes[line.id] = recipe
+
         changed = False
 
-        # Anything left pointing at a line that is no longer a bracket - or at
-        # nothing at all, which is what the cart-wide version left behind.
+        # Anything pointing at a line that no longer takes it: a host that has
+        # gone, a host that never was - which is what the cart-wide version
+        # left behind - or a companion the host's recipe does not call for,
+        # which is how a rule that changes cleans up after itself.
         orphans = self.order_line.filtered(
             lambda line: line.track_prep_role in self.FASTENER_ROLES
-            and line.track_prep_parent_id not in brackets)
+            and line.track_prep_role not in recipes.get(
+                line.track_prep_parent_id.id, {}))
 
         if orphans:
             orphans.unlink()
@@ -898,10 +979,11 @@ class SaleOrder(models.Model):
 
         missing = []
 
-        for bracket in brackets:
-            for role in self.FASTENER_ROLES:
+        for host in self.order_line.browse(list(recipes)):
+            for role, each in recipes[host.id].items():
                 product = self._fastener_product(role)
-                line = bracket.aa_included_line_ids.filtered(
+                wanted = host.product_uom_qty * each
+                line = host.aa_included_line_ids.filtered(
                     lambda l, role=role: l.track_prep_role == role)[:1]
 
                 if not product:
@@ -910,6 +992,7 @@ class SaleOrder(models.Model):
                     # for. Said once however many brackets are in the cart.
                     label = "%s (%s)" % (
                         self.FASTENER_LABELS[role], self.FASTENER_NAMES[role])
+
 
                     if label not in missing:
                         missing.append(label)
@@ -921,8 +1004,8 @@ class SaleOrder(models.Model):
                     continue
 
                 if line:
-                    if line.product_uom_qty != bracket.product_uom_qty:
-                        line.product_uom_qty = bracket.product_uom_qty
+                    if line.product_uom_qty != wanted:
+                        line.product_uom_qty = wanted
                         changed = True
 
                     continue
@@ -930,8 +1013,8 @@ class SaleOrder(models.Model):
                 self.env["sale.order.line"].create({
                     "order_id": self.id,
                     "product_id": product.id,
-                    "product_uom_qty": bracket.product_uom_qty,
-                    "track_prep_parent_id": bracket.id,
+                    "product_uom_qty": wanted,
+                    "track_prep_parent_id": host.id,
                     "track_prep_role": role,
                 })
                 changed = True
@@ -941,9 +1024,9 @@ class SaleOrder(models.Model):
 
         if missing:
             return _(
-                "We are missing a part that goes with the jamb brackets (%s),"
-                " so it was not added. Please call us and we will send it with"
-                " them.",
+                "We are missing a part that goes with something in your"
+                " cart (%s), so it was not added. Please call us and we will"
+                " send it with the rest.",
                 ", ".join(missing),
             )
 
