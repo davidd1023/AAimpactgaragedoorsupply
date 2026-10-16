@@ -216,7 +216,12 @@ class TestMinimumOrderOnThePage(HttpCase):
     def test_a_qualifying_cart_may_go_to_the_checkout(self):
         self.authenticate("admin", "admin")
         self._add(10)
-        answer = self.url_open("/shop/checkout", allow_redirects=False)
+        answer = self.url_open("/shop/checkout")
 
-        self.assertNotIn("/shop/cart", answer.headers.get("Location", ""),
+        # FOLLOWED, AND THE END OF THE JOURNEY CHECKED. Asserting only that
+        # the Location header does not say /shop/cart passes for a response
+        # that has no Location at all - a 500 among them - so it proved the
+        # cart was not bounced back and nothing whatever about the checkout.
+        self.assertEqual(answer.status_code, 200, answer.status_code)
+        self.assertNotIn("/shop/cart", answer.url,
                          "a cart over the minimum was sent back")

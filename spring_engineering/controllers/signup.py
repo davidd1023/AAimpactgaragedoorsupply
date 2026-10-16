@@ -100,6 +100,30 @@ class SignupNeedsARealAddress(AuthSignupHome):
         return bool(website and website.aa_require_email_confirmation)
 
     @http.route()
+    def web_login(self, *args, **kw):
+        """A HELD SIGNUP MUST NOT TRY TO SIGN IN.
+
+        Odoo's signup route finishes by calling this one with the credentials
+        just posted. For a held account that attempt is refused, which is
+        correct and also a lie about what happened: Odoo writes "Login failed
+        for login: <address>" for every new customer, and feeds the failure
+        to its own cooldown counter (base.login_cooldown_after), which starts
+        IGNORING attempts once a login has failed often enough. A customer
+        who signed up and then tried their password twice could find
+        themselves throttled on top of being asked to confirm.
+
+        So the attempt is not made. The flag is set only while a signup is
+        creating a held account, so an ordinary sign-in is untouched.
+        """
+        pending = request.session.get("aa_pending_confirmation")
+
+        if pending and request.httprequest.method == "POST":
+            return request.redirect(
+                "/my/email-confirmation?" + url_encode({"login": pending}))
+
+        return super().web_login(*args, **kw)
+
+    @http.route()
     def web_auth_signup(self, *args, **kw):
         """Finish a held signup on a page of its own.
 
@@ -127,18 +151,44 @@ class SignupNeedsARealAddress(AuthSignupHome):
     # --- spending the link ---------------------------------------------------
 
     @http.route("/my/confirm-email/<string:token>", type="http", auth="public",
-                website=True, sitemap=False)
+                website=True, sitemap=False, methods=["GET", "POST"])
     def aa_confirm_email(self, token, **kw):
-        user = request.env["res.users"]._aa_confirm_email(token)
+        """Read the link on GET, spend it on POST.
 
-        if user:
-            _logger.info("Email confirmed for <%s>", user.login)
-            request.session.pop("aa_unconfirmed_login", None)
+        A LINK IN AN EMAIL IS FETCHED BY THINGS THAT ARE NOT THE CUSTOMER.
+        Mail gateways, previewers and antivirus products follow every link
+        they are sent, to see where it goes. While following it was enough to
+        use it up, the scanner confirmed the account and the customer's own
+        click was met with "that link is no longer good" - the complaint
+        reads as a broken shop and the account looks unconfirmed to them.
 
-        return request.render("spring_engineering.aa_email_confirmed", {
-            "confirmed": bool(user),
-            "login": user.login if user else
-                     request.session.get("aa_unconfirmed_login", ""),
+        So a GET only looks: it shows the address the link belongs to and a
+        button. The button POSTs, and only that spends the token. Nothing
+        automated presses buttons.
+        """
+        Users = request.env["res.users"]
+
+        if request.httprequest.method == "POST":
+            user = Users._aa_confirm_email(token)
+
+            if user:
+                _logger.info("Email confirmed for <%s>", user.login)
+                request.session.pop("aa_unconfirmed_login", None)
+
+            return request.render("spring_engineering.aa_email_confirmed", {
+                "confirmed": bool(user),
+                "login": user.login if user else "",
+            })
+
+        user = Users._aa_find_verification(token)
+
+        if not user:
+            return request.render("spring_engineering.aa_email_confirmed",
+                                  {"confirmed": False, "login": ""})
+
+        return request.render("spring_engineering.aa_email_confirm_ask", {
+            "login": user.login,
+            "token": token,
         })
 
     @http.route("/my/email-confirmation", type="http", auth="public",
@@ -170,7 +220,9 @@ class SignupNeedsARealAddress(AuthSignupHome):
                 order=Users._get_login_order(), limit=1)
 
             if user and not user.aa_email_verified:
-                user._aa_start_email_verification()
+                # Throttled, and it resends the SAME link rather than killing
+                # the one already in their inbox - see _aa_resend_verification.
+                user._aa_resend_verification()
 
             return request.render("spring_engineering.aa_email_confirm_sent",
                                   {"login": login})

@@ -111,6 +111,40 @@ class TestConfirmingTheAddress(TransactionCase):
         self.assertFalse(self.env["res.users"]._aa_confirm_email("not-a-token"))
         self.assertFalse(self.env["res.users"]._aa_confirm_email(""))
 
+    # --- asking for another one ----------------------------------------------
+
+    def test_asking_again_too_soon_sends_nothing(self):
+        """Without a floor, anybody who knows an address can post its owner
+        as many emails as they like."""
+        self.user._aa_start_email_verification()
+        token = self.user.sudo().aa_verify_token
+
+        self.assertFalse(self.user._aa_resend_verification())
+        self.assertEqual(self.user.sudo().aa_verify_token, token)
+
+    def test_asking_again_later_sends_THE_SAME_link(self):
+        """A fresh token kills the letter already in their inbox: somebody
+        who presses "send it again" and then finds the first email would be
+        told their link is dead."""
+        self.user._aa_start_email_verification()
+        token = self.user.sudo().aa_verify_token
+        self.user.sudo().aa_verify_sent_at = (
+            fields.Datetime.now() - timedelta(minutes=5))
+
+        self.assertTrue(self.user._aa_resend_verification())
+        self.assertEqual(self.user.sudo().aa_verify_token, token)
+
+    def test_a_link_past_its_date_is_replaced_when_asked_for_again(self):
+        self.user._aa_start_email_verification()
+        old_token = self.user.sudo().aa_verify_token
+        self.user.sudo().write({
+            "aa_verify_expiry": fields.Datetime.now() - timedelta(days=1),
+            "aa_verify_sent_at": fields.Datetime.now() - timedelta(minutes=5),
+        })
+
+        self.assertTrue(self.user._aa_resend_verification())
+        self.assertNotEqual(self.user.sudo().aa_verify_token, old_token)
+
     # --- the letter itself ---------------------------------------------------
 
     def test_the_email_carries_a_working_link(self):
@@ -181,19 +215,86 @@ class TestSigningUpOnTheWebsite(HttpCase):
         self.assertFalse(user.aa_email_verified)
         self.assertTrue(user.aa_verify_token, "no link was minted")
 
-    def test_the_link_lands_on_a_page_that_says_so(self):
-        self._signup("lands@example.com")
-        user = self._user("lands@example.com")
+    def test_a_scanner_following_the_link_does_not_spend_it(self):
+        """A LINK IN AN EMAIL IS FETCHED BY THINGS THAT ARE NOT THE CUSTOMER.
+        Mail gateways and previewers follow every address they are sent. When
+        following was enough to use the link up, the scanner confirmed the
+        account and the customer's own click was told the link was dead."""
+        self._signup("scanned@example.com")
+        before = self._user("scanned@example.com").aa_verify_token
 
-        page = self.url_open("/my/confirm-email/%s" % user.aa_verify_token)
+        self.url_open("/my/confirm-email/%s" % before)
 
-        self.assertIn("confirmed", page.text.lower())
-        self.assertTrue(self._user("lands@example.com").aa_email_verified)
+        after = self._user("scanned@example.com")
+
+        self.assertFalse(after.aa_email_verified, "a fetch confirmed it")
+        self.assertEqual(after.aa_verify_token, before, "a fetch spent it")
+
+    def test_the_button_on_that_page_is_what_confirms(self):
+        self._signup("presses@example.com")
+        token = self._user("presses@example.com").aa_verify_token
+        page = self.url_open("/my/confirm-email/%s" % token)
+        csrf = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', page.text)
+
+        self.assertTrue(csrf, "the page offers no button to press")
+        self.assertIn("presses@example.com", page.text, "it does not say whose")
+
+        answer = self.url_open("/my/confirm-email/%s" % token,
+                               data={"csrf_token": csrf.group(1)})
+
+        self.assertIn("confirmed", answer.text.lower())
+        self.assertTrue(self._user("presses@example.com").aa_email_verified)
+
+    def test_signing_up_records_no_failed_login(self):
+        """Odoo counts login failures PER IP ADDRESS, in
+        registry._login_failures, and starts ignoring attempts from an
+        address that has failed too often. The signup route ends by calling
+        the login route, so every new customer used to add a failure - and an
+        office behind one address could put itself in cooldown by signing a
+        few people up."""
+        def failures():
+            book = getattr(self.env.registry, "_login_failures", None) or {}
+
+            return dict(book).get("127.0.0.1", (0, None))[0]
+
+        before = failures()
+        self._signup("quiet@example.com")
+
+        self.assertEqual(failures(), before,
+                         "the signup was counted as a failed login")
 
     def test_a_bad_link_offers_another_one(self):
         page = self.url_open("/my/confirm-email/nonsense")
 
         self.assertIn("no longer good", page.text.lower())
+
+    def test_each_outcome_has_its_own_title(self):
+        """THE TAB USED TO SAY "EMAIL CONFIRMED" EITHER WAY. A controller's
+        page has no record of its own, so the layout falls back to the view's
+        name - one string for both branches - and somebody turned away by a
+        dead link was told in the tab that it had worked."""
+        self._signup("titled@example.com")
+        user = self._user("titled@example.com")
+
+        def title_of(path):
+            found = re.search(r"<title>([^<]*)</title>",
+                              self.url_open(path).text)
+
+            return (found.group(1) if found else "").strip()
+
+        good = "/my/confirm-email/%s" % user.aa_verify_token
+
+        self.assertIn("no longer good", title_of("/my/confirm-email/nonsense"))
+        # Following the link only asks; the title says so rather than
+        # claiming the thing has already happened.
+        self.assertIn("Confirm your email", title_of(good))
+
+        page = self.url_open(good)
+        csrf = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', page.text)
+        done = self.url_open(good, data={"csrf_token": csrf.group(1)})
+        done_title = re.search(r"<title>([^<]*)</title>", done.text)
+
+        self.assertIn("confirmed", (done_title.group(1) if done_title else ""))
 
     def test_the_resend_page_never_says_who_has_an_account(self):
         """It would otherwise read the customer list one guess at a time."""

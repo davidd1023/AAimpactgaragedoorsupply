@@ -41,10 +41,18 @@ class ResUsers(models.Model):
     # checks it, and is never rendered on a page.
     aa_verify_token = fields.Char(copy=False, groups="base.group_system")
     aa_verify_expiry = fields.Datetime(copy=False, groups="base.group_system")
+    # When the last letter went out, so asking again cannot be used to post
+    # one person an unlimited number of them.
+    aa_verify_sent_at = fields.Datetime(copy=False, groups="base.group_system")
 
     # Long enough to survive a weekend and a spam folder, short enough that a
     # link found later in a forwarded mailbox is no longer a key.
     AA_VERIFY_VALID_FOR = timedelta(days=3)
+
+    # The least time between two letters to the same address. Long enough that
+    # nobody can be buried, short enough that a customer who pressed the
+    # button too early is not left waiting.
+    AA_VERIFY_RESEND_EVERY = timedelta(minutes=2)
 
     def _aa_start_email_verification(self):
         """Mark the account unconfirmed, mint a link and send it."""
@@ -53,8 +61,47 @@ class ResUsers(models.Model):
             "aa_email_verified": False,
             "aa_verify_token": secrets.token_urlsafe(32),
             "aa_verify_expiry": fields.Datetime.now() + self.AA_VERIFY_VALID_FOR,
+            "aa_verify_sent_at": fields.Datetime.now(),
         })
         self._aa_send_verification_email()
+
+    def _aa_resend_verification(self):
+        """Send the link again - THE SAME LINK, and not too often.
+
+        THE SAME ONE, because minting a fresh token kills the letter already
+        in their inbox: somebody who presses "send it again" and then finds
+        the first email is told their link is dead, which is nonsense and
+        looks like a broken shop. A new token is minted only when there is no
+        usable one left.
+
+        AND NOT TOO OFTEN, because this can be asked for by anybody who knows
+        an address - without a floor it is a way of posting a stranger as
+        many emails as you like. Refusing is silent: the page says the same
+        thing either way, so a caller still learns nothing about who has an
+        account.
+
+        Returns True when a letter actually went out.
+        """
+        self.ensure_one()
+        user = self.sudo()
+        now = fields.Datetime.now()
+
+        if user.aa_verify_sent_at and now - user.aa_verify_sent_at < self.AA_VERIFY_RESEND_EVERY:
+            return False
+
+        spent = not user.aa_verify_token or (
+            user.aa_verify_expiry and user.aa_verify_expiry < now)
+
+        if spent:
+            user.write({
+                "aa_verify_token": secrets.token_urlsafe(32),
+                "aa_verify_expiry": now + self.AA_VERIFY_VALID_FOR,
+            })
+
+        user.write({"aa_verify_sent_at": now})
+        self._aa_send_verification_email()
+
+        return True
 
     def _aa_send_verification_email(self):
         self.ensure_one()
@@ -82,14 +129,15 @@ class ResUsers(models.Model):
 
         return "%s/my/confirm-email/%s" % (base, self.sudo().aa_verify_token or "")
 
-    def _aa_confirm_email(self, token):
-        """Spend a confirmation link.
+    def _aa_find_verification(self, token):
+        """The account a link belongs to, WITHOUT spending it.
 
-        Returns the user it confirmed, or an empty recordset for a link that
-        is unknown, already spent or out of date - all three of which the
-        page answers the same way, with the offer of a fresh one. A link that
-        has been used is no different from one that never existed: the token
-        is cleared the moment it works, so it cannot be replayed.
+        Reading and spending are separate because the link arrives by email,
+        and a link in an email is fetched by things that are not the
+        customer: scanners, previewers and security gateways all follow it
+        before a human sees it. When following it was enough to use it up,
+        those made the customer's own click fail - see the controller, which
+        now reads on GET and spends on POST.
         """
         Users = self.env["res.users"].sudo()
 
@@ -103,6 +151,22 @@ class ResUsers(models.Model):
 
         if user.aa_verify_expiry and user.aa_verify_expiry < fields.Datetime.now():
             return Users.browse()
+
+        return user
+
+    def _aa_confirm_email(self, token):
+        """Spend a confirmation link.
+
+        Returns the user it confirmed, or an empty recordset for a link that
+        is unknown, already spent or out of date - all three of which the
+        page answers the same way, with the offer of a fresh one. A link that
+        has been used is no different from one that never existed: the token
+        is cleared the moment it works, so it cannot be replayed.
+        """
+        user = self._aa_find_verification(token)
+
+        if not user:
+            return user
 
         user.write({
             "aa_email_verified": True,

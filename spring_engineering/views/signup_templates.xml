@@ -38,9 +38,22 @@
     </xpath>
   </template>
 
-  <!-- What the link lands on. -->
-  <template id="aa_email_confirmed" name="Email confirmed">
+  <!-- What the link lands on, for both answers it can give.
+
+       THE TAB SAID "EMAIL CONFIRMED" EVEN WHEN IT WAS NOT. A page rendered
+       by a controller has no record of its own, so website.layout falls back
+       to main_object.name - which for one of these is the VIEW's name, the
+       same string whichever branch the body took. Somebody sent away by an
+       expired link was told in the tab that it had worked.
+
+       Both titles are set here instead, as text rather than as an expression,
+       so they can be translated like anything else on the page. -->
+  <template id="aa_email_confirmed" name="Email confirmation">
     <t t-call="website.layout">
+      <t t-set="aa_title_confirmed">Your email is confirmed</t>
+      <t t-set="aa_title_expired">That link is no longer good</t>
+      <t t-set="additional_title"
+         t-value="aa_title_confirmed if confirmed else aa_title_expired"/>
       <div id="wrap" class="oe_structure">
         <div class="container py-5">
           <t t-if="confirmed">
@@ -61,6 +74,35 @@
               Send me a new link
             </a>
           </t>
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <!-- WHAT THE LINK ITSELF OPENS: a question, not a deed.
+
+       Following the link only looks the account up; the button below is what
+       confirms it. That is deliberate - mail scanners and link previewers
+       fetch every address in an email before the customer sees it, and while
+       the fetch was enough to spend the token, the customer's own click was
+       met with "no longer good". Nothing automated presses buttons. -->
+  <template id="aa_email_confirm_ask" name="Confirm this email address">
+    <t t-call="website.layout">
+      <t t-set="additional_title">Confirm your email</t>
+      <div id="wrap" class="oe_structure">
+        <div class="container py-5">
+          <h1>Confirm your email address</h1>
+          <p class="lead">
+            Press the button to confirm <strong t-out="login"/> and finish
+            setting up your account.
+          </p>
+          <form t-attf-action="/my/confirm-email/{{ token }}" method="post">
+            <input type="hidden" name="csrf_token"
+                   t-att-value="request.csrf_token()"/>
+            <button type="submit" class="btn btn-primary btn-lg">
+              Confirm my email
+            </button>
+          </form>
         </div>
       </div>
     </t>
