@@ -20,7 +20,7 @@
     # load, and a field declared in Python has no column behind it. That is
     # exactly how main and Prod both reached 19.0.2.28.0 carrying different
     # code. Every number since is deliberately ahead of what Prod holds.
-    'version': '19.0.2.36.0',
+    'version': '19.0.2.40.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
@@ -29,8 +29,12 @@
         'sale_management', 'base', 'web', 'website', 'website_sale',
         # The wishlist heart on a product card is turned into a toggle, which
         # patches that module's own interaction - so it has to be there.
-        'website_sale_wishlist'],
+        'website_sale_wishlist',
+        # The signup form and its controller are extended: a real address,
+        # and a link that proves it.
+        'auth_signup'],
     'data': [
+        'data/mail_template_confirm_email.xml',
         'data/track_prep_data.xml',
         'data/website_wishlist_data.xml',
         'data/trim_data.xml',
@@ -43,6 +47,7 @@
         'views/cart_included_parts.xml',
         'views/minimum_order.xml',
         'views/quantity_limits.xml',
+        'views/signup_templates.xml',
         'views/spring_engineering_settings.xml',
         'views/spring_engineering_config_settings.xml',
     ],
@@ -69,6 +74,9 @@
             'spring_engineering/static/src/css/cart_included.css',
             # A quantity box that holds only quantities.
             'spring_engineering/static/src/js/quantity_limits.js',
+            # Says a bad address is bad while the customer is still looking
+            # at the box, rather than after they press Sign up.
+            'spring_engineering/static/src/js/signup_email_check.js',
         ],
         'web.assets_tests': [
             'spring_engineering/static/tests/tours/wishlist_toggle_tour.js',

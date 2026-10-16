@@ -1,6 +1,7 @@
 import base64
 import re
 
+from odoo import fields
 from odoo.exceptions import AccessError
 from odoo.tests.common import HttpCase, tagged
 
@@ -443,3 +444,119 @@ class TestDeliveryConfirmation(HttpCase):
 
         self.assertIn(self.cable.display_name, log)
         self.assertNotIn("Thimble", log)
+
+
+@tagged("post_install", "-at_install")
+class TestPrintingTheConfirmation(HttpCase):
+    """The shop asked for it on paper, from both ends.
+
+    The customer's copy is the web form, which now offers a Print button;
+    the office prints the same confirmation from the dispatch page, under
+    Print > Delivery Confirmation. Both read the SAME _dispatch_groups, so
+    a change to how the delivery is grouped cannot leave one of them
+    describing a different delivery from the other.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.partner = self.env["res.partner"].create({"name": "Print Customer"})
+        self.product = self.env["product.product"].create({
+            "name": "Printed Probe Roller", "type": "consu"})
+        # Built the way the other tests here build one: this warehouse
+        # delivers in two steps, so a sale order does not produce the
+        # outgoing transfer, and stock.move carries no name of its own.
+        picking_type = self.env["stock.picking.type"].search(
+            [("code", "=", "outgoing")], limit=1)
+        source = (picking_type.default_location_src_id.id
+                  or self.env.ref("stock.stock_location_stock").id)
+        destination = (picking_type.default_location_dest_id.id
+                       or self.env.ref("stock.stock_location_customers").id)
+        self.picking = self.env["stock.picking"].create({
+            "partner_id": self.partner.id,
+            "picking_type_id": picking_type.id,
+            "location_id": source,
+            "location_dest_id": destination,
+            "move_ids": [(0, 0, {
+                "product_id": self.product.id, "product_uom_qty": 3,
+                "location_id": source, "location_dest_id": destination,
+            })],
+        })
+        self.picking.action_confirm()
+        self.picking._dispatch_form_open()
+
+    def _report(self):
+        return self.env.ref(
+            "work_order_sheet.action_report_delivery_confirmation")
+
+    def _rendered(self):
+        report = self._report()
+        html = report._render_qweb_html(report.report_name, self.picking.ids)[0]
+
+        return html.decode() if isinstance(html, bytes) else html
+
+    # --- the customer's copy -------------------------------------------------
+
+    def test_the_form_offers_a_print_button(self):
+        page = self.url_open(
+            "/delivery/%s" % self.picking.dispatch_access_token).text
+
+        self.assertIn('id="print"', page)
+        self.assertIn("window.print()", page, "the button is not wired to anything")
+
+    def test_the_button_is_there_once_it_has_been_signed_too(self):
+        """THE WIRING LIVES OUTSIDE BOTH HALVES OF THE PAGE. The signature
+        pad's script is in the unsigned half only, so a button wired in
+        there would do nothing on the receipt - which is the copy somebody
+        actually wants to print."""
+        self.picking.write({
+            "dispatch_signed_by": "Jane Customer",
+            "dispatch_signed_on": fields.Datetime.now(),
+        })
+        page = self.url_open(
+            "/delivery/%s" % self.picking.dispatch_access_token).text
+
+        self.assertIn('id="print"', page)
+        self.assertIn("window.print()", page)
+        self.assertIn("Print receipt", page)
+
+    def test_paper_is_not_asked_to_print_the_screen(self):
+        page = self.url_open(
+            "/delivery/%s" % self.picking.dispatch_access_token).text
+
+        self.assertIn("@media print", page, "no print rules at all")
+        # The buttons and the dark header are for a phone, not for paper.
+        rules = page[page.find("@media print"):]
+        self.assertIn("button", rules[:600])
+
+    # --- the office's copy ---------------------------------------------------
+
+    def test_the_dispatch_page_offers_it_under_print(self):
+        """binding_model_id is what puts a report in that menu."""
+        report = self._report()
+
+        self.assertEqual(report.binding_model_id.model, "stock.picking")
+        self.assertEqual(report.binding_type, "report")
+
+    def test_the_printed_copy_lists_what_the_form_lists(self):
+        html = self._rendered()
+
+        self.assertIn(self.picking.name, html)
+        self.assertIn("Printed Probe Roller", html)
+        self.assertIn("Print Customer", html)
+
+    def test_unsigned_it_prints_as_a_form_to_sign_by_hand(self):
+        html = self._rendered()
+
+        self.assertIn("Signature and name", html)
+        self.assertNotIn("Confirmed", html, "nothing was confirmed yet")
+
+    def test_signed_it_prints_what_was_said_at_the_door(self):
+        self.picking.write({
+            "dispatch_signed_by": "Jane Customer",
+            "dispatch_signed_on": fields.Datetime.now(),
+            "dispatch_signature": PNG,
+        })
+        html = self._rendered()
+
+        self.assertIn("Jane Customer", html)
+        self.assertIn("data:image/png;base64", html, "the signature is missing")

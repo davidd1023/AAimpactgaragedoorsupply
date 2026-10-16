@@ -49,6 +49,11 @@ class ResConfigSettings(models.TransientModel):
     # in a calculation - so it is stored on the website record and only
     # surfaced here. That also keeps a deliberate zero safe: see the note on
     # the field itself and the set_values docstring below.
+    aa_require_email_confirmation = fields.Boolean(
+        related="website_id.aa_require_email_confirmation",
+        readonly=False,
+    )
+
     aa_maximum_line_quantity = fields.Integer(
         related="website_id.aa_maximum_line_quantity",
         readonly=False,

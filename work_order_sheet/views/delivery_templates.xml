@@ -62,6 +62,32 @@
       .confirm-all { white-space: nowrap; }
       .ticked { color: #1b8f4d; font-weight: bold; }
       .missed { color: #b03030; font-weight: bold; }
+      .toolbar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+
+      /* ON PAPER IT IS A RECEIPT, NOT A SCREEN.
+         The dark header, the grey board and the card borders make a phone
+         easy to read; printed they are a sheet of wasted ink around the only
+         part anybody wants, which is what was ticked, who signed and when.
+         Everything that can be pressed goes too - a printed button is a
+         smudge that invites somebody to press paper. */
+      @page { margin: 14mm; }
+
+      @media print {
+        body { background: #fff; font-size: 11pt; }
+        header { background: #fff; color: #000; padding: 0 0 8px;
+                 border-bottom: 2px solid #000; }
+        header h1 { font-size: 16pt; }
+        main { max-width: none; padding: 10px 0 0; }
+        .card { border: 0; border-bottom: 1px solid #ccc; border-radius: 0;
+                padding: 6px 0; margin-bottom: 8px; }
+        .card.signed { background: #fff; }
+        button, .toolbar, .message { display: none !important; }
+        /* A SIGNATURE IS THE POINT OF THE PAGE, so it is not broken over a
+           page end. */
+        .signed img { border: 0; max-height: 120px; }
+        canvas { border: 1px solid #999; height: 110px; }
+        label.item, .item { break-inside: avoid; page-break-inside: avoid; }
+      }
     </style>
   </head>
   <body>
@@ -74,6 +100,16 @@
     </header>
 
     <main>
+      <!-- Offered whether or not it has been signed: before, so a paper copy
+           can be carried to the van and signed by hand; after, because the
+           page is then the receipt and somebody always wants one. -->
+      <div class="toolbar">
+        <button type="button" class="clear" id="print">
+          <t t-if="picking.dispatch_signed_on">Print receipt</t>
+          <t t-else="">Print</t>
+        </button>
+      </div>
+
       <t t-if="message">
         <div class="message"><t t-esc="message"/></div>
       </t>
@@ -277,6 +313,14 @@
         </script>
       </t>
     </main>
+    <!-- OUTSIDE BOTH BRANCHES. The signature pad's script lives inside the
+         unsigned half, and the button is offered in both, so wiring it in
+         there would leave the receipt with a button that did nothing. -->
+    <script>
+      document.getElementById("print").addEventListener("click", function () {
+          window.print();
+      });
+    </script>
   </body>
 </html>
   </template>

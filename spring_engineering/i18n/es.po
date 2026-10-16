@@ -1113,11 +1113,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/spring_engineering/models/sale_order.py:0
 msgid ""
-"We are missing a part that goes with the jamb brackets (%s), so it was not "
-"added. Please call us and we will send it with them."
+"We are missing a part that goes with something in your cart (%s), so it was "
+"not added. Please call us and we will send it with the rest."
 msgstr ""
-"Nos falta una pieza que acompaña a los soportes de marco (%s), así que no se"
-" agregó. Llámenos y la enviaremos con ellos."
+"Nos falta una pieza que acompaña a algo de su carrito (%s), así que no se "
+"agregó. Llámenos y la enviaremos con el resto."
 
 #. module: spring_engineering
 #. odoo-python
@@ -1260,3 +1260,304 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:spring_engineering.cart_lines_included_parts
 msgid "x"
 msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_pending
+msgid "- follow it and you can sign in."
+msgstr "- sígalo y podrá iniciar sesión."
+
+#. module: spring_engineering
+#: model:mail.template,body_html:spring_engineering.mail_template_confirm_email
+msgid ""
+"<div style=\"margin: 0px; padding: 0px; font-size: 14px;\">\n"
+"          <p>\n"
+"            Hello <t t-out=\"object.name or ''\">Customer</t>,\n"
+"          </p>\n"
+"          <p>\n"
+"            An account was created at\n"
+"            <t t-out=\"object.company_id.name or ''\">AA Impact Garage Door Supply</t>\n"
+"            with this email address. Please confirm it so you can sign in.\n"
+"          </p>\n"
+"          <div style=\"margin: 16px 0px;\">\n"
+"            <a t-att-href=\"object._aa_verification_url()\" style=\"background-color:#714B67; padding:10px 16px; text-decoration:none; color:#fff; border-radius:5px;\">\n"
+"              Confirm my email\n"
+"            </a>\n"
+"          </div>\n"
+"          <p>\n"
+"            The link works once and expires in three days. If you did not\n"
+"            create this account you can ignore this message - nothing was\n"
+"            done with your address.\n"
+"          </p>\n"
+"          <p>\n"
+"            Thank you,<br/>\n"
+"            <t t-out=\"object.company_id.name or ''\">AA Impact Garage Door Supply</t>\n"
+"          </p>\n"
+"        </div>\n"
+"      "
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "<span class=\"ms-1\">of any one product</span>"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirmed
+msgid ""
+"A confirmation link can only be used once, and it expires after\n"
+"              three days. We can send you another one."
+msgstr ""
+"Un enlace de confirmación solo se puede usar una vez y caduca a los tres "
+"días. Podemos enviarle otro."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid ""
+"A customer who signs up on the website is sent a link and cannot sign in "
+"until they follow it. Customers you invite are unaffected - their address is"
+" proven by the invitation - and accounts that already existed are treated as"
+" confirmed."
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,help:spring_engineering.field_res_config_settings__aa_require_email_confirmation
+#: model:ir.model.fields,help:spring_engineering.field_website__aa_require_email_confirmation
+msgid ""
+"A customer who signs up on the website is sent a link and cannot sign in "
+"until they follow it. Invited customers are unaffected: their address is "
+"proven by the invitation."
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_res_users__aa_verify_expiry
+msgid "Aa Verify Expiry"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_res_users__aa_verify_token
+msgid "Aa Verify Token"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/models/sale_order.py:0
+msgid ""
+"An order cannot hold less than one of something, so we put one in the cart."
+msgstr ""
+"Un pedido no puede tener menos de una unidad, así que pusimos una en el "
+"carrito."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_sent
+msgid "Back to sign in"
+msgstr "Volver a iniciar sesión"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_sent
+msgid "Check your inbox"
+msgstr "Revise su bandeja de entrada"
+
+#. module: spring_engineering
+#: model:ir.model.fields,help:spring_engineering.field_res_users__aa_email_verified
+msgid ""
+"Cleared when somebody signs up on the website, and set again when they "
+"follow the link sent to the address they gave. An account cannot be signed "
+"in to until it is set."
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_res_config_settings__aa_require_email_confirmation
+#: model:ir.model.fields,field_description:spring_engineering.field_website__aa_require_email_confirmation
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "Confirm email addresses"
+msgstr ""
+
+#. module: spring_engineering
+#: model:mail.template,subject:spring_engineering.mail_template_confirm_email
+msgid "Confirm your email address"
+msgstr "Confirme su dirección de correo electrónico"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_resend
+msgid "Email"
+msgstr "Correo electrónico"
+
+#. module: spring_engineering
+#: model:ir.model,name:spring_engineering.model_mail_template
+msgid "Email Templates"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_res_users__aa_email_verified
+msgid "Email confirmed"
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model,name:spring_engineering.model_ir_http
+msgid "HTTP Routing"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_sent
+msgid "If"
+msgstr "Si"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_pending
+msgid "Keep looking around"
+msgstr "Seguir mirando"
+
+#. module: spring_engineering
+#: model:ir.model.fields,field_description:spring_engineering.field_res_config_settings__aa_maximum_line_quantity
+#: model:ir.model.fields,field_description:spring_engineering.field_website__aa_maximum_line_quantity
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid "Maximum per item"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/models/res_users.py:0
+msgid ""
+"Please confirm your email address before signing in. We sent a link to "
+"%(email)s when the account was created."
+msgstr ""
+"Confirme su dirección de correo electrónico antes de iniciar sesión. "
+"Enviamos un enlace a %(email)s cuando se creó la cuenta."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_pending
+msgid "Please confirm your email to continue"
+msgstr "Confirme su correo electrónico para continuar"
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/controllers/signup.py:0
+msgid ""
+"Please enter a valid email address - we send your order confirmation and "
+"your receipt to it."
+msgstr ""
+"Ingrese una dirección de correo electrónico válida: a ella enviamos la "
+"confirmación de su pedido y su recibo."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.login_offers_another_confirmation
+msgid "Resend the confirmation email"
+msgstr "Reenviar el correo de confirmación"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_pending
+msgid "Send it again"
+msgstr "Enviarlo de nuevo"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirmed
+msgid "Send me a new link"
+msgstr "Envíenme un enlace nuevo"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_resend
+msgid "Send the confirmation again"
+msgstr "Enviar la confirmación de nuevo"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_resend
+msgid "Send the link"
+msgstr "Enviar el enlace"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirmed
+msgid "Sign in"
+msgstr "Iniciar sesión"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_resend
+msgid "Tell us the address you signed up with and we will send another link."
+msgstr ""
+"Díganos la dirección con la que se registró y le enviaremos otro enlace."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirmed
+msgid "Thank you. Your account is ready - please sign in."
+msgstr "Gracias. Su cuenta está lista: inicie sesión."
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/models/sale_order.py:0
+msgid "That is not a number we can order, so we put one in the cart."
+msgstr ""
+"Eso no es una cantidad que podamos pedir, así que pusimos una en el carrito."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirmed
+msgid "That link is no longer good"
+msgstr "Ese enlace ya no es válido"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_pending
+msgid ""
+"The link works once and expires in three days. If it has not\n"
+"            arrived in a few minutes, check your spam folder."
+msgstr ""
+"El enlace funciona una sola vez y caduca en tres días. Si no llega en unos "
+"minutos, revise su carpeta de spam."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.res_config_settings_view_form
+msgid ""
+"The most of any one product a customer may put in an order. What they ask "
+"for beyond it is not added, and the page tells them why. Counts each product"
+" separately, so a cart may hold this many of several different things. Zero "
+"means no limit."
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model.fields,help:spring_engineering.field_res_config_settings__aa_maximum_line_quantity
+#: model:ir.model.fields,help:spring_engineering.field_website__aa_maximum_line_quantity
+msgid ""
+"The most of any one product a customer may put in an order. What they ask "
+"for beyond it is not added, and they are told why. Zero means no limit."
+msgstr ""
+
+#. module: spring_engineering
+#: model:ir.model,name:spring_engineering.model_res_users
+msgid "User"
+msgstr ""
+
+#. module: spring_engineering
+#. odoo-python
+#: code:addons/spring_engineering/models/sale_order.py:0
+msgid ""
+"We can take up to %(limit)s of any one item in an order, so that is what was"
+" added. Please call us if you need more."
+msgstr ""
+"Podemos aceptar hasta %(limit)s unidades de un mismo artículo por pedido, "
+"así que eso es lo que se agregó. Llámenos si necesita más."
+
+#. module: spring_engineering
+#: model:mail.template,name:spring_engineering.mail_template_confirm_email
+msgid "Website: confirm your email address"
+msgstr ""
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_pending
+msgid "Your account is made. We have sent a link to"
+msgstr "Su cuenta está creada. Hemos enviado un enlace a"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirmed
+msgid "Your email is confirmed"
+msgstr "Su correo electrónico está confirmado"
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_sent
+msgid ""
+"belongs to an account that still needs\n"
+"            confirming, a new link is on its way to it."
+msgstr ""
+"pertenece a una cuenta que aún necesita confirmación, un enlace nuevo va en "
+"camino."
+
+#. module: spring_engineering
+#: model_terms:ir.ui.view,arch_db:spring_engineering.aa_email_confirm_pending
+msgid "your email address"
+msgstr "su dirección de correo electrónico"

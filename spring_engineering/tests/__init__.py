@@ -10,3 +10,4 @@ from . import test_wishlist_diagnosis
 from . import test_minimum_order
 from . import test_spanish
 from . import test_quantity_limits
+from . import test_signup_email

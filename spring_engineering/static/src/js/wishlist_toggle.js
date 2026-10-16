@@ -374,10 +374,32 @@ document.addEventListener("change", (ev) => {
 // ids fill in the rest, and are fetched here if this tab has never asked for
 // them - without that, a heart on a page served from a cache sits empty next
 // to a wishlist that has the product in it.
+/**
+ * How many things the SERVER says are on the list, or null if it did not say.
+ *
+ * The navbar badge is rendered server-side from the real wishlist, so the
+ * answer is already on the page. Reading it is what lets the fetch below be
+ * skipped for the overwhelming majority of visits - a visitor with an empty
+ * wishlist has nothing to fetch, and asking anyway cost an extra request on
+ * every page view of the whole site.
+ */
+function serverWishlistCount() {
+    const badge = document.querySelector(".my_wish_quantity");
+    const said = parseInt((badge?.textContent || "").trim(), 10);
+
+    return Number.isFinite(said) ? said : null;
+}
+
 async function paintOnArrival() {
     paintAll();
 
-    if (!wishlistUtils.getWishlistProductIds().length) {
+    const onTheList = serverWishlistCount();
+
+    if (onTheList === 0) {
+        // Nothing to ask about. Said explicitly so a stale list from an
+        // earlier page in this tab is cleared rather than believed.
+        wishlistUtils.setWishlistProductIds([]);
+    } else if (!wishlistUtils.getWishlistProductIds().length) {
         try {
             const state = await rpc("/shop/wishlist/state");
 

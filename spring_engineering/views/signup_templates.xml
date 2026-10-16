@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE BOX LABELLED EMAIL, TOLD THAT IT HOLDS ONE.
+       Odoo renders it as type="text" under a label reading Email, so a
+       browser has no opinion about what goes in it. The server is where this
+       is settled - see controllers/signup.py - and this is the courtesy in
+       front of it: the customer is told before pressing the button, not
+       after. Both forms, because the password reset asks for the same
+       thing. -->
+  <template id="signup_asks_for_an_email"
+            inherit_id="auth_signup.signup">
+    <xpath expr="//input[@name='login']" position="attributes">
+      <attribute name="type">email</attribute>
+      <attribute name="autocomplete">email</attribute>
+    </xpath>
+  </template>
+
+  <template id="reset_password_asks_for_an_email"
+            inherit_id="auth_signup.reset_password">
+    <xpath expr="//input[@name='login']" position="attributes">
+      <attribute name="type">email</attribute>
+      <attribute name="autocomplete">email</attribute>
+    </xpath>
+  </template>
+
+  <!-- A WAY BACK FOR SOMEBODY WHOSE LINK NEVER ARRIVED.
+       Shown only to a visitor who has just been refused for an unconfirmed
+       address, so an ordinary sign-in page is not cluttered with an offer
+       that means nothing to the person reading it. -->
+  <template id="login_offers_another_confirmation"
+            inherit_id="web.login">
+    <xpath expr="//form" position="after">
+      <div t-if="request.session.get('aa_unconfirmed_login')"
+           class="text-center small mt-2">
+        <a href="/my/email-confirmation/resend">Resend the confirmation email</a>
+      </div>
+    </xpath>
+  </template>
+
+  <!-- What the link lands on, for both answers it can give.
+
+       THE TAB SAID "EMAIL CONFIRMED" EVEN WHEN IT WAS NOT. A page rendered
+       by a controller has no record of its own, so website.layout falls back
+       to main_object.name - which for one of these is the VIEW's name, the
+       same string whichever branch the body took. Somebody sent away by an
+       expired link was told in the tab that it had worked.
+
+       Both titles are set here instead, as text rather than as an expression,
+       so they can be translated like anything else on the page. -->
+  <template id="aa_email_confirmed" name="Email confirmation">
+    <t t-call="website.layout">
+      <t t-set="aa_title_confirmed">Your email is confirmed</t>
+      <t t-set="aa_title_expired">That link is no longer good</t>
+      <t t-set="additional_title"
+         t-value="aa_title_confirmed if confirmed else aa_title_expired"/>
+      <div id="wrap" class="oe_structure">
+        <div class="container py-5">
+          <t t-if="confirmed">
+            <h1>Your email is confirmed</h1>
+            <p class="lead">
+              Thank you. Your account is ready - please sign in.
+            </p>
+            <a class="btn btn-primary"
+               t-attf-href="/web/login?login={{ login }}">Sign in</a>
+          </t>
+          <t t-else="">
+            <h1>That link is no longer good</h1>
+            <p class="lead">
+              A confirmation link can only be used once, and it expires after
+              three days. We can send you another one.
+            </p>
+            <a class="btn btn-primary" href="/my/email-confirmation/resend">
+              Send me a new link
+            </a>
+          </t>
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <!-- WHAT THE LINK ITSELF OPENS: a question, not a deed.
+
+       Following the link only looks the account up; the button below is what
+       confirms it. That is deliberate - mail scanners and link previewers
+       fetch every address in an email before the customer sees it, and while
+       the fetch was enough to spend the token, the customer's own click was
+       met with "no longer good". Nothing automated presses buttons. -->
+  <template id="aa_email_confirm_ask" name="Confirm this email address">
+    <t t-call="website.layout">
+      <t t-set="additional_title">Confirm your email</t>
+      <div id="wrap" class="oe_structure">
+        <div class="container py-5">
+          <h1>Confirm your email address</h1>
+          <p class="lead">
+            Press the button to confirm <strong t-out="login"/> and finish
+            setting up your account.
+          </p>
+          <form t-attf-action="/my/confirm-email/{{ token }}" method="post">
+            <input type="hidden" name="csrf_token"
+                   t-att-value="request.csrf_token()"/>
+            <button type="submit" class="btn btn-primary btn-lg">
+              Confirm my email
+            </button>
+          </form>
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <!-- WHERE A HELD SIGNUP LANDS. Not the login page: being bounced back to
+       a sign-in box after successfully creating an account reads as failure,
+       and reloading the result of the signup POST is what produced "oops,
+       something went wrong". -->
+  <template id="aa_email_confirm_pending" name="Please confirm your email">
+    <t t-call="website.layout">
+      <div id="wrap" class="oe_structure">
+        <div class="container py-5">
+          <h1>Please confirm your email to continue</h1>
+          <p class="lead">
+            Your account is made. We have sent a link to
+            <strong t-if="login" t-out="login"/><t t-else="">your email address</t>
+            - follow it and you can sign in.
+          </p>
+          <p class="text-muted">
+            The link works once and expires in three days. If it has not
+            arrived in a few minutes, check your spam folder.
+          </p>
+          <a class="btn btn-primary" href="/my/email-confirmation/resend">
+            Send it again
+          </a>
+          <a class="btn btn-link" href="/shop">Keep looking around</a>
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <template id="aa_email_confirm_resend" name="Resend the confirmation email">
+    <t t-call="website.layout">
+      <div id="wrap" class="oe_structure">
+        <div class="container py-5">
+          <h1>Send the confirmation again</h1>
+          <p>Tell us the address you signed up with and we will send another link.</p>
+          <form action="/my/email-confirmation/resend" method="post" class="mt-3"
+                style="max-width: 24rem;">
+            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+            <div class="mb-3">
+              <label for="login" class="form-label">Email</label>
+              <input type="email" name="login" id="login" class="form-control"
+                     required="required" autocomplete="email"
+                     t-att-value="login"/>
+            </div>
+            <button type="submit" class="btn btn-primary">Send the link</button>
+          </form>
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <template id="aa_email_confirm_sent" name="Confirmation sent">
+    <t t-call="website.layout">
+      <div id="wrap" class="oe_structure">
+        <div class="container py-5">
+          <h1>Check your inbox</h1>
+          <!-- SAID WHETHER OR NOT THERE WAS ANYBODY TO SEND TO. Telling a
+               visitor that an address is not on the list would make this
+               page a way of reading the customer list one guess at a time. -->
+          <p class="lead">
+            If <strong t-out="login"/> belongs to an account that still needs
+            confirming, a new link is on its way to it.
+          </p>
+          <a class="btn btn-primary" href="/web/login">Back to sign in</a>
+        </div>
+      </div>
+    </t>
+  </template>
+
+</odoo>
