@@ -28,6 +28,9 @@ class MrpWorkorder(models.Model):
     # group every job by order (owner, 2026-10-15).
     aa_sale_order = fields.Char(
         related="production_id.origin", string="Sale Order", store=True, index=True)
+    # The number the shop knows the order by (owner, 2026-10-19): W/O #200.
+    aa_wo_number = fields.Char(
+        related="production_id.aa_wo_number", string="W/O #", store=True, index=True)
 
     aa_suggested_workcenter_id = fields.Many2one(
         "mrp.workcenter", string="Own Station", copy=False, readonly=True,
@@ -82,6 +85,7 @@ class MrpProduction(models.Model):
             production.aa_station_board = json.dumps({
                 "can_assign": can_assign,
                 "received": received,
+                "wo": production.aa_wo_number or "",
                 "station": ", ".join(stations.mapped("name")),
                 "can_send": bool(waiting),
                 "can_remove": bool(released),
@@ -147,7 +151,7 @@ class MrpProduction(models.Model):
             more = "%s: %d %s" % (more, items, "item" if items == 1 else "items")
         return summary, more
 
-    @api.depends("origin", "state", "workorder_ids.workcenter_id", "workorder_ids.state",
+    @api.depends("origin", "aa_wo_number", "state", "workorder_ids.workcenter_id", "workorder_ids.state",
                  "workorder_ids.duration", "workorder_ids.time_ids.date_end")
     @api.depends_context("uid")
     def _compute_aa_order_board(self):
@@ -245,7 +249,9 @@ class MrpProduction(models.Model):
             production.aa_order_board = json.dumps({
                 "grouped": True,
                 "leader": production == leader,
-                "order": production.origin,
+                # The card is headed by the W/O number; the S number only
+                # when an order has none (one confirmed before W/O existed).
+                "order": production.aa_wo_number or production.origin,
                 "customer": order.partner_id.display_name or "",
                 "received": received,
                 "can_assign": can_assign,

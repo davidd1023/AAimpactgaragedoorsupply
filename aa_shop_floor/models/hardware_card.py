@@ -138,7 +138,7 @@ class MrpProduction(models.Model):
 
         notes = dict(self._aa_line_notes(kit))
         card = {
-            "order": order.name or self.origin or "",
+            "order": self.aa_wo_number or order.aa_wo_number or order.name or self.origin or "",
             "customer": order.partner_id.name or "",
             "kit": (self.product_id.product_tmpl_id.name or "").replace(
                 " Hardware Kit", ""),
