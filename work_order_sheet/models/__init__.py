@@ -4,3 +4,4 @@ from . import work_station_item
 from . import delivery_confirmation
 from . import res_config_settings
 from . import wo_number
+from . import dispatched

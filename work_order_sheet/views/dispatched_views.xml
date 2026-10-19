@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- THE DISPATCHED BUTTON (owner, 2026-10-19). Shown on a delivery that is
+       Ready. Signed for in full: one press. Otherwise it asks first. -->
+  <record id="view_picking_form_aa_dispatched" model="ir.ui.view">
+    <field name="name">stock.picking.form.aa.dispatched</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//header/button[@name='button_validate'][1]" position="before">
+        <field name="aa_dispatch_clean" invisible="1"/>
+        <button name="action_aa_dispatched" type="object" string="Dispatched"
+                class="btn-success" icon="fa-truck" groups="stock.group_stock_user"
+                invisible="picking_type_code != 'outgoing' or state != 'assigned' or not aa_dispatch_clean"/>
+        <button name="action_aa_dispatched" type="object" string="Dispatched"
+                class="btn-success" icon="fa-truck" groups="stock.group_stock_user"
+                confirm="The customer has not signed, or did not tick every item. Dispatch anyway?"
+                invisible="picking_type_code != 'outgoing' or state != 'assigned' or aa_dispatch_clean"/>
+      </xpath>
+      <xpath expr="//field[@name='dispatch_signed_on']" position="after">
+        <field name="aa_dispatched_by" invisible="not aa_dispatched_on"/>
+        <field name="aa_dispatched_on" invisible="not aa_dispatched_on"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="vpicktree_aa_dispatched" model="ir.ui.view">
+    <field name="name">stock.picking.list.aa.dispatched</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.vpicktree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='state']" position="before">
+        <field name="aa_dispatched_on" optional="show"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>
