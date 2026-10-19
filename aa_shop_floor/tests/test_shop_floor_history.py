@@ -19,6 +19,9 @@ class ShopFloorHistoryCase(TransactionCase):
 
     def setUp(self):
         super().setUp()
+        # THE CARD SHOWS THE TABLET'S OWN CLOCK, so a test that asserts a time
+        # has to fix the zone or it is really asserting where the server is.
+        self.env = self.env(context=dict(self.env.context, tz="UTC"))
         self.partner = self.env["res.partner"].create({"name": "Fitter"})
         self.workcenters = {
             name: self.env["mrp.workcenter"].search(
@@ -31,13 +34,21 @@ class ShopFloorHistoryCase(TransactionCase):
         return self.env["product.product"].create({
             "name": name, "type": "consu", "is_storable": True})
 
-    def _job(self, order, station, product_name, minutes=0.0,
+    def _job(self, order, station, product_name, minutes=None, logs=(),
              started=None, finished=None, state="done"):
         """A manufacturing order with one work order, as the stations make them.
 
-        The times are written rather than clocked in real time, because a test
-        that waited twelve minutes to prove a job took twelve minutes would be
-        a test nobody runs.
+        `logs` are turns at the bench, (start, end), which is what the Shop
+        Floor really writes and what `duration` is computed from. `started`
+        and `finished` are the PLANNED window - what Odoo schedules and what
+        it shows in date_start / date_finished until the job is really
+        finished.
+
+        WRITING `minutes` IS NOT THE SAME AS CLOCKING THEM, and that caught me
+        out: mrp.workorder.duration has an inverse, so writing it makes Odoo
+        fabricate a time log of that length starting NOW. Tests about the
+        words a duration is said in may use it; tests about WHEN something
+        happened must use `logs`.
         """
         product = self._product(product_name)
         production = self.env["mrp.production"].create({
@@ -45,18 +56,38 @@ class ShopFloorHistoryCase(TransactionCase):
             "product_qty": 1.0,
             "origin": order,
         })
-        workorder = self.env["mrp.workorder"].create({
+        values = {
             "name": "Make it",
             "production_id": production.id,
             "product_uom_id": production.product_uom_id.id,
             "workcenter_id": self.workcenters[station].id,
             "state": state,
-            "duration": minutes,
             "date_start": started,
             "date_finished": finished,
-        })
+        }
+
+        if minutes is not None:
+            values["duration"] = minutes
+
+        workorder = self.env["mrp.workorder"].create(values)
+
+        for log_start, log_end in logs:
+            self._log(workorder, log_start, log_end)
+
+        workorder.invalidate_recordset()
 
         return production, workorder
+
+    def _log(self, workorder, start, end=None):
+        """A turn at the bench: Start opens one of these, Mark as Done closes
+        it. This is the clock `duration` is summed from."""
+        return self.env["mrp.workcenter.productivity"].create({
+            "workorder_id": workorder.id,
+            "workcenter_id": workorder.workcenter_id.id,
+            "date_start": start,
+            "date_end": end,
+            "loss_id": self.env.ref("mrp.block_reason7").id,
+        })
 
     def _history(self, order=None):
         return self.env["mrp.workorder"].aa_shop_floor_history(order=order)
@@ -114,13 +145,13 @@ class ShopFloorHistoryCase(TransactionCase):
 
     def test_how_long_it_took_after_starting(self):
         start = datetime(2026, 10, 19, 13, 0, 0)
-        self._job("S00123", "Springs", "A spring", minutes=12.0,
-                  started=start, finished=start + timedelta(minutes=12))
+        self._job("S00123", "Springs", "A spring",
+                  logs=[(start, start + timedelta(minutes=12))])
         job = self._history("S00123")[0]["jobs"][0]
         self.assertEqual(job["worked"], "12 min")
         self.assertEqual(job["worked_minutes"], 12.0)
-        self.assertTrue(job["started"], "it says when it was started")
-        self.assertTrue(job["finished"])
+        self.assertEqual(job["started"], "Oct 19, 01:00 PM")
+        self.assertEqual(job["finished"], "Oct 19, 01:12 PM")
 
     def test_an_hour_is_said_as_an_hour(self):
         self._job("S00123", "Hardware", "A kit", minutes=65.0)
@@ -128,21 +159,26 @@ class ShopFloorHistoryCase(TransactionCase):
                          "1 h 05 min")
 
     def test_a_job_that_sat_on_the_bench_says_both_figures(self):
-        """TWO HONEST ANSWERS. Twenty minutes of work spread over an
-        afternoon is not a twenty minute job and not a seven hour one."""
-        start = datetime(2026, 10, 19, 9, 0, 0)
-        self._job("S00123", "Hardware", "A kit", minutes=20.0,
-                  started=start, finished=start + timedelta(hours=7))
+        """TWO HONEST ANSWERS. Forty minutes of work spread over a day is not
+        a forty minute job and not a seven hour one.
+
+        Two turns at the bench, which is what a paused and resumed job is."""
+        self._job("S00123", "Hardware", "A kit", logs=[
+            (datetime(2026, 10, 19, 9, 0, 0), datetime(2026, 10, 19, 9, 20, 0)),
+            (datetime(2026, 10, 19, 15, 40, 0), datetime(2026, 10, 19, 16, 0, 0)),
+        ])
         job = self._history("S00123")[0]["jobs"][0]
-        self.assertEqual(job["worked"], "20 min")
+        self.assertEqual(job["worked"], "40 min")
         self.assertEqual(job["took"], "7 h 00 min")
+        self.assertEqual(job["started"], "Oct 19, 09:00 AM")
+        self.assertEqual(job["finished"], "Oct 19, 04:00 PM")
 
     def test_a_job_done_in_one_sitting_says_one_figure(self):
         """The wall and the clock agree, so printing both would be two
         answers to one question."""
         start = datetime(2026, 10, 19, 9, 0, 0)
-        self._job("S00123", "Springs", "A spring", minutes=30.0,
-                  started=start, finished=start + timedelta(minutes=30))
+        self._job("S00123", "Springs", "A spring",
+                  logs=[(start, start + timedelta(minutes=30))])
         self.assertFalse(self._history("S00123")[0]["jobs"][0]["took"])
 
     def test_the_order_s_total_is_the_sum_of_its_parts(self):
@@ -214,3 +250,93 @@ class ShopFloorHistoryCase(TransactionCase):
             [term for term in workorder._aa_history_domain()
              if term[0] == "state"],
             [term for term in eval(action.domain) if term[0] == "state"])
+
+
+@tagged("post_install", "-at_install")
+class RunningJobCase(ShopFloorHistoryCase):
+    """THE BUG THE OWNER CAUGHT, 2026-10-19.
+
+    A job still running read "2 h 00 min start to finish" and "Oct 19, 08:55
+    AM -> Oct 19, 10:55 AM", for a finish that had not happened. date_start
+    and date_finished on a work order are a computed PLANNED window: starting
+    the job overwrites the start with the real time and leaves the finish as
+    the plan - the start plus the expected duration - so reading it as an
+    actual finish made every running job look like it had finished exactly on
+    schedule, two hours being the expected duration rather than anything that
+    happened.
+    """
+
+    def _running(self, expected=120.0):
+        """A job started at 08:55 and not finished, planned to take two hours
+        - exactly the case in the owner's screenshot.
+
+        No duration is written: the clock is an OPEN log, which is what Start
+        leaves behind and what Mark as Done would close.
+        """
+        start = datetime(2026, 10, 19, 8, 55, 0)
+        _production, workorder = self._job(
+            "S00040", "Hardware", "AA-1200 Hardware Kit",
+            started=start, finished=start + timedelta(minutes=expected),
+            state="progress")
+        self._log(workorder, start)
+        workorder.invalidate_recordset()
+
+        return workorder
+
+    def test_a_running_job_has_no_finish(self):
+        self._running()
+        job = self._history("S00040")[0]["jobs"][0]
+        self.assertFalse(job["finished"], "it has not finished")
+        self.assertFalse(job["took"], "there is no finish to measure to")
+        self.assertTrue(job["running"])
+        self.assertFalse(job["done"])
+
+    def test_a_running_job_says_when_it_was_started(self):
+        self._running()
+        job = self._history("S00040")[0]["jobs"][0]
+        self.assertIn("08:55 AM", job["started"])
+
+    def test_the_planned_window_is_never_shown_as_time_taken(self):
+        """Two hours was the EXPECTED duration. Nothing on the card may
+        present it as something that happened."""
+        self._running(expected=120.0)
+        job = self._history("S00040")[0]["jobs"][0]
+        self.assertNotIn("2 h", job["took"] or "")
+        self.assertNotIn("10:55", job["finished"] or "")
+
+    def test_finishing_it_gives_the_real_times(self):
+        workorder = self._running()
+        # Mark as Done: the log closes and the job finishes. The duration
+        # follows from the log rather than being written over it.
+        workorder.time_ids[:1].date_end = datetime(2026, 10, 19, 9, 35, 0)
+        workorder.write({"state": "done",
+                         "date_finished": datetime(2026, 10, 19, 9, 35, 0)})
+        workorder.invalidate_recordset()
+        job = self._history("S00040")[0]["jobs"][0]
+        self.assertIn("09:35 AM", job["finished"])
+        self.assertEqual(job["worked"], "40 min")
+        self.assertFalse(job["took"], "it was done in one sitting")
+        self.assertTrue(job["done"])
+
+    def test_a_job_put_down_is_paused_rather_than_running(self):
+        """Started and set aside: the clock is not ticking and the job is not
+        finished, and a board somebody reads to find out what is happening
+        should not call that Running."""
+        workorder = self._running()
+        workorder.time_ids.date_end = datetime(2026, 10, 19, 9, 5, 0)
+        job = self._history("S00040")[0]["jobs"][0]
+        self.assertFalse(job["running"])
+        self.assertFalse(job["done"])
+        self.assertFalse(job["finished"], "paused is not finished")
+
+    def test_the_real_start_wins_over_the_planned_one(self):
+        """A job planned for the morning and started in the afternoon is said
+        to have started in the afternoon."""
+        start = datetime(2026, 10, 19, 14, 20, 0)
+        _production, workorder = self._job(
+            "S00041", "Springs", "A spring",
+            started=datetime(2026, 10, 19, 8, 0, 0),
+            finished=datetime(2026, 10, 19, 9, 0, 0), state="progress")
+        self._log(workorder, start)
+        workorder.invalidate_recordset()
+        self.assertIn("02:20 PM", self._history("S00041")[0]["jobs"][0]["started"])

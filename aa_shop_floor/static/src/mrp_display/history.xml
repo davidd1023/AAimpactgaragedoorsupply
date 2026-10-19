@@ -61,19 +61,31 @@
                                 </div>
                             </div>
                             <div class="text-end text-nowrap">
-                                <div t-if="aaJob.worked" class="fw-bold" t-esc="aaJob.worked"/>
+                                <div t-if="aaJob.worked" class="fw-bold">
+                                    <t t-esc="aaJob.worked"/><t t-if="!aaJob.done"> so far</t>
+                                </div>
                                 <!-- The wall clock, when it says something the
                                      worked time does not: a job that sat on the
-                                     bench between being started and finished. -->
+                                     bench between being started and finished.
+                                     Never on an unfinished job - there is no
+                                     finish to measure to. -->
                                 <div t-if="aaJob.took" class="text-muted small">
                                     <t t-esc="aaJob.took"/> start to finish
                                 </div>
-                                <span t-if="!aaJob.done" class="badge text-bg-info">Running</span>
+                                <span t-if="aaJob.running" class="badge text-bg-info">Running</span>
+                                <span t-elif="!aaJob.done" class="badge text-bg-secondary">Paused</span>
                             </div>
                         </div>
                         <div class="text-muted small mt-1">
-                            <t t-esc="aaJob.started"/>
-                            <t t-if="aaJob.finished"> → <t t-esc="aaJob.finished"/></t>
+                            <t t-if="aaJob.started">
+                                <t t-esc="aaJob.started"/>
+                                <t t-if="aaJob.finished"> → <t t-esc="aaJob.finished"/></t>
+                                <t t-elif="aaJob.running"> · still running</t>
+                                <t t-else=""> · not finished</t>
+                            </t>
+                            <t t-elif="aaJob.finished">
+                                Finished <t t-esc="aaJob.finished"/>
+                            </t>
                         </div>
                     </div>
                 </div>
