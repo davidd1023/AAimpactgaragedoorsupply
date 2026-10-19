@@ -317,19 +317,46 @@ class OrderCancelCase(TransactionCase):
 
     # --- who may do it -------------------------------------------------------
 
-    def test_only_a_sales_manager_may_do_this(self):
-        """It gives money back and unwinds a day's work on the floor."""
+    def test_any_employee_may_do_this(self):
+        """EVERYONE CAN CANCEL AND REFUND (owner, 2026-10-19). It was Sales
+        managers only; the shop is small enough that whoever picks up the
+        phone should be able to act on it. The steps themselves run with
+        raised rights, authorised by that one check - a plain employee cannot
+        cancel a manufacturing order or refund a transaction otherwise."""
         order = self._order()
+        self._job(order)
         self._paid(order)
+        # A SALESPERSON, NOT A MANAGER - which is the change. A bare employee
+        # with no Sales app cannot read a sale order in Odoo at all, so
+        # "everyone" means everyone who can see the order: it no longer takes
+        # a manager to cancel one.
         clerk = self.env["res.users"].create({
             "name": "A clerk", "login": "aa_clerk",
-            "group_ids": [(6, 0, [self.env.ref("base.group_user").id,
-                                  self.env.ref("sales_team.group_sale_salesman").id])],
+            "group_ids": [(6, 0, [
+                self.env.ref("base.group_user").id,
+                # "All Documents", because "Own Documents Only" carries a
+                # record rule that hides somebody else's order - a different
+                # restriction from the one being tested here.
+                self.env.ref("sales_team.group_sale_salesman_all_leads").id])],
         })
-        wizard = self._wizard(order).with_user(clerk)
+        self._wizard(order).with_user(clerk).action_cancel_and_refund()
+
+        self.assertEqual(order.state, "cancel")
+        self.assertIn(clerk.display_name, order.message_ids[0].body,
+                      "the log has to name who pressed it")
+
+    def test_a_portal_user_may_not(self):
+        """The line that matters: a customer must never cancel and refund
+        their own order."""
+        order = self._order()
+        self._paid(order)
+        customer = self.env["res.users"].create({
+            "name": "A customer", "login": "aa_cancel_portal",
+            "group_ids": [(6, 0, [self.env.ref("base.group_portal").id])],
+        })
 
         with self.assertRaises(AccessError):
-            wizard.action_cancel_and_refund()
+            self._wizard(order).with_user(customer).action_cancel_and_refund()
 
         self.assertNotEqual(order.state, "cancel")
 

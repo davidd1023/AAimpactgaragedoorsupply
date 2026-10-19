@@ -82,7 +82,12 @@ class OrderCancel(models.TransientModel):
         """
         self.ensure_one()
 
-        return self.order_id.transaction_ids.filtered(
+        # READ WITH RAISED RIGHTS. transaction_ids is a restricted field on
+        # the order - a salesperson cannot read it - and the owner asked for
+        # anybody here to be able to cancel and refund. The gate in
+        # action_cancel_and_refund is what authorises this; without the sudo
+        # the dialog cannot even work out what was paid.
+        return self.order_id.sudo().transaction_ids.filtered(
             lambda tx: tx.state == "done"
             and tx.operation != "refund"
             and tx.sudo().provider_id.support_refund)
@@ -171,7 +176,7 @@ class OrderCancel(models.TransientModel):
                     provider=", ".join(
                         wizard._refundable_transactions().sudo()
                         .mapped("provider_id.name"))))
-            elif order.transaction_ids.filtered(lambda tx: tx.state == "done"):
+            elif order.sudo().transaction_ids.filtered(lambda tx: tx.state == "done"):
                 lines.append(_(
                     "No refund can be sent: this order was taken by a method "
                     "that cannot give money back (a dealer account or a "
@@ -202,12 +207,18 @@ class OrderCancel(models.TransientModel):
         """The procedure, in the order the dialog promised."""
         self.ensure_one()
 
-        # ONE GROUP MAY DO THIS. Cancelling a paid order gives money back and
-        # unwinds a day's work on the floor; it is not a thing for whoever
-        # happens to have the order open.
-        if not self.env.user.has_group("sales_team.group_sale_manager"):
+        # ANY EMPLOYEE MAY DO THIS (owner, 2026-10-19: "everyone should be
+        # able to use and see the cancel and refund"). It was Sales managers
+        # only; the shop is small enough that whoever picks up the phone when
+        # a customer cancels is the person who should be able to act on it.
+        #
+        # INTERNAL USERS ONLY, THOUGH, and that is the line that matters: a
+        # portal user must never be able to cancel and refund an order, their
+        # own included.
+        if not self.env.user.has_group("base.group_user"):
             raise AccessError(_(
-                "Only a Sales manager can cancel a paid order and refund it."))
+                "Only somebody who works here can cancel a paid order and "
+                "refund it."))
 
         order = self.order_id
 
@@ -258,7 +269,7 @@ class OrderCancel(models.TransientModel):
             # of the floor - the name is reported instead.
             try:
                 with self.env.cr.savepoint():
-                    job.action_cancel()
+                    job.sudo().action_cancel()
             except Exception:
                 _logger.exception("work_order_sheet: cancelling %s failed", job.name)
                 stuck.append(job.name)
@@ -277,7 +288,7 @@ class OrderCancel(models.TransientModel):
         said = []
 
         if to_cancel:
-            to_cancel.action_cancel()
+            to_cancel.sudo().action_cancel()
             said.append(_("Cancelled %(count)s transfer(s): %(names)s.",
                           count=len(to_cancel),
                           names=", ".join(to_cancel.mapped("name"))))
@@ -306,7 +317,7 @@ class OrderCancel(models.TransientModel):
         # fills its lines from picking_id, and a wizard created without one
         # has nothing to return and says "specify at least one non-zero
         # quantity".
-        wizard = self.env["stock.return.picking"].with_context(
+        wizard = self.env["stock.return.picking"].sudo().with_context(
             active_id=picking.id, active_model="stock.picking").create({
                 "picking_id": picking.id})
 
@@ -337,7 +348,7 @@ class OrderCancel(models.TransientModel):
         transactions = self._refundable_transactions()
 
         if not transactions:
-            taken = self.order_id.transaction_ids.filtered(
+            taken = self.order_id.sudo().transaction_ids.filtered(
                 lambda tx: tx.state == "done" and tx.operation != "refund")
 
             if taken:
@@ -362,7 +373,11 @@ class OrderCancel(models.TransientModel):
                 break
 
             share = min(left, transaction.amount)
-            transaction.action_refund(amount_to_refund=share)
+            # RAISED RIGHTS, AUTHORISED ABOVE. Odoo checks write access on the
+            # transaction before refunding, which a plain employee does not
+            # have; the permission question is answered once, by the check at
+            # the top, and the log below records who actually pressed it.
+            transaction.sudo().action_refund(amount_to_refund=share)
             left -= share
             sent.append(transaction.reference)
 
@@ -379,7 +394,7 @@ class OrderCancel(models.TransientModel):
         (owner, 2026-10-19: it is one of the four emails a customer gets).
         """
         order = self.order_id
-        order._action_cancel()
+        order.sudo()._action_cancel()
         template = self.env.ref(
             "work_order_sheet.mail_template_order_cancelled",
             raise_if_not_found=False)
@@ -408,4 +423,4 @@ class OrderCancel(models.TransientModel):
                 "<b>Invoice %s is still standing</b> and needs a credit note.",
                 ", ".join(invoices.mapped("name"))))
 
-        self.order_id.message_post(body="<br/>".join(body))
+        self.order_id.sudo().message_post(body="<br/>".join(body))
