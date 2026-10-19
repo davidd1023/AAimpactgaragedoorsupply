@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- HISTORY, in the Shop Floor's own options menu - the one that already
+         holds Reload Data. A tablet bolted to a bench cannot reach the back
+         office's Reporting menu, which is where these figures lived. -->
+    <t t-inherit="mrp_workorder.MrpDisplay.BurgerMenu" t-inherit-mode="extension">
+        <xpath expr="//button[@t-on-click='onClickRefresh']/.." position="after">
+            <li>
+                <button class="dropdown-item py-2" t-on-click="() => this.aaOpenHistory()">
+                    <i class="fa fa-history me-2" role="img"/>History
+                </button>
+            </li>
+        </xpath>
+    </t>
+
+    <!-- WHAT WAS MADE AND HOW LONG IT TOOK.
+
+         One row per part, in the order the shop made them, with the station it
+         was made at. Read standing up: the part and its time are the big type,
+         the clock times underneath. -->
+    <t t-name="aa_shop_floor.HistoryDialog">
+        <Dialog title="title" size="'lg'">
+            <div t-if="state.loading" class="text-center text-muted py-4">
+                <i class="fa fa-circle-o-notch fa-spin fa-2x"/>
+            </div>
+
+            <div t-elif="!state.groups.length" class="text-center text-muted py-4">
+                <div class="fs-5">Nothing has been started yet.</div>
+                <div class="small">A job shows here as soon as somebody taps Start on it.</div>
+            </div>
+
+            <t t-else="">
+                <div t-foreach="state.groups" t-as="aaGroup" t-key="aaGroup.order"
+                     class="o_aa_history_order mb-3">
+                    <div class="d-flex justify-content-between align-items-baseline gap-2 border-bottom pb-1 mb-2">
+                        <span class="fs-5 fw-bold" t-esc="aaGroup.order"/>
+                        <span class="text-muted text-end small">
+                            <t t-esc="aaGroup.customer"/>
+                        </span>
+                    </div>
+                    <div class="text-muted small mb-2">
+                        <t t-esc="aaGroup.done"/> of <t t-esc="aaGroup.count"/> finished<!--
+                     --><span t-if="aaGroup.worked"> · <t t-esc="aaGroup.worked"/> worked in total</span>
+                    </div>
+
+                    <div t-foreach="aaGroup.jobs" t-as="aaJob" t-key="aaJob.id"
+                         class="o_aa_history_job border rounded p-2 mb-1"
+                         t-att-class="{'opacity-75': !aaJob.done}">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="flex-grow-1">
+                                <div class="fw-bold" t-esc="aaJob.product"/>
+                                <div class="text-muted small">
+                                    <span class="text-uppercase fw-bold" t-esc="aaJob.station"/>
+                                    <span t-if="aaJob.quantity and aaJob.quantity != 1">
+                                        · <t t-esc="aaJob.quantity"/> <t t-esc="aaJob.uom"/>
+                                    </span>
+                                    <span t-if="aaJob.workers.length">
+                                        · <t t-esc="aaJob.workers.join(', ')"/>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-end text-nowrap">
+                                <div t-if="aaJob.worked" class="fw-bold" t-esc="aaJob.worked"/>
+                                <!-- The wall clock, when it says something the
+                                     worked time does not: a job that sat on the
+                                     bench between being started and finished. -->
+                                <div t-if="aaJob.took" class="text-muted small">
+                                    <t t-esc="aaJob.took"/> start to finish
+                                </div>
+                                <span t-if="!aaJob.done" class="badge text-bg-info">Running</span>
+                            </div>
+                        </div>
+                        <div class="text-muted small mt-1">
+                            <t t-esc="aaJob.started"/>
+                            <t t-if="aaJob.finished"> → <t t-esc="aaJob.finished"/></t>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <t t-set-slot="footer">
+                <button type="button" class="btn btn-secondary" t-on-click="() => this.props.close()">
+                    Close
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>
