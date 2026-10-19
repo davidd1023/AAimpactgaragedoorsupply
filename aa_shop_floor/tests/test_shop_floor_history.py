@@ -211,6 +211,21 @@ class ShopFloorHistoryCase(TransactionCase):
         self.assertEqual(self._history("S00123")[0]["jobs"][0]["worked"],
                          "under a minute")
 
+    def test_the_order_is_found_and_named_by_its_wo_number(self):
+        """The order card asks by W/O # (owner, 2026-10-19), and History
+        names the order the same way the card does."""
+        partner = self.env["res.partner"].create({"name": "W/O customer"})
+        sale = self.env["sale.order"].create({"name": "S00777", "partner_id": partner.id})
+        sale.aa_wo_number = "W/O #777"
+        self._job("S00777", "Springs", "A spring for 777")
+
+        history = self._history("W/O #777")
+        self.assertEqual(len(history), 1)
+        self.assertEqual(history[0]["order"], "W/O #777")
+        self.assertEqual(history[0]["customer"], "W/O customer")
+        # The S number still finds it.
+        self.assertEqual(self._history("S00777")[0]["order"], "W/O #777")
+
     # --- the whole shop, not one order ---------------------------------------
 
     def test_the_whole_shop_shows_the_newest_orders_first(self):

@@ -5,6 +5,10 @@
             <!-- One card per sale order in the Overview: every job of the order,
                  each with its own Send / Remove, plus Send all / Remove all. -->
             <t t-set="aaOrderData" t-value="aaOrder()"/>
+            <!-- W/O # on every card that is not already headed by it - a
+                 station's job, or an order with a single job (owner,
+                 2026-10-19: the order is known by this number everywhere). -->
+            <div t-if="record.aa_wo_number and !aaOrderData.grouped" class="o_aa_wo fs-4 fw-bold" t-esc="record.aa_wo_number"/>
             <div t-if="aaOrderData.grouped" class="o_aa_order">
                 <div class="d-flex justify-content-between align-items-baseline gap-2">
                     <span class="fs-4 fw-bold" t-esc="aaOrderData.order"/>

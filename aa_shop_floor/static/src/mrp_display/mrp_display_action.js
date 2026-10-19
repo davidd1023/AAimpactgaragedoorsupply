@@ -8,9 +8,9 @@ patch(MrpDisplayAction.prototype, {
         structure["mrp.production"].push(
             "aa_shop_spec", "aa_packed", "aa_station_board", "aa_order_board",
             // What the box is for, and the link its sticker opens.
-            "aa_hardware_card", "aa_box_url");
+            "aa_hardware_card", "aa_box_url", "aa_wo_number");
         structure["mrp.workorder"].push(
-            "aa_shop_spec", "aa_packed", "aa_hardware_card", "aa_box_url");
+            "aa_shop_spec", "aa_packed", "aa_hardware_card", "aa_box_url", "aa_wo_number");
         return structure;
     },
 });

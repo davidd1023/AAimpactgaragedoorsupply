@@ -39,8 +39,9 @@
                             <t t-esc="o.company_id.name"/>
                         </h2>
                         <div style="font-size:14px;">
+                            <t t-if="o.aa_wo_number"><b><t t-esc="o.aa_wo_number"/></b> - </t>
                             Delivery <b><t t-esc="o.name"/></b>
-                            <t t-if="o.origin"> - order <t t-esc="o.origin"/></t>
+                            <t t-if="o.origin and not o.aa_wo_number"> - order <t t-esc="o.origin"/></t>
                         </div>
                     </div>
 
@@ -143,6 +144,9 @@
                         <div style="background:#1B2A6B;color:#fff;text-align:center;font-size:18px;font-weight:800;letter-spacing:.1em;padding:8px 0;border-bottom:4px solid #C0272D;">WORK ORDER</div>
                         <div style="text-align:center;margin:14px 0 2px;font-size:34px;font-weight:800;color:#1B2A6B;">
                             <span t-field="o.name"/>
+                        </div>
+                        <div t-if="o.aa_wo_number and o.aa_wo_number != o.name" style="text-align:center;margin:0 0 2px;font-size:22px;font-weight:800;color:#1B2A6B;">
+                            <t t-esc="o.aa_wo_number"/>
                         </div>
                         <div t-if="o.origin" style="text-align:center;margin:0 0 20px;font-size:15px;color:#666;">
                             Order <strong t-esc="o.origin"/>

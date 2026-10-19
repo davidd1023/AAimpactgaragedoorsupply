@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+  <!-- W/O #202, #203 ... (owner, 2026-10-19: start at 200; the two orders
+       already open took #200 and #201). No gaps. -->
+  <record id="sequence_aa_work_order_number" model="ir.sequence">
+    <field name="name">Work Order Number (W/O #)</field>
+    <field name="code">aa.work.order.number</field>
+    <field name="prefix">W/O #</field>
+    <field name="padding">0</field>
+    <field name="number_next">202</field>
+    <field name="number_increment">1</field>
+    <field name="implementation">no_gap</field>
+    <field name="company_id" eval="False"/>
+  </record>
+</odoo>

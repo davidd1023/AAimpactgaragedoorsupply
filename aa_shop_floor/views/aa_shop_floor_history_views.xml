@@ -9,7 +9,8 @@
         <field name="priority">99</field>
         <field name="arch" type="xml">
             <list string="Shop Floor History" create="0" edit="0" delete="0" default_order="date_start desc">
-                <field name="aa_sale_order"/>
+                <field name="aa_wo_number"/>
+                <field name="aa_sale_order" optional="hide"/>
                 <field name="production_id"/>
                 <field name="product_id"/>
                 <field name="workcenter_id" string="Station"/>
@@ -31,6 +32,7 @@
         <field name="priority">99</field>
         <field name="arch" type="xml">
             <search string="Shop Floor History">
+                <field name="aa_wo_number"/>
                 <field name="aa_sale_order"/>
                 <field name="production_id"/>
                 <field name="product_id"/>
@@ -41,6 +43,7 @@
                 <separator/>
                 <filter name="aa_finished" string="Finished" date="date_finished"/>
                 <group>
+                    <filter name="aa_by_wo" string="W/O #" context="{'group_by': 'aa_wo_number'}"/>
                     <filter name="aa_by_order" string="Sale Order" context="{'group_by': 'aa_sale_order'}"/>
                     <filter name="aa_by_station" string="Station" context="{'group_by': 'workcenter_id'}"/>
                     <filter name="aa_by_day" string="Day Finished" context="{'group_by': 'date_finished:day'}"/>
@@ -56,7 +59,7 @@
         <field name="view_id" ref="aa_shop_floor_history_list"/>
         <field name="search_view_id" ref="aa_shop_floor_history_search"/>
         <field name="domain">[('state', 'in', ('progress', 'done'))]</field>
-        <field name="context">{'search_default_aa_by_order': 1}</field>
+        <field name="context">{'search_default_aa_by_wo': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No jobs started yet</p>
             <p>Every job started at a Shop Floor station shows here, with its time.</p>
