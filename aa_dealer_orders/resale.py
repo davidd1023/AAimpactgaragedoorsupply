@@ -163,9 +163,6 @@ class ResPartner(models.Model):
         group = self.env.ref("sales_team.group_sale_manager",
                              raise_if_not_found=False)
 
-        if not group:
-            return
-
         self.sudo().activity_schedule(
             "mail.mail_activity_data_todo",
             summary=_("Review resale certificate"),
@@ -173,14 +170,19 @@ class ResPartner(models.Model):
                    "the contact.", self.display_name),
             # user_ids, not users: Odoo 19 renamed it, the same rename that
             # turned res.users.groups_id into group_ids.
-            user_id=(group.user_ids[:1].id or self.env.uid),
+            # WHOEVER IS AROUND, not the right department: anybody who works
+            # here can deal with one now, so the activity only has to land on
+            # a real person - a sales manager if there is one, else the
+            # contact's own salesperson, else whoever is doing this.
+            user_id=(group and group.user_ids[:1].id)
+            or self.user_id.id or self.env.uid,
         )
 
     # --- the office's side ----------------------------------------------------
 
     def action_aa_resale_approve(self):
         """Approve the certificate and apply the exemption."""
-        self._aa_resale_check_manager()
+        self._aa_resale_check_user()
 
         for partner in self:
             if partner.aa_resale_state == "approved":
@@ -193,14 +195,20 @@ class ResPartner(models.Model):
                     "exemption comes off when it passes, so it has to have "
                     "one."))
 
-            partner.write({
+            # WRITTEN WITH RAISED RIGHTS, authorised by the check above.
+            # A plain employee cannot write a contact in Odoo, and the owner
+            # asked for any employee to be able to deal with these - so the
+            # permission question is answered once, by _aa_resale_check_user,
+            # rather than by whether somebody also happens to be allowed to
+            # edit contacts. The same thing the dealer's own upload does.
+            partner.sudo().write({
                 "aa_resale_state": "approved",
                 "aa_resale_reviewed_on": fields.Datetime.now(),
                 "aa_resale_reviewed_by": self.env.uid,
                 "aa_resale_note": False,
             })
             partner._aa_resale_apply_position()
-            partner.message_post(body=_(
+            partner.sudo().message_post(body=_(
                 "Resale certificate approved. Tax exempt until %(date)s.",
                 date=partner.aa_resale_expiry))
             partner._aa_resale_email("mail_template_resale_approved")
@@ -209,7 +217,7 @@ class ResPartner(models.Model):
 
     def action_aa_resale_reject(self):
         """Turn it down, with a reason the dealer can act on."""
-        self._aa_resale_check_manager()
+        self._aa_resale_check_user()
 
         for partner in self:
             # A REASON IS NOT OPTIONAL. The dealer is told this and has to know
@@ -220,22 +228,29 @@ class ResPartner(models.Model):
                     "Say why it was rejected in the Reason box first - the "
                     "dealer is told, and they need to know what to fix."))
 
-            partner.write({
+            partner.sudo().write({
                 "aa_resale_state": "rejected",
                 "aa_resale_reviewed_on": fields.Datetime.now(),
                 "aa_resale_reviewed_by": self.env.uid,
             })
             partner._aa_resale_clear_position()
-            partner.message_post(body=_(
+            partner.sudo().message_post(body=_(
                 "Resale certificate rejected: %s", partner.aa_resale_note))
             partner._aa_resale_email("mail_template_resale_rejected")
 
         return True
 
-    def _aa_resale_check_manager(self):
-        if not self.env.user.has_group("sales_team.group_sale_manager"):
+    def _aa_resale_check_user(self):
+        """ANY EMPLOYEE MAY HANDLE THESE (owner, 2026-10-19).
+
+        It was Sales managers only, which is the wrong shape for this shop:
+        whoever is at the counter when a dealer turns up with a certificate is
+        the person who should be able to deal with it. Internal users only,
+        though - a portal user must never approve their own.
+        """
+        if not self.env.user.has_group("base.group_user"):
             raise UserError(_(
-                "Only a Sales manager can approve or reject a resale "
+                "Only somebody who works here can approve or reject a resale "
                 "certificate."))
 
     def _aa_resale_email(self, template_name):

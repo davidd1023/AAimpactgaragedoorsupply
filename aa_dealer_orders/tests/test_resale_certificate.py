@@ -57,6 +57,47 @@ class ResaleCertificateCase(HttpCase):
     def _exempt(self):
         return self.partner.property_account_position_id == self.position
 
+    # --- and nothing of this reaches the front page --------------------------
+
+    def test_this_module_does_not_depend_on_the_one_that_owns_the_front_page(self):
+        """THE BUG THE OWNER CAUGHT ON 2026-10-19, and the guard against
+        repeating it.
+
+        garage_door_supply ships aa_impact_homepage, which inherits
+        website.homepage and REPLACES the whole of //div[@id='wrap']. Naming
+        that module as a dependency here - which I did, only so the fiscal
+        position lookup looked tidy - is enough for an update of this module
+        to carry it along and put the shipped hero back over whatever has been
+        done to the page in the website builder. He restored a backup and
+        watched the page change back, which is what proved it.
+
+        The position is found with env.ref(..., raise_if_not_found=False)
+        instead, which needs no dependency at all.
+        """
+        module = self.env["ir.module.module"].search(
+            [("name", "=", "aa_dealer_orders")], limit=1)
+        depends = module.dependencies_id.mapped("name")
+
+        self.assertNotIn("garage_door_supply", depends)
+        self.assertTrue(self.position,
+                        "and the fiscal position is still found without it")
+
+    def test_nothing_here_touches_a_website_page(self):
+        """Every template this module adds hangs off the PORTAL - My Account
+        and an order's own page - and none off the website layout or a page
+        anybody browses to."""
+        views = self.env["ir.ui.view"].search(
+            [("key", "=like", "aa_dealer_orders.%")])
+
+        for view in views:
+            root = view.inherit_id
+
+            while root and root.inherit_id:
+                root = root.inherit_id
+
+            with self.subTest(view=view.key):
+                self.assertNotIn("homepage", (root.key or view.key or ""))
+
     # --- the dealer registers -------------------------------------------------
 
     def test_the_fiscal_position_this_is_all_about_exists(self):
@@ -157,17 +198,39 @@ class ResaleCertificateCase(HttpCase):
 
         self.assertFalse(self._exempt)
 
-    def test_only_a_sales_manager_decides(self):
+    def test_any_employee_can_decide(self):
+        """ANY EMPLOYEE, NOT ONLY A SALES MANAGER (owner, 2026-10-19).
+        Whoever is at the counter when a dealer turns up with a certificate."""
         self._apply()
         clerk = self.env["res.users"].create({
             "name": "A clerk", "login": "aa_resale_clerk",
-            "group_ids": [(6, 0, [self.env.ref("base.group_user").id,
-                                  self.env.ref("sales_team.group_sale_salesman").id])]})
+            "group_ids": [(6, 0, [self.env.ref("base.group_user").id])]})
+
+        self.partner.with_user(clerk).action_aa_resale_approve()
+
+        self.assertTrue(self._exempt)
+        self.assertEqual(self.partner.aa_resale_reviewed_by, clerk)
+
+    def test_a_dealer_cannot_approve_their_own(self):
+        """Internal users only. The whole point of the review is that somebody
+        here looks at it."""
+        self._apply()
 
         with self.assertRaises(UserError):
-            self.partner.with_user(clerk).action_aa_resale_approve()
+            self.partner.with_user(self.dealer).action_aa_resale_approve()
 
         self.assertFalse(self._exempt)
+
+    def test_the_menu_is_not_behind_the_sales_administrator_group(self):
+        """IT WAS, AND THE GROUP ON IT MADE NO DIFFERENCE. Sales >
+        Configuration is restricted to Sales / Administrator, so a
+        salesperson could not see this menu however it was marked."""
+        menu = self.env.ref("aa_dealer_orders.menu_aa_resale_certificates")
+        restricted = self.env.ref("sales_team.group_sale_manager")
+
+        self.assertNotIn(restricted, menu.parent_id.group_ids,
+                         "the parent menu is manager-only again")
+        self.assertIn(self.env.ref("base.group_user"), menu.group_ids)
 
     def test_approving_without_a_date_is_refused(self):
         """The exemption comes off when the date passes, so it has to have
