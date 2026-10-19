@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- WHERE THE ORDER HAS GOT TO, on the customer's own pages (owner,
+       2026-10-19). Odoo's own column answers "has it shipped"; this one
+       answers "is it made yet", which on a made-to-order spring is the
+       question the customer is actually ringing up to ask. -->
+
+  <template id="portal_my_orders_progress" name="Your Orders: being made"
+            inherit_id="sale.portal_my_orders">
+    <xpath expr="//th[@name='order_total']" position="before">
+      <!-- "Progress", not "Being Made": the same column carries Finished
+           badges on an order that is done, and a heading has to be true of
+           every row under it. -->
+      <th class="text-end" name="aa_order_progress">Progress</th>
+    </xpath>
+    <xpath expr="//td[@name='order_amount_total']" position="before">
+      <td class="text-end" name="aa_order_progress_status">
+        <t t-set="aa_progress" t-value="order._aa_station_progress()"/>
+        <!-- NOTHING FOR AN ORDER THAT IS NOT BEING MADE. Parts off the shelf
+             are not made at a station, and an empty cell says that better
+             than a badge claiming something. -->
+        <div t-if="aa_progress" class="d-flex flex-column align-items-end gap-1">
+          <span t-foreach="aa_progress" t-as="aa_station" t-key="aa_station['label']"
+                t-attf-class="badge rounded-pill text-nowrap #{
+                    'text-bg-success' if aa_station['state'] == 'done'
+                    else 'text-bg-primary' if aa_station['state'] == 'making'
+                    else 'text-bg-secondary'}">
+            <t t-esc="aa_station['label']"/>: <t t-esc="aa_station['words']"/>
+          </span>
+        </div>
+      </td>
+    </xpath>
+  </template>
+
+  <!-- THE NUMBERS COME OFF THE CUSTOMER'S PAGE. sale_mrp lists the order's
+       manufacturing orders there - "AAM/MO/00054 Date: 10/19/2026 Confirmed" -
+       which is internal numbering a customer cannot act on, and it answers the
+       same question as the block below: is it made yet. Two answers to one
+       question, one of them in the shop's own language, is worse than one. The
+       finish date it carried is kept, beside the station it belongs to. -->
+  <template id="sale_order_portal_content_no_mo_numbers"
+            name="Order page: no manufacturing order numbers"
+            inherit_id="sale_mrp.sale_order_portal_content_inherit_sale_mrp">
+    <xpath expr="//t[@t-if='mrp_productions']" position="replace"/>
+  </template>
+
+  <!-- And the same thing, with room to breathe, on the order's own page. -->
+  <template id="sale_order_portal_content_progress" name="Order page: being made"
+            inherit_id="sale.sale_order_portal_content">
+    <xpath expr="//div[@id='informations']" position="after">
+      <t t-set="aa_progress" t-value="sale_order._aa_station_progress()"/>
+      <div t-if="aa_progress" class="o_aa_order_progress mb-4 d-print-none">
+        <h4 class="mb-2">How your order is being made</h4>
+        <div class="list-group">
+          <div t-foreach="aa_progress" t-as="aa_station" t-key="aa_station['label']"
+               class="list-group-item d-flex justify-content-between align-items-center gap-2">
+            <span>
+              <span class="fw-bold" t-esc="aa_station['label']"/>
+              <!-- The day it was finished: the one thing worth keeping from
+                   the list of manufacturing order numbers this replaces. -->
+              <span t-if="aa_station['date']" class="text-muted small ms-2">
+                finished <t t-esc="aa_station['date']"/>
+              </span>
+            </span>
+            <span t-attf-class="badge rounded-pill text-nowrap #{
+                      'text-bg-success' if aa_station['state'] == 'done'
+                      else 'text-bg-primary' if aa_station['state'] == 'making'
+                      else 'text-bg-secondary'}">
+              <i t-attf-class="fa me-1 #{
+                     'fa-check' if aa_station['state'] == 'done'
+                     else 'fa-cog' if aa_station['state'] == 'making'
+                     else 'fa-clock-o'}"/>
+              <t t-esc="aa_station['words']"/>
+            </span>
+          </div>
+        </div>
+        <!-- SAID IN WORDS AS WELL AS IN COLOUR, because a colour is not a
+             sentence and a customer reading this on a phone in the sun may
+             not be able to tell green from grey. -->
+        <div class="form-text">
+          Each part of your order is made at its own bench. We will let you
+          know when everything is ready to go out.
+        </div>
+      </div>
+    </xpath>
+  </template>
+
+</odoo>
