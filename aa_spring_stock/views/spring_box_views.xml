@@ -7,8 +7,8 @@
         <field name="model">aa.spring.place.summary</field>
         <field name="arch" type="xml">
             <list string="Spring Inventory" create="0" edit="0" delete="0">
-                <field name="place" column_invisible="context.get('aa_place')"/>
-                <field name="box_id" column_invisible="context.get('aa_place') != 'Boxes'"/>
+                <field name="place" column_invisible="context.get('aa_all_places')"/>
+                <field name="box_id" optional="show"/>
                 <field name="inside_diameter"/>
                 <field name="wire"/>
                 <field name="pairs" sum="Pairs"/>
@@ -34,40 +34,21 @@
                 <filter name="id_375" string='3 3/4"' domain="[('inside_diameter_num', '=', 3.75)]"/>
                 <filter name="id_525" string='5 1/4"' domain="[('inside_diameter_num', '=', 5.25)]"/>
                 <group>
+                    <filter name="group_place" string="Place" context="{'group_by': 'place'}"/>
                     <filter name="group_id" string="I.D." context="{'group_by': 'inside_diameter'}"/>
                     <filter name="group_box" string="Box" context="{'group_by': 'box_id'}"/>
-                    <filter name="group_place" string="Place" context="{'group_by': 'place'}"/>
                 </group>
             </search>
         </field>
     </record>
 
-    <record id="action_aa_spring_floor" model="ir.actions.act_window">
-        <field name="name">Floor</field>
+    <record id="action_aa_spring_places" model="ir.actions.act_window">
+        <field name="name">Floor / Rack / Boxes</field>
         <field name="res_model">aa.spring.place.summary</field>
         <field name="view_mode">list</field>
-        <field name="domain">[('place', '=', 'Floor')]</field>
-        <field name="context">{'aa_place': 'Floor', 'search_default_group_id': 1}</field>
-        <field name="help" type="html"><p>Coils and cut pieces on the floor.</p></field>
-    </record>
-
-    <record id="action_aa_spring_rack" model="ir.actions.act_window">
-        <field name="name">Rack</field>
-        <field name="res_model">aa.spring.place.summary</field>
-        <field name="view_mode">list</field>
-        <field name="domain">[('place', '=', 'Rack')]</field>
-        <field name="context">{'aa_place': 'Rack', 'search_default_group_id': 1}</field>
-        <field name="help" type="html"><p>Leftover pieces and set-aside springs on the rack.
-            They are used first.</p></field>
-    </record>
-
-    <record id="action_aa_spring_boxes_stock" model="ir.actions.act_window">
-        <field name="name">Boxes</field>
-        <field name="res_model">aa.spring.place.summary</field>
-        <field name="view_mode">list</field>
-        <field name="domain">[('place', '=', 'Boxes')]</field>
-        <field name="context">{'aa_place': 'Boxes', 'search_default_group_id': 1}</field>
-        <field name="help" type="html"><p>Coils still in their boxes. They are used last.</p></field>
+        <field name="context">{'aa_all_places': 1, 'search_default_group_place': 1, 'search_default_group_id': 1}</field>
+        <field name="help" type="html"><p>Open Floor, Rack or Boxes to see what is in each, by I.D.
+            Springs are cut from the Rack first, then the Floor, and the Boxes last.</p></field>
     </record>
 
     <!-- Spring boxes -->
@@ -221,12 +202,8 @@
     </record>
 
     <!-- Inventory > Springs -->
-    <menuitem id="menu_aa_spring_floor" name="Floor" parent="menu_aa_springs"
-              action="action_aa_spring_floor" sequence="12"/>
-    <menuitem id="menu_aa_spring_rack" name="Rack" parent="menu_aa_springs"
-              action="action_aa_spring_rack" sequence="13"/>
-    <menuitem id="menu_aa_spring_boxes_stock" name="Boxes" parent="menu_aa_springs"
-              action="action_aa_spring_boxes_stock" sequence="14"/>
+    <menuitem id="menu_aa_spring_places" name="Floor / Rack / Boxes" parent="menu_aa_springs"
+              action="action_aa_spring_places" sequence="12"/>
     <menuitem id="menu_aa_spring_boxes" name="Spring Boxes" parent="menu_aa_springs"
               action="action_aa_spring_boxes" sequence="15"/>
 

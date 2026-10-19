@@ -102,6 +102,7 @@ coils are used last. Each numbered box (`aa.spring.box`) is its own location
 under Boxes (`AAM/Stock/Boxes/Box 3`) and can hold several wires / I.D.s. Coils
 are added per line (I.D., wire, LH and RH count; one 84" lot each, named
 `BOX<n>-<wire>-<I.D.>-<hand>-NN`), moved down to the floor a chosen number at a
-time, and a box is removed only once it is empty. Floor, Rack and Boxes each
-have their own table (`aa.spring.place.summary`). Anything that asks "is this a
+time, and a box is removed only once it is empty. Floor, Rack and Boxes are
+shown on ONE page, a fold-out group per place (owner, 2026-10-19: not separate
+menus) - `aa.spring.place.summary`, menu "Floor / Rack / Boxes". Anything that asks "is this a
 box coil" must use `place_of()`, never `location.name == "Boxes"`.
