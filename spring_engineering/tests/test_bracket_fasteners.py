@@ -599,9 +599,10 @@ class TestWhatElseTakesCompanions(TransactionCase):
     """The owner's second list, 2026-10-16.
 
     A jamb bracket also takes a lag screw; a flag angle takes three lag
-    screws, four studs and four nuts; end bearing plates and spring anchor
-    brackets take two lag screws each. One table, because they are one rule:
-    something that cannot be fitted with what is in the box.
+    screws, four studs and four nuts; end bearing plates take two lag screws
+    and four track/hanger bolts; spring anchor brackets take two lag screws.
+    One table, because they are one rule: something that cannot be fitted
+    with what is in the box.
     """
 
     def setUp(self):
@@ -610,6 +611,7 @@ class TestWhatElseTakesCompanions(TransactionCase):
         self.stud = self._product("1/4 X 3/4 KNURLEL STUD 18-8")
         self.nut = self._product("Flage Nuts 1/4 20")
         self.lag = self._product("Lag Screws")
+        self.bolt = self._product("Track/Hanger Bolt/Nut")
 
     def _product(self, name):
         return self.env["product.product"].create({
@@ -644,16 +646,29 @@ class TestWhatElseTakesCompanions(TransactionCase):
         self.assertEqual(self._qty(order, self.stud), 4)
         self.assertEqual(self._qty(order, self.nut), 4)
 
-    def test_an_end_bearing_plate_takes_two_lag_screws(self):
+    def test_an_end_bearing_plate_takes_two_lag_and_four_track_bolts(self):
         order = self._cart_with(self._product("End Bearing Plate 8GA LH"))
 
         self.assertEqual(self._qty(order, self.lag), 2)
+        self.assertEqual(self._qty(order, self.bolt), 4)
         self.assertFalse(self._qty(order, self.stud), "it takes no studs")
+
+    def test_the_track_bolt_is_not_the_hex_lag_bolt(self):
+        """BOTH ARE BOLTS, and only one of them is this one. A read for the
+        word "bolt" alone would hand the bearing plates a 5/16 hex lag bolt,
+        which is why the pattern asks for HANGER as well."""
+        hex_bolt = self._product("5/16 x 1-5/8 Hex Lag Bolt")
+        order = self._cart_with(self._product("End Bearing Plate 8GA LH"))
+
+        self.assertEqual(self._qty(order, self.bolt), 4)
+        self.assertFalse(self._qty(order, hex_bolt), "the wrong bolt")
+        self.assertEqual(self._qty(order, self.lag), 2, "nor is it the lag")
 
     def test_a_spring_anchor_bracket_takes_two_lag_screws(self):
         order = self._cart_with(self._product("Spring Anchor Bracket"))
 
         self.assertEqual(self._qty(order, self.lag), 2)
+        self.assertFalse(self._qty(order, self.bolt), "and no track bolts")
 
     # --- and the edges of the table -----------------------------------------
 
@@ -664,11 +679,13 @@ class TestWhatElseTakesCompanions(TransactionCase):
             self._product("End Bearing Plate 3 3-8 Black ( Pair )"))
 
         self.assertEqual(self._qty(order, self.lag), 2)
+        self.assertEqual(self._qty(order, self.bolt), 4)
 
     def test_the_count_follows_the_quantity(self):
         order = self._cart_with(self._product("End Bearing Plate 8GA RH"), 3)
 
         self.assertEqual(self._qty(order, self.lag), 6, "two for each ordered")
+        self.assertEqual(self._qty(order, self.bolt), 12, "and four each")
 
     def test_things_that_take_nothing_still_take_nothing(self):
         """A LOOSE SEARCH FOR THREE LETTERS FINDS EVERY FLAG ANGLE. The lag
@@ -681,6 +698,7 @@ class TestWhatElseTakesCompanions(TransactionCase):
 
             self.assertFalse(self._qty(order, self.lag), name)
             self.assertFalse(self._qty(order, self.stud), name)
+            self.assertFalse(self._qty(order, self.bolt), name)
 
     def test_a_lag_screw_does_not_breed_lag_screws(self):
         """A companion is never a host. Nothing in the table matches one
