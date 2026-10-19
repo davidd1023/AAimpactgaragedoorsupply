@@ -19,7 +19,7 @@
     <field name="model">sale.order</field>
     <field name="inherit_id" ref="sale.sale_order_tree"/>
     <field name="arch" type="xml">
-      <xpath expr="//field[@name='name']" position="after">
+      <xpath expr="//field[@name='name']" position="before">
         <field name="aa_wo_number" optional="show"/>
       </xpath>
     </field>
@@ -52,7 +52,7 @@
     <field name="model">stock.picking</field>
     <field name="inherit_id" ref="stock.vpicktree"/>
     <field name="arch" type="xml">
-      <xpath expr="//field[@name='name']" position="after">
+      <xpath expr="//field[@name='name']" position="before">
         <field name="aa_wo_number" optional="show"/>
       </xpath>
       <!-- Under Manufacturing > Work Orders the transfer IS called by its
@@ -91,7 +91,7 @@
     <field name="model">mrp.production</field>
     <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
     <field name="arch" type="xml">
-      <xpath expr="//field[@name='name']" position="after">
+      <xpath expr="//field[@name='name']" position="before">
         <field name="aa_wo_number" optional="show"/>
       </xpath>
     </field>
