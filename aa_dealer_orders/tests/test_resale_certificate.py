@@ -82,6 +82,26 @@ class ResaleCertificateCase(HttpCase):
         self.assertTrue(self.position,
                         "and the fiscal position is still found without it")
 
+    def test_the_tile_icon_is_a_file_that_really_exists(self):
+        """THE TILE SHOWED A BROKEN IMAGE on production, 2026-10-19.
+
+        The icon pointed at /account/static/src/img/Bills.svg - the real file
+        is bill.svg, lower case - and nothing anywhere complains about that: a
+        missing icon is a 404 on one image and a perfectly rendered page around
+        it, so it is only ever found by looking. This asserts the path resolves
+        to a file on disk, which is the cheapest guard there is against the
+        same typo.
+        """
+        from odoo.tools.misc import file_path
+
+        view = self.env.ref("aa_dealer_orders.portal_my_home_resale")
+        paths = re.findall(r"'(/[A-Za-z0-9_./-]+\.svg)'", view.arch)
+        self.assertTrue(paths, "the tile has no icon at all")
+
+        for path in paths:
+            # Raises FileNotFoundError if it is not there.
+            file_path(path.lstrip("/"))
+
     def test_nothing_here_touches_a_website_page(self):
         """Every template this module adds hangs off the PORTAL - My Account
         and an order's own page - and none off the website layout or a page
