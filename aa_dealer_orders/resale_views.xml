@@ -13,11 +13,11 @@
         <header>
           <button name="action_aa_resale_approve" type="object"
                   string="Approve certificate" class="btn-primary"
-                  groups="sales_team.group_sale_manager"
+                  groups="base.group_user"
                   invisible="aa_resale_state not in ('pending', 'expired', 'rejected')"/>
           <button name="action_aa_resale_reject" type="object"
                   string="Reject certificate"
-                  groups="sales_team.group_sale_manager"
+                  groups="base.group_user"
                   invisible="aa_resale_state not in ('pending', 'approved')"/>
           <field name="aa_resale_state" widget="statusbar"
                  statusbar_visible="none,pending,approved"
@@ -86,11 +86,18 @@
     </field>
   </record>
 
+  <!-- UNDER SALES ITSELF, not under its Configuration menu. Configuration is
+       restricted to Sales / Administrator, so the group on this item made no
+       difference whatever: a salesperson could not see it however it was
+       marked (owner, 2026-10-19 - "any employee users should be able to
+       access the tax forms"). An employee with no Sales app at all still has
+       a route: the three filters above are on the contacts search view, so
+       any contact list can be filtered to the certificates waiting. -->
   <menuitem id="menu_aa_resale_certificates"
             name="Resale Certificates"
-            parent="sale.menu_sale_config"
+            parent="sale.sale_menu_root"
             action="action_aa_resale_certificates"
-            groups="sales_team.group_sale_manager"
+            groups="base.group_user"
             sequence="90"/>
 
 </odoo>
