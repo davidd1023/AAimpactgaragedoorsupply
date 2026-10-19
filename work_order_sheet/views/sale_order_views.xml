@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ON THE ORDER, where somebody looking at it decides to cancel it. Odoo's
+       own Cancel button stops at the order: it does not take the job off the
+       floor, put the goods back or give the money back, which is the whole of
+       what the owner asked for. -->
+  <record id="view_order_form_aa_cancel" model="ir.ui.view">
+    <field name="name">sale.order.form.aa.cancel</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//header" position="inside">
+        <button name="action_aa_cancel_and_refund" type="object"
+                string="Cancel &amp; Refund"
+                groups="sales_team.group_sale_manager"
+                invisible="state != 'sale'"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

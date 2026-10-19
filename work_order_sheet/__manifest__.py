@@ -1,6 +1,6 @@
 {
     'name': "Work Order Sheet",
-    'version': '19.0.1.34.0',
+    'version': '19.0.1.35.0',
     'summary': "Print a work order, and sort its work onto the benches",
     'description': """
 Adds a printable sheet to a work order - the transfer the shop sees under
@@ -24,6 +24,25 @@ The printed sheet stays on the transfer, which is the record it describes, and
 the delivery confirmation never had anything to do with the benches - it hangs
 off the outgoing transfer and the customer's own link.
 
+CANCELLING A PAID ORDER. "Right now there is no defined process for this"
+(owner, 2026-10-19), so there is one, on the order itself: Cancel & Refund.
+The dialog states the procedure before it runs it, and then runs it in that
+order:
+
+  1. every unfinished job of the order comes off the Shop Floor;
+  2. transfers that have not happened are cancelled, and transfers that have
+     get a return raised against them for somebody to validate when the goods
+     are physically back;
+  3. the money goes back through whichever provider took it - Stripe can, a
+     dealer account cannot and it says so rather than pretending;
+  4. the order itself is cancelled, last, because the steps above need it.
+
+It does NOT touch the ledger: a posted invoice stays posted, is named in the
+order's log and needs a credit note from an accountant. The refund amount comes
+in filled with what was taken and may be reduced for a restocking fee. Only a
+Sales manager may do any of it, and the whole procedure - with who and why - is
+written on the order.
+
 SEPARATE FROM door_work_order ON PURPOSE. That module exists to receive a door
 from the external calculator and raise a manufacturing order; this one prints
 what a customer ordered on the website. They share a look and nothing else, and
@@ -33,7 +52,7 @@ machinery it does not use.
     'category': 'Inventory/Inventory',
     'license': 'LGPL-3',
     'author': 'AA Impact Garage Door Supply',
-    'depends': ['stock', 'sale_stock', 'mrp'],
+    'depends': ['stock', 'sale_stock', 'mrp', 'payment'],
     'data': [
         'security/ir.model.access.csv',
         'data/mail_template_order_ready.xml',
@@ -41,6 +60,8 @@ machinery it does not use.
         'report/work_order_sheet_reports.xml',
         'views/delivery_templates.xml',
         'views/res_config_settings_views.xml',
+        'views/sale_order_views.xml',
+        'wizard/order_cancel_views.xml',
         'views/stock_picking_views.xml',
         # THE WORK STATIONS, PUT AWAY FOR NOW - the owner's instruction,
         # 2026-10-14: the shop floor module does the same job. Nothing is
