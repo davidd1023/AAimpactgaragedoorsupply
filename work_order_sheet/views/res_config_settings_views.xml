@@ -16,8 +16,17 @@
           <setting id="aa_ready_email_from"
                    string="Order-ready alerts"
                    help="The address the &quot;your order is ready&quot; email is sent from, and the one a customer's reply comes back to. Left empty, the company's own email address is used.">
+            <field name="dispatch_ready_email_auto"/>
             <div class="content-group mt-2">
+              <label for="dispatch_ready_email_from" string="Sent from" class="o_light_label"/>
               <field name="dispatch_ready_email_from" placeholder="sales@aaigd.com"/>
+            </div>
+          </setting>
+          <setting id="aa_pickup_hours"
+                   string="Pickup hours"
+                   help="Printed on every email the customer gets - the order confirmation, the invoice, &quot;ready for pickup&quot; and the cancellation - under the address they collect from.">
+            <div class="content-group mt-2">
+              <field name="aa_pickup_hours" placeholder="Monday to Friday, 8:00 AM to 4:30 PM"/>
             </div>
           </setting>
         </block>

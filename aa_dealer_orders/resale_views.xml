@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- APPROVE / REJECT, ON THE CONTACT the certificate belongs to. The
+       certificate, the number and the date it runs out are all here, so the
+       decision is made with the document open rather than from a list. -->
+  <record id="view_partner_form_aa_resale" model="ir.ui.view">
+    <field name="name">res.partner.form.aa.resale</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="before">
+        <header>
+          <button name="action_aa_resale_approve" type="object"
+                  string="Approve certificate" class="btn-primary"
+                  groups="sales_team.group_sale_manager"
+                  invisible="aa_resale_state not in ('pending', 'expired', 'rejected')"/>
+          <button name="action_aa_resale_reject" type="object"
+                  string="Reject certificate"
+                  groups="sales_team.group_sale_manager"
+                  invisible="aa_resale_state not in ('pending', 'approved')"/>
+          <field name="aa_resale_state" widget="statusbar"
+                 statusbar_visible="none,pending,approved"
+                 invisible="aa_resale_state in ('none', False)"/>
+        </header>
+      </xpath>
+
+      <xpath expr="//page[@name='sales_purchases']//group" position="after">
+        <group name="aa_resale" string="Tax-exempt dealer (resale certificate)">
+          <field name="aa_resale_state" readonly="1"/>
+          <field name="aa_resale_certificate" filename="aa_resale_certificate_name"
+                 invisible="not aa_resale_certificate"/>
+          <field name="aa_resale_certificate_name" invisible="1"/>
+          <field name="aa_resale_number"
+                 invisible="aa_resale_state in ('none', False)"/>
+          <field name="aa_resale_expiry"
+                 invisible="aa_resale_state in ('none', False)"/>
+          <!-- THE REASON IS WRITTEN BEFORE REJECTING, not after: the dealer is
+               told what it says, so Reject refuses to go without one. -->
+          <field name="aa_resale_note" placeholder="Why it cannot be approved - the dealer is told this"
+                 invisible="aa_resale_state in ('none', False)"/>
+          <field name="aa_resale_submitted_on" readonly="1"
+                 invisible="not aa_resale_submitted_on"/>
+          <field name="aa_resale_reviewed_by" readonly="1"
+                 invisible="not aa_resale_reviewed_on"/>
+          <field name="aa_resale_reviewed_on" readonly="1"
+                 invisible="not aa_resale_reviewed_on"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- FOUND WITHOUT OPENING ANYTHING. The two questions worth asking of this
+       list are "what is waiting for me" and "whose has run out". -->
+  <record id="view_res_partner_filter_aa_resale" model="ir.ui.view">
+    <field name="name">res.partner.search.aa.resale</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_res_partner_filter"/>
+    <field name="arch" type="xml">
+      <xpath expr="//search" position="inside">
+        <separator/>
+        <filter name="aa_resale_pending" string="Resale certificate to review"
+                domain="[('aa_resale_state', '=', 'pending')]"/>
+        <filter name="aa_resale_approved" string="Tax exempt"
+                domain="[('aa_resale_state', '=', 'approved')]"/>
+        <filter name="aa_resale_expired" string="Resale certificate expired"
+                domain="[('aa_resale_state', '=', 'expired')]"/>
+        <group>
+          <filter name="aa_resale_group" string="Resale certificate"
+                  context="{'group_by': 'aa_resale_state'}"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="action_aa_resale_certificates" model="ir.actions.act_window">
+    <field name="name">Resale Certificates</field>
+    <field name="res_model">res.partner</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('aa_resale_state', '!=', 'none')]</field>
+    <field name="context">{'search_default_aa_resale_pending': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No resale certificates yet</p>
+      <p>A dealer uploads theirs under Tax-exempt dealer status in My Account,
+         and it appears here to be approved or rejected.</p>
+    </field>
+  </record>
+
+  <menuitem id="menu_aa_resale_certificates"
+            name="Resale Certificates"
+            parent="sale.menu_sale_config"
+            action="action_aa_resale_certificates"
+            groups="sales_team.group_sale_manager"
+            sequence="90"/>
+
+</odoo>

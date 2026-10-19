@@ -2,9 +2,14 @@ import uuid
 
 from markupsafe import Markup
 
+import logging
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools.mail import email_normalize
+
+
+_logger = logging.getLogger(__name__)
 
 
 def _token(record=None):
@@ -318,12 +323,15 @@ class StockPickingOpenForm(models.Model):
                 else self.origin or self.name or "")
 
     def _dispatch_ready_email_from(self):
-        """The address the alert comes from, as set in Inventory > Settings."""
-        self.ensure_one()
-        typed = (self.env["ir.config_parameter"].sudo().get_param(
-            "work_order_sheet.ready_email_from") or "").strip()
+        """The address the alert comes from, as set in Inventory > Settings.
 
-        return typed or self.company_id.email or ""
+        ONE HOME NOW (see email_letterhead): all four customer emails come
+        from the same mailbox, so the lookup moved there and this is the name
+        the mail template has always called it by.
+        """
+        self.ensure_one()
+
+        return self._aa_email_from()
 
     def _dispatch_pickup_place(self):
         """Where it is ready for pickup - "Medley".
@@ -383,6 +391,76 @@ class StockPickingOpenForm(models.Model):
                 "next": {"type": "ir.actions.act_window_close"},
             },
         }
+
+    # --- and sent without being asked -----------------------------------------
+    #
+    # "send the email to the customer automatically, well keep the button for
+    # resending in case we ever need it" (owner, 2026-10-19).
+    #
+    # READY MEANS READY, and Odoo already knows when: a delivery is Ready when
+    # everything on it is reserved and could be handed over. For a made-to-order
+    # door that is exactly when the shop has finished making it - the springs
+    # and the tracks only reach stock when their manufacturing orders are marked
+    # done, and the delivery reserves against them the moment they do. An order
+    # of parts off the shelf is ready at once, which is also true.
+    #
+    # ON A SCHEDULE RATHER THAN ON A TRIGGER, deliberately. `state` is a stored
+    # COMPUTED field, so it changes without write() being called and there is no
+    # single moment to hang a hook on that catches every way a delivery becomes
+    # ready - stock arriving, a manufacturing order finishing, somebody
+    # reserving by hand. A sweep every few minutes catches all of them, and the
+    # "told on" stamp below makes it safe to run twice.
+
+    @api.model
+    def _cron_notify_ready(self, limit=200):
+        """Tell the customer about every delivery that has become ready."""
+        parameters = self.env["ir.config_parameter"].sudo()
+
+        if parameters.get_param("work_order_sheet.ready_email_auto", "True") \
+                not in ("True", "true", "1"):
+            return 0
+
+        # NOT THE BACK CATALOGUE. Switching this on must not email everybody
+        # whose order has been sitting ready since before it existed - fifty
+        # customers hearing at once that an order they collected weeks ago is
+        # ready would be the worst possible first impression of it. Only orders
+        # raised since the day it was switched on are told automatically; an
+        # older one can still be told with the button.
+        since = parameters.get_param("work_order_sheet.ready_auto_since")
+
+        domain = [
+            ("picking_type_id.code", "=", "outgoing"),
+            ("state", "=", "assigned"),
+            ("dispatch_ready_sent_on", "=", False),
+        ]
+
+        if since:
+            domain.append(("create_date", ">=", since))
+
+        sent = 0
+
+        for picking in self.search(domain, order="id", limit=limit):
+            if not email_normalize(picking.partner_id.email or ""):
+                # Left for somebody to deal with rather than retried for ever:
+                # the button says the same thing out loud when it is pressed.
+                _logger.info(
+                    "work_order_sheet: %s is ready but %s has no email address",
+                    picking.name, picking.partner_id.display_name)
+                continue
+
+            # ONE BAD RECORD MUST NOT STOP THE SWEEP. A dead mail server or a
+            # template that cannot render for one order is no reason for the
+            # next twenty customers to hear nothing.
+            try:
+                with self.env.cr.savepoint():
+                    picking.action_notify_ready()
+                    sent += 1
+            except Exception:
+                _logger.exception(
+                    "work_order_sheet: telling %s about %s failed",
+                    picking.partner_id.display_name, picking.name)
+
+        return sent
 
     def action_open_dispatch_form(self):
         """Open the customer's confirmation form in a new tab (owner, 2026-10-14):

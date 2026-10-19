@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- WHAT THE DEALER IS TOLD. Three short messages: it was approved, it was
+       not, or it is about to run out. Nobody sits on a portal page waiting for
+       an answer, and a dealer who is not told is a dealer who rings up.
+
+       noupdate, because these are the shop's words from the moment they exist:
+       a module update must not put the owner's wording back to mine. -->
+  <data noupdate="1">
+
+    <record id="mail_template_resale_approved" model="mail.template">
+      <field name="name">Resale certificate approved</field>
+      <field name="model_id" ref="base.model_res_partner"/>
+      <field name="subject">Your tax-exempt status is approved</field>
+      <field name="partner_to">{{ object.id }}</field>
+      <field name="auto_delete" eval="False"/>
+      <field name="body_html" type="html">
+        <div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #111;">
+          <p>
+            Your resale certificate has been approved, so your orders are no
+            longer charged sales tax.
+          </p>
+          <p t-if="object.aa_resale_expiry">
+            The certificate on file runs out on
+            <strong t-out="object.aa_resale_expiry">12/31/2027</strong>. Send us
+            a new one before then and nothing is interrupted - there is a page
+            for it under Tax-exempt dealer status in your account.
+          </p>
+          <p>
+            Thank you,<br/>
+            <t t-out="object.company_id.name or user.company_id.name">AA Impact Garage Door Supply</t>
+          </p>
+        </div>
+      </field>
+    </record>
+
+    <record id="mail_template_resale_rejected" model="mail.template">
+      <field name="name">Resale certificate not approved</field>
+      <field name="model_id" ref="base.model_res_partner"/>
+      <field name="subject">About your resale certificate</field>
+      <field name="partner_to">{{ object.id }}</field>
+      <field name="auto_delete" eval="False"/>
+      <field name="body_html" type="html">
+        <div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #111;">
+          <p>
+            We could not approve the resale certificate you sent us.
+          </p>
+          <p t-if="object.aa_resale_note">
+            <strong t-out="object.aa_resale_note">The certificate was not readable.</strong>
+          </p>
+          <p>
+            You can upload another one under Tax-exempt dealer status in your
+            account, or call us and we will sort it out.
+          </p>
+          <p>
+            Thank you,<br/>
+            <t t-out="object.company_id.name or user.company_id.name">AA Impact Garage Door Supply</t>
+          </p>
+        </div>
+      </field>
+    </record>
+
+    <record id="mail_template_resale_expiring" model="mail.template">
+      <field name="name">Resale certificate expiring</field>
+      <field name="model_id" ref="base.model_res_partner"/>
+      <field name="subject">Your resale certificate expires soon</field>
+      <field name="partner_to">{{ object.id }}</field>
+      <field name="auto_delete" eval="False"/>
+      <field name="body_html" type="html">
+        <div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #111;">
+          <p>
+            The resale certificate we have on file for you expires on
+            <strong t-out="object.aa_resale_expiry">12/31/2027</strong>.
+          </p>
+          <p>
+            Please upload a current one under Tax-exempt dealer status in your
+            account. If it lapses we have to start charging sales tax again
+            until a new certificate is approved.
+          </p>
+          <p>
+            Thank you,<br/>
+            <t t-out="object.company_id.name or user.company_id.name">AA Impact Garage Door Supply</t>
+          </p>
+        </div>
+      </field>
+    </record>
+
+    <!-- ONCE A DAY IS OFTEN ENOUGH for a date: a certificate does not expire at
+         ten past three. noupdate with the templates, so a changed interval or a
+         stopped cron stays the owner's decision. -->
+    <record id="ir_cron_aa_resale_expiry" model="ir.cron">
+      <field name="name">Resale certificates: warn and expire</field>
+      <field name="model_id" ref="base.model_res_partner"/>
+      <field name="state">code</field>
+      <field name="code">model._cron_aa_resale_expiry()</field>
+      <field name="interval_number">1</field>
+      <field name="interval_type">days</field>
+      <field name="active" eval="True"/>
+    </record>
+
+  </data>
+
+</odoo>
