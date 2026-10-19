@@ -10,3 +10,4 @@ from . import test_delivery_confirmation
 # stays, and comes back with the benches.
 #
 #   from . import test_work_stations
+from . import test_order_ready_alert

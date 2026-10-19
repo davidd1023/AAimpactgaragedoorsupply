@@ -36,6 +36,11 @@
             <button name="action_dispatch_form" type="object" class="btn-link"
                     string="Make the confirmation form"
                     invisible="dispatch_state"/>
+            <!-- WHEN THE CUSTOMER WAS TOLD, and what address it went to, so
+                 nobody has to guess whether it has been done and nobody
+                 tells them twice by accident. -->
+            <field name="dispatch_ready_sent_on" invisible="not dispatch_ready_sent_on"/>
+            <field name="dispatch_ready_sent_to" invisible="not dispatch_ready_sent_on"/>
           </group>
           <group>
             <!-- The link itself stays on the record but off the form: the button
@@ -44,6 +49,17 @@
             <button name="action_open_dispatch_form" type="object" class="btn btn-primary"
                     icon="fa-external-link" string="Open the confirmation form"
                     invisible="not dispatch_state" colspan="2"/>
+            <!-- THE DECISION IS THE PRESS (owner, 2026-10-19): the alert goes
+                 when somebody says the order is really ready, not when the
+                 last box happens to be ticked. The words change once it has
+                 gone, because sending it twice should be a thing somebody
+                 means to do. -->
+            <button name="action_notify_ready" type="object" class="btn btn-secondary"
+                    icon="fa-envelope-o" string="Tell the customer it's ready"
+                    invisible="dispatch_ready_sent_on" colspan="2"/>
+            <button name="action_notify_ready" type="object" class="btn btn-link"
+                    icon="fa-repeat" string="Tell the customer again"
+                    invisible="not dispatch_ready_sent_on" colspan="2"/>
             <field name="dispatch_signature" widget="image"
                    options="{'size': [0, 90]}"
                    invisible="not dispatch_signed_on"/>
