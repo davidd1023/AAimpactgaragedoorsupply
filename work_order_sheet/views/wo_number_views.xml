@@ -55,6 +55,12 @@
       <xpath expr="//field[@name='name']" position="after">
         <field name="aa_wo_number" optional="show"/>
       </xpath>
+      <!-- Under Manufacturing > Work Orders the transfer IS called by its
+           W/O #, so Reference and W/O # said the same thing twice (owner,
+           2026-10-19). That list's action carries aa_hide_reference. -->
+      <xpath expr="//field[@name='name']" position="attributes">
+        <attribute name="column_invisible">context.get('aa_hide_reference')</attribute>
+      </xpath>
     </field>
   </record>
 
