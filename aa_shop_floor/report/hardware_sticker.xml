@@ -33,7 +33,7 @@
     <field name="paperformat_id" ref="paperformat_hardware_sticker"/>
     <field name="binding_model_id" ref="mrp.model_mrp_production"/>
     <field name="binding_type">report</field>
-    <field name="print_report_name">'Hardware - %s' % (object.origin or object.name)</field>
+    <field name="print_report_name">'Hardware - %s' % (object.aa_wo_number or object.origin or object.name)</field>
   </record>
 
   <template id="report_hardware_sticker">
@@ -45,7 +45,7 @@
              lines on it. -->
         <div t-if="not card" class="page" style="font-family: Arial, Helvetica, sans-serif;">
           <div style="font-size: 12pt; font-weight: bold;">
-            <t t-esc="o.origin or o.name"/>
+            <t t-esc="o.aa_wo_number or o.origin or o.name"/>
           </div>
           <div style="font-size: 10pt; margin-top: 6pt;">
             Nothing on this order says what this box is for, so there is
