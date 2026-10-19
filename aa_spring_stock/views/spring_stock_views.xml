@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Summary: one row per wire and I.D., LH and RH side by side -->
+    <record id="view_aa_spring_stock_summary_list" model="ir.ui.view">
+        <field name="name">aa.spring.stock.summary.list</field>
+        <field name="model">aa.spring.stock.summary</field>
+        <field name="arch" type="xml">
+            <list string="Spring Inventory" create="0" edit="0" delete="0"
+                  decoration-danger="alert == 'order'" decoration-warning="alert == 'open_box'">
+                <field name="inside_diameter"/>
+                <field name="wire"/>
+                <field name="floor_pairs"/>
+                <field name="floor_l_pcs" optional="show"/>
+                <field name="floor_r_pcs" optional="show"/>
+                <field name="floor_l_in" optional="hide"/>
+                <field name="floor_r_in" optional="hide"/>
+                <field name="rack_l_pcs" optional="show"/>
+                <field name="rack_r_pcs" optional="show"/>
+                <field name="rack_l_in" optional="hide"/>
+                <field name="rack_r_in" optional="hide"/>
+                <field name="boxes_l_pcs" optional="show"/>
+                <field name="boxes_r_pcs" optional="show"/>
+                <field name="total_l_in" optional="show"/>
+                <field name="total_r_in" optional="show"/>
+                <field name="alert" widget="badge"
+                       decoration-danger="alert == 'order'" decoration-warning="alert == 'open_box'"
+                       decoration-success="alert == 'ok'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_aa_spring_stock_summary_search" model="ir.ui.view">
+        <field name="name">aa.spring.stock.summary.search</field>
+        <field name="model">aa.spring.stock.summary</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="wire"/>
+                <field name="inside_diameter"/>
+                <filter name="needs_attention" string="Needs Attention" domain="[('alert', '!=', 'ok')]"/>
+                <filter name="to_order" string="Order from Supplier" domain="[('alert', '=', 'order')]"/>
+                <separator/>
+                <filter name="id_2625" string='2 5/8"' domain="[('inside_diameter_num', '=', 2.625)]"/>
+                <filter name="id_375" string='3 3/4"' domain="[('inside_diameter_num', '=', 3.75)]"/>
+                <filter name="id_525" string='5 1/4"' domain="[('inside_diameter_num', '=', 5.25)]"/>
+                <group>
+                    <filter name="group_id" string="I.D." context="{'group_by': 'inside_diameter'}"/>
+                    <filter name="group_alert" string="Alert" context="{'group_by': 'alert'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_aa_spring_stock_summary" model="ir.actions.act_window">
+        <field name="name">Spring Inventory</field>
+        <field name="res_model">aa.spring.stock.summary</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_group_id': 1}</field>
+        <field name="help" type="html">
+            <p>One row per wire and I.D. Red: no box behind the floor coils - order
+            from the supplier. Yellow: one pair or less on the floor - open a box.</p>
+        </field>
+    </record>
+
+    <!-- Coil pieces (Rack leftovers by default) -->
+    <record id="view_aa_coil_piece_list" model="ir.ui.view">
+        <field name="name">stock.quant.aa.coil.piece.list</field>
+        <field name="model">stock.quant</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <list string="Coil Pieces" create="0" default_order="product_id, quantity">
+                <field name="location_id"/>
+                <field name="product_id"/>
+                <field name="lot_id"/>
+                <field name="quantity" string="Length (in)" sum="Total"/>
+                <field name="reserved_quantity" string="Reserved (in)" optional="show"/>
+                <field name="product_uom_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_aa_coil_piece_search" model="ir.ui.view">
+        <field name="name">stock.quant.aa.coil.piece.search</field>
+        <field name="model">stock.quant</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="lot_id"/>
+                <filter name="rack" string="Rack" domain="[('location_id.name', '=', 'Rack')]"/>
+                <filter name="floor" string="Floor" domain="[('location_id.name', '=', 'Floor')]"/>
+                <filter name="boxes" string="Boxes" domain="[('location_id.name', '=', 'Boxes')]"/>
+                <group>
+                    <filter name="group_product" string="Coil" context="{'group_by': 'product_id'}"/>
+                    <filter name="group_location" string="Location" context="{'group_by': 'location_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_aa_coil_pieces" model="ir.actions.act_window">
+        <field name="name">Coil Pieces</field>
+        <field name="res_model">stock.quant</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_aa_coil_piece_list"/>
+        <field name="search_view_id" ref="view_aa_coil_piece_search"/>
+        <field name="domain">[('product_id.default_code', '=like', 'COIL-%'), ('location_id.usage', '=', 'internal'), ('quantity', '>', 0)]</field>
+        <field name="context">{'search_default_rack': 1, 'search_default_group_product': 1}</field>
+    </record>
+
+    <!-- Cut history -->
+    <record id="view_aa_spring_cut_list" model="ir.ui.view">
+        <field name="name">aa.spring.cut.list</field>
+        <field name="model">aa.spring.cut</field>
+        <field name="arch" type="xml">
+            <list string="Spring Cuts" create="0"
+                  decoration-danger="state in ('short', 'untracked')" decoration-muted="state == 'planned'">
+                <field name="date"/>
+                <field name="wo_number"/>
+                <field name="origin" optional="show"/>
+                <field name="production_id" optional="hide"/>
+                <field name="hand"/>
+                <field name="role" optional="hide"/>
+                <field name="wire"/>
+                <field name="inside_diameter"/>
+                <field name="length"/>
+                <field name="lot_id"/>
+                <field name="source"/>
+                <field name="remaining"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'" decoration-info="state == 'planned'"
+                       decoration-danger="state in ('short', 'untracked')"/>
+                <field name="note" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_aa_spring_cut_search" model="ir.ui.view">
+        <field name="name">aa.spring.cut.search</field>
+        <field name="model">aa.spring.cut</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="wo_number"/>
+                <field name="origin"/>
+                <field name="lot_id"/>
+                <field name="product_id"/>
+                <filter name="done" string="Cut" domain="[('state', '=', 'done')]"/>
+                <filter name="planned" string="Planned" domain="[('state', '=', 'planned')]"/>
+                <filter name="problems" string="Problems" domain="[('state', 'in', ('short', 'untracked'))]"/>
+                <group>
+                    <filter name="group_wo" string="W/O #" context="{'group_by': 'wo_number'}"/>
+                    <filter name="group_product" string="Coil" context="{'group_by': 'product_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_aa_spring_cuts" model="ir.actions.act_window">
+        <field name="name">Cut History</field>
+        <field name="res_model">aa.spring.cut</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- On the manufacturing order -->
+    <record id="mrp_production_form_aa_spring_cuts" model="ir.ui.view">
+        <field name="name">mrp.production.form.aa.spring.cuts</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Spring Cuts" name="aa_spring_cuts" invisible="not aa_spring_cut_ids">
+                    <field name="aa_spring_cut_ids" readonly="1">
+                        <list>
+                            <field name="hand"/>
+                            <field name="role"/>
+                            <field name="wire"/>
+                            <field name="inside_diameter"/>
+                            <field name="length"/>
+                            <field name="lot_id"/>
+                            <field name="source"/>
+                            <field name="remaining"/>
+                            <field name="state"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inventory > Springs -->
+    <menuitem id="menu_aa_springs" name="Springs" parent="stock.menu_stock_root" sequence="4"/>
+    <menuitem id="menu_aa_spring_summary" name="Spring Inventory" parent="menu_aa_springs"
+              action="action_aa_spring_stock_summary" sequence="10"/>
+    <menuitem id="menu_aa_coil_pieces" name="Coil Pieces" parent="menu_aa_springs"
+              action="action_aa_coil_pieces" sequence="20"/>
+    <menuitem id="menu_aa_spring_cuts" name="Cut History" parent="menu_aa_springs"
+              action="action_aa_spring_cuts" sequence="30"/>
+
+</odoo>
