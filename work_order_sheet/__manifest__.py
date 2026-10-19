@@ -1,13 +1,17 @@
 {
     'name': "Work Order Sheet",
-    # 19.0.1.36.0 BECAUSE BOTH BRANCHES REACHED 1.35.0 WITH DIFFERENT CODE.
-    # Prod's W/O number went out as 1.35.0 and this branch's cancel-and-refund
-    # was also 1.35.0: git merged that line without a word, because the line is
-    # identical, and a database already holding 1.35.0 would have upgraded
-    # nothing - no cron, no Cancel & Refund wizard, no sale order button. The
-    # same trap this repository hit on 2026-10-17; the version has to clear
-    # BOTH sides, not just the base. Prod's 1.35.0 migration scripts still run
-    # for any database below that.
+    # THE VERSION HAS TO CLEAR BOTH SIDES, NOT JUST THE BASE, and this file
+    # has now watched that happen twice.
+    #
+    # On the 17th both branches reached 1.35.0 with different code - Prod's W/O
+    # number and this branch's cancel-and-refund - and git merged the identical
+    # line without a word, leaving a number a database already held and so
+    # upgrading nothing at all. Hence 1.36.0.
+    #
+    # Then both reached 1.36.0 with different code again: Prod's Dispatched
+    # button and this branch's merge. 1.37.0 clears both, so a database holding
+    # either 1.36.0 still upgrades. Prod's 1.35.0 migration scripts continue to
+    # run for anything below them.
     'version': '19.0.1.37.0',
     'summary': "Print a work order, and sort its work onto the benches",
     'description': """
@@ -74,6 +78,7 @@ machinery it does not use.
         'wizard/order_cancel_views.xml',
         'views/stock_picking_views.xml',
         'views/wo_number_views.xml',
+        'views/dispatched_views.xml',
         # THE WORK STATIONS, PUT AWAY FOR NOW - the owner's instruction,
         # 2026-10-14: the shop floor module does the same job. Nothing is
         # deleted; these three simply do not load, and a migration archives
