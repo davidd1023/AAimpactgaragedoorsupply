@@ -109,6 +109,7 @@ class AaCustomerEmail(models.AbstractModel):
 
 
 class SaleOrder(models.Model):
+    _name = "sale.order"
     _inherit = ["sale.order", "aa.customer.email"]
 
     def _aa_email_wo_number(self):
@@ -126,6 +127,7 @@ class SaleOrder(models.Model):
 
 
 class AccountMove(models.Model):
+    _name = "account.move"
     _inherit = ["account.move", "aa.customer.email"]
 
     def _aa_email_wo_number(self):
@@ -149,6 +151,7 @@ class AccountMove(models.Model):
 
 
 class StockPicking(models.Model):
+    _name = "stock.picking"
     _inherit = ["stock.picking", "aa.customer.email"]
 
     def _aa_email_wo_number(self):
