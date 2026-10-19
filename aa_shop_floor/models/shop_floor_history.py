@@ -168,7 +168,10 @@ class MrpWorkorder(models.Model):
         domain = self._aa_history_domain()
 
         if order:
-            domain = domain + [("aa_sale_order", "=", order)]
+            # The order card now names its order by W/O # (owner,
+            # 2026-10-19); an S number still finds it too.
+            domain = domain + ["|", ("aa_sale_order", "=", order),
+                               ("aa_wo_number", "=", order)]
             workorders = self.search(domain, order="id")
         else:
             # Grouped here rather than in SQL because the question is "the
@@ -188,7 +191,8 @@ class MrpWorkorder(models.Model):
                     continue
 
                 by_order[name] = {
-                    "order": name,
+                    "order": workorder.aa_wo_number or name,
+                    "sale": name,
                     "customer": "",
                     "jobs": [],
                     "worked_minutes": 0.0,
@@ -207,7 +211,7 @@ class MrpWorkorder(models.Model):
         customers = {so.name: so.partner_id.display_name or "" for so in sale_orders}
 
         for group in groups:
-            group["customer"] = customers.get(group["order"], "")
+            group["customer"] = customers.get(group.pop("sale"), "")
             # EVERY PART IN THE ORDER IT WAS MADE IN, oldest first, so the
             # card reads like the order went through the shop.
             group["jobs"].sort(key=lambda job: job["id"])
