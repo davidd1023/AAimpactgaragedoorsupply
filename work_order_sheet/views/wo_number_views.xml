@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- W/O # wherever the order shows: the sale order, its transfers (Work
+       Order and Dispatch) and its manufacturing orders. -->
+
+  <record id="view_order_form_aa_wo_number" model="ir.ui.view">
+    <field name="name">sale.order.form.aa.wo.number</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[hasclass('oe_title')]/h1" position="after">
+        <h2 invisible="not aa_wo_number"><field name="aa_wo_number"/></h2>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="sale_order_tree_aa_wo_number" model="ir.ui.view">
+    <field name="name">sale.order.list.aa.wo.number</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.sale_order_tree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="aa_wo_number" optional="show"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_sales_order_filter_aa_wo_number" model="ir.ui.view">
+    <field name="name">sale.order.search.aa.wo.number</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="aa_wo_number"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_picking_form_aa_wo_number" model="ir.ui.view">
+    <field name="name">stock.picking.form.aa.wo.number</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='origin']" position="before">
+        <field name="aa_wo_number" invisible="not aa_wo_number"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="vpicktree_aa_wo_number" model="ir.ui.view">
+    <field name="name">stock.picking.list.aa.wo.number</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.vpicktree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="aa_wo_number" optional="show"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_picking_internal_search_aa_wo_number" model="ir.ui.view">
+    <field name="name">stock.picking.search.aa.wo.number</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="aa_wo_number"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="mrp_production_form_aa_wo_number" model="ir.ui.view">
+    <field name="name">mrp.production.form.aa.wo.number</field>
+    <field name="model">mrp.production</field>
+    <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[hasclass('oe_title')]/h1" position="after">
+        <h2 invisible="not aa_wo_number"><field name="aa_wo_number"/></h2>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="mrp_production_tree_aa_wo_number" model="ir.ui.view">
+    <field name="name">mrp.production.list.aa.wo.number</field>
+    <field name="model">mrp.production</field>
+    <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="aa_wo_number" optional="show"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_mrp_production_filter_aa_wo_number" model="ir.ui.view">
+    <field name="name">mrp.production.search.aa.wo.number</field>
+    <field name="model">mrp.production</field>
+    <field name="inherit_id" ref="mrp.view_mrp_production_filter"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="aa_wo_number"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

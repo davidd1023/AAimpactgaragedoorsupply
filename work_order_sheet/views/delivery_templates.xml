@@ -94,8 +94,9 @@
     <header>
       <h1><t t-esc="company.name"/></h1>
       <div class="sub">
+        <t t-if="picking.aa_wo_number"><b><t t-esc="picking.aa_wo_number"/></b> - </t>
         Delivery <t t-esc="picking.name"/>
-        <t t-if="picking.origin"> - order <t t-esc="picking.origin"/></t>
+        <t t-if="picking.origin and not picking.aa_wo_number"> - order <t t-esc="picking.origin"/></t>
       </div>
     </header>
 
