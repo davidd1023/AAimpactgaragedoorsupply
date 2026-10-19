@@ -1,9 +1,10 @@
 from odoo import api, fields, models
 
-# The two parts every jamb bracket is fitted with. Named here because this is
-# where the roles are declared, and read from here by sale_order so the two
-# cannot drift apart.
-FASTENER_ROLES = ("stud", "nut", "lag")
+# THE COMPANION PARTS - the fixings that come with something rather than being
+# bought on their own. Named here because this is where the roles are declared,
+# and read from here by sale_order, so the list and the recipes that use it
+# cannot drift apart. What takes which, and how many, is FASTENER_RECIPES.
+FASTENER_ROLES = ("stud", "nut", "lag", "bolt")
 
 
 class SaleOrderLine(models.Model):
@@ -86,12 +87,15 @@ class SaleOrderLine(models.Model):
             ("jamb_14", "Jamb brackets #14"),
             ("jamb_16", "Jamb brackets #16"),
             ("flag", "Flag angle"),
-            # EVERY JAMB BRACKET TAKES ONE OF EACH. Not per track and not per
-            # door: per bracket, wherever the bracket came from, which is why
-            # these two carry no parent - they answer to the whole cart.
+            # WHAT COMES WITH SOMETHING ELSE. Each of these hangs off the
+            # line that calls for it - track_prep_parent_id - so the cart can
+            # show it under that line and deleting the line takes it along.
+            # Four studs for a flag angle, one for a jamb bracket, four
+            # track/hanger bolts for a pair of end bearing plates.
             ("stud", "Knurled studs"),
             ("nut", "Flange nuts"),
             ("lag", "Lag screws"),
+            ("bolt", "Track/hanger bolts"),
         ],
         string="Preparation part",
         copy=False,
