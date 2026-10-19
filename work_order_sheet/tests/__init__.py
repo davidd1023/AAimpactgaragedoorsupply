@@ -11,3 +11,4 @@ from . import test_wo_number
 # stays, and comes back with the benches.
 #
 #   from . import test_work_stations
+from . import test_order_ready_alert

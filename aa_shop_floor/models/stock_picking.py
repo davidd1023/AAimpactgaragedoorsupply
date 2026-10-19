@@ -24,46 +24,19 @@ class StockPicking(models.Model):
              "worked on now) or Ready (finished).")
 
     def _aa_station_statuses(self):
-        """[(label, status)] for each station the order's manufacturing orders use."""
+        """[(label, status)] for each station the order's manufacturing orders use.
+
+        THE RECKONING MOVED TO portal_progress, where the customer's own page
+        reads it too. This is the same answer, with the warehouse's own label
+        for the Track Prep work center - so the transfer and the customer's
+        page cannot say two different things about one order.
+        """
         self.ensure_one()
-        if not self.origin:
-            return []
-        productions = self.env["mrp.production"].sudo().search(
-            [("origin", "=", self.origin), ("state", "!=", "cancel")], order="id")
-        pending = self.env["mrp.workcenter"].sudo()._aa_pending()
-        groups = {}
-        for mo in productions:
-            wos = mo.workorder_ids.filtered(lambda w: w.state != "cancel")
-            if not wos:
-                continue
-            open_wos = wos.filtered(lambda w: w.state != "done")
-            waiting = open_wos.filtered(lambda w: w.workcenter_id == pending)
-            stations = (wos - waiting).workcenter_id - pending
-            for wo in waiting:
-                stations |= wo._aa_own_station()
-            if mo.state == "done":
-                status = "done"
-            elif open_wos.filtered(lambda w: w.state == "progress"):
-                status = "progress"
-            elif waiting:
-                status = "pending"
-            else:
-                status = "station"
-            for name in stations.mapped("name") or ["Shop Floor"]:
-                groups.setdefault(name, []).append(status)
-        result = []
-        for name, statuses in groups.items():
-            found = set(statuses)
-            if found == {"done"}:
-                status = "done"
-            elif "progress" in found:
-                status = "progress"
-            elif "pending" in found:
-                status = "pending"
-            else:
-                status = "station"
-            result.append((STATION_LABELS.get(name, name), status))
-        return result
+
+        return [(STATION_LABELS.get(entry["station"], entry["station"]),
+                 entry["status"])
+                for entry in self.env["mrp.production"]
+                ._aa_station_statuses_for(self.origin)]
 
     def _compute_aa_order_status(self):
         for picking in self:

@@ -3,4 +3,7 @@ from . import mrp_production
 from . import sale_order
 from . import hardware_card
 from . import mrp_workorder
+from . import shop_floor_history
 from . import stock_picking
+from . import portal_progress
+from . import res_config_settings

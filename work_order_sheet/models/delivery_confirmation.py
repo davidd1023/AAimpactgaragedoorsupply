@@ -2,7 +2,9 @@ import uuid
 
 from markupsafe import Markup
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
+from odoo.tools.mail import email_normalize
 
 
 def _token(record=None):
@@ -287,6 +289,100 @@ class StockPicking(models.Model):
 
 class StockPickingOpenForm(models.Model):
     _inherit = "stock.picking"
+
+    # --- "your order is ready" ------------------------------------------------
+    #
+    # THE BUTTON IS THE DECISION (owner, 2026-10-19). It is not sent the moment
+    # the last bench ticks its last box: an email cannot be unsent, and the
+    # last box gets ticked by mistake. Somebody presses this when the order is
+    # really ready, and the page then says when it went and to whom.
+
+    dispatch_ready_sent_on = fields.Datetime(
+        string="Customer told", copy=False, readonly=True,
+        help="When the customer was emailed to say the order is ready.")
+    dispatch_ready_sent_to = fields.Char(
+        string="Told at", copy=False, readonly=True,
+        help="The address that email went to.")
+
+    def _dispatch_order_name(self):
+        """THE NUMBER THE CUSTOMER ALREADY HAS (owner, 2026-10-19).
+
+        Their own order number - the one on the confirmation email and in My
+        Account > Your Orders - rather than the W/O number off the printed
+        sheet, which is ours and which they have never seen. Falls back to
+        whatever the transfer knows if there is no sale order behind it.
+        """
+        self.ensure_one()
+
+        return (self.sale_id.name if "sale_id" in self._fields and self.sale_id
+                else self.origin or self.name or "")
+
+    def _dispatch_ready_email_from(self):
+        """The address the alert comes from, as set in Inventory > Settings."""
+        self.ensure_one()
+        typed = (self.env["ir.config_parameter"].sudo().get_param(
+            "work_order_sheet.ready_email_from") or "").strip()
+
+        return typed or self.company_id.email or ""
+
+    def _dispatch_pickup_place(self):
+        """Where it is ready for pickup - "Medley".
+
+        THE WAREHOUSE'S OWN TOWN, not a word typed into a template: an order
+        picked at a second site would otherwise tell the customer to drive to
+        the first one. Says nothing at all when nobody has filled the town in,
+        because "ready for pickup" is still true and "ready for pickup at" is
+        not a sentence.
+        """
+        self.ensure_one()
+        warehouse = self.picking_type_id.warehouse_id
+
+        return (warehouse.partner_id.city or self.company_id.city or "").strip()
+
+    def action_notify_ready(self):
+        """Email the customer that the order is ready, and remember doing it."""
+        self.ensure_one()
+        template = self.env.ref(
+            "work_order_sheet.mail_template_order_ready", raise_if_not_found=False)
+
+        if not template:
+            raise UserError(_(
+                "The \"order is ready\" email template is missing. Update the "
+                "Work Order Sheet module and try again."))
+
+        partner = self.partner_id
+        address = email_normalize(partner.email or "")
+
+        # SAID PLAINLY RATHER THAN FAILING QUIETLY. A customer with no address
+        # on file is the one case where this cannot work, and the shop needs to
+        # be told that now - while somebody is looking at the order - rather
+        # than finding out when the customer rings.
+        if not address:
+            raise UserError(_(
+                "%(customer)s has no email address on file, so there is "
+                "nobody to tell. Add one to the contact and press this again.",
+                customer=partner.display_name or _("This customer"),
+            ))
+
+        template.send_mail(self.id, force_send=True)
+        self.write({
+            "dispatch_ready_sent_on": fields.Datetime.now(),
+            "dispatch_ready_sent_to": address,
+        })
+        self.message_post(body=_(
+            "Told %(customer)s the order is ready, at %(address)s.",
+            customer=partner.display_name, address=address))
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "type": "success",
+                "message": _("%(customer)s has been told the order is ready.",
+                             customer=partner.display_name),
+                "next": {"type": "ir.actions.act_window_close"},
+            },
+        }
 
     def action_open_dispatch_form(self):
         """Open the customer's confirmation form in a new tab (owner, 2026-10-14):

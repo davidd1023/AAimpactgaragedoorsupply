@@ -376,7 +376,7 @@ class HardwareCardCase(HttpCase):
         found out on the printer."""
         job = self._kit_job(self._confirm(self._order_a_kit()))
         report = self.env.ref("aa_shop_floor.action_report_hardware_sticker")
-        self.assertEqual(report.paperformat_id.page_width, 101)
+        self.assertEqual(report.paperformat_id.page_width, 102)
         self.assertEqual(report.paperformat_id.page_height, 152)
         # Odoo renders reports as HTML under test unless it is told the point
         # of the test is the PDF.
@@ -398,3 +398,205 @@ class HardwareCardCase(HttpCase):
         html = self.env["ir.actions.report"]._render_qweb_html(
             "aa_shop_floor.report_hardware_sticker", job.ids)[0].decode()
         self.assertIn("nothing to put on a sticker", html)
+
+
+@tagged("post_install", "-at_install")
+class StickerSizeCase(HardwareCardCase):
+    """"We don't know what sticker size we are going to use yet" (owner,
+    2026-10-19). So the size is a setting, and the label fits itself to it.
+    """
+
+    def _set_size(self, size, width=0.0, height=0.0):
+        """Choose a size the way the Settings page does."""
+        settings = self.env["res.config.settings"].create({
+            "aa_sticker_size": size,
+            "aa_sticker_width_in": width,
+            "aa_sticker_height_in": height,
+        })
+        settings.set_values()
+
+        return self.env.ref("aa_shop_floor.paperformat_hardware_sticker")
+
+    # A card of ten rows with a door on it, which is what a real one is.
+    TEN_ROWS = {"size": "9' 0\" x 7' 0\"", "weight": "355 lb",
+                "rows": [["Fact", "value"]] * 10}
+
+    def _layout(self, card=None):
+        product = self.kit.product_variant_ids[:1]
+        job = self.env["mrp.production"].create({"product_id": product.id})
+
+        return job._aa_sticker_layout(card if card is not None else self.TEN_ROWS)
+
+    # --- the size itself ------------------------------------------------------
+
+    def test_the_default_is_a_four_by_six(self):
+        """What a database that has never been told prints on."""
+        paperformat = self.env.ref("aa_shop_floor.paperformat_hardware_sticker")
+        self.assertEqual(
+            (paperformat.page_width, paperformat.page_height), (102, 152))
+
+    def test_choosing_a_size_resizes_the_label(self):
+        paperformat = self._set_size("4x2")
+        self.assertEqual((paperformat.page_width, paperformat.page_height),
+                         (102, 51))
+
+    def test_the_small_roll_is_two_and_a_quarter_by_one_and_a_quarter(self):
+        """The key holds the size, fractions and all, so there is no second
+        table to fall out of step with the words on the dropdown."""
+        paperformat = self._set_size("2.25x1.25")
+        self.assertEqual((paperformat.page_width, paperformat.page_height),
+                         (57, 32))
+
+    def test_a_custom_size_is_taken_in_inches(self):
+        paperformat = self._set_size("custom", width=3.5, height=2.5)
+        self.assertEqual((paperformat.page_width, paperformat.page_height),
+                         (89, 64))
+
+    def test_a_small_label_keeps_less_margin(self):
+        """3mm all round is a tenth of a small sticker."""
+        self.assertEqual(self._set_size("4x6").margin_top, 3)
+        self.assertEqual(self._set_size("2.25x1.25").margin_top, 1)
+
+    def test_a_size_that_cannot_be_meant_is_refused_quietly(self):
+        """A typed 0 would make wkhtmltopdf fail outright and a typed 400
+        would waste a ream finding out. Neither reaches the printer."""
+        paperformat = self._set_size("custom", width=0, height=400)
+        self.assertEqual(paperformat.page_width, 102, "0 falls back to 4in")
+        self.assertEqual(paperformat.page_height, int(round(18 * 25.4)))
+
+    def test_the_owner_s_choice_survives_a_module_update(self):
+        """THE SETTING IS THE TRUTH. An update re-applies it; a paper format
+        shipped in a data file would put 4 x 6 back without a word."""
+        self._set_size("3x2")
+        self.env["mrp.production"]._aa_sticker_apply_size()
+        paperformat = self.env.ref("aa_shop_floor.paperformat_hardware_sticker")
+        self.assertEqual((paperformat.page_width, paperformat.page_height),
+                         (76, 51))
+
+    # --- and the label fits itself to it -------------------------------------
+
+    def test_the_type_shrinks_with_the_label(self):
+        big = self._set_size("4x6") and self._layout()
+        small = self._set_size("2.25x1.25") and self._layout()
+        self.assertEqual(big["scale"], 1.0, "4 x 6 is the design")
+        self.assertLess(small["root"], big["root"])
+
+    def test_the_type_stops_shrinking_where_it_stops_being_readable(self):
+        """7pt on a bench at arm's length is the floor. Past it the label
+        shows fewer rows instead - a sticker nobody can read is not a
+        smaller sticker, it is a blank one."""
+        self._set_size("2.25x1.25")
+        self.assertEqual(self._layout()["root"], 7.0)
+
+    def test_the_label_does_not_swell_to_fill_a_sheet_of_paper(self):
+        self._set_size("8.5x11")
+        self.assertEqual(self._layout()["scale"], 1.0)
+
+    def test_the_type_follows_the_tighter_of_the_two_sides(self):
+        """A short wide label runs out of room downwards long before it runs
+        out across, so the height is what sets the type there."""
+        self._set_size("4x4")
+        self.assertAlmostEqual(self._layout()["scale"], 102 / 152.0, places=2)
+
+    # --- and then the list gives way -----------------------------------------
+
+    def test_everything_fits_on_the_full_size_label(self):
+        self._set_size("4x6")
+        self.assertGreaterEqual(self._layout()["rows"], 10)
+
+    def test_a_short_label_shows_fewer_rows(self):
+        self._set_size("4x6")
+        full = self._layout()["rows"]
+        self._set_size("4x2")
+        short = self._layout()["rows"]
+        self.assertLess(short, full)
+        self.assertGreaterEqual(short, 1, "something always goes on the box")
+
+    def test_the_smallest_label_still_says_one_thing(self):
+        """A sticker with a heading and no figures at all would be a code
+        with a caption; one row is the floor."""
+        self._set_size("2.25x1.25")
+        self.assertGreaterEqual(self._layout()["rows"], 1)
+
+    def test_nothing_is_left_off_without_saying_so(self):
+        """THE ROWS THAT DID NOT FIT ARE COUNTED ON THE LABEL. A sticker that
+        quietly stopped after four facts would read like the whole list."""
+        job = self._kit_job(self._confirm(self._order_a_kit()))
+        self._set_size("4x2")
+        html = self.env["ir.actions.report"]._render_qweb_html(
+            "aa_shop_floor.report_hardware_sticker", job.ids)[0].decode()
+        self.assertIn("more - scan the code", html)
+        # The spring is what a short label keeps: the facts are printed in
+        # the order the owner listed them.
+        self.assertIn("Spring (outer)", html)
+
+    def test_a_full_size_label_says_nothing_about_leaving_things_out(self):
+        job = self._kit_job(self._confirm(self._order_a_kit()))
+        self._set_size("4x6")
+        html = self.env["ir.actions.report"]._render_qweb_html(
+            "aa_shop_floor.report_hardware_sticker", job.ids)[0].decode()
+        self.assertNotIn("scan the code", html)
+        # The last row this order's card holds - a kit bought without a track
+        # or a cable has seven facts, not ten.
+        self.assertIn("Lift", html)
+
+    def test_the_qr_stays_scannable_on_the_smallest_label(self):
+        """A phone needs something like three quarters of an inch for a link
+        this long, whatever the type does."""
+        self._set_size("2.25x1.25")
+        self.assertGreaterEqual(self._layout()["qr"], 16.0 * 2.8346 - 0.1)
+        # AND THE LINK IS KEPT SHORT so that 16mm is enough: every character
+        # is more modules in the same square.
+        job = self.env["mrp.production"].create(
+            {"product_id": self.kit.product_variant_ids[:1].id})
+        self.assertLessEqual(len(job._aa_box_url()), 90, job._aa_box_url())
+
+    # --- and from beside the Print button ------------------------------------
+
+    def test_the_sizes_are_offered_beside_the_print_button(self):
+        """ASKED FOR AT THE PRINTER (owner, 2026-10-19). Same setting, read
+        from where the label printer is."""
+        self._set_size("4x6")
+        offered = self.env["mrp.production"].aa_sticker_sizes()
+        self.assertEqual(offered["current"], "4x6")
+        values = [value for value, _label in offered["options"]]
+        self.assertIn("4x6", values)
+        self.assertIn("2.25x1.25", values)
+        self.assertNotIn("custom", values,
+                         "there is nowhere in a dialog footer to type inches")
+
+    def test_changing_it_there_changes_the_label(self):
+        production = self.env["mrp.production"]
+        production.aa_set_sticker_size("3x2")
+        paperformat = self.env.ref("aa_shop_floor.paperformat_hardware_sticker")
+        self.assertEqual((paperformat.page_width, paperformat.page_height),
+                         (76, 51))
+        self.assertEqual(production.aa_sticker_sizes()["current"], "3x2")
+
+    def test_a_size_nobody_offered_is_not_written(self):
+        """The parameter is written with raised rights, so what may be
+        written is checked rather than trusted."""
+        production = self.env["mrp.production"]
+        production.aa_set_sticker_size("4x3")
+        production.aa_set_sticker_size("99x99")
+        self.assertEqual(production.aa_sticker_sizes()["current"], "4x3")
+
+    def test_a_custom_size_set_in_settings_is_shown_as_the_one_in_use(self):
+        """Otherwise opening the popup would say 4 x 6 under a label printer
+        loaded with something else, and the next print would make it true."""
+        self._set_size("custom", width=3.5, height=2.5)
+        offered = self.env["mrp.production"].aa_sticker_sizes()
+        self.assertEqual(offered["current"], "custom")
+        self.assertIn(["custom", "Custom - 3.5 x 2.5 in"], offered["options"])
+
+    def test_the_label_still_prints_at_a_new_size(self):
+        """The whole point: a size the owner chose has to come out of the
+        printer, not only out of a field."""
+        job = self._kit_job(self._confirm(self._order_a_kit()))
+        self._set_size("4x2")
+        report = self.env.ref("aa_shop_floor.action_report_hardware_sticker")
+        pdf, kind = report.with_context(
+            force_report_rendering=True)._render_qweb_pdf(
+                report.report_name, job.ids)
+        self.assertEqual(kind, "pdf")
+        self.assertTrue(pdf.startswith(b"%PDF"))

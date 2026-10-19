@@ -44,6 +44,18 @@
                 <button type="button" class="btn btn-primary" t-on-click="printSticker">
                     <i class="fa fa-print me-1"/>Print sticker
                 </button>
+                <!-- WHAT IT PRINTS ON, next to the button that prints it
+                     (owner, 2026-10-19). The same setting as Manufacturing >
+                     Settings, changed from where the printer is: pick the
+                     roll that is in the machine, then print. -->
+                <select class="form-select w-auto o_aa_sticker_size"
+                        aria-label="Sticker size"
+                        t-on-change="onChangeSize">
+                    <option t-foreach="sizes.options" t-as="aaSize" t-key="aaSize[0]"
+                            t-att-value="aaSize[0]"
+                            t-att-selected="aaSize[0] === sizes.current ? 'selected' : false"
+                            t-esc="aaSize[1]"/>
+                </select>
                 <button type="button" class="btn btn-secondary" t-on-click="() => this.props.close()">
                     Close
                 </button>
