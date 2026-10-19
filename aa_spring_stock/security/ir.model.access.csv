@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_aa_spring_cut_user,aa.spring.cut user,model_aa_spring_cut,stock.group_stock_user,1,0,0,0
+access_aa_spring_cut_manager,aa.spring.cut manager,model_aa_spring_cut,stock.group_stock_manager,1,1,1,1
+access_aa_spring_cut_mrp,aa.spring.cut mrp,model_aa_spring_cut,mrp.group_mrp_user,1,1,1,0
+access_aa_spring_stock_summary_user,aa.spring.stock.summary user,model_aa_spring_stock_summary,stock.group_stock_user,1,0,0,0
+access_aa_spring_place_summary_user,aa.spring.place.summary user,model_aa_spring_place_summary,stock.group_stock_user,1,0,0,0
+access_aa_spring_box_user,aa.spring.box user,model_aa_spring_box,stock.group_stock_user,1,1,1,0
+access_aa_spring_box_manager,aa.spring.box manager,model_aa_spring_box,stock.group_stock_manager,1,1,1,1
+access_aa_spring_box_add_user,aa.spring.box.add user,model_aa_spring_box_add,stock.group_stock_user,1,1,1,1
+access_aa_spring_box_add_line_user,aa.spring.box.add.line user,model_aa_spring_box_add_line,stock.group_stock_user,1,1,1,1
+access_aa_spring_box_move_user,aa.spring.box.move user,model_aa_spring_box_move,stock.group_stock_user,1,1,1,1
+access_aa_spring_box_move_line_user,aa.spring.box.move.line user,model_aa_spring_box_move_line,stock.group_stock_user,1,1,1,1
