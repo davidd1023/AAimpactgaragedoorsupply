@@ -83,3 +83,14 @@ the delivery still explodes the kits' and cables' own phantom BoMs.
 ## Git
 
 Never `git push`. Use `odoosh-push`.
+
+## Spring coil stock (`aa_spring_stock`)
+
+Coils are COIL-<wire>-<I.D.>-<L/R>, in inches, one lot per piece, under
+AAM/Stock/Rack (leftover pieces), /Floor (coils in use) and /Boxes (unopened).
+A Springs MO reserves, when confirmed, the piece each spring is cut from and
+consumes it when done. Order of preference (owner, 2026-10-19): a Rack piece
+that is long enough, then the Floor, then the Boxes - the shortest piece that
+fits in each. A coil taken from a Box is moved to the Floor once cut. A piece
+left shorter than 16" is scrapped; 16" or more stays where it is. A spring
+with no matching coil never blocks the order: it is logged as a problem cut.
