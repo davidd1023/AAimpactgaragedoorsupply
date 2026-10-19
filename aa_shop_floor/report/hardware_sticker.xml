@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- A 4 x 6 LABEL, the size the shipping-label printers take (owner,
+       2026-10-19). Portrait, and no margins to speak of: a label printer has
+       no unprintable border to allow for, and every millimetre given away is
+       a millimetre off the QR code. -->
+  <record id="paperformat_hardware_sticker" model="report.paperformat">
+    <field name="name">AA Hardware Sticker 4 x 6</field>
+    <field name="default" eval="False"/>
+    <field name="format">custom</field>
+    <field name="page_width">101</field>
+    <field name="page_height">152</field>
+    <field name="orientation">Portrait</field>
+    <field name="margin_top">3</field>
+    <field name="margin_bottom">3</field>
+    <field name="margin_left">3</field>
+    <field name="margin_right">3</field>
+    <field name="header_line" eval="False"/>
+    <field name="header_spacing">0</field>
+    <field name="dpi">96</field>
+  </record>
+
+  <!-- IN THE PRINT MENU as well as on the station card, because the office
+       reprints these: a label that peeled off in the van is reprinted from
+       the work order rather than by sending somebody back to the tablet. -->
+  <record id="action_report_hardware_sticker" model="ir.actions.report">
+    <field name="name">Hardware Sticker</field>
+    <field name="model">mrp.production</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">aa_shop_floor.report_hardware_sticker</field>
+    <field name="report_file">aa_shop_floor.report_hardware_sticker</field>
+    <field name="paperformat_id" ref="paperformat_hardware_sticker"/>
+    <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+    <field name="binding_type">report</field>
+    <field name="print_report_name">'Hardware - %s' % (object.origin or object.name)</field>
+  </record>
+
+  <template id="report_hardware_sticker">
+    <t t-call="web.basic_layout">
+      <t t-foreach="docs" t-as="o">
+        <t t-set="card" t-value="o._aa_hardware_card()"/>
+        <!-- NOTHING TO SAY, NOTHING TO STICK. A box whose order says none of
+             the six things does not get a label with a heading and six blank
+             lines on it. -->
+        <div t-if="not card" class="page" style="font-family: Arial, Helvetica, sans-serif;">
+          <div style="font-size: 12pt; font-weight: bold;">
+            <t t-esc="o.origin or o.name"/>
+          </div>
+          <div style="font-size: 10pt; margin-top: 6pt;">
+            Nothing on this order says what this box is for, so there is
+            nothing to put on a sticker.
+          </div>
+        </div>
+        <div t-if="card" class="page" style="font-family: Arial, Helvetica, sans-serif; color: #000;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="vertical-align: top;">
+                <div style="font-size: 17pt; font-weight: bold; line-height: 1.1;">
+                  <t t-esc="card['order']"/>
+                </div>
+                <div t-if="card.get('door')" style="font-size: 11pt; font-weight: bold; margin-top: 1pt;">
+                  <t t-esc="card['door']"/>
+                </div>
+                <div t-if="card.get('kit')" style="font-size: 10pt; margin-top: 2pt;">
+                  <t t-esc="card['kit']"/> hardware
+                </div>
+              </td>
+              <!-- SCAN FOR THE SAME THING, not for more: the page the code
+                   opens is this label, which is the point - a label that has
+                   been written on, torn or soaked still answers. -->
+              <td style="width: 78pt; vertical-align: top; text-align: right;">
+                <img t-att-src="o._aa_box_qr_src(220)" style="width: 76pt; height: 76pt;"/>
+              </td>
+            </tr>
+          </table>
+
+          <div t-if="card.get('size') or card.get('weight')"
+               style="margin-top: 6pt; padding: 4pt 0; border-top: 1.5pt solid #000; border-bottom: 1.5pt solid #000; font-size: 13pt; font-weight: bold;">
+            <t t-esc="card.get('size')"/>
+            <span t-if="card.get('size') and card.get('weight')"> · </span>
+            <t t-esc="card.get('weight')"/>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; margin-top: 6pt;">
+            <t t-foreach="card['rows']" t-as="row" t-key="row_index">
+              <tr>
+                <td style="font-size: 8.5pt; text-transform: uppercase; color: #333; padding: 2.5pt 4pt 2.5pt 0; vertical-align: top; width: 62pt;">
+                  <t t-esc="row[0]"/>
+                </td>
+                <td style="font-size: 11pt; font-weight: bold; padding: 2.5pt 0; vertical-align: top;">
+                  <t t-esc="row[1]"/>
+                </td>
+              </tr>
+            </t>
+          </table>
+
+          <t t-if="card.get('also')">
+            <div style="font-size: 8.5pt; text-transform: uppercase; color: #333; margin-top: 7pt; border-top: 0.75pt solid #999; padding-top: 3pt;">
+              Also on this order
+            </div>
+            <table style="width: 100%; border-collapse: collapse;">
+              <t t-foreach="card['also']" t-as="row" t-key="row_index">
+                <tr>
+                  <td style="font-size: 8.5pt; color: #333; padding: 2pt 4pt 2pt 0; vertical-align: top; width: 62pt;">
+                    <t t-esc="row[0]"/>
+                  </td>
+                  <td style="font-size: 10pt; font-weight: bold; padding: 2pt 0; vertical-align: top;">
+                    <t t-esc="row[1]"/>
+                  </td>
+                </tr>
+              </t>
+            </table>
+          </t>
+        </div>
+      </t>
+    </t>
+  </template>
+
+</odoo>

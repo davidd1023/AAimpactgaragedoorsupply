@@ -154,6 +154,40 @@ def _door_height(value):
     return feet, inches
 
 
+# The drum names the calculator works in - "CANIMEX/TF D400-144" - plus the
+# bare codes the dealer page stores. Letters, digits, spaces and the three
+# punctuation marks those names actually use, and nothing else: this string is
+# printed on a sticker that goes in a box and on a page a phone opens, so it is
+# checked here rather than trusted to whatever posted it.
+DRUM_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9 /.-]{0,39}")
+
+# No drum needs more turns than this, and a figure past it is a bug rather
+# than a door. The reference prints turns to a tenth, so a tenth is kept.
+MAX_TURNS = 60.0
+
+
+def _drum_name(value):
+    """The drum a quote was worked out on, or "" if it was not stated."""
+    match = DRUM_NAME.fullmatch(str(value or "").strip())
+
+    return match.group(0) if match else ""
+
+
+def _turns(value):
+    """Turns at full wind to a tenth, or 0.0 if the browser did not state them.
+
+    ZERO IS "NOT STATED", which is also what the calculator returns for a
+    hi-lift drum it has no turns curve for, and the two mean the same thing
+    here: there is no figure to put on the sticker.
+    """
+    try:
+        parsed = round(float(value), 1)
+    except (TypeError, ValueError):
+        return 0.0
+
+    return parsed if 0 < parsed <= MAX_TURNS else 0.0
+
+
 def _pricing_param(key):
     """A non-negative number from a system parameter, or ValueError.
 
@@ -351,6 +385,25 @@ def quote_assembly(spec, factor=None):
     width = _door_height(spec.get("doorWidth"))
     hi_lift = _as_int(spec.get("hiLift"), 0, 240) or 0
 
+    # THE DRUM AND THE TURNS, for the shop and not for the customer.
+    #
+    # Both have always been worked out in the browser and both were thrown
+    # away here - the drum deliberately (see the description below, where it
+    # still does not appear), the turns because nobody had asked for them.
+    # The hardware station asks for them now: a winder needs to know how many
+    # turns to put on, and which drum the figures were worked out on, and
+    # neither is recoverable from a wire size and a length.
+    #
+    # KEPT AS DATA, NOT AS PROSE, and only in the spec the shop floor reads.
+    # The order line the customer sees is unchanged.
+    #
+    # NEITHER MAY STOP A SALE, like the width and the hi-lift above: a spec
+    # from an older page carries no turns, and a hi-lift drum has no turns
+    # curve to state them from, so an absent figure is left out rather than
+    # printed as a zero somebody has to interpret.
+    drum = _drum_name(spec.get("drum"))
+    turns = _turns(spec.get("turns"))
+
     cone_total = 0.0
     steel_weight = 0.0
     filler_inches = 0.0
@@ -462,6 +515,16 @@ def quote_assembly(spec, factor=None):
             "cycles": cycles,
         },
     }
+
+    # ABSENT RATHER THAN EMPTY. A spec that cannot say which drum or how many
+    # turns says nothing, so the shop floor can tell "nobody worked this out"
+    # from "worked out as zero" without a special case for either.
+    if drum:
+        spec_data["drum"] = drum
+
+    if turns:
+        spec_data["turns"] = turns
+
     return {
         "springs": springs,
         "assembly": assembly,

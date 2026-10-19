@@ -4287,6 +4287,16 @@ closeDrumInfo() {
             // "not a hi-lift door" from "nobody said".
             doorWidth: `${this.state.doorWidthFeet}' ${this.state.doorWidthInches || 0}"`,
             hiLift: this.state.liftType === "Hi-Lift" ? this.hiLiftInches : 0,
+            // THE TURNS, for the shop floor. The winder needs them and they
+            // are worked out here and nowhere else - a wire size and a length
+            // do not imply them, and the curve they come from is fitted to
+            // reference readings rather than derived, so recomputing them on
+            // the server would be a second copy of the one thing in this file
+            // that must not be copied.
+            //
+            // The Turns row's own figure, to a tenth: what the reference
+            // prints, what the page shows, and so what the sticker should say.
+            turns: this.turns,
             springsSpec: springs,
         };
     }

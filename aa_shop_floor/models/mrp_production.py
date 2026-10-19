@@ -202,11 +202,16 @@ class MrpProduction(models.Model):
     # Hardware rows never carry spring specs: only the kit, its drum and the lift
     # cables (owner, 2026-10-14).
 
-    def _aa_line_notes(self):
+    def _aa_line_notes(self, line=None):
         """The extra lines of the sale line description, e.g.
         'Track: 3" 15R | Lift: Standard | Drum: D400-144 | W 16' 0" x H 8' 0" | 650 lb'
-        or 'Cables for Door 1', as (label, value) rows."""
-        line = self.aa_sale_line_id
+        or 'Cables for Door 1', as (label, value) rows.
+
+        READS THIS ORDER'S OWN LINE BY DEFAULT, and any line it is handed -
+        the hardware card asks it about each door's kit line in turn, which on
+        a multi-door order is not the line this manufacturing order is for.
+        """
+        line = line if line is not None else self.aa_sale_line_id
         rows = []
         for text in (line.name or "").split("\n")[1:]:
             text = text.strip()
@@ -266,13 +271,11 @@ class MrpProduction(models.Model):
         pairs = pairs or self.product_qty or 1.0
         rows = [("Cable", size.group(1) if size else product.display_name)]
 
-        bom = self.env["mrp.bom"].sudo()._bom_find(product, bom_type="phantom").get(product)
-        reel = bom and bom.bom_line_ids.filtered(lambda l: "reel" in (l.product_id.name or "").lower())[:1]
-        if reel:
-            uom = (reel.product_uom_id.name or "").lower()
-            inches_per_unit = 1.0 if uom in ("in", "inch", "inches") else 12.0
-            feet = reel.product_qty * inches_per_unit / 12.0
-            each = feet * 12.0 / 2.0 / (bom.product_qty or 1.0)
+        # ONE PLACE WORKS OUT THE CUT LENGTH (see hardware_card), so the
+        # Cables card and the hardware box's sticker cannot print two
+        # different lengths for the same pair of cables.
+        each = self._aa_cable_cut_inches(product)
+        if each:
             rows.append(("Cut", "%s x %s" % (qty_label(2 * pairs), inches_label(each))))
         else:
             rows.append(("Cut", "%s cables - length not set on the product" % qty_label(2 * pairs)))

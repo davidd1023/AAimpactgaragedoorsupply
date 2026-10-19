@@ -11,7 +11,19 @@
              taps Start when he begins and Mark as Done when he finishes. It does
              what tapping the card header does - starts the work order and the
              station timer for the operator who is signed in. -->
+        <!-- BOTH BUTTONS IN ONE INSERT, so their order on the card is written
+             down rather than left to the order two xpaths happen to run in:
+             what the box is for, then Start, then Mark as Done. -->
         <xpath expr="//button[@t-on-click='validate']" position="before">
+            <!-- What this box is for (owner, 2026-10-19). Shown whatever state
+                 the job is in - the figures are as worth checking halfway
+                 through packing as before starting - and not shown at all when
+                 the order says none of them. -->
+            <button t-if="aaHardwareCard()"
+                    type="button" class="btn btn-outline-primary o_aa_card_btn"
+                    t-on-click.stop="() => this.aaOpenHardwareCard()">
+                <i class="fa fa-info-circle me-1"/>What for
+            </button>
             <button t-if="!active and !disabled and !['done', 'cancel'].includes(props.record.data.state)"
                     type="button" class="btn btn-success o_aa_start_btn"
                     t-on-click.stop="onClickHeader">
