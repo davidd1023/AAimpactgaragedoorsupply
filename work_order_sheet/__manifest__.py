@@ -1,6 +1,6 @@
 {
     'name': "Work Order Sheet",
-    'version': '19.0.1.32.0',
+    'version': '19.0.1.33.0',
     'summary': "Print a work order, and sort its work onto the benches",
     'description': """
 Adds a printable sheet to a work order - the transfer the shop sees under
@@ -36,9 +36,11 @@ machinery it does not use.
     'depends': ['stock', 'sale_stock', 'mrp'],
     'data': [
         'security/ir.model.access.csv',
+        'data/wo_number_sequence.xml',
         'report/work_order_sheet_reports.xml',
         'views/delivery_templates.xml',
         'views/stock_picking_views.xml',
+        'views/wo_number_views.xml',
         # THE WORK STATIONS, PUT AWAY FOR NOW - the owner's instruction,
         # 2026-10-14: the shop floor module does the same job. Nothing is
         # deleted; these three simply do not load, and a migration archives
