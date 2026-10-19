@@ -5,7 +5,7 @@ from odoo import _, api, fields, models
 
 from odoo.addons.aa_shop_floor.models.mrp_production import inches_label
 
-from .coil import ID_LABELS, SOURCES, pick_piece, spring_cuts, wire_code, id_code
+from .coil import ID_LABELS, SOURCES, pick_piece, place_of, spring_cuts, wire_code, id_code
 
 _logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class MrpProduction(models.Model):
         ])
         pieces = []
         for quant in quants:
-            source = quant.location_id.name
+            source = place_of(quant.location_id)
             available = quant.quantity - quant.reserved_quantity
             if source in SOURCES and available > 1e-6:
                 pieces.append((source, available, quant.lot_id.name or "", quant))
@@ -210,8 +210,9 @@ class MrpProduction(models.Model):
             for product_id, lot_id in boxed:
                 quants = Quant.search([
                     ("product_id", "=", product_id), ("lot_id", "=", lot_id),
-                    ("location_id.name", "=", "Boxes"), ("quantity", ">", 0)])
-                quants = quants.filtered(lambda q: not q.reserved_quantity)
+                    ("location_id.usage", "=", "internal"), ("quantity", ">", 0)])
+                quants = quants.filtered(
+                    lambda q: not q.reserved_quantity and place_of(q.location_id) == "Boxes")
                 if quants:
                     try:
                         with self.env.cr.savepoint():

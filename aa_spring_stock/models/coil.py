@@ -3,6 +3,7 @@
 Coils are products COIL-<wire>-<I.D.>-<L/R> (COIL-262-2.625-R), kept in inches,
 one lot per physical piece. Pieces live in three places under the warehouse
 stock: Rack (leftover cut pieces), Floor (coils in use) and Boxes (unopened).
+Each numbered box is its own location under Boxes (AAM/Stock/Boxes/Box 3).
 """
 
 # Nominal wire code -> real diameter (same table as spring_engineering's
@@ -20,6 +21,18 @@ ID_LABELS = {"2.625": '2 5/8"', "3.75": '3 3/4"', "5.25": '5 1/4"'}
 # Where a spring is cut from, best first (owner, 2026-10-19): a leftover piece
 # if one is long enough, then the coils on the floor, and the boxes last.
 SOURCES = ("Rack", "Floor", "Boxes")
+
+# A full coil as it comes from the supplier, in inches.
+FULL_COIL = 84.0
+
+
+def place_of(location):
+    """'Rack', 'Floor' or 'Boxes' for a location or one inside it (Box 3), else None."""
+    while location:
+        if location.name in SOURCES:
+            return location.name
+        location = location.location_id
+    return None
 
 
 def wire_code(wire):

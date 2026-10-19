@@ -1,6 +1,6 @@
 {
     'name': 'AA Spring Stock',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': 'Spring orders consume coil inches; a plain view of the spring inventory',
     'description': """
 Spring coils (COIL-<wire>-<I.D.>-<L/R>, kept in inches, one lot per piece) are
@@ -18,6 +18,11 @@ consumed by the Springs manufacturing order of each custom spring.
   a Box is moved to the Floor, since it has been opened.
 * Inventory > Springs: a summary per wire and I.D. (L and R side by side, with
   reorder alerts), the leftover pieces on the Rack, and the cut history.
+* Floor, Rack and Boxes each have their own table per wire and I.D.
+* Spring Boxes: numbered boxes (Box 1, Box 2...), each its own location under
+  Boxes. Add coils to a box (wire, I.D., LH / RH count - one box can hold
+  several sizes), move some of them to the floor, and remove the box once it is
+  empty (owner, 2026-10-19).
 """,
     'author': 'AA Impact Garage Door Supply',
     'category': 'Inventory/Inventory',
@@ -25,6 +30,8 @@ consumed by the Springs manufacturing order of each custom spring.
     'data': [
         'security/ir.model.access.csv',
         'views/spring_stock_views.xml',
+        'views/spring_box_views.xml',
+        'data/spring_box_data.xml',
     ],
     'installable': True,
     'application': False,

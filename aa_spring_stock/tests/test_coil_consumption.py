@@ -11,8 +11,8 @@ from odoo.tests.common import TransactionCase, tagged
 from odoo.addons.aa_spring_stock.models.coil import pick_piece, spring_cuts, coil_code
 
 
-@tagged("post_install", "-at_install")
-class CoilConsumptionCase(TransactionCase):
+class CoilStockMixin:
+    """Coil products, the Rack / Floor / Boxes places and a Springs order maker."""
 
     @classmethod
     def setUpClass(cls):
@@ -71,6 +71,11 @@ class CoilConsumptionCase(TransactionCase):
         })
         production.action_confirm()
         return production
+
+
+
+@tagged("post_install", "-at_install")
+class CoilConsumptionCase(CoilStockMixin, TransactionCase):
 
     # --- the pure rules -------------------------------------------------------
 

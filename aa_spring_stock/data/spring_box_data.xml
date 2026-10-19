@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Coils already in Boxes with a BOX<n>- lot go into their numbered box. -->
+    <function model="aa.spring.box" name="_aa_adopt_loose_box_coils"/>
+</odoo>

@@ -45,11 +45,13 @@ class AaSpringStockSummary(models.Model):
                 SELECT split_part(pp.default_code, '-', 2) AS wire,
                        split_part(pp.default_code, '-', 3) AS id_code,
                        split_part(pp.default_code, '-', 4) AS hand,
-                       sl.name AS place,
+                       CASE WHEN sl.name IN ('Floor', 'Rack', 'Boxes') THEN sl.name
+                            ELSE parent.name END AS place,
                        q.quantity AS qty
                   FROM stock_quant q
                   JOIN product_product pp ON pp.id = q.product_id
                   JOIN stock_location sl ON sl.id = q.location_id
+                  LEFT JOIN stock_location parent ON parent.id = sl.location_id
                  WHERE pp.default_code LIKE 'COIL-%%'
                    AND sl.usage = 'internal'
                    AND q.quantity > 0.001

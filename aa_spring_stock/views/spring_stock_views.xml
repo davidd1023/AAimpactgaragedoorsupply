@@ -89,7 +89,7 @@
                 <field name="lot_id"/>
                 <filter name="rack" string="Rack" domain="[('location_id.name', '=', 'Rack')]"/>
                 <filter name="floor" string="Floor" domain="[('location_id.name', '=', 'Floor')]"/>
-                <filter name="boxes" string="Boxes" domain="[('location_id.name', '=', 'Boxes')]"/>
+                <filter name="boxes" string="Boxes" domain="['|', ('location_id.name', '=', 'Boxes'), ('location_id.location_id.name', '=', 'Boxes')]"/>
                 <group>
                     <filter name="group_product" string="Coil" context="{'group_by': 'product_id'}"/>
                     <filter name="group_location" string="Location" context="{'group_by': 'location_id'}"/>

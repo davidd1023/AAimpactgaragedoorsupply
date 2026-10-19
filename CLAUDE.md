@@ -94,3 +94,14 @@ that is long enough, then the Floor, then the Boxes - the shortest piece that
 fits in each. A coil taken from a Box is moved to the Floor once cut. A piece
 left shorter than 16" is scrapped; 16" or more stays where it is. A spring
 with no matching coil never blocks the order: it is logged as a problem cut.
+
+### Spring boxes (owner, 2026-10-19)
+
+Springs come in big supplier boxes and stay boxed until the floor has room; box
+coils are used last. Each numbered box (`aa.spring.box`) is its own location
+under Boxes (`AAM/Stock/Boxes/Box 3`) and can hold several wires / I.D.s. Coils
+are added per line (I.D., wire, LH and RH count; one 84" lot each, named
+`BOX<n>-<wire>-<I.D.>-<hand>-NN`), moved down to the floor a chosen number at a
+time, and a box is removed only once it is empty. Floor, Rack and Boxes each
+have their own table (`aa.spring.place.summary`). Anything that asks "is this a
+box coil" must use `place_of()`, never `location.name == "Boxes"`.
