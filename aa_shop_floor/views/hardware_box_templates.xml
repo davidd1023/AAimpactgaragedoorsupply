@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- WHAT THE PHONE SEES.
+
+       A whole document rather than a website page, for the same reasons the
+       bench kiosks are: this is read once, in a garage or on a ladder, by
+       somebody who scanned a box. No menu, no cart, no search, nothing to tap
+       by accident - and everything inline, so a page that has to be read at
+       the kerb is not waiting on an asset bundle first.
+
+       BIG AND HIGH CONTRAST. It is read at arm's length, often in sunlight. -->
+  <template id="hardware_box_page" name="Hardware box">&lt;!DOCTYPE html&gt;
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title><t t-esc="card['order']"/> - Hardware</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: Arial, Helvetica, sans-serif;
+             color: #111; background: #f4f5f7; font-size: 17px; }
+      header { background: #1f2d3d; color: #fff; padding: 18px; }
+      header .order { font-size: 26px; font-weight: bold; }
+      header .door { font-size: 18px; opacity: .9; margin-top: 2px; }
+      header .kit { font-size: 16px; opacity: .75; margin-top: 6px; }
+      main { padding: 14px; max-width: 620px; margin: 0 auto; }
+      .door_size { background: #fff; border: 1px solid #d6dbe1;
+                   border-radius: 10px; padding: 14px; margin-bottom: 12px;
+                   display: flex; justify-content: space-between;
+                   align-items: baseline; gap: 12px; }
+      .door_size .size { font-size: 24px; font-weight: bold; }
+      .door_size .weight { font-size: 20px; color: #1f2d3d; }
+      table { width: 100%; border-collapse: collapse; background: #fff;
+              border: 1px solid #d6dbe1; border-radius: 10px; }
+      th { text-align: left; color: #5a6b7c; font-size: 14px;
+           text-transform: uppercase; letter-spacing: .04em;
+           font-weight: bold; padding: 12px 14px 12px 14px;
+           width: 38%; vertical-align: top; }
+      td { padding: 12px 14px 12px 0; font-size: 19px; font-weight: bold;
+           vertical-align: top; }
+      tr + tr th, tr + tr td { border-top: 1px solid #e6e9ed; }
+      .section { margin: 22px 0 8px; font-size: 14px; color: #5a6b7c;
+                 text-transform: uppercase; letter-spacing: .04em; }
+      footer { color: #5a6b7c; font-size: 14px; padding: 18px;
+               text-align: center; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="order"><t t-esc="card['order']"/></div>
+      <div class="door" t-if="card.get('door')"><t t-esc="card['door']"/></div>
+      <div class="kit" t-if="card.get('kit')">
+        <t t-esc="card['kit']"/> hardware
+      </div>
+    </header>
+
+    <main>
+      <div class="door_size" t-if="card.get('size') or card.get('weight')">
+        <span class="size"><t t-esc="card.get('size')"/></span>
+        <span class="weight"><t t-esc="card.get('weight')"/></span>
+      </div>
+
+      <table t-if="card['rows']">
+        <t t-foreach="card['rows']" t-as="row" t-key="row_index">
+          <tr>
+            <th><t t-esc="row[0]"/></th>
+            <td><t t-esc="row[1]"/></td>
+          </tr>
+        </t>
+      </table>
+
+      <!-- Anything on the order that belongs to no door. Shown, because a
+           spring that is on the order and on no box is exactly the thing
+           somebody needs to be told about. -->
+      <t t-if="card.get('also')">
+        <div class="section">Also on this order</div>
+        <table>
+          <t t-foreach="card['also']" t-as="row" t-key="row_index">
+            <tr>
+              <th><t t-esc="row[0]"/></th>
+              <td><t t-esc="row[1]"/></td>
+            </tr>
+          </t>
+        </table>
+      </t>
+    </main>
+
+    <footer>
+      <t t-esc="company.name"/>
+    </footer>
+  </body>
+</html>
+  </template>
+
+</odoo>
