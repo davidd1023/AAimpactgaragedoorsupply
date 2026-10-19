@@ -4,3 +4,4 @@ from . import sale_order
 from . import hardware_card
 from . import mrp_workorder
 from . import stock_picking
+from . import res_config_settings

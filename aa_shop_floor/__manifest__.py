@@ -1,6 +1,6 @@
 {
     'name': 'AA Shop Floor',
-    'version': '19.0.1.9.0',
+    'version': '19.0.1.10.0',
     'summary': 'Each Shop Floor station shows exactly what to make for the order',
     'description': """
 The Shop Floor card tells the worker what to make, without opening anything else.
@@ -29,6 +29,7 @@ only what goes in the box (kit, its pieces, lift cables).
         'data/aa_pending_workcenter.xml',
         'views/mrp_production_views.xml',
         'views/hardware_box_templates.xml',
+        'views/res_config_settings_views.xml',
         'report/hardware_sticker.xml',
         'views/aa_shop_floor_history_views.xml',
     ],
