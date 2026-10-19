@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE DIALOG IS THE PROCEDURE. "Right now there is no defined process for
+       this" (owner, 2026-10-19) - so the process is written out here, in the
+       order it will happen, and read before anything is pressed. -->
+  <record id="view_aa_order_cancel_form" model="ir.ui.view">
+    <field name="name">aa.order.cancel.form</field>
+    <field name="model">aa.order.cancel</field>
+    <field name="arch" type="xml">
+      <form string="Cancel and refund">
+        <field name="order_id" invisible="1"/>
+        <field name="currency_id" invisible="1"/>
+        <field name="can_refund" invisible="1"/>
+        <group>
+          <group>
+            <field name="amount_total" widget="monetary"/>
+            <field name="amount_paid" widget="monetary"/>
+            <field name="amount_refund" widget="monetary"
+                   readonly="not can_refund"/>
+          </group>
+          <group>
+            <field name="reason" placeholder="Customer changed their mind"/>
+          </group>
+        </group>
+        <separator string="What this will do"/>
+        <field name="plan" readonly="1" nolabel="1"/>
+        <footer>
+          <button name="action_cancel_and_refund" type="object"
+                  string="Cancel and refund" class="btn-primary"
+                  data-hotkey="q"/>
+          <button string="Close" class="btn-secondary" special="cancel"
+                  data-hotkey="x"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_aa_order_cancel" model="ir.actions.act_window">
+    <field name="name">Cancel and refund</field>
+    <field name="res_model">aa.order.cancel</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_view_types">form</field>
+    <!-- IN THE ACTIONS MENU TOO, for anybody working from the list. The
+         wizard refuses a portal user whatever menu they came from, but there
+         is no point offering it to somebody it will refuse. -->
+    <field name="group_ids" eval="[(4, ref('base.group_user'))]"/>
+  </record>
+
+</odoo>

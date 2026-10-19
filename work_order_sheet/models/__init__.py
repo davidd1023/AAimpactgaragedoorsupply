@@ -3,5 +3,7 @@ from . import work_station
 from . import work_station_item
 from . import delivery_confirmation
 from . import res_config_settings
+from . import sale_order_cancel
 from . import wo_number
+from . import email_letterhead
 from . import dispatched

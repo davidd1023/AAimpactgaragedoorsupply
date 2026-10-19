@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- TOLD WITHOUT BEING ASKED (owner, 2026-10-19).
+
+       Every few minutes, every delivery that has become ready and whose
+       customer has not been told yet gets the one-line email. The stamp on the
+       transfer is what keeps it to one message, so running this twice is
+       harmless - which is the whole reason it is a sweep rather than a hook on
+       a state that changes without write() being called.
+
+       noupdate, because the interval and the on/off switch are the owner's
+       from the moment this exists: a module update must not start it again
+       after he has stopped it, or put fifteen minutes back after he has asked
+       for five. -->
+  <data noupdate="1">
+    <record id="ir_cron_notify_order_ready" model="ir.cron">
+      <field name="name">Tell customers their order is ready</field>
+      <field name="model_id" ref="stock.model_stock_picking"/>
+      <field name="state">code</field>
+      <field name="code">model._cron_notify_ready()</field>
+      <field name="interval_number">15</field>
+      <field name="interval_type">minutes</field>
+      <field name="active" eval="True"/>
+    </record>
+  </data>
+
+  <!-- THE LINE THIS STARTS FROM. Set once, the first time the module is
+       updated with this in it, and never touched again: orders raised before
+       it are not told automatically, so switching the feature on does not
+       email everybody whose order has been sitting ready for a month. They can
+       still be told with the button. -->
+  <function model="ir.config_parameter" name="_work_order_sheet_ready_since"/>
+
+</odoo>

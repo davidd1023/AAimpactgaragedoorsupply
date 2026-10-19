@@ -22,6 +22,7 @@ not appear at all, and neither does its button.
 """
 
 import json
+import logging
 import re
 from urllib.parse import quote
 
@@ -39,6 +40,8 @@ from .mrp_production import (
 )
 from .res_config_settings import DEFAULT_STICKER_SIZE, STICKER_SIZES
 from .sale_order import is_hardware_kit
+
+_logger = logging.getLogger(__name__)
 
 # The calculator names a drum for its maker, the shop names it for its size:
 # "CANIMEX/TF D400-144" is the D400-144 everybody here asks for.
@@ -106,8 +109,24 @@ class MrpProduction(models.Model):
         "aa_sale_line_id.order_id.order_line.linked_line_id",
     )
     def _compute_aa_hardware_card(self):
+        """ONE ODD ORDER MUST NOT TAKE THE BOARD DOWN WITH IT.
+
+        Every card on the Shop Floor is read in one request, so anything this
+        raises for one job stops the whole page rendering - which is how it
+        showed up on production: an Owl error with "Component is destroyed"
+        underneath and nothing naming the real cause. A card is a convenience;
+        the board is the work. So a job whose order cannot be read leaves its
+        card empty, says so in the log, and lets the rest of the floor load.
+        """
         for production in self:
-            card = production._aa_hardware_card()
+            try:
+                card = production._aa_hardware_card()
+            except Exception:
+                _logger.exception(
+                    "aa_shop_floor: the hardware card for %s could not be "
+                    "worked out", production.display_name)
+                card = {}
+
             production.aa_hardware_card = json.dumps(card) if card else False
 
     def _aa_hardware_card(self):
@@ -156,7 +175,16 @@ class MrpProduction(models.Model):
         # WHICH DOOR OF HOW MANY, and only when there is more than one. On a
         # single-door order "Door 1 of 1" is noise; on a four-door order it is
         # the whole point of the card.
-        if len(doors) > 1:
+        #
+        # AND ONLY WHEN THIS KIT IS ONE OF THEM. doors.index(kit) raises
+        # ValueError when it is not, which is not hypothetical: a job carries
+        # aa_station_kind "kit" from the day it was made, and the product on
+        # its line can stop looking like a hardware kit afterwards - renamed,
+        # swapped, or a template retitled. The read of this field then raised
+        # for that one job and took the WHOLE Shop Floor down with it, because
+        # every card on the board is read in one go. Found on production,
+        # 2026-10-19, as "Component is destroyed".
+        if len(doors) > 1 and kit in doors:
             card["door"] = "Door %d of %d" % (doors.index(kit) + 1, len(doors))
 
         return card

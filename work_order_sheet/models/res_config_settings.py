@@ -19,14 +19,48 @@ from odoo.exceptions import ValidationError
 from odoo.tools.mail import email_normalize, single_email_re
 
 READY_FROM = "work_order_sheet.ready_email_from"
+READY_AUTO = "work_order_sheet.ready_email_auto"
+READY_SINCE = "work_order_sheet.ready_auto_since"
 
 # "AA Impact Garage Door <sales@aaigd.com>" -> what is between the angles.
 INSIDE_ANGLES = re.compile(r"[^<>]*<([^<>]+)>")
 
 
+class IrConfigParameter(models.Model):
+    _inherit = "ir.config_parameter"
+
+    @api.model
+    def _work_order_sheet_ready_since(self):
+        """Stamp the day automatic alerts started, once and once only.
+
+        Called from the data file on every module update, and does nothing at
+        all after the first time: the point of it is that the sweep has a line
+        to start from, so switching this feature on does not email every
+        customer whose order has been sitting ready since before it existed.
+        """
+        if not self.sudo().get_param(READY_SINCE):
+            self.sudo().set_param(READY_SINCE, fields.Datetime.now())
+
+        return True
+
+
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    # PRINTED ON EVERY CUSTOMER EMAIL, under the address they collect from.
+    # Related to the company rather than a parameter of its own, because it is
+    # letterhead: a second company would have its own hours.
+    aa_pickup_hours = fields.Char(
+        related="company_id.aa_pickup_hours", readonly=False,
+        string="Pickup hours")
+    dispatch_ready_email_auto = fields.Boolean(
+        string="Tell customers automatically when their order is ready",
+        default=True,
+        config_parameter=READY_AUTO,
+        help="Sends the \"your order is ready\" email by itself, within a few "
+             "minutes of the delivery becoming ready - which for a made-to-order "
+             "door is when the shop has finished making it. The button on the "
+             "delivery stays either way, for sending it again.")
     dispatch_ready_email_from = fields.Char(
         string="Order-ready alerts are sent from",
         config_parameter=READY_FROM,

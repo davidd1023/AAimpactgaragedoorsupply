@@ -7,3 +7,4 @@ from . import shop_floor_history
 from . import stock_picking
 from . import portal_progress
 from . import res_config_settings
+from . import shop_floor_live

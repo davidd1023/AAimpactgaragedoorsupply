@@ -19,27 +19,11 @@
     <record id="mail_template_order_ready" model="mail.template">
       <field name="name">Order ready for pickup</field>
       <field name="model_id" ref="stock.model_stock_picking"/>
-      <field name="subject">Your order {{ object._dispatch_order_name() }} is ready</field>
-      <field name="email_from">{{ object._dispatch_ready_email_from() }}</field>
-      <field name="reply_to">{{ object._dispatch_ready_email_from() }}</field>
-      <field name="partner_to">{{ object.partner_id.id }}</field>
-      <field name="auto_delete" eval="False"/>
-      <field name="body_html" type="html">
-        <div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #111;">
-          <p>
-            Your order <strong t-out="object._dispatch_order_name()">S00040</strong>
-            is ready for pickup<t t-if="object._dispatch_pickup_place()">
-            at <t t-out="object._dispatch_pickup_place()">Medley</t></t>.
-          </p>
-          <p t-if="object.company_id.phone">
-            Any questions, call us on <t t-out="object.company_id.phone">+1 786-238-7640</t>.
-          </p>
-          <p>
-            Thank you,<br/>
-            <t t-out="object.company_id.name">AA Impact Garage Door Supply</t>
-          </p>
-        </div>
-      </field>
+      <!-- THE WORDING LIVES IN data/customer_emails.xml, with the other
+           three emails a customer gets, so "every email the customer
+           receives" is one file to read. This record is only brought into
+           being here, under noupdate, so that an id already on a live
+           database keeps whatever the owner has done to the rest of it. -->
     </record>
   </data>
 

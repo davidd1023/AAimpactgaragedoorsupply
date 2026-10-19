@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE CARD ON MY ACCOUNT. Shown to everybody signed in, because a dealer
+       who is not registered yet is exactly who this is for - and it says where
+       the registration has got to, so nobody has to ring up and ask. -->
+  <template id="portal_my_home_resale" inherit_id="portal.portal_my_home"
+            name="Tax-exempt dealer status tile">
+    <div id="portal_client_category" position="inside">
+      <t t-call="portal.portal_docs_entry">
+        <!-- OUR OWN ICON, in the module. The first one pointed at
+             /account/static/src/img/Bills.svg, which does not exist - the real
+             file is bill.svg, lower case - so the tile showed a broken image.
+             And bill.svg is what Your Invoices already uses, so borrowing it
+             would have put the same picture on two tiles. This one is drawn in
+             the portal's own three colours and cannot 404, because it ships
+             here. -->
+        <t t-set="icon" t-value="'/aa_dealer_orders/static/src/img/resale-certificate.svg'"/>
+        <t t-set="title">Tax-exempt dealer status</t>
+        <t t-set="url" t-value="'/my/resale-certificate'"/>
+        <t t-set="text">
+          <t t-if="aa_resale_state == 'approved'">Approved - you are not charged sales tax</t>
+          <t t-elif="aa_resale_state == 'pending'">Certificate sent - waiting to be approved</t>
+          <t t-elif="aa_resale_state == 'rejected'">Not approved - see why, and send another</t>
+          <t t-elif="aa_resale_state == 'expired'">Your certificate has expired - send a new one</t>
+          <t t-else="">Upload your resale certificate to buy without sales tax</t>
+        </t>
+        <t t-set="config_card" t-value="True"/>
+      </t>
+    </div>
+  </template>
+
+  <!-- THE FORM ITSELF. Short on purpose: the certificate, the number on it and
+       the date it runs out. Everything else about the dealer is already on
+       their account. -->
+  <template id="portal_resale_certificate" name="Tax-exempt dealer status">
+    <t t-call="portal.portal_layout">
+      <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+      <t t-call="portal.portal_back_in_edit_mode">
+        <t t-set="backend_url" t-value="'/odoo/action-base_setup.action_general_configuration'"/>
+      </t>
+
+      <div class="row mt-4 mb-2 o_aa_resale">
+        <div class="col-12 col-lg-8">
+          <h3 class="mb-3">Tax-exempt dealer status</h3>
+
+          <div t-if="done" class="alert alert-success" role="status">
+            <b>Thank you.</b> Your certificate is with us and somebody will
+            look at it shortly. You will get an email either way.
+          </div>
+
+          <div t-if="error" class="alert alert-danger" role="alert">
+            <t t-esc="error"/>
+          </div>
+
+          <!-- WHERE IT STANDS, in a sentence, before the form. -->
+          <div t-attf-class="alert #{
+                 'alert-success' if partner.aa_resale_state == 'approved'
+                 else 'alert-warning' if partner.aa_resale_state in ('pending', 'expired')
+                 else 'alert-danger' if partner.aa_resale_state == 'rejected'
+                 else 'alert-info'}" role="status">
+            <t t-if="partner.aa_resale_state == 'approved'">
+              <b>Approved.</b> You are not charged sales tax. Your certificate
+              is on file until
+              <b><span t-field="partner.aa_resale_expiry"/></b> - send a new one
+              before then and nothing is interrupted.
+            </t>
+            <t t-elif="partner.aa_resale_state == 'pending'">
+              <b>With us for review.</b> You sent a certificate on
+              <span t-field="partner.aa_resale_submitted_on"/>. We will email you
+              when it has been looked at.
+            </t>
+            <t t-elif="partner.aa_resale_state == 'rejected'">
+              <b>Not approved.</b>
+              <t t-if="partner.aa_resale_note"> <t t-esc="partner.aa_resale_note"/></t>
+              Upload another certificate below.
+            </t>
+            <t t-elif="partner.aa_resale_state == 'expired'">
+              <b>Expired.</b> The certificate on file ran out on
+              <span t-field="partner.aa_resale_expiry"/>, so sales tax is being
+              charged again. Upload a current one below.
+            </t>
+            <t t-else="">
+              Buying for resale? Upload your resale certificate and we will take
+              sales tax off your orders once it is approved.
+            </t>
+          </div>
+
+          <form action="/my/resale-certificate" method="post"
+                enctype="multipart/form-data" class="mt-3">
+            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+            <div class="mb-3">
+              <label for="certificate" class="form-label">Resale certificate</label>
+              <input type="file" class="form-control" id="certificate"
+                     name="certificate" accept=".pdf,.png,.jpg,.jpeg" required="required"/>
+              <div class="form-text">PDF or a photograph, up to 8 MB.</div>
+            </div>
+
+            <div class="row">
+              <div class="col-12 col-md-6 mb-3">
+                <label for="number" class="form-label">Certificate number</label>
+                <input type="text" class="form-control" id="number" name="number"
+                       maxlength="64" t-att-value="partner.aa_resale_number or ''"/>
+              </div>
+              <div class="col-12 col-md-6 mb-3">
+                <label for="expiry" class="form-label">Expires on</label>
+                <input type="date" class="form-control" id="expiry" name="expiry"
+                       required="required"/>
+                <div class="form-text">The date on the certificate.</div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <t t-if="partner.aa_resale_state in ('none', False)">Send it to us</t>
+              <t t-else="">Send a new certificate</t>
+            </button>
+          </form>
+        </div>
+      </div>
+    </t>
+  </template>
+
+</odoo>
