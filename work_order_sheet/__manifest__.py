@@ -8,7 +8,7 @@
     # same trap this repository hit on 2026-10-17; the version has to clear
     # BOTH sides, not just the base. Prod's 1.35.0 migration scripts still run
     # for any database below that.
-    'version': '19.0.1.36.0',
+    'version': '19.0.1.37.0',
     'summary': "Print a work order, and sort its work onto the benches",
     'description': """
 Adds a printable sheet to a work order - the transfer the shop sees under
@@ -60,11 +60,12 @@ machinery it does not use.
     'category': 'Inventory/Inventory',
     'license': 'LGPL-3',
     'author': 'AA Impact Garage Door Supply',
-    'depends': ['stock', 'sale_stock', 'mrp', 'payment'],
+    'depends': ['stock', 'sale_stock', 'mrp', 'payment', 'account'],
     'data': [
         'security/ir.model.access.csv',
         'data/mail_template_order_ready.xml',
         'data/cron_order_ready.xml',
+        'data/customer_emails.xml',
         'data/wo_number_sequence.xml',
         'report/work_order_sheet_reports.xml',
         'views/delivery_templates.xml',

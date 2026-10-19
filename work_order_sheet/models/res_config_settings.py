@@ -47,6 +47,12 @@ class IrConfigParameter(models.Model):
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    # PRINTED ON EVERY CUSTOMER EMAIL, under the address they collect from.
+    # Related to the company rather than a parameter of its own, because it is
+    # letterhead: a second company would have its own hours.
+    aa_pickup_hours = fields.Char(
+        related="company_id.aa_pickup_hours", readonly=False,
+        string="Pickup hours")
     dispatch_ready_email_auto = fields.Boolean(
         string="Tell customers automatically when their order is ready",
         default=True,

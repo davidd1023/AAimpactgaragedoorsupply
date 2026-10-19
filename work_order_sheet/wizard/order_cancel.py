@@ -371,10 +371,26 @@ class OrderCancel(models.TransientModel):
                   references=", ".join(sent))]
 
     def _cancel_order(self):
-        """Step 4: last, because the steps above needed it alive."""
-        self.order_id._action_cancel()
+        """Step 4: last, because the steps above needed it alive.
 
-        return [_("Cancelled %s.", self.order_id.name)]
+        AND THE CUSTOMER IS TOLD. There was no cancellation email anywhere -
+        Odoo does not send one and this procedure did not either - so somebody
+        whose paid order was cancelled heard nothing at all until they rang up
+        (owner, 2026-10-19: it is one of the four emails a customer gets).
+        """
+        order = self.order_id
+        order._action_cancel()
+        template = self.env.ref(
+            "work_order_sheet.mail_template_order_cancelled",
+            raise_if_not_found=False)
+
+        if template and order.partner_id.email:
+            refunded = self._money(self.amount_refund) \
+                if self.amount_refund and self.can_refund else ""
+            template.sudo().with_context(aa_refunded=refunded).send_mail(
+                order.id, force_send=True)
+
+        return [_("Cancelled %s, and told the customer.", order.name)]
 
     def _log(self, done):
         """The whole procedure, written on the order, with who and why."""

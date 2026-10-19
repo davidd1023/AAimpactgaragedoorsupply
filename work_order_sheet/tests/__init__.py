@@ -13,3 +13,4 @@ from . import test_wo_number
 #   from . import test_work_stations
 from . import test_order_ready_alert
 from . import test_order_cancel
+from . import test_customer_emails

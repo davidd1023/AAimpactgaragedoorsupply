@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- EVERY EMAIL THE CUSTOMER GETS, IN ONE FILE, so "review every email the
+       customer receives" (owner, 2026-10-19) is one thing to read rather than
+       four scattered records. The order confirmation, the invoice, ready for
+       pickup and the cancellation - each in English, each ending with the same
+       block below.
+
+       NOT noupdate, deliberately. There is nothing in these bodies anybody
+       here would hand-edit: the hours are a setting, the address comes off the
+       warehouse and the logo off the company, so an update that improves the
+       wording cannot throw away something the shop typed. -->
+
+  <!-- FIRST, TAKE OWNERSHIP. Three of the four already existed with their
+       ir.model.data noupdate flag set - Odoo's own two, and the order-ready
+       one from the 19th - and such a record is SKIPPED by every later data
+       load, whichever module declares it. Without this the four bodies below
+       do nothing whatever: no error, no warning, the generic text still going
+       out. Found by a test that rendered them and read what came back. -->
+  <function model="ir.model.data" name="_aa_own_customer_emails"/>
+
+  <!-- THE BLOCK ALL FOUR END WITH. One address, written once. -->
+  <template id="aa_email_letterhead">
+    <t t-set="pickup" t-value="doc._aa_email_pickup_partner()"/>
+    <t t-set="wo" t-value="doc._aa_email_wo_label()"/>
+    <div style="margin-top: 24px; border-top: 2px solid #0d2764; padding-top: 14px; font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #444;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="vertical-align: top;">
+            <!-- RELATIVE SRC ON PURPOSE: Odoo rewrites it to an absolute URL
+                 when the mail goes out, which is how its own templates do it
+                 and the only way an image shows in a mail client. -->
+            <img t-if="doc.company_id"
+                 t-attf-src="/web/image/res.company/{{ doc.company_id.id }}/logo"
+                 t-att-alt="doc.company_id.name"
+                 style="height: 46px; width: auto; object-fit: contain;"/>
+          </td>
+          <td style="vertical-align: top; text-align: right;">
+            <div t-if="wo" style="font-size: 15px; font-weight: bold; color: #0d2764;">
+              <t t-out="wo">W/O #200</t>
+            </div>
+          </td>
+        </tr>
+      </table>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <tr>
+          <td style="vertical-align: top; padding-right: 18px;">
+            <div style="font-weight: bold; color: #0d2764;">Pick up at</div>
+            <div t-if="pickup">
+              <t t-out="pickup.name or doc.company_id.name">AA Impact Garage Door Supply</t><br/>
+              <t t-if="pickup.street"><t t-out="pickup.street">9753 NW 91st Ct</t><br/></t>
+              <t t-if="pickup.street2"><t t-out="pickup.street2"/><br/></t>
+              <t t-out="pickup.city or ''">Medley</t><t t-if="pickup.state_id">, <t t-out="pickup.state_id.code"/></t>
+              <t t-out="pickup.zip or ''">33178</t>
+            </div>
+          </td>
+          <td style="vertical-align: top;">
+            <div style="font-weight: bold; color: #0d2764;">Pickup hours</div>
+            <div t-out="doc.company_id.aa_pickup_hours or ''">Monday to Friday, 8:00 AM to 4:30 PM</div>
+            <div t-if="doc.company_id.phone" style="margin-top: 6px;">
+              <t t-out="doc.company_id.phone">+1 786-238-7640</t>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </template>
+
+  <!-- 1. THE ORDER CONFIRMATION. Odoo's own is a wall of generated table; this
+          says the order is in, what it is called here, and where to collect
+          it. The quotation report is still attached, which is where the
+          customer looks for the figures. -->
+  <record id="sale.mail_template_sale_confirmation" model="mail.template">
+    <field name="subject">Order {{ object.name }} is confirmed{{ object._aa_email_wo_label() and ' - %s' % object._aa_email_wo_label() or '' }}</field>
+    <field name="lang">en_US</field>
+    <field name="email_from">{{ object._aa_email_from() }}</field>
+    <field name="reply_to">{{ object._aa_email_from() }}</field>
+    <field name="body_html" type="html">
+      <div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #111;">
+        <p>Hello <t t-out="object.partner_id.name or ''">Hector</t>,</p>
+        <p>
+          Thank you - your order <strong t-out="object.name">S00040</strong> is
+          confirmed<t t-if="object._aa_email_wo_label()"> and is on our floor as
+          <strong t-out="object._aa_email_wo_label()">W/O #200</strong></t>.
+        </p>
+        <p>
+          We will email you again as soon as it is ready to collect. You can
+          follow it any time under
+          <a t-att-href="object.get_portal_url()" style="color: #0d2764;">Your Orders</a>,
+          which shows each part of it - springs, tracks, hardware - as it is
+          made.
+        </p>
+        <p t-if="object.amount_total">
+          Order total:
+          <strong t-out="format_amount(object.amount_total, object.currency_id)">$755.22</strong>
+        </p>
+        <p>Thank you,<br/><t t-out="object.company_id.name">AA Impact Garage Door Supply</t></p>
+        <t t-call="work_order_sheet.aa_email_letterhead">
+          <t t-set="doc" t-value="object"/>
+        </t>
+      </div>
+    </field>
+  </record>
+
+  <!-- 2. THE INVOICE. The PDF carries the detail; the email says what it is
+          for and which W/O it belongs to, which is the question somebody rings
+          up with. -->
+  <record id="account.email_template_edi_invoice" model="mail.template">
+    <field name="subject">{{ object.company_id.name }} invoice {{ object.name or '' }}{{ object._aa_email_wo_label() and ' - %s' % object._aa_email_wo_label() or '' }}</field>
+    <field name="lang">en_US</field>
+    <field name="email_from">{{ object._aa_email_from() }}</field>
+    <field name="reply_to">{{ object._aa_email_from() }}</field>
+    <field name="body_html" type="html">
+      <div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #111;">
+        <p>Hello <t t-out="object.partner_id.name or ''">Hector</t>,</p>
+        <p>
+          Here is invoice <strong t-out="object.name or ''">INV/2026/0123</strong><t t-if="object._aa_email_wo_label()">
+          for <strong t-out="object._aa_email_wo_label()">W/O #200</strong></t>,
+          attached as a PDF.
+        </p>
+        <p t-if="object.amount_total">
+          Amount due:
+          <strong t-out="format_amount(object.amount_residual or object.amount_total, object.currency_id)">$755.22</strong><t t-if="object.invoice_date_due">,
+          due <t t-out="format_date(object.invoice_date_due)">12/31/2026</t></t>.
+        </p>
+        <p>
+          If anything on it does not look right, reply to this email or call us
+          and we will sort it out.
+        </p>
+        <p>Thank you,<br/><t t-out="object.company_id.name">AA Impact Garage Door Supply</t></p>
+        <t t-call="work_order_sheet.aa_email_letterhead">
+          <t t-set="doc" t-value="object"/>
+        </t>
+      </div>
+    </field>
+  </record>
+
+  <!-- 3. READY FOR PICKUP. Short, as the owner asked on the 19th - "we dont
+          need to give them too much detail just that their order is ready" -
+          with the address and hours now under it, which is exactly what
+          somebody about to drive over needs. -->
+  <record id="work_order_sheet.mail_template_order_ready" model="mail.template">
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="auto_delete" eval="False"/>
+    <field name="subject">Your order {{ object._dispatch_order_name() }} is ready{{ object._aa_email_wo_label() and ' - %s' % object._aa_email_wo_label() or '' }}</field>
+    <field name="lang">en_US</field>
+    <field name="email_from">{{ object._aa_email_from() }}</field>
+    <field name="reply_to">{{ object._aa_email_from() }}</field>
+    <field name="body_html" type="html">
+      <div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #111;">
+        <p>Hello <t t-out="object.partner_id.name or ''">Hector</t>,</p>
+        <p>
+          Your order <strong t-out="object._dispatch_order_name()">S00040</strong>
+          is ready for pickup<t t-if="object._dispatch_pickup_place()"> at
+          <t t-out="object._dispatch_pickup_place()">Medley</t></t>.
+        </p>
+        <p>Thank you,<br/><t t-out="object.company_id.name">AA Impact Garage Door Supply</t></p>
+        <t t-call="work_order_sheet.aa_email_letterhead">
+          <t t-set="doc" t-value="object"/>
+        </t>
+      </div>
+    </field>
+  </record>
+
+  <!-- 4. THE CANCELLATION. There was no such email at all - Odoo does not send
+          one and the Cancel & Refund procedure did not either, so a customer
+          whose paid order was cancelled heard nothing. It says what was
+          cancelled, what is coming back and how, and nothing about the shop's
+          own reasons. -->
+  <record id="mail_template_order_cancelled" model="mail.template">
+    <field name="name">Order cancelled and refunded</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="subject">Order {{ object.name }} has been cancelled{{ object._aa_email_wo_label() and ' - %s' % object._aa_email_wo_label() or '' }}</field>
+    <field name="partner_to">{{ object.partner_id.id }}</field>
+    <field name="lang">en_US</field>
+    <field name="email_from">{{ object._aa_email_from() }}</field>
+    <field name="reply_to">{{ object._aa_email_from() }}</field>
+    <field name="auto_delete" eval="False"/>
+    <field name="body_html" type="html">
+      <div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #111;">
+        <p>Hello <t t-out="object.partner_id.name or ''">Hector</t>,</p>
+        <p>
+          Your order <strong t-out="object.name">S00040</strong><t t-if="object._aa_email_wo_label()">
+          (<strong t-out="object._aa_email_wo_label()">W/O #200</strong>)</t>
+          has been cancelled.
+        </p>
+        <p t-if="ctx.get('aa_refunded')">
+          We have refunded
+          <strong t-out="ctx.get('aa_refunded')">$755.22</strong> the way it was
+          paid. Depending on your bank it can take a few days to appear.
+        </p>
+        <p t-else="">
+          Nothing was charged for it, so there is nothing to refund.
+        </p>
+        <p>
+          If this is not what you expected, call us and we will put it right.
+        </p>
+        <p>Thank you,<br/><t t-out="object.company_id.name">AA Impact Garage Door Supply</t></p>
+        <t t-call="work_order_sheet.aa_email_letterhead">
+          <t t-set="doc" t-value="object"/>
+        </t>
+      </div>
+    </field>
+  </record>
+
+</odoo>

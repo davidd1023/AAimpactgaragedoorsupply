@@ -22,6 +22,13 @@
               <field name="dispatch_ready_email_from" placeholder="sales@aaigd.com"/>
             </div>
           </setting>
+          <setting id="aa_pickup_hours"
+                   string="Pickup hours"
+                   help="Printed on every email the customer gets - the order confirmation, the invoice, &quot;ready for pickup&quot; and the cancellation - under the address they collect from.">
+            <div class="content-group mt-2">
+              <field name="aa_pickup_hours" placeholder="Monday to Friday, 8:00 AM to 4:30 PM"/>
+            </div>
+          </setting>
         </block>
       </xpath>
     </field>

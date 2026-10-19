@@ -323,12 +323,15 @@ class StockPickingOpenForm(models.Model):
                 else self.origin or self.name or "")
 
     def _dispatch_ready_email_from(self):
-        """The address the alert comes from, as set in Inventory > Settings."""
-        self.ensure_one()
-        typed = (self.env["ir.config_parameter"].sudo().get_param(
-            "work_order_sheet.ready_email_from") or "").strip()
+        """The address the alert comes from, as set in Inventory > Settings.
 
-        return typed or self.company_id.email or ""
+        ONE HOME NOW (see email_letterhead): all four customer emails come
+        from the same mailbox, so the lookup moved there and this is the name
+        the mail template has always called it by.
+        """
+        self.ensure_one()
+
+        return self._aa_email_from()
 
     def _dispatch_pickup_place(self):
         """Where it is ready for pickup - "Medley".
