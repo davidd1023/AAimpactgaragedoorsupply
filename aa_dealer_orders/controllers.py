@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 
@@ -27,7 +28,95 @@ class AADealerPortal(CustomerPortal):
             # Only on the /my page render. The counters RPC must return counters only,
             # otherwise the portal JS looks for a placeholder that does not exist.
             values['aa_is_dealer'] = request.env.user.partner_id._aa_is_on_account_dealer()
+            values['aa_resale_state'] = request.env.user.partner_id.aa_resale_state
         return values
+
+    # --- tax-exempt dealer registration ---------------------------------------
+    #
+    # THE DEALER'S OWN PAGE. The owner, 2026-10-19: the exemption exists but
+    # "every dealer has to be set up by hand". This is where they hand the
+    # certificate over - signed in, so it attaches to a real account rather
+    # than making a contact somebody has to merge later.
+
+    # WHAT A CERTIFICATE MAY BE. A tax document is a PDF or a photograph of
+    # one; anything else arriving here is either a mistake or an attempt, and
+    # both are refused the same way.
+    RESALE_TYPES = {
+        "pdf": "application/pdf",
+        "png": "image/png",
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+    }
+    # Big enough for a scanned page, small enough that a public form is not a
+    # way of filling the database.
+    RESALE_MAX_BYTES = 8 * 1024 * 1024
+
+    def _aa_resale_values(self, **extra):
+        partner = request.env.user.partner_id
+        values = {
+            "partner": partner,
+            "page_name": "resale_certificate",
+            "error": "",
+            "done": False,
+        }
+        values.update(extra)
+
+        return values
+
+    @route("/my/resale-certificate", type="http", auth="user", website=True,
+           methods=["GET"], sitemap=False)
+    def aa_resale_form(self, **kwargs):
+        return request.render(
+            "aa_dealer_orders.portal_resale_certificate",
+            self._aa_resale_values(done=bool(kwargs.get("done"))))
+
+    @route("/my/resale-certificate", type="http", auth="user", website=True,
+           methods=["POST"], sitemap=False)
+    def aa_resale_submit(self, **post):
+        partner = request.env.user.partner_id
+        upload = request.httprequest.files.get("certificate")
+
+        try:
+            data = self._aa_resale_file(upload)
+            partner._aa_resale_submit(
+                certificate=data,
+                filename=upload.filename,
+                number=(post.get("number") or "").strip(),
+                expiry=(post.get("expiry") or "").strip(),
+            )
+        except (UserError, ValidationError) as error:
+            return request.render(
+                "aa_dealer_orders.portal_resale_certificate",
+                self._aa_resale_values(error=error.args[0] if error.args else str(error)))
+
+        # REDIRECTED RATHER THAN RENDERED, so a refresh does not upload the
+        # certificate a second time.
+        return request.redirect("/my/resale-certificate?done=1")
+
+    def _aa_resale_file(self, upload):
+        """The uploaded certificate as base64, or a plain refusal."""
+        if not upload or not upload.filename:
+            raise UserError(_("Choose the certificate file to upload."))
+
+        extension = upload.filename.rsplit(".", 1)[-1].lower() \
+            if "." in upload.filename else ""
+
+        if extension not in self.RESALE_TYPES:
+            raise UserError(_(
+                "A certificate has to be a PDF or a photograph (PDF, PNG or "
+                "JPG). %(name)s is neither.", name=upload.filename))
+
+        data = upload.read(self.RESALE_MAX_BYTES + 1)
+
+        if len(data) > self.RESALE_MAX_BYTES:
+            raise UserError(_(
+                "That file is bigger than 8 MB. Send a smaller scan, or email "
+                "it to us."))
+
+        if not data:
+            raise UserError(_("That file is empty."))
+
+        return base64.b64encode(data)
 
 
 class AAOptionPricing:
