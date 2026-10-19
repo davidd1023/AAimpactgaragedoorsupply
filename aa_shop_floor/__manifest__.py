@@ -1,6 +1,6 @@
 {
     'name': 'AA Shop Floor',
-    'version': '19.0.1.12.0',
+    'version': '19.0.1.13.0',
     'summary': 'Each Shop Floor station shows exactly what to make for the order',
     'description': """
 The Shop Floor card tells the worker what to make, without opening anything else.
@@ -23,12 +23,16 @@ only what goes in the box (kit, its pieces, lift cables).
 """,
     'author': 'AA Impact Garage Door Supply',
     'category': 'Manufacturing',
-    'depends': ['mrp_workorder', 'sale', 'spring_engineering'],
+    # sale_mrp puts the order's manufacturing ORDER NUMBERS on the customer's
+    # portal page; the station progress replaces them, so it has to be there to
+    # be replaced. It installs itself anyway wherever sale and mrp both are.
+    'depends': ['mrp_workorder', 'sale', 'sale_mrp', 'spring_engineering'],
     'data': [
         'data/aa_shop_floor_data.xml',
         'data/aa_pending_workcenter.xml',
         'views/mrp_production_views.xml',
         'views/hardware_box_templates.xml',
+        'views/portal_templates.xml',
         'views/res_config_settings_views.xml',
         'report/hardware_sticker.xml',
         'views/aa_shop_floor_history_views.xml',
