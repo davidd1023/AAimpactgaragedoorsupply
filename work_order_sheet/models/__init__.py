@@ -7,3 +7,4 @@ from . import sale_order_cancel
 from . import wo_number
 from . import email_letterhead
 from . import dispatched
+from . import auto_dispatch
