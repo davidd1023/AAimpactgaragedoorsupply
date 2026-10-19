@@ -25,7 +25,8 @@ import json
 import re
 from urllib.parse import quote
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import AccessError
 from odoo.tools.misc import hmac
 
 from .mrp_production import (
@@ -36,6 +37,7 @@ from .mrp_production import (
     qty_label,
     wire_label,
 )
+from .res_config_settings import DEFAULT_STICKER_SIZE, STICKER_SIZES
 from .sale_order import is_hardware_kit
 
 # The calculator names a drum for its maker, the shop names it for its size:
@@ -614,6 +616,57 @@ class MrpProduction(models.Model):
     # turn into a code with a caption.
     QR_MIN_MM = 16.0
     QR_MAX_MM = 32.0
+
+    @api.model
+    def aa_sticker_sizes(self):
+        """The sizes to offer beside Print sticker, and the one in use.
+
+        ASKED FOR AT THE PRINTER (owner, 2026-10-19). The Settings page is
+        where a size is configured once; this is where somebody standing at
+        the label printer with a different roll in it changes it. Same
+        setting, same system parameter - there is no second place the answer
+        can live.
+        """
+        param = self.env["ir.config_parameter"].sudo()
+        current = param.get_param(
+            "aa_shop_floor.sticker_size") or DEFAULT_STICKER_SIZE
+        options = [[value, label] for value, label in STICKER_SIZES
+                   if value != "custom"]
+
+        # A SIZE TYPED IN SETTINGS IS STILL THE SIZE IN USE, so it has to be
+        # in the list and selected - otherwise opening this would silently
+        # show 4 x 6 as the current stock and the next print would change it.
+        if current == "custom":
+            width, height = self._aa_sticker_inches()
+            options.append(["custom", "Custom - %g x %g in" % (width, height)])
+
+        return {"current": current, "options": options}
+
+    @api.model
+    def aa_set_sticker_size(self, size):
+        """Change the label stock from the Shop Floor. Returns what is in use.
+
+        ONLY THE SIZES ON THE LIST. The parameter is written with raised
+        rights - a worker at a bench cannot write system parameters, and
+        should not be given a way to write any of them - so what may be
+        written here is checked against the offered values rather than
+        trusted. "custom" is not one of them: there is nothing in a dialog
+        footer to type two inch figures into, so a custom size stays
+        Settings' business and is left exactly as it was.
+        """
+        if not self.env.user.has_group("mrp.group_mrp_user"):
+            raise AccessError(_(
+                "Only somebody who works in Manufacturing can change the "
+                "sticker size."))
+
+        allowed = {value for value, _label in STICKER_SIZES if value != "custom"}
+
+        if size in allowed:
+            self.env["ir.config_parameter"].sudo().set_param(
+                "aa_shop_floor.sticker_size", size)
+            self._aa_sticker_apply_size()
+
+        return self.aa_sticker_sizes()
 
     def _aa_sticker_layout(self, card=None):
         """How to lay the label out on the stock the owner has chosen.

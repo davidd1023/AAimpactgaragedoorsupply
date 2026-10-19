@@ -10,7 +10,7 @@
 // says none of those things, so "don't display anything" needs no condition of
 // its own here: the card either has rows or does not exist.
 
-import { Component } from "@odoo/owl";
+import { Component, onWillStart, useState } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
@@ -25,10 +25,38 @@ export class AaHardwareCardDialog extends Component {
         close: Function,
     };
 
+    setup() {
+        this.orm = useService("orm");
+        // THE LABEL STOCK, BESIDE THE BUTTON THAT PRINTS ON IT (owner,
+        // 2026-10-19). Loaded when the dialog opens rather than carried on
+        // every card, because it is one answer for the whole shop and not
+        // something about this box.
+        this.sizes = useState({ current: "", options: [] });
+
+        onWillStart(async () => {
+            Object.assign(
+                this.sizes,
+                await this.orm.call("mrp.production", "aa_sticker_sizes", [])
+            );
+        });
+    }
+
     get title() {
         const card = this.props.card;
 
         return [card.order, card.door].filter(Boolean).join(" · ") || "Hardware";
+    }
+
+    async onChangeSize(ev) {
+        // Saved before anything is printed, so Print sticker prints on what
+        // the dropdown says - and so the next box prints on it too, which is
+        // the point of changing it here.
+        Object.assign(
+            this.sizes,
+            await this.orm.call("mrp.production", "aa_set_sticker_size", [
+                ev.target.value,
+            ])
+        );
     }
 
     // THE PDF, IN A TAB OF ITS OWN, which is what a tablet can actually print

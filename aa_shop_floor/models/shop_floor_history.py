@@ -62,19 +62,55 @@ class MrpWorkorder(models.Model):
         return "%d h %02d min" % divmod(whole, 60)
 
     def _aa_history_job(self):
-        """One finished (or running) job, as the Shop Floor shows it."""
+        """One finished (or running) job, as the Shop Floor shows it.
+
+        THE CLOCK IS THE TIME LOG, NOT THE SCHEDULE, and getting that wrong
+        is what the owner caught on 2026-10-19: a job still running said
+        "2 h 00 min start to finish" and "Oct 19, 08:55 AM -> Oct 19, 10:55
+        AM" for a finish that had not happened.
+
+        `date_start` and `date_finished` on a work order are a COMPUTED
+        PLANNED WINDOW - core even calls them the planned dates when it
+        refuses an end before a start. Starting a job overwrites date_start
+        with the real time, and finishing it overwrites date_finished; until
+        then date_finished is still the plan, which is the start plus the
+        expected duration. Reading it as an actual finish turns every running
+        job into a job that finished exactly on schedule.
+
+        So the times come from mrp.workcenter.productivity - the log Start and
+        Mark as Done write, the same log `duration` is summed from - and a
+        finish is only shown when there is one.
+        """
         self.ensure_one()
         production = self.production_id
         product = production.product_id.with_context(display_default_code=False)
 
-        # The clock, and the wall. date_start is when it was first started -
-        # Odoo writes it when the first time log opens - and date_finished
-        # when it was marked done.
+        logs = self.time_ids
+        log_starts = [log.date_start for log in logs if log.date_start]
+        log_ends = [log.date_end for log in logs if log.date_end]
+        # The clock is ticking when a log has been opened and not closed.
+        running = any(not log.date_end for log in logs)
+        done = self.state == "done"
+
+        started = min(log_starts) if log_starts else False
+
+        if not started and self.state == "progress":
+            # Started, but the log is not written yet.
+            started = self.date_start
+
+        finished = False
+
+        if done and not running:
+            # A done job's own date_finished IS the real one - finishing is
+            # what writes it - and it is the only answer for a job the manager
+            # marked done from the Overview without the clock ever running.
+            finished = max(log_ends) if log_ends else self.date_finished
+
         worked = self.duration or 0.0
         elapsed = 0.0
 
-        if self.date_start and self.date_finished:
-            elapsed = (self.date_finished - self.date_start).total_seconds() / 60.0
+        if started and finished:
+            elapsed = (finished - started).total_seconds() / 60.0
 
         return {
             "id": self.id,
@@ -84,8 +120,8 @@ class MrpWorkorder(models.Model):
             "quantity": production.product_qty,
             "uom": production.product_uom_id.name or "",
             "workers": self.employee_ids.mapped("name"),
-            "started": self._aa_clock_words(self.date_start),
-            "finished": self._aa_clock_words(self.date_finished),
+            "started": self._aa_clock_words(started),
+            "finished": self._aa_clock_words(finished),
             "worked": self._aa_duration_words(worked),
             # SHOWN ONLY WHEN IT SAYS SOMETHING ELSE. On a job that was done
             # in one sitting the two figures are the same and printing both
@@ -94,7 +130,11 @@ class MrpWorkorder(models.Model):
                     if elapsed and elapsed - worked >= 1 else "",
             "worked_minutes": round(worked, 2),
             "state": self.state,
-            "done": self.state == "done",
+            "done": done,
+            # RUNNING AND PAUSED ARE NOT THE SAME THING on a board somebody
+            # is reading to find out what is happening: one has somebody on
+            # it, the other was started and put down.
+            "running": running,
         }
 
     def _aa_clock_words(self, value):

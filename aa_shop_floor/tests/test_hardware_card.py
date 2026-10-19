@@ -551,6 +551,44 @@ class StickerSizeCase(HardwareCardCase):
             {"product_id": self.kit.product_variant_ids[:1].id})
         self.assertLessEqual(len(job._aa_box_url()), 90, job._aa_box_url())
 
+    # --- and from beside the Print button ------------------------------------
+
+    def test_the_sizes_are_offered_beside_the_print_button(self):
+        """ASKED FOR AT THE PRINTER (owner, 2026-10-19). Same setting, read
+        from where the label printer is."""
+        self._set_size("4x6")
+        offered = self.env["mrp.production"].aa_sticker_sizes()
+        self.assertEqual(offered["current"], "4x6")
+        values = [value for value, _label in offered["options"]]
+        self.assertIn("4x6", values)
+        self.assertIn("2.25x1.25", values)
+        self.assertNotIn("custom", values,
+                         "there is nowhere in a dialog footer to type inches")
+
+    def test_changing_it_there_changes_the_label(self):
+        production = self.env["mrp.production"]
+        production.aa_set_sticker_size("3x2")
+        paperformat = self.env.ref("aa_shop_floor.paperformat_hardware_sticker")
+        self.assertEqual((paperformat.page_width, paperformat.page_height),
+                         (76, 51))
+        self.assertEqual(production.aa_sticker_sizes()["current"], "3x2")
+
+    def test_a_size_nobody_offered_is_not_written(self):
+        """The parameter is written with raised rights, so what may be
+        written is checked rather than trusted."""
+        production = self.env["mrp.production"]
+        production.aa_set_sticker_size("4x3")
+        production.aa_set_sticker_size("99x99")
+        self.assertEqual(production.aa_sticker_sizes()["current"], "4x3")
+
+    def test_a_custom_size_set_in_settings_is_shown_as_the_one_in_use(self):
+        """Otherwise opening the popup would say 4 x 6 under a label printer
+        loaded with something else, and the next print would make it true."""
+        self._set_size("custom", width=3.5, height=2.5)
+        offered = self.env["mrp.production"].aa_sticker_sizes()
+        self.assertEqual(offered["current"], "custom")
+        self.assertIn(["custom", "Custom - 3.5 x 2.5 in"], offered["options"])
+
     def test_the_label_still_prints_at_a_new_size(self):
         """The whole point: a size the owner chose has to come out of the
         printer, not only out of a field."""
