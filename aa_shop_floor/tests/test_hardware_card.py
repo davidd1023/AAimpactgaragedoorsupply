@@ -337,7 +337,15 @@ class HardwareCardCase(HttpCase):
     def test_a_wrong_token_opens_nothing(self):
         job = self._kit_job(self._confirm(self._order_a_kit()))
 
-        for token in ("", "x", "0" * 64, job._aa_box_token()[:-1] + "0"):
+        real = job._aa_box_token()
+        # A LAST CHARACTER IT IS NOT. "token[:-1] + '0'" IS the real token
+        # whenever the real one already ends in 0 - a one-in-sixteen flake
+        # that passed all day and then opened the page instead of refusing
+        # it. Near-misses have to be built by changing something, not by
+        # setting it to a value it might already hold.
+        near_miss = real[:-1] + ("1" if real[-1] == "0" else "0")
+
+        for token in ("", "x", "0" * 64, near_miss):
             response = self.url_open("/box/%d/%s" % (job.id, token or "-"))
             self.assertEqual(response.status_code, 404, token)
 

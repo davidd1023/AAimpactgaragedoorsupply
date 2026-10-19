@@ -8,7 +8,14 @@
             name="Tax-exempt dealer status tile">
     <div id="portal_client_category" position="inside">
       <t t-call="portal.portal_docs_entry">
-        <t t-set="icon" t-value="'/account/static/src/img/Bills.svg'"/>
+        <!-- OUR OWN ICON, in the module. The first one pointed at
+             /account/static/src/img/Bills.svg, which does not exist - the real
+             file is bill.svg, lower case - so the tile showed a broken image.
+             And bill.svg is what Your Invoices already uses, so borrowing it
+             would have put the same picture on two tiles. This one is drawn in
+             the portal's own three colours and cannot 404, because it ships
+             here. -->
+        <t t-set="icon" t-value="'/aa_dealer_orders/static/src/img/resale-certificate.svg'"/>
         <t t-set="title">Tax-exempt dealer status</t>
         <t t-set="url" t-value="'/my/resale-certificate'"/>
         <t t-set="text">
