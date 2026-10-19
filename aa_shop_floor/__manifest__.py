@@ -1,6 +1,6 @@
 {
     'name': 'AA Shop Floor',
-    'version': '19.0.1.13.0',
+    'version': '19.0.1.13.1',
     'summary': 'Each Shop Floor station shows exactly what to make for the order',
     'description': """
 The Shop Floor card tells the worker what to make, without opening anything else.
@@ -26,7 +26,7 @@ only what goes in the box (kit, its pieces, lift cables).
     # sale_mrp puts the order's manufacturing ORDER NUMBERS on the customer's
     # portal page; the station progress replaces them, so it has to be there to
     # be replaced. It installs itself anyway wherever sale and mrp both are.
-    'depends': ['mrp_workorder', 'sale', 'sale_mrp', 'spring_engineering'],
+    'depends': ['mrp_workorder', 'sale', 'sale_mrp', 'spring_engineering', 'work_order_sheet'],
     'data': [
         'data/aa_shop_floor_data.xml',
         'data/aa_pending_workcenter.xml',

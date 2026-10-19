@@ -164,7 +164,7 @@ class HardwareCardCase(HttpCase):
         card = self._card(self._confirm(self._order_a_kit()))
         rows = self._rows(card)
 
-        self.assertEqual(card["order"][:1], "S", card["order"])
+        self.assertTrue(card["order"].startswith("W/O #"), card["order"])
         self.assertIn("1200", card["kit"])
         self.assertEqual(card["size"], '9\' 0" x 7\' 0"', card["size"])
         self.assertEqual(card["weight"], "355 lb")
