@@ -1,0 +1,526 @@
+"""WHAT THE BOX IS FOR: one card per hardware kit, and a sticker that carries it.
+
+The hardware station packs a box. Everything about the door that box is for -
+the spring it will be hung on, the turns to wind it to, the drum the figures
+came off, the finish, the lift, the cable and the track - is on the sale order
+in six different places, and none of them is the kit line the packer is looking
+at. So the packer either knows the order by heart or goes and asks.
+
+This is that answer, assembled once and shown three ways: a button beside Start
+on the Hardware card, a sticker printed for the box, and the page that sticker's
+QR code opens on a phone. All three read `aa_hardware_card`, so they cannot
+disagree.
+
+ONE DOOR PER CARD (owner, 2026-10-19). A dealer order carries several doors and
+each one has its own kit, its own springs and its own cable; mixing two doors'
+figures onto one card is how the wrong spring goes in the wrong box. What
+belongs to which door is settled by _aa_door_split below.
+
+NOTHING IS INVENTED. A fact that is not on the order is left out - no "n/a", no
+zero standing in for a figure nobody worked out. A card with nothing to say does
+not appear at all, and neither does its button.
+"""
+
+import json
+import re
+from urllib.parse import quote
+
+from odoo import api, fields, models
+from odoo.tools.misc import hmac
+
+from .mrp_production import (
+    HORIZONTAL_TRACK,
+    VERTICAL_TRACK,
+    id_label,
+    inches_label,
+    qty_label,
+    wire_label,
+)
+from .sale_order import is_hardware_kit
+
+# The calculator names a drum for its maker, the shop names it for its size:
+# "CANIMEX/TF D400-144" is the D400-144 everybody here asks for.
+DRUM_MAKER = re.compile(r"^\s*CANIMEX\s*/\s*TF\s*", re.I)
+
+# Which attribute carries the finish. Spelled four ways across the catalogue
+# because the kit templates were not all built on the same day.
+COLOUR_ATTRIBUTES = ("finish color", "finish colour", "color", "colour")
+
+# A lift cable line, however the catalogue spells the rest of the name.
+CABLE_NAME = re.compile(r"\blift\s*cable\b", re.I)
+
+# Any track, for the lines whose name the two exact patterns do not match.
+TRACK_NAME = re.compile(r"\btrack\b", re.I)
+
+
+def feet_label(inches):
+    """108 -> 9' 0", 100.5 -> 8' 4 1/2". How a door is spoken.
+
+    THE SHOP TALKS IN FEET, and so does every other document this order
+    touches: the dealer note writes W 9' 0" x H 7' 0" and the calculator asks
+    for the height that way. A card that answered 108" would be the only thing
+    on the bench that did.
+    """
+    inches = float(inches or 0)
+    feet = int(inches // 12)
+    rest = inches - feet * 12
+
+    if not feet:
+        return inches_label(rest)
+
+    return "%d' %s" % (feet, inches_label(rest))
+
+
+class MrpProduction(models.Model):
+    _inherit = "mrp.production"
+
+    # --- the card -------------------------------------------------------------
+
+    aa_hardware_card = fields.Text(
+        string="Hardware Card (data)", compute="_compute_aa_hardware_card",
+        help="Everything the hardware station needs to know about the door this "
+             "box is for: spring and turns, drum, finish, lift, cable and track.")
+
+    aa_box_url = fields.Char(
+        string="Box sticker link", compute="_compute_aa_box_url",
+        help="What the sticker's QR code opens. The link is the key, so it is "
+             "kept from anybody the box's own figures are kept from.")
+
+    @api.depends("aa_station_kind")
+    def _compute_aa_box_url(self):
+        for production in self:
+            production.aa_box_url = production._aa_box_url() \
+                if production.aa_station_kind == "kit" and production.id else ""
+
+    # NOT STORED, like the two Overview boards. The card is read when somebody
+    # asks for it - a tap, a print, a scan - and it is assembled from eight
+    # fields on four other records, so a stored copy would be a copy that can
+    # be out of date the moment any of them is corrected.
+    @api.depends(
+        "aa_station_kind", "aa_sale_line_id", "product_id", "product_qty",
+        "aa_sale_line_id.order_id.order_line.product_uom_qty",
+        "aa_sale_line_id.order_id.order_line.spring_spec_json",
+        "aa_sale_line_id.order_id.order_line.name",
+        "aa_sale_line_id.order_id.order_line.linked_line_id",
+    )
+    def _compute_aa_hardware_card(self):
+        for production in self:
+            card = production._aa_hardware_card()
+            production.aa_hardware_card = json.dumps(card) if card else False
+
+    def _aa_hardware_card(self):
+        """The whole card as plain data, or {} when there is nothing to say.
+
+        {} MEANS NO BUTTON. "If there isn't any hardware in the order don't
+        display anything" (owner, 2026-10-19), and a kit whose order says
+        nothing about any of the six facts is the same case: a card listing a
+        heading and no figures is worse than no card.
+        """
+        self.ensure_one()
+
+        if self.aa_station_kind != "kit":
+            return {}
+
+        kit = self.aa_sale_line_id
+
+        if not kit:
+            return {}
+
+        order = kit.order_id
+        by_kit, loose = self._aa_door_split(order)
+        lines = by_kit.get(kit, self.env["sale.order.line"])
+        doors = list(by_kit)
+        rows = self._aa_card_rows(kit, lines)
+        also = self._aa_card_rows(kit.browse(), loose) if loose else []
+
+        if not rows and not also:
+            return {}
+
+        notes = dict(self._aa_line_notes(kit))
+        card = {
+            "order": order.name or self.origin or "",
+            "customer": order.partner_id.name or "",
+            "kit": (self.product_id.product_tmpl_id.name or "").replace(
+                " Hardware Kit", ""),
+            # The door the box is for, which is the heading everything under
+            # it belongs to. Left out when the order never said.
+            "size": self._aa_card_door(kit, notes),
+            "weight": self._aa_card_weight(kit, notes,
+                                           self._aa_card_specs(lines)),
+            "rows": rows,
+            "also": also,
+        }
+
+        # WHICH DOOR OF HOW MANY, and only when there is more than one. On a
+        # single-door order "Door 1 of 1" is noise; on a four-door order it is
+        # the whole point of the card.
+        if len(doors) > 1:
+            card["door"] = "Door %d of %d" % (doors.index(kit) + 1, len(doors))
+
+        return card
+
+    # --- which lines belong to which door -------------------------------------
+
+    def _aa_door_split(self, order):
+        """({kit line: its lines}, lines that belong to no kit).
+
+        TWO RULES, THE STRICTER ONE FIRST. The dealer Quick Order links a
+        door's extras to its kit line (linked_line_id), which is a fact rather
+        than a guess, so it wins. Anything else - a kit and a spring put in a
+        cart by hand - falls back to the rule this module already uses for
+        boxing lift cables: a line belongs to the closest kit ABOVE it, which
+        is the order the pages that build these orders write them in.
+
+        Lines above the first kit belong to no door. They are still on the
+        order and still want saying, so they come back separately rather than
+        being attached to a door they may have nothing to do with.
+        """
+        lines = order.order_line.sorted(lambda line: (line.sequence, line.id))
+        empty = self.env["sale.order.line"]
+        by_kit = {}
+
+        for line in lines:
+            if is_hardware_kit(line.product_id):
+                by_kit[line] = empty
+
+        loose = empty
+        current = None
+
+        for line in lines:
+            if line in by_kit:
+                current = line
+                continue
+
+            if self._aa_card_ignores(line):
+                continue
+
+            owner = line.linked_line_id if line.linked_line_id in by_kit else current
+
+            if owner:
+                by_kit[owner] |= line
+            else:
+                loose |= line
+
+        return by_kit, loose
+
+    def _aa_card_ignores(self, line):
+        """Lines that can hold none of the six facts."""
+        if line.display_type or line.product_uom_qty <= 0 or not line.product_id:
+            return True
+
+        if getattr(line, "is_delivery", False):
+            return True
+
+        # A knurled stud is hardware, and it is not one of the six facts. The
+        # fasteners spring_engineering adds under a bracket would otherwise
+        # have to be read past on every card.
+        return bool(line.track_prep_role)
+
+    # --- the six facts --------------------------------------------------------
+
+    def _aa_card_rows(self, kit, lines):
+        """[(label, value)] for one door: only what the order actually says."""
+        notes = dict(self._aa_line_notes(kit)) if kit else {}
+        specs = self._aa_card_specs(lines)
+        rows = []
+
+        # THE OWNER'S OWN ORDER, as he listed them: spring and turns, drum,
+        # colour, lift, cable, track. The door itself is not one of the six -
+        # it is the heading the six belong to - so it is in the card above
+        # rather than in this list.
+        for label, value in (
+            *self._aa_card_spring_rows(lines, specs),
+            ("Drum", self._aa_card_drum(kit, specs, notes)),
+            ("Colour", self._aa_card_colour(kit)),
+            ("Lift", self._aa_card_lift(kit, notes, lines)),
+            ("Cable", self._aa_card_cable(lines)),
+            ("Track", self._aa_card_track(lines)),
+        ):
+            if value:
+                rows.append([label, value])
+
+        return rows
+
+    @staticmethod
+    def _aa_card_specs(lines):
+        """The spring specifications on these lines, as (line, spec) pairs."""
+        specs = []
+
+        for line in lines:
+            if not line.spring_spec_json:
+                continue
+
+            try:
+                spec = json.loads(line.spring_spec_json)
+            except ValueError:
+                continue
+
+            if isinstance(spec, dict) and spec.get("items"):
+                specs.append((line, spec))
+
+        return specs
+
+    def _aa_card_spring_rows(self, lines, specs):
+        """The spring, written the way the shop writes it, and its turns.
+
+        A DUPLEX PAIR IS TWO ROWS, because it is two springs wound to one
+        specification and the inner one has its own wire and its own length.
+        """
+        rows = []
+
+        for line, spec in specs:
+            items = spec["items"]
+            quantity = line.product_uom_qty or 1.0
+
+            for item in items:
+                label = "Spring"
+
+                if len(items) > 1:
+                    label = "Spring (%s)" % (item.get("role") or "spring").lower()
+
+                rows.append((label, '%s wire · %s I.D. · %s long' % (
+                    wire_label(item["wire"]), id_label(item["id"]),
+                    inches_label(item["length"]))))
+
+            if spec.get("turns"):
+                # To a tenth, which is what the reference prints and what the
+                # calculator showed whoever priced this order.
+                rows.append(("Turns", "%s at full wind" % qty_label(
+                    round(float(spec["turns"]), 1))))
+
+            hands = []
+
+            for hand, key in (("LH", "lh"), ("RH", "rh")):
+                count = (spec.get(key) or 0) * quantity
+
+                if count:
+                    hands.append("%s %s" % (qty_label(count), hand))
+
+            if hands:
+                rows.append(("Wind", ", ".join(hands)))
+
+        if not rows:
+            # A stock spring carries no specification, but its code is the
+            # specification: SPR-2625-2.625-R.
+            for line in lines:
+                code = line.product_id.default_code or ""
+
+                if code.startswith("SPR-"):
+                    rows.append(("Spring", line.product_id.with_context(
+                        display_default_code=False).display_name))
+
+        return rows
+
+    def _aa_card_drum(self, kit, specs, notes):
+        """The drum the spring figures were worked out on.
+
+        THE SPRING'S OWN DRUM FIRST. The owner asked for "the drum used in
+        calculation", and that is the one the calculator was set to when it
+        sized this spring - now carried in the spec. The kit's own drum option
+        and the line note are the same drum in every order we have seen, and
+        they are what an order placed before the spec carried it has.
+        """
+        for _line, spec in specs:
+            if spec.get("drum"):
+                return DRUM_MAKER.sub("", spec["drum"]).strip()
+
+        # aa_dealer_orders' own field, when that module is installed.
+        if kit and "aa_drum" in kit._fields and kit.aa_drum:
+            return kit.aa_drum
+
+        return (notes.get("Drum") or "").strip()
+
+    def _aa_card_colour(self, kit):
+        """White or Black, off the kit's own finish option."""
+        if not kit:
+            return ""
+
+        values = kit.product_id.product_template_attribute_value_ids \
+            | kit.product_no_variant_attribute_value_ids
+
+        for value in values:
+            if (value.attribute_id.name or "").strip().lower() in COLOUR_ATTRIBUTES:
+                return value.name or ""
+
+        # Kits built before the finish was an option carry it in the name.
+        name = kit.product_id.display_name or ""
+
+        for word in ("Black", "White"):
+            if re.search(r"\b%s\b" % word, name, re.I):
+                return word
+
+        return ""
+
+    def _aa_card_lift(self, kit, notes, lines):
+        """Standard, or high lift and how much of it."""
+        note = (notes.get("Lift") or "").strip()
+
+        if note:
+            return note
+
+        if kit and "aa_lift_type" in kit._fields and kit.aa_lift_type:
+            if kit.aa_lift_type == "highlift":
+                return "High Lift %s" % inches_label(kit.aa_high_lift or 0)
+
+            return "Standard"
+
+        # A calculator spring knows the lift it was sized for: the hi-lift
+        # figure is sent as 0 for a standard door and the door height is only
+        # there at all when somebody entered it, so this says nothing about an
+        # order where nobody did.
+        for line in lines:
+            if not line.aa_door_height_in:
+                continue
+
+            if line.aa_door_hi_lift_in:
+                return "High Lift %s" % inches_label(line.aa_door_hi_lift_in)
+
+            return "Standard"
+
+        return ""
+
+    def _aa_cable_cut_inches(self, product):
+        """How long each cable of a prepared pair is cut, in inches, or 0.
+
+        The reel quantity on the pair's own kit BoM is for the PAIR, so one
+        cable is half of it.
+        """
+        bom = self.env["mrp.bom"].sudo()._bom_find(
+            product, bom_type="phantom").get(product)
+        reel = bom and bom.bom_line_ids.filtered(
+            lambda line: "reel" in (line.product_id.name or "").lower())[:1]
+
+        if not reel:
+            return 0.0
+
+        uom = (reel.product_uom_id.name or "").lower()
+        inches_per_unit = 1.0 if uom in ("in", "inch", "inches") else 12.0
+        feet = reel.product_qty * inches_per_unit / 12.0
+
+        return feet * 12.0 / 2.0 / (bom.product_qty or 1.0)
+
+    def _aa_card_cable(self, lines):
+        """The lift cable, and how long each one is cut."""
+        said = []
+
+        for line in lines:
+            name = line.product_id.product_tmpl_id.name or ""
+
+            if not CABLE_NAME.search(name):
+                continue
+
+            each = self._aa_cable_cut_inches(line.product_id)
+            size = re.search(r"Lift Cable\s+(\S+)", name, re.I)
+            label = size.group(1) if size else line.product_id.display_name
+
+            if each:
+                said.append("%s - %s x %s" % (
+                    label, qty_label(2 * line.product_uom_qty),
+                    inches_label(each)))
+            else:
+                # A cut length nobody set is not a cut length to print.
+                said.append(label)
+
+        return " · ".join(said)
+
+    def _aa_card_track(self, lines):
+        """Every track on the door, with its length."""
+        said = []
+
+        for line in lines:
+            product = line.product_id.with_context(display_default_code=False)
+            name = (product.display_name or "").strip()
+
+            # A PREPARED CABLE IS NAMED FOR THE TRACK IT SUITS - "Lift Cable
+            # 1/8" Pair - Prepared (7' Door, 3" Track (15R))" - so the loose
+            # read for the word "track" below found the cable and printed it
+            # as a third track. Each fact is said once, by the part that owns
+            # it.
+            if CABLE_NAME.search(name):
+                continue
+
+            horizontal = HORIZONTAL_TRACK.match(name)
+            vertical = VERTICAL_TRACK.match(name)
+
+            if horizontal:
+                size, length, _colour = horizontal.groups()
+                said.append('%s" Horizontal %s"' % (size, length))
+            elif vertical:
+                size, length, _door, _colour = vertical.groups()
+                said.append('%s" Vertical %s"' % (size, length))
+            elif TRACK_NAME.search(name):
+                said.append(name)
+
+        return " · ".join(said)
+
+    def _aa_card_door(self, kit, notes):
+        """The door itself: width by height."""
+        if kit and kit.aa_door_width_in and kit.aa_door_height_in:
+            return "%s x %s" % (feet_label(kit.aa_door_width_in),
+                                feet_label(kit.aa_door_height_in))
+
+        return (notes.get("Door") or "").strip()
+
+    def _aa_card_weight(self, kit, notes, specs):
+        """What the door weighs, which is what the spring was sized for."""
+        if kit and kit.aa_door_weight_lb:
+            return "%s lb" % qty_label(kit.aa_door_weight_lb)
+
+        note = (notes.get("Weight") or "").strip()
+
+        if note:
+            return note
+
+        for _line, spec in specs:
+            weight = (spec.get("door") or {}).get("weight")
+
+            if weight:
+                return "%s lb" % qty_label(float(weight))
+
+        return ""
+
+    # --- the sticker ----------------------------------------------------------
+
+    def _aa_box_token(self):
+        """The secret half of this box's link.
+
+        DERIVED, NOT STORED. The same work order always produces the same
+        token, so a sticker printed today still opens tomorrow, and there is
+        nothing to generate, migrate or leak out of a database column. It
+        cannot be guessed without the database secret, and knowing one box's
+        token says nothing about any other.
+        """
+        self.ensure_one()
+
+        return hmac(self.env(su=True), "aa_shop_floor.box", (self.id,))
+
+    def _aa_box_url(self):
+        """The whole link the QR code holds."""
+        self.ensure_one()
+        base = (self.get_base_url() or "").rstrip("/")
+
+        return "%s/box/%d/%s" % (base, self.id, self._aa_box_token())
+
+    def _aa_box_qr_src(self, size=240):
+        """The <img src> that draws this box's QR code.
+
+        Built here rather than in the template because the value is a URL -
+        slashes, a colon and a query of its own - and it has to be quoted
+        before it is put inside another one.
+        """
+        self.ensure_one()
+
+        return "/report/barcode/?barcode_type=QR&value=%s&width=%d&height=%d" % (
+            quote(self._aa_box_url(), safe=""), size, size)
+
+
+class MrpWorkorder(models.Model):
+    _inherit = "mrp.workorder"
+
+    # THE CARD IS THE MANUFACTURING ORDER'S, and the Hardware station shows
+    # work orders, so the station's cards read it through here - exactly as
+    # they already read aa_shop_spec.
+    aa_hardware_card = fields.Text(
+        related="production_id.aa_hardware_card", string="Hardware Card (data)")
+    aa_box_url = fields.Char(
+        related="production_id.aa_box_url", string="Box sticker link")

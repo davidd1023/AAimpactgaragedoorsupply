@@ -810,6 +810,7 @@ class SaleOrder(models.Model):
         "stud": "1/4 X 3/4 KNURLEL STUD 18-8",
         "nut": "Flage Nuts 1/4 20",
         "lag": "Lag Screws",
+        "bolt": "Track/Hanger Bolt/Nut",
     }
     FASTENER_PATTERNS = {
         "stud": (r"\bstud\b", r"knurl"),
@@ -817,13 +818,20 @@ class SaleOrder(models.Model):
         # \blag\b, NOT "lag": the catalogue is full of FLAG angles, and a
         # loose search for those three letters finds every one of them.
         "lag": (r"\blag\b", r"\bscrews?\b"),
+        # HANGER as well as BOLT. The catalogue has a hex LAG bolt in it, so
+        # reading for "bolt" alone would hand the bearing plates the wrong
+        # fixing - and the slashes in "Track/Hanger Bolt/Nut" are word breaks
+        # to a regex, so each word still stands on its own.
+        "bolt": (r"\bhanger\b", r"\bbolts?\b"),
     }
     FASTENER_LABELS = {
-        "stud": "knurled stud", "nut": "flange nut", "lag": "lag screw"}
+        "stud": "knurled stud", "nut": "flange nut", "lag": "lag screw",
+        "bolt": "track/hanger bolt and nut"}
     # What to pull out of the catalogue before reading names closely. It used
     # to be "/4", which every stud and nut name happens to contain and no lag
     # screw need, so the search looked straight past them.
-    FASTENER_SEARCH = {"stud": "stud", "nut": "nut", "lag": "lag"}
+    FASTENER_SEARCH = {
+        "stud": "stud", "nut": "nut", "lag": "lag", "bolt": "bolt"}
 
     # WHAT EACH PART BRINGS WITH IT, per one of them ordered.
     #
@@ -838,7 +846,7 @@ class SaleOrder(models.Model):
     FASTENER_RECIPES = {
         "jamb": {"stud": 1, "nut": 1, "lag": 1},
         "flag": {"lag": 3, "stud": 4, "nut": 4},
-        "bearing_plate": {"lag": 2},
+        "bearing_plate": {"lag": 2, "bolt": 4},
         "spring_anchor": {"lag": 2},
     }
 

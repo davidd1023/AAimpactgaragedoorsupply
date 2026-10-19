@@ -5,8 +5,12 @@ import { MrpDisplayAction } from "@mrp_workorder/mrp_display/mrp_display_action"
 patch(MrpDisplayAction.prototype, {
     get fieldsStructure() {
         const structure = super.fieldsStructure;
-        structure["mrp.production"].push("aa_shop_spec", "aa_packed", "aa_station_board", "aa_order_board");
-        structure["mrp.workorder"].push("aa_shop_spec", "aa_packed");
+        structure["mrp.production"].push(
+            "aa_shop_spec", "aa_packed", "aa_station_board", "aa_order_board",
+            // What the box is for, and the link its sticker opens.
+            "aa_hardware_card", "aa_box_url");
+        structure["mrp.workorder"].push(
+            "aa_shop_spec", "aa_packed", "aa_hardware_card", "aa_box_url");
         return structure;
     },
 });
