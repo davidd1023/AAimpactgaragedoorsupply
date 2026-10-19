@@ -28,6 +28,20 @@ def migrate(cr, version):
     if sequence and sequence.number_next_actual < FIRST_NEW:
         sequence.number_next_actual = FIRST_NEW
 
+    # ANY OTHER ORDER STILL OPEN - confirmed, not yet fully delivered - takes
+    # the next number, oldest first, so nothing on the floor is left without
+    # one (an order confirmed in production between the request and the
+    # update, e.g. S00040).
+    if sequence:
+        still_open = Sale.search([
+            ("state", "=", "sale"),
+            ("aa_wo_number", "=", False),
+            ("delivery_status", "!=", "full"),
+        ], order="date_order, id")
+        for order in still_open:
+            order.aa_wo_number = sequence.next_by_id()
+            order._aa_name_work_order_transfer()
+
     # The new stored columns were filled before the orders had a number.
     pickings = env["stock.picking"].search([("origin", "!=", False)])
     pickings._compute_aa_wo_number()
