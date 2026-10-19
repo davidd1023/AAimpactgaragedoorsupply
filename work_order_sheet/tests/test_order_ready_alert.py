@@ -41,9 +41,43 @@ class OrderReadyAlertCase(TransactionCase):
         return order
 
     def _picking(self):
+        """The order's OUTGOING transfer - the one that leaves the building.
+
+        NOT picking_ids[:1], which is what I wrote first and which was wrong
+        twice over. This warehouse delivers in TWO STEPS (pick_ship): confirming
+        the order makes only the internal PICK that gathers goods to Output,
+        and the delivery the customer collects does not exist until that pick
+        is finished - at which point it appears already Ready, because its goods
+        are standing in Output reserved for it.
+
+        That is the real sequence and it is the whole point of the feature: the
+        moment somebody finishes picking an order is the moment it is ready to
+        be collected. So the fixture does the pick, as the warehouse does.
+
+        My first tests took picking_ids[:1] and passed anyway, because nothing
+        in the action cares what type a transfer is - they were quietly
+        exercising an internal move instead of the delivery the button appears
+        on.
+        """
         order = self._order()
-        picking = order.picking_ids[:1]
-        self.assertTrue(picking, "confirming the order made no transfer")
+        pick = order.picking_ids.filtered(
+            lambda p: p.picking_type_id.code != "outgoing")
+
+        for step in pick:
+            self.env["stock.quant"]._update_available_quantity(
+                self.product, step.location_id, 10.0)
+            step.action_assign()
+
+            for move in step.move_ids:
+                move.quantity = move.product_uom_qty
+                move.picked = True
+
+            step.button_validate()
+
+        order.invalidate_recordset()
+        picking = order.picking_ids.filtered(
+            lambda p: p.picking_type_id.code == "outgoing")[:1]
+        self.assertTrue(picking, "picking the order made no delivery")
 
         return order, picking
 
@@ -196,3 +230,138 @@ class OrderReadyAlertCase(TransactionCase):
             lambda m: "is ready" in (m.body or ""))
         self.assertTrue(messages, "nothing in the order's log")
         self.assertIn("hector@example.com", messages[0].body)
+
+
+@tagged("post_install", "-at_install")
+class SentWithoutBeingAskedCase(OrderReadyAlertCase):
+    """"send the email to the customer automatically, well keep the button for
+    resending in case we ever need it" (owner, 2026-10-19).
+
+    READY MEANS READY: a delivery is Ready when everything on it is reserved
+    and could be handed over, which for a made-to-order door is when the shop
+    has finished making it - the springs and tracks only reach stock when their
+    manufacturing orders are marked done. These tests put the stock there and
+    let the sweep find it.
+    """
+
+    def setUp(self):
+        super().setUp()
+        # THE STAMP IS LEFT WHERE IT IS, and my first draft of this moved it
+        # back to the year 2000 "so the test orders are included" - which also
+        # included this database's own 23 ready-and-never-told deliveries and
+        # sent the lot. That is the exact hazard the stamp exists to prevent,
+        # found by a test that had disabled it. Orders made in the test are
+        # made now, which is after it, so nothing needs moving.
+        self.env["ir.config_parameter"].sudo().set_param(
+            "work_order_sheet.ready_email_auto", "True")
+
+    def _ready_picking(self):
+        """A delivery standing ready: picked, in Output, waiting to be
+        collected. Which is what _picking already leaves behind here."""
+        _order, picking = self._picking()
+        picking.invalidate_recordset()
+        self.assertEqual(picking.state, "assigned", "the delivery is not ready")
+
+        return picking
+
+    def _sweep(self):
+        return self.env["stock.picking"]._cron_notify_ready()
+
+    # --- it goes by itself ---------------------------------------------------
+
+    def test_a_ready_delivery_tells_the_customer_by_itself(self):
+        picking = self._ready_picking()
+        self._sweep()
+
+        self.assertTrue(picking.dispatch_ready_sent_on)
+        self.assertTrue(self._sent(picking), "nothing was actually sent")
+
+    def test_a_delivery_that_is_not_ready_is_left_alone(self):
+        """Nothing is reserved, so nothing is ready, so nobody is told."""
+        _order, picking = self._picking()
+        picking.do_unreserve()
+        picking.invalidate_recordset()
+        self.assertNotEqual(picking.state, "assigned")
+        self._sweep()
+        self.assertFalse(picking.dispatch_ready_sent_on)
+
+    def test_nobody_is_told_twice(self):
+        """THE STAMP IS THE GUARD, which is what makes a sweep safe to run
+        every quarter of an hour for ever."""
+        picking = self._ready_picking()
+        self._sweep()
+        self._sweep()
+        self.assertEqual(
+            len(self.env["mail.mail"].search(
+                [("model", "=", "stock.picking"), ("res_id", "=", picking.id)])),
+            1)
+
+    def test_the_button_still_sends_it_again_afterwards(self):
+        """The owner kept the button on purpose."""
+        picking = self._ready_picking()
+        self._sweep()
+        picking.action_notify_ready()
+        self.assertEqual(
+            len(self.env["mail.mail"].search(
+                [("model", "=", "stock.picking"), ("res_id", "=", picking.id)])),
+            2)
+
+    # --- and the guards around it --------------------------------------------
+
+    def test_switching_it_off_stops_it(self):
+        self.env["ir.config_parameter"].sudo().set_param(
+            "work_order_sheet.ready_email_auto", "False")
+        picking = self._ready_picking()
+
+        self._sweep()
+        self.assertFalse(picking.dispatch_ready_sent_on)
+
+    def test_the_back_catalogue_is_not_emailed(self):
+        """SWITCHING THIS ON MUST NOT TELL FIFTY PEOPLE AT ONCE that an order
+        they collected weeks ago is ready. Only orders raised since the day it
+        was switched on go by themselves; an older one can still be told with
+        the button."""
+        picking = self._ready_picking()
+        self.env["ir.config_parameter"].sudo().set_param(
+            "work_order_sheet.ready_auto_since", "2099-01-01 00:00:00")
+
+        self._sweep()
+        self.assertFalse(picking.dispatch_ready_sent_on)
+
+        # And the button is still there for it.
+        picking.action_notify_ready()
+        self.assertTrue(picking.dispatch_ready_sent_on)
+
+    def test_a_customer_with_no_address_is_skipped_not_claimed(self):
+        """The sweep cannot say it out loud - there is nobody to say it to -
+        so it leaves the order untouched for the button to complain about."""
+        picking = self._ready_picking()
+        self.customer.email = False
+
+        self._sweep()
+        self.assertFalse(picking.dispatch_ready_sent_on,
+                         "it must not claim to have told anybody")
+
+    def test_one_bad_order_does_not_stop_the_rest(self):
+        """A dead mail server or a template that cannot render for one order
+        is no reason for the next twenty customers to hear nothing."""
+        first = self._ready_picking()
+        second = self._ready_picking()
+        real = type(self.env["stock.picking"]).action_notify_ready
+
+        def explode(picking):
+            if picking.id == first.id:
+                raise ValueError("the mail server fell over")
+
+            return real(picking)
+
+        patched = type(self.env["stock.picking"])
+        patched.action_notify_ready = explode
+
+        try:
+            self._sweep()
+        finally:
+            patched.action_notify_ready = real
+
+        self.assertFalse(first.dispatch_ready_sent_on)
+        self.assertTrue(second.dispatch_ready_sent_on)

@@ -16,7 +16,9 @@
           <setting id="aa_ready_email_from"
                    string="Order-ready alerts"
                    help="The address the &quot;your order is ready&quot; email is sent from, and the one a customer's reply comes back to. Left empty, the company's own email address is used.">
+            <field name="dispatch_ready_email_auto"/>
             <div class="content-group mt-2">
+              <label for="dispatch_ready_email_from" string="Sent from" class="o_light_label"/>
               <field name="dispatch_ready_email_from" placeholder="sales@aaigd.com"/>
             </div>
           </setting>
