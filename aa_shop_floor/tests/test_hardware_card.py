@@ -12,6 +12,7 @@ it makes the manufacturing order, and the card is read off that.
 """
 
 import json
+from unittest.mock import patch
 
 from odoo.tests.common import HttpCase, tagged
 
@@ -385,6 +386,41 @@ class HardwareCardCase(HttpCase):
                 report.report_name, job.ids)
         self.assertEqual(kind, "pdf")
         self.assertTrue(pdf.startswith(b"%PDF"), pdf[:20])
+
+    def test_a_kit_job_whose_product_stopped_looking_like_a_kit(self):
+        """THE CRASH THAT TOOK THE SHOP FLOOR DOWN on production, 2026-10-19.
+
+        A job carries aa_station_kind "kit" from the day it was made, and the
+        product on its line can stop looking like a hardware kit afterwards -
+        renamed, swapped, a template retitled. doors.index(kit) then raised
+        ValueError, and because every card on the board is read in one
+        request, the whole page failed to render: an Owl error with "Component
+        is destroyed" under it and nothing naming the cause.
+        """
+        order = self._confirm(self._order_a_kit())
+        job = self._kit_job(order)
+        # Two kits, so the card wants to say "Door 1 of 2"...
+        self._order_a_kit(drum_ptav=self.other_drum_ptav)
+        order.invalidate_recordset()
+        # ...and then this job's own line stops being a hardware kit.
+        job.aa_sale_line_id.product_id.product_tmpl_id.sudo().name = "Just A Box"
+        job.invalidate_recordset()
+
+        card = job._aa_hardware_card()
+        self.assertIsInstance(card, dict, "it raised instead of answering")
+
+    def test_one_unreadable_job_does_not_stop_the_board(self):
+        """A card is a convenience; the board is the work."""
+        order = self._confirm(self._order_a_kit())
+        job = self._kit_job(order)
+
+        with patch.object(
+                type(job), "_aa_hardware_card",
+                side_effect=ValueError("something on this order is odd")):
+            job.invalidate_recordset()
+            job._compute_aa_hardware_card()
+
+        self.assertFalse(job.aa_hardware_card, "it should be empty, not fatal")
 
     def test_a_job_with_nothing_to_say_prints_no_figures(self):
         """The report is bound to every manufacturing order, so somebody will

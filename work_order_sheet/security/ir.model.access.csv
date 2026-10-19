@@ -7,4 +7,4 @@ access_work_station_item_user,work.station.item user,model_work_station_item,sto
 access_work_station_item_manager,work.station.item manager,model_work_station_item,stock.group_stock_manager,1,1,1,1
 access_work_station_item_mrp_user,work.station.item mrp user,model_work_station_item,mrp.group_mrp_user,1,1,0,0
 access_work_station_item_mrp_manager,work.station.item mrp manager,model_work_station_item,mrp.group_mrp_manager,1,1,1,1
-access_aa_order_cancel,aa.order.cancel sales manager,model_aa_order_cancel,sales_team.group_sale_manager,1,1,1,1
+access_aa_order_cancel,aa.order.cancel employee,model_aa_order_cancel,base.group_user,1,1,1,1

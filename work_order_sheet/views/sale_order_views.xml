@@ -13,7 +13,7 @@
       <xpath expr="//header" position="inside">
         <button name="action_aa_cancel_and_refund" type="object"
                 string="Cancel &amp; Refund"
-                groups="sales_team.group_sale_manager"
+                groups="base.group_user"
                 invisible="state != 'sale'"/>
       </xpath>
     </field>

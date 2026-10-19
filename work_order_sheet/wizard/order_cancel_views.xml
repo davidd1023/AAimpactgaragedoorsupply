@@ -43,10 +43,10 @@
     <field name="target">new</field>
     <field name="binding_model_id" ref="sale.model_sale_order"/>
     <field name="binding_view_types">form</field>
-    <!-- IN THE ACTIONS MENU TOO, for a manager working from the list. The
-         wizard refuses anybody else whatever menu they came from, but there is
-         no point offering it to somebody it will refuse. -->
-    <field name="group_ids" eval="[(4, ref('sales_team.group_sale_manager'))]"/>
+    <!-- IN THE ACTIONS MENU TOO, for anybody working from the list. The
+         wizard refuses a portal user whatever menu they came from, but there
+         is no point offering it to somebody it will refuse. -->
+    <field name="group_ids" eval="[(4, ref('base.group_user'))]"/>
   </record>
 
 </odoo>
