@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- IN MANUFACTURING > SETTINGS, where the rest of the shop floor is set
+       up, rather than in Technical > Paper Formats. The owner changes label
+       stock; nobody should have to know what a paper format is to do it.
+
+       priority 40 so this applies after mrp's own settings view (35), whose
+       Operations block it hangs off. -->
+  <record id="res_config_settings_view_form_aa_sticker" model="ir.ui.view">
+    <field name="name">res.config.settings.view.form.aa.shop.floor</field>
+    <field name="model">res.config.settings</field>
+    <field name="priority" eval="40"/>
+    <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//block[@name='process_operations_setting_container']" position="after">
+        <block title="Hardware Station" name="aa_hardware_station_container">
+          <setting id="aa_sticker_size"
+                   string="Hardware sticker"
+                   help="What the hardware box's sticker is printed on. The label fits itself to the size, so a smaller sticker prints smaller type rather than running onto a second label.">
+            <field name="aa_sticker_size"/>
+            <div class="content-group mt-2" invisible="aa_sticker_size != 'custom'">
+              <div class="row">
+                <label for="aa_sticker_width_in" string="Width (inches)" class="col-lg-4 o_light_label"/>
+                <field name="aa_sticker_width_in"/>
+              </div>
+              <div class="row">
+                <label for="aa_sticker_height_in" string="Height (inches)" class="col-lg-4 o_light_label"/>
+                <field name="aa_sticker_height_in"/>
+              </div>
+            </div>
+          </setting>
+        </block>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

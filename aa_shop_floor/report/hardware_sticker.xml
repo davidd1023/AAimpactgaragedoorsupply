@@ -1,25 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <!-- A 4 x 6 LABEL, the size the shipping-label printers take (owner,
-       2026-10-19). Portrait, and no margins to speak of: a label printer has
-       no unprintable border to allow for, and every millimetre given away is
-       a millimetre off the QR code. -->
-  <record id="paperformat_hardware_sticker" model="report.paperformat">
-    <field name="name">AA Hardware Sticker 4 x 6</field>
-    <field name="default" eval="False"/>
-    <field name="format">custom</field>
-    <field name="page_width">101</field>
-    <field name="page_height">152</field>
-    <field name="orientation">Portrait</field>
-    <field name="margin_top">3</field>
-    <field name="margin_bottom">3</field>
-    <field name="margin_left">3</field>
-    <field name="margin_right">3</field>
-    <field name="header_line" eval="False"/>
-    <field name="header_spacing">0</field>
-    <field name="dpi">96</field>
-  </record>
+  <!-- THE SIZE IS THE OWNER'S, FROM THE MOMENT IT EXISTS.
+
+       "We don't know what sticker size we are going to use yet" (owner,
+       2026-10-19), so the size is a setting in Manufacturing > Settings and
+       this record is only how wkhtmltopdf is told about it. noupdate, because
+       a format shipped in a data file is rewritten on every module update -
+       which would put the owner's chosen label stock back to 4 x 6 without a
+       word. The setting is re-applied below instead.
+
+       The values here are the default, for a database that has never been
+       told: 4 x 6 inches, the shipping label every thermal printer takes. -->
+  <data noupdate="1">
+    <record id="paperformat_hardware_sticker" model="report.paperformat">
+      <field name="name">AA Hardware Sticker</field>
+      <field name="default" eval="False"/>
+      <field name="format">custom</field>
+      <field name="page_width">102</field>
+      <field name="page_height">152</field>
+      <field name="orientation">Portrait</field>
+      <field name="margin_top">3</field>
+      <field name="margin_bottom">3</field>
+      <field name="margin_left">3</field>
+      <field name="margin_right">3</field>
+      <field name="header_line" eval="False"/>
+      <field name="header_spacing">0</field>
+      <field name="dpi">96</field>
+    </record>
+  </data>
 
   <!-- IN THE PRINT MENU as well as on the station card, because the office
        reprints these: a label that peeled off in the van is reprinted from
@@ -52,60 +61,81 @@
             nothing to put on a sticker.
           </div>
         </div>
-        <div t-if="card" class="page" style="font-family: Arial, Helvetica, sans-serif; color: #000;">
+        <!-- ONE NUMBER SETS THE WHOLE LABEL. Every size below is in `em`
+             against this one, worked out from the sticker size the owner has
+             chosen - so a smaller label prints the same label smaller, down
+             to the smallest type worth printing, and then shows fewer rows
+             rather than running onto a second label. -->
+        <t t-set="layout" t-value="o._aa_sticker_layout(card)"/>
+        <!-- WHAT FITS ON THIS STOCK, and an honest line about what did not.
+             The rows are in the order the owner listed the facts, so a short
+             label keeps the spring and loses the track rather than the other
+             way round. -->
+        <t t-set="shown" t-value="(card or {}).get('rows') and card['rows'][:layout['rows']] or []"/>
+        <t t-set="left_out" t-value="card and (len(card['rows']) - len(shown) + len(card.get('also') or [])) or 0"/>
+        <div t-if="card" class="page"
+             t-attf-style="font-family: Arial, Helvetica, sans-serif; color: #000; font-size: {{layout['root']}}pt; line-height: 1.25;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="vertical-align: top;">
-                <div style="font-size: 17pt; font-weight: bold; line-height: 1.1;">
+                <div style="font-size: 1.55em; font-weight: bold; line-height: 1.1;">
                   <t t-esc="card['order']"/>
                 </div>
-                <div t-if="card.get('door')" style="font-size: 11pt; font-weight: bold; margin-top: 1pt;">
+                <div t-if="card.get('door')" style="font-size: 1em; font-weight: bold;">
                   <t t-esc="card['door']"/>
                 </div>
-                <div t-if="card.get('kit')" style="font-size: 10pt; margin-top: 2pt;">
+                <div t-if="card.get('kit')" style="font-size: 0.9em; margin-top: 0.2em;">
                   <t t-esc="card['kit']"/> hardware
                 </div>
               </td>
               <!-- SCAN FOR THE SAME THING, not for more: the page the code
                    opens is this label, which is the point - a label that has
-                   been written on, torn or soaked still answers. -->
-              <td style="width: 78pt; vertical-align: top; text-align: right;">
-                <img t-att-src="o._aa_box_qr_src(220)" style="width: 76pt; height: 76pt;"/>
+                   been written on, torn or soaked still answers. Sized in
+                   points rather than em because a QR code has to stay big
+                   enough for a phone whatever the type does. -->
+              <td t-attf-style="width: {{layout['qr'] + 4}}pt; vertical-align: top; text-align: right;">
+                <img t-att-src="o._aa_box_qr_src(240)"
+                     t-attf-style="width: {{layout['qr']}}pt; height: {{layout['qr']}}pt;"/>
               </td>
             </tr>
           </table>
 
           <div t-if="card.get('size') or card.get('weight')"
-               style="margin-top: 6pt; padding: 4pt 0; border-top: 1.5pt solid #000; border-bottom: 1.5pt solid #000; font-size: 13pt; font-weight: bold;">
+               style="margin-top: 0.5em; padding: 0.3em 0; border-top: 1.5pt solid #000; border-bottom: 1.5pt solid #000; font-size: 1.2em; font-weight: bold;">
             <t t-esc="card.get('size')"/>
             <span t-if="card.get('size') and card.get('weight')"> · </span>
             <t t-esc="card.get('weight')"/>
           </div>
 
-          <table style="width: 100%; border-collapse: collapse; margin-top: 6pt;">
-            <t t-foreach="card['rows']" t-as="row" t-key="row_index">
+          <table style="width: 100%; border-collapse: collapse; margin-top: 0.5em;">
+            <t t-foreach="shown" t-as="row" t-key="row_index">
               <tr>
-                <td style="font-size: 8.5pt; text-transform: uppercase; color: #333; padding: 2.5pt 4pt 2.5pt 0; vertical-align: top; width: 62pt;">
+                <td style="font-size: 0.77em; text-transform: uppercase; color: #333; padding: 0.2em 0.35em 0.2em 0; vertical-align: top; width: 28%;">
                   <t t-esc="row[0]"/>
                 </td>
-                <td style="font-size: 11pt; font-weight: bold; padding: 2.5pt 0; vertical-align: top;">
+                <td style="font-size: 1em; font-weight: bold; padding: 0.2em 0; vertical-align: top;">
                   <t t-esc="row[1]"/>
                 </td>
               </tr>
             </t>
           </table>
 
-          <t t-if="card.get('also')">
-            <div style="font-size: 8.5pt; text-transform: uppercase; color: #333; margin-top: 7pt; border-top: 0.75pt solid #999; padding-top: 3pt;">
+          <div t-if="left_out"
+               style="font-size: 0.8em; font-weight: bold; margin-top: 0.4em; border-top: 0.75pt solid #999; padding-top: 0.25em;">
+            and <t t-esc="left_out"/> more - scan the code
+          </div>
+
+          <t t-if="card.get('also') and not left_out">
+            <div style="font-size: 0.77em; text-transform: uppercase; color: #333; margin-top: 0.6em; border-top: 0.75pt solid #999; padding-top: 0.25em;">
               Also on this order
             </div>
             <table style="width: 100%; border-collapse: collapse;">
               <t t-foreach="card['also']" t-as="row" t-key="row_index">
                 <tr>
-                  <td style="font-size: 8.5pt; color: #333; padding: 2pt 4pt 2pt 0; vertical-align: top; width: 62pt;">
+                  <td style="font-size: 0.77em; color: #333; padding: 0.18em 0.35em 0.18em 0; vertical-align: top; width: 28%;">
                     <t t-esc="row[0]"/>
                   </td>
-                  <td style="font-size: 10pt; font-weight: bold; padding: 2pt 0; vertical-align: top;">
+                  <td style="font-size: 0.9em; font-weight: bold; padding: 0.18em 0; vertical-align: top;">
                     <t t-esc="row[1]"/>
                   </td>
                 </tr>
@@ -116,5 +146,12 @@
       </t>
     </t>
   </template>
+
+  <!-- THE SETTING IS RE-APPLIED ON EVERY UPDATE, after the format and the
+       report exist. The chosen size lives in a system parameter, so this is
+       what keeps the format record agreeing with it - including on the
+       database where the format was created by the noupdate block above and
+       the owner has since chosen something else. -->
+  <function model="mrp.production" name="_aa_sticker_apply_size"/>
 
 </odoo>

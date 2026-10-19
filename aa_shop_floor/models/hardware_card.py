@@ -492,7 +492,14 @@ class MrpProduction(models.Model):
         """
         self.ensure_one()
 
-        return hmac(self.env(su=True), "aa_shop_floor.box", (self.id,))
+        # TWENTY-FOUR CHARACTERS OF IT, which is 96 bits - more than enough
+        # that nobody will find a box by typing, and 40 characters shorter
+        # than the full digest. The length matters because the whole link goes
+        # into a QR code that has to be read off a 1 1/4 inch label if the
+        # owner chooses one: every character is more modules in the same
+        # square, and a denser code is a code a phone gives up on. Truncating
+        # an HMAC is sound - the standard allows it, well below this.
+        return hmac(self.env(su=True), "aa_shop_floor.box", (self.id,))[:24]
 
     def _aa_box_url(self):
         """The whole link the QR code holds."""
@@ -500,6 +507,168 @@ class MrpProduction(models.Model):
         base = (self.get_base_url() or "").rstrip("/")
 
         return "%s/box/%d/%s" % (base, self.id, self._aa_box_token())
+
+    # --- what the sticker is printed on ---------------------------------------
+    #
+    # THE SIZE IS A SETTING (see res_config_settings): the owner has not
+    # settled on label stock yet, so the label reads its own size and lays
+    # itself out to fit. A 4 x 6 is the baseline every proportion below is
+    # written against.
+
+    STICKER_BASE_WIDTH_MM = 102.0
+    STICKER_BASE_HEIGHT_MM = 152.0
+
+    # A label is not a billboard and not a postage stamp. These only catch a
+    # typed figure that cannot be meant - a 0 that would make wkhtmltopdf fail
+    # outright, or a 400 that would waste a ream finding out.
+    STICKER_MIN_INCHES = 1.0
+    STICKER_MAX_INCHES = 18.0
+
+    @api.model
+    def _aa_sticker_inches(self):
+        """(width, height) of the chosen label, in inches."""
+        param = self.env["ir.config_parameter"].sudo()
+        size = param.get_param("aa_shop_floor.sticker_size") or "4x6"
+
+        if size == "custom":
+            width = param.get_param("aa_shop_floor.sticker_width_in")
+            height = param.get_param("aa_shop_floor.sticker_height_in")
+        else:
+            # The key IS the size: "2.25x1.25" is two and a quarter by one and
+            # a quarter, so there is no second table to fall out of step.
+            width, _sep, height = size.partition("x")
+
+        def inches(value, fallback):
+            try:
+                number = float(value)
+            except (TypeError, ValueError):
+                return fallback
+
+            if not number:
+                return fallback
+
+            return min(max(number, self.STICKER_MIN_INCHES),
+                       self.STICKER_MAX_INCHES)
+
+        return inches(width, 4.0), inches(height, 6.0)
+
+    @api.model
+    def _aa_sticker_apply_size(self):
+        """Write the chosen size onto the sticker's own paper format.
+
+        RUN FROM THE SETTING AND FROM EVERY MODULE UPDATE, because the setting
+        is the truth and the format record is only how wkhtmltopdf is told
+        about it. A format shipped in a data file would otherwise put the
+        owner's choice back to 4 x 6 the next time the module was updated.
+        """
+        paperformat = self.env.ref(
+            "aa_shop_floor.paperformat_hardware_sticker", raise_if_not_found=False)
+
+        if not paperformat:
+            return
+
+        width, height = self._aa_sticker_inches()
+        page_width = int(round(width * 25.4))
+        page_height = int(round(height * 25.4))
+
+        # A LABEL PRINTER HAS NO UNPRINTABLE BORDER to allow for, and on a
+        # small label a 3mm margin all round is a tenth of the sticker, so the
+        # smaller the stock the less is given away.
+        margin = 3 if min(width, height) >= 3 else 1
+
+        paperformat.sudo().write({
+            # Portrait, always, with the real numbers: an orientation that
+            # swapped them would mean the layout below had to guess which way
+            # round the page was.
+            "format": "custom",
+            "orientation": "Portrait",
+            "page_width": page_width,
+            "page_height": page_height,
+            "margin_top": margin,
+            "margin_bottom": margin,
+            "margin_left": margin,
+            "margin_right": margin,
+        })
+
+        # TOLD TO FORGET THE OLD SIZE. print_page_width and print_page_height
+        # are computed WITHOUT @api.depends in core, so writing page_width
+        # does not invalidate them and anything that read them earlier in the
+        # same transaction keeps the previous answer - which here means a
+        # label laid out for the size that has just been replaced. A test
+        # holds this: it chose two sizes in a row and the type never changed.
+        paperformat.invalidate_recordset(
+            ["print_page_width", "print_page_height"])
+
+    # A LABEL HAS TO STAY READABLE. Below about 7pt the figures stop being
+    # readable at arm's length on a bench, so the type stops shrinking there
+    # and the label shows fewer rows instead - which is what a small sticker
+    # is for: enough to know the box, and a code for the rest.
+    MIN_ROOT_PT = 7.0
+    BASE_ROOT_PT = 11.0
+    MM_TO_PT = 2.8346
+
+    # THE SMALLEST QR STILL WORTH PRINTING. At 16mm a link this long lays out
+    # at roughly 0.4mm per module, which is about the floor for a phone camera
+    # on a thermal print - and on a 1 1/4 inch label there is physically
+    # nowhere else for it to go. The upper bound is so a big label does not
+    # turn into a code with a caption.
+    QR_MIN_MM = 16.0
+    QR_MAX_MM = 32.0
+
+    def _aa_sticker_layout(self, card=None):
+        """How to lay the label out on the stock the owner has chosen.
+
+        TWO THINGS GIVE, IN THIS ORDER: the type shrinks to the smallest size
+        still worth printing, and then the list shortens. A fixed template
+        does neither, so changing the paper under it either wastes four
+        fifths of a 4 x 6 or runs a 4 x 2 onto a second label - and a second
+        label for one box is worse than a short one, because only one of them
+        ends up on the box.
+
+        NOTHING IS DROPPED SILENTLY. The template says how many rows it left
+        out, and the code on the label is the way to read them.
+        """
+        self.ensure_one()
+        report = self.env.ref(
+            "aa_shop_floor.action_report_hardware_sticker",
+            raise_if_not_found=False)
+        paperformat = report.paperformat_id if report else None
+        width = paperformat and paperformat.print_page_width or self.STICKER_BASE_WIDTH_MM
+        height = paperformat and paperformat.print_page_height or self.STICKER_BASE_HEIGHT_MM
+        margin = paperformat.margin_top if paperformat else 3
+
+        scale = min(width / self.STICKER_BASE_WIDTH_MM,
+                    height / self.STICKER_BASE_HEIGHT_MM)
+        # Not bigger than the design on a sheet of letter paper: the sticker
+        # stays a sticker and leaves the rest of the page white.
+        scale = min(max(scale, self.MIN_ROOT_PT / self.BASE_ROOT_PT), 1.0)
+        root = round(self.BASE_ROOT_PT * scale, 2)
+
+        # The code is worth more than the tenth row, so on a short label it
+        # keeps its size while the list gives way - but it never takes more
+        # than its share of the height either.
+        qr_mm = min(max(min(width * 0.30, height * 0.45), self.QR_MIN_MM),
+                    self.QR_MAX_MM)
+
+        # WHAT WILL FIT, in points. The heading sits beside the code, so the
+        # block costs whichever of the two is taller; the door size is a band
+        # of its own when the order knows the door; and each row is one line
+        # plus the air around it.
+        usable = (height - 2 * margin) * self.MM_TO_PT
+        heading = max(qr_mm * self.MM_TO_PT, root * 3.4)
+        banner = root * 2.4 if (card or {}).get("size") or (card or {}).get("weight") else 0.0
+        # Room kept back for the "and N more" line and for the rounding
+        # wkhtmltopdf does on the way to whole dots.
+        slack = root * 1.6
+        row = root * 1.62
+        fits = int(max((usable - heading - banner - slack) // row, 1))
+
+        return {
+            "root": root,
+            "qr": round(qr_mm * self.MM_TO_PT, 1),
+            "scale": scale,
+            "rows": fits,
+        }
 
     def _aa_box_qr_src(self, size=240):
         """The <img src> that draws this box's QR code.

@@ -11,13 +11,20 @@
                     <span class="text-muted text-end" t-esc="aaOrderData.customer"/>
                 </div>
                 <div class="text-muted small"><i class="fa fa-clock-o me-1"/>Received <t t-esc="aaOrderData.received"/></div>
-                <div t-if="aaOrderData.can_assign and (aaOrderData.send_ids.length or aaOrderData.remove_ids.length)"
-                     class="d-flex flex-wrap gap-2 mt-2">
-                    <button t-if="aaOrderData.send_ids.length" type="button" class="btn btn-primary"
+                <!-- ONE ROW OF ORDER-WIDE BUTTONS. History is always there -
+                     anybody may ask what has been made and how long it took -
+                     and the two that change the board join it only for a
+                     manager, which is the rule those two already had. -->
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <button type="button" class="btn btn-outline-secondary o_aa_history_btn"
+                            t-on-click.stop="() => this.aaOpenHistory(aaOrderData.order)">
+                        <i class="fa fa-history me-1"/>History
+                    </button>
+                    <button t-if="aaOrderData.can_assign and aaOrderData.send_ids.length" type="button" class="btn btn-primary"
                             t-on-click.stop="() => this.aaOrderAction('aa_send_to_station', aaOrderData.send_ids)">
                         <i class="fa fa-arrow-right me-1"/>Send all
                     </button>
-                    <button t-if="aaOrderData.remove_ids.length" type="button" class="btn btn-outline-secondary"
+                    <button t-if="aaOrderData.can_assign and aaOrderData.remove_ids.length" type="button" class="btn btn-outline-secondary"
                             t-on-click.stop="() => this.aaOrderAction('aa_remove_from_station', aaOrderData.remove_ids)">
                         <i class="fa fa-undo me-1"/>Remove all
                     </button>
