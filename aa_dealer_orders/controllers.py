@@ -577,6 +577,10 @@ class AAKitCart(AAOptionPricing, Cart):
     def add_to_cart(self, product_template_id, product_id, quantity=1.0, uom_id=None,
                     product_custom_attribute_values=None, no_variant_attribute_value_ids=None,
                     linked_products=None, **kwargs):
+        # TAKEN OUT OF kwargs BEFORE super(), because everything left in there
+        # is handed down to _cart_add and on into the line values, and this is
+        # ours to read rather than Odoo's to carry.
+        custom_parts = kwargs.pop('aa_custom_parts', None)
         template = self._shop_kit(product_template_id)
         no_variant = request.env['product.template.attribute.value'].sudo().browse(
             [int(v) for v in no_variant_attribute_value_ids or []]).exists()
@@ -625,7 +629,8 @@ class AAKitCart(AAOptionPricing, Cart):
 
             if kit_line:
                 added = self._aa_add_custom_parts(
-                    custom, kit_line, max(1, int(quantity or 1)))
+                    custom, kit_line, max(1, int(quantity or 1)),
+                    posted=custom_parts)
                 added.setdefault(kit_line.id, kit_line.product_uom_qty)
                 self._aa_popup(result, added)
 
@@ -740,12 +745,47 @@ class AAKitCart(AAOptionPricing, Cart):
         return {'parts': rows, 'total': round(total, 2), 'count': len(rows),
                 'sent': len(parts or [])}
 
-    def _aa_add_custom_parts(self, template, kit_line, qty):
+    @staticmethod
+    def _aa_posted_parts(posted):
+        """The parts list as the Add to Cart request carried it, if it did.
+
+        WHY IT COMES THIS WAY NOW, 2026-10-20. An ordinary AA kit's extras are
+        ticked attributes posted IN the cart request, which is why those have
+        always worked. A custom kit's parts were posted earlier, to the pricing
+        route, and kept in the session - and on production that list was not
+        there when the cart request ran. The page now sends it with the
+        request, the same way the working kits send theirs.
+        """
+        if not posted:
+            return None
+
+        if isinstance(posted, str):
+            try:
+                posted = json.loads(posted)
+            except ValueError:
+                _logger.warning(
+                    "aa_dealer_orders: a custom kit arrived with a parts list "
+                    "that is not JSON")
+
+                return None
+
+        return posted if isinstance(posted, list) else None
+
+    def _aa_add_custom_parts(self, template, kit_line, qty, posted=None):
         """Book each chosen part as its own line, under the kit line.
 
         Returns {line id: quantity added} so the popup can say what went in.
         """
-        chosen = (request.session.get(CUSTOM_KIT_KEY) or {}).get(str(template.id))
+        chosen = self._aa_posted_parts(posted)
+        source = "the cart request"
+
+        if chosen is None:
+            chosen = (request.session.get(CUSTOM_KIT_KEY) or {}).get(str(template.id))
+            source = "the session"
+
+        _logger.info(
+            "aa_dealer_orders: custom kit %s is being packed with %s part(s) "
+            "from %s", template.display_name, len(chosen or []), source)
         picked = self._aa_custom_kit_chosen(template, chosen)
         added = {}
 

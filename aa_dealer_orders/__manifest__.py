@@ -51,6 +51,7 @@ at the moment of ordering.
             'aa_dealer_orders/static/src/js/dealer_order.js',
             'aa_dealer_orders/static/src/js/kit_page.js',
             'aa_dealer_orders/static/src/js/custom_kit.js',
+            'aa_dealer_orders/static/src/js/custom_kit_cart.js',
         ],
     },
     'post_init_hook': 'post_init_hook',
