@@ -55,6 +55,35 @@ class CustomKitPage {
             part.colours.some((colour) => colour.id === variantId));
     }
 
+    get categories() {
+        // ONE LIST PER CATEGORY (owner, 2026-10-20): "so there would be one
+        // list for hinges, one for shafts, and so on. That way the customer
+        // wont have to scroll through a giant list".
+        //
+        // GROUPED BY ID, LABELLED BY NAME: two categories under different
+        // parents can both be called Hinges, and they are not the same shelf.
+        const groups = new Map();
+
+        for (const part of this.parts) {
+            const key = part.category_id || 0;
+
+            if (!groups.has(key)) {
+                groups.set(key, {
+                    key, label: part.category || "Other parts", parts: [],
+                });
+            }
+
+            groups.get(key).parts.push(part);
+        }
+
+        return [...groups.values()].sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    quantityOf(part) {
+        return part.colours.reduce(
+            (sum, colour) => sum + (this.chosen.get(colour.id) || 0), 0);
+    }
+
     // --- building the page ---------------------------------------------------
 
     render() {
@@ -91,40 +120,195 @@ class CustomKitPage {
             this.root.appendChild(row);
         }
 
+        this.root.appendChild(el("div",
+            { class: "text-uppercase text-muted small" }, "In your kit"));
         this.list = el("div", { class: "o_aa_custom_parts" });
         this.root.appendChild(this.list);
 
-        const adder = el("div", { class: "d-flex align-items-center gap-2 mt-2" });
-        this.picker = el("select", { class: "form-select w-auto" });
-        this.picker.appendChild(el("option", { value: "" }, "Add a part…"));
-        let group = null;
+        this.total = el("div", { class: "fw-bold mt-2" });
+        this.root.appendChild(this.total);
 
-        for (const part of this.parts) {
-            if (part.category !== group) {
-                group = part.category;
-                this.optGroup = el("optgroup", { label: group || "Parts" });
-                this.picker.appendChild(this.optGroup);
-            }
+        this.root.appendChild(this.catalogue());
+    }
 
-            this.optGroup.appendChild(el("option",
-                { value: String(part.colours[0].id) },
-                part.code ? `${part.name} (${part.code})` : part.name));
+    // --- the catalogue: one list per category ---------------------------------
+
+    catalogue() {
+        // A SHELF PER CATEGORY, SHUT UNTIL IT IS ASKED FOR. What was here
+        // before was every product in one dropdown, which is exactly the giant
+        // list the owner asked to be rid of. Now: Hinges, Shafts, Drums - open
+        // one, and only its parts are in front of you.
+        const box = el("div", { class: "o_aa_custom_catalogue mt-3" });
+        box.appendChild(el("h6", { class: "mb-2" }, "Add parts"));
+
+        // AND A SEARCH ACROSS ALL OF THEM, for the customer who knows the part
+        // but not which shelf we keep it on.
+        const search = el("input", {
+            type: "search", class: "form-control form-control-sm mb-2",
+            placeholder: "Search every part…",
+        });
+        search.addEventListener("input",
+            () => this.filter(search.value.trim().toLowerCase()));
+        box.appendChild(search);
+
+        this.panels = [];
+        this.offers = [];
+
+        for (const category of this.categories) {
+            box.appendChild(this.panelFor(category));
         }
 
-        this.picker.addEventListener("change", () => {
-            const id = parseInt(this.picker.value, 10);
+        return box;
+    }
 
-            if (id) {
-                this.setQuantity(id, (this.chosen.get(id) || 0) + 1);
+    panelFor(category) {
+        const panel = el("div", { class: "o_aa_custom_category border rounded mb-1" });
+        const header = el("button", {
+            type: "button",
+            class: "o_aa_custom_category_head btn w-100 d-flex align-items-center " +
+                   "gap-2 text-start",
+        });
+        const chevron = el("span", { class: "o_aa_custom_chevron text-muted" }, "▸");
+        const badge = el("span", { class: "badge text-bg-primary d-none" });
+        header.append(
+            chevron,
+            el("span", { class: "flex-grow-1 fw-bold" }, category.label),
+            badge,
+            el("span", { class: "text-muted small" },
+                `${category.parts.length} part${category.parts.length === 1 ? "" : "s"}`));
+
+        const body = el("div",
+            { class: "o_aa_custom_category_body border-top p-2 d-none" });
+        panel.append(header, body);
+
+        const entry = { category, panel, body, badge, chevron, open: false, filled: false };
+        header.addEventListener("click", () => this.toggle(entry));
+        this.panels.push(entry);
+
+        return panel;
+    }
+
+    toggle(entry, force) {
+        const open = force === undefined ? !entry.open : force;
+
+        // BUILT THE FIRST TIME IT IS OPENED. A catalogue of a few thousand
+        // parts would otherwise be a few thousand rows of markup on a page
+        // where most customers want two shelves.
+        if (open && !entry.filled) {
+            entry.filled = true;
+
+            for (const part of entry.category.parts) {
+                entry.body.appendChild(this.offerFor(part));
             }
 
-            this.picker.value = "";
-        });
-        adder.appendChild(this.picker);
-        this.root.appendChild(adder);
+            this.badges();
+        }
 
-        this.total = el("div", { class: "fw-bold mt-3" });
-        this.root.appendChild(this.total);
+        if (force === undefined) {
+            // ONE SHELF AT A TIME, which is the whole point of splitting them.
+            for (const other of this.panels) {
+                if (other !== entry && other.open) {
+                    this.toggle(other, false);
+                }
+            }
+        }
+
+        entry.open = open;
+        entry.body.classList.toggle("d-none", !open);
+        entry.chevron.textContent = open ? "▾" : "▸";
+    }
+
+    offerFor(part) {
+        const row = el("div",
+            { class: "o_aa_custom_offer d-flex align-items-center gap-2 py-1" });
+        row.dataset.search = `${part.name} ${part.code}`.toLowerCase();
+        row.appendChild(el("span", { class: "flex-grow-1" },
+            part.code ? `${part.name} (${part.code})` : part.name));
+
+        // Which colour the Add button adds. The quantity and the colour can
+        // both be changed afterwards, in the kit itself.
+        let variantId = part.colours[0].id;
+
+        if (part.colours.length > 1) {
+            const colour = el("select",
+                { class: "form-select form-select-sm w-auto", "aria-label": "Colour" });
+
+            for (const option of part.colours) {
+                colour.appendChild(el("option",
+                    { value: String(option.id) }, option.label));
+            }
+
+            colour.addEventListener("change",
+                () => { variantId = parseInt(colour.value, 10); });
+            row.appendChild(colour);
+        }
+
+        const mark = el("span", { class: "badge text-bg-light d-none" });
+        row.appendChild(mark);
+
+        const add = el("button",
+            { type: "button", class: "btn btn-sm btn-outline-primary" }, "Add");
+        add.addEventListener("click",
+            () => this.setQuantity(variantId, (this.chosen.get(variantId) || 0) + 1));
+        row.appendChild(add);
+
+        this.offers.push({ part, node: mark });
+
+        return row;
+    }
+
+    filter(term) {
+        for (const entry of this.panels) {
+            if (!term) {
+                entry.panel.classList.remove("d-none");
+
+                // EVERYTHING BACK ON THE SHELF. Without this, the rows a
+                // previous search hid stayed hidden, and the shelf opened
+                // later looking half empty.
+                for (const row of entry.body.querySelectorAll(".o_aa_custom_offer")) {
+                    row.classList.remove("d-none");
+                }
+
+                this.toggle(entry, false);
+
+                continue;
+            }
+
+            if (!entry.filled) {
+                this.toggle(entry, true);
+            }
+
+            const hitCategory = entry.category.label.toLowerCase().includes(term);
+            let matches = 0;
+
+            for (const row of entry.body.querySelectorAll(".o_aa_custom_offer")) {
+                const hit = hitCategory || row.dataset.search.includes(term);
+                row.classList.toggle("d-none", !hit);
+                matches += hit ? 1 : 0;
+            }
+
+            // A SHELF WITH NOTHING ON IT GOES AWAY, so a search leaves only
+            // the categories that have what was asked for.
+            entry.panel.classList.toggle("d-none", !matches);
+            this.toggle(entry, Boolean(matches));
+        }
+    }
+
+    badges() {
+        // How many of each part, and of each category, are in the kit - so the
+        // shut shelves still say what is on them.
+        for (const { part, node } of this.offers || []) {
+            const quantity = this.quantityOf(part);
+            node.textContent = quantity ? `${quantity} in kit` : "";
+            node.classList.toggle("d-none", !quantity);
+        }
+
+        for (const entry of this.panels || []) {
+            const quantity = entry.category.parts.reduce(
+                (sum, part) => sum + this.quantityOf(part), 0);
+            entry.badge.textContent = quantity ? String(quantity) : "";
+            entry.badge.classList.toggle("d-none", !quantity);
+        }
     }
 
     fillFromBase() {
@@ -187,6 +371,7 @@ class CustomKitPage {
             this.list.appendChild(this.rowFor(part, variantId, quantity));
         }
 
+        this.badges();
         this.price();
     }
 

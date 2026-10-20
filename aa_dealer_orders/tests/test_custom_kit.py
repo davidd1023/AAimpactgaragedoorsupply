@@ -117,6 +117,74 @@ class CustomKitCase(HttpCase):
         self.assertEqual(hinge_colours, ["Black", "White"])
         self.assertEqual(len(parts["J-10 Jamb Bracket"]["colours"]), 1)
 
+    # --- one list per category --------------------------------------------------
+
+    def _shaft(self):
+        """A part on a different shelf, so there is something to split."""
+        shafts = self.env["product.category"].create({"name": "Shafts"})
+
+        return self.env["product.template"].create({
+            "name": '1" Steel Shaft', "default_code": "SHF-1",
+            "type": "consu", "is_storable": True, "list_price": 24.0,
+            "categ_id": shafts.id, "is_published": True,
+            "aa_custom_kit_part": True})
+
+    def test_each_part_says_which_category_it_is_in(self):
+        """WHAT THE SPLITTING IS DONE ON (owner, 2026-10-20: "one list for
+        hinges, one for shafts"). The id groups and the name only labels,
+        because two categories under different parents can share a name."""
+        self._shaft()
+        parts = {part["name"]: part for part in self._payload()["parts"]}
+
+        self.assertEqual(parts['1" Steel Shaft']["category"], "Shafts")
+        self.assertEqual(parts["11ga #8 Hinge"]["category"], "Hinges")
+        self.assertNotEqual(parts['1" Steel Shaft']["category_id"],
+                            parts["11ga #8 Hinge"]["category_id"])
+
+    def test_the_page_is_given_the_parts_under_their_own_categories(self):
+        """What the shelves are built from, read off the page itself: the data
+        the builder groups by has to reach it, and reach it per category.
+
+        A REAL BROWSER WOULD BE BETTER and I wrote that test first - open
+        Hinges, assert no shaft is on the shelf. Chrome cannot start in this
+        container ("can't start new thread"), so it would have been a test that
+        never ran. This asserts the contract the page depends on; the grouping
+        itself is asserted below, off the script.
+        """
+        self._shaft()
+        page = self.url_open(self.kit.website_url).text
+        data = json.loads(page.split('data-kit="')[1].split('"')[0]
+                          .replace("&#34;", '"').replace("&quot;", '"'))
+        shelves = {}
+
+        for part in data["parts"]:
+            shelves.setdefault(part["category"], []).append(part["name"])
+
+        self.assertIn("Hinges", shelves)
+        self.assertIn("Shafts", shelves)
+        self.assertNotIn('1" Steel Shaft', shelves["Hinges"],
+                         "a shaft is on the hinge shelf")
+
+    def test_the_builder_has_no_one_giant_list_left(self):
+        """THE CHANGE THE OWNER ASKED FOR, 2026-10-20: "Instead of having every
+        product in one list, can we split them up into categories ... That way
+        the customer wont have to scroll through a giant list".
+
+        What was there was a single "Add a part…" dropdown holding the whole
+        catalogue. This asserts it is gone and that what replaced it is built
+        per category - the one thing a source check can honestly hold on to
+        while this container cannot run a browser.
+        """
+        from odoo.tools.misc import file_path
+
+        with open(file_path(
+                "aa_dealer_orders/static/src/js/custom_kit.js")) as handle:
+            source = handle.read()
+
+        self.assertNotIn("Add a part", source, "the giant dropdown is still there")
+        self.assertIn("get categories()", source)
+        self.assertIn("o_aa_custom_category", source)
+
     # --- starting from a kit that exists ---------------------------------------
 
     def test_an_existing_kit_offers_its_real_contents_to_start_from(self):
