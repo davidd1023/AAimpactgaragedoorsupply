@@ -208,6 +208,14 @@ class AaSpringBox(models.Model):
             box.location_id.sudo().active = False
         return True
 
+    def _aa_close_if_empty(self):
+        """A box is removed by itself once its last coil is gone (owner, 2026-10-20)."""
+        for box in self.filtered(lambda b: b.state == "open" and b.location_id):
+            if not box._quants():
+                box.state = "closed"
+                box.location_id.sudo().active = False
+        return True
+
     def action_view_coils(self):
         self.ensure_one()
         action = self.env["ir.actions.act_window"]._for_xml_id("aa_spring_stock.action_aa_coil_pieces")
@@ -274,7 +282,11 @@ class AaSpringBoxAdd(models.TransientModel):
     _name = "aa.spring.box.add"
     _description = "Add Coils to a Box"
 
-    box_id = fields.Many2one("aa.spring.box", required=True, ondelete="cascade")
+    box_id = fields.Many2one("aa.spring.box", string="Box", ondelete="cascade",
+                             domain=[("state", "=", "open")],
+                             help="Leave empty to start a new box.")
+    new_box_number = fields.Integer(string="New Box #",
+                                    default=lambda self: self.env["aa.spring.box"]._next_number())
     line_ids = fields.One2many("aa.spring.box.add.line", "wizard_id", string="Coils")
 
     def action_confirm(self):
@@ -282,6 +294,10 @@ class AaSpringBoxAdd(models.TransientModel):
         lines = self.line_ids.filtered(lambda l: l.l_qty > 0 or l.r_qty > 0)
         if not lines:
             raise UserError(_("Enter at least one line with LH or RH coils."))
+        if not self.box_id:
+            if self.new_box_number <= 0:
+                raise UserError(_("Enter the number of the new box."))
+            self.box_id = self.env["aa.spring.box"].create({"number": self.new_box_number})
         for line in lines:
             for hand, qty in (("L", line.l_qty), ("R", line.r_qty)):
                 if qty > 0:
@@ -317,10 +333,13 @@ class AaSpringBoxMove(models.TransientModel):
     box_id = fields.Many2one("aa.spring.box", required=True, ondelete="cascade")
     line_ids = fields.One2many("aa.spring.box.move.line", "wizard_id", string="Coils")
 
-    def _fill_lines(self):
+    def _fill_lines(self, codes=None):
+        """One line per coil product in the box; only `codes` (default_codes) when given."""
         self.ensure_one()
         counts = {}
         for quant in self.box_id._quants():
+            if codes and quant.product_id.default_code not in codes:
+                continue
             if quant.quantity - quant.reserved_quantity > 0.001:
                 counts[quant.product_id] = counts.get(quant.product_id, 0) + 1
         self.line_ids = [(0, 0, {"product_id": product.id, "available": count, "qty": 0})
@@ -350,6 +369,7 @@ class AaSpringBoxMove(models.TransientModel):
             quants = quants.filtered(lambda q: q.quantity - q.reserved_quantity > 0.001)[:line.qty]
             quants.move_quants(location_dest_id=floor,
                                message=_("%s to the floor", self.box_id.name))
+        self.box_id._aa_close_if_empty()
         return {"type": "ir.actions.act_window_close"}
 
 
