@@ -62,16 +62,34 @@
             </xpath>
         </field>
     </record>
-  <record id="view_product_template_search_aa_custom_kit" model="ir.ui.view">
-    <field name="name">product.template.search.aa.custom.kit</field>
-    <field name="model">product.template</field>
-    <field name="inherit_id" ref="product.product_template_search_view"/>
-    <field name="arch" type="xml">
-      <xpath expr="//search" position="inside">
-        <filter name="aa_custom_kit_part" string="Offered in Custom Kit"
-                domain="[('aa_custom_kit_part', '=', True)]"/>
-      </xpath>
-    </field>
-  </record>
+    <!-- AS A COLUMN, so several products can be ticked at once. Odoo's list
+         view multi-edit only works on fields that are IN the list: select the
+         rows, tick the box on one of them, and it offers to update all the
+         selected records. Optional and hidden by default, so it is there when
+         it is wanted and out of the way when it is not (the owner asked how to
+         mass select, 2026-10-20). -->
+    <record id="view_product_template_tree_aa_custom_kit" model="ir.ui.view">
+        <field name="name">product.template.list.aa.custom.kit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="aa_custom_kit_part" optional="hide"
+                       string="In Custom Kit" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_product_template_search_aa_custom_kit" model="ir.ui.view">
+        <field name="name">product.template.search.aa.custom.kit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter name="aa_custom_kit_part" string="Offered in Custom Kit"
+                        domain="[('aa_custom_kit_part', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
 
 </odoo>

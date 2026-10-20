@@ -266,6 +266,57 @@ class CustomKitCase(HttpCase):
         self.assertIn('id="aa_custom_kit"', page)
         self.assertIn("11ga #8 Hinge", page, "the parts did not reach the page")
 
+    # --- ticking it on a lot of products at once --------------------------------
+
+    def _product_view(self, view, mode):
+        from lxml import etree
+
+        return etree.fromstring(self.env["product.template"].get_view(
+            self.env.ref(view).id, mode)["arch"])
+
+    def test_the_tick_is_a_column_of_the_product_list(self):
+        """HOW SEVERAL PRODUCTS GET TICKED AT ONCE (owner, 2026-10-20: "how do
+        i mass select products to put them on the kit").
+
+        Odoo's answer is list-view multi-edit, and it only offers to update the
+        other selected records for a field that is IN THE LIST. The tick was on
+        the form only, so selecting fifty hinges got you nowhere. This asserts
+        the column, which is the whole mechanism.
+        """
+        arch = self._product_view("product.product_template_tree_view", "list")
+        column = arch.xpath("//field[@name='aa_custom_kit_part']")
+
+        self.assertTrue(column, "no column, so no multi-edit")
+        self.assertEqual(column[0].get("optional"), "hide",
+                         "it should be off until it is wanted")
+
+    def test_the_tick_on_the_form_is_labelled(self):
+        """THE BUG THIS GUARDS: group[@name='sale'] is a container OF GROUPS, so
+        a bare field dropped in it rendered as an unlabelled checkbox - "two
+        random boxes in the ecommerce media section" (owner, 2026-10-20)."""
+        arch = self._product_view("product.product_template_form_view", "form")
+        field = arch.xpath("//field[@name='aa_custom_kit_part']")
+
+        self.assertTrue(field, "the tick is not on the product form")
+        self.assertEqual(
+            field[0].getparent().get("string"), "AA Impact",
+            "it is not inside a titled group, so it renders without a label")
+
+    def test_a_filter_finds_the_ones_already_ticked(self):
+        arch = self._product_view("product.product_template_search_view", "search")
+
+        self.assertTrue(arch.xpath("//filter[@name='aa_custom_kit_part']"))
+
+    def test_ticking_many_at_once_offers_them_all(self):
+        """What multi-edit does under the covers: one write over the selection."""
+        chosen = self.secret | self.env["product.template"].create({
+            "name": "Second Widget", "type": "consu", "list_price": 4.0})
+        chosen.write({"aa_custom_kit_part": True})
+
+        names = [part["name"] for part in self._payload()["parts"]]
+        self.assertIn("Shop Only Widget", names)
+        self.assertIn("Second Widget", names)
+
     def test_the_builder_starts_itself_on_an_already_loaded_page(self):
         """THE BUG THIS GUARDS, 2026-10-20: the owner ticked a part, the data
         reached the page - the test above proved that much - and the builder
