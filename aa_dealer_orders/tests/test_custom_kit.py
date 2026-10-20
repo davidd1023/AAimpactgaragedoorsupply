@@ -117,6 +117,105 @@ class CustomKitCase(HttpCase):
         self.assertEqual(hinge_colours, ["Black", "White"])
         self.assertEqual(len(parts["J-10 Jamb Bracket"]["colours"]), 1)
 
+    # --- the same part in two colours, as two products -------------------------
+
+    def _coloured_pair(self, stem="Cut Down Hinge"):
+        """How this catalogue really holds a colour: two separate products."""
+        return self.env["product.template"].create([{
+            "name": "%s %s" % (stem, colour), "type": "consu",
+            "is_storable": True, "list_price": 2.5,
+            "categ_id": self.category.id, "is_published": True,
+            "aa_custom_kit_part": True,
+        } for colour in ("White", "Black")])
+
+    def test_two_products_that_are_one_part_in_two_colours_become_one_row(self):
+        """WHY THE COLOUR DROPDOWN NEVER APPEARED, 2026-10-20: "i dont see the
+        color dropdown".
+
+        It is offered when a part has more than one colour, and nothing in
+        this catalogue has a finish ATTRIBUTE - a white hinge and a black
+        hinge are two separate products with the colour in the name. So there
+        was no part with two colours to offer, and the rows a kit fills itself
+        with were the white ones.
+        """
+        white, black = self._coloured_pair()
+        parts = {part["name"]: part for part in self._payload()["parts"]}
+
+        self.assertIn("Cut Down Hinge", parts, "the pair was not recognised")
+        self.assertNotIn("Cut Down Hinge White", parts, "it is still two rows")
+        row = parts["Cut Down Hinge"]
+
+        self.assertEqual(
+            sorted((colour["label"], colour["id"]) for colour in row["colours"]),
+            sorted([("White", white.product_variant_ids[:1].id),
+                    ("Black", black.product_variant_ids[:1].id)]),
+            "a colour has to point at its own product, or the cart books the "
+            "wrong one")
+
+    def test_a_colour_that_has_no_sibling_keeps_the_name_it_was_given(self):
+        """A FAMILY OF ONE IS NEVER RENAMED. Nothing to switch to, so the
+        product stays what the catalogue calls it - "Zinc Plated Bolt" does
+        not become a "Plated Bolt" that comes in zinc."""
+        self.env["product.template"].create({
+            "name": "Zinc Plated Bolt", "type": "consu", "list_price": 0.4,
+            "categ_id": self.category.id, "aa_custom_kit_part": True})
+        parts = {part["name"]: part for part in self._payload()["parts"]}
+
+        self.assertIn("Zinc Plated Bolt", parts)
+        self.assertEqual(len(parts["Zinc Plated Bolt"]["colours"]), 1)
+        self.assertEqual(parts["Zinc Plated Bolt"]["colours"][0]["label"], "")
+
+    def test_a_two_word_finish_is_read_as_one_colour(self):
+        """"Desert Tan" is a colour, not a tan one of something desert."""
+        for colour in ("Desert Tan", "White"):
+            self.env["product.template"].create({
+                "name": "End Bearing Plate %s" % colour, "type": "consu",
+                "list_price": 3.0, "categ_id": self.category.id,
+                "aa_custom_kit_part": True})
+        parts = {part["name"]: part for part in self._payload()["parts"]}
+
+        self.assertIn("End Bearing Plate", parts)
+        self.assertEqual(
+            sorted(colour["label"] for colour in parts["End Bearing Plate"]["colours"]),
+            ["Desert Tan", "White"])
+
+    def test_a_part_with_real_finish_variants_is_left_alone(self):
+        """It already offers its own colours; it is not merged with anything
+        that happens to be named similarly."""
+        parts = {part["name"]: part for part in self._payload()["parts"]}
+
+        self.assertIn("11ga #8 Hinge", parts)
+        self.assertEqual(
+            sorted(colour["label"] for colour in parts["11ga #8 Hinge"]["colours"]),
+            ["Black", "White"])
+
+    def test_a_kit_filled_from_a_base_can_be_moved_to_the_other_colour(self):
+        """END TO END, the thing he asked for: a kit that fills itself with
+        white parts, and a colour that moves them - because the white row and
+        the black row are now one part with two colours."""
+        white, black = self._coloured_pair()
+        base = self.env["product.template"].create({
+            "name": "AA 2000 Hardware Kit", "type": "consu",
+            "is_storable": True, "aa_dealer_quick_order": True})
+        self.env["mrp.bom"].create({
+            "product_tmpl_id": base.id,
+            "product_id": base.product_variant_ids[:1].id,
+            "type": "phantom", "product_qty": 1.0,
+            "bom_line_ids": [(0, 0, {
+                "product_id": white.product_variant_ids[:1].id,
+                "product_qty": 10})],
+        })
+        payload = self._payload()
+        filled = {b["name"]: b for b in payload["bases"]}["AA 2000 Hardware Kit"]
+        row = {part["name"]: part for part in payload["parts"]}["Cut Down Hinge"]
+
+        # What the kit fills itself with is the white product...
+        self.assertEqual(filled["parts"],
+                         {str(white.product_variant_ids[:1].id): 10.0})
+        # ...and the page knows which product the same part in black is.
+        self.assertIn(black.product_variant_ids[:1].id,
+                      [colour["id"] for colour in row["colours"]])
+
     # --- one list per category --------------------------------------------------
 
     def _shaft(self):
