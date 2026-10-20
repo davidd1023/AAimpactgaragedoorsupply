@@ -234,6 +234,127 @@ class CustomKitCase(HttpCase):
         self.assertNotIn('1" Steel Shaft', shelves["Hinges"],
                          "a shaft is on the hinge shelf")
 
+    def test_the_trims_are_at_the_bottom_of_the_page(self):
+        """THE ORDER ON THE PAGE (owner, 2026-10-20: "move the trims to the
+        bottom"): build your kit, then the trims, then Add to Cart.
+
+        Done by putting the builder in front of Odoo's attribute section
+        rather than by moving that section down: it lives inside the
+        add-to-cart form and carries the chosen trim with it.
+        """
+        page = self.url_open(self.kit.website_url).text
+        builder = page.index('id="aa_custom_kit"')
+        trims = page.index("o_wsale_product_details_content_section_attributes")
+        cart = page.index("o_wsale_product_details_content_section_cta")
+
+        self.assertLess(builder, trims, "the trims are above the builder")
+        self.assertLess(trims, cart, "the trims are below Add to Cart")
+
+    def _run_in_node(self, body):
+        """The builder's own script, run as plain JavaScript.
+
+        NOT A SUBSTITUTE FOR A BROWSER, and it does not pretend to be one: it
+        loads custom_kit.js, makes a bare page object and calls the methods
+        that are pure arithmetic over what is in the kit. Chrome cannot start
+        in this container, and this is the part of the page that can still be
+        tested rather than described.
+        """
+        import shutil
+        import subprocess
+
+        from odoo.tools.misc import file_path
+
+        node = shutil.which("node")
+
+        if not node:
+            self.skipTest("node is not installed, so the page script cannot be run")
+
+        script = """
+            const fs = require("fs"), vm = require("vm"), assert = require("assert");
+            const source = fs.readFileSync(process.argv[1], "utf8");
+            const document = {
+                readyState: "complete", getElementById: () => null,
+                addEventListener: () => {}, querySelector: () => null,
+            };
+            const CustomKitPage = vm.runInNewContext(
+                source + ";CustomKitPage", { document, fetch: () => {} });
+            const page = (parts, chosen) => {
+                const built = Object.create(CustomKitPage.prototype);
+                Object.assign(built, {
+                    data: { parts }, chosen: new Map(chosen), colour: "",
+                    panels: [], offers: [],
+                    rebuildShelves: () => {}, draw: () => {},
+                });
+
+                return built;
+            };
+            // JSON, NOT deepStrictEqual: the script runs in its own vm
+            // context, so an array it builds has a different Array prototype
+            // and a structural comparison fails on that alone.
+            const inKit = (built, expected, why) => assert.strictEqual(
+                JSON.stringify([...built.chosen]), JSON.stringify(expected), why);
+            const HINGE = { name: "Hinge", colours: [
+                { id: 1, label: "White" }, { id: 2, label: "Black" }] };
+            const STRUT = { name: "Strut", colours: [
+                { id: 3, label: "White" }, { id: 4, label: "Black" }] };
+            const GALV = { name: "Galvanised shaft", colours: [{ id: 5, label: "" }] };
+        """ + body + """
+            console.log("ok");
+        """
+        done = subprocess.run(
+            [node, "-e", script,
+             file_path("aa_dealer_orders/static/src/js/custom_kit.js")],
+            capture_output=True, text=True, timeout=60)
+
+        self.assertEqual(done.returncode, 0,
+                         "%s%s" % (done.stdout, done.stderr))
+
+    def test_the_kit_colour_moves_every_part_that_comes_in_it(self):
+        """THE CHANGE ASKED FOR, 2026-10-20: "the build your kit makes it so
+        all items added are white so you should add an option to change the
+        auto added products to a different color".
+
+        Starting from an existing kit fills the rows from that kit's own parts
+        list - white ones - so every automatic row came out white. One colour
+        for the kit moves the lot, and leaves alone the parts that are not
+        made in it.
+        """
+        self._run_in_node("""
+            const kit = page([HINGE, STRUT, GALV], [[1, 4], [3, 2], [5, 1]]);
+            kit.setColour("Black");
+            inKit(kit, [[2, 4], [4, 2], [5, 1]],
+                "the kit did not move to black (the shaft should not move)");
+
+            // And what Add puts in from then on.
+            assert.strictEqual(kit.variantFor(HINGE), 2);
+            assert.strictEqual(kit.variantFor(GALV), 5,
+                "a part that is not made in black was dragged out of the kit");
+
+            // Back again, with nothing lost on the way.
+            kit.setColour("White");
+            inKit(kit, [[1, 4], [3, 2], [5, 1]], "it did not come back");
+        """)
+
+    def test_two_colours_of_one_part_add_up_when_the_kit_colour_moves(self):
+        """Four white hinges and three black ones become seven black hinges,
+        not three."""
+        self._run_in_node("""
+            const kit = page([HINGE], [[1, 4], [2, 3]]);
+            kit.setColour("Black");
+            inKit(kit, [[2, 7]], "the two colours did not add up");
+        """)
+
+    def test_the_colours_offered_are_the_ones_the_catalogue_sells(self):
+        """Commonest first, and a part with no finish of its own is not a
+        colour anybody can pick for the kit."""
+        self._run_in_node("""
+            const ONE_OFF = { name: "Almond latch", colours: [
+                { id: 6, label: "White" }, { id: 7, label: "Almond" }] };
+            const kit = page([HINGE, STRUT, GALV, ONE_OFF], []);
+            assert.strictEqual(JSON.stringify(kit.colourLabels()),
+                JSON.stringify(["White", "Black", "Almond"]));
+        """)
+
     def test_the_builder_has_no_one_giant_list_left(self):
         """THE CHANGE THE OWNER ASKED FOR, 2026-10-20: "Instead of having every
         product in one list, can we split them up into categories ... That way

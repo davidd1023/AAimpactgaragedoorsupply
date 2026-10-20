@@ -42,6 +42,8 @@ class CustomKitPage {
         this.symbol = this.data.currency || "$";
         // variant id -> quantity. The whole state of the page.
         this.chosen = new Map();
+        // "" means every part in whatever colour it is listed in.
+        this.colour = "";
         this.render();
         this.fillFromBase();
     }
@@ -87,6 +89,64 @@ class CustomKitPage {
             (last(a) - last(b)) || a.label.localeCompare(b.label));
     }
 
+    colourLabels() {
+        // The finishes this catalogue actually sells, commonest first, counted
+        // over the parts that come in more than one. A product whose colour is
+        // in its name has a single variant and no finish to offer, so it is
+        // not counted and the kit colour cannot move it.
+        const counts = new Map();
+
+        for (const part of this.parts) {
+            if (part.colours.length < 2) {
+                continue;
+            }
+
+            for (const colour of part.colours) {
+                if (colour.label) {
+                    counts.set(colour.label, (counts.get(colour.label) || 0) + 1);
+                }
+            }
+        }
+
+        return [...counts.entries()]
+            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+            .map(([label]) => label);
+    }
+
+    variantFor(part, fallbackId) {
+        // The kit colour where this part comes in it, and otherwise whatever
+        // it already was - a part that is only made in galvanised stays
+        // galvanised rather than disappearing from the kit.
+        if (this.colour) {
+            const match = part.colours.find(
+                (colour) => colour.label === this.colour);
+
+            if (match) {
+                return match.id;
+            }
+        }
+
+        return fallbackId === undefined ? part.colours[0].id : fallbackId;
+    }
+
+    setColour(label) {
+        this.colour = label;
+        const moved = new Map();
+
+        for (const [variantId, quantity] of this.chosen) {
+            const part = this.partFor(variantId);
+            const id = part ? this.variantFor(part, variantId) : variantId;
+
+            // SUMMED, not overwritten: a kit holding the white and the black
+            // of one part becomes that many of the one colour.
+            moved.set(id, (moved.get(id) || 0) + quantity);
+        }
+
+        this.chosen = moved;
+        this.rebuildShelves();
+        this.draw();
+    }
+
     quantityOf(part) {
         return part.colours.reduce(
             (sum, colour) => sum + (this.chosen.get(colour.id) || 0), 0);
@@ -107,12 +167,14 @@ class CustomKitPage {
             return;
         }
 
+        const row = el("div",
+            { class: "d-flex align-items-center flex-wrap gap-2 mb-3" });
+
         // Start from an existing kit, which is the fastest way to a kit for a
         // door we do not have one for.
         const bases = this.data.bases || [];
 
         if (bases.length) {
-            const row = el("div", { class: "d-flex align-items-center gap-2 mb-3" });
             row.appendChild(el("label", { class: "form-label mb-0" }, "Start from"));
             this.baseSelect = el("select", { class: "form-select w-auto" });
             this.baseSelect.appendChild(el("option", { value: "" }, "Empty kit"));
@@ -125,6 +187,37 @@ class CustomKitPage {
 
             this.baseSelect.addEventListener("change", () => this.fillFromBase());
             row.appendChild(this.baseSelect);
+        }
+
+        // ONE COLOUR FOR THE WHOLE KIT (owner, 2026-10-20: "the build your kit
+        // makes it so all items added are white so you should add an option to
+        // change the auto added products to a different color").
+        //
+        // Starting from an existing kit fills the rows from that kit's own
+        // parts list, and those are the white ones, so every automatic row
+        // came out white and had to be changed one at a time. This moves the
+        // lot - and sets what a part is added in from here on.
+        const colours = this.colourLabels();
+
+        if (colours.length) {
+            row.appendChild(el("label",
+                { class: "form-label mb-0 ms-md-3" }, "Colour"));
+            this.colourSelect = el("select", { class: "form-select w-auto" });
+            this.colourSelect.appendChild(el("option", { value: "" }, "As listed"));
+
+            for (const label of colours) {
+                this.colourSelect.appendChild(
+                    el("option", { value: label }, label));
+            }
+
+            this.colourSelect.addEventListener("change",
+                () => this.setColour(this.colourSelect.value));
+            row.appendChild(this.colourSelect);
+            row.appendChild(el("span", { class: "text-muted small" },
+                "applies to every part that comes in it"));
+        }
+
+        if (row.childNodes.length) {
             this.root.appendChild(row);
         }
 
@@ -233,17 +326,24 @@ class CustomKitPage {
         row.appendChild(el("span", { class: "flex-grow-1" },
             part.code ? `${part.name} (${part.code})` : part.name));
 
-        // Which colour the Add button adds. The quantity and the colour can
-        // both be changed afterwards, in the kit itself.
-        let variantId = part.colours[0].id;
+        // Which colour the Add button adds: the kit colour when this part
+        // comes in it. The quantity and the colour can both be changed
+        // afterwards, in the kit itself.
+        let variantId = this.variantFor(part);
 
         if (part.colours.length > 1) {
             const colour = el("select",
                 { class: "form-select form-select-sm w-auto", "aria-label": "Colour" });
 
             for (const option of part.colours) {
-                colour.appendChild(el("option",
-                    { value: String(option.id) }, option.label));
+                const node = el("option",
+                    { value: String(option.id) }, option.label);
+
+                if (option.id === variantId) {
+                    node.setAttribute("selected", "selected");
+                }
+
+                colour.appendChild(node);
             }
 
             colour.addEventListener("change",
@@ -263,6 +363,26 @@ class CustomKitPage {
         this.offers.push({ part, node: mark });
 
         return row;
+    }
+
+    rebuildShelves() {
+        // After a colour change, every Add button adds the new colour and
+        // every row's dropdown shows it, so the rows that were already built
+        // are thrown away and built again.
+        this.offers = [];
+
+        for (const entry of this.panels || []) {
+            entry.body.innerHTML = "";
+            entry.filled = false;
+
+            if (entry.open) {
+                entry.filled = true;
+
+                for (const part of entry.category.parts) {
+                    entry.body.appendChild(this.offerFor(part));
+                }
+            }
+        }
     }
 
     filter(term) {
@@ -327,12 +447,17 @@ class CustomKitPage {
         if (base) {
             for (const [variantId, quantity] of Object.entries(base.parts || {})) {
                 const number = parseInt(variantId, 10);
+                const part = this.partFor(number);
 
                 // Only what this page actually offers: a kit's BoM can hold
                 // parts nobody has ticked, and a row the customer cannot see
                 // is a row they cannot remove.
-                if (this.partFor(number)) {
-                    this.chosen.set(number, quantity);
+                if (part) {
+                    // IN THE KIT'S COLOUR, not the colour the kit we copied
+                    // happens to be built in. These are the rows the owner
+                    // was changing one at a time.
+                    const id = this.variantFor(part, number);
+                    this.chosen.set(id, (this.chosen.get(id) || 0) + quantity);
                 }
             }
         }
