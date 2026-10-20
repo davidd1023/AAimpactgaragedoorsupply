@@ -213,6 +213,25 @@ class ProductTemplate(models.Model):
 
         return "", ""
 
+    def _aa_custom_kit_build(self):
+        """The installed version of this module - for staff, on the page.
+
+        WHICH IS NOT TRIVIA, 2026-10-20: three faults in a row were reported
+        against a build that did not have the code being discussed. Production
+        carries whatever has been merged into it, a dev build carries whatever
+        was last pushed, and nothing on the page said which. Now it does, to
+        anybody signed in as staff and to nobody else.
+        """
+        self.ensure_one()
+
+        if not self.env.user.has_group("base.group_user"):
+            return ""
+
+        module = self.env["ir.module.module"].sudo().search(
+            [("name", "=", "aa_dealer_orders")], limit=1)
+
+        return module.installed_version or ""
+
     def _aa_custom_kit_part_json(self, name, colours):
         """One row of the page: a part, under a name, in these colours."""
         self.ensure_one()
