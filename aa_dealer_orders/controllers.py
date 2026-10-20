@@ -683,13 +683,48 @@ class AAKitCart(AAOptionPricing, Cart):
 
         qty = max(1, int(qty or 1))
         picked = self._aa_custom_kit_chosen(template, parts)
+
+        # STORED BEFORE ANYTHING IS PRICED, and this order is the whole point.
+        #
+        # THE FAULT IT FIXES, 2026-10-20: the owner started a kit from AA 1200,
+        # watched the page fill with its parts, added it to the cart and got
+        # the kit plus ONE galvanised hinge at quantity one - which is not a
+        # quantity any parts list holds, but exactly what an earlier Add click
+        # had put in the page. The kit was booked from an OLDER call.
+        #
+        # Because the store used to be the last thing this route did, after a
+        # loop that reaches into pricelists, dealer rules and uoms for every
+        # part. One product that cannot be priced raised, the route ended
+        # before the store, the session kept what the last call had left in
+        # it, and the cart was booked from that - silently, because the page
+        # only loses its total.
+        #
+        # What the customer chose is now written down first. Pricing is
+        # display; losing it costs a figure on a page, and losing this costs
+        # the order.
+        stored = request.session.get(CUSTOM_KIT_KEY) or {}
+        stored[str(template.id)] = [
+            {'variant_id': variant.id, 'quantity': quantity}
+            for variant, quantity in picked]
+        request.session[CUSTOM_KIT_KEY] = stored
+
         partner = request.env.user.partner_id
         empty = request.env['product.template.attribute.value']
         rows = []
         total = 0.0
 
         for variant, quantity in picked:
-            unit = self._unit_price(partner, variant, empty, quantity * qty)
+            # AND ONE PART THAT CANNOT BE PRICED DOES NOT TAKE THE REST WITH
+            # IT: it is shown without a figure rather than being dropped, and
+            # the cart prices it properly in any case.
+            try:
+                unit = self._unit_price(partner, variant, empty, quantity * qty)
+            except Exception:
+                _logger.exception(
+                    "aa_dealer_orders: %s could not be priced for a custom kit",
+                    variant.display_name)
+                unit = 0.0
+
             line = round(unit * quantity, 2)
             total += line
             rows.append({
@@ -700,16 +735,10 @@ class AAKitCart(AAOptionPricing, Cart):
                 'price': line,
             })
 
-        # KEPT AS THE BROWSER MEANT IT, not as it was priced: the cart books
-        # from this, and a price worked out now would be a price worked out
-        # before the customer changed their mind.
-        stored = request.session.get(CUSTOM_KIT_KEY) or {}
-        stored[str(template.id)] = [
-            {'variant_id': variant.id, 'quantity': quantity}
-            for variant, quantity in picked]
-        request.session[CUSTOM_KIT_KEY] = stored
-
-        return {'parts': rows, 'total': round(total, 2), 'count': len(rows)}
+        # `sent` lets the page say so when something it offered was refused
+        # here, instead of quietly showing a shorter kit than was built.
+        return {'parts': rows, 'total': round(total, 2), 'count': len(rows),
+                'sent': len(parts or [])}
 
     def _aa_add_custom_parts(self, template, kit_line, qty):
         """Book each chosen part as its own line, under the kit line.
@@ -721,6 +750,14 @@ class AAKitCart(AAOptionPricing, Cart):
         added = {}
 
         if not picked:
+            # SAID OUT LOUD. A custom kit with no parts is a box of nothing,
+            # and the only reason it can happen is that the page never got its
+            # list to us - so it is worth a line in the log rather than a
+            # cart that looks deliberate.
+            _logger.warning(
+                "aa_dealer_orders: %s went into a cart with no parts at all "
+                "(the page had sent: %s)", template.display_name, chosen)
+
             return added
 
         order = request.cart
