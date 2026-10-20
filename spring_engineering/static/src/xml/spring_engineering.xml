@@ -1630,7 +1630,23 @@
                 <button class="se-clear" t-on-click="clearAll">
                     Clear
                 </button>
-                <button class="se-add-cart" t-on-click="addToCart"
+                <!-- A WIRE WE DO NOT STOCK IS NOT A SALE (owner, 2026-10-20):
+                     "when giving the warning about wire size change the add to
+                     cart button to the contact us button."
+
+                     The same answer the shop already gives for a product it
+                     will not sell off the page, and a better one than a
+                     refusal at the end: the customer is not walked through a
+                     cart to be turned away at it. The warning above says which
+                     sizes we do hold, and this says what to do if none of them
+                     suits - so the door is still engineered, still on screen,
+                     and the conversation starts with the figures in hand. -->
+                <a t-if="unstockedWires.length"
+                   class="se-add-cart se-contact-us"
+                   t-att-href="contactUsUrl">
+                    Contact Us
+                </a>
+                <button t-else="" class="se-add-cart" t-on-click="addToCart"
                         t-att-disabled="state.cartBusy or undefined">
                     <t t-if="state.cartBusy">Adding...</t>
                     <t t-else="">Add to Cart</t>

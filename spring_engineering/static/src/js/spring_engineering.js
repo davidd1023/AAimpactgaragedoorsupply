@@ -2456,6 +2456,15 @@ get unstockedWires() {
         inPlay.filter((wire) => wire && !isWireStocked(wire)).map(String))];
 }
 
+get contactUsUrl() {
+    // Where Contact Us goes when the wire is one we do not stock. The site's
+    // own contact page, which is what the shop's own "Contact us" button uses
+    // (website.contact_us_button_url, whose default this is); the component is
+    // mounted with no props in either place it runs, so it is named here
+    // rather than read off a record that one of those two has no access to.
+    return "/contactus";
+}
+
 get stockedWireLabels() {
     // In the dropdown's own spelling, so a customer can match them up one for
     // one with what they are being asked to choose from.

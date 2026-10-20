@@ -130,6 +130,36 @@ class WireStockCase(TransactionCase):
         self.assertIn("get unstockedWires()", source)
         self.assertIn("isWireStocked", source)
 
+    def test_contact_us_replaces_add_to_cart(self):
+        """THE OWNER'S ANSWER, 2026-10-20, to whether a wire we do not stock
+        should still be orderable: "when giving the warning about wire size
+        change the add to cart button to the contact us button."
+
+        The same answer the shop already gives for a product it will not sell
+        off the page, and kinder than a refusal at the end of a cart. One gate
+        drives both the warning and the button, so they cannot disagree.
+        """
+        page = self._source("xml/spring_engineering.xml")
+        swap = re.search(
+            r'<a t-if="unstockedWires.length".*?</button>', page, re.S)
+
+        self.assertTrue(swap, "Add to Cart is still the only button")
+        self.assertIn("se-contact-us", swap.group(0))
+        self.assertIn("contactUsUrl", swap.group(0))
+        self.assertIn("Contact Us", swap.group(0))
+        # The ordinary button is the other half of the same choice, so a kit
+        # with a stocked wire still goes in a cart.
+        self.assertIn('<button t-else=""', swap.group(0))
+        self.assertIn("addToCart", swap.group(0))
+
+    def test_contact_us_points_at_the_sites_contact_page(self):
+        source = self._source("js/spring_engineering.js")
+        found = re.search(
+            r'get contactUsUrl\(\) \{.*?return "(.*?)";', source, re.S)
+
+        self.assertTrue(found, "there is nowhere for Contact Us to go")
+        self.assertEqual(found.group(1), "/contactus")
+
     def test_the_styles_exist_in_both_skins(self):
         """The calculator is shown twice: the backend page and the website
         card. A warning styled in one of them only is a warning that looks
@@ -137,4 +167,8 @@ class WireStockCase(TransactionCase):
         for sheet in ("css/spring_engineering.css",
                       "css/spring_engineering_site.css"):
             with self.subTest(sheet=sheet):
-                self.assertIn("se-wire-stock-warning", self._source(sheet))
+                stylesheet = self._source(sheet)
+                self.assertIn("se-wire-stock-warning", stylesheet)
+                # A link wearing a button's clothes needs the centring and the
+                # underline removal a <button> gets for nothing.
+                self.assertIn("se-contact-us", stylesheet)

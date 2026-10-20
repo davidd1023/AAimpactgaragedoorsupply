@@ -233,3 +233,12 @@
 .aa-se-page .se-wire-stock-size {
     font-size: 0.8125rem;
 }
+
+/* Contact Us keeps the site button's colour and pill shape through .se-add-cart;
+   this is only the link-vs-button housekeeping. */
+.aa-se-page .se-contact-us,
+.aa-se-page .se-contact-us:hover,
+.aa-se-page .se-contact-us:focus {
+    color: #fff;
+    text-decoration: none;
+}

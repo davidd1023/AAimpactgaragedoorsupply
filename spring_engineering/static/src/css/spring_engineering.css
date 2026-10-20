@@ -898,3 +898,19 @@
     font-weight: 600;
     white-space: nowrap;
 }
+
+/* Contact Us in place of Add to Cart, when the wire is one we do not stock.
+   It is a link rather than a button, so it needs the centring a <button>
+   gets for nothing; everything else it borrows from .se-add-cart. */
+.se-contact-us {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-decoration: none;
+}
+
+.se-contact-us:hover {
+    text-decoration: none;
+    color: #ffffff;
+}
