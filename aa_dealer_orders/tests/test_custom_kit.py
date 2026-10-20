@@ -383,8 +383,10 @@ class CustomKitCase(HttpCase):
                 readyState: "complete", getElementById: () => null,
                 addEventListener: () => {}, querySelector: () => null,
             };
+            // `sandbox` stays reachable so a test can swap fetch for its own.
+            const sandbox = { document, fetch: () => {} };
             const CustomKitPage = vm.runInNewContext(
-                source + ";CustomKitPage", { document, fetch: () => {} });
+                source + ";CustomKitPage", sandbox);
             const page = (parts, chosen) => {
                 const built = Object.create(CustomKitPage.prototype);
                 Object.assign(built, {
@@ -405,8 +407,13 @@ class CustomKitCase(HttpCase):
             const STRUT = { name: "Strut", colours: [
                 { id: 3, label: "White" }, { id: 4, label: "Black" }] };
             const GALV = { name: "Galvanised shaft", colours: [{ id: 5, label: "" }] };
+            (async () => {
         """ + body + """
-            console.log("ok");
+                console.log("ok");
+            })().catch((error) => {
+                console.error((error && error.message) || error);
+                process.exit(1);
+            });
         """
         done = subprocess.run(
             [node, "-e", script,
@@ -449,6 +456,67 @@ class CustomKitCase(HttpCase):
             const kit = page([HINGE], [[1, 4], [2, 3]]);
             kit.setColour("Black");
             inKit(kit, [[2, 7]], "the two colours did not add up");
+        """)
+
+    def test_the_price_calls_are_made_one_at_a_time(self):
+        """WHY THAT MATTERS: the server keeps the last list it is told about,
+        and the cart books from exactly that. Every change used to fire its
+        own call, so an older one landing late replaced the kit with an
+        earlier version of itself. Chained, the call the Add to Cart click
+        waits for is the last one there is."""
+        self._run_in_node("""
+            const kit = page([HINGE, STRUT], [[1, 2]]);
+            kit.templateId = 7;
+            kit.total = { textContent: "", after: () => {} };
+            kit.warn = () => {};
+            const events = [];
+            const bodies = [];
+            let inFlight = 0;
+            let unblock = null;
+            sandbox.fetch = (url, options) => {
+                bodies.push(JSON.parse(options.body).params.parts);
+                inFlight += 1;
+                events.push("start");
+                assert.ok(inFlight <= 1, "two price calls in flight at once");
+
+                return new Promise((resolve) => {
+                    const answer = () => {
+                        inFlight -= 1;
+                        events.push("end");
+                        resolve({ ok: true, json: async () => ({
+                            result: { count: 2, total: 1, sent: 2 } }) });
+                    };
+
+                    if (!unblock) {
+                        unblock = answer;      // hold the first one up
+                    } else {
+                        answer();
+                    }
+                });
+            };
+
+            const first = kit.price();
+            kit.chosen.set(3, 5);          // the kit changes mid-flight
+            const second = kit.price();
+            // A tick, because the chain starts on a microtask: nothing has
+            // gone out at the instant price() returns.
+            await new Promise((resolve) => setTimeout(resolve, 0));
+            assert.strictEqual(JSON.stringify(events), JSON.stringify(["start"]),
+                "the second call went out while the first was still in flight");
+            unblock();
+            await Promise.all([first, second]);
+            assert.strictEqual(
+                JSON.stringify(events),
+                JSON.stringify(["start", "end", "start", "end"]),
+                "the calls overlapped, so an older list could land last");
+
+            // AND THE LAST REQUEST CARRIES THE KIT AS IT IS NOW: the list is
+            // read when a call goes out, not when it was queued, so the thing
+            // the cart books from is never an older version of the kit.
+            assert.strictEqual(
+                JSON.stringify(bodies[bodies.length - 1]),
+                JSON.stringify([{ variant_id: 1, quantity: 2 },
+                                { variant_id: 3, quantity: 5 }]));
         """)
 
     def test_the_colours_offered_are_the_ones_the_catalogue_sells(self):
@@ -582,6 +650,72 @@ class CustomKitCase(HttpCase):
         ])
         self.assertAlmostEqual(sum(parts.mapped("price_subtotal")),
                                priced["total"], places=2)
+
+    def test_a_part_that_cannot_be_priced_does_not_lose_the_kit(self):
+        """THE FAULT THIS FIXES, 2026-10-20: the owner started a kit from AA
+        1200, watched it fill with that kit's parts, added it to the cart and
+        got the kit plus ONE galvanised hinge at quantity one - not a quantity
+        any parts list holds, but exactly what an earlier Add click had put on
+        the page. The cart had been booked from an OLDER call.
+
+        Because the kit used to be written to the session as the LAST thing
+        the pricing route did, after a loop that reaches into pricelists,
+        dealer rules and uoms for every part. One product that cannot be
+        priced raised, the route ended before the kit was written down, the
+        session kept what the previous call had left, and the cart was booked
+        from that - silently, because a failed price only costs a figure on a
+        page.
+
+        So: pricing is made to fail here, and the kit must still reach the
+        cart. What the customer chose is written down before any of it.
+        """
+        from unittest.mock import patch
+
+        from odoo.addons.aa_dealer_orders.controllers import AAOptionPricing
+
+        hinge = self._white_hinge()
+        bracket = self.bracket.product_variant_ids[:1]
+
+        def explode(self, partner, variant, no_variant, qty):
+            raise ValueError("no price for %s" % variant.display_name)
+
+        with patch.object(AAOptionPricing, "_unit_price", explode):
+            priced = self._build([
+                {"variant_id": hinge.id, "quantity": 4},
+                {"variant_id": bracket.id, "quantity": 8},
+            ])
+
+        # The page is told about both parts, with no money against them.
+        self.assertEqual(priced["count"], 2)
+        self.assertEqual(priced["total"], 0.0)
+
+        self._rpc("/shop/cart/add", {
+            "product_template_id": self.kit.id,
+            "product_id": self.kit.product_variant_ids[:1].id,
+            "quantity": 1,
+        })
+        order = self.env["sale.order"].search(
+            [("order_line.product_id", "in", self.kit.product_variant_ids.ids)],
+            order="id desc", limit=1)
+        parts = order.order_line.filtered("linked_line_id")
+
+        self.assertEqual(
+            {(line.product_id, line.product_uom_qty) for line in parts},
+            {(hinge, 4.0), (bracket, 8.0)},
+            "the kit was lost because one part could not be priced")
+        # AND IT IS PRICED PROPERLY IN THE CART, which is where the money is
+        # actually worked out.
+        self.assertGreater(sum(parts.mapped("price_subtotal")), 0.0)
+
+    def test_the_page_is_told_how_many_parts_were_refused(self):
+        """So a kit that reaches the cart short says so on the page first."""
+        priced = self._build([
+            {"variant_id": self._white_hinge().id, "quantity": 4},
+            {"variant_id": self.secret.product_variant_ids[:1].id, "quantity": 1},
+        ])
+
+        self.assertEqual(priced["sent"], 2)
+        self.assertEqual(priced["count"], 1, "the unticked part was taken")
 
     def test_the_popup_names_the_parts_that_went_in_with_the_kit(self):
         """THE FAULT THIS GUARDS, 2026-10-20: "when i put the kit into the

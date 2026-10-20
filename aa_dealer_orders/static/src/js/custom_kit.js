@@ -553,22 +553,66 @@ class CustomKitPage {
 
     // --- pricing, which is also what tells the server what is in the kit ------
 
-    async price() {
+    price() {
+        // ONE AT A TIME, IN ORDER. Every change used to fire its own call and
+        // they raced: the server keeps the last list it is told about, so an
+        // older call landing late replaced the kit with an earlier version of
+        // itself - and the cart books from exactly that. Chaining them means
+        // the call the Add to Cart click waits for is the last one there is.
+        this.queue = (this.queue || Promise.resolve())
+            .catch(() => {})
+            .then(() => this.sendPrice());
+
+        return this.queue;
+    }
+
+    async sendPrice() {
         const parts = [...this.chosen].map(([variant_id, quantity]) =>
             ({ variant_id, quantity }));
-        const response = await fetch("/aa/custom-kit/price", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                jsonrpc: "2.0", method: "call",
-                params: { template_id: this.templateId, parts, qty: 1 },
-            }),
-        });
-        const result = (await response.json()).result || {};
 
-        this.total.textContent = result.count
-            ? `${result.count} part${result.count === 1 ? "" : "s"} — ${CURRENCY(this.symbol, result.total || 0)}`
-            : "";
+        try {
+            const response = await fetch("/aa/custom-kit/price", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    jsonrpc: "2.0", method: "call",
+                    params: { template_id: this.templateId, parts, qty: 1 },
+                }),
+            });
+            const body = await response.json();
+            const result = body.result || {};
+
+            if (body.error || !response.ok) {
+                throw new Error(body.error ? JSON.stringify(body.error) : response.status);
+            }
+
+            this.total.textContent = result.count
+                ? `${result.count} part${result.count === 1 ? "" : "s"} — ${CURRENCY(this.symbol, result.total || 0)}`
+                : "";
+
+            // SAID ON THE PAGE when the server would not take something that
+            // was offered, instead of a kit that is quietly short.
+            const refused = parts.length - (result.count || 0);
+            this.warn(refused > 0
+                ? `${refused} part${refused === 1 ? "" : "s"} could not be added to this kit.`
+                : "");
+        } catch (error) {
+            // The kit is still on the page and still in the browser; what is
+            // not certain any more is that the cart knows about it.
+            this.warn("Your kit could not be saved just now - change anything " +
+                      "on it, or reload the page, before adding it to the cart.");
+
+            throw error;
+        }
+    }
+
+    warn(message) {
+        if (!this.warning) {
+            this.warning = el("div", { class: "text-danger small mt-1" });
+            this.total.after(this.warning);
+        }
+
+        this.warning.textContent = message || "";
     }
 }
 
@@ -589,7 +633,16 @@ function wire(root) {
 
             event.preventDefault();
             event.stopImmediatePropagation();
-            await page.price();
+
+            try {
+                await page.price();
+            } catch (error) {
+                // THE PARTS NEVER REACHED US, so adding the kit now would
+                // book a box of nothing and look like a completed order. The
+                // page says what happened; the click does nothing.
+                return;
+            }
+
             button.dataset.aaCustomDone = "1";
             button.click();
         }, true);
