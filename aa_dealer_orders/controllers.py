@@ -509,6 +509,16 @@ class AADealerOrder(AAOptionPricing, http.Controller):
 
 KIT_EXTRAS = {'Springs', 'Tracks', 'Cables'}
 SESSION_KEY = 'aa_kit_door'
+# WHAT THE CUSTOMER PUT IN THEIR CUSTOM KIT, between the page and the cart.
+# The same trick the door box above uses, for the same reason: /shop/cart/add
+# is Odoo's own route and carries no room for a parts list, so the page leaves
+# it here and add_to_cart picks it up. Keyed by template, so two tabs on two
+# kits do not overwrite each other.
+CUSTOM_KIT_KEY = 'aa_custom_kit_parts'
+# A guard rather than a policy: nobody builds a kit of two hundred different
+# parts, and an unbounded list from a browser is an unbounded list.
+MAX_CUSTOM_PARTS = 60
+MAX_CUSTOM_QTY = 500
 
 
 class AAKitCart(AAOptionPricing, Cart):
@@ -604,7 +614,121 @@ class AAKitCart(AAOptionPricing, Cart):
             self._aa_add_extras(*plan)
             order = request.cart
             result['cart_quantity'] = order.cart_quantity
+
+        # A CUSTOM KIT'S PARTS GO IN THE SAME WAY the extras above do: as their
+        # own lines, hung off the kit line, every one of them a real product.
+        custom = self._custom_kit(product_template_id)
+
+        if custom:
+            order = request.cart
+            kit_line = order.order_line.filtered(
+                lambda line: line.product_id.product_tmpl_id == custom
+                and not line.linked_line_id)[-1:]
+
+            if kit_line:
+                self._aa_add_custom_parts(custom, kit_line, max(1, int(quantity or 1)))
+                result['cart_quantity'] = order.cart_quantity
+
         return result
+
+    # --- the custom kit ------------------------------------------------------
+
+    def _custom_kit(self, template_id):
+        """The template, if it really is a custom kit page."""
+        template = request.env['product.template'].sudo().browse(
+            int(template_id or 0)).exists()
+
+        return template if template and template.aa_custom_kit else None
+
+    def _aa_custom_kit_chosen(self, template, chosen):
+        """[(variant, quantity)] - what the browser asked for, checked.
+
+        EVERY PART IS CHECKED AGAINST WHAT IS OFFERED, not against what was
+        sent. The list comes from a browser, so a variant that belongs to no
+        offered product - or a spring, a track or a cable - does not reach a
+        cart however it is posted.
+        """
+        allowed = template._aa_custom_kit_parts()
+        variants = request.env['product.product'].sudo().browse([
+            int(part.get('variant_id') or 0)
+            for part in (chosen or [])[:MAX_CUSTOM_PARTS]
+        ]).exists()
+        by_id = {variant.id: variant for variant in variants
+                 if variant.product_tmpl_id in allowed}
+        picked = []
+
+        for part in (chosen or [])[:MAX_CUSTOM_PARTS]:
+            variant = by_id.get(int(part.get('variant_id') or 0))
+
+            if not variant:
+                continue
+
+            try:
+                quantity = float(part.get('quantity') or 0)
+            except (TypeError, ValueError):
+                continue
+
+            if 0 < quantity <= MAX_CUSTOM_QTY:
+                picked.append((variant, quantity))
+
+        return picked
+
+    @route('/aa/custom-kit/price', type='jsonrpc', auth='public', website=True)
+    def aa_custom_kit_price(self, template_id, parts=None, qty=1, **kwargs):
+        """Price what is in the kit so far, and remember it for the cart."""
+        template = self._custom_kit(template_id)
+
+        if not template:
+            return {'error': _("That is not a custom kit.")}
+
+        qty = max(1, int(qty or 1))
+        picked = self._aa_custom_kit_chosen(template, parts)
+        partner = request.env.user.partner_id
+        empty = request.env['product.template.attribute.value']
+        rows = []
+        total = 0.0
+
+        for variant, quantity in picked:
+            unit = self._unit_price(partner, variant, empty, quantity * qty)
+            line = round(unit * quantity, 2)
+            total += line
+            rows.append({
+                'variant_id': variant.id,
+                'name': variant.display_name,
+                'quantity': quantity,
+                'unit_price': unit,
+                'price': line,
+            })
+
+        # KEPT AS THE BROWSER MEANT IT, not as it was priced: the cart books
+        # from this, and a price worked out now would be a price worked out
+        # before the customer changed their mind.
+        stored = request.session.get(CUSTOM_KIT_KEY) or {}
+        stored[str(template.id)] = [
+            {'variant_id': variant.id, 'quantity': quantity}
+            for variant, quantity in picked]
+        request.session[CUSTOM_KIT_KEY] = stored
+
+        return {'parts': rows, 'total': round(total, 2), 'count': len(rows)}
+
+    def _aa_add_custom_parts(self, template, kit_line, qty):
+        """Book each chosen part as its own line, under the kit line."""
+        chosen = (request.session.get(CUSTOM_KIT_KEY) or {}).get(str(template.id))
+        picked = self._aa_custom_kit_chosen(template, chosen)
+
+        if not picked:
+            return
+
+        order = request.cart
+
+        for variant, quantity in picked:
+            order._cart_add(
+                product_id=variant.id,
+                quantity=quantity * qty,
+                linked_line_id=kit_line.id,
+            )
+
+        order._verify_cart_after_update()
 
     def _aa_sync_kit_note(self, variant, door, notes):
         """Keep the kit line's door note in step with the page.

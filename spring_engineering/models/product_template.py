@@ -8,7 +8,10 @@ from .sale_order import PREPARED
 # names are consistent: "... Vertical Track 76" - 7' Door Height Black" and
 # "AA 1200 Hardware Kit".
 VERTICAL_TRACK = "vertical track"
+# "hardware kit" and "custom kit" both get the trim option: the owner's custom
+# kit includes trims (2026-10-20) and is a kit in every other respect too.
 HARDWARE_KIT = "hardware kit"
+KIT_NAMES = (HARDWARE_KIT, "custom kit")
 
 
 class ProductTemplate(models.Model):
@@ -42,8 +45,14 @@ class ProductTemplate(models.Model):
         if len(values) != len(value_refs):
             return
 
+        # ONE FRAGMENT OR SEVERAL. The trim option belongs on a "hardware kit"
+        # and on a "custom kit", which are two names for the same bench, so
+        # this takes either a string or a tuple of them.
+        fragments = (name_fragment,) if isinstance(name_fragment, str) \
+            else tuple(name_fragment)
         products = self.with_context(active_test=False).search(
-            [("name", "ilike", name_fragment)]
+            ["|"] * (len(fragments) - 1)
+            + [("name", "ilike", fragment) for fragment in fragments]
         )
         lines = self.env["product.template.attribute.line"]
 
@@ -94,7 +103,7 @@ class ProductTemplate(models.Model):
                 "spring_engineering.attribute_value_trim_bronze",
                 "spring_engineering.attribute_value_trim_white",
             ),
-            HARDWARE_KIT,
+            KIT_NAMES,
         )
 
     # --- what a prepared track costs, before anything is in a cart ----------

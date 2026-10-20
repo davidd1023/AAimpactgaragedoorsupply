@@ -7,8 +7,18 @@ from .mrp_bom import CABLE_OPERATION, HARDWARE_WORKCENTER, KIT_OPERATION
 _logger = logging.getLogger(__name__)
 
 
+# A CUSTOM KIT IS A KIT (owner, 2026-10-20). It is packed at the same bench,
+# goes in the same box and gets the same sticker; the only difference is that
+# its contents are the order's own lines rather than a phantom BoM. Teaching
+# this one sentence about it was cheaper than teaching four modules about a new
+# kind of product.
+KIT_NAMES = ("hardware kit", "custom kit")
+
+
 def is_hardware_kit(product):
-    return "hardware kit" in (product.product_tmpl_id.name or "").lower()
+    name = (product.product_tmpl_id.name or "").lower()
+
+    return any(kit in name for kit in KIT_NAMES)
 
 
 def is_prepared_cable(product):
