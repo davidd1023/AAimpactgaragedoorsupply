@@ -848,3 +848,53 @@
 
     box-sizing: border-box;
 }
+
+/* =========================================
+   WIRE WE DO NOT STOCK
+   =========================================
+
+   Owner, 2026-10-20: "for any wire sizes we dont stock, we need to implement
+   a warning that tells the customer that we dont currently stock that wire
+   size and to try another one that we do stock and then maybe a list or image
+   showing which wire sizes we do stock."
+
+   Sits between the Wire Size box and the results, which is where the figures
+   it is warning about begin. Amber rather than red: nothing is wrong, the
+   spring is simply one we would have to get in. */
+.se-wire-stock-warning {
+    padding: 14px 16px;
+    background: #fff4e5;
+    border-top: 2px solid #f0a500;
+    border-bottom: 2px solid #f0a500;
+    color: #3d3d3d;
+}
+
+.se-wire-stock-head {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.se-wire-stock-body {
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+/* The sizes we do hold, as chips: a list to read across rather than a
+   sentence to read through, and it wraps on a phone. */
+.se-wire-stock-sizes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.se-wire-stock-size {
+    padding: 2px 8px;
+    background: #ffffff;
+    border: 1px solid #f0a500;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}

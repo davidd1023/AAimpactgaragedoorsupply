@@ -210,3 +210,26 @@
         padding: 1rem 1rem 0.5rem;
     }
 }
+
+/* Wire we do not stock: the same warning in the site's own clothes - softer
+   edges, the page's spacing, and no full-bleed amber bands. */
+.aa-se-page .se-wire-stock-warning {
+    margin: 0.75rem 1.5rem 0;
+    padding: 0.875rem 1rem;
+    border: 1px solid #f0a500;
+    border-radius: var(--bs-border-radius, 0.375rem);
+    background: #fff8ec;
+}
+
+.aa-se-page .se-wire-stock-head {
+    font-size: 1rem;
+}
+
+.aa-se-page .se-wire-stock-body {
+    font-size: 0.875rem;
+    color: var(--bs-body-color, #212529);
+}
+
+.aa-se-page .se-wire-stock-size {
+    font-size: 0.8125rem;
+}
