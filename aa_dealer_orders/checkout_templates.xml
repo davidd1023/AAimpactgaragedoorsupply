@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- PICKUP ONLY (owner, 2026-10-20): "Checkout asks for a full address even
+       though orders are pickup only ... Name, phone and email are enough for
+       pickup. 'VAT' doesn't apply in the US; for dealers, what matters is the
+       Resale Certificate."
+
+       HIDDEN, NOT DELETED. Odoo's own address script reaches for the country
+       and state inputs and rebuilds the state list when the country changes;
+       a form that has removed them is a form that throws on the way in. With
+       d-none they are all still there, still work, and are asked of nobody.
+       The country is then filled in server side - see checkout.py, where the
+       reason is tax rather than post. -->
+  <template id="address_form_pickup_only" inherit_id="portal.address_form_fields"
+            name="Pickup only: no postal address, no VAT">
+
+    <xpath expr="//div[@id='div_street']" position="attributes">
+      <attribute name="class" add="d-none" separator=" "/>
+    </xpath>
+    <xpath expr="//div[@id='div_street2']" position="attributes">
+      <attribute name="class" add="d-none" separator=" "/>
+    </xpath>
+    <xpath expr="//div[@id='div_city']" position="attributes">
+      <attribute name="class" add="d-none" separator=" "/>
+    </xpath>
+    <xpath expr="//div[@id='div_country']" position="attributes">
+      <attribute name="class" add="d-none" separator=" "/>
+    </xpath>
+    <xpath expr="//div[@id='div_state']" position="attributes">
+      <attribute name="class" add="d-none" separator=" "/>
+    </xpath>
+
+    <!-- The zip input is in the arch TWICE, once for each of the two layouts
+         core lays the city and zip out in, and an xpath hits the first match
+         only - so it is hidden twice, deliberately. -->
+    <xpath expr="//div[@id='div_zip']" position="attributes">
+      <attribute name="class" add="d-none" separator=" "/>
+    </xpath>
+    <xpath expr="//div[@id='div_zip'][not(contains(@class, 'd-none'))]"
+           position="attributes">
+      <attribute name="class" add="d-none" separator=" "/>
+    </xpath>
+
+    <!-- VAT IS A EUROPEAN NUMBER. What takes tax off an order here is the
+         resale certificate, so the field goes and says where to send one. -->
+    <xpath expr="//div[@id='div_vat']" position="attributes">
+      <attribute name="class" add="d-none" separator=" "/>
+    </xpath>
+    <xpath expr="//div[@id='div_vat']" position="after">
+      <div t-if="is_used_as_billing" class="col-12 mb-2">
+        <small class="form-text text-muted">
+          Buying for resale? We take sales tax off your orders once your
+          resale certificate is approved<t t-if="not request.env.user._is_public()">
+          - <a href="/my/resale-certificate">send it to us here</a></t>.
+        </small>
+      </div>
+    </xpath>
+  </template>
+
+</odoo>

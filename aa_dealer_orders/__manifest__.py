@@ -43,6 +43,7 @@ at the moment of ordering.
         'resale_views.xml',
         'templates.xml',
         'resale_templates.xml',
+        'checkout_templates.xml',
     ],
     'assets': {
         'web.assets_frontend': [
