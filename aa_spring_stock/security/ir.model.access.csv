@@ -10,3 +10,5 @@ access_aa_spring_box_add_user,aa.spring.box.add user,model_aa_spring_box_add,sto
 access_aa_spring_box_add_line_user,aa.spring.box.add.line user,model_aa_spring_box_add_line,stock.group_stock_user,1,1,1,1
 access_aa_spring_box_move_user,aa.spring.box.move user,model_aa_spring_box_move,stock.group_stock_user,1,1,1,1
 access_aa_spring_box_move_line_user,aa.spring.box.move.line user,model_aa_spring_box_move_line,stock.group_stock_user,1,1,1,1
+access_aa_spring_adjust_user,aa.spring.adjust user,model_aa_spring_adjust,stock.group_stock_user,1,1,1,1
+access_aa_spring_adjust_line_user,aa.spring.adjust.line user,model_aa_spring_adjust_line,stock.group_stock_user,1,1,1,1
