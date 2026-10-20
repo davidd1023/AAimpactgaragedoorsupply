@@ -232,22 +232,38 @@ class ProductTemplate(models.Model):
         for family in families.values():
             members = family["members"]
 
+            # ONE PRODUCT PER COLOUR. A catalogue can hold the same name
+            # twice, and a dropdown offering Galvanized, Galvanized and White
+            # asks the customer a question with no answer.
+            seen = {}
+
+            for part, colour, variant_id in members:
+                seen.setdefault(colour, variant_id)
+
             # ONE ROW, IN BOTH COLOURS, when the catalogue really does have
             # the same part twice: "11ga #8 Hinge White" and "... Black"
             # become "11ga #8 Hinge" with a colour to pick, which is also
             # half as many rows to read.
-            if len(members) > 1:
+            if len(seen) > 1:
                 parts.append(members[0][0]._aa_custom_kit_part_json(
                     family["stem"],
-                    [(variant_id, colour) for _part, colour, variant_id in members]))
+                    [(variant_id, colour) for colour, variant_id in seen.items()]))
+
+                # AND NOTHING DISAPPEARS: a second product of a colour that is
+                # already taken is still offered, under its own name.
+                for part, colour, variant_id in members:
+                    if seen[colour] != variant_id:
+                        parts.append(part._aa_custom_kit_part_json(
+                            part.name, [(variant_id, "")]))
 
                 continue
 
-            # A FAMILY OF ONE IS NEVER RENAMED. There is nothing to switch to,
-            # so "Zinc Plated Bolt" stays what it is called rather than
-            # becoming a "Plated Bolt" that comes in zinc.
-            part, _colour, variant_id = members[0]
-            parts.append(part._aa_custom_kit_part_json(part.name, [(variant_id, "")]))
+            # A FAMILY OF ONE COLOUR IS NEVER RENAMED. There is nothing to
+            # switch to, so "Zinc Plated Bolt" stays what it is called rather
+            # than becoming a "Plated Bolt" that comes in zinc.
+            for part, _colour, variant_id in members:
+                parts.append(
+                    part._aa_custom_kit_part_json(part.name, [(variant_id, "")]))
 
         parts.sort(key=lambda row: row["name"])
 

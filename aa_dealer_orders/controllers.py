@@ -611,9 +611,7 @@ class AAKitCart(AAOptionPricing, Cart):
             linked_products=linked_products, **kwargs)
 
         if plan:
-            self._aa_add_extras(*plan)
-            order = request.cart
-            result['cart_quantity'] = order.cart_quantity
+            self._aa_popup(result, self._aa_add_extras(*plan))
 
         # A CUSTOM KIT'S PARTS GO IN THE SAME WAY the extras above do: as their
         # own lines, hung off the kit line, every one of them a real product.
@@ -626,8 +624,10 @@ class AAKitCart(AAOptionPricing, Cart):
                 and not line.linked_line_id)[-1:]
 
             if kit_line:
-                self._aa_add_custom_parts(custom, kit_line, max(1, int(quantity or 1)))
-                result['cart_quantity'] = order.cart_quantity
+                added = self._aa_add_custom_parts(
+                    custom, kit_line, max(1, int(quantity or 1)))
+                added.setdefault(kit_line.id, kit_line.product_uom_qty)
+                self._aa_popup(result, added)
 
         return result
 
@@ -712,23 +712,59 @@ class AAKitCart(AAOptionPricing, Cart):
         return {'parts': rows, 'total': round(total, 2), 'count': len(rows)}
 
     def _aa_add_custom_parts(self, template, kit_line, qty):
-        """Book each chosen part as its own line, under the kit line."""
+        """Book each chosen part as its own line, under the kit line.
+
+        Returns {line id: quantity added} so the popup can say what went in.
+        """
         chosen = (request.session.get(CUSTOM_KIT_KEY) or {}).get(str(template.id))
         picked = self._aa_custom_kit_chosen(template, chosen)
+        added = {}
 
         if not picked:
-            return
+            return added
 
         order = request.cart
 
         for variant, quantity in picked:
-            order._cart_add(
+            booked = order._cart_add(
                 product_id=variant.id,
                 quantity=quantity * qty,
                 linked_line_id=kit_line.id,
             )
 
+            if booked.get('line_id'):
+                added[booked['line_id']] = booked.get('quantity') or quantity * qty
+
         order._verify_cart_after_update()
+
+        return added
+
+    def _aa_popup(self, result, added):
+        """Make the "added to your cart" popup say what actually went in.
+
+        THE FAULT THIS FIXES, 2026-10-20: "when i put the kit into the cart,
+        the only things that pop up are the kit at 1$ and a galvanized hinge
+        #1 ... none of the items i added to the kit are getting added into the
+        cart."
+
+        They were going in. Core builds notification_info out of the lines IT
+        added and returns it, and both kit paths in this file add their lines
+        AFTER that - so the popup named the kit and nothing else, and read as
+        if the parts had been dropped. The cart page had them all along; the
+        popup was the only thing lying. It is rebuilt here from the lines that
+        were really booked.
+        """
+        order = request.cart
+
+        if not order or not added:
+            return
+
+        information = result.get('notification_info') or {}
+        result['notification_info'] = {
+            **self._get_cart_notification_information(order, added),
+            'warning': information.get('warning'),
+        }
+        result['cart_quantity'] = order.cart_quantity
 
     def _aa_sync_kit_note(self, variant, door, notes):
         """Keep the kit line's door note in step with the page.
@@ -796,24 +832,35 @@ class AAKitCart(AAOptionPricing, Cart):
         line.aa_write_door(self._aa_door_numbers(door), note=info)
 
     def _aa_add_extras(self, variant, door, qty, extras, notes):
+        """Returns {line id: quantity added}, the kit line included, so the
+        popup can name the springs and tracks that went in with the kit."""
         order = request.cart
+        added = {}
         if not order:
-            return
+            return added
         kit_line = order.order_line.filtered(lambda l: l.product_id == variant).sorted('id')[-1:]
         info = " | ".join(filter(None, [self._line_note(door)] + notes))
         if kit_line and info:
             self._aa_store_door(kit_line, door, info)
+        if kit_line:
+            added[kit_line.id] = kit_line.product_uom_qty
         for extra in extras:
             if extra.get('quote'):
                 before = order.order_line
                 booked = add_assembly_lines(order, extra['quote'], qty=qty, note="Springs for the kit above")
                 if booked.get('error'):
                     raise UserError(booked['error'])
-                (order.order_line - before).write({'linked_line_id': kit_line.id})
+                fresh = order.order_line - before
+                fresh.write({'linked_line_id': kit_line.id})
+                added.update({line.id: line.product_uom_qty for line in fresh})
                 continue
-            order.with_context(skip_cart_verification=True)._cart_add(
+            booked = order.with_context(skip_cart_verification=True)._cart_add(
                 product_id=extra['product'].id,
                 quantity=extra['qty'] * qty,
                 linked_line_id=kit_line.id,
             )
+            if booked.get('line_id'):
+                added[booked['line_id']] = booked.get('quantity') or extra['qty'] * qty
         order._verify_cart_after_update()
+
+        return added
