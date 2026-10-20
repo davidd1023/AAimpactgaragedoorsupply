@@ -118,6 +118,11 @@ class ProductTemplate(models.Model):
                 "template_id": part.id,
                 "name": part.name,
                 "code": part.default_code or "",
+                # THE PAGE IS SPLIT UP BY THIS (owner, 2026-10-20: "one list
+                # for hinges, one for shafts"). The id does the grouping and
+                # the name is only the heading, because two categories under
+                # different parents can share a name.
+                "category_id": part.categ_id.id,
                 "category": part.categ_id.name or "",
                 "price": round(part.list_price, 2),
                 "colours": [{"id": variant_id, "label": label}

@@ -4,3 +4,10 @@
 #aa_dealer_order .aa-price { font-weight: 600; min-width: 7rem; text-align: right; }
 #aa_dealer_order .aa-summary { position: sticky; bottom: 0; z-index: 5; box-shadow: 0 -2px 8px rgba(0,0,0,.08); }
 #aa_dealer_order .aa-dim input { max-width: 5.5rem; }
+
+/* THE CUSTOM KIT CATALOGUE: one shelf per category, and a long shelf scrolls
+   inside its own box rather than pushing the Add to Cart button off the page. */
+#aa_custom_kit .o_aa_custom_category_head { box-shadow: none; }
+#aa_custom_kit .o_aa_custom_category_head:hover { background: var(--bs-light, #f8f9fa); }
+#aa_custom_kit .o_aa_custom_category_body { max-height: 18rem; overflow-y: auto; }
+#aa_custom_kit .o_aa_custom_chevron { width: 1rem; }
