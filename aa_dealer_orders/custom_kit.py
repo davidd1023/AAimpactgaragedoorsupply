@@ -58,6 +58,39 @@ COLOUR_WORDS = (
 )
 
 
+class SaleOrder(models.Model):
+    _inherit = "sale.order"
+
+    def _verify_updated_quantity(self, order_line, product_id, new_qty, uom_id, **kwargs):
+        """A KIT'S PARTS ARE BUILT TO ORDER, so the shop's out-of-stock rule
+        does not apply to them.
+
+        THE FAULT THIS FIXES, 2026-10-20: the owner built a 13-part kit, the
+        page priced it at $236.91, he added it to the cart and got the kit by
+        itself. The parts WERE sent, stored and read back - and then dropped
+        one by one, here.
+
+        website_sale_stock refuses a storable product that is not in stock:
+        "%s has not been added to your cart since it is not available", with
+        the quantity clamped to zero and no line created. Every part of that
+        kit is a part AA Impact fits to order rather than keeps on a shelf, so
+        every one of them was refused. The one hinge that did get through on
+        an earlier attempt was the one with stock on hand, which is what made
+        it look as if the list were being lost.
+
+        THE RULE IS NOT REMOVED, it is scoped: it still applies to anything a
+        customer buys on its own. It is passed over only for lines this
+        module's kit pages book as the contents of a kit, which is how a
+        phantom-BoM kit already behaves - nobody is stopped from ordering an
+        AA 1200 because a hinge inside it shows zero.
+        """
+        if self.env.context.get("aa_kit_parts"):
+            return new_qty, ""
+
+        return super()._verify_updated_quantity(
+            order_line, product_id, new_qty, uom_id, **kwargs)
+
+
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
