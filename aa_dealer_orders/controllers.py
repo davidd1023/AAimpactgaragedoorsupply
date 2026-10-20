@@ -763,7 +763,10 @@ class AAKitCart(AAOptionPricing, Cart):
         order = request.cart
 
         for variant, quantity in picked:
-            booked = order._cart_add(
+            # aa_kit_parts: the contents of a kit are built to order, so the
+            # shop's out-of-stock rule does not throw them out. See
+            # sale_order._verify_updated_quantity in custom_kit.py.
+            booked = order.with_context(aa_kit_parts=True)._cart_add(
                 product_id=variant.id,
                 quantity=quantity * qty,
                 linked_line_id=kit_line.id,
@@ -771,6 +774,12 @@ class AAKitCart(AAOptionPricing, Cart):
 
             if booked.get('line_id'):
                 added[booked['line_id']] = booked.get('quantity') or quantity * qty
+            else:
+                # NEVER AGAIN IN SILENCE: core returns the reason it would not
+                # take a line, and this used to be dropped on the floor.
+                _logger.warning(
+                    "aa_dealer_orders: %s was refused by the cart for a custom "
+                    "kit (%s)", variant.display_name, booked.get('warning') or "")
 
         order._verify_cart_after_update()
 
@@ -891,7 +900,8 @@ class AAKitCart(AAOptionPricing, Cart):
                 fresh.write({'linked_line_id': kit_line.id})
                 added.update({line.id: line.product_uom_qty for line in fresh})
                 continue
-            booked = order.with_context(skip_cart_verification=True)._cart_add(
+            booked = order.with_context(
+                skip_cart_verification=True, aa_kit_parts=True)._cart_add(
                 product_id=extra['product'].id,
                 quantity=extra['qty'] * qty,
                 linked_line_id=kit_line.id,

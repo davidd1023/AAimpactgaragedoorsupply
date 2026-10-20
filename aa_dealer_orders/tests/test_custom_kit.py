@@ -651,6 +651,77 @@ class CustomKitCase(HttpCase):
         self.assertAlmostEqual(sum(parts.mapped("price_subtotal")),
                                priced["total"], places=2)
 
+    def test_a_part_that_is_not_in_stock_still_goes_in_the_kit(self):
+        """THE FAULT THIS FIXES, 2026-10-20: the owner built a 13-part kit,
+        the page priced it at $236.91, he added it to the cart - and got the
+        kit on its own.
+
+        website_sale_stock is installed, and it refuses a storable product
+        that is not in stock: "... has not been added to your cart since it is
+        not available", quantity clamped to zero, no line created. Every part
+        of that kit is fitted to order rather than kept on a shelf, so every
+        one of them was refused - and the warning core hands back was being
+        dropped, so it happened in silence.
+
+        A kit's contents are built to order, like the components of a
+        phantom-BoM kit: nobody is stopped from ordering an AA 1200 because a
+        hinge inside it shows zero on hand.
+        """
+        part = self.env["product.template"].create({
+            "name": "Out Of Stock Strut", "type": "consu", "is_storable": True,
+            "list_price": 6.0, "categ_id": self.category.id,
+            "is_published": True, "aa_custom_kit_part": True,
+            "allow_out_of_stock_order": False,
+        })
+        variant = part.product_variant_ids[:1]
+        self.assertEqual(variant.qty_available, 0.0, "the fixture is stocked")
+
+        self._build([{"variant_id": variant.id, "quantity": 6}])
+        self._rpc("/shop/cart/add", {
+            "product_template_id": self.kit.id,
+            "product_id": self.kit.product_variant_ids[:1].id,
+            "quantity": 1,
+        })
+        order = self.env["sale.order"].search(
+            [("order_line.product_id", "in", self.kit.product_variant_ids.ids)],
+            order="id desc", limit=1)
+        booked = order.order_line.filtered(lambda line: line.product_id == variant)
+
+        self.assertTrue(booked, "the part was thrown out for being out of stock")
+        self.assertEqual(booked.product_uom_qty, 6.0)
+
+    def test_the_shop_rule_is_scoped_and_not_removed(self):
+        """OUT-OF-STOCK STILL MEANS OUT-OF-STOCK for anything a customer buys
+        by itself. It is passed over only for lines a kit page books as the
+        contents of a kit.
+
+        Asserted at the method core asks rather than through the cart: an
+        out-of-stock add is answered by clamping the quantity, and what then
+        happens to the line is core's business and has moved between versions.
+        What is ours is which answer that method gives.
+        """
+        part = self.env["product.template"].create({
+            "name": "Out Of Stock Strut", "type": "consu", "is_storable": True,
+            "list_price": 6.0, "categ_id": self.category.id,
+            "is_published": True, "allow_out_of_stock_order": False,
+        })
+        variant = part.product_variant_ids[:1]
+        order = self.env["sale.order"].create({
+            "partner_id": self.env.ref("base.partner_admin").id})
+        nothing = self.env["sale.order.line"]
+
+        asked = 6.0
+        allowed, warning = order._verify_updated_quantity(
+            nothing, variant.id, asked, variant.uom_id.id)
+        in_a_kit, kit_warning = order.with_context(
+            aa_kit_parts=True)._verify_updated_quantity(
+                nothing, variant.id, asked, variant.uom_id.id)
+
+        self.assertLess(allowed, asked, "the shop sold what it has none of")
+        self.assertTrue(warning)
+        self.assertEqual(in_a_kit, asked, "the kit lost its part")
+        self.assertFalse(kit_warning)
+
     def test_a_part_that_cannot_be_priced_does_not_lose_the_kit(self):
         """THE FAULT THIS FIXES, 2026-10-20: the owner started a kit from AA
         1200, watched it fill with that kit's parts, added it to the cart and
