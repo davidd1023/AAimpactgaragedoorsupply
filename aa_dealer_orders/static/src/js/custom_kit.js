@@ -278,10 +278,23 @@ function wire(root) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+// RUN NOW IF THE PAGE IS ALREADY HERE. This bundle is loaded lazily, after
+// DOMContentLoaded has been and gone, so a listener for that event is a
+// listener that never fires - the builder kept its d-none and the page showed
+// only the ordinary product options, which is why the owner reported seeing
+// "only the trims" after ticking a part (2026-10-20). kit_page.js next door
+// has always done it this way; I did not copy the one line that mattered.
+function boot() {
     const root = document.getElementById("aa_custom_kit");
 
-    if (root) {
+    if (root && !root.dataset.aaReady) {
+        root.dataset.aaReady = "1";
         wire(root);
     }
-});
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+} else {
+    boot();
+}

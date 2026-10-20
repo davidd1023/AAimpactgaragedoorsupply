@@ -265,3 +265,25 @@ class CustomKitCase(HttpCase):
 
         self.assertIn('id="aa_custom_kit"', page)
         self.assertIn("11ga #8 Hinge", page, "the parts did not reach the page")
+
+    def test_the_builder_starts_itself_on_an_already_loaded_page(self):
+        """THE BUG THIS GUARDS, 2026-10-20: the owner ticked a part, the data
+        reached the page - the test above proved that much - and the builder
+        never appeared, because the script only LISTENED for DOMContentLoaded.
+
+        The frontend bundle is loaded lazily, after that event has been and
+        gone, so the listener never fired and the div kept the d-none it ships
+        with. The test above could not catch it: it proved the data arrived,
+        not that anything used it. kit_page.js has always handled this; this
+        asserts the one line that matters is in both.
+        """
+        from odoo.tools.misc import file_path
+
+        for name in ("custom_kit.js", "kit_page.js"):
+            with open(file_path(
+                    "aa_dealer_orders/static/src/js/%s" % name)) as handle:
+                source = handle.read()
+
+            with self.subTest(script=name):
+                self.assertIn('readyState', source,
+                              "it only waits for an event that may have passed")
