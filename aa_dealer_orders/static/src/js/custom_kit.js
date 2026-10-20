@@ -65,7 +65,10 @@ class CustomKitPage {
         const groups = new Map();
 
         for (const part of this.parts) {
-            const key = part.category_id || 0;
+            // THE LABEL IS A GOOD ENOUGH KEY on its own if the server sent no
+            // key, so an older payload still splits by category instead of
+            // piling everything onto one shelf.
+            const key = part.category_id || part.category || "none";
 
             if (!groups.has(key)) {
                 groups.set(key, {
@@ -76,7 +79,12 @@ class CustomKitPage {
             groups.get(key).parts.push(part);
         }
 
-        return [...groups.values()].sort((a, b) => a.label.localeCompare(b.label));
+        // A-Z, and the parts we have no category for last whatever they are
+        // called - a shelf of leftovers belongs at the bottom.
+        const last = (group) => group.key === "none" || !group.label;
+
+        return [...groups.values()].sort((a, b) =>
+            (last(a) - last(b)) || a.label.localeCompare(b.label));
     }
 
     quantityOf(part) {
