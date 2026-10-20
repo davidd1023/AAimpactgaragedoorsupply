@@ -566,9 +566,31 @@ class CustomKitPage {
         return this.queue;
     }
 
+    lockAddToCart(locked, why) {
+        // BOOTSTRAP'S OWN DISABLED STATE, which puts pointer-events: none on
+        // the button, so the click cannot happen at all while the kit is in
+        // mid-air. No listener of ours sits on Odoo's button; when it is
+        // enabled, its click is Odoo's alone.
+        const button = document.querySelector("#add_to_cart");
+
+        if (!button) {
+            return;
+        }
+
+        button.classList.toggle("disabled", Boolean(locked));
+        button.setAttribute("aria-disabled", locked ? "true" : "false");
+
+        if (why) {
+            button.setAttribute("title", why);
+        } else {
+            button.removeAttribute("title");
+        }
+    }
+
     async sendPrice() {
         const parts = [...this.chosen].map(([variant_id, quantity]) =>
             ({ variant_id, quantity }));
+        this.lockAddToCart(true, "Saving your kit…");
 
         try {
             const response = await fetch("/aa/custom-kit/price", {
@@ -596,9 +618,11 @@ class CustomKitPage {
             this.warn(refused > 0
                 ? `${refused} part${refused === 1 ? "" : "s"} could not be added to this kit.`
                 : "");
+            this.lockAddToCart(false);
         } catch (error) {
-            // The kit is still on the page and still in the browser; what is
-            // not certain any more is that the cart knows about it.
+            // THE BUTTON STAYS LOCKED. The kit is still on the page and still
+            // in this browser; what is not certain is that the cart knows
+            // about it, and a kit added now would be a box of nothing.
             this.warn("Your kit could not be saved just now - change anything " +
                       "on it, or reload the page, before adding it to the cart.");
 
@@ -616,37 +640,23 @@ class CustomKitPage {
     }
 }
 
-// THE ADD TO CART BUTTON WAITS FOR THE PRICE CALL, exactly as the door box
-// does: the server books from what it was last told, so it has to have been
-// told before the cart route runs.
+// NOTHING TOUCHES THE ADD TO CART CLICK.
+//
+// WHAT THIS REPLACES, and why, 2026-10-20: the click used to be caught here,
+// held while the kit was sent to the server, and then let through on a second,
+// synthetic click. The production log shows exactly what that did - dozens of
+// POST /aa/custom-kit/price and, in sixteen hours, not one POST
+// /shop/cart/add. The click went in and never came out: Odoo 19 binds the
+// #add_to_cart handler straight onto that node, and a re-dispatched click
+// does not reliably reach it. The kit was never the problem; the button was.
+//
+// There is nothing to hold the click for anyway. The kit is sent on every
+// change, so the server already has it by the time anybody clicks. The one
+// gap - a click in the instant between a change and its call landing - is
+// closed by DISABLING the button while a call is in flight, which is a thing
+// done to our own page rather than to Odoo's event.
 function wire(root) {
-    const page = new CustomKitPage(root);
-    const button = document.querySelector("#add_to_cart, .js_check_product");
-
-    if (button) {
-        button.addEventListener("click", async (event) => {
-            if (button.dataset.aaCustomDone) {
-                delete button.dataset.aaCustomDone;
-
-                return;
-            }
-
-            event.preventDefault();
-            event.stopImmediatePropagation();
-
-            try {
-                await page.price();
-            } catch (error) {
-                // THE PARTS NEVER REACHED US, so adding the kit now would
-                // book a box of nothing and look like a completed order. The
-                // page says what happened; the click does nothing.
-                return;
-            }
-
-            button.dataset.aaCustomDone = "1";
-            button.click();
-        }, true);
-    }
+    return new CustomKitPage(root);
 }
 
 // RUN NOW IF THE PAGE IS ALREADY HERE. This bundle is loaded lazily, after
