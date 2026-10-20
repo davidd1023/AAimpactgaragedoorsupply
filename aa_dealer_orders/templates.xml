@@ -55,6 +55,14 @@
             <div t-if="product.aa_custom_kit" id="aa_custom_kit" class="mb-4 d-none"
                  t-att-data-template-id="product.id"
                  t-att-data-kit="product._aa_custom_kit_json()"/>
+            <!-- WHICH CODE THIS PAGE IS RUNNING, for staff and nobody else.
+                 A customer never sees it; the method returns nothing at all
+                 unless the viewer is signed in as an employee. -->
+            <t t-set="aa_kit_build"
+               t-value="product.aa_custom_kit and product._aa_custom_kit_build()"/>
+            <div t-if="aa_kit_build" class="text-muted small mb-3">
+                Custom Kit build <t t-esc="aa_kit_build"/> (staff only)
+            </div>
         </xpath>
     </template>
 

@@ -862,6 +862,24 @@ class CustomKitCase(HttpCase):
 
     # --- and the page it is all shown on ---------------------------------------
 
+    def test_the_page_says_which_build_it_is_running_to_staff_only(self):
+        """WHY IT IS THERE, 2026-10-20: three faults in a row were reported
+        against a build that did not have the code being discussed, because
+        production carries whatever has been merged into it and nothing said
+        what that was."""
+        version = self.kit._aa_custom_kit_build()
+
+        self.assertTrue(version, "an employee cannot tell which build this is")
+        self.assertTrue(version.startswith("19.0."), version)
+
+        public = self.env.ref("base.public_user")
+        self.assertEqual(
+            self.kit.with_user(public)._aa_custom_kit_build(), "",
+            "a customer is being shown our build number")
+        self.assertNotIn("Custom Kit build",
+                         self.url_open(self.kit.website_url).text,
+                         "the build number reached a public page")
+
     def test_the_product_page_carries_the_builder(self):
         page = self.url_open(self.kit.website_url).text
 
