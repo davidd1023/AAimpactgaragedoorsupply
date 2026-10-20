@@ -33,6 +33,7 @@ variants where it has them, and otherwise as the product it is.
 """
 
 import json
+import re
 
 from odoo import api, fields, models
 
@@ -43,6 +44,18 @@ COLOUR_ATTRIBUTES = ("finish color", "finish colour", "color", "colour")
 # Never offered in a custom kit, whatever anybody ticks: these are sized from a
 # door and sold against one (owner, 2026-10-20).
 NEVER_IN_A_CUSTOM_KIT = ("spring", "track", "cable")
+
+# THE FINISHES THIS TRADE SELLS, longest first so "desert tan" is read as one
+# colour and not as "tan". Used to recognise that two products are the same
+# part in two colours - which is how this catalogue is built, there being no
+# finish attribute on a hinge - and nothing is grouped unless a sibling with
+# the same name in another colour is actually there to group it with.
+COLOUR_WORDS = (
+    "desert tan", "sandstone", "terratone", "chocolate", "galvanized",
+    "galvanised", "almond", "bronze", "walnut", "wicker", "silver", "copper",
+    "primed", "white", "black", "brown", "clay", "gray", "grey", "zinc",
+    "tan",
+)
 
 
 class ProductTemplate(models.Model):
@@ -138,10 +151,61 @@ class ProductTemplate(models.Model):
 
         return "none", "Other parts"
 
+    def _aa_colour_in_name(self):
+        """(what the part is, what colour it is) read off the product's name.
+
+        WHY THIS EXISTS, 2026-10-20: the colour dropdown did not appear, and
+        the reason is that nothing in this catalogue has a finish ATTRIBUTE.
+        A white hinge and a black hinge are two separate products with the
+        colour written in the name, so there was no part with two colours for
+        the page to offer - and the parts a kit fills itself with were the
+        white ones, which is what the owner was changing a row at a time.
+
+        ("", "") is returned for a name that is only a colour, and for a
+        product whose name holds no colour at all, which are both left alone.
+        """
+        self.ensure_one()
+        name = (self.name or "").strip()
+
+        for word in COLOUR_WORDS:
+            found = re.search(r"\b%s\b" % re.escape(word), name, re.IGNORECASE)
+
+            if not found:
+                continue
+
+            stem = "%s %s" % (name[:found.start()], name[found.end():])
+            stem = re.sub(r"\s+", " ", stem).strip(" -,/()")
+
+            return stem, found.group(0).title()
+
+        return "", ""
+
+    def _aa_custom_kit_part_json(self, name, colours):
+        """One row of the page: a part, under a name, in these colours."""
+        self.ensure_one()
+
+        # THE PAGE IS SPLIT UP BY THIS (owner, 2026-10-20: "one list for
+        # hinges, one for shafts"). The key does the grouping and the name is
+        # only the heading, because two categories under different parents can
+        # share a name.
+        shelf, shelf_name = self._aa_custom_kit_shelf()
+
+        return {
+            "template_id": self.id,
+            "name": name,
+            "code": self.default_code or "",
+            "category_id": shelf,
+            "category": shelf_name,
+            "price": round(self.list_price, 2),
+            "colours": [{"id": variant_id, "label": label}
+                        for variant_id, label in colours],
+        }
+
     def _aa_custom_kit_json(self):
         """Everything the page needs, as data: the parts and the kits to start from."""
         self.ensure_one()
-        parts = []
+        rows = []
+        families = {}
 
         for part in self._aa_custom_kit_parts():
             colours = part._aa_custom_kit_colours()
@@ -149,22 +213,43 @@ class ProductTemplate(models.Model):
             if not colours:
                 continue
 
-            # THE PAGE IS SPLIT UP BY THIS (owner, 2026-10-20: "one list for
-            # hinges, one for shafts"). The key does the grouping and the name
-            # is only the heading, because two categories under different
-            # parents can share a name.
-            shelf, shelf_name = part._aa_custom_kit_shelf()
+            stem, colour = part._aa_colour_in_name()
 
-            parts.append({
-                "template_id": part.id,
-                "name": part.name,
-                "code": part.default_code or "",
-                "category_id": shelf,
-                "category": shelf_name,
-                "price": round(part.list_price, 2),
-                "colours": [{"id": variant_id, "label": label}
-                            for variant_id, label in colours],
-            })
+            # A part with real finish variants already offers them itself, and
+            # a product with no colour in its name is just that product.
+            if len(colours) > 1 or not colour or not stem:
+                rows.append((part, part.name, colours))
+
+                continue
+
+            key = re.sub(r"[^a-z0-9]+", "", stem.lower())
+            families.setdefault(key, {"stem": stem, "members": []})
+            families[key]["members"].append((part, colour, colours[0][0]))
+
+        parts = [part._aa_custom_kit_part_json(name, colours)
+                 for part, name, colours in rows]
+
+        for family in families.values():
+            members = family["members"]
+
+            # ONE ROW, IN BOTH COLOURS, when the catalogue really does have
+            # the same part twice: "11ga #8 Hinge White" and "... Black"
+            # become "11ga #8 Hinge" with a colour to pick, which is also
+            # half as many rows to read.
+            if len(members) > 1:
+                parts.append(members[0][0]._aa_custom_kit_part_json(
+                    family["stem"],
+                    [(variant_id, colour) for _part, colour, variant_id in members]))
+
+                continue
+
+            # A FAMILY OF ONE IS NEVER RENAMED. There is nothing to switch to,
+            # so "Zinc Plated Bolt" stays what it is called rather than
+            # becoming a "Plated Bolt" that comes in zinc.
+            part, _colour, variant_id = members[0]
+            parts.append(part._aa_custom_kit_part_json(part.name, [(variant_id, "")]))
+
+        parts.sort(key=lambda row: row["name"])
 
         return json.dumps({
             "parts": parts,
