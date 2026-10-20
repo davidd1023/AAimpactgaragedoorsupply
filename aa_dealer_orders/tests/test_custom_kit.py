@@ -519,6 +519,92 @@ class CustomKitCase(HttpCase):
                                 { variant_id: 3, quantity: 5 }]));
         """)
 
+    def test_nothing_of_ours_sits_on_odoo_s_add_to_cart_click(self):
+        """THE FAULT THIS FIXES, 2026-10-20. The production log for a whole day
+        of trying: dozens of POST /aa/custom-kit/price and not one POST
+        /shop/cart/add. The click went in and never came out.
+
+        It was being caught here, held while the kit was sent, and let through
+        on a second synthetic click - and Odoo 19 binds the #add_to_cart
+        handler straight onto that node, where a re-dispatched click does not
+        reliably reach it. The kit was never the problem. The button was.
+
+        So the page no longer touches that click at all; it disables the
+        button while a call is in flight instead, which is done to our own
+        page rather than to Odoo's event.
+        """
+        from odoo.tools.misc import file_path
+
+        with open(file_path(
+                "aa_dealer_orders/static/src/js/custom_kit.js")) as handle:
+            source = handle.read()
+
+        for forbidden in ("stopImmediatePropagation", "aaCustomDone",
+                          "button.click()"):
+            self.assertNotIn(forbidden, source,
+                             "the click is being interfered with again")
+
+    def test_add_to_cart_is_locked_while_the_kit_is_in_mid_air(self):
+        """The one gap left by not holding the click: a click in the instant
+        between a change and its call landing. The button is disabled for
+        exactly that long."""
+        self._run_in_node("""
+            const button = {
+                classes: {}, attributes: {},
+                classList: { toggle: (name, on) => { button.classes[name] = on; } },
+                setAttribute: (name, value) => { button.attributes[name] = value; },
+                removeAttribute: (name) => { delete button.attributes[name]; },
+            };
+            sandbox.document.querySelector = () => button;
+            const kit = page([HINGE], [[1, 2]]);
+            kit.templateId = 7;
+            kit.total = { textContent: "", after: () => {} };
+            kit.warn = () => {};
+            let unblock;
+            sandbox.fetch = () => new Promise((resolve) => {
+                unblock = () => resolve({ ok: true, json: async () => ({
+                    result: { count: 1, total: 2, sent: 1 } }) });
+            });
+
+            const sending = kit.price();
+            await new Promise((resolve) => setTimeout(resolve, 0));
+            assert.strictEqual(button.classes.disabled, true,
+                "the kit can be added to a cart that has not been told about it");
+            assert.strictEqual(button.attributes["aria-disabled"], "true");
+
+            unblock();
+            await sending;
+            assert.strictEqual(button.classes.disabled, false,
+                "the button was left disabled after the kit was saved");
+            assert.strictEqual(button.attributes.title, undefined);
+        """)
+
+    def test_add_to_cart_stays_locked_when_the_kit_cannot_be_saved(self):
+        """A kit the cart has not been told about must not be addable: it
+        would book a box of nothing and look like a finished order."""
+        self._run_in_node("""
+            const button = {
+                classes: {}, attributes: {},
+                classList: { toggle: (name, on) => { button.classes[name] = on; } },
+                setAttribute: (name, value) => { button.attributes[name] = value; },
+                removeAttribute: (name) => { delete button.attributes[name]; },
+            };
+            sandbox.document.querySelector = () => button;
+            const kit = page([HINGE], [[1, 2]]);
+            kit.templateId = 7;
+            kit.total = { textContent: "", after: () => {} };
+            let said = "";
+            kit.warn = (message) => { said = message; };
+            sandbox.fetch = async () => { throw new Error("no network"); };
+
+            await kit.price().then(
+                () => { throw new Error("a failed save looked like a good one"); },
+                () => {});
+            assert.strictEqual(button.classes.disabled, true,
+                "the button was unlocked after the kit failed to save");
+            assert.ok(said.includes("could not be saved"), said);
+        """)
+
     def test_the_colours_offered_are_the_ones_the_catalogue_sells(self):
         """Commonest first, and a part with no finish of its own is not a
         colour anybody can pick for the kit."""
