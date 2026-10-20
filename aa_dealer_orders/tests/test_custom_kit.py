@@ -166,17 +166,25 @@ class CustomKitCase(HttpCase):
         self.assertEqual(parts["Zinc Plated Bolt"]["colours"][0]["label"], "")
 
     def test_a_two_word_finish_is_read_as_one_colour(self):
-        """"Desert Tan" is a colour, not a tan one of something desert."""
+        """"Desert Tan" is a colour, not a tan one of something desert.
+
+        The stem is deliberately a name no real product has: this runs against
+        a live catalogue, and the first version used "End Bearing Plate",
+        which a product already in the database was also called - so the
+        family came out with a third colour and the test failed on data rather
+        than on code.
+        """
         for colour in ("Desert Tan", "White"):
             self.env["product.template"].create({
-                "name": "End Bearing Plate %s" % colour, "type": "consu",
+                "name": "Sudden Bearing Plate %s" % colour, "type": "consu",
                 "list_price": 3.0, "categ_id": self.category.id,
                 "aa_custom_kit_part": True})
         parts = {part["name"]: part for part in self._payload()["parts"]}
 
-        self.assertIn("End Bearing Plate", parts)
+        self.assertIn("Sudden Bearing Plate", parts)
         self.assertEqual(
-            sorted(colour["label"] for colour in parts["End Bearing Plate"]["colours"]),
+            sorted(colour["label"]
+                   for colour in parts["Sudden Bearing Plate"]["colours"]),
             ["Desert Tan", "White"])
 
     def test_a_part_with_real_finish_variants_is_left_alone(self):
@@ -574,6 +582,38 @@ class CustomKitCase(HttpCase):
         ])
         self.assertAlmostEqual(sum(parts.mapped("price_subtotal")),
                                priced["total"], places=2)
+
+    def test_the_popup_names_the_parts_that_went_in_with_the_kit(self):
+        """THE FAULT THIS GUARDS, 2026-10-20: "when i put the kit into the
+        cart, the only things that pop up are the kit at 1$ and a galvanized
+        hinge #1 ... none of the items i added to the kit are getting added
+        into the cart."
+
+        They were going in - the cart held every one of them. Core builds the
+        "added to your cart" popup out of the lines IT added and returns that
+        with the response, and the parts are hung off the kit line afterwards,
+        so the popup named the kit alone and read as if nothing else had been
+        booked. The cart page was right; the popup was the liar.
+        """
+        hinge = self._white_hinge()
+        bracket = self.bracket.product_variant_ids[:1]
+        self._build([
+            {"variant_id": hinge.id, "quantity": 4},
+            {"variant_id": bracket.id, "quantity": 8},
+        ])
+        added = self._rpc("/shop/cart/add", {
+            "product_template_id": self.kit.id,
+            "product_id": self.kit.product_variant_ids[:1].id,
+            "quantity": 1,
+        })
+        shown = (added.get("notification_info") or {}).get("lines") or []
+        headers = " ".join(line.get("name") or "" for line in shown)
+
+        self.assertEqual(len(shown), 3,
+                         "the popup shows %s of the 3 lines booked" % len(shown))
+        self.assertIn("Custom Kit", headers)
+        self.assertIn("11ga #8 Hinge", headers)
+        self.assertIn("J-10 Jamb Bracket", headers)
 
     def test_two_kits_bring_twice_the_parts(self):
         hinge = self._white_hinge()
