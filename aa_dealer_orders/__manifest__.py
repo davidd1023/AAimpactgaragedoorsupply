@@ -1,6 +1,6 @@
 {
     'name': 'AA Dealer Orders',
-    'version': '19.0.1.6.0',
+    'version': '19.0.1.10.0',
     'summary': 'Preferred-dealer ordering on account: Quick Order page and "Charge to Account" checkout',
     'description': """
 Lets a preferred dealer (AA Impact Garage Door) order hardware kits without paying
@@ -38,6 +38,7 @@ at the moment of ordering.
     'data': [
         'data.xml',
         'resale_data.xml',
+        'custom_kit_data.xml',
         'views.xml',
         'resale_views.xml',
         'templates.xml',
@@ -49,6 +50,7 @@ at the moment of ordering.
             'aa_dealer_orders/static/src/js/spring_bridge.js',
             'aa_dealer_orders/static/src/js/dealer_order.js',
             'aa_dealer_orders/static/src/js/kit_page.js',
+            'aa_dealer_orders/static/src/js/custom_kit.js',
         ],
     },
     'post_init_hook': 'post_init_hook',

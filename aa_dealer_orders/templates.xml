@@ -36,6 +36,18 @@
         </xpath>
     </template>
 
+    <!-- THE CUSTOM KIT PAGE, on the product itself, exactly where the door box
+         goes for an ordinary kit. The parts and the kits to start from travel
+         as data rather than as markup, so the page is built from what the
+         catalogue says today. -->
+    <template id="product_page_custom_kit" inherit_id="website_sale.product" name="Custom kit builder">
+        <xpath expr="//div[hasclass('o_wsale_product_details_content_section_cta')]" position="before">
+            <div t-if="product.aa_custom_kit" id="aa_custom_kit" class="mb-4 d-none"
+                 t-att-data-template-id="product.id"
+                 t-att-data-kit="product._aa_custom_kit_json()"/>
+        </xpath>
+    </template>
+
     <template id="dealer_order_denied" name="Dealer Quick Order - not available">
         <t t-call="website.layout">
             <div class="container py-5 text-center">
