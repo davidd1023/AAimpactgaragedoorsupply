@@ -216,8 +216,11 @@ class MrpProduction(models.Model):
                 if quants:
                     try:
                         with self.env.cr.savepoint():
+                            box_locations = quants.location_id
                             quants.move_quants(location_dest_id=floor,
                                                message=_("Opened for %s", production.aa_wo_number or production.name))
+                            self.env["aa.spring.box"].sudo().search([
+                                ("location_id", "in", box_locations.ids)])._aa_close_if_empty()
                     except Exception:
                         _logger.exception("aa_spring_stock: could not move %s to the floor", quants.lot_id.name)
 

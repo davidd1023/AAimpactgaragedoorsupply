@@ -7,6 +7,10 @@
         <field name="model">aa.spring.place.summary</field>
         <field name="arch" type="xml">
             <list string="Spring Inventory" create="0" edit="0" delete="0">
+                <header>
+                    <button name="action_add_coils" type="object" string="Add Coils to a Box"
+                            class="btn-primary" display="always"/>
+                </header>
                 <field name="place" column_invisible="context.get('aa_all_places')"/>
                 <field name="box_id" optional="show"/>
                 <field name="inside_diameter"/>
@@ -18,6 +22,10 @@
                 <field name="r_in" sum="RH (in)" optional="show"/>
                 <field name="l_longest" optional="hide"/>
                 <field name="r_longest" optional="hide"/>
+                <field name="inside_diameter_num" column_invisible="1"/>
+                <button name="action_move_to_floor" type="object" string="Move to Floor"
+                        icon="fa-arrow-down" invisible="place != 'Boxes'"/>
+                <button name="action_adjust" type="object" string="Adjust" icon="fa-pencil"/>
             </list>
         </field>
     </record>
@@ -154,7 +162,11 @@
         <field name="model">aa.spring.box.add</field>
         <field name="arch" type="xml">
             <form string="Add Coils">
-                <field name="box_id" invisible="1"/>
+                <group>
+                    <field name="box_id" options="{'no_create': True, 'no_open': True}"
+                           placeholder="New box"/>
+                    <field name="new_box_number" invisible="box_id"/>
+                </group>
                 <p>One line per I.D. and wire. Each coil is 84" unless you change the length.</p>
                 <field name="line_ids">
                     <list editable="bottom">
@@ -201,10 +213,42 @@
         </field>
     </record>
 
+    <!-- Adjust the pieces of one row -->
+    <record id="view_aa_spring_adjust_form" model="ir.ui.view">
+        <field name="name">aa.spring.adjust.form</field>
+        <field name="model">aa.spring.adjust</field>
+        <field name="arch" type="xml">
+            <form string="Adjust Pieces">
+                <field name="location_id" invisible="1"/>
+                <field name="box_id" invisible="1"/>
+                <p>Type the real inches of each piece. 0 takes the piece out; "Add a line" adds a
+                    piece that is there but not in the system.</p>
+                <group>
+                    <field name="reason" placeholder="e.g. used for a repair, counted on the floor"/>
+                </group>
+                <field name="line_ids">
+                    <list editable="bottom" delete="0">
+                        <field name="quant_id" column_invisible="1"/>
+                        <field name="is_new" column_invisible="1"/>
+                        <field name="lot_id" readonly="1"/>
+                        <field name="hand" readonly="not is_new" required="is_new"/>
+                        <field name="current" sum="On Hand"/>
+                        <field name="reserved" optional="show"/>
+                        <field name="new_qty" sum="Real"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_apply" type="object" string="Apply" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
     <!-- Inventory > Springs -->
     <menuitem id="menu_aa_spring_places" name="Floor / Rack / Boxes" parent="menu_aa_springs"
               action="action_aa_spring_places" sequence="12"/>
-    <menuitem id="menu_aa_spring_boxes" name="Spring Boxes" parent="menu_aa_springs"
-              action="action_aa_spring_boxes" sequence="15"/>
+    <!-- Spring Boxes menu removed (owner, 2026-10-20): boxes are worked from
+         Floor / Rack / Boxes. The action stays for links to a box. -->
 
 </odoo>
