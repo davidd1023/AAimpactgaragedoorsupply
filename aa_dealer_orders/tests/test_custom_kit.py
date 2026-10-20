@@ -129,6 +129,75 @@ class CustomKitCase(HttpCase):
             "categ_id": shafts.id, "is_published": True,
             "aa_custom_kit_part": True})
 
+    def _shelf_of(self, name):
+        parts = {part["name"]: part for part in self._payload()["parts"]}
+
+        return parts[name]["category"]
+
+    def test_a_part_is_shelved_BY_ITS_SHOP_CATEGORY(self):
+        """THE BUG THIS FIXES, 2026-10-20: "all the items i add to the kit are
+        going into other parts, they each have categories that should be used".
+
+        In Odoo 19 the internal Product Category is neither required nor
+        defaulted - I checked the field, there is no `required=True` and no
+        default - so a catalogue built through the website can have every
+        product in no internal category at all, which put every ticked part on
+        one "Other parts" shelf. The categories the owner means are the ones
+        the shop is arranged by, so those are what shelve a part.
+        """
+        shop = self.env["product.public.category"].create({"name": "Hinges & Brackets"})
+        part = self.env["product.template"].create({
+            "name": "Shop Categorised Hinge", "type": "consu",
+            "list_price": 3.0, "is_published": True,
+            "aa_custom_kit_part": True,
+            "public_categ_ids": [(6, 0, shop.ids)]})
+
+        self.assertFalse(part.categ_id, "Odoo 19 gave it an internal category "
+                                        "after all - this test is now moot")
+        self.assertEqual(self._shelf_of("Shop Categorised Hinge"),
+                         "Hinges & Brackets")
+
+    def test_the_shop_category_wins_over_the_internal_one(self):
+        """Both set: the shop's own arrangement is the one the customer knows."""
+        shop = self.env["product.public.category"].create({"name": "Struts"})
+        self.hinge.public_categ_ids = shop
+
+        self.assertEqual(self._shelf_of("11ga #8 Hinge"), "Struts")
+
+    def test_the_internal_category_shelves_a_part_with_no_shop_category(self):
+        self.assertFalse(self.hinge.public_categ_ids)
+        self.assertEqual(self._shelf_of("11ga #8 Hinge"), "Hinges")
+
+    def test_a_part_with_no_category_anywhere_goes_on_other_parts(self):
+        """Honestly labelled rather than invented. "All" counts as none: it is
+        Odoo's root shelf, not a category anybody chose."""
+        self.env["product.template"].create({
+            "name": "Uncategorised Widget", "type": "consu", "list_price": 1.0,
+            "aa_custom_kit_part": True})
+        root = self.env["product.category"].search(
+            [("parent_id", "=", False), ("name", "=", "All")], limit=1)
+        self.env["product.template"].create({
+            "name": "Widget In All", "type": "consu", "list_price": 1.0,
+            "categ_id": root.id, "aa_custom_kit_part": True})
+
+        self.assertEqual(self._shelf_of("Uncategorised Widget"), "Other parts")
+
+        if root:
+            self.assertEqual(self._shelf_of("Widget In All"), "Other parts")
+
+    def test_two_shop_categories_shelve_a_part_once(self):
+        """Under the one the shop itself puts first, so a part is in one place
+        and the quantity on the page is the quantity in the kit."""
+        first = self.env["product.public.category"].create(
+            {"name": "Hinges", "sequence": 1})
+        second = self.env["product.public.category"].create(
+            {"name": "Zinc", "sequence": 9})
+        self.bracket.public_categ_ids = first | second
+        shelves = [part["category"] for part in self._payload()["parts"]
+                   if part["name"] == "J-10 Jamb Bracket"]
+
+        self.assertEqual(shelves, ["Hinges"])
+
     def test_each_part_says_which_category_it_is_in(self):
         """WHAT THE SPLITTING IS DONE ON (owner, 2026-10-20: "one list for
         hinges, one for shafts"). The id groups and the name only labels,

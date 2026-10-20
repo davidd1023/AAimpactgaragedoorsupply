@@ -69,10 +69,12 @@ class ProductTemplate(models.Model):
         a custom kit that quietly contained a track would be sized against a
         door nobody asked about.
         """
+        # BY NAME, because the shelving no longer follows the internal
+        # category and this is the order the parts appear in within a shelf.
         parts = self.sudo().search([
             ("aa_custom_kit_part", "=", True),
             ("sale_ok", "=", True),
-        ], order="categ_id, name")
+        ], order="name")
 
         return parts.filtered(lambda part: not any(
             word in (part.name or "").lower() for word in NEVER_IN_A_CUSTOM_KIT))
@@ -103,6 +105,39 @@ class ProductTemplate(models.Model):
 
         return colours
 
+    def _aa_custom_kit_shelf(self):
+        """(key, label) - which of the page's lists this part belongs on.
+
+        THE SHOP'S OWN CATEGORY FIRST, the internal Product Category second.
+        Which matters more than it sounds: in Odoo 19 `categ_id` is neither
+        required nor given a default, so a catalogue built through the website
+        can have every single product in no internal category at all - and
+        that is how the owner came to see every part he ticked land on one
+        "Other parts" shelf (2026-10-20: "they each have categories that
+        should be used to split them into the correct groups"). The categories
+        he means are the ones the shop is arranged by.
+
+        A part in several shop categories is shelved under the first of them,
+        which is the one the shop itself puts first (sequence, then name).
+
+        The key is prefixed because the two sources are different models and
+        their ids collide: shop category 4 is not product category 4.
+        """
+        self.ensure_one()
+        shop = self.sudo().public_categ_ids[:1]
+
+        if shop:
+            return "w%d" % shop.id, shop.name
+
+        category = self.sudo().categ_id
+
+        # A parentless "All" is Odoo's root shelf, not a category anybody
+        # chose, so it is treated as none at all rather than printed.
+        if category and (category.parent_id or category.name != "All"):
+            return "c%d" % category.id, category.name
+
+        return "none", "Other parts"
+
     def _aa_custom_kit_json(self):
         """Everything the page needs, as data: the parts and the kits to start from."""
         self.ensure_one()
@@ -114,16 +149,18 @@ class ProductTemplate(models.Model):
             if not colours:
                 continue
 
+            # THE PAGE IS SPLIT UP BY THIS (owner, 2026-10-20: "one list for
+            # hinges, one for shafts"). The key does the grouping and the name
+            # is only the heading, because two categories under different
+            # parents can share a name.
+            shelf, shelf_name = part._aa_custom_kit_shelf()
+
             parts.append({
                 "template_id": part.id,
                 "name": part.name,
                 "code": part.default_code or "",
-                # THE PAGE IS SPLIT UP BY THIS (owner, 2026-10-20: "one list
-                # for hinges, one for shafts"). The id does the grouping and
-                # the name is only the heading, because two categories under
-                # different parents can share a name.
-                "category_id": part.categ_id.id,
-                "category": part.categ_id.name or "",
+                "category_id": shelf,
+                "category": shelf_name,
                 "price": round(part.list_price, 2),
                 "colours": [{"id": variant_id, "label": label}
                             for variant_id, label in colours],
