@@ -1,6 +1,6 @@
 {
     'name': 'AA Spring Stock',
-    'version': '19.0.1.2.0',
+    'version': '19.0.1.3.0',
     'summary': 'Spring orders consume coil inches; a plain view of the spring inventory',
     'description': """
 Spring coils (COIL-<wire>-<I.D.>-<L/R>, kept in inches, one lot per piece) are
@@ -19,7 +19,11 @@ consumed by the Springs manufacturing order of each custom spring.
 * Inventory > Springs: a summary per wire and I.D. (L and R side by side, with
   reorder alerts), the leftover pieces on the Rack, and the cut history.
 * Floor / Rack / Boxes: one page, a fold-out group per place, per wire and I.D.
-* Spring Boxes: numbered boxes (Box 1, Box 2...), each its own location under
+* Floor / Rack / Boxes is where the stock is worked (owner, 2026-10-20): Move
+  to Floor on a box line, Adjust on any line (change, remove or add pieces when
+  springs were used without the system knowing), and Add Coils to a Box at the
+  top. A box closes by itself once empty. The Spring Boxes menu was removed.
+* Spring boxes: numbered boxes (Box 1, Box 2...), each its own location under
   Boxes. Add coils to a box (wire, I.D., LH / RH count - one box can hold
   several sizes), move some of them to the floor, and remove the box once it is
   empty (owner, 2026-10-19).
