@@ -392,6 +392,9 @@ class CustomKitCase(HttpCase):
                 Object.assign(built, {
                     data: { parts }, chosen: new Map(chosen), colour: "",
                     panels: [], offers: [],
+                    // The builder keeps the parts list on its own element,
+                    // where the Add to Cart request picks it up.
+                    root: { dataset: {} },
                     rebuildShelves: () => {}, draw: () => {},
                 });
 
@@ -873,6 +876,105 @@ class CustomKitCase(HttpCase):
 
         self.assertEqual(priced["sent"], 2)
         self.assertEqual(priced["count"], 1, "the unticked part was taken")
+
+    def test_the_parts_reach_the_cart_without_the_session(self):
+        """WHY THE OTHER KITS WORK AND THIS ONE DID NOT (the owner's own
+        question, 2026-10-20, and the right one).
+
+        An ordinary AA kit's extras are ticked attributes posted IN the Add to
+        Cart request, so the server reads them off what the browser just sent.
+        A custom kit's parts were posted earlier, to the pricing route, and
+        kept in the session - and on production that list was not there when
+        the cart request ran. Measured rather than guessed: a cart add booking
+        thirteen parts costs 271 queries, an empty one 89, and production's
+        was 78, so the packing never even started.
+
+        This books a kit WITHOUT ANY PRICING CALL FIRST - nothing in the
+        session, nothing stored anywhere - and the parts must still arrive.
+        """
+        hinge = self._white_hinge()
+        bracket = self.bracket.product_variant_ids[:1]
+
+        added = self._rpc("/shop/cart/add", {
+            "product_template_id": self.kit.id,
+            "product_id": self.kit.product_variant_ids[:1].id,
+            "quantity": 1,
+            "aa_custom_parts": json.dumps([
+                {"variant_id": hinge.id, "quantity": 4},
+                {"variant_id": bracket.id, "quantity": 8},
+            ]),
+        })
+        order = self.env["sale.order"].search(
+            [("order_line.product_id", "in", self.kit.product_variant_ids.ids)],
+            order="id desc", limit=1)
+        parts = order.order_line.filtered("linked_line_id")
+
+        self.assertEqual(
+            {(line.product_id, line.product_uom_qty) for line in parts},
+            {(hinge, 4.0), (bracket, 8.0)},
+            "the kit arrived empty even though its parts were in the request")
+        self.assertEqual(
+            len((added.get("notification_info") or {}).get("lines") or []), 3)
+
+    def test_a_parts_list_in_the_request_is_checked_like_any_other(self):
+        """It comes from a browser either way, so it is checked against what is
+        offered rather than against what was sent."""
+        self._rpc("/shop/cart/add", {
+            "product_template_id": self.kit.id,
+            "product_id": self.kit.product_variant_ids[:1].id,
+            "quantity": 1,
+            "aa_custom_parts": json.dumps([
+                {"variant_id": self.secret.product_variant_ids[:1].id,
+                 "quantity": 1},
+                {"variant_id": self.cable.product_variant_ids[:1].id,
+                 "quantity": 2},
+            ]),
+        })
+        order = self.env["sale.order"].search(
+            [("order_line.product_id", "in", self.kit.product_variant_ids.ids)],
+            order="id desc", limit=1)
+
+        self.assertFalse(order.order_line.filtered("linked_line_id"),
+                         "an unticked product and a cable were booked")
+
+    def test_rubbish_in_the_request_falls_back_on_what_was_stored(self):
+        """A parts list that is not JSON is not a reason to lose the kit."""
+        hinge = self._white_hinge()
+        self._build([{"variant_id": hinge.id, "quantity": 4}])
+        self._rpc("/shop/cart/add", {
+            "product_template_id": self.kit.id,
+            "product_id": self.kit.product_variant_ids[:1].id,
+            "quantity": 1,
+            "aa_custom_parts": "}{ not json",
+        })
+        order = self.env["sale.order"].search(
+            [("order_line.product_id", "in", self.kit.product_variant_ids.ids)],
+            order="id desc", limit=1)
+        parts = order.order_line.filtered("linked_line_id")
+
+        self.assertEqual(parts.product_id, hinge)
+        self.assertEqual(parts.product_uom_qty, 4.0)
+
+    def test_the_page_sends_the_parts_with_the_cart_request(self):
+        """The other half of it, in the page: the list is kept on the builder
+        and added to Odoo's own cart request, which is how the working kits
+        have always sent their ticks."""
+        from odoo.tools.misc import file_path
+
+        with open(file_path(
+                "aa_dealer_orders/static/src/js/custom_kit_cart.js")) as handle:
+            patched = handle.read()
+
+        with open(file_path(
+                "aa_dealer_orders/static/src/js/custom_kit.js")) as handle:
+            builder = handle.read()
+
+        # The patch lives in a file of its own: the builder is loaded as a
+        # plain script by the tests above, which an import statement would
+        # break.
+        self.assertIn("_updateRootProduct", patched)
+        self.assertIn("aa_custom_parts", patched)
+        self.assertIn("dataset.aaParts", builder)
 
     def test_the_popup_names_the_parts_that_went_in_with_the_kit(self):
         """THE FAULT THIS GUARDS, 2026-10-20: "when i put the kit into the

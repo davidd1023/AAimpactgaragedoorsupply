@@ -1,4 +1,5 @@
 /** @odoo-module **/
+
 // BUILD YOUR OWN KIT (owner, 2026-10-20): "customer can decide almost
 // everything and can add and remove things from their kit".
 //
@@ -587,9 +588,18 @@ class CustomKitPage {
         }
     }
 
-    async sendPrice() {
-        const parts = [...this.chosen].map(([variant_id, quantity]) =>
+    get partsList() {
+        return [...this.chosen].map(([variant_id, quantity]) =>
             ({ variant_id, quantity }));
+    }
+
+    async sendPrice() {
+        const parts = this.partsList;
+        // ON THE PAGE ITSELF, where the Add to Cart request picks it up. This
+        // is what the patch at the top of this file reads, and it is written
+        // before the call goes out rather than after it comes back: the cart
+        // must carry the kit even if this call never lands.
+        this.root.dataset.aaParts = JSON.stringify(parts);
         this.lockAddToCart(true, "Saving your kit…");
 
         try {
