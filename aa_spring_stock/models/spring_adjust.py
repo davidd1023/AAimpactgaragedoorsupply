@@ -98,9 +98,10 @@ class AaSpringPlaceSummary(models.Model):
             "target": "new",
         }
 
-    @api.model
     def action_add_coils(self):
-        """Top-of-page button: coils into a new box (or one already in stock)."""
+        """Top-of-page button: coils into a new box (or one already in stock).
+
+        Not @api.model: a list header button sends the (empty) selection as ids."""
         return {
             "type": "ir.actions.act_window",
             "name": _("Add Coils to a Box"),
