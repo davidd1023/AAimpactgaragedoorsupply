@@ -2,6 +2,7 @@ from . import controllers
 from . import models
 from . import resale
 from . import custom_kit
+from . import checkout
 from .kit_setup import refresh_prepared_costs, retire_old_kit_page_script, setup_kit_options
 
 from odoo.addons.payment import reset_payment_provider

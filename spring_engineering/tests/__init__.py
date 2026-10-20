@@ -11,3 +11,4 @@ from . import test_minimum_order
 from . import test_spanish
 from . import test_quantity_limits
 from . import test_signup_email
+from . import test_wire_stock

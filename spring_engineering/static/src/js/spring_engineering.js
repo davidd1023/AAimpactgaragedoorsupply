@@ -863,9 +863,36 @@ const WIRE_SIZES = [
     0.5, 0.5312, 0.5625, 0.625,
 ];
 
+// THE SIZES WE ACTUALLY HOLD, out of the ladder above (owner, 2026-10-20):
+// ".262 .273 .295 .312 .319 .331 .343 .375 .393 .406".
+//
+// WRITTEN IN TRADE SHORTHAND, STORED AS THE WIRE. The owner's .262 is the
+// ladder's 0.2625, his .312 is 0.3125, .343 is 0.3437, .393 is 0.3938 and .406
+// is 0.4062 - the same ten wires, said the short way. Anybody "correcting"
+// 0.2625 to 0.262 here would take a stocked size off the list and have the
+// page tell customers to pick something else instead.
+//
+// EVERY ONE OF THEM IS ON THE LADDER, which matters: a size we stock that the
+// model cannot quote would never be offered, and a test holds that.
+//
+// WHAT IT DOES NOT DO is change which wire gets chosen. The auto-pick is
+// calibrated against thousands of reference readings and it answers the
+// engineering question - what this door needs. Stock is a different question,
+// asked afterwards and out loud.
+const STOCKED_WIRE_SIZES = [
+    0.2625, 0.273, 0.295, 0.3125, 0.3195, 0.331, 0.3437, 0.375, 0.3938, 0.4062,
+];
+
 // Back to the exact string the dropdown uses, so the select matches.
 function formatWire(wire) {
     return String(wire) + '"';
+}
+
+// A wire size, however it is written - 0.2625, "0.2625" or '0.2625"'.
+function isWireStocked(wire) {
+    const size = parseFloat(wire);
+
+    return STOCKED_WIRE_SIZES.some((stocked) => Math.abs(stocked - size) < 1e-9);
 }
 
 // What the info panel shows for each drum, in display order.
@@ -2405,6 +2432,43 @@ get turns() {
 // assembly is switched back.
 get wireSizeVisible() {
     return this.resultsVisible && this.state.assembly !== "Duplex";
+}
+
+// --- wire we do not stock (owner, 2026-10-20) -----------------------------
+//
+// "for any wire sizes we dont stock, we need to implement a warning that
+// tells the customer that we dont currently stock that wire size and to try
+// another one that we do stock and then maybe a list or image showing which
+// wire sizes we do stock."
+//
+// SAID, NOT ENFORCED. The wire this door needs is an engineering answer and
+// it is not changed here; what is added is the shop's side of it, which the
+// customer could not otherwise know.
+
+get unstockedWires() {
+    // Duplex carries a wire per spring and has no dropdown; everything else
+    // has the one the customer can see and change.
+    const inPlay = this.state.assembly === "Duplex"
+        ? [this.duplexOuterWire, this.duplexInnerWire]
+        : [this.state.wireSize];
+
+    return [...new Set(
+        inPlay.filter((wire) => wire && !isWireStocked(wire)).map(String))];
+}
+
+get contactUsUrl() {
+    // Where Contact Us goes when the wire is one we do not stock. The site's
+    // own contact page, which is what the shop's own "Contact us" button uses
+    // (website.contact_us_button_url, whose default this is); the component is
+    // mounted with no props in either place it runs, so it is named here
+    // rather than read off a record that one of those two has no access to.
+    return "/contactus";
+}
+
+get stockedWireLabels() {
+    // In the dropdown's own spelling, so a customer can match them up one for
+    // one with what they are being asked to choose from.
+    return STOCKED_WIRE_SIZES.map(formatWire);
 }
 
 get multiplierExact() {

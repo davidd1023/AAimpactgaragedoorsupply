@@ -1335,6 +1335,52 @@
 
             </t>
 
+            <!-- WIRE WE DO NOT STOCK (owner, 2026-10-20): "for any wire sizes
+                 we dont stock, we need to implement a warning that tells the
+                 customer that we dont currently stock that wire size and to
+                 try another one that we do stock and then maybe a list or
+                 image showing which wire sizes we do stock."
+
+                 OUTSIDE THE WIRE SIZE GATE ABOVE, because Duplex has no
+                 dropdown and still has two wires to check - unstockedWires
+                 reads whichever the assembly actually uses.
+
+                 ABOVE THE RESULTS rather than below them: the figures
+                 underneath are worked out for a wire we would have to get in,
+                 and that is worth knowing before reading them. -->
+
+            <t t-if="resultsVisible and unstockedWires.length">
+
+            <div class="se-wire-stock-warning">
+                <div class="se-wire-stock-head">
+                    <t t-if="unstockedWires.length === 1">
+                        We don't currently stock <t t-esc="unstockedWires[0]"/> wire.
+                    </t>
+                    <t t-else="">
+                        We don't currently stock
+                        <t t-esc="unstockedWires.join(' or ')"/> wire.
+                    </t>
+                </div>
+                <div class="se-wire-stock-body">
+                    <t t-if="wireSizeVisible">
+                        Choose one of the sizes we do stock from the Wire Size
+                        box above - the spring length and the price are worked
+                        out again for whichever you pick.
+                    </t>
+                    <t t-else="">
+                        Please call us on 786-238-7640 and we will tell you what
+                        we can do for this door.
+                    </t>
+                </div>
+                <div class="se-wire-stock-sizes">
+                    <span t-foreach="stockedWireLabels" t-as="size"
+                          t-key="size" class="se-wire-stock-size"
+                          t-esc="size"/>
+                </div>
+            </div>
+
+            </t>
+
             <!-- Results: same gate as the wire size above. -->
 
             <t t-if="resultsVisible">
@@ -1584,7 +1630,23 @@
                 <button class="se-clear" t-on-click="clearAll">
                     Clear
                 </button>
-                <button class="se-add-cart" t-on-click="addToCart"
+                <!-- A WIRE WE DO NOT STOCK IS NOT A SALE (owner, 2026-10-20):
+                     "when giving the warning about wire size change the add to
+                     cart button to the contact us button."
+
+                     The same answer the shop already gives for a product it
+                     will not sell off the page, and a better one than a
+                     refusal at the end: the customer is not walked through a
+                     cart to be turned away at it. The warning above says which
+                     sizes we do hold, and this says what to do if none of them
+                     suits - so the door is still engineered, still on screen,
+                     and the conversation starts with the figures in hand. -->
+                <a t-if="unstockedWires.length"
+                   class="se-add-cart se-contact-us"
+                   t-att-href="contactUsUrl">
+                    Contact Us
+                </a>
+                <button t-else="" class="se-add-cart" t-on-click="addToCart"
                         t-att-disabled="state.cartBusy or undefined">
                     <t t-if="state.cartBusy">Adding...</t>
                     <t t-else="">Add to Cart</t>
