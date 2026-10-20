@@ -1,0 +1,267 @@
+"""THE CUSTOM KIT: a kit the customer puts together themselves.
+
+The owner, 2026-10-20: "customer can decide almost everything and can add and
+remove things from their kit, no spring, tracks, or cables will be in the kit
+... the trims will be included ... it should basically work like the other
+kits we have just with more options so that we can serve customers that want
+doors that we dont have kits for."
+
+Four decisions he made when asked: the page starts from an existing kit and is
+then changed; colour is PER PART; only products ticked "Offer in Custom Kit"
+may be chosen; and the parts add up, one order line each.
+"""
+
+import json
+
+from odoo.tests.common import HttpCase, tagged
+
+
+@tagged("post_install", "-at_install")
+class CustomKitCase(HttpCase):
+
+    def setUp(self):
+        super().setUp()
+        self.kit = self.env.ref("aa_dealer_orders.product_custom_kit")
+        self.category = self.env["product.category"].create({"name": "Hinges"})
+
+        # A part that comes in two finishes, as a real variant pair.
+        finish = self.env["product.attribute"].create({
+            "name": "Finish Color", "create_variant": "always",
+            "value_ids": [(0, 0, {"name": "White"}), (0, 0, {"name": "Black"})],
+        })
+        self.hinge = self.env["product.template"].create({
+            "name": "11ga #8 Hinge", "default_code": "CH1411-8",
+            "type": "consu", "is_storable": True, "list_price": 1.85,
+            "categ_id": self.category.id, "is_published": True,
+            "aa_custom_kit_part": True,
+            "attribute_line_ids": [(0, 0, {
+                "attribute_id": finish.id,
+                "value_ids": [(6, 0, finish.value_ids.ids)]})],
+        })
+        # A part with one finish only.
+        self.bracket = self.env["product.template"].create({
+            "name": "J-10 Jamb Bracket", "default_code": "ATL-610J10JBBR",
+            "type": "consu", "is_storable": True, "list_price": 2.10,
+            "categ_id": self.category.id, "is_published": True,
+            "aa_custom_kit_part": True,
+        })
+        # Ticked but not offerable: sized from a door, never in a custom kit.
+        self.cable = self.env["product.template"].create({
+            "name": '1/8" 7x19 Lift Cable', "type": "consu",
+            "list_price": 9.0, "aa_custom_kit_part": True})
+        # Not ticked at all.
+        self.secret = self.env["product.template"].create({
+            "name": "Shop Only Widget", "type": "consu", "list_price": 99.0})
+
+    def _white_hinge(self):
+        return self.hinge.product_variant_ids.filtered(
+            lambda v: "White" in v.product_template_attribute_value_ids.mapped("name"))[:1]
+
+    def _payload(self):
+        return json.loads(self.kit._aa_custom_kit_json())
+
+    def _rpc(self, route, params):
+        response = self.url_open(
+            route,
+            data=json.dumps({"jsonrpc": "2.0", "method": "call", "params": params}),
+            headers={"Content-Type": "application/json"})
+        self.assertEqual(response.status_code, 200, route)
+
+        return response.json().get("result") or {}
+
+    # --- the product itself ---------------------------------------------------
+
+    def test_the_custom_kit_exists_and_is_a_kit(self):
+        """"it should basically work like the other kits we have". The word
+        kit in the name is what the rest of the shop keys off."""
+        from odoo.addons.aa_shop_floor.models.sale_order import is_hardware_kit
+
+        self.assertTrue(self.kit.aa_custom_kit)
+        self.assertTrue(self.kit.is_published)
+        self.assertTrue(is_hardware_kit(self.kit.product_variant_ids[:1]),
+                        "the Hardware station would not pack it")
+
+    def test_it_carries_no_price_of_its_own(self):
+        """The parts carry the money, one line each (owner's choice). A price
+        here would be charged on top of them."""
+        self.assertEqual(self.kit.list_price, 0.0)
+
+    def test_the_trims_option_is_on_it(self):
+        """"the trims will be included" - the same Plastic Trims option every
+        other kit carries, attached by name."""
+        attributes = self.kit.attribute_line_ids.attribute_id.mapped("name")
+        self.assertIn("Plastic Trims", attributes)
+
+    # --- what may be put in it -------------------------------------------------
+
+    def test_only_ticked_parts_are_offered(self):
+        names = [part["name"] for part in self._payload()["parts"]]
+
+        self.assertIn("11ga #8 Hinge", names)
+        self.assertIn("J-10 Jamb Bracket", names)
+        self.assertNotIn("Shop Only Widget", names, "it was never ticked")
+
+    def test_springs_tracks_and_cables_are_never_offered(self):
+        """Sized from a door and sold against one. A custom kit exists because
+        the door is not one we have a kit for, so the page does not offer
+        them - whatever anybody ticks."""
+        names = [part["name"] for part in self._payload()["parts"]]
+        self.assertNotIn('1/8" 7x19 Lift Cable', names)
+
+    def test_a_part_is_offered_in_the_colours_it_actually_has(self):
+        """PER PART (owner's choice). A part with a finish attribute offers
+        its colours; one without is offered as the product it is."""
+        parts = {part["name"]: part for part in self._payload()["parts"]}
+
+        hinge_colours = sorted(c["label"] for c in parts["11ga #8 Hinge"]["colours"])
+        self.assertEqual(hinge_colours, ["Black", "White"])
+        self.assertEqual(len(parts["J-10 Jamb Bracket"]["colours"]), 1)
+
+    # --- starting from a kit that exists ---------------------------------------
+
+    def test_an_existing_kit_offers_its_real_contents_to_start_from(self):
+        """READ OFF THE KIT'S OWN PHANTOM BoM, which is what the picker takes
+        out of stock for it today."""
+        base = self.env["product.template"].create({
+            "name": "AA 1200 Hardware Kit", "type": "consu",
+            "is_storable": True, "aa_dealer_quick_order": True})
+        variant = base.product_variant_ids[:1]
+        self.env["mrp.bom"].create({
+            "product_tmpl_id": base.id, "product_id": variant.id,
+            "type": "phantom", "product_qty": 1.0,
+            "bom_line_ids": [
+                (0, 0, {"product_id": self._white_hinge().id, "product_qty": 4}),
+                (0, 0, {"product_id": self.cable.product_variant_ids[:1].id,
+                        "product_qty": 2}),
+            ],
+        })
+
+        bases = {b["name"]: b for b in self._payload()["bases"]}
+        self.assertIn("AA 1200 Hardware Kit", bases)
+        parts = bases["AA 1200 Hardware Kit"]["parts"]
+
+        self.assertEqual(parts.get(str(self._white_hinge().id)), 4.0)
+        self.assertNotIn(str(self.cable.product_variant_ids[:1].id), parts,
+                         "a cable came along from the base kit")
+
+    def test_the_custom_kit_is_not_offered_as_its_own_base(self):
+        self.assertNotIn(self.kit.name,
+                         [b["name"] for b in self._payload()["bases"]])
+
+    # --- building one, and putting it in a cart --------------------------------
+
+    def _build(self, parts):
+        return self._rpc("/aa/custom-kit/price",
+                         {"template_id": self.kit.id, "parts": parts, "qty": 1})
+
+    def test_the_page_prices_what_is_in_the_kit(self):
+        priced = self._build([
+            {"variant_id": self._white_hinge().id, "quantity": 4},
+            {"variant_id": self.bracket.product_variant_ids[:1].id, "quantity": 8},
+        ])
+
+        self.assertEqual(priced["count"], 2)
+        # ADDED UP FROM ITS OWN ROWS rather than from the list prices: this
+        # shop has a pricelist, and my first version of this test asserted
+        # 24.20 against a 10% discounted 21.78. What the page owes is that its
+        # total is the sum of the lines it is showing.
+        self.assertAlmostEqual(
+            priced["total"],
+            sum(row["price"] for row in priced["parts"]), places=2)
+        self.assertGreater(priced["total"], 0.0)
+
+    def test_a_part_nobody_offered_cannot_be_priced_or_bought(self):
+        """The list comes from a browser, so it is checked against what is
+        offered rather than against what was sent."""
+        priced = self._build([
+            {"variant_id": self.secret.product_variant_ids[:1].id, "quantity": 1},
+        ])
+
+        self.assertEqual(priced["count"], 0)
+        self.assertEqual(priced["total"], 0.0)
+
+    def test_the_parts_reach_the_cart_as_their_own_lines(self):
+        """THE WHOLE SHAPE OF IT: the kit line is a heading and each part is a
+        line of its own, hung off it - exactly how Springs, Tracks and Cables
+        already reach a cart from the ordinary kit page."""
+        hinge = self._white_hinge()
+        bracket = self.bracket.product_variant_ids[:1]
+        self._build([
+            {"variant_id": hinge.id, "quantity": 4},
+            {"variant_id": bracket.id, "quantity": 8},
+        ])
+        self._rpc("/shop/cart/add", {
+            "product_template_id": self.kit.id,
+            "product_id": self.kit.product_variant_ids[:1].id,
+            "quantity": 1,
+        })
+
+        order = self.env["sale.order"].search(
+            [("order_line.product_id", "in", self.kit.product_variant_ids.ids)],
+            order="id desc", limit=1)
+        self.assertTrue(order, "the kit never reached a cart")
+        kit_line = order.order_line.filtered(
+            lambda line: line.product_id.product_tmpl_id == self.kit)[:1]
+        parts = order.order_line.filtered(
+            lambda line: line.linked_line_id == kit_line)
+
+        self.assertEqual(len(parts), 2, "the parts did not come with it")
+        self.assertEqual(
+            {(line.product_id, line.product_uom_qty) for line in parts},
+            {(hinge, 4.0), (bracket, 8.0)})
+        # WHAT THE PAGE SAID IS WHAT THE CART CHARGES, which is the figure
+        # worth holding: both go through the same pricelist.
+        priced = self._build([
+            {"variant_id": hinge.id, "quantity": 4},
+            {"variant_id": bracket.id, "quantity": 8},
+        ])
+        self.assertAlmostEqual(sum(parts.mapped("price_subtotal")),
+                               priced["total"], places=2)
+
+    def test_two_kits_bring_twice_the_parts(self):
+        hinge = self._white_hinge()
+        self._build([{"variant_id": hinge.id, "quantity": 4}])
+        self._rpc("/shop/cart/add", {
+            "product_template_id": self.kit.id,
+            "product_id": self.kit.product_variant_ids[:1].id,
+            "quantity": 2,
+        })
+
+        order = self.env["sale.order"].search(
+            [("order_line.product_id", "in", self.kit.product_variant_ids.ids)],
+            order="id desc", limit=1)
+        part = order.order_line.filtered(lambda line: line.product_id == hinge)[:1]
+
+        self.assertEqual(part.product_uom_qty, 8.0)
+
+    def test_an_empty_kit_adds_nothing_but_itself(self):
+        self._build([])
+        self._rpc("/shop/cart/add", {
+            "product_template_id": self.kit.id,
+            "product_id": self.kit.product_variant_ids[:1].id,
+            "quantity": 1,
+        })
+
+        order = self.env["sale.order"].search(
+            [("order_line.product_id", "in", self.kit.product_variant_ids.ids)],
+            order="id desc", limit=1)
+        kit_line = order.order_line.filtered(
+            lambda line: line.product_id.product_tmpl_id == self.kit)[:1]
+
+        self.assertTrue(kit_line)
+        self.assertFalse(order.order_line.filtered(
+            lambda line: line.linked_line_id == kit_line))
+
+    def test_a_silly_quantity_is_refused(self):
+        hinge = self._white_hinge()
+        priced = self._build([{"variant_id": hinge.id, "quantity": 100000}])
+
+        self.assertEqual(priced["count"], 0, "an unbounded quantity got through")
+
+    # --- and the page it is all shown on ---------------------------------------
+
+    def test_the_product_page_carries_the_builder(self):
+        page = self.url_open(self.kit.website_url).text
+
+        self.assertIn('id="aa_custom_kit"', page)
+        self.assertIn("11ga #8 Hinge", page, "the parts did not reach the page")

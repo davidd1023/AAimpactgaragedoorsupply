@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE PRODUCT ITSELF. "a new product called Custom Kit" (owner,
+       2026-10-20), named exactly that - and the word "kit" in the name is what
+       makes the rest of the shop treat it like one: the trim attribute attaches
+       itself, the Hardware station raises a Pack hardware kit job for it, and
+       the sticker and the customer emails need no special case.
+
+       PRICED AT NOTHING ON PURPOSE. The parts carry the money, each on its own
+       line (owner's choice, 2026-10-20), so the kit line is a heading. A price
+       here would be charged on top of the parts.
+
+       noupdate, because from the moment it exists it is the owner's product:
+       the description, the image and the price are his to change and a module
+       update must not put them back. -->
+  <data noupdate="1">
+    <record id="product_custom_kit" model="product.template">
+      <field name="name">Custom Kit</field>
+      <field name="default_code">AA-CUSTOM</field>
+      <field name="type">consu</field>
+      <field name="is_storable" eval="True"/>
+      <field name="sale_ok" eval="True"/>
+      <field name="purchase_ok" eval="False"/>
+      <field name="list_price">0.0</field>
+      <field name="is_published" eval="True"/>
+      <field name="aa_custom_kit" eval="True"/>
+      <field name="description_sale">Build the kit yourself: choose the hardware, the finish of each piece and how many of each. Trims are included. Springs, tracks and cables are sized from your door and are not part of a custom kit - order those separately.</field>
+    </record>
+  </data>
+
+  <!-- AND THE TRIM OPTION, HERE, because of load order. spring_engineering
+       attaches it to every product whose name says "kit", and it is a
+       DEPENDENCY of this module - so its data file runs before this one, when
+       the Custom Kit does not exist yet, and the option would not arrive until
+       the next time spring_engineering itself was updated. Found by a test
+       that looked for it on the product. Calling it again here is free: it
+       only ever adds, and skips a product that already has it. -->
+  <function model="product.template" name="_attach_trim_colour"/>
+
+</odoo>
