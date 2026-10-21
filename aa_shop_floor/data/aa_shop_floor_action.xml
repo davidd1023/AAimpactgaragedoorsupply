@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The Shop Floor opens WITHOUT the "MO Ready" filter (owner, 2026-10-21).
+         The manager decides from the Overview what each station works on; a
+         track order sent to Track Prep must show there even when its RAW track
+         is not in stock yet (W/O #207 sat hidden at Track Prep for that). The
+         work order filters (ready / in progress) are kept as Odoo has them. -->
+    <record id="mrp_workorder.action_mrp_display" model="ir.actions.client">
+        <field name="context">{
+            'search_default_ready': True,
+            'search_default_progress': True,
+            'search_view_ref': 'mrp_workorder.view_mrp_production_filter_shop_floor'
+        }</field>
+    </record>
+</odoo>
