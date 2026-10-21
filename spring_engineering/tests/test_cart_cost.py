@@ -476,10 +476,17 @@ class TestCartCostOnThePage(HttpCase):
         # rather than being a loose number under the Total.
         self.assertIn("Cost", row, row)
 
-    def test_the_caret_is_invisible_until_the_mouse_is_near_it(self):
-        """The stylesheet does the hiding, so the markup has to carry the
-        hook it keys on. Lose the class and the caret is a visible mark on
-        every customer's screen with nothing failing anywhere."""
+    def test_the_caret_never_fades_away(self):
+        """IT USED TO FADE IN ON HOVER (owner, 2026-10-21: stop that). The
+        employee had to reach for a control that was not visibly there, and a
+        touch screen has no hover to reach with, so the caret is painted at
+        rest instead. Nothing is given away by it: the caret is bare, the
+        figure is still behind the fold, and the row only exists on a page
+        served to an internal user.
+
+        The stylesheet is what decides this, so it is what is checked - the
+        class has to stay on the button for it to reach, and no rule may put
+        the caret back behind a hover or a transparency."""
         css = open(
             "/home/odoo/src/user/spring_engineering/static/src/css/"
             "cart_included.css", encoding="utf-8").read()
@@ -489,8 +496,11 @@ class TestCartCostOnThePage(HttpCase):
 
         self.assertIn("o_aa_cost_toggle", row, row)
         self.assertIn(".o_aa_cart_cost .o_aa_cost_toggle", css)
-        self.assertIn("opacity: 0;", css)
-        self.assertIn(".o_cart_total:hover", css)
+
+        # Not transparent, and not conditional on the mouse being anywhere.
+        self.assertNotIn("opacity: 0;", css)
+        self.assertNotIn(":hover", css)
+        self.assertNotIn("hover: none", css)
 
     def test_the_employee_sees_it_on_the_checkout_summary_too(self):
         """One template feeds the cart page and the summary card on every
