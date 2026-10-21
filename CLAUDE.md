@@ -72,6 +72,31 @@ charge, but not secret - it is a commodity price. Default $1.46/lb, in
   so a spring costs every customer the same.
 - Cone and filler COSTS live in `spring_engineering/pricing.py`, server side.
 
+### Spring steel COSTS $0.81 a pound (owner, 2026-10-21)
+
+A SECOND FIGURE, not a division of the sell rate. "Spring sell price per pound"
+($1.46) has the winding labour and the margin inside it, so no arithmetic on it
+can recover a cost. The cost is its own setting next to it in Website >
+Configuration > Settings - "Spring steel cost per pound", key
+`spring_engineering.steel_cost_per_lb`, default in `pricing.py` as
+`STEEL_COST_PER_LB` - because steel moves and the owner changes it himself.
+
+**Nothing a customer sees is priced from it.** Its only use is the staff-only
+cost line on the cart (`sale.order._aa_cart_cost`), which costs a custom spring
+the way the quote prices it: the same weights off the same stored
+`spring_spec_json`, cones at the `pricing.py` cost, and this rate in place of
+the sell rate. Left at nothing, a spring is reported as "no cost set" rather
+than counted at the price of its cones alone - which would look like a costed
+line and be out by a factor of ten.
+
+### The cart's cost line is for employees only
+
+`_aa_cart_cost()` returns None for anyone who is not an internal user, so a
+customer renders the row as nothing at all. The `t-if` in
+`views/cart_cost.xml` is the second lock, not the only one: that template is
+reachable from the website editor and the cost of goods is not a number to
+guard with an xpath. Keep the decision in Python.
+
 ### Hardware station
 
 Each hardware kit line gets a "Pack hardware kit" MO (kit, color, panels, rollers,
@@ -83,3 +108,18 @@ the delivery still explodes the kits' and cables' own phantom BoMs.
 ## Git
 
 Never `git push`. Use `odoosh-push`.
+
+### Commit and push without being asked (owner, 2026-10-21)
+
+*"whenever you make a change you can commit and push automatically."* So finish
+a piece of work by committing it and running `odoosh-push` - no asking first,
+no leaving it uncommitted for the owner to remember. This container is
+ephemeral: uncommitted work is lost on a rebuild, which is the whole reason for
+the instruction.
+
+TEST IT FIRST. "A change" means one that has been updated into the database and
+had its tests run, not one that merely saves. A broken commit is worse than an
+uncommitted one, because it reaches Prod the next time main is merged.
+
+The push lands on this build's branch (`main`). Prod is still the owner's own
+merge - never commit to or push the `Prod` branch directly.

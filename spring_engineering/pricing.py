@@ -31,6 +31,21 @@ of it. A density is physics and tells a competitor nothing.
 # starts with and what the setting is restored to if the parameter is deleted.
 STEEL_PRICE_PER_LB = 1.46
 
+# WHAT A POUND OF THAT STEEL COSTS US, which is a different figure from the one
+# above and not a division of it.
+#
+# $0.81 (owner, 2026-10-21). STEEL_PRICE_PER_LB is a SELL price with the winding
+# labour and the margin already inside it, so nothing in the sale price can be
+# turned back into a cost - the two are independent numbers and both have to be
+# written down.
+#
+# It is only ever used to tell STAFF what a cart costs; no customer-facing price
+# is computed from it. Like the sell rate it is the DEFAULT, not the live figure:
+# the live one is an ir.config_parameter editable in Website > Configuration >
+# Settings, and this is what a fresh database starts with and what the setting is
+# restored to if the parameter is deleted.
+STEEL_COST_PER_LB = 0.81
+
 # Plastic filler, per FOOT, for a 5 1/4" spring.
 #
 # One filler per spring, cut to that spring's own length - a 4 ft spring takes

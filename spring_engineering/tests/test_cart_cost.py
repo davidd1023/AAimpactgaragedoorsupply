@@ -1,7 +1,12 @@
 import json
+import math
 import re
 
 from odoo.tests.common import HttpCase, TransactionCase, tagged
+
+from odoo.addons.spring_engineering.pricing import (
+    CONE_PRICES, FILLER_PRICE_PER_FOOT, STEEL_COST_PER_LB,
+)
 
 
 @tagged("post_install", "-at_install")
@@ -164,6 +169,218 @@ class TestCartCost(TransactionCase):
         self.assertTrue(employee._is_internal())
         self.assertEqual(
             self._cart(4).with_user(employee.id)._aa_cart_cost()["cost"], 44.0)
+
+
+@tagged("post_install", "-at_install")
+class TestCustomSpringCost(TransactionCase):
+    """A custom spring is costed the way it was priced.
+
+    The quote charges cones plus steel: the cones at what they cost us, the
+    steel at a price per pound that SELLS - labour and margin inside it. So
+    the cost of the same assembly is the same sum with the cost per pound in
+    its place, off the same stored specification and the same closed form for
+    the weight. Nothing is worked backwards from the price, because nothing in
+    a selling rate can be.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.website = self.env["website"].search([], limit=1)
+        self.partner = self.env["res.partner"].create({"name": "Spring Coster"})
+        self.spring = self.env.ref(
+            "spring_engineering.product_custom_spring").product_variant_id
+        self.filler = self.env.ref(
+            "spring_engineering.product_custom_filler").product_variant_id
+        self.rate(STEEL_COST_PER_LB)
+
+    def rate(self, value):
+        self.env["ir.config_parameter"].sudo().set_param(
+            "spring_engineering.steel_cost_per_lb", str(value))
+
+    def _density(self):
+        from odoo.addons.spring_engineering.controllers.main import (
+            _calculator_constants,
+        )
+
+        return _calculator_constants()["density"]
+
+    def _weight(self, wire, diameter, length):
+        """The published closed form, spelled out here rather than imported.
+
+        density * (pi^2 / 4) * wire * (ID + wire) * length, to the cent. If
+        the two ever disagree this test is the one that should fail.
+        """
+        volume = (math.pi ** 2) / 4 * wire * (diameter + wire) * length
+
+        return round(self._density() * volume, 2)
+
+    def _assembly(self, items, springs=2, qty=1, spec=True):
+        """A spring line as add_assembly_lines books one."""
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id, "website_id": self.website.id})
+        order.order_line = [(0, 0, {
+            "product_id": self.spring.id, "product_uom_qty": qty,
+            "price_unit": 410.0, "discount": 0.0})]
+
+        if spec:
+            order.order_line[0].spring_spec_json = json.dumps({
+                "assembly": "Single", "springs": springs,
+                "lh": (springs + 1) // 2, "rh": springs - (springs + 1) // 2,
+                "items": [
+                    {"role": "Spring", "wire": wire, "id": diameter,
+                     "length": length}
+                    for wire, diameter, length in items
+                ],
+                "door": {"weight": 355, "height": "7' 0\"", "cycles": 10000},
+            })
+
+        return order
+
+    # --- the sum --------------------------------------------------------------
+
+    def test_a_single_spring_costs_its_cones_plus_its_steel(self):
+        order = self._assembly([(0.2625, 3.75, 30.0)], springs=2)
+        cones = round(2 * CONE_PRICES[3.75], 2)
+        steel = round(2 * self._weight(0.2625, 3.75, 30.0) * STEEL_COST_PER_LB, 2)
+
+        self.assertEqual(order._aa_cart_cost(),
+                         {"cost": round(cones + steel, 2), "unpriced": 0})
+
+    def test_the_cost_rate_is_used_and_not_the_selling_rate(self):
+        """THE WHOLE POINT. The per-pound setting the quotes use is a sale
+        price with the labour and the margin in it; costing a spring with it
+        would print the sale price back as a cost."""
+        sell = 1.46
+        self.env["ir.config_parameter"].sudo().set_param(
+            "spring_engineering.steel_per_lb", str(sell))
+        self.rate(0.81)
+        order = self._assembly([(0.2625, 3.75, 30.0)], springs=2)
+        weight = 2 * self._weight(0.2625, 3.75, 30.0)
+        cones = round(2 * CONE_PRICES[3.75], 2)
+
+        self.assertEqual(order._aa_cart_cost()["cost"],
+                         round(cones + round(weight * 0.81, 2), 2))
+        self.assertNotEqual(order._aa_cart_cost()["cost"],
+                            round(cones + round(weight * sell, 2), 2))
+
+    def test_a_duplex_pair_counts_both_springs_and_both_cones(self):
+        """A Duplex is two springs nested on one shaft position, so it carries
+        a set of cones for the inner diameter and a set for the outer."""
+        order = self._assembly([(0.2625, 3.75, 30.0), (0.1875, 6.0, 30.0)])
+        cones = round(2 * (CONE_PRICES[3.75] + CONE_PRICES[6.0]), 2)
+        weight = (self._weight(0.2625, 3.75, 30.0)
+                  + self._weight(0.1875, 6.0, 30.0))
+        steel = round(2 * weight * STEEL_COST_PER_LB, 2)
+
+        self.assertEqual(order._aa_cart_cost()["cost"], round(cones + steel, 2))
+
+    def test_two_assemblies_cost_twice_one(self):
+        one = self._assembly([(0.2625, 3.75, 30.0)], qty=1)._aa_cart_cost()
+        two = self._assembly([(0.2625, 3.75, 30.0)], qty=2)._aa_cart_cost()
+
+        self.assertEqual(two["cost"], round(one["cost"] * 2, 2))
+
+    def test_a_longer_spring_costs_more_steel(self):
+        short = self._assembly([(0.2625, 3.75, 24.0)])._aa_cart_cost()["cost"]
+        long = self._assembly([(0.2625, 3.75, 48.0)])._aa_cart_cost()["cost"]
+
+        self.assertGreater(long, short)
+
+    # --- the plastic filler ---------------------------------------------------
+
+    def test_the_filler_costs_its_rate_a_foot(self):
+        """One per spring, cut to that spring's own length, and the line's
+        quantity IS feet. It is charged at cost already, so this is the same
+        arithmetic the quote does."""
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id, "website_id": self.website.id})
+        order.order_line = [(0, 0, {
+            "product_id": self.filler.id, "product_uom_qty": 7.0,
+            "price_unit": FILLER_PRICE_PER_FOOT, "discount": 0.0})]
+
+        self.assertEqual(
+            order._aa_cart_cost(),
+            {"cost": round(7.0 * FILLER_PRICE_PER_FOOT, 2), "unpriced": 0})
+
+    def test_the_filler_is_still_costed_when_the_steel_cost_is_missing(self):
+        """It has nothing to do with the steel rate: it is a bought-in part at
+        a known price per foot."""
+        self.rate(0)
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id, "website_id": self.website.id})
+        order.order_line = [(0, 0, {
+            "product_id": self.filler.id, "product_uom_qty": 6.0,
+            "price_unit": FILLER_PRICE_PER_FOOT, "discount": 0.0})]
+
+        self.assertEqual(order._aa_cart_cost()["cost"],
+                         round(6.0 * FILLER_PRICE_PER_FOOT, 2))
+
+    # --- when it cannot be said ----------------------------------------------
+
+    def test_no_steel_cost_set_means_the_spring_is_reported_uncosted(self):
+        """NOT COSTED AT THE PRICE OF ITS CONES. That would look like a costed
+        line and be out by a factor of ten."""
+        self.rate(0)
+        order = self._assembly([(0.2625, 3.75, 30.0)])
+
+        self.assertEqual(order._aa_cart_cost(), {"cost": 0.0, "unpriced": 1})
+
+    def test_a_steel_cost_that_is_not_a_number_is_treated_as_unset(self):
+        self.rate("about a dollar")
+        order = self._assembly([(0.2625, 3.75, 30.0)])
+
+        self.assertEqual(order._aa_cart_cost(), {"cost": 0.0, "unpriced": 1})
+
+    def test_a_deleted_setting_falls_back_to_the_shipped_figure(self):
+        """Nothing a customer sees is priced from this rate, so a missing row
+        is answered with the figure the module ships with rather than with a
+        page that cannot add up."""
+        self.env["ir.config_parameter"].sudo().search(
+            [("key", "=", "spring_engineering.steel_cost_per_lb")]).unlink()
+        order = self._assembly([(0.2625, 3.75, 30.0)])
+        cones = round(2 * CONE_PRICES[3.75], 2)
+        steel = round(2 * self._weight(0.2625, 3.75, 30.0) * STEEL_COST_PER_LB, 2)
+
+        self.assertEqual(order._aa_cart_cost()["cost"], round(cones + steel, 2))
+
+    def test_a_spring_with_no_specification_is_reported_uncosted(self):
+        """An assembly booked before the specification was stored has nothing
+        to work from, and saying so is the honest answer."""
+        order = self._assembly([(0.2625, 3.75, 30.0)], spec=False)
+
+        self.assertEqual(order._aa_cart_cost(), {"cost": 0.0, "unpriced": 1})
+
+    def test_an_inside_diameter_we_have_no_cone_price_for_is_uncosted(self):
+        """One the calculator would have refused to quote in the first place."""
+        order = self._assembly([(0.2625, 4.5, 30.0)])
+
+        self.assertNotIn(4.5, CONE_PRICES, "the fixture wants an unknown ID")
+        self.assertEqual(order._aa_cart_cost(), {"cost": 0.0, "unpriced": 1})
+
+    # --- the setting ----------------------------------------------------------
+
+    def test_the_rate_comes_from_the_setting_and_takes_effect_at_once(self):
+        """Read fresh on every cart, like the sell rate, so a change in
+        Settings does not wait for a restart."""
+        order = self._assembly([(0.2625, 3.75, 30.0)])
+        self.rate(0.81)
+        cheap = order._aa_cart_cost()["cost"]
+        self.rate(1.62)
+        dear = order._aa_cart_cost()["cost"]
+        cones = round(2 * CONE_PRICES[3.75], 2)
+
+        self.assertEqual(round(dear - cones, 2), round((cheap - cones) * 2, 2))
+
+    def test_the_settings_page_writes_the_rate(self):
+        settings = self.env["res.config.settings"].create(
+            {"spring_steel_cost_per_lb": 0.93})
+        settings.execute()
+
+        self.assertEqual(
+            self.env["ir.config_parameter"].sudo().get_param(
+                "spring_engineering.steel_cost_per_lb"), "0.93")
+        self.assertEqual(
+            self.env["sale.order"]._aa_steel_cost_per_lb(), 0.93)
 
 
 @tagged("post_install", "-at_install")
