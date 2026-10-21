@@ -1,0 +1,436 @@
+"""FOLDING COLOURS, SIZES AND HANDS INTO ONE PRODUCT, WITHOUT LOSING ANYTHING.
+
+The merge in models/product_variant_merge.py rewrites the catalogue: it turns
+81 products into 15 and moves stock, part numbers, costs, prices, kit BoM
+lines, reordering rules, draft paperwork and a setting onto new variants. The
+risk is not that it fails loudly - it is that it half-works and nobody sees:
+a count landing on the wrong colour, or a kit quietly picking the left-hand
+bracket because something matched by position.
+
+So these tests are about what must SURVIVE the merge, product by product, and
+about the merge refusing a family it cannot do properly.
+
+The families here are the owner's own, with his part numbers, but the prices
+are made up: his real ones were already checked to be additive (colour never
+moves a price, size always does) and the test needs to prove the arithmetic
+both ways, which means it needs a family that does not add up too.
+"""
+
+from odoo.tests import TransactionCase, tagged
+
+
+@tagged("post_install", "-at_install")
+class TestVariantMerge(TransactionCase):
+
+    def setUp(self):
+        super().setUp()
+        self.stock = self.env.ref("stock.stock_location_stock")
+        self.other = self.env["stock.location"].create({
+            "name": "Rack B", "usage": "internal",
+            "location_id": self.stock.id,
+        })
+
+    # --- the fixture ----------------------------------------------------
+
+    def _product(self, name, code=None, price=1.0, cost=0.5, stock=0.0,
+                 location=None):
+        tmpl = self.env["product.template"].create({
+            "name": name,
+            "default_code": code,
+            "type": "consu",
+            "is_storable": True,
+            "list_price": price,
+            "standard_price": cost,
+            "sale_ok": True,
+            "is_published": True,
+        })
+        if stock:
+            self._put(tmpl.product_variant_id, stock, location or self.stock)
+        return tmpl
+
+    def _put(self, variant, quantity, location):
+        quant = self.env["stock.quant"].with_context(inventory_mode=True).create({
+            "product_id": variant.id,
+            "location_id": location.id,
+            "inventory_quantity": quantity,
+        })
+        quant.action_apply_inventory()
+
+    def _on_hand(self, variant, location=None):
+        domain = [("product_id", "=", variant.id)]
+        if location:
+            domain.append(("location_id", "=", location.id))
+        else:
+            domain.append(("location_id.usage", "in", ("internal", "transit")))
+        return sum(self.env["stock.quant"].search(domain).mapped("quantity"))
+
+    def _anchor_brackets(self):
+        """The owner's own example: one bracket, two hands, two colours."""
+        made = {}
+        for hand in ("LH", "RH"):
+            for colour, qty in (("Black", 200.0), ("White", 90.0)):
+                name = "Spring Anchor Bracket %s %s" % (hand, colour)
+                made[name] = self._product(
+                    name, code="CH1119D", price=6.91, cost=3.10,
+                    stock=qty + (1.0 if hand == "RH" else 0.0),
+                )
+        return made
+
+    def _jamb_brackets(self):
+        """Four sizes, two colours, and a price that climbs with the size."""
+        made = {}
+        for size, price in (("10", 1.20), ("12", 1.36), ("14", 1.61), ("16", 1.91)):
+            for colour, qty in (("Black", 800.0), ("White", 330.0)):
+                name = "Jamb Bracket # %s %s" % (size, colour)
+                made[name] = self._product(
+                    name, code="CH1108", price=price, cost=price / 2,
+                    stock=qty + float(size),
+                )
+        return made
+
+    def _hinges(self):
+        """Seven sizes, three colours, and a part number per SIZE."""
+        made = {}
+        for n in range(1, 8):
+            for colour in ("Black", "White", "Galvanized"):
+                name = "Hinge # %d %s" % (n, colour)
+                made[name] = self._product(
+                    name, code="CH1411-%d" % n, price=2.4 + n * 0.1,
+                    cost=1.0 + n * 0.05, stock=100.0 + n,
+                )
+        return made
+
+    def _merge(self, survivor, dry_run=False):
+        reports = self.env["product.template"]._aa_merge_variant_families(
+            dry_run=dry_run, only=[survivor]
+        )
+        self.assertEqual(len(reports), 1, reports)
+        return reports[0]
+
+    def _survivor(self, name):
+        return self.env["product.template"].with_context(
+            active_test=False, lang="en_US"
+        ).search([("name", "=", name)])
+
+    def _live_variants(self, survivor):
+        """The variants on the shop page: the archived original that stays
+        behind to hold its history is not one of them."""
+        return self._survivor(survivor).with_context(
+            active_test=True).product_variant_ids
+
+    def _variant(self, survivor, **combo):
+        """The variant of the merged product with these choices, by NAME."""
+        for variant in self._live_variants(survivor):
+            got = {
+                ptav.attribute_id.name: ptav.name
+                for ptav in variant.product_template_attribute_value_ids
+            }
+            if got == combo:
+                return variant
+        return self.env["product.product"]
+
+    # --- what the owner asked for ---------------------------------------
+
+    def test_one_bracket_with_a_hand_and_a_colour_to_choose(self):
+        """"there will only be one spring anchor bracket rh but with two color
+        choices" - and, since 2026-10-21, the hand is a choice on it too."""
+        self._anchor_brackets()
+
+        report = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(report["state"], "merged", report)
+        survivor = self._survivor("Spring Anchor Bracket")
+        self.assertTrue(survivor.active)
+        self.assertEqual(len(self._live_variants("Spring Anchor Bracket")), 4)
+        # The base's own original variant stays, archived, because a done
+        # stock move still points at it.
+        self.assertEqual(
+            len(survivor.with_context(active_test=False).product_variant_ids), 5)
+        self.assertEqual(
+            sorted(survivor.attribute_line_ids.attribute_id.mapped("name")),
+            ["Colour", "Hand"],
+        )
+        # The four old products are gone from the shop, not deleted.
+        olds = self.env["product.template"].with_context(active_test=False).search(
+            [("name", "=like", "Spring Anchor Bracket %")]
+        )
+        self.assertEqual(len(olds), 3, olds.mapped("name"))
+        self.assertFalse(any(olds.mapped("active")))
+        self.assertFalse(any(olds.mapped("is_published")))
+        self.assertTrue(survivor.is_published)
+
+    def test_the_stock_lands_on_the_right_colour_and_the_right_hand(self):
+        """THE TEST THIS WHOLE THING EXISTS FOR. A count on the wrong hand is
+        invisible on screen and wrong in the rack."""
+        self._anchor_brackets()
+
+        self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(self._on_hand(self._variant(
+            "Spring Anchor Bracket", Hand="RH", Colour="Black")), 201.0)
+        self.assertEqual(self._on_hand(self._variant(
+            "Spring Anchor Bracket", Hand="RH", Colour="White")), 91.0)
+        self.assertEqual(self._on_hand(self._variant(
+            "Spring Anchor Bracket", Hand="LH", Colour="Black")), 200.0)
+        self.assertEqual(self._on_hand(self._variant(
+            "Spring Anchor Bracket", Hand="LH", Colour="White")), 90.0)
+
+    def test_stock_keeps_the_location_it_was_in(self):
+        """Stock is moved per location, not totalled and dumped in one."""
+        made = self._anchor_brackets()
+        white = made["Spring Anchor Bracket LH White"].product_variant_id
+        self._put(white, 7.0, self.other)
+
+        self._merge("Spring Anchor Bracket")
+
+        variant = self._variant("Spring Anchor Bracket", Hand="LH", Colour="White")
+        self.assertEqual(self._on_hand(variant, self.stock), 90.0)
+        self.assertEqual(self._on_hand(variant, self.other), 7.0)
+
+    def test_nothing_is_counted_twice(self):
+        """The old product must be left at nothing: stock on both records for
+        even a moment is stock on the books twice."""
+        made = self._anchor_brackets()
+        old = made["Spring Anchor Bracket RH Black"].product_variant_id
+
+        self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(self._on_hand(old), 0.0)
+
+    def test_each_variant_keeps_its_own_part_number_and_cost(self):
+        """Hinges have a part number PER SIZE - CH1411-1 to CH1411-7 - so the
+        number cannot live on the product; it lives on each variant."""
+        self._hinges()
+
+        self._merge("Hinge")
+
+        for n in range(1, 8):
+            for colour in ("Black", "White", "Galvanized"):
+                variant = self._variant("Hinge", **{
+                    "Hinge Size": "#%d" % n, "Colour": colour})
+                self.assertTrue(variant, "no variant for #%d %s" % (n, colour))
+                self.assertEqual(variant.default_code, "CH1411-%d" % n)
+                self.assertAlmostEqual(variant.standard_price, 1.0 + n * 0.05, 2)
+                self.assertEqual(self._on_hand(variant), 100.0 + n)
+
+    def test_every_variant_costs_what_its_old_product_cost(self):
+        """Size moves the price, colour does not - and the page has to charge
+        exactly what the four old products charged."""
+        self._jamb_brackets()
+
+        self._merge("Jamb Bracket")
+
+        for size, price in (("#10", 1.20), ("#12", 1.36), ("#14", 1.61), ("#16", 1.91)):
+            for colour in ("Black", "White"):
+                variant = self._variant("Jamb Bracket", **{
+                    "Bracket Size": size, "Colour": colour})
+                self.assertAlmostEqual(
+                    variant.lst_price, price, 2,
+                    "%s %s should still be %s" % (size, colour, price))
+
+    def test_the_sizes_are_offered_in_the_order_a_person_reads_them(self):
+        """#10 before #16, which is not what sorting gives you."""
+        self._jamb_brackets()
+
+        self._merge("Jamb Bracket")
+
+        line = self._survivor("Jamb Bracket").attribute_line_ids.filtered(
+            lambda l: l.attribute_id.name == "Bracket Size")
+        self.assertEqual(
+            line.product_template_value_ids.sorted(
+                lambda v: v.product_attribute_value_id.sequence).mapped("name"),
+            ["#10", "#12", "#14", "#16"],
+        )
+
+    # --- what must not get lost ------------------------------------------
+
+    def test_a_kit_bom_line_follows_the_exact_part_it_pointed_at(self):
+        """A KIT MUST NOT CHANGE HANDS. The BoM line said RH Black; after the
+        merge it has to say the RH Black VARIANT, not whichever came first."""
+        made = self._anchor_brackets()
+        kit = self._product("Test Hardware Kit", code="HK-TEST", price=100.0)
+        bom = self.env["mrp.bom"].create({
+            "product_tmpl_id": kit.id,
+            "type": "normal",
+            "bom_line_ids": [(0, 0, {
+                "product_id": made["Spring Anchor Bracket RH Black"].product_variant_id.id,
+                "product_qty": 2.0,
+            })],
+        })
+
+        self._merge("Spring Anchor Bracket")
+
+        want = self._variant("Spring Anchor Bracket", Hand="RH", Colour="Black")
+        self.assertEqual(bom.bom_line_ids.product_id, want)
+        self.assertEqual(
+            bom.bom_line_ids.product_id.product_template_attribute_value_ids
+            .filtered(lambda p: p.attribute_id.name == "Hand").name,
+            "RH",
+            "the kit changed hands in the merge",
+        )
+
+    def test_a_reordering_rule_follows_its_product(self):
+        made = self._anchor_brackets()
+        variant = made["Spring Anchor Bracket LH White"].product_variant_id
+        rule = self.env["stock.warehouse.orderpoint"].create({
+            "product_id": variant.id,
+            "location_id": self.stock.id,
+            "product_min_qty": 10.0,
+            "product_max_qty": 50.0,
+        })
+
+        self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(
+            rule.product_id,
+            self._variant("Spring Anchor Bracket", Hand="LH", Colour="White"),
+        )
+
+    def test_a_draft_quotation_follows_but_a_confirmed_one_does_not(self):
+        """An open quote should sell the product that now has the stock. A
+        confirmed order is a record of what was sold and stays as it is."""
+        made = self._anchor_brackets()
+        variant = made["Spring Anchor Bracket RH White"].product_variant_id
+        partner = self.env["res.partner"].create({"name": "Merge Test Customer"})
+        draft = self.env["sale.order"].create({
+            "partner_id": partner.id,
+            "order_line": [(0, 0, {"product_id": variant.id, "product_uom_qty": 1})],
+        })
+        done = self.env["sale.order"].create({
+            "partner_id": partner.id,
+            "order_line": [(0, 0, {"product_id": variant.id, "product_uom_qty": 1})],
+        })
+        done.action_confirm()
+        # The delivery it booked would stop the family, and rightly so - this
+        # test is about the order line, so take the picking out of the way.
+        done.picking_ids.action_cancel()
+
+        self._merge("Spring Anchor Bracket")
+
+        want = self._variant("Spring Anchor Bracket", Hand="RH", Colour="White")
+        self.assertEqual(draft.order_line.product_id, want)
+        self.assertEqual(done.order_line.product_id, variant)
+
+    def test_the_flag_angle_setting_follows_its_product(self):
+        """The prepared-track flag angle is stored in a setting as a product
+        id. Archive the product it names and prepared tracks lose their flag
+        angle with nothing failing."""
+        made = {}
+        for size in ('5.9"', '6-3/8"'):
+            for colour in ("Black", "White"):
+                name = "Flag Angle %s %s" % (size, colour)
+                made[name] = self._product(
+                    name, price=9.1 if size == '5.9"' else 9.22, stock=50.0)
+        named = made['Flag Angle 5.9" White'].product_variant_id
+        self.env["ir.config_parameter"].sudo().set_param(
+            "spring_engineering.track_prep_flag_product_id", str(named.id))
+
+        self._merge("Flag Angle")
+
+        want = self._variant("Flag Angle", **{
+            "Flag Angle Size": '5.9"', "Colour": "White"})
+        self.assertEqual(
+            self.env["ir.config_parameter"].sudo().get_param(
+                "spring_engineering.track_prep_flag_product_id"),
+            str(want.id),
+        )
+
+    # --- refusing to do it badly -----------------------------------------
+
+    def test_a_family_that_cannot_be_priced_by_attribute_is_left_alone(self):
+        """If a white bracket ever costs more than a black one, the price
+        cannot be expressed as "product plus choices". Say so; change nothing.
+        """
+        made = self._anchor_brackets()
+        made["Spring Anchor Bracket LH White"].list_price = 8.50
+
+        report = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(report["state"], "skipped", report)
+        self.assertTrue(
+            any("cannot be priced" in p for p in report["problems"]), report)
+        for tmpl in made.values():
+            self.assertTrue(tmpl.active, "%s was touched anyway" % tmpl.name)
+            self.assertFalse(tmpl.attribute_line_ids)
+
+    def test_an_open_delivery_stops_the_family(self):
+        """We are about to move this stock to another product. A picking that
+        has not gone out has a claim on it."""
+        made = self._anchor_brackets()
+        variant = made["Spring Anchor Bracket RH Black"].product_variant_id
+        picking = self.env["stock.picking"].create({
+            "picking_type_id": self.env.ref("stock.picking_type_out").id,
+            "location_id": self.stock.id,
+            "location_dest_id": self.env.ref("stock.stock_location_customers").id,
+            "move_ids": [(0, 0, {
+                "product_id": variant.id,
+                "product_uom_qty": 5.0,
+                "location_id": self.stock.id,
+                "location_dest_id": self.env.ref("stock.stock_location_customers").id,
+            })],
+        })
+        picking.action_confirm()
+
+        report = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(report["state"], "skipped", report)
+        self.assertTrue(
+            any("still open" in p for p in report["problems"]), report)
+        self.assertEqual(self._on_hand(variant), 201.0, "stock was moved anyway")
+
+    def test_a_product_missing_from_the_catalogue_stops_the_family(self):
+        """Half a family is worse than none: the store would offer variants
+        with nobody's stock on them."""
+        made = self._anchor_brackets()
+        made["Spring Anchor Bracket LH Black"].name = "Anchor Bracket, old"
+
+        report = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(report["state"], "skipped", report)
+        self.assertTrue(
+            any("not in the catalogue" in p for p in report["problems"]), report)
+
+    def test_a_colour_added_after_the_table_was_written_is_reported(self):
+        """A sibling nobody mapped would be orphaned by the merge. It is left
+        alone and said out loud."""
+        self._hinges()
+        self._product("Hinge # 8 Brown", code="CH1411-8", price=3.5)
+
+        report = self._merge("Hinge")
+
+        self.assertEqual(report["state"], "merged", report)
+        self.assertTrue(
+            any("Hinge # 8 Brown" in n for n in report["notes"]), report)
+        self.assertTrue(
+            self._survivor("Hinge # 8 Brown").active,
+            "the stray was swept up instead of being left alone")
+
+    # --- the rehearsal ----------------------------------------------------
+
+    def test_the_rehearsal_reports_without_changing_anything(self):
+        """The dry run performs the merge and rolls it back, so what it
+        reports is what happened rather than what somebody expected."""
+        made = self._anchor_brackets()
+
+        report = self._merge("Spring Anchor Bracket", dry_run=True)
+
+        self.assertEqual(report["state"], "rehearsed", report)
+        self.assertEqual(report["variants"], 4, report)
+        for name, tmpl in made.items():
+            self.assertTrue(tmpl.active, "%s was left changed" % name)
+            self.assertFalse(tmpl.attribute_line_ids, name)
+            self.assertEqual(tmpl.name, name)
+        self.assertFalse(
+            self._survivor("Spring Anchor Bracket"),
+            "the merged product was left behind by the rehearsal")
+
+    def test_running_it_again_does_nothing(self):
+        """A migration gets re-run. The second pass must recognise its own
+        work rather than fold the merged product into itself."""
+        self._anchor_brackets()
+
+        self._merge("Spring Anchor Bracket")
+        again = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(again["state"], "already merged", again)
+        self.assertEqual(len(self._live_variants("Spring Anchor Bracket")), 4)
