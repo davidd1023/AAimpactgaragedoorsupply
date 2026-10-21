@@ -55,3 +55,7 @@ class OverviewListCase(TransactionCase):
         board = self._board(self._job("Made by hand"))
 
         self.assertEqual(board, {"grouped": False})
+
+    def test_the_shop_floor_loads_every_order_on_one_page(self):
+        """Odoo's 40 split an order's jobs across pages."""
+        self.assertGreaterEqual(int(self.env["mrp.workorder"].get_shopfloor_limit()), 500)
