@@ -41,6 +41,8 @@ RECENT_JOBS_SCANNED = 400
 # tablet never pulls the whole year over the shop wifi.
 DAYS_BACK = 60
 DAY_JOBS_SCANNED = 3000
+# Days shown at first; "Show older days" adds this many more each time.
+DAYS_SHOWN = 7
 
 
 class MrpWorkorder(models.Model):
@@ -250,12 +252,15 @@ class MrpWorkorder(models.Model):
         return max(ends) if ends else self.date_finished
 
     @api.model
-    def aa_shop_floor_history_by_day(self, day=None):
-        """{days: [{key, label, orders, jobs}], day, groups, count, worked}.
+    def aa_shop_floor_history_by_day(self, days=DAYS_SHOWN):
+        """[{key, label, orders, count, worked, groups}] - the History
+        organised by the day things were finished, newest day first.
 
-        `days` is every day in the last DAYS_BACK with something finished,
-        newest first; `groups` is the History for `day` ("2026-10-21"), or
-        for the newest day when none is asked for.
+        NOT A DAY TO PICK (owner, 2026-10-21: "not choose - organised by
+        day"): every day is shown, one under the other, each with the orders
+        whose parts were finished that day. `days` is how many days with work
+        in them to return; the dialog asks for more as it is scrolled back.
+        Returns {days: [...], more: bool}.
         """
         since = fields.Datetime.now() - timedelta(days=DAYS_BACK + 1)
         workorders = self.search(
@@ -275,32 +280,26 @@ class MrpWorkorder(models.Model):
             key = local.strftime("%Y-%m-%d")
             entry = by_day.setdefault(key, {
                 "key": key,
-                "label": local.strftime("%a, %b %d"),
+                "label": local.strftime("%A, %b %d"),
                 "workorders": self.browse(),
-                "orders": set(),
             })
             entry["workorders"] |= workorder
-            entry["orders"].add(workorder.aa_sale_order)
 
-        days = sorted(by_day.values(), key=lambda entry: entry["key"], reverse=True)
-        chosen = day if day in by_day else (days[0]["key"] if days else False)
-        groups = []
-        minutes = 0.0
-        count = 0
+        ordered = sorted(by_day.values(), key=lambda entry: entry["key"], reverse=True)
+        wanted = max(int(days or DAYS_SHOWN), 1)
+        result = []
 
-        if chosen:
-            # Oldest first, so the day reads in the order it was worked.
-            jobs = by_day[chosen]["workorders"].sorted("id")
-            groups = jobs._aa_history_groups()
+        for entry in ordered[:wanted]:
+            # Oldest first within the day, so it reads in the order it was worked.
+            groups = entry["workorders"].sorted("id")._aa_history_groups()
             minutes = sum(group["worked_minutes"] for group in groups)
-            count = len(jobs)
+            result.append({
+                "key": entry["key"],
+                "label": entry["label"],
+                "orders": len(groups),
+                "count": len(entry["workorders"]),
+                "worked": self._aa_duration_words(minutes),
+                "groups": groups,
+            })
 
-        return {
-            "days": [{"key": entry["key"], "label": entry["label"],
-                      "orders": len(entry["orders"]),
-                      "jobs": len(entry["workorders"])} for entry in days],
-            "day": chosen,
-            "groups": groups,
-            "count": count,
-            "worked": self._aa_duration_words(minutes),
-        }
+        return {"days": result, "more": len(ordered) > wanted}
