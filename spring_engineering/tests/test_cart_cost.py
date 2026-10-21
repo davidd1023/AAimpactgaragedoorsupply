@@ -424,6 +424,74 @@ class TestCartCostOnThePage(HttpCase):
         self.assertIn("44.00", row, row)
         self.assertIn("staff only", row, row)
 
+    # --- folded away until asked for ------------------------------------------
+
+    def test_the_figure_is_folded_away_until_it_is_clicked(self):
+        """THE COUNTER IS OFTEN FACING THE CUSTOMER. The row is there, the
+        figure is not: it takes a deliberate click, so turning the screen
+        round does not show somebody what their own order costs us."""
+        self.authenticate("admin", "admin")
+        self._add(4)
+        row = self._row(self.url_open("/shop/cart").text)
+
+        # The amount and the note both sit inside collapsed containers, and
+        # the button that opens them says so.
+        self.assertRegex(
+            row, r'class="collapse[^"]*"[^>]*id="aa_cart_cost_value"',
+            "the amount is not inside a collapsed container")
+        self.assertIn('aria-expanded="false"', row, row)
+        self.assertIn('data-bs-toggle="collapse"', row, row)
+
+        # NOT ONE OF THEM PRE-OPENED. Bootstrap shows a collapse that carries
+        # the `show` class, and a cart that came back already expanded would
+        # defeat the whole point.
+        self.assertNotIn("collapse show", row, row)
+        self.assertNotIn("show collapse", row, row)
+
+    def test_the_row_says_nothing_at_all_until_it_is_opened(self):
+        """NOT EVEN THE WORD "Cost" (owner, 2026-10-21). Naming it told the
+        customer there was a cost to see, which is most of what we were
+        trying not to say.
+
+        READ AS A BROWSER WOULD PAINT IT: the collapsed containers are cut
+        out, then the tags, leaving the text that is actually on the screen
+        before anybody clicks. There should be none of it.
+        """
+        self.authenticate("admin", "admin")
+        self._add(4)
+        row = self._row(self.url_open("/shop/cart").text)
+        folded = re.sub(r'<div class="collapse.*?</div>\s*</td>', "</td>", row)
+        folded = re.sub(r'<div class="collapse.*?</div>', "", folded)
+        visible = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", folded)).strip()
+
+        self.assertEqual(visible, "", "the row shows text before it is opened")
+
+        # The name is still on the control for anyone who cannot see the
+        # screen - and NOT as a `title`, which would paint a tooltip saying
+        # "Cost" to whoever is looking at it.
+        self.assertIn('aria-label="Cost, staff only"', row, row)
+        self.assertNotIn("title=", row, row)
+
+        # And the word is there once the fold is open, so the figure is named
+        # rather than being a loose number under the Total.
+        self.assertIn("Cost", row, row)
+
+    def test_the_caret_is_invisible_until_the_mouse_is_near_it(self):
+        """The stylesheet does the hiding, so the markup has to carry the
+        hook it keys on. Lose the class and the caret is a visible mark on
+        every customer's screen with nothing failing anywhere."""
+        css = open(
+            "/home/odoo/src/user/spring_engineering/static/src/css/"
+            "cart_included.css", encoding="utf-8").read()
+        self.authenticate("admin", "admin")
+        self._add(4)
+        row = self._row(self.url_open("/shop/cart").text)
+
+        self.assertIn("o_aa_cost_toggle", row, row)
+        self.assertIn(".o_aa_cart_cost .o_aa_cost_toggle", css)
+        self.assertIn("opacity: 0;", css)
+        self.assertIn(".o_cart_total:hover", css)
+
     def test_the_employee_sees_it_on_the_checkout_summary_too(self):
         """One template feeds the cart page and the summary card on every
         checkout and payment step, so the figure travels with the order."""

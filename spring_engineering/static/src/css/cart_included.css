@@ -8,3 +8,43 @@
 .o_aa_included [aria-expanded="true"] .fa-caret-right {
     transform: rotate(90deg);
 }
+
+/* The staff-only cost row folds the same way, so it turns the same caret. */
+.o_aa_cart_cost .fa-caret-right {
+    transition: transform 0.15s ease-out;
+}
+
+.o_aa_cart_cost [aria-expanded="true"] .fa-caret-right {
+    transform: rotate(90deg);
+}
+
+/* NOTHING ON THE PAGE UNTIL SOMEBODY REACHES FOR IT.
+   The counter is often turned round to face the customer, so the cost row
+   leaves no mark at rest: not a word, not a caret. It fades in when the mouse
+   is over the totals, which only the person driving is doing.
+
+   OPACITY RATHER THAN display OR visibility, so the caret occupies its space
+   all along. Revealing something that was taking up no room would shift the
+   totals under the reader's eye, which is its own kind of announcement. */
+.o_aa_cart_cost .o_aa_cost_toggle {
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+}
+
+.o_cart_total:hover .o_aa_cart_cost .o_aa_cost_toggle,
+.o_aa_cart_cost:hover .o_aa_cost_toggle,
+/* Keyboard users get it on focus, and it stays while the fold is open - a
+   control that vanished while its own content showed would be a puzzle. */
+.o_aa_cart_cost .o_aa_cost_toggle:focus,
+.o_aa_cart_cost .o_aa_cost_toggle[aria-expanded="true"] {
+    opacity: 0.65;
+}
+
+/* A TOUCH SCREEN HAS NO HOVER, and a control that can never appear is a
+   control that is not there. On a phone or a tablet it sits faintly visible
+   instead - still nothing a customer would read as a price. */
+@media (hover: none) {
+    .o_aa_cart_cost .o_aa_cost_toggle {
+        opacity: 0.35;
+    }
+}
