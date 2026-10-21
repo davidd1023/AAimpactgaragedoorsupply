@@ -65,6 +65,7 @@
                                 <th t-esc="aaCol"/>
                             </t>
                             <th class="text-end">Age</th>
+                            <th class="o_aa_overview_send_col"/>
                         </tr>
                     </thead>
                     <tbody>
@@ -77,7 +78,7 @@
                                     <t t-esc="aaRow.order"/>
                                 </td>
                                 <td class="text-nowrap" t-esc="aaRow.received"/>
-                                <td class="o_aa_overview_customer" t-esc="aaRow.customer"/>
+                                <td class="o_aa_overview_customer" t-att-title="aaRow.customer" t-esc="aaRow.customer"/>
                                 <t t-foreach="aaCols" t-as="aaCol" t-key="aaCol">
                                     <td>
                                         <t t-set="aaJob" t-value="aaRow.byStation[aaCol]"/>
@@ -92,9 +93,18 @@
                                           t-att-class="aaAgeClass(aaRow.ageHours)"
                                           t-esc="aaAgeLabel(aaRow.ageHours)"/>
                                 </td>
+                                <!-- Send all ON THE ROW (owner, 2026-10-21): an
+                                     order goes to its stations without opening it. -->
+                                <td class="text-end o_aa_overview_send_col">
+                                    <button t-if="aaRow.canAssign and aaRow.sendIds.length" type="button"
+                                            class="btn btn-sm btn-primary text-nowrap"
+                                            t-on-click.stop="() => this.aaListAction('aa_send_to_station', aaRow.sendIds)">
+                                        <i class="fa fa-arrow-right me-1"/>Send all
+                                    </button>
+                                </td>
                             </tr>
                             <tr t-if="aaOverview.open[aaRow.key]" class="o_aa_overview_detail">
-                                <td t-att-colspan="4 + aaCols.length" class="bg-100 p-3">
+                                <td t-att-colspan="5 + aaCols.length" class="bg-100 p-3">
                                     <div t-if="aaRow.canAssign and (aaRow.sendIds.length or aaRow.removeIds.length)"
                                          class="d-flex flex-wrap gap-2 mb-2">
                                         <button t-if="aaRow.sendIds.length" type="button" class="btn btn-primary"
@@ -147,7 +157,7 @@
                             </tr>
                         </t>
                         <tr t-if="!aaRows.length">
-                            <td t-att-colspan="4 + aaCols.length" class="text-center text-muted py-4">
+                            <td t-att-colspan="5 + aaCols.length" class="text-center text-muted py-4">
                                 No orders here.
                             </td>
                         </tr>

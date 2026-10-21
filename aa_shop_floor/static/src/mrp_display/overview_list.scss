@@ -18,10 +18,17 @@
             cursor: pointer;
         }
 
+        // Narrow (owner, 2026-10-21): the full name shows on hover.
         .o_aa_overview_customer {
-            max-width: 18rem;
+            width: 11rem;
+            max-width: 11rem;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .o_aa_overview_send_col {
+            width: 1%;
             white-space: nowrap;
         }
 
