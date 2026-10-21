@@ -4,7 +4,8 @@
          The manager decides from the Overview what each station works on; a
          track order sent to Track Prep must show there even when its RAW track
          is not in stock yet (W/O #207 sat hidden at Track Prep for that). The
-         work order filters (ready / in progress) are kept as Odoo has them. -->
+         work order filters (ready / in progress) are kept as Odoo has them.
+         Loaded from aa_shop_floor 19.0.1.17.0. -->
     <record id="mrp_workorder.action_mrp_display" model="ir.actions.client">
         <field name="context">{
             'search_default_ready': True,
