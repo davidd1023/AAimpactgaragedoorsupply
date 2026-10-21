@@ -443,6 +443,41 @@ class TestCartCostOnThePage(HttpCase):
         self.assertNotIn("staff only", page)
         self.assertNotIn("44.00", page, "a customer can read the cost off the page")
 
+    def test_a_spring_from_the_calculator_shows_a_cost_on_the_cart(self):
+        """THE WHOLE PATH A MEMBER OF STAFF TAKES, not a crafted line: the
+        calculator's own route books the assembly, and the cart page has to
+        show a worked-out cost for it rather than "no cost set"."""
+        self.authenticate("admin", "admin")
+        answer = self.url_open(
+            "/spring-calculator/add-to-cart",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call", "params": {
+                "spec": {
+                    "assembly": "Duplex", "springs": 2,
+                    "springsSpec": [
+                        {"role": "Outer", "wire": 0.2625, "id": 6,
+                         "length": 32.25},
+                        {"role": "Inner", "wire": 0.2253, "id": 3.75,
+                         "length": 31.25}],
+                    "doorWeight": 355, "doorHeight": "7' 0\"",
+                    "cycles": 25000}}}),
+            headers={"Content-Type": "application/json"})
+        self.assertNotIn("error", answer.json().get("result", {}),
+                         answer.json())
+
+        line = self.env["sale.order.line"].sudo().search(
+            [("spring_spec_json", "!=", False)], order="id desc", limit=1)
+        self.assertTrue(line, "the route booked no spring")
+
+        worked_out = line.order_id.sudo()._aa_cart_cost()
+        row = self._row(self.url_open("/shop/cart").text)
+
+        self.assertTrue(row, "no cost row for an order holding a spring")
+        self.assertNotIn("no cost set", row, row)
+        self.assertGreater(worked_out["cost"], 0.0, "the spring costed as zero")
+        self.assertIn("%.2f" % worked_out["cost"], row, row)
+        self.assertLess(worked_out["cost"], line.price_subtotal,
+                        "a spring cannot cost what it sells for")
+
     def test_the_warning_names_how_many_lines_have_no_cost(self):
         uncosted = self.env["product.product"].create({
             "name": "Cost Page Spring", "type": "consu", "list_price": 410.0,
