@@ -21,6 +21,20 @@
                             </div>
                         </div>
                     </setting>
+                    <!-- A SECOND FIGURE, NOT A DIVISION OF THE FIRST. The rate
+                         above is a sell price with the labour and the margin
+                         already in it, so nothing can be worked backwards from
+                         it. This one is what the steel costs, and it is only
+                         ever used for the cost line staff see on the cart. -->
+                    <setting string="Spring steel cost per pound"
+                             help="What a pound of spring steel costs us, before winding and margin. Used only for the cost figure staff see on the cart - never for a price a customer is quoted. Left at nothing, a custom spring is reported on that line as having no cost set rather than being counted at the price of its cones alone.">
+                        <div class="content-group">
+                            <div class="mt16">
+                                <field name="spring_steel_cost_per_lb" class="oe_inline"/>
+                                <span class="ms-1">per lb, cost</span>
+                            </div>
+                        </div>
+                    </setting>
                 </block>
                 <!-- A RULE OF THE SHOP, so it gets its own block rather than
                      sitting under the calculator's heading. Per website, which

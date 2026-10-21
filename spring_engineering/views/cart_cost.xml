@@ -31,8 +31,9 @@
           <!-- SAY WHEN THE SUM IS SHORT. A product with a blank Cost field
                adds nothing, so without this line the total reads like the
                real cost of the order when it is only the part of it that has
-               been costed. Custom springs and custom kits are priced as they
-               are added to the cart and have no Cost of their own. -->
+               been costed. A custom spring is costed from its own
+               specification, so it lands here only when the steel cost has
+               not been set in Settings. -->
           <div t-if="aa_cost['unpriced']" class="small text-warning">
             <t t-out="aa_cost['unpriced']"/>
             <t t-if="aa_cost['unpriced'] == 1">item has</t>
