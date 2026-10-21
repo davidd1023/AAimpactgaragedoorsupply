@@ -1,0 +1,43 @@
+// The Overview as a list (owner, 2026-10-21).
+.o_mrp_display .o_aa_overview_list {
+    min-width: 0;
+    overflow: auto;
+
+    .o_aa_overview_table {
+        font-size: 1rem;
+
+        thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-color: var(--body-bg, #fff);
+            white-space: nowrap;
+        }
+
+        .o_aa_overview_row {
+            cursor: pointer;
+        }
+
+        .o_aa_overview_customer {
+            max-width: 18rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .o_aa_chip {
+            font-size: 0.85rem;
+            min-width: 6.5rem;
+        }
+    }
+
+    .o_aa_overview_search {
+        min-width: 12rem;
+    }
+
+    .o_aa_overview_jobs {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+        gap: 0.5rem;
+    }
+}
