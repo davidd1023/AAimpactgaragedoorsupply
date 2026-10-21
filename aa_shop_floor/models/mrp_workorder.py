@@ -11,6 +11,11 @@ from odoo.exceptions import AccessError, UserError
 PENDING_XMLID = "aa_shop_floor.workcenter_pending"
 MANAGER_GROUP = "mrp.group_mrp_manager"
 LOCKED_STATES = ("progress", "done", "cancel")
+# How many records the Shop Floor loads at once (owner, 2026-10-21: more than
+# 60 orders). Odoo's own is 40 and the Overview then pages: an order is two or
+# three manufacturing orders, so at 40 an order's jobs land on different pages
+# and the first-in, first-out list breaks across them.
+SHOPFLOOR_LIMIT = 500
 
 
 class MrpWorkcenter(models.Model):
@@ -49,6 +54,16 @@ class MrpWorkorder(models.Model):
                     vals["aa_suggested_workcenter_id"] = vals["workcenter_id"]
                     vals["workcenter_id"] = pending.id
         return super().create(vals_list)
+
+    @api.model
+    def get_shopfloor_limit(self):
+        """The page size the Shop Floor asks for when it opens. Never below
+        SHOPFLOOR_LIMIT; a higher one somebody set stays."""
+        try:
+            limit = int(super().get_shopfloor_limit())
+        except (TypeError, ValueError):
+            limit = 0
+        return max(limit, SHOPFLOOR_LIMIT)
 
     def _aa_own_station(self):
         self.ensure_one()
@@ -159,7 +174,12 @@ class MrpProduction(models.Model):
         can_assign = self.env.user.has_group(MANAGER_GROUP)
         for production in self:
             siblings = production._aa_order_siblings() if production.id else production.browse()
-            if len(siblings) < 2:
+            # A ONE-JOB ORDER GETS ITS BOARD TOO (owner, 2026-10-21: the
+            # Overview's list view shows every order as a row, and an order
+            # with one job needs its station, status and buttons as much as
+            # one with three). It is still not "grouped", so its card in the
+            # card view is drawn exactly as before.
+            if not siblings:
                 production.aa_order_board = json.dumps({"grouped": False})
                 continue
             open_ones = siblings.filtered(lambda p: p.state not in ("done", "cancel"))
@@ -244,10 +264,13 @@ class MrpProduction(models.Model):
                 group["started"] = self._aa_clock(group["started_utc"])
                 group["finished"] = self._aa_clock(group["finished_utc"])
             order = self.env["sale.order"].sudo().search([("name", "=", production.origin)], limit=1)
+            first_in = min(siblings.mapped("create_date"))
             received = fields.Datetime.context_timestamp(
-                production, min(siblings.mapped("create_date"))).strftime("%b %d, %I:%M %p")
+                production, first_in).strftime("%b %d, %I:%M %p")
             production.aa_order_board = json.dumps({
-                "grouped": True,
+                "grouped": len(siblings) > 1,
+                # For the list view's age column, worked out in the tablet.
+                "received_utc": fields.Datetime.to_string(first_in).replace(" ", "T") + "Z",
                 "leader": production == leader,
                 # The card is headed by the W/O number; the S number only
                 # when an order has none (one confirmed before W/O existed).
