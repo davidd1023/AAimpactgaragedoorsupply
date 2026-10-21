@@ -29,7 +29,19 @@ export class AaShopFloorHistoryDialog extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.state = useState({ loading: true, groups: [] });
+        // BY DAY (owner, 2026-10-21): everything finished on one day, the
+        // orders separated by the day their parts were finished. Only from
+        // the menu - one order's own history is already one order.
+        this.state = useState({
+            loading: true,
+            groups: [],
+            mode: "recent",
+            days: [],
+            day: false,
+            dayGroups: [],
+            dayCount: 0,
+            dayWorked: "",
+        });
 
         onWillStart(async () => {
             this.state.groups = await this.orm.call(
@@ -40,6 +52,49 @@ export class AaShopFloorHistoryDialog extends Component {
             );
             this.state.loading = false;
         });
+    }
+
+    async setMode(mode) {
+        this.state.mode = mode;
+        if (mode === "day" && !this.state.days.length) {
+            await this.loadDay(false);
+        }
+    }
+
+    async loadDay(day) {
+        this.state.loading = true;
+        const result = await this.orm.call(
+            "mrp.workorder",
+            "aa_shop_floor_history_by_day",
+            [],
+            { day: day || false }
+        );
+        this.state.days = result.days;
+        this.state.day = result.day;
+        this.state.dayGroups = result.groups;
+        this.state.dayCount = result.count;
+        this.state.dayWorked = result.worked;
+        this.state.loading = false;
+    }
+
+    get dayIndex() {
+        return this.state.days.findIndex((day) => day.key === this.state.day);
+    }
+
+    get currentDay() {
+        return this.state.days[this.dayIndex] || false;
+    }
+
+    // The days are newest first, so "older" is further down the list.
+    async stepDay(step) {
+        const next = this.state.days[this.dayIndex + step];
+        if (next) {
+            await this.loadDay(next.key);
+        }
+    }
+
+    get shownGroups() {
+        return this.state.mode === "day" ? this.state.dayGroups || [] : this.state.groups;
     }
 
     get title() {

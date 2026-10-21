@@ -21,17 +21,65 @@
          the clock times underneath. -->
     <t t-name="aa_shop_floor.HistoryDialog">
         <Dialog title="title" size="'lg'">
+            <!-- Recent orders / By day: from the menu only. -->
+            <div t-if="!props.order" class="btn-group mb-3" role="group">
+                <button type="button" class="btn"
+                        t-att-class="state.mode === 'recent' ? 'btn-primary' : 'btn-outline-secondary'"
+                        t-on-click="() => this.setMode('recent')">
+                    <i class="fa fa-history me-1"/>Recent orders
+                </button>
+                <button type="button" class="btn"
+                        t-att-class="state.mode === 'day' ? 'btn-primary' : 'btn-outline-secondary'"
+                        t-on-click="() => this.setMode('day')">
+                    <i class="fa fa-calendar me-1"/>By day
+                </button>
+            </div>
+
+            <!-- BY DAY: pick the day, then everything finished on it, order by
+                 order. Older / Newer step a day at a time. -->
+            <div t-if="state.mode === 'day' and state.days.length" class="o_aa_history_days mb-3">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <button type="button" class="btn btn-outline-secondary"
+                            t-att-disabled="dayIndex &gt;= state.days.length - 1 or state.loading"
+                            t-on-click="() => this.stepDay(1)">
+                        <i class="fa fa-chevron-left me-1"/>Older
+                    </button>
+                    <select class="form-select w-auto fw-bold"
+                            t-on-change="(ev) => this.loadDay(ev.target.value)">
+                        <t t-foreach="state.days" t-as="aaDay" t-key="aaDay.key">
+                            <option t-att-value="aaDay.key" t-att-selected="aaDay.key === state.day">
+                                <t t-esc="aaDay.label"/> · <t t-esc="aaDay.orders"/> <t t-esc="aaDay.orders === 1 ? 'order' : 'orders'"/>
+                            </option>
+                        </t>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary"
+                            t-att-disabled="dayIndex &lt;= 0 or state.loading"
+                            t-on-click="() => this.stepDay(-1)">
+                        Newer<i class="fa fa-chevron-right ms-1"/>
+                    </button>
+                </div>
+                <div t-if="currentDay" class="text-muted mt-2">
+                    <t t-esc="currentDay.orders"/> <t t-esc="currentDay.orders === 1 ? 'order' : 'orders'"/>
+                    · <t t-esc="state.dayCount"/> <t t-esc="state.dayCount === 1 ? 'part' : 'parts'"/> finished<!--
+                 --><span t-if="state.dayWorked"> · <t t-esc="state.dayWorked"/> worked</span>
+                </div>
+            </div>
+
             <div t-if="state.loading" class="text-center text-muted py-4">
                 <i class="fa fa-circle-o-notch fa-spin fa-2x"/>
             </div>
 
-            <div t-elif="!state.groups.length" class="text-center text-muted py-4">
+            <div t-elif="state.mode === 'day' and !state.days.length" class="text-center text-muted py-4">
+                <div class="fs-5">Nothing finished in the last 60 days.</div>
+            </div>
+
+            <div t-elif="!shownGroups.length" class="text-center text-muted py-4">
                 <div class="fs-5">Nothing has been started yet.</div>
                 <div class="small">A job shows here as soon as somebody taps Start on it.</div>
             </div>
 
             <t t-else="">
-                <div t-foreach="state.groups" t-as="aaGroup" t-key="aaGroup.order"
+                <div t-foreach="shownGroups" t-as="aaGroup" t-key="aaGroup.order"
                      class="o_aa_history_order mb-3">
                     <div class="d-flex justify-content-between align-items-baseline gap-2 border-bottom pb-1 mb-2">
                         <span class="fs-5 fw-bold" t-esc="aaGroup.order"/>
@@ -40,7 +88,10 @@
                         </span>
                     </div>
                     <div class="text-muted small mb-2">
-                        <t t-esc="aaGroup.done"/> of <t t-esc="aaGroup.count"/> finished<!--
+                        <!-- By day lists only that day's parts, so "2 of 2"
+                             would say nothing: just how many were finished. -->
+                        <t t-if="state.mode === 'day'"><t t-esc="aaGroup.count"/> <t t-esc="aaGroup.count === 1 ? 'part' : 'parts'"/> finished</t>
+                        <t t-else=""><t t-esc="aaGroup.done"/> of <t t-esc="aaGroup.count"/> finished</t><!--
                      --><span t-if="aaGroup.worked"> · <t t-esc="aaGroup.worked"/> worked in total</span>
                     </div>
 
