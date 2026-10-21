@@ -133,7 +133,10 @@ patch(MrpDisplay.prototype, {
             : null;
 
         return {
-            key: record.id,
+            // BY THE ORDER, not the record: the records are new after every
+            // reload, and a row the manager opened must stay open after he
+            // presses Send.
+            key: order || record.id,
             order: order || "",
             customer: board.customer || "",
             received: received || "",
