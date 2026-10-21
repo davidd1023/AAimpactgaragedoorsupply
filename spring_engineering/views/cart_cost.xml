@@ -40,10 +40,10 @@
 
           <!-- NO LABEL. The word "Cost" told the customer there was a cost to
                see (owner, 2026-10-21), which is most of what we were trying
-               not to say. What is left is a caret the stylesheet keeps
-               invisible until the mouse is over the totals, so at rest this
-               row says nothing whatever - and the employee can still find it
-               without remembering where it is.
+               not to say. What is left is a bare caret, which says nothing
+               about what it opens - and it is always visible (owner,
+               2026-10-21), because a control the employee cannot see is one
+               he has to remember is there.
 
                THE NAME IS STILL ON IT, for anyone who cannot see the screen:
                aria-label is read by a screen reader and shown to nobody. A
