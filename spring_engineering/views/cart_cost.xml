@@ -38,23 +38,39 @@
       <tr t-if="aa_cost" name="aa_cart_cost" class="o_aa_cart_cost">
         <td colspan="2" class="border-0 ps-0 pt-2 text-muted">
 
-          <!-- ONE BUTTON, BOTH CELLS. data-bs-target takes a selector, so the
-               label's note and the amount in the next cell open together -
-               which they must, because an amount with no label beside it is
-               not worth showing and a label with no amount is not worth
-               clicking. -->
+          <!-- NO LABEL. The word "Cost" told the customer there was a cost to
+               see (owner, 2026-10-21), which is most of what we were trying
+               not to say. What is left is a caret the stylesheet keeps
+               invisible until the mouse is over the totals, so at rest this
+               row says nothing whatever - and the employee can still find it
+               without remembering where it is.
+
+               THE NAME IS STILL ON IT, for anyone who cannot see the screen:
+               aria-label is read by a screen reader and shown to nobody. A
+               `title` would have been the easy way to label it and is exactly
+               wrong here - it paints a tooltip saying "Cost" on hover.
+
+               ONE BUTTON, BOTH CELLS. data-bs-target takes a selector, so the
+               note and the amount in the next cell open together - which they
+               must, because an amount with nothing naming it is not worth
+               showing. -->
           <button type="button"
-                  class="btn btn-link btn-sm p-0 text-muted text-decoration-none"
+                  class="btn btn-link btn-sm p-0 text-muted text-decoration-none
+                         o_aa_cost_toggle"
                   data-bs-toggle="collapse"
                   data-bs-target=".o_aa_cost_folded"
                   aria-controls="aa_cart_cost_value aa_cart_cost_note"
-                  aria-expanded="false">
-            <i class="fa fa-caret-right me-1"/>
-            Cost
+                  aria-expanded="false"
+                  aria-label="Cost, staff only">
+            <i class="fa fa-caret-right" role="img"/>
           </button>
 
           <div class="collapse o_aa_cost_folded small"
                id="aa_cart_cost_note">
+            <!-- THE WORD LIVES INSIDE THE FOLD NOW, so that once it is open
+                 the figure is still named rather than being a loose number
+                 under the Total. -->
+            Cost
             <span class="badge text-bg-light fw-normal">staff only</span>
 
             <!-- SAY WHEN THE SUM IS SHORT. A product with a blank Cost field

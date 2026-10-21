@@ -448,13 +448,14 @@ class TestCartCostOnThePage(HttpCase):
         self.assertNotIn("collapse show", row, row)
         self.assertNotIn("show collapse", row, row)
 
-    def test_the_word_cost_is_the_only_thing_showing(self):
-        """What a customer could read over a shoulder is the label and
-        nothing else - no amount, and no count of uncosted lines.
+    def test_the_row_says_nothing_at_all_until_it_is_opened(self):
+        """NOT EVEN THE WORD "Cost" (owner, 2026-10-21). Naming it told the
+        customer there was a cost to see, which is most of what we were
+        trying not to say.
 
         READ AS A BROWSER WOULD PAINT IT: the collapsed containers are cut
         out, then the tags, leaving the text that is actually on the screen
-        before anybody clicks.
+        before anybody clicks. There should be none of it.
         """
         self.authenticate("admin", "admin")
         self._add(4)
@@ -463,9 +464,33 @@ class TestCartCostOnThePage(HttpCase):
         folded = re.sub(r'<div class="collapse.*?</div>', "", folded)
         visible = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", folded)).strip()
 
-        self.assertIn("Cost", visible, visible)
-        self.assertNotIn("44.00", visible, visible)
-        self.assertNotIn("staff only", visible, visible)
+        self.assertEqual(visible, "", "the row shows text before it is opened")
+
+        # The name is still on the control for anyone who cannot see the
+        # screen - and NOT as a `title`, which would paint a tooltip saying
+        # "Cost" to whoever is looking at it.
+        self.assertIn('aria-label="Cost, staff only"', row, row)
+        self.assertNotIn("title=", row, row)
+
+        # And the word is there once the fold is open, so the figure is named
+        # rather than being a loose number under the Total.
+        self.assertIn("Cost", row, row)
+
+    def test_the_caret_is_invisible_until_the_mouse_is_near_it(self):
+        """The stylesheet does the hiding, so the markup has to carry the
+        hook it keys on. Lose the class and the caret is a visible mark on
+        every customer's screen with nothing failing anywhere."""
+        css = open(
+            "/home/odoo/src/user/spring_engineering/static/src/css/"
+            "cart_included.css", encoding="utf-8").read()
+        self.authenticate("admin", "admin")
+        self._add(4)
+        row = self._row(self.url_open("/shop/cart").text)
+
+        self.assertIn("o_aa_cost_toggle", row, row)
+        self.assertIn(".o_aa_cart_cost .o_aa_cost_toggle", css)
+        self.assertIn("opacity: 0;", css)
+        self.assertIn(".o_cart_total:hover", css)
 
     def test_the_employee_sees_it_on_the_checkout_summary_too(self):
         """One template feeds the cart page and the summary card on every
