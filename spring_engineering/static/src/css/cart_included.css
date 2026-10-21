@@ -8,3 +8,12 @@
 .o_aa_included [aria-expanded="true"] .fa-caret-right {
     transform: rotate(90deg);
 }
+
+/* The staff-only cost row folds the same way, so it turns the same caret. */
+.o_aa_cart_cost .fa-caret-right {
+    transition: transform 0.15s ease-out;
+}
+
+.o_aa_cart_cost [aria-expanded="true"] .fa-caret-right {
+    transform: rotate(90deg);
+}

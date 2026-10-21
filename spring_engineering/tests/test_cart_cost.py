@@ -424,6 +424,49 @@ class TestCartCostOnThePage(HttpCase):
         self.assertIn("44.00", row, row)
         self.assertIn("staff only", row, row)
 
+    # --- folded away until asked for ------------------------------------------
+
+    def test_the_figure_is_folded_away_until_it_is_clicked(self):
+        """THE COUNTER IS OFTEN FACING THE CUSTOMER. The row is there, the
+        figure is not: it takes a deliberate click, so turning the screen
+        round does not show somebody what their own order costs us."""
+        self.authenticate("admin", "admin")
+        self._add(4)
+        row = self._row(self.url_open("/shop/cart").text)
+
+        # The amount and the note both sit inside collapsed containers, and
+        # the button that opens them says so.
+        self.assertRegex(
+            row, r'class="collapse[^"]*"[^>]*id="aa_cart_cost_value"',
+            "the amount is not inside a collapsed container")
+        self.assertIn('aria-expanded="false"', row, row)
+        self.assertIn('data-bs-toggle="collapse"', row, row)
+
+        # NOT ONE OF THEM PRE-OPENED. Bootstrap shows a collapse that carries
+        # the `show` class, and a cart that came back already expanded would
+        # defeat the whole point.
+        self.assertNotIn("collapse show", row, row)
+        self.assertNotIn("show collapse", row, row)
+
+    def test_the_word_cost_is_the_only_thing_showing(self):
+        """What a customer could read over a shoulder is the label and
+        nothing else - no amount, and no count of uncosted lines.
+
+        READ AS A BROWSER WOULD PAINT IT: the collapsed containers are cut
+        out, then the tags, leaving the text that is actually on the screen
+        before anybody clicks.
+        """
+        self.authenticate("admin", "admin")
+        self._add(4)
+        row = self._row(self.url_open("/shop/cart").text)
+        folded = re.sub(r'<div class="collapse.*?</div>\s*</td>', "</td>", row)
+        folded = re.sub(r'<div class="collapse.*?</div>', "", folded)
+        visible = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", folded)).strip()
+
+        self.assertIn("Cost", visible, visible)
+        self.assertNotIn("44.00", visible, visible)
+        self.assertNotIn("staff only", visible, visible)
+
     def test_the_employee_sees_it_on_the_checkout_summary_too(self):
         """One template feeds the cart page and the summary card on every
         checkout and payment step, so the figure travels with the order."""

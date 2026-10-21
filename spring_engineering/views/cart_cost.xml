@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <!-- WHAT THE CART COSTS, UNDER WHAT IT SELLS FOR - STAFF ONLY.
+  <!-- WHAT THE CART COSTS, UNDER WHAT IT SELLS FOR - STAFF ONLY, AND FOLDED.
 
        One inherit covers every place the figures appear, because Odoo renders
        the cart page's totals and the summary card on each checkout and payment
@@ -13,7 +13,19 @@
        at all - no label, no empty cell, no hint it exists. The t-if below is
        the SECOND lock rather than the only one, because this template can be
        reached from the website editor and the cost of goods is not a number to
-       guard with an xpath. -->
+       guard with an xpath.
+
+       AND IT IS FOLDED AWAY EVEN FROM THE STAFF, because the person at the
+       counter is often showing the screen to the customer it belongs to
+       (owner, 2026-10-21). The figure takes a deliberate click to see, and it
+       is collapsed again on every page load - there is nothing remembered, so
+       a cart can never come back with the cost already showing. Bootstrap's
+       own collapse does the work, so there is no script here to go wrong.
+
+       IT IS A FOLD, NOT A SECRET. The figure is in the page the employee was
+       served, so anybody at that keyboard could read it from the source as
+       easily as by clicking. What this stops is the customer reading it over
+       a shoulder, which is what was asked for. -->
   <template id="cart_cost_total" inherit_id="website_sale.total"
             name="Cart: cost for staff">
 
@@ -25,28 +37,49 @@
 
       <tr t-if="aa_cost" name="aa_cart_cost" class="o_aa_cart_cost">
         <td colspan="2" class="border-0 ps-0 pt-2 text-muted">
-          Cost
-          <span class="badge text-bg-light fw-normal">staff only</span>
 
-          <!-- SAY WHEN THE SUM IS SHORT. A product with a blank Cost field
-               adds nothing, so without this line the total reads like the
-               real cost of the order when it is only the part of it that has
-               been costed. A custom spring is costed from its own
-               specification, so it lands here only when the steel cost has
-               not been set in Settings. -->
-          <div t-if="aa_cost['unpriced']" class="small text-warning">
-            <t t-out="aa_cost['unpriced']"/>
-            <t t-if="aa_cost['unpriced'] == 1">item has</t>
-            <t t-else="">items have</t>
-            no cost set
+          <!-- ONE BUTTON, BOTH CELLS. data-bs-target takes a selector, so the
+               label's note and the amount in the next cell open together -
+               which they must, because an amount with no label beside it is
+               not worth showing and a label with no amount is not worth
+               clicking. -->
+          <button type="button"
+                  class="btn btn-link btn-sm p-0 text-muted text-decoration-none"
+                  data-bs-toggle="collapse"
+                  data-bs-target=".o_aa_cost_folded"
+                  aria-controls="aa_cart_cost_value aa_cart_cost_note"
+                  aria-expanded="false">
+            <i class="fa fa-caret-right me-1"/>
+            Cost
+          </button>
+
+          <div class="collapse o_aa_cost_folded small"
+               id="aa_cart_cost_note">
+            <span class="badge text-bg-light fw-normal">staff only</span>
+
+            <!-- SAY WHEN THE SUM IS SHORT. A product with a blank Cost field
+                 adds nothing, so without this line the total reads like the
+                 real cost of the order when it is only the part of it that
+                 has been costed. A custom spring is costed from its own
+                 specification, so it lands here only when the steel cost has
+                 not been set in Settings. -->
+            <div t-if="aa_cost['unpriced']" class="text-warning">
+              <t t-out="aa_cost['unpriced']"/>
+              <t t-if="aa_cost['unpriced'] == 1">item has</t>
+              <t t-else="">items have</t>
+              no cost set
+            </div>
           </div>
         </td>
+
         <td class="text-end border-0 px-0 pt-2 text-muted">
-          <span t-out="aa_cost['cost']"
-                class="monetary_field"
-                style="white-space: nowrap;"
-                t-options="{'widget': 'monetary',
-                            'display_currency': website_sale_order.currency_id}"/>
+          <div class="collapse o_aa_cost_folded" id="aa_cart_cost_value">
+            <span t-out="aa_cost['cost']"
+                  class="monetary_field"
+                  style="white-space: nowrap;"
+                  t-options="{'widget': 'monetary',
+                              'display_currency': website_sale_order.currency_id}"/>
+          </div>
         </td>
       </tr>
 
