@@ -29,72 +29,64 @@ export class AaShopFloorHistoryDialog extends Component {
 
     setup() {
         this.orm = useService("orm");
-        // BY DAY (owner, 2026-10-21): everything finished on one day, the
-        // orders separated by the day their parts were finished. Only from
-        // the menu - one order's own history is already one order.
+        // BY DAY (owner, 2026-10-21: "not choose - organised by day"): from
+        // the menu the History opens on the days, newest first, each day
+        // with the orders whose parts were finished on it. One order's own
+        // history (from its card) is already one order and stays as it was.
         this.state = useState({
             loading: true,
             groups: [],
-            mode: "recent",
+            mode: this.props.order ? "recent" : "day",
             days: [],
-            day: false,
-            dayGroups: [],
-            dayCount: 0,
-            dayWorked: "",
+            more: false,
+            dayLimit: 7,
         });
 
         onWillStart(async () => {
-            this.state.groups = await this.orm.call(
-                "mrp.workorder",
-                "aa_shop_floor_history",
-                [],
-                { order: this.props.order || false }
-            );
-            this.state.loading = false;
+            if (this.state.mode === "day") {
+                await this.loadDays();
+            } else {
+                await this.loadRecent();
+            }
         });
     }
 
-    async setMode(mode) {
-        this.state.mode = mode;
-        if (mode === "day" && !this.state.days.length) {
-            await this.loadDay(false);
-        }
+    async loadRecent() {
+        this.state.loading = true;
+        this.state.groups = await this.orm.call(
+            "mrp.workorder",
+            "aa_shop_floor_history",
+            [],
+            { order: this.props.order || false }
+        );
+        this.state.loading = false;
     }
 
-    async loadDay(day) {
+    async loadDays() {
         this.state.loading = true;
         const result = await this.orm.call(
             "mrp.workorder",
             "aa_shop_floor_history_by_day",
             [],
-            { day: day || false }
+            { days: this.state.dayLimit }
         );
         this.state.days = result.days;
-        this.state.day = result.day;
-        this.state.dayGroups = result.groups;
-        this.state.dayCount = result.count;
-        this.state.dayWorked = result.worked;
+        this.state.more = result.more;
         this.state.loading = false;
     }
 
-    get dayIndex() {
-        return this.state.days.findIndex((day) => day.key === this.state.day);
-    }
-
-    get currentDay() {
-        return this.state.days[this.dayIndex] || false;
-    }
-
-    // The days are newest first, so "older" is further down the list.
-    async stepDay(step) {
-        const next = this.state.days[this.dayIndex + step];
-        if (next) {
-            await this.loadDay(next.key);
+    async setMode(mode) {
+        this.state.mode = mode;
+        if (mode === "day") {
+            await this.loadDays();
+        } else {
+            await this.loadRecent();
         }
     }
 
-    get shownGroups() {
-        return this.state.mode === "day" ? this.state.dayGroups || [] : this.state.groups;
+    async showOlderDays() {
+        this.state.dayLimit += 7;
+        await this.loadDays();
     }
 
     get title() {
