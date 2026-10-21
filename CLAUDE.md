@@ -105,6 +105,25 @@ drum, track, lift, door size, weight) and each prepared lift cable pair gets a
 stop per cable). The station BoMs are NORMAL, template-level, with no components:
 the delivery still explodes the kits' and cables' own phantom BoMs.
 
+## Git
+
+Never `git push`. Use `odoosh-push`.
+
+### Commit and push without being asked (owner, 2026-10-21)
+
+*"whenever you make a change you can commit and push automatically."* So finish
+a piece of work by committing it and running `odoosh-push` - no asking first,
+no leaving it uncommitted for the owner to remember. This container is
+ephemeral: uncommitted work is lost on a rebuild, which is the whole reason for
+the instruction.
+
+TEST IT FIRST. "A change" means one that has been updated into the database and
+had its tests run, not one that merely saves. A broken commit is worse than an
+uncommitted one, because it reaches Prod the next time main is merged.
+
+The push lands on this build's branch (`main`). Prod is still the owner's own
+merge - never commit to or push the `Prod` branch directly.
+
 ## Spring coil stock (`aa_spring_stock`)
 
 Coils are COIL-<wire>-<I.D.>-<L/R>, in inches, one lot per piece, under
@@ -127,22 +146,3 @@ time, and a box is removed only once it is empty. Floor, Rack and Boxes are
 shown on ONE page, a fold-out group per place (owner, 2026-10-19: not separate
 menus) - `aa.spring.place.summary`, menu "Floor / Rack / Boxes". Anything that asks "is this a
 box coil" must use `place_of()`, never `location.name == "Boxes"`.
-
-## Git
-
-Never `git push`. Use `odoosh-push`.
-
-### Commit and push without being asked (owner, 2026-10-21)
-
-*"whenever you make a change you can commit and push automatically."* So finish
-a piece of work by committing it and running `odoosh-push` - no asking first,
-no leaving it uncommitted for the owner to remember. This container is
-ephemeral: uncommitted work is lost on a rebuild, which is the whole reason for
-the instruction.
-
-TEST IT FIRST. "A change" means one that has been updated into the database and
-had its tests run, not one that merely saves. A broken commit is worse than an
-uncommitted one, because it reaches Prod the next time main is merged.
-
-The push lands on this build's branch (`main`). Prod is still the owner's own
-merge - never commit to or push the `Prod` branch directly.
