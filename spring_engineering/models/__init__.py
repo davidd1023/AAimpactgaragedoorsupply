@@ -10,3 +10,4 @@ from . import sale_order_line
 from . import sale_order
 from . import cart_cost
 from . import product_variant_merge
+from . import variant_merge_wizard

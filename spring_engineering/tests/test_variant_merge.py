@@ -995,3 +995,41 @@ class TestVariantMerge(TransactionCase):
 
         self.assertFalse(wanted)
         self.assertIn('Flag Angle 6-3/8" Black', warning)
+
+    # --- the screen that says what the migration did ----------------------
+
+    def test_the_rehearsal_screen_reports_without_changing_anything(self):
+        """The migration writes its report to the build log, which is no use
+        to somebody asking "did it work?" from inside Odoo. This is the same
+        report as a screen."""
+        made = self._anchor_brackets()
+
+        wizard = self.env["aa.variant.merge.rehearsal"].create({})
+
+        self.assertIn("Spring Anchor Bracket", wizard.report)
+        self.assertIn("Rehearsal", wizard.report)
+        self.assertFalse(wizard.done)
+        for name, tmpl in made.items():
+            self.assertTrue(tmpl.active, name)
+            self.assertFalse(tmpl.attribute_line_ids, name)
+
+    def test_the_rehearsal_screen_names_what_it_could_not_find(self):
+        """The report has to be a diagnosis, not a verdict: a family that was
+        skipped says which products it went looking for, so a name that does
+        not match can be seen rather than guessed at."""
+        wizard = self.env["aa.variant.merge.rehearsal"].create({})
+
+        self.assertIn("not in the catalogue", wizard.report)
+        self.assertIn("Jamb Bracket # 10 Black", wizard.report)
+
+    def test_the_screen_can_do_it_for_real(self):
+        """So that a family put right - a delivery validated, a price
+        corrected - does not need another deploy to get another attempt."""
+        self._anchor_brackets()
+        wizard = self.env["aa.variant.merge.rehearsal"].create({})
+
+        wizard.action_merge_for_real()
+
+        self.assertTrue(wizard.done)
+        self.assertIn("MERGED FOR REAL", wizard.report)
+        self.assertEqual(len(self._live_variants("Spring Anchor Bracket")), 4)
