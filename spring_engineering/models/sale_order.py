@@ -353,12 +353,17 @@ class SaleOrder(models.Model):
                 return found
 
         # 2. Anything that reads like a jamb bracket of this size in this
-        #    finish. Ordered by name so a catalogue holding two candidates
-        #    resolves the same way on every order rather than by chance.
+        #    finish - including, since the colours and sizes were folded into
+        #    one product (owner, 2026-10-21), a VARIANT of one. The size and
+        #    the finish used to be in the name and are now values on the
+        #    variant, so the reading is done on _aa_choice_text: the name with
+        #    the chosen values on the end. Before the merge that is just the
+        #    name, which is why this one path serves both.
         wanted = int(size)
+        candidates = Product.browse()
 
-        for product in Product.search([("name", "ilike", "jamb")], order="name"):
-            name = product.name or ""
+        for product in Product.search([("name", "ilike", "jamb")]):
+            name = product._aa_choice_text()
 
             if not re.search(r"\bbracket\b", name, re.I):
                 continue
@@ -369,7 +374,13 @@ class SaleOrder(models.Model):
                 continue
 
             if self._track_prep_declared_size(name) == wanted:
-                return product
+                candidates |= product
+
+        # ONE ANSWER, ALWAYS THE SAME ONE. This used to order by name and take
+        # the first, which no longer separates anything: every variant of a
+        # product carries its product's name.
+        if candidates:
+            return candidates._aa_pick_stable()
 
         # 3. The catalogue part numbers, for a database carrying
         #    garage_door_supply's data instead of the owner's own products.
@@ -462,12 +473,26 @@ class SaleOrder(models.Model):
             # that is not found takes the whole preparation down with it, so
             # "Flag Angle - Black" costing the customer every bracket on the
             # order is not a trade the strict lookup was ever worth making.
-            for product in Product.search([("name", "ilike", "flag")], order="name"):
-                name = product.name or ""
+            #
+            # AND THE SAME READING: the finish moved off the name and onto the
+            # variant when the two flag angle sizes became one product, so this
+            # reads the name with the chosen values on the end.
+            candidates = Product.browse()
+
+            for product in Product.search([("name", "ilike", "flag")]):
+                name = product._aa_choice_text()
 
                 if re.search(r"\bangle\b", name, re.I) \
                         and re.search(r"\b%s\b" % re.escape(colour), name, re.I):
-                    return product
+                    candidates |= product
+
+            # TWO SIZES, BOTH IN THIS FINISH, and nothing here knows which a
+            # prepared track takes - the owner has not said yet, and the old
+            # lookup never asked: ordering by name gave it 5.9" by alphabet.
+            # _aa_pick_stable gives the same answer deliberately rather than by
+            # accident, and the setting below overrides it.
+            if candidates:
+                return candidates._aa_pick_stable()
 
         return self._track_prep_configured_part("flag")
 

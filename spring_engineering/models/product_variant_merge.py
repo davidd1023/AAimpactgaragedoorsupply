@@ -682,3 +682,68 @@ class ProductTemplate(models.Model):
             if tmpl == base:
                 continue
             tmpl.write({"is_published": False, "active": False})
+
+
+class ProductProduct(models.Model):
+    _inherit = "product.product"
+
+    # The spellings a finish attribute answers to. The catalogue was not built
+    # on one day and aa_dealer_orders already reads all four
+    # (custom_kit.py COLOUR_ATTRIBUTES); this is the same list, so a product
+    # the owner set up by hand as "Color" is understood too.
+    AA_COLOUR_ATTRIBUTES = ("colour", "color", "finish colour", "finish color")
+
+    def _aa_choice_text(self):
+        """This product's name with the values it was chosen in.
+
+        THE POINT OF THIS FUNCTION. Half the shop used to read a colour or a
+        size out of a product NAME, because that is where they were: "Jamb
+        Bracket # 10 Black" said its size and its finish out loud. After the
+        merge the name is "Jamb Bracket" and the size and the finish are
+        variant values, so every one of those readers would come up empty -
+        and a bracket that is not found takes the whole prepared track with it
+        (_track_prep_sync adds every part or none).
+
+        So the readers go on reading a name; this is just a longer name. Before
+        the merge it returns the name unchanged, which is why the same code
+        works on a database that has not been merged yet - and on the owner's,
+        between the deploy and the migration.
+        """
+        self.ensure_one()
+        chosen = self.product_template_attribute_value_ids.mapped("name")
+        return " ".join([self.name or ""] + [v for v in chosen if v])
+
+    def _aa_chosen_colour(self):
+        """The finish this variant was chosen in, or "" if it has no finish."""
+        self.ensure_one()
+        for ptav in self.product_template_attribute_value_ids:
+            if (ptav.attribute_id.name or "").strip().lower() in self.AA_COLOUR_ATTRIBUTES:
+                return (ptav.name or "").strip()
+        return ""
+
+    def _aa_pick_stable(self):
+        """One of several candidates - THE SAME ONE EVERY TIME.
+
+        A tolerant lookup that matched one product could be left matching
+        several once its colour stopped being part of its name: "Flag Angle
+        Black" used to name one product and now describes a Black flag angle
+        in either of two sizes. Ordering by name no longer separates them -
+        every variant of a product shares its name - so a plain `limit=1`
+        would hand out whichever the database happened to return first, and a
+        different one on the next order.
+
+        The order here is the page order: the sequence of the chosen values,
+        then the id. For the flag angles that means 5.9" before 6-3/8", which
+        is what the old alphabetical-by-name lookup was giving the owner by
+        accident. Preserving an accident is deliberate - it is still what his
+        orders have been getting - and it is the setting
+        (spring_engineering.track_prep_flag_product_id) that overrides it until
+        he says which size a prepared track should take.
+        """
+        return self.sorted(
+            key=lambda p: (
+                [v.product_attribute_value_id.sequence
+                 for v in p.product_template_attribute_value_ids],
+                p.id,
+            )
+        )[:1]

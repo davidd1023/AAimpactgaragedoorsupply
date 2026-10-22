@@ -75,7 +75,13 @@ class Catalog:
             ('name', 'ilike', 'Lift Cable'),
         ]) | env['product.product'].sudo().search([
             ('sale_ok', '=', True),
-            ('name', 'in', [f'{c} Trims' for c in TRIM_COLOURS]),
+            # THREE PRODUCTS OR ONE, depending on whether the colours have been
+            # folded in yet (owner, 2026-10-21): "White Trims", "Bronze Trims"
+            # and "Black Trims" became one "Trims" with a colour to choose.
+            # Both shapes are searched for, because the code has to work on the
+            # database as it is today and as it will be after the migration.
+            '|', ('name', 'in', [f'{c} Trims' for c in TRIM_COLOURS]),
+            ('name', '=', 'Trims'),
         ])
         self.horizontal = []  # (size, length, color, product)
         self.vertical = []
@@ -86,6 +92,15 @@ class Catalog:
             # 'Lift Cable 5/32" Pair - Prepared (8' Door, 3" Track (15R))'
             name = (p.display_name or '').strip()
             if 'RAW' in name:
+                continue
+            # THE COLOUR, from wherever this catalogue keeps it. A merged Trims
+            # product says it in its variant values ("Trims (Black)"); the
+            # three old products said it in their names ("Black Trims"). Asked
+            # of the variant first, because that is the answer that cannot be
+            # thrown off by how a name happens to be spelled.
+            chosen = p._aa_chosen_colour()
+            if chosen in TRIM_COLOURS:
+                self.trims[chosen] = p
                 continue
             if name.endswith(' Trims') and name.split(' ')[0] in TRIM_COLOURS:
                 self.trims[name.split(' ')[0]] = p

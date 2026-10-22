@@ -434,3 +434,106 @@ class TestVariantMerge(TransactionCase):
 
         self.assertEqual(again["state"], "already merged", again)
         self.assertEqual(len(self._live_variants("Spring Anchor Bracket")), 4)
+
+    # --- the shop has to find its parts on both sides of the merge --------
+
+    def _flag_angles(self):
+        made = {}
+        for size, price in (('5.9"', 9.1), ('6-3/8"', 9.22)):
+            for colour in ("Black", "White"):
+                name = "Flag Angle %s %s" % (size, colour)
+                made[name] = self._product(name, price=price, stock=50.0)
+        return made
+
+    def test_a_prepared_track_finds_its_brackets_before_the_merge(self):
+        """The lookup this change could break, proved on today's catalogue
+        first - so a failure after the merge is the merge's fault and not a
+        test that never worked."""
+        made = self._jamb_brackets()
+
+        found = self.env["sale.order"]._track_prep_bracket_product("12", "White")
+
+        self.assertEqual(found, made["Jamb Bracket # 12 White"].product_variant_id)
+
+    def test_a_prepared_track_still_finds_its_brackets_after_the_merge(self):
+        """THE ONE THAT MATTERS. A bracket not found does not fail on its own:
+        _track_prep_sync abandons the whole preparation, so the customer's
+        prepared track quietly arrives with no brackets and no flag angle."""
+        self._jamb_brackets()
+
+        self._merge("Jamb Bracket")
+        found = self.env["sale.order"]._track_prep_bracket_product("12", "White")
+
+        self.assertTrue(found, "the brackets were lost in the merge")
+        self.assertEqual(
+            found,
+            self._variant("Jamb Bracket", **{
+                "Bracket Size": "#12", "Colour": "White"}),
+        )
+
+    def test_a_black_track_is_never_given_a_white_bracket(self):
+        """The finish is matched as a whole word, and it has to go on being
+        matched once it is a variant value rather than part of a name."""
+        self._jamb_brackets()
+
+        self._merge("Jamb Bracket")
+
+        for colour in ("Black", "White"):
+            found = self.env["sale.order"]._track_prep_bracket_product("16", colour)
+            self.assertEqual(found._aa_chosen_colour(), colour)
+            self.assertEqual(
+                found.product_template_attribute_value_ids.filtered(
+                    lambda v: v.attribute_id.name == "Bracket Size").name,
+                "#16",
+            )
+
+    def test_the_flag_angle_survives_the_merge_and_does_not_wander(self):
+        """Two sizes, both in the track's finish, and the old lookup picked
+        5.9" by alphabet. After the merge both are one product and ordering by
+        name separates nothing - so the pick has to be deliberate, and it has
+        to be the SAME one every time."""
+        made = self._flag_angles()
+        before = self.env["sale.order"]._track_prep_flag_for_colour("Black")
+        self.assertEqual(before, made['Flag Angle 5.9" Black'].product_variant_id)
+
+        self._merge("Flag Angle")
+
+        after = self.env["sale.order"]._track_prep_flag_for_colour("Black")
+        self.assertTrue(after, "the flag angle was lost in the merge")
+        self.assertEqual(after._aa_chosen_colour(), "Black")
+        self.assertEqual(
+            after.product_template_attribute_value_ids.filtered(
+                lambda v: v.attribute_id.name == "Flag Angle Size").name,
+            '5.9"',
+            "the flag angle changed size in the merge",
+        )
+        # Asked again, and again: the same variant, not whichever the database
+        # felt like returning.
+        for _ in range(3):
+            self.assertEqual(
+                self.env["sale.order"]._track_prep_flag_for_colour("Black"), after)
+
+    def test_the_choice_text_is_just_the_name_before_a_merge(self):
+        """Everything above leans on _aa_choice_text reading the same on an
+        unmerged catalogue, which is how one code path serves the database
+        before the migration and after it."""
+        made = self._jamb_brackets()
+        plain = made["Jamb Bracket # 14 Black"].product_variant_id
+
+        self.assertEqual(plain._aa_choice_text(), "Jamb Bracket # 14 Black")
+        self.assertEqual(plain._aa_chosen_colour(), "")
+
+        self._merge("Jamb Bracket")
+        merged = self._variant("Jamb Bracket", **{
+            "Bracket Size": "#14", "Colour": "Black"})
+
+        # THE ORDER OF THE VALUES IS ODOO'S, not this table's: it sorts them by
+        # the attribute's own sequence, so a colour (10) comes before a size
+        # (30+) whichever way round the family lists them. Nothing here may
+        # depend on that order - the readers are regexes over the whole text -
+        # so the test does not either.
+        self.assertEqual(
+            sorted(merged._aa_choice_text().split()),
+            sorted("Jamb Bracket #14 Black".split()),
+        )
+        self.assertEqual(merged._aa_chosen_colour(), "Black")
