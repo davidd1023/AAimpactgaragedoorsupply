@@ -89,10 +89,13 @@ class TestVariantMerge(TransactionCase):
         return made
 
     def _hinges(self):
-        """Seven sizes, three colours, and a part number per SIZE."""
+        """The owner's hinges as they really are: NINE sizes with a part number
+        each - except that #8 and #9 come in Black and White only, which is the
+        hole the merge has to archive rather than offer."""
         made = {}
-        for n in range(1, 8):
-            for colour in ("Black", "White", "Galvanized"):
+        for n in range(1, 10):
+            for colour in (("Black", "White", "Galvanized") if n <= 7
+                           else ("Black", "White")):
                 name = "Hinge # %d %s" % (n, colour)
                 made[name] = self._product(
                     name, code="CH1411-%d" % n, price=2.4 + n * 0.1,
@@ -353,31 +356,6 @@ class TestVariantMerge(TransactionCase):
             self.assertTrue(tmpl.active, "%s was touched anyway" % tmpl.name)
             self.assertFalse(tmpl.attribute_line_ids)
 
-    def test_an_open_delivery_stops_the_family(self):
-        """We are about to move this stock to another product. A picking that
-        has not gone out has a claim on it."""
-        made = self._anchor_brackets()
-        variant = made["Spring Anchor Bracket RH Black"].product_variant_id
-        picking = self.env["stock.picking"].create({
-            "picking_type_id": self.env.ref("stock.picking_type_out").id,
-            "location_id": self.stock.id,
-            "location_dest_id": self.env.ref("stock.stock_location_customers").id,
-            "move_ids": [(0, 0, {
-                "product_id": variant.id,
-                "product_uom_qty": 5.0,
-                "location_id": self.stock.id,
-                "location_dest_id": self.env.ref("stock.stock_location_customers").id,
-            })],
-        })
-        picking.action_confirm()
-
-        report = self._merge("Spring Anchor Bracket")
-
-        self.assertEqual(report["state"], "skipped", report)
-        self.assertTrue(
-            any("still open" in p for p in report["problems"]), report)
-        self.assertEqual(self._on_hand(variant), 201.0, "stock was moved anyway")
-
     def test_a_product_missing_from_the_catalogue_stops_the_family(self):
         """Half a family is worse than none: the store would offer variants
         with nobody's stock on them."""
@@ -563,7 +541,7 @@ class TestVariantMerge(TransactionCase):
         self._migration().migrate(self.env.cr, "19.0.2.48.0")
 
         self.assertEqual(len(self._live_variants("Spring Anchor Bracket")), 4)
-        self.assertEqual(len(self._live_variants("Hinge")), 21)
+        self.assertEqual(len(self._live_variants("Hinge")), 25)
 
     def test_the_migration_does_nothing_on_a_fresh_database(self):
         """No version means a database being created, which has no catalogue
@@ -793,10 +771,10 @@ class TestVariantMerge(TransactionCase):
             self.env["mrp.bom"]._bom_find(want)[want], bom,
             "the merged part cannot find its own BoM")
 
-    def test_a_family_with_a_hole_in_it_is_refused(self):
-        """Odoo builds a variant for every COMBINATION, so a family missing
-        one would offer a priced bracket that was never stocked. Both
-        docstrings promised this refusal; now it exists."""
+    def test_a_product_the_table_names_but_the_catalogue_lost_stops_it(self):
+        """A product in the table that is not in the catalogue - renamed,
+        retired - means half a family, and half a family would leave variants
+        with nobody's stock on them."""
         made = self._anchor_brackets()
         # the catalogue no longer has an RH White - somebody renamed it
         made["Spring Anchor Bracket RH White"].name = "Anchor RH White, retired"
@@ -1033,3 +1011,118 @@ class TestVariantMerge(TransactionCase):
         self.assertTrue(wizard.done)
         self.assertIn("MERGED FOR REAL", wizard.report)
         self.assertEqual(len(self._live_variants("Spring Anchor Bracket")), 4)
+
+    # --- what his own catalogue threw at the first rehearsal ---------------
+
+    def test_a_combination_he_has_never_stocked_is_archived_not_offered(self):
+        """HIS HINGES ARE NOT SQUARE: #1-#9 in Black and White, Galvanized only
+        to #7. Nine sizes by three colours is 27 combinations over 25 products,
+        and Odoo builds all 27. The two he has never stocked are archived,
+        which Odoo reads as "this combination does not exist" - so the shop
+        cannot sell a #8 Galvanized hinge, and he can start selling one by
+        un-archiving it. An earlier draft refused the whole family, which would
+        have left four hinge sizes as separate products."""
+        self._hinges()
+
+        report = self._merge("Hinge")
+
+        self.assertEqual(report["state"], "merged", report)
+        self.assertEqual(report["variants"], 25, report)
+        self.assertEqual(len(self._live_variants("Hinge")), 25)
+        self.assertTrue(
+            any("never stocked" in n for n in report["notes"]), report["notes"])
+
+        survivor = self._survivor("Hinge")
+        archived = survivor.with_context(
+            active_test=False).product_variant_ids.filtered(
+            lambda v: not v.active and v.product_template_attribute_value_ids)
+        self.assertEqual(
+            sorted(", ".join(v.product_template_attribute_value_ids.mapped("name"))
+                   for v in archived),
+            ["Galvanized, #8", "Galvanized, #9"],
+        )
+        # And the shop agrees it is not a thing to sell.
+        self.assertFalse(survivor._is_combination_possible(
+            archived[0].product_template_attribute_value_ids))
+
+    def test_an_open_work_order_follows_the_stock_instead_of_blocking_it(self):
+        """THE REASON THE FIRST REAL RUN DID ALMOST NOTHING. Thirteen of
+        fifteen families were refused because W/O #204, #207, #208, #209 and
+        AAM/MO/00072 hold brackets and hinges. A working shop always has open
+        work orders, so refusing was a refusal that could never come right: it
+        asked him to empty his own floor to tidy the catalogue."""
+        made = self._anchor_brackets()
+        old = made["Spring Anchor Bracket RH Black"].product_variant_id
+        picking = self.env["stock.picking"].create({
+            "picking_type_id": self.env.ref("stock.picking_type_out").id,
+            "location_id": self.stock.id,
+            "location_dest_id": self.env.ref("stock.stock_location_customers").id,
+            "move_ids": [(0, 0, {
+                "product_id": old.id,
+                "product_uom_qty": 5.0,
+                "location_id": self.stock.id,
+                "location_dest_id": self.env.ref("stock.stock_location_customers").id,
+            })],
+        })
+        picking.action_confirm()
+        picking.action_assign()
+        move = picking.move_ids
+        self.assertEqual(move.state, "assigned", "the fixture did not reserve")
+
+        report = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(report["state"], "merged", report)
+        want = self._variant("Spring Anchor Bracket", Hand="RH", Colour="Black")
+        self.assertEqual(move.product_id, want, "the work order lost its part")
+        self.assertEqual(move.product_uom_qty, 5.0, "the quantity changed")
+        self.assertEqual(move.product_uom, want.uom_id, "the unit was lost")
+        self.assertEqual(
+            move.state, "assigned",
+            "the work order came out of the merge unreserved")
+        self.assertEqual(sum(move.move_line_ids.mapped("quantity")), 5.0)
+
+    def test_a_move_somebody_is_validating_stops_the_family(self):
+        """`picked` means a quantity has been entered against it. Unreserving
+        that would throw away a count a person made at the rack."""
+        made = self._anchor_brackets()
+        old = made["Spring Anchor Bracket LH Black"].product_variant_id
+        picking = self.env["stock.picking"].create({
+            "picking_type_id": self.env.ref("stock.picking_type_out").id,
+            "location_id": self.stock.id,
+            "location_dest_id": self.env.ref("stock.stock_location_customers").id,
+            "move_ids": [(0, 0, {
+                "product_id": old.id,
+                "product_uom_qty": 5.0,
+                "location_id": self.stock.id,
+                "location_dest_id": self.env.ref("stock.stock_location_customers").id,
+            })],
+        })
+        picking.action_confirm()
+        picking.action_assign()
+        picking.move_ids.picked = True
+
+        report = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(report["state"], "skipped", report)
+        self.assertTrue(
+            any("part way through" in p for p in report["problems"]), report)
+        self.assertEqual(self._on_hand(old), 200.0, "its stock was moved anyway")
+
+    def test_a_barcode_is_moved_rather_than_copied(self):
+        """WHAT KILLED THE TORSION SOLID SHAFT FAMILY on his first deploy: a
+        barcode is unique per company and the old product is still active when
+        the new variant is written, so copying it raised "Barcode
+        CH-SH02-10FT6 already assigned" and rolled the family back."""
+        for length, price in (("8'6\"", 38.93), ("9'6\"", 43.18), ("10'6\"", 47.29)):
+            made = self._product("Torsion Solid Shaft %s" % length,
+                                 code="CH-SH02", price=price, stock=50.0)
+            made.product_variant_id.barcode = "BC-SHAFT-%s" % price
+
+        report = self._merge("Torsion Solid Shaft")
+
+        self.assertEqual(report["state"], "merged", report)
+        for length, price in (("8'6\"", 38.93), ("9'6\"", 43.18), ("10'6\"", 47.29)):
+            variant = self._variant("Torsion Solid Shaft", **{"Length": length})
+            self.assertEqual(
+                variant.barcode, "BC-SHAFT-%s" % price,
+                "scanning %s would not find the variant with the stock" % length)
