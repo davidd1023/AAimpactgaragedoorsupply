@@ -9,3 +9,4 @@ from . import product_wishlist
 from . import sale_order_line
 from . import sale_order
 from . import cart_cost
+from . import product_variant_merge

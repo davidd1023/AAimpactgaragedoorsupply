@@ -52,7 +52,15 @@ from .variant_families import ATTRIBUTE_VALUES, FAMILIES
 
 _logger = logging.getLogger(__name__)
 
-MODULE = "garage_door_supply"
+# WHY THIS IS NOT IN garage_door_supply, where the catalogue otherwise lives:
+# that module owns views/website_homepage.xml, which replaces the whole of the
+# homepage's //div[@id='wrap'] and carries no noupdate. Every update of it puts
+# the shipped hero back over whatever has been done in the website builder -
+# the owner restored a backup on 2026-10-19 and watched the page change back.
+# A merge needs a migration, a migration needs an update, and an update there
+# costs him his front page. See aa_dealer_orders/__manifest__.py, which refuses
+# to depend on that module for the same reason.
+MODULE = "spring_engineering"
 
 # A stock move that is neither done nor cancelled still has a claim on the
 # quantity we are about to move to another product. Validating or cancelling it
