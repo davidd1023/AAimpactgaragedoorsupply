@@ -126,7 +126,16 @@ class ProductTemplate(models.Model):
             word in (part.name or "").lower() for word in NEVER_IN_A_CUSTOM_KIT))
 
     def _aa_custom_kit_colours(self):
-        """[(variant id, label)] - the finishes this part comes in.
+        """[(variant id, label, finish)] - the variants this part comes in.
+
+        THE LABEL AND THE FINISH ARE NOT THE SAME THING, and conflating them
+        is what put a hundred entries in the kit's colour box (owner,
+        2026-10-22: "the custom kits color option ... is showing a lot of
+        options when it should only show 3"). The LABEL has to name the whole
+        variant - "#3 Black" - or the per-part dropdown cannot be read. The
+        FINISH is the colour alone, and it is what the ONE COLOUR FOR THE
+        WHOLE KIT box offers, so that box lists three finishes rather than
+        every size in every colour.
 
         ITS OWN VARIANTS WHERE IT HAS THEM. A product with a Finish Color
         attribute offers its colours; one whose colour is in its name is
@@ -137,7 +146,7 @@ class ProductTemplate(models.Model):
         variants = self.sudo().product_variant_ids
 
         if len(variants) <= 1:
-            return [(variants[:1].id, "")] if variants else []
+            return [(variants[:1].id, "", "")] if variants else []
 
         colours = []
 
@@ -161,8 +170,11 @@ class ProductTemplate(models.Model):
                 finish[:1].name or "",
             ) if part)
 
-            colours.append((variant.id,
-                            label or ", ".join(values.mapped("name"))))
+            colours.append((
+                variant.id,
+                label or ", ".join(values.mapped("name")),
+                finish[:1].name or "",
+            ))
 
         return colours
 
@@ -264,8 +276,10 @@ class ProductTemplate(models.Model):
             "category_id": shelf,
             "category": shelf_name,
             "price": round(self.list_price, 2),
-            "colours": [{"id": variant_id, "label": label}
-                        for variant_id, label in colours],
+            # finish is the colour ALONE, for the one-colour-for-the-whole-kit
+            # box; label names the whole variant, for the per-part dropdown.
+            "colours": [{"id": variant_id, "label": label, "finish": finish}
+                        for variant_id, label, finish in colours],
         }
 
     def _aa_custom_kit_json(self):
@@ -314,14 +328,15 @@ class ProductTemplate(models.Model):
             if len(seen) > 1:
                 parts.append(members[0][0]._aa_custom_kit_part_json(
                     family["stem"],
-                    [(variant_id, colour) for colour, variant_id in seen.items()]))
+                    [(variant_id, colour, colour)
+                     for colour, variant_id in seen.items()]))
 
                 # AND NOTHING DISAPPEARS: a second product of a colour that is
                 # already taken is still offered, under its own name.
                 for part, colour, variant_id in members:
                     if seen[colour] != variant_id:
                         parts.append(part._aa_custom_kit_part_json(
-                            part.name, [(variant_id, "")]))
+                            part.name, [(variant_id, "", "")]))
 
                 continue
 
@@ -330,7 +345,7 @@ class ProductTemplate(models.Model):
             # than becoming a "Plated Bolt" that comes in zinc.
             for part, _colour, variant_id in members:
                 parts.append(
-                    part._aa_custom_kit_part_json(part.name, [(variant_id, "")]))
+                    part._aa_custom_kit_part_json(part.name, [(variant_id, "", "")]))
 
         parts.sort(key=lambda row: row["name"])
 

@@ -95,6 +95,12 @@ class CustomKitPage {
         // over the parts that come in more than one. A product whose colour is
         // in its name has a single variant and no finish to offer, so it is
         // not counted and the kit colour cannot move it.
+        //
+        // THE FINISH, NOT THE LABEL. A label names the whole variant - "#3
+        // Black" - because the per-part dropdown has to be readable now that
+        // a hinge is one product with 25 variants. Counting labels here put
+        // every size of every colour in this box: owner, 2026-10-22, "showing
+        // a lot of options when it should only show 3".
         const counts = new Map();
 
         for (const part of this.parts) {
@@ -103,8 +109,8 @@ class CustomKitPage {
             }
 
             for (const colour of part.colours) {
-                if (colour.label) {
-                    counts.set(colour.label, (counts.get(colour.label) || 0) + 1);
+                if (colour.finish) {
+                    counts.set(colour.finish, (counts.get(colour.finish) || 0) + 1);
                 }
             }
         }
@@ -119,8 +125,10 @@ class CustomKitPage {
         // it already was - a part that is only made in galvanised stays
         // galvanised rather than disappearing from the kit.
         if (this.colour) {
+            // Matched on the FINISH, for the same reason the box lists
+            // finishes: "Black" has to find the black one whatever size it is.
             const match = part.colours.find(
-                (colour) => colour.label === this.colour);
+                (colour) => colour.finish === this.colour);
 
             if (match) {
                 return match.id;
@@ -202,7 +210,7 @@ class CustomKitPage {
 
         if (colours.length) {
             row.appendChild(el("label",
-                { class: "form-label mb-0 ms-md-3" }, "Colour"));
+                { class: "form-label mb-0 ms-md-3" }, "Color"));
             this.colourSelect = el("select", { class: "form-select w-auto" });
             this.colourSelect.appendChild(el("option", { value: "" }, "As listed"));
 
@@ -334,7 +342,7 @@ class CustomKitPage {
 
         if (part.colours.length > 1) {
             const colour = el("select",
-                { class: "form-select form-select-sm w-auto", "aria-label": "Colour" });
+                { class: "form-select form-select-sm w-auto", "aria-label": "Color" });
 
             for (const option of part.colours) {
                 const node = el("option",
