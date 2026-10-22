@@ -243,15 +243,16 @@ class MrpProduction(models.Model):
         # No separate Drum row: the drum is already a piece in Box Contents
         # (owner, 2026-10-14).
 
-        bom = self.env["mrp.bom"].sudo()._bom_find(product, bom_type="phantom").get(product)
-        if bom:
-            pieces = {}
-            for line in bom.bom_line_ids:
-                if line._skip_bom_line(product):
-                    continue
-                part = line.product_id
-                pieces.setdefault(part, 0.0)
-                pieces[part] += line.product_qty * qty / (bom.product_qty or 1.0)
+        # A CUSTOM KIT IS A KIT (owner, 2026-10-20), and the only difference
+        # is where its contents are written down: a catalogue kit explodes its
+        # phantom BoM, a custom one is the order's own lines. Reading only the
+        # BoM left the bench a card saying "Kit: Custom Kit" and nothing else -
+        # owner, 2026-10-22: "it only makes one assignment and the only thing
+        # on it says custom kit".
+        pieces = self._aa_kit_pieces_from_bom(product, qty) \
+            or self._aa_kit_pieces_from_order()
+
+        if pieces:
             rows.append(("Box contents", ""))
             for part, amount in pieces.items():
                 name = part.with_context(display_default_code=False).display_name
@@ -262,6 +263,66 @@ class MrpProduction(models.Model):
             rows.append(("Lift cable", "", "c"))
             rows += self._aa_cable_rows(cable.product_id, cable.product_uom_qty, notes=False)
         return rows
+
+    def _aa_kit_pieces_from_bom(self, product, qty):
+        """{part: how many} for a catalogue kit, out of its phantom BoM."""
+        bom = self.env["mrp.bom"].sudo()._bom_find(
+            product, bom_type="phantom").get(product)
+
+        if not bom:
+            return {}
+
+        pieces = {}
+
+        for line in bom.bom_line_ids:
+            if line._skip_bom_line(product):
+                continue
+
+            part = line.product_id
+            pieces.setdefault(part, 0.0)
+            pieces[part] += line.product_qty * qty / (bom.product_qty or 1.0)
+
+        return pieces
+
+    def _aa_kit_pieces_from_order(self):
+        """{part: how many} for a CUSTOM kit, out of the order's own lines.
+
+        THE SAME RULE THE PRINTED CARD USES. _aa_door_split attaches a line to
+        its kit by linked_line_id - which the dealer page writes, and which is
+        a fact rather than a guess - and otherwise to the nearest kit above
+        it. Reusing it means the bench card and the printed sheet cannot
+        disagree about what is in the box.
+
+        THE QUANTITIES ARE AS ORDERED, not multiplied by the kit count: the
+        page books a custom kit's parts in the total the customer asked for,
+        where a phantom BoM gives a per-kit figure that has to be scaled.
+
+        Lift cables are left out, because they are already on the card under
+        their own heading with their cut length - the one tick for the pair
+        (owner, 2026-10-14).
+        """
+        line = self.aa_sale_line_id
+
+        if not line or not line.exists():
+            return {}
+
+        by_kit, _loose = self._aa_door_split(line.order_id)
+        mine = by_kit.get(line)
+
+        if not mine:
+            return {}
+
+        cables = self.aa_cable_line_ids
+        pieces = {}
+
+        for part in mine:
+            if part in cables or self._aa_card_ignores(part):
+                continue
+
+            pieces.setdefault(part.product_id, 0.0)
+            pieces[part.product_id] += part.product_uom_qty
+
+        return pieces
 
     def _aa_cable_rows(self, product=None, pairs=None, notes=True):
         """A prepared lift cable pair. The cut length comes from its kit BoM:
