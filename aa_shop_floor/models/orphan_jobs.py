@@ -87,15 +87,29 @@ class MrpProduction(models.Model):
         if any(w.state == "done" for w in self.workorder_ids):
             return "leave", "work has been done on it"
 
+        # A CANCELLED JOB IS LITTER, WHATEVER ITS ORDER IS DOING. This is the
+        # case the owner kept coming back about: seven rows reading cancel,
+        # left alone because their orders were still live, and still sitting
+        # in his Manufacturing list. Nobody is going to make a cancelled job -
+        # it is not work, and it is not a record of work. If the kit is wanted
+        # after all, the order raises a new job for it.
+        #
+        # Ours to clear means ours to have raised: a station job, or anything
+        # carrying one of this shop's W/O numbers - which is how the prepared
+        # track jobs Odoo's own route puts up are recognised, since they have
+        # no station kind but do belong to an order.
+        if self.state == "cancel":
+            if self.aa_station_kind or self.aa_wo_number:
+                return "delete", "cancelled, so nothing is going to be made"
+
+            return "leave", "cancelled, but not a job this shop raised"
+
         fate = self._aa_order_fate()
 
         if fate == "live":
             return "leave", "its order is still live"
 
         if fate == "cancelled":
-            if self.state == "cancel":
-                return "leave", "already cancelled beside its order"
-
             return "cancel", "its order was cancelled"
 
         # The order is gone. Is this job ours - raised from a sale?
