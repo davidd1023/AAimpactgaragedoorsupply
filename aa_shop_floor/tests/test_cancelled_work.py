@@ -414,3 +414,59 @@ class WorkOutlivingItsOrderCase(TransactionCase):
         wizard.action_clear()
 
         self.assertFalse(production.exists())
+
+    # --- the seven rows he pasted -----------------------------------------
+
+    def test_a_cancelled_station_job_is_cleared_even_on_a_live_order(self):
+        """HIS SEVEN ROWS. Every one read "cancel" with its order still live,
+        and the screen left them alone - so they sat in his Manufacturing
+        list. Nobody is going to make a cancelled job: it is not work, and it
+        is not a record of work. If the kit is wanted after all, the order
+        raises a new one."""
+        order = self._order()
+        job = self._jobs(order)
+        job.action_cancel()
+        self.assertEqual(order.state, "sale", "the fixture's order is not live")
+
+        wizard = self.env["aa.shop.floor.cleanup"].create({})
+
+        self.assertIn("cancelled, so nothing is going to be made", wizard.report)
+        self.assertEqual(wizard.job_count, 1)
+
+        wizard.action_clear()
+
+        self.assertFalse(job.exists(), "the cancelled job stayed in the list")
+
+    def test_a_cancelled_track_job_counts_too(self):
+        """Two of his seven were prepared-track jobs Odoo's own route raised:
+        no station kind, but a W/O number, so they belong to an order of his
+        and are his to clear."""
+        product = self.env["product.product"].create({
+            "name": '3" Vertical Track 76" - 7\' Door Height White',
+            "type": "consu", "is_storable": True})
+        production = self.env["mrp.production"].create({
+            "product_id": product.id, "product_qty": 1.0})
+        production.action_confirm()
+        production.action_cancel()
+        # the W/O number is what marks it as this shop's work
+        production.write({"aa_wo_number": "W/O #217"})
+
+        verdict, why = production._aa_cleanup_verdict()
+
+        self.assertEqual(verdict, "delete", why)
+
+    def test_somebody_elses_cancelled_job_is_left_alone(self):
+        """A cancelled manufacturing order with no station kind and no W/O
+        number was not raised by this shop's orders, and is not ours to tidy
+        away."""
+        product = self.env["product.product"].create({
+            "name": "Hand made three", "type": "consu", "is_storable": True})
+        production = self.env["mrp.production"].create({
+            "product_id": product.id, "product_qty": 1.0})
+        production.action_confirm()
+        production.action_cancel()
+
+        verdict, why = production._aa_cleanup_verdict()
+
+        self.assertEqual(verdict, "leave", why)
+        self.assertIn("not a job this shop raised", why)

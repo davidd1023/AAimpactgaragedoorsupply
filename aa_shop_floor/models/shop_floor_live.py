@@ -24,7 +24,7 @@ now, which is the only answer that cannot go stale.
 
 import logging
 
-from odoo import models
+from odoo import _, models
 
 _logger = logging.getLogger(__name__)
 
@@ -176,7 +176,19 @@ class MrpWorkorder(models.Model):
 
                     if delete:
                         job.sudo().unlink()
-            except Exception:
+            except Exception as error:
                 _logger.exception(
                     "aa_shop_floor: %s lost its work order and would not %s",
                     job.name, "delete" if delete else "cancel")
+                # SAID WHERE SOMEBODY WILL SEE IT. A swallowed failure here is
+                # indistinguishable from a rule that never fired, which is
+                # most of why this took six attempts.
+                try:
+                    job.sudo().message_post(body=_(
+                        "Its work order was %(what)s, but this job could not"
+                        " be %(what)s with it: %(error)s",
+                        what="deleted" if delete else "cancelled",
+                        error=error,
+                    ))
+                except Exception:
+                    _logger.exception("aa_shop_floor: and could not say so")
