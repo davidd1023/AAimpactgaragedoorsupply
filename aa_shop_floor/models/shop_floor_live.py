@@ -82,3 +82,30 @@ class MrpWorkorder(models.Model):
         self.production_id._aa_tell_the_shop_floor()
 
         return result
+
+    def unlink(self):
+        """A bench's job DELETED rather than cancelled.
+
+        The owner, 2026-10-22: "if i delete the work order in manufacturing,
+        the assignments in shop floor are still there."
+
+        DELETING A WHOLE ORDER WAS ALREADY COVERED, and by accident rather
+        than by design: Odoo's own mrp.production.unlink cancels the order
+        before deleting it (mrp/models/mrp_production.py:1130), so the cancel
+        hooked above fires and the board hears about it. Deleting a single
+        WORK ORDER goes nowhere near a cancel - mrp.workorder.unlink unhooks
+        the moves, drops the row and recomputes the order
+        (mrp/models/mrp_workorder.py:316) - so nothing told the tablet, and a
+        job that no longer existed stayed on the board until somebody pressed
+        Reload Data. Which looks exactly like a delete that did not work.
+
+        THE ORDER IS READ BEFORE THE ROW GOES, because afterwards there is no
+        row to read it from. It is checked with exists() because these work
+        orders may be going as part of their own order being deleted, in which
+        case that order is about to follow them.
+        """
+        productions = self.production_id
+        result = super().unlink()
+        productions.exists()._aa_tell_the_shop_floor()
+
+        return result
