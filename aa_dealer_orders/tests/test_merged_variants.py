@@ -57,7 +57,7 @@ class TestDealerPagesAfterTheMerge(TransactionCase):
         offered = hinge._aa_custom_kit_colours()
 
         self.assertEqual(len(offered), 25)
-        labels = [label for _, label in offered]
+        labels = [label for _, label, _finish in offered]
         self.assertEqual(
             len(set(labels)), 25,
             "the dealer is offered the same label more than once: %s"
@@ -74,7 +74,7 @@ class TestDealerPagesAfterTheMerge(TransactionCase):
         bracket = self._merge("Top Bracket")
 
         self.assertEqual(
-            sorted(label for _, label in bracket._aa_custom_kit_colours()),
+            sorted(label for _, label, _f in bracket._aa_custom_kit_colours()),
             ["Black", "White"],
         )
 
@@ -87,7 +87,8 @@ class TestDealerPagesAfterTheMerge(TransactionCase):
                               code="CH1119D", price=6.91)
 
         anchor = self._merge("Spring Anchor Bracket")
-        labels = sorted(label for _, label in anchor._aa_custom_kit_colours())
+        labels = sorted(
+            label for _, label, _f in anchor._aa_custom_kit_colours())
 
         self.assertEqual(labels, ["LH Black", "LH White", "RH Black", "RH White"])
 
@@ -124,3 +125,38 @@ class TestDealerPagesAfterTheMerge(TransactionCase):
             self.assertEqual(found._aa_chosen_colour(), colour)
         # Three colours, three different variants - not the same one thrice.
         self.assertEqual(len({p.id for p in catalog.trims.values()}), 3)
+
+    # --- the kit's own colour box, which is not the per-part dropdown -----
+
+    def test_the_kit_colour_box_offers_finishes_not_every_variant(self):
+        """Owner, 2026-10-22: "the custom kits color option next to the start
+        from kit options is showing a lot of options when it should only show
+        3, white black or galvanized."
+
+        It was built from the per-part LABELS, which name the whole variant -
+        "#3 Black" - because a hinge is now one product with 25 of them. The
+        box wants the FINISH alone, which is three."""
+        for n in range(1, 10):
+            for colour in (("Black", "White", "Galvanized") if n <= 7
+                           else ("Black", "White")):
+                self._product("Hinge # %d %s" % (n, colour),
+                              code="CH1411-%d" % n, price=2.4 + n * 0.1)
+        hinge = self._merge("Hinge")
+
+        offered = hinge._aa_custom_kit_colours()
+        finishes = {finish for _id, _label, finish in offered}
+        labels = {label for _id, label, _finish in offered}
+
+        self.assertEqual(finishes, {"Black", "White", "Galvanized"})
+        self.assertEqual(len(labels), 25, "the per-part dropdown still names"
+                                          " every variant")
+
+    def test_a_part_with_no_finish_offers_no_finish(self):
+        """A product whose colour is in its name has one variant and nothing
+        to put in the kit's colour box - the kit colour must not move it."""
+        shaft = self._product("Torsion Solid Shaft 9'6\"", code="CH-SH02")
+
+        offered = shaft._aa_custom_kit_colours()
+
+        self.assertEqual(len(offered), 1)
+        self.assertEqual(offered[0][2], "", "it offered a finish it has not got")

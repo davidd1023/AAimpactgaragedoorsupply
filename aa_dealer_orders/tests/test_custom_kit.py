@@ -406,10 +406,13 @@ class CustomKitCase(HttpCase):
             const inKit = (built, expected, why) => assert.strictEqual(
                 JSON.stringify([...built.chosen]), JSON.stringify(expected), why);
             const HINGE = { name: "Hinge", colours: [
-                { id: 1, label: "White" }, { id: 2, label: "Black" }] };
+                { id: 1, label: "White", finish: "White" },
+                { id: 2, label: "Black", finish: "Black" }] };
             const STRUT = { name: "Strut", colours: [
-                { id: 3, label: "White" }, { id: 4, label: "Black" }] };
-            const GALV = { name: "Galvanised shaft", colours: [{ id: 5, label: "" }] };
+                { id: 3, label: "White", finish: "White" },
+                { id: 4, label: "Black", finish: "Black" }] };
+            const GALV = { name: "Galvanised shaft",
+                colours: [{ id: 5, label: "", finish: "" }] };
             (async () => {
         """ + body + """
                 console.log("ok");
@@ -613,7 +616,8 @@ class CustomKitCase(HttpCase):
         colour anybody can pick for the kit."""
         self._run_in_node("""
             const ONE_OFF = { name: "Almond latch", colours: [
-                { id: 6, label: "White" }, { id: 7, label: "Almond" }] };
+                { id: 6, label: "White", finish: "White" },
+                { id: 7, label: "Almond", finish: "Almond" }] };
             const kit = page([HINGE, STRUT, GALV, ONE_OFF], []);
             assert.strictEqual(JSON.stringify(kit.colourLabels()),
                 JSON.stringify(["White", "Black", "Almond"]));
