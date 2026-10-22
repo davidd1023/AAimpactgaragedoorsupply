@@ -470,3 +470,41 @@ class WorkOutlivingItsOrderCase(TransactionCase):
 
         self.assertEqual(verdict, "leave", why)
         self.assertIn("not a job this shop raised", why)
+
+    def test_a_prepared_track_job_is_recognised_by_its_wo_number(self):
+        """HIS FOUR ROWS, two of which were prepared-track jobs: raised by
+        Odoo's own route, so no station kind and no sale line, but showing
+        W/O #220 in their own column while the screen called them
+        unaccountable. The number is computed from the origin and stored, so
+        it survives the order being deleted - which is exactly when it is the
+        only thing left to say whose work this was."""
+        track = self.env["product.product"].create({
+            "name": '3" Horizontal Track - 96" White',
+            "type": "consu", "is_storable": True})
+        job = self.env["mrp.production"].create({
+            "product_id": track.id, "product_qty": 1.0, "origin": "S00062"})
+        job.action_confirm()
+        job.write({"aa_wo_number": "W/O #220"})
+
+        verdict, why = job._aa_cleanup_verdict()
+
+        self.assertEqual(verdict, "delete", why)
+        self.assertIn("its order was deleted", why)
+
+        self.env["aa.shop.floor.cleanup"].create({}).action_clear()
+
+        self.assertFalse(job.exists(), "the track job was left behind again")
+
+    def test_a_job_with_no_mark_of_this_shop_is_still_left_alone(self):
+        """The guard this leans on: no station kind, no sale line, no W/O
+        number. It could be a replenishment, so it is listed as unsure rather
+        than deleted on a guess."""
+        product = self.env["product.product"].create({
+            "name": "Replenishment thing", "type": "consu", "is_storable": True})
+        job = self.env["mrp.production"].create({
+            "product_id": product.id, "product_qty": 1.0, "origin": "OP/00012"})
+        job.action_confirm()
+
+        verdict, _why = job._aa_cleanup_verdict()
+
+        self.assertEqual(verdict, "unsure")

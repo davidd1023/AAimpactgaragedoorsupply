@@ -61,6 +61,31 @@ class MrpProduction(models.Model):
 
         return "deleted"
 
+    def _aa_is_this_shops_work(self):
+        """Was this job raised by one of this shop's orders?
+
+        THREE MARKS, AND THE THIRD IS THE ONE THAT WAS MISSING. A station kind
+        or a sale line says so outright, and both are written by
+        _aa_create_station_productions. But the PREPARED TRACK jobs come from
+        Odoo's own route rather than from that code, so they carry neither -
+        and they were being left as "cannot be accounted for" even while
+        showing W/O #220 in their own column.
+
+        A W/O number is proof enough. It is computed from the origin and
+        STORED, so it survives the order it came from being deleted, which is
+        exactly when it is needed: by then the sale line is null and nothing
+        answers to the origin, and that number is all that is left to say
+        whose work this was. Owner, 2026-10-22, with a photograph of four such
+        jobs: "i deleted their work order but they are still there."
+        """
+        self.ensure_one()
+
+        return bool(
+            self.aa_station_kind
+            or self.aa_sale_line_id.exists()
+            or self.aa_wo_number
+        )
+
     def _aa_cleanup_verdict(self):
         """(verdict, reason) - what should become of this job, and why.
 
@@ -99,7 +124,7 @@ class MrpProduction(models.Model):
         # track jobs Odoo's own route puts up are recognised, since they have
         # no station kind but do belong to an order.
         if self.state == "cancel":
-            if self.aa_station_kind or self.aa_wo_number:
+            if self._aa_is_this_shops_work():
                 return "delete", "cancelled, so nothing is going to be made"
 
             return "leave", "cancelled, but not a job this shop raised"
@@ -113,7 +138,7 @@ class MrpProduction(models.Model):
             return "cancel", "its order was cancelled"
 
         # The order is gone. Is this job ours - raised from a sale?
-        if self.aa_station_kind or self.aa_sale_line_id.exists():
+        if self._aa_is_this_shops_work():
             return "delete", "its order was deleted"
 
         if not self.origin:
