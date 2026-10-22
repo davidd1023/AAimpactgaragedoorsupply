@@ -24,6 +24,8 @@ a seven-hour job, and it is not a twenty-minute job either. Both are shown, and
 TOOK only when it says something WORKED does not.
 """
 
+from datetime import timedelta
+
 from odoo import api, fields, models
 
 # HOW FAR BACK THE WHOLE-SHOP VIEW LOOKS. Opening History with no order asks
@@ -32,6 +34,15 @@ from odoo import api, fields, models
 # the shop wifi to show twenty of them.
 RECENT_ORDERS = 20
 RECENT_JOBS_SCANNED = 400
+
+# BY DAY (owner, 2026-10-21: "everything that was done in one day, the orders
+# separated by the day they were finished"). How many days back the day list
+# reaches, and the most finished jobs it reads to build it - a bound, so the
+# tablet never pulls the whole year over the shop wifi.
+DAYS_BACK = 60
+DAY_JOBS_SCANNED = 3000
+# Days shown at first; "Show older days" adds this many more each time.
+DAYS_SHOWN = 7
 
 
 class MrpWorkorder(models.Model):
@@ -180,14 +191,21 @@ class MrpWorkorder(models.Model):
             workorders = self.search(
                 domain, order="id desc", limit=RECENT_JOBS_SCANNED)
 
+        return workorders._aa_history_groups(
+            order_limit=None if order else max(limit, 1))
+
+    def _aa_history_groups(self, order_limit=None):
+        """These jobs as the History shows them: one group per order, in the
+        order the orders first appear here, each with its jobs oldest first.
+        `order_limit` stops at that many orders."""
         groups = []
         by_order = {}
 
-        for workorder in workorders:
+        for workorder in self:
             name = workorder.aa_sale_order
 
             if name not in by_order:
-                if not order and len(by_order) >= max(limit, 1):
+                if order_limit and len(by_order) >= order_limit:
                     continue
 
                 by_order[name] = {
@@ -219,3 +237,69 @@ class MrpWorkorder(models.Model):
             group["count"] = len(group["jobs"])
 
         return groups
+
+    # --- by day ---------------------------------------------------------------
+    #
+    # A JOB BELONGS TO THE DAY IT WAS FINISHED, on the shop's own calendar -
+    # the tablet's time zone, not UTC, or everything marked done after 8 PM
+    # would land on tomorrow. Only finished jobs: a day's list is what that
+    # day produced, and a job still running has produced nothing yet.
+
+    def _aa_finished_at(self):
+        """When this job was really finished (see _aa_history_job)."""
+        self.ensure_one()
+        ends = [log.date_end for log in self.time_ids if log.date_end]
+        return max(ends) if ends else self.date_finished
+
+    @api.model
+    def aa_shop_floor_history_by_day(self, days=DAYS_SHOWN):
+        """[{key, label, orders, count, worked, groups}] - the History
+        organised by the day things were finished, newest day first.
+
+        NOT A DAY TO PICK (owner, 2026-10-21: "not choose - organised by
+        day"): every day is shown, one under the other, each with the orders
+        whose parts were finished that day. `days` is how many days with work
+        in them to return; the dialog asks for more as it is scrolled back.
+        Returns {days: [...], more: bool}.
+        """
+        since = fields.Datetime.now() - timedelta(days=DAYS_BACK + 1)
+        workorders = self.search(
+            [("state", "=", "done"), ("aa_sale_order", "!=", False),
+             ("date_finished", ">=", since)],
+            order="date_finished desc, id desc", limit=DAY_JOBS_SCANNED)
+
+        by_day = {}
+
+        for workorder in workorders:
+            finished = workorder._aa_finished_at()
+
+            if not finished:
+                continue
+
+            local = fields.Datetime.context_timestamp(workorder, finished)
+            key = local.strftime("%Y-%m-%d")
+            entry = by_day.setdefault(key, {
+                "key": key,
+                "label": local.strftime("%A, %b %d"),
+                "workorders": self.browse(),
+            })
+            entry["workorders"] |= workorder
+
+        ordered = sorted(by_day.values(), key=lambda entry: entry["key"], reverse=True)
+        wanted = max(int(days or DAYS_SHOWN), 1)
+        result = []
+
+        for entry in ordered[:wanted]:
+            # Oldest first within the day, so it reads in the order it was worked.
+            groups = entry["workorders"].sorted("id")._aa_history_groups()
+            minutes = sum(group["worked_minutes"] for group in groups)
+            result.append({
+                "key": entry["key"],
+                "label": entry["label"],
+                "orders": len(groups),
+                "count": len(entry["workorders"]),
+                "worked": self._aa_duration_words(minutes),
+                "groups": groups,
+            })
+
+        return {"days": result, "more": len(ordered) > wanted}

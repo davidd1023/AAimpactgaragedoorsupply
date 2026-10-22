@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- The Overview as a list (owner, 2026-10-21): one row per order, a chip
+         per station, an age, and a click to open it. See overview_list.js. -->
+    <t t-inherit="mrp_workorder.MrpDisplay" t-inherit-mode="extension">
+        <!-- List / Cards, in the top bar, on the Overview only. -->
+        <xpath expr="//MrpDisplaySearchBar" position="before">
+            <div t-if="aaIsOverview()" class="btn-group o_aa_view_switch flex-shrink-0" role="group">
+                <button type="button" class="btn" title="List"
+                        t-att-class="aaOverview.view === 'list' ? 'btn-primary' : 'btn-outline-secondary'"
+                        t-on-click="() => this.aaSetView('list')">
+                    <i class="fa fa-list me-1"/>List
+                </button>
+                <button type="button" class="btn" title="Cards"
+                        t-att-class="aaOverview.view === 'cards' ? 'btn-primary' : 'btn-outline-secondary'"
+                        t-on-click="() => this.aaSetView('cards')">
+                    <i class="fa fa-th-large me-1"/>Cards
+                </button>
+            </div>
+        </xpath>
+
+        <xpath expr="//div[hasclass('o_mrp_display_records')]" position="attributes">
+            <attribute name="t-if">!aaListActive()</attribute>
+        </xpath>
+
+        <xpath expr="//div[hasclass('o_mrp_display_records')]" position="before">
+            <div t-if="aaListActive()" class="o_aa_overview_list flex-grow-1 p-3">
+                <t t-set="aaAll" t-value="aaAllRows()"/>
+                <t t-set="aaRows" t-value="aaFilterRows(aaAll)"/>
+                <t t-set="aaCols" t-value="aaStations(aaAll)"/>
+
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    <div class="btn-group flex-wrap" role="group">
+                        <t t-foreach="aaTabs(aaAll)" t-as="aaTab" t-key="aaTab.key">
+                            <button type="button" class="btn"
+                                    t-att-class="aaOverview.tab === aaTab.key ? 'btn-primary' : 'btn-outline-secondary'"
+                                    t-on-click="() => this.aaSetTab(aaTab.key)">
+                                <t t-esc="aaTab.label"/>
+                                <span class="badge rounded-pill ms-1 text-bg-light" t-esc="aaTab.count"/>
+                            </button>
+                        </t>
+                    </div>
+                    <select class="form-select w-auto" t-on-change="(ev) => this.aaSetStation(ev.target.value)">
+                        <option value="" t-att-selected="!aaOverview.station">All stations</option>
+                        <t t-foreach="aaCols" t-as="aaCol" t-key="aaCol">
+                            <option t-att-value="aaCol" t-att-selected="aaOverview.station === aaCol" t-esc="aaCol"/>
+                        </t>
+                    </select>
+                    <input type="search" class="form-control w-auto o_aa_overview_search"
+                           placeholder="W/O # or customer"
+                           t-att-value="aaOverview.query"
+                           t-on-input="(ev) => this.aaSetQuery(ev.target.value)"/>
+                    <span class="ms-auto text-muted">
+                        <t t-esc="aaRows.length"/> of <t t-esc="aaAll.length"/> orders
+                    </span>
+                </div>
+
+                <table class="table table-sm table-hover align-middle bg-view border o_aa_overview_table mb-0">
+                    <thead>
+                        <tr>
+                            <th>W/O #</th>
+                            <th>Received</th>
+                            <th>Customer</th>
+                            <t t-foreach="aaCols" t-as="aaCol" t-key="aaCol">
+                                <th t-esc="aaCol"/>
+                            </t>
+                            <th class="text-end">Age</th>
+                            <th class="o_aa_overview_send_col"/>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="aaRows" t-as="aaRow" t-key="aaRow.key">
+                            <tr class="o_aa_overview_row" t-att-class="{'table-active': aaOverview.open[aaRow.key]}"
+                                t-on-click="() => this.aaToggleRow(aaRow.key)">
+                                <td class="fw-bold text-nowrap">
+                                    <i class="fa fa-fw me-1 text-muted"
+                                       t-att-class="aaOverview.open[aaRow.key] ? 'fa-caret-down' : 'fa-caret-right'"/>
+                                    <t t-esc="aaRow.order"/>
+                                </td>
+                                <td class="text-nowrap" t-esc="aaRow.received"/>
+                                <td class="o_aa_overview_customer" t-att-title="aaRow.customer" t-esc="aaRow.customer"/>
+                                <t t-foreach="aaCols" t-as="aaCol" t-key="aaCol">
+                                    <td>
+                                        <t t-set="aaJob" t-value="aaRow.byStation[aaCol]"/>
+                                        <span t-if="aaJob" class="badge o_aa_chip"
+                                              t-att-class="aaChip(aaJob.status).cls"
+                                              t-esc="aaChip(aaJob.status).text"/>
+                                        <span t-else="" class="text-muted">—</span>
+                                    </td>
+                                </t>
+                                <td class="text-end">
+                                    <span t-if="aaRow.ageHours !== null" class="badge"
+                                          t-att-class="aaAgeClass(aaRow.ageHours)"
+                                          t-esc="aaAgeLabel(aaRow.ageHours)"/>
+                                </td>
+                                <!-- Send all ON THE ROW (owner, 2026-10-21): an
+                                     order goes to its stations without opening it. -->
+                                <td class="text-end o_aa_overview_send_col">
+                                    <button t-if="aaRow.canAssign and aaRow.sendIds.length" type="button"
+                                            class="btn btn-sm btn-primary text-nowrap"
+                                            t-on-click.stop="() => this.aaListAction('aa_send_to_station', aaRow.sendIds)">
+                                        <i class="fa fa-arrow-right me-1"/>Send all
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr t-if="aaOverview.open[aaRow.key]" class="o_aa_overview_detail">
+                                <td t-att-colspan="5 + aaCols.length" class="bg-100 p-3">
+                                    <div t-if="aaRow.canAssign and (aaRow.sendIds.length or aaRow.removeIds.length)"
+                                         class="d-flex flex-wrap gap-2 mb-2">
+                                        <button t-if="aaRow.sendIds.length" type="button" class="btn btn-primary"
+                                                t-on-click.stop="() => this.aaListAction('aa_send_to_station', aaRow.sendIds)">
+                                            <i class="fa fa-arrow-right me-1"/>Send all
+                                        </button>
+                                        <button t-if="aaRow.removeIds.length" type="button" class="btn btn-outline-secondary"
+                                                t-on-click.stop="() => this.aaListAction('aa_remove_from_station', aaRow.removeIds)">
+                                            <i class="fa fa-undo me-1"/>Remove all
+                                        </button>
+                                    </div>
+                                    <div class="o_aa_overview_jobs">
+                                        <t t-foreach="aaRow.jobs" t-as="aaJob" t-key="aaJob.id">
+                                            <div class="border rounded bg-view p-2" t-att-class="{'opacity-50': aaJob.status === 'done'}">
+                                                <div class="d-flex justify-content-between align-items-center gap-2">
+                                                    <span class="fw-bold text-uppercase" t-esc="aaJob.station"/>
+                                                    <span class="badge" t-att-class="aaChip(aaJob.status).cls" t-esc="aaChip(aaJob.status).text"/>
+                                                </div>
+                                                <t t-foreach="aaJob.items" t-as="aaItem" t-key="aaItem.id">
+                                                    <div class="mt-1">
+                                                        <div class="fw-bold" t-esc="aaItem.product"/>
+                                                        <t t-foreach="aaItem.summary" t-as="aaSum" t-key="aaSum_index">
+                                                            <div class="d-flex justify-content-between gap-3 small">
+                                                                <span class="text-muted" t-esc="aaSum[0]"/>
+                                                                <span class="fw-bold text-end" t-esc="aaSum[1]"/>
+                                                            </div>
+                                                        </t>
+                                                        <div t-if="aaItem.more" class="text-muted small" t-esc="aaItem.more"/>
+                                                    </div>
+                                                </t>
+                                                <div t-if="aaRow.canAssign and (aaJob.send_ids.length or aaJob.remove_ids.length or aaJob.done_ids.length)"
+                                                     class="d-flex flex-wrap gap-2 mt-2">
+                                                    <button t-if="aaJob.send_ids.length" type="button" class="btn btn-sm btn-primary"
+                                                            t-on-click.stop="() => this.aaListAction('aa_send_to_station', aaJob.send_ids)">
+                                                        <i class="fa fa-arrow-right me-1"/>Send to <t t-esc="aaJob.station"/>
+                                                    </button>
+                                                    <button t-if="aaJob.remove_ids.length" type="button" class="btn btn-sm btn-outline-secondary"
+                                                            t-on-click.stop="() => this.aaListAction('aa_remove_from_station', aaJob.remove_ids)">
+                                                        <i class="fa fa-undo me-1"/>Remove
+                                                    </button>
+                                                    <button t-if="aaJob.done_ids.length" type="button" class="btn btn-sm btn-success ms-auto"
+                                                            t-on-click.stop="() => this.aaListAction('aa_mark_done_jobs', aaJob.done_ids)">
+                                                        <i class="fa fa-check me-1"/>Mark as Done
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </td>
+                            </tr>
+                        </t>
+                        <tr t-if="!aaRows.length">
+                            <td t-att-colspan="5 + aaCols.length" class="text-center text-muted py-4">
+                                No orders here.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </xpath>
+    </t>
+</templates>
