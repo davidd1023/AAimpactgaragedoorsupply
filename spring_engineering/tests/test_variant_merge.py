@@ -537,3 +537,114 @@ class TestVariantMerge(TransactionCase):
             sorted("Jamb Bracket #14 Black".split()),
         )
         self.assertEqual(merged._aa_chosen_colour(), "Black")
+
+    # --- the migration, which is what will run on the owner's database ----
+
+    def _migration(self):
+        """The real migration script, loaded from where Odoo will load it."""
+        import importlib.util
+        import os
+
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "migrations", "19.0.2.49.0", "post-migration.py",
+        )
+        spec = importlib.util.spec_from_file_location("aa_merge_migration", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def test_the_migration_merges_the_families(self):
+        """Run the actual script, not a copy of what it does."""
+        self._anchor_brackets()
+        self._hinges()
+
+        self._migration().migrate(self.env.cr, "19.0.2.48.0")
+
+        self.assertEqual(len(self._live_variants("Spring Anchor Bracket")), 4)
+        self.assertEqual(len(self._live_variants("Hinge")), 21)
+
+    def test_the_migration_does_nothing_on_a_fresh_database(self):
+        """No version means a database being created, which has no catalogue
+        to fold - and folding one that a demo install happened to create would
+        be a surprise."""
+        made = self._anchor_brackets()
+
+        self._migration().migrate(self.env.cr, None)
+
+        for name, tmpl in made.items():
+            self.assertTrue(tmpl.active, name)
+            self.assertFalse(tmpl.attribute_line_ids, name)
+
+    def test_the_owner_can_hold_the_merge_from_the_settings(self):
+        """A migration runs on Prod the moment he merges, so there has to be a
+        way to call it off that does not need us."""
+        made = self._anchor_brackets()
+        self.env["ir.config_parameter"].sudo().set_param(
+            "spring_engineering.variant_merge_hold", "1")
+
+        self._migration().migrate(self.env.cr, "19.0.2.48.0")
+
+        for name, tmpl in made.items():
+            self.assertTrue(tmpl.active, "%s was merged despite the hold" % name)
+            self.assertFalse(tmpl.attribute_line_ids, name)
+        self.assertFalse(self._survivor("Spring Anchor Bracket"))
+
+    # --- the awkward cases in the owner's real catalogue ------------------
+
+    def test_a_product_standing_in_the_red_keeps_its_negative_count(self):
+        """HIS CATALOGUE HAS NEGATIVES. "White Trims" stands at -2 and several
+        cable products are below zero too. A merge that quietly rounded those
+        up to nothing would hand him back stock he has already sold."""
+        made = self._anchor_brackets()
+        short = made["Spring Anchor Bracket LH White"].product_variant_id
+        self._put(short, -5.0, self.stock)
+        self.assertEqual(self._on_hand(short), -5.0, "the fixture is not negative")
+
+        report = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(report["state"], "merged", report)
+        self.assertEqual(
+            self._on_hand(self._variant(
+                "Spring Anchor Bracket", Hand="LH", Colour="White")),
+            -5.0,
+            "a product in the red came out of the merge at nothing",
+        )
+
+    def test_the_merged_product_is_published_if_any_of_them_was(self):
+        """The base is picked for its stock, not for being on the website. If
+        the one the customers could see is folded into one that was never
+        published, the part would vanish from the shop."""
+        made = self._anchor_brackets()
+        for name, tmpl in made.items():
+            tmpl.is_published = (name == "Spring Anchor Bracket LH White")
+
+        self._merge("Spring Anchor Bracket")
+
+        self.assertTrue(
+            self._survivor("Spring Anchor Bracket").is_published,
+            "the part dropped off the website in the merge",
+        )
+
+    def test_nothing_published_stays_unpublished(self):
+        """And the other way: a part the owner has deliberately kept off the
+        website must not be published by being merged."""
+        made = self._anchor_brackets()
+        for tmpl in made.values():
+            tmpl.is_published = False
+
+        self._merge("Spring Anchor Bracket")
+
+        self.assertFalse(self._survivor("Spring Anchor Bracket").is_published)
+
+    def test_a_skipped_family_says_why_once(self):
+        """The price plan is worked out twice - once to check, once to do - so
+        a family that cannot be priced must not report the same problem
+        twice over."""
+        made = self._anchor_brackets()
+        made["Spring Anchor Bracket LH White"].list_price = 8.50
+
+        report = self._merge("Spring Anchor Bracket")
+
+        priced = [p for p in report["problems"] if "cannot be priced" in p]
+        self.assertEqual(len(priced), 1, report["problems"])
