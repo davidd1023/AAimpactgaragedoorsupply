@@ -362,3 +362,55 @@ class WorkOutlivingItsOrderCase(TransactionCase):
 
         self.assertTrue(production.exists())
         self.assertNotEqual(production.state, "cancel")
+
+    # --- the screen has to be able to say why nothing happened ------------
+
+    def test_the_screen_says_why_it_leaves_a_live_job_alone(self):
+        """"its like you are not even correctly detecting the manufacturing
+        orders so nothing is happening" - a screen that silently does nothing
+        cannot be argued with. Every job is listed with a verdict and a
+        reason, especially the ones left alone."""
+        order = self._order()
+        job = self._jobs(order)
+
+        wizard = self.env["aa.shop.floor.cleanup"].create({})
+
+        self.assertIn(job.name, wizard.report)
+        self.assertIn("its order is still live", wizard.report)
+        self.assertIn("leave", wizard.report)
+        self.assertEqual(wizard.job_count, 0)
+
+    def test_a_job_that_cannot_be_accounted_for_is_listed_not_deleted(self):
+        """No order answers to its origin and nothing on it says it came from
+        a sale - it could be a replenishment. Listed, counted, and left until
+        somebody says otherwise."""
+        product = self.env["product.product"].create({
+            "name": "Mystery", "type": "consu", "is_storable": True})
+        production = self.env["mrp.production"].create({
+            "product_id": product.id, "product_qty": 1.0,
+            "origin": "S0NOSUCHORDER"})
+        production.action_confirm()
+
+        wizard = self.env["aa.shop.floor.cleanup"].create({})
+
+        self.assertIn("unsure", wizard.report)
+        self.assertGreaterEqual(wizard.unsure_count, 1)
+
+        wizard.action_clear()
+
+        self.assertTrue(production.exists(), "it was cleared on a guess")
+
+    def test_the_box_clears_the_ones_it_cannot_account_for(self):
+        """His call to make, not a rule I can write from here."""
+        product = self.env["product.product"].create({
+            "name": "Mystery two", "type": "consu", "is_storable": True})
+        production = self.env["mrp.production"].create({
+            "product_id": product.id, "product_qty": 1.0,
+            "origin": "S0NOSUCHORDER"})
+        production.action_confirm()
+        wizard = self.env["aa.shop.floor.cleanup"].create({
+            "include_unsure": True})
+
+        wizard.action_clear()
+
+        self.assertFalse(production.exists())
