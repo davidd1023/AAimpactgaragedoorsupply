@@ -8,10 +8,21 @@ before it was written here:
     spells it - double spaces, "( Pair )" and all - because the merge matches
     on the name and a near miss is a product left behind;
   * no name is claimed by two families;
-  * every family is a FULL matrix. 7 hinge sizes x 3 colours is 21 rows and
-    the catalogue has 21. If a family were missing a combination, Odoo would
-    still create that variant and the store would offer a part the owner has
-    never stocked - so the merge refuses a family that does not square.
+  * a family NEED NOT be a full matrix, and the hinges are not: they run #1
+    to #9 while the Galvanized ones stop at #7, so nine sizes by three colours
+    is 27 combinations over 25 products. Odoo builds a variant per combination
+    regardless, so the two the owner has never stocked are ARCHIVED by the
+    merge, which Odoo reads as "this combination does not exist". An earlier
+    draft refused a family like that outright - which would have left four
+    hinge sizes as separate products, the very thing this change exists to
+    stop.
+
+HIS CATALOGUE MOVED UNDER THIS TABLE ALREADY. Hinge #8 and #9 and Cut Down
+Hinge #8 and #9 were not in the export it was generated from, and the first
+rehearsal on his database named them as strays it had left alone. They are in
+here now, on the assumption that a "Hinge # 8" belongs with "Hinge # 7" - the
+part numbers continue the same CH1411 series - and if that is ever wrong, the
+four lines to delete are obvious.
 
 WHAT THE OWNER DECIDED (2026-10-21, all three in his words):
 
@@ -43,7 +54,8 @@ one people have been buying.
 ATTRIBUTE_VALUES = {
     "attribute_finish_colour": ("Black", "White", "Bronze", "Galvanized"),
     "attribute_hand": ("LH", "RH"),
-    "attribute_hinge_size": ("#1", "#2", "#3", "#4", "#5", "#6", "#7"),
+    "attribute_hinge_size": ("#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8",
+                            "#9"),
     "attribute_jamb_bracket_size": ("#10", "#12", "#14", "#16"),
     "attribute_bearing_plate_size": ('3 3/8"', '4 3/8"', '6"'),
     "attribute_flag_angle_size": ('5.9"', '6-3/8"'),
@@ -176,6 +188,10 @@ FAMILIES = (
             'Hinge # 7 Black': {'attribute_finish_colour': 'Black', 'attribute_hinge_size': '#7'},
             'Hinge # 7 Galvanized': {'attribute_finish_colour': 'Galvanized', 'attribute_hinge_size': '#7'},
             'Hinge # 7 White': {'attribute_finish_colour': 'White', 'attribute_hinge_size': '#7'},
+            'Hinge # 8 Black': {'attribute_finish_colour': 'Black', 'attribute_hinge_size': '#8'},
+            'Hinge # 8 White': {'attribute_finish_colour': 'White', 'attribute_hinge_size': '#8'},
+            'Hinge # 9 Black': {'attribute_finish_colour': 'Black', 'attribute_hinge_size': '#9'},
+            'Hinge # 9 White': {'attribute_finish_colour': 'White', 'attribute_hinge_size': '#9'},
         },
     },
     {
@@ -197,6 +213,10 @@ FAMILIES = (
             'Cut Down Hinge # 6 White': {'attribute_finish_colour': 'White', 'attribute_hinge_size': '#6'},
             'Cut Down Hinge # 7 Black': {'attribute_finish_colour': 'Black', 'attribute_hinge_size': '#7'},
             'Cut Down Hinge # 7 White': {'attribute_finish_colour': 'White', 'attribute_hinge_size': '#7'},
+            'Cut Down Hinge # 8 Black': {'attribute_finish_colour': 'Black', 'attribute_hinge_size': '#8'},
+            'Cut Down Hinge # 8 White': {'attribute_finish_colour': 'White', 'attribute_hinge_size': '#8'},
+            'Cut Down Hinge # 9 Black': {'attribute_finish_colour': 'Black', 'attribute_hinge_size': '#9'},
+            'Cut Down Hinge # 9 White': {'attribute_finish_colour': 'White', 'attribute_hinge_size': '#9'},
         },
     },
     {

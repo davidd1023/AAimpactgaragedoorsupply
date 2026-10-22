@@ -42,20 +42,24 @@ class TestDealerPagesAfterTheMerge(TransactionCase):
     # --- the custom kit picker -------------------------------------------
 
     def test_a_hinge_dropdown_names_the_size_as_well_as_the_colour(self):
-        """Seven sizes and three colours is 21 variants on one product. The
-        dealer has to be able to tell them apart."""
-        for n in range(1, 8):
-            for colour in ("Black", "White", "Galvanized"):
+        """Nine sizes and three colours - minus the two he has never stocked -
+        is 25 variants on one product. The dealer has to be able to tell them
+        apart."""
+        # Nine sizes, and Galvanized only to #7 - his catalogue, not a tidy
+        # version of it. 25 products, so 25 rows in the dropdown.
+        for n in range(1, 10):
+            for colour in (("Black", "White", "Galvanized") if n <= 7
+                           else ("Black", "White")):
                 self._product("Hinge # %d %s" % (n, colour),
                               code="CH1411-%d" % n, price=2.4 + n * 0.1)
 
         hinge = self._merge("Hinge")
         offered = hinge._aa_custom_kit_colours()
 
-        self.assertEqual(len(offered), 21)
+        self.assertEqual(len(offered), 25)
         labels = [label for _, label in offered]
         self.assertEqual(
-            len(set(labels)), 21,
+            len(set(labels)), 25,
             "the dealer is offered the same label more than once: %s"
             % sorted(labels))
         self.assertIn("#3 Black", labels)

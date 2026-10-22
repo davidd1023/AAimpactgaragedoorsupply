@@ -25,11 +25,22 @@ cannot lose a count:
   6. archive and unpublish what is left.
 
 A FAMILY IS ALL OR NOTHING. Each one runs in its own savepoint, and anything
-that does not add up - a product missing from the catalogue, a part number that
-appears twice, two colours of one size that disagree about the price, stock
-reserved on a delivery that has not gone out - skips that whole family and says
-so. A half-merged family is the one outcome worse than an unmerged one: the
-store would show a product whose variants are missing their stock.
+that does not add up - a product missing from the catalogue, two colours of one
+size that disagree about the price, a move somebody is part way through
+validating - skips that whole family and says so. A half-merged family is the
+one outcome worse than an unmerged one: the store would show a product whose
+variants are missing their stock.
+
+WHAT IS *NOT* A REASON TO REFUSE, because the owner's first real run taught us:
+
+  * OPEN WORK. Thirteen of fifteen families were refused on the first rehearsal
+    because open work orders held brackets and hinges, and a working shop
+    always has those - it was asking him to empty his floor to tidy the
+    catalogue. Open moves are unreserved, repointed and reserved again.
+  * A HOLE IN THE MATRIX. His hinges run #1-#9 but the Galvanized ones stop at
+    #7, and refusing that would have left four sizes as separate products. The
+    combinations he has never stocked are archived instead, which Odoo reads as
+    "this combination does not exist".
 
 NOTHING IS MATCHED BY POSITION. Every variant is found by attribute name and
 value name (`_aa_variant_for`). Hand is why: this catalogue has exactly one
@@ -44,7 +55,7 @@ the report to read on staging before this reaches Prod.
 
 import logging
 
-from odoo import api, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import float_compare, float_is_zero
 
@@ -110,6 +121,11 @@ REMAP_IF_OPEN = (
      ("name", "price_unit", "discount", "product_uom_qty", "tax_ids")),
     ("purchase.order.line", "product_id", "order_id.state", ("draft", "sent"),
      ("name", "price_unit", "discount", "product_qty", "taxes_id")),
+    # THE WORK ON THE FLOOR. A delivery or a manufacturing order that has not
+    # gone out keeps its quantity and its unit - what is being made does not
+    # change because the catalogue was tidied - and is re-reserved afterwards.
+    ("stock.move", "product_id", "state", MOVES_IN_THE_WAY,
+     ("product_uom_qty", "product_uom")),
 )
 
 
@@ -361,19 +377,28 @@ class ProductTemplate(models.Model):
                 " %s" % ", ".join(tracked)
             )
 
-        # NOTHING RESERVED OR IN FLIGHT. We are about to move the stock to
-        # another product; a picking that has not gone out has a claim on it.
-        variants = self.env["product.product"].with_context(active_test=False).browse(
-            [t.product_variant_ids[:1].id for t in olds.values() if t.product_variant_ids]
-        )
-        moves = self.env["stock.move"].search(
-            [("product_id", "in", variants.ids), ("state", "in", MOVES_IN_THE_WAY)]
-        )
-        if moves:
-            where = ", ".join(sorted({m.reference or "?" for m in moves})[:6])
+        # WORK IN PROGRESS IS MOVED WITH THE STOCK, not waited for.
+        #
+        # The first rehearsal on the owner's own database refused THIRTEEN of
+        # fifteen families for this: W/O #204, #207, #208, #209 and
+        # AAM/MO/00072 hold hinges, brackets, rollers and angles. A working
+        # shop always has open work orders, so "validate or cancel them first"
+        # was a refusal that would never have come right - it asked him to
+        # empty his own floor to tidy the catalogue.
+        #
+        # So an open move is unreserved, repointed at the new variant and
+        # re-reserved from the stock that followed it. What IS refused is a
+        # move somebody is part way through validating: `picked` means a
+        # quantity has been entered against it, and unreserving that would
+        # throw away a count a person made standing at the rack.
+        moves = self._aa_open_moves(olds)
+        picked = moves.filtered("picked")
+
+        if picked:
+            where = ", ".join(sorted({m.reference or "?" for m in picked})[:6])
             report["problems"].append(
-                "%d stock moves are still open on these products (%s) - validate"
-                " or cancel them first" % (len(moves), where)
+                "%d stock moves are part way through being validated (%s) -"
+                " finish or reset those first" % (len(picked), where)
             )
 
         # THE PRICE HAS TO BE EXPLAINABLE BY THE CHOICES. A variant's price is
@@ -388,6 +413,21 @@ class ProductTemplate(models.Model):
         # left behind as an orphan product. Advisory only - it does not stop
         # the merge, it just must not pass unnoticed.
         self._aa_note_unmapped_siblings(spec, olds, report)
+
+    @api.model
+    def _aa_open_moves(self, olds):
+        """Every stock move on this family that has not gone out or been
+        cancelled - the work in progress that has to follow the stock."""
+        variants = self.env["product.product"].with_context(active_test=False).browse([
+            t.with_context(active_test=False).product_variant_ids[:1].id
+            for t in olds.values()
+            if t.with_context(active_test=False).product_variant_ids
+        ])
+
+        return self.env["stock.move"].search([
+            ("product_id", "in", variants.ids),
+            ("state", "in", MOVES_IN_THE_WAY),
+        ])
 
     @api.model
     def _aa_price_plan(self, spec, olds, report):
@@ -484,6 +524,15 @@ class ProductTemplate(models.Model):
                 % self.env.company.name
             )
 
+        # LET GO OF THE STOCK BEFORE MOVING IT. A quant cannot be counted away
+        # from under a reservation, so every open move releases its claim here
+        # and takes it again at the end, against the variant that now holds the
+        # goods.
+        open_moves = self._aa_open_moves(olds)
+
+        if open_moves:
+            open_moves._do_unreserve()
+
         snapshot = self._aa_snapshot(olds)
         self._aa_zero_stock(snapshot)
 
@@ -498,19 +547,23 @@ class ProductTemplate(models.Model):
             base.with_context(active_test=True).product_variant_ids
         )
 
-        # THE REFUSAL BOTH DOCSTRINGS PROMISE, which until now was only ever
-        # checked by hand while the table was written. Odoo creates a variant
-        # for EVERY combination of the values, so a family with a hole in it -
-        # LH/Black, LH/White, RH/Black and no RH/White - produces a fourth
-        # variant that no old product becomes: priced, offered in the shop,
-        # and carrying no stock, no part number and no picture. Every family is
-        # square today; this is what keeps that true.
-        if report["variants"] != len(olds):
-            raise UserError(
-                "%d products but %d variants - the family is not square, so"
-                " the shop would offer a combination that was never stocked"
-                % (len(olds), report["variants"])
-            )
+        # A HOLE IN THE MATRIX IS ARCHIVED, NOT REFUSED.
+        #
+        # Odoo builds a variant for EVERY combination of the values, and the
+        # owner's catalogue is not square: his hinges run #1 to #9 but the
+        # Galvanized ones stop at #7, so nine sizes times three colours is 27
+        # combinations over 25 products. An earlier draft refused a family like
+        # that outright, which would have left four hinge sizes as separate
+        # products - the thing this whole change exists to stop.
+        #
+        # So the two combinations he has never stocked are archived, and Odoo
+        # takes an archived variant to mean the combination is IMPOSSIBLE
+        # (_is_combination_possible: "there should not be any archived variant
+        # with the exact same combination"), so the shop will not sell it. They
+        # are named in the report, because a hole is worth knowing about: if he
+        # starts stocking #8 Galvanized, un-archiving that variant is the whole
+        # of the work.
+        claimed = self.env["product.product"]
 
         for name, combo in spec["products"].items():
             if name not in olds:
@@ -518,10 +571,34 @@ class ProductTemplate(models.Model):
             target = self._aa_variant_for(base, combo)
             if not target:
                 raise UserError("no variant for %r (%s)" % (name, combo))
+            claimed |= target
             self._aa_restore(snapshot[name], target, report)
+
+        phantom = base.with_context(active_test=True).product_variant_ids - claimed
+
+        if phantom:
+            phantom.write({"active": False})
+            report["variants"] = report["variants"] - len(phantom)
+            report["notes"].append(
+                "never stocked, so archived rather than offered: %s"
+                % ", ".join(sorted(
+                    ", ".join(v.product_template_attribute_value_ids.mapped("name"))
+                    for v in phantom
+                ))
+            )
 
         self._aa_check_prices(spec, olds, base, report)
         self._aa_retire(spec, olds, base, report)
+
+        # AND TAKE THE STOCK BACK. The moves were repointed product by product
+        # as each one's stock was restored, so by now every one of them is
+        # asking for a variant that has the goods.
+        if open_moves:
+            open_moves._action_assign()
+            report["notes"].append(
+                "%d open stock move(s) unreserved, repointed and reserved again"
+                % len(open_moves)
+            )
 
     @api.model
     def _aa_snapshot(self, olds):
@@ -674,6 +751,15 @@ class ProductTemplate(models.Model):
             "standard_price": entry["standard_price"],
         }
         if entry["barcode"]:
+            # MOVED, NOT COPIED. A barcode is unique per company and the old
+            # product is still ACTIVE at this point - it is archived at the end
+            # of the family - so writing it onto the new variant raised
+            # "Barcode CH-SH02-10FT6 already assigned" and rolled the whole
+            # Torsion Solid Shaft family back on the owner's first deploy.
+            # Clearing it from the old product first also means scanning that
+            # barcode at the counter finds the variant that now holds the
+            # stock, which is the only useful answer.
+            entry["variant"].barcode = False
             values["barcode"] = entry["barcode"]
         if entry["weight"]:
             values["weight"] = entry["weight"]
@@ -830,10 +916,21 @@ class ProductTemplate(models.Model):
                     if name in record._fields
                 }
                 record.write({field: new.id})
-                record.write({
-                    name: (value.ids if hasattr(value, "ids") else value)
-                    for name, value in kept.items()
-                })
+                # WRITTEN BACK IN THE SHAPE EACH FIELD WANTS. A many2one takes
+                # an id, not a list of one - putting `.ids` into product_uom
+                # left a move with no unit at all, and the next thing to ask it
+                # for a rounding got "precision_rounding must be positive, got
+                # 0.0" and rolled the family back.
+                putback = {}
+                for name, value in kept.items():
+                    kind = record._fields[name].type
+                    if kind == "many2one":
+                        putback[name] = value.id
+                    elif kind in ("many2many", "one2many"):
+                        putback[name] = [fields.Command.set(value.ids)]
+                    else:
+                        putback[name] = value
+                record.write(putback)
             if records:
                 moved[model] = moved.get(model, 0) + len(records)
 
