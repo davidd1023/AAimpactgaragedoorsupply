@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- ONE PRODUCT PER PART, NOT ONE PER COLOUR (owner, 2026-10-21).
+
+         The catalogue was built one supplier sheet at a time, so a part that
+         comes in two colours became two products: "Spring Anchor Bracket RH
+         Black" and "Spring Anchor Bracket RH White" sat side by side in the
+         shop as if they were different things to buy. They are not. They are
+         one bracket with a choice, and that is what the store now offers -
+         "there will only be one spring anchor bracket rh but with two color
+         choices" (owner).
+
+         WHAT STAYS SEPARATE IS THE TYPE OF PART. A top bracket and a spring
+         anchor bracket remain two products, because they are two parts. What
+         collapses is the colour, the size and the hand of ONE part.
+
+         THE ATTRIBUTES ARE DEFINED HERE AND THE VALUES ARE NOT, because the
+         values are read from the family table in models/variant_families.py,
+         which was generated from the owner's own catalogue export. Writing
+         them twice would let the two copies drift, and the table is the one
+         that decides which old product becomes which variant.
+
+         EVERY ONE OF THESE MAKES REAL VARIANTS (`always`), unlike the trim
+         colour on a hardware kit, which is `no_variant`. A black bracket and
+         a white bracket are two things on a shelf with two counts and two
+         costs, so each has to be its own stockable variant. A kit's trim
+         colour is a note on an order line; this is inventory. -->
+
+    <!--
+      COLOUR, and the only one of these the shop offers as a filter.
+
+      Somebody browsing hardware may well want only white, and the sidebar is
+      the place to say so. The sizes below are not browsed that way - nobody
+      shops for "#4" across the catalogue - so they are hidden from the filter
+      panel. Hidden there does NOT mean hidden on the product page: the field
+      is labelled "eCommerce Filter Visibility" in Odoo and governs the shop
+      sidebar alone. The choice itself is always on the page, which is the
+      whole point of this change.
+
+      THE NAME IS "COLOUR" AND THE TRADE WORD IS "FINISH". The catalogue uses
+      both - aa_dealer_orders reads finish attributes under four spellings
+      (custom_kit.py COLOUR_ATTRIBUTES) - and this is the one that reaches a
+      customer, so it is the plain word.
+    -->
+    <record id="attribute_finish_colour" model="product.attribute">
+      <field name="name">Colour</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">always</field>
+      <field name="visibility">visible</field>
+      <field name="sequence">10</field>
+    </record>
+
+    <!--
+      HAND, on exactly one product in the catalogue: the spring anchor bracket.
+
+      Nothing else is split left and right - end bearing plates are sold as a
+      pair, the Canimex drums are named by size - so this attribute exists for
+      four rows collapsing into one product with an LH/RH choice.
+
+      THE VALUES ARE "LH" AND "RH", not "Left Hand". That is what the old
+      product names said, what the counter says, and what the shop floor reads
+      off a work order, and a merge is a bad moment to also start renaming
+      things. Hand is the one choice on this list that cannot be got wrong
+      quietly: a bracket of the wrong colour is an annoyance, a bracket of the
+      wrong hand will not mount. Everything that picks a hand picks it by
+      name, never by position - see _aa_variant_for in product_variant_merge.
+    -->
+    <record id="attribute_hand" model="product.attribute">
+      <field name="name">Hand</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">always</field>
+      <field name="visibility">hidden</field>
+      <field name="sequence">20</field>
+    </record>
+
+    <!--
+      THE SIZES, one attribute per part rather than one "Size" for everything.
+
+      A single shared Size attribute would put "#4", '3 3/8"', "9'6"" and '7"'
+      in one list, and the page would label a hinge "Size: #4" while labelling
+      a shaft "Size: 9'6"". Separate attributes let each page say what it
+      actually means - "Hinge Size", "Stem", "Length" - and keep one family's
+      values out of another's dropdown.
+
+      SIZE IS THE ONE CHOICE THAT MOVES THE PRICE. Colour never does: every
+      colour of every part in the owner's export is the same price as its
+      siblings, checked before this was written. Size almost always does - a
+      #16 jamb bracket is 1.91 against 1.20 for a #10 - so the price lives on
+      the size value as an extra, and the merge refuses to run on a family
+      where two colours of one size disagree about the price.
+    -->
+    <record id="attribute_hinge_size" model="product.attribute">
+      <field name="name">Hinge Size</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">always</field>
+      <field name="visibility">hidden</field>
+      <field name="sequence">30</field>
+    </record>
+
+    <record id="attribute_jamb_bracket_size" model="product.attribute">
+      <field name="name">Bracket Size</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">always</field>
+      <field name="visibility">hidden</field>
+      <field name="sequence">31</field>
+    </record>
+
+    <record id="attribute_bearing_plate_size" model="product.attribute">
+      <field name="name">Bearing Plate Size</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">always</field>
+      <field name="visibility">hidden</field>
+      <field name="sequence">32</field>
+    </record>
+
+    <record id="attribute_flag_angle_size" model="product.attribute">
+      <field name="name">Flag Angle Size</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">always</field>
+      <field name="visibility">hidden</field>
+      <field name="sequence">33</field>
+    </record>
+
+    <!-- The stem, not the wheel: a "Roller 3-7" is a 3" wheel on a 7" stem.
+         The wheel is which product you are on (Roller 2" or Roller 3", kept
+         apart because they are two part numbers - CH-NR05-2" and CH-NR05-3"),
+         and the stem is the choice on the page. -->
+    <record id="attribute_roller_stem" model="product.attribute">
+      <field name="name">Stem</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">always</field>
+      <field name="visibility">hidden</field>
+      <field name="sequence">34</field>
+    </record>
+
+    <record id="attribute_shaft_length" model="product.attribute">
+      <field name="name">Length</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">always</field>
+      <field name="visibility">hidden</field>
+      <field name="sequence">35</field>
+    </record>
+
+  </data>
+</odoo>

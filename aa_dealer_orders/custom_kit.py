@@ -142,12 +142,27 @@ class ProductTemplate(models.Model):
         colours = []
 
         for variant in variants:
-            finish = variant.product_template_attribute_value_ids.filtered(
+            values = variant.product_template_attribute_value_ids
+            finish = values.filtered(
                 lambda value: (value.attribute_id.name or "").strip().lower()
                 in COLOUR_ATTRIBUTES)
-            colours.append((variant.id, finish[:1].name or
-                            ", ".join(variant.product_template_attribute_value_ids
-                                      .mapped("name"))))
+
+            # EVERY OTHER CHOICE GOES IN THE LABEL TOO, or the list cannot be
+            # read. Since the catalogue's colours and sizes were folded into
+            # one product each (owner, 2026-10-21) a hinge is ONE product with
+            # 21 variants, and labelling them by finish alone offered the
+            # dealer "Black" seven times over - whereupon picking Black got
+            # him whichever SIZE happened to come first. "#3 Black" says which
+            # one he is choosing. A part that only comes in colours reads
+            # exactly as it did before.
+            others = values - finish
+            label = " ".join(part for part in (
+                ", ".join(others.mapped("name")),
+                finish[:1].name or "",
+            ) if part)
+
+            colours.append((variant.id,
+                            label or ", ".join(values.mapped("name"))))
 
         return colours
 
