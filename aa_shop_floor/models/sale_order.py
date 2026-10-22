@@ -34,6 +34,94 @@ class SaleOrder(models.Model):
         self._aa_create_station_productions()
         return result
 
+    def _action_cancel(self):
+        """Nobody makes anything for an order that has been cancelled.
+
+        THE OTHER HALF OF action_confirm, and it was missing. Confirming an
+        order puts a job on the floor for every spring, kit and cable on it;
+        cancelling the order left every one of them standing there. Odoo
+        cancels the order's TRANSFERS for itself and has never had an opinion
+        about manufacturing raised from a sale, so the board kept showing work
+        for an order that no longer existed - owner, 2026-10-22: "deleted
+        orders still go to shop floor".
+
+        IT IS ALSO THE DELETE CASE. Odoo will not delete a confirmed sale
+        order - it has to be cancelled first - so a job that stops on cancel
+        is a job that cannot outlive a deletion either.
+
+        THE WIZARD STILL DOES MORE. "Cancel and refund" (aa.order.cancel)
+        takes the money back, unwinds done transfers and raises returns. This
+        is only the part that cannot be wrong: work nobody has finished, for
+        an order nobody is going to pay for.
+        """
+        result = super()._action_cancel()
+        self._aa_cancel_station_productions()
+
+        return result
+
+    def _aa_station_jobs(self):
+        """This order's unfinished manufacturing, at any station.
+
+        BY THE SALE LINE AND BY THE ORDER'S NAME. The line is the firm link -
+        _aa_create_station_productions writes it - and the name catches the
+        jobs Odoo's own routes raise for the same order, which is how the
+        cancel-and-refund wizard finds them too.
+        """
+        Production = self.env["mrp.production"].sudo()
+        jobs = Production.browse()
+
+        for order in self:
+            jobs |= Production.search([
+                ("aa_sale_line_id", "in", order.order_line.ids),
+                ("state", "not in", ("done", "cancel")),
+            ])
+
+            if order.name:
+                jobs |= Production.search([
+                    ("origin", "=", order.name),
+                    ("state", "not in", ("done", "cancel")),
+                ])
+
+        return jobs
+
+    def _aa_cancel_station_productions(self):
+        """Stop the jobs, and say so on the order."""
+        jobs = self._aa_station_jobs()
+
+        if not jobs:
+            return
+
+        stuck = []
+
+        for job in jobs:
+            # ONE JOB THAT WILL NOT CANCEL MUST NOT STOP THE CANCEL. A job
+            # that has already consumed its components can refuse, and an
+            # order held open by a half-made spring is worse than a job
+            # somebody has to close by hand - so it is named instead.
+            try:
+                with self.env.cr.savepoint():
+                    job.action_cancel()
+            except Exception as error:
+                _logger.exception(
+                    "aa_shop_floor: cancelling %s with its order failed", job.name)
+                stuck.append((job, error))
+
+        for order in self:
+            order.message_post(body=_(
+                "Shop Floor work stopped with this order: %(names)s.",
+                names=", ".join(jobs.mapped("name")),
+            ))
+
+        if stuck:
+            for order in self:
+                order.message_post(body=_(
+                    "These would not cancel and need closing by hand:"
+                    " %(names)s.",
+                    names=", ".join(job.name for job, _error in stuck),
+                ))
+
+        jobs._aa_tell_the_shop_floor()
+
     def _aa_station_kind(self, line, spring_tmpl):
         """Which Shop Floor station a line goes to, or None."""
         if line.display_type or line.product_uom_qty <= 0 or not line.product_id:
