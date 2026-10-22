@@ -199,8 +199,16 @@ class ProductTemplate(models.Model):
             "notes": [],
         }
 
-        if self._aa_already_merged(spec):
+        merged_as = self._aa_already_merged(spec)
+
+        if merged_as:
+            # SAY WHAT IS THERE, not nothing. A line reading "4 products -> 0
+            # variants" next to "already merged" reads like something was
+            # lost; the count of what the product now offers is the reassuring
+            # number and the one worth checking.
             report["state"] = "already merged"
+            report["variants"] = len(
+                merged_as.with_context(active_test=True).product_variant_ids)
             return report
 
         olds, already = self._aa_family_products(spec, report)
@@ -242,7 +250,7 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _aa_already_merged(self, spec):
-        """Has this family already been folded up?
+        """The merged product for this family, or an empty recordset.
 
         The question is asked of the SURVIVING product, not of the old ones:
         the base keeps its record and is renamed, so most of the old names are
@@ -261,8 +269,8 @@ class ProductTemplate(models.Model):
         }
         for template in survivor:
             if wanted <= set(template.attribute_line_ids.attribute_id.ids):
-                return True
-        return False
+                return template
+        return self.env["product.template"]
 
     @api.model
     def _aa_family_products(self, spec, report):
@@ -316,29 +324,57 @@ class ProductTemplate(models.Model):
                     "%r already has %d variants" % (name, count)
                 )
 
-        # THE SAME KIND OF THING THROUGHOUT. A different unit or a different
-        # tax is not a variant of a product, it is a different product, and
-        # folding them would quietly reprice or re-measure one of them.
+        # THE SAME KIND OF THING THROUGHOUT - but only where a difference
+        # would cost somebody something.
+        #
+        # A different unit, a different product type or a different CUSTOMER
+        # tax is not a variant of a product: folding those would quietly
+        # re-measure one of them or change what a customer is charged. Those
+        # still refuse the family.
+        #
+        # VENDOR TAXES ONLY GET A NOTE (owner's database, 2026-10-22). His
+        # hinges were refused for this - 25 products where #8 and #9 were
+        # created later than #1-#7 and carry a different purchase tax, which
+        # is an accident of how they were entered rather than a fact about
+        # hinges. Refusing meant the two hinge families stayed as 43 separate
+        # products, which is the whole thing this change exists to stop. The
+        # merged product keeps the base's, and the report says what the others
+        # were so the purchase side can be put right if it matters.
         # EVERY FIELD IS CHECKED FOR EXISTENCE FIRST. uom_po_id was on this
         # list for an hour and is not a field in 19 - the purchase unit went
         # away - and a KeyError here would have taken down the whole merge
         # rather than one comparison. A version that renames a field should
         # cost us a check, not the catalogue.
-        for field, label in (
-            ("uom_id", "unit"),
-            ("type", "type"),
-            ("taxes_id", "customer taxes"),
-            ("supplier_taxes_id", "vendor taxes"),
+        for field, label, refuse in (
+            ("uom_id", "unit", True),
+            ("type", "type", True),
+            ("taxes_id", "customer taxes", True),
+            ("supplier_taxes_id", "vendor taxes", False),
         ):
             if any(field not in t._fields for t in olds.values()):
                 continue
+
             seen = {tuple(sorted(t[field].ids)) if t._fields[field].type
                     in ("many2many", "one2many") else t[field]
                     for t in olds.values()}
-            if len(seen) > 1:
+
+            if len(seen) <= 1:
+                continue
+
+            if refuse:
                 report["problems"].append(
                     "the %s is not the same across the family" % label
                 )
+                continue
+
+            base = olds.get(spec["base"])
+            report["notes"].append(
+                "the %s differ across the family (%d different settings); the"
+                " merged product keeps the base's: %s"
+                % (label, len(seen),
+                   ", ".join(base[field].mapped("name")) if base and base[field]
+                   else "none")
+            )
 
         # PART NUMBERS MUST NOT COLLIDE. Two products sharing one reference is
         # normal here and fine - they become two variants - but the same
