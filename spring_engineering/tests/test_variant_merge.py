@@ -1126,3 +1126,45 @@ class TestVariantMerge(TransactionCase):
             self.assertEqual(
                 variant.barcode, "BC-SHAFT-%s" % price,
                 "scanning %s would not find the variant with the stock" % length)
+
+    def test_vendor_taxes_that_differ_are_reported_not_refused(self):
+        """HIS HINGES WERE REFUSED FOR THIS. #8 and #9 were created later than
+        #1-#7 and carry a different purchase tax, which is an accident of how
+        they were entered rather than a fact about hinges - and refusing left
+        two whole families as 43 separate products. The merged product keeps
+        the base's, and the report says so."""
+        made = self._hinges()
+        tax = self.env["account.tax"].create({
+            "name": "Test Use Tax", "amount": 7.0, "type_tax_use": "purchase"})
+        made["Hinge # 8 Black"].supplier_taxes_id = [(6, 0, tax.ids)]
+
+        report = self._merge("Hinge")
+
+        self.assertEqual(report["state"], "merged", report)
+        self.assertTrue(
+            any("vendor taxes differ" in n for n in report["notes"]),
+            report["notes"])
+
+    def test_customer_taxes_that_differ_still_stop_the_family(self):
+        """That one is money a customer is charged, so it is not ours to pick
+        for him."""
+        made = self._anchor_brackets()
+        tax = self.env["account.tax"].create({
+            "name": "Test Sales Tax", "amount": 9.0, "type_tax_use": "sale"})
+        made["Spring Anchor Bracket LH White"].taxes_id = [(6, 0, tax.ids)]
+
+        report = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(report["state"], "skipped", report)
+        self.assertTrue(
+            any("customer taxes" in p for p in report["problems"]), report)
+
+    def test_an_already_merged_family_reports_what_it_offers(self):
+        """"4 products -> 0 variants" reads like something was lost."""
+        self._anchor_brackets()
+        self._merge("Spring Anchor Bracket")
+
+        again = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(again["state"], "already merged")
+        self.assertEqual(again["variants"], 4, again)
