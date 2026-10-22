@@ -508,3 +508,69 @@ class WorkOutlivingItsOrderCase(TransactionCase):
         verdict, _why = job._aa_cleanup_verdict()
 
         self.assertEqual(verdict, "unsure")
+
+    # --- deleting the W/O transfer: the path his log finally identified ----
+
+    def test_deleting_the_wo_transfer_takes_its_manufacturing_with_it(self):
+        """HIS LOG, 2026-10-22: four jobs on W/O #221, all confirmed, Order
+        reading "live". He had deleted the work order and the sale order was
+        still there - so what he deletes is the TRANSFER named W/O #221, and
+        nothing connected that to manufacturing.
+
+        Reproduced before it was written: delete the transfer, the order stays
+        `sale`, the job stays `confirmed`, no transfer is left carrying the
+        number."""
+        order = self._order()
+        job = self._jobs(order)
+        self.assertTrue(order.picking_ids, "the fixture booked no transfer")
+        self.assertTrue(job.aa_wo_number, "the fixture has no W/O number")
+
+        order.picking_ids.unlink()
+
+        self.assertFalse(job.exists(), "the work outlived its work sheet")
+        self.assertEqual(order.state, "sale",
+                         "the order itself should be untouched")
+
+    def test_one_transfer_of_two_going_leaves_the_work_alone(self):
+        """An order can carry a pick AND a delivery. Tidying one away is not
+        the end of the job - only the last sheet going is."""
+        order = self._order()
+        job = self._jobs(order)
+        first = order.picking_ids[:1]
+        # A second sheet for the same order - a pick and a delivery, say. The
+        # W/O number is computed from the order, so the copy carries it too;
+        # the NAME is unique and must not be forced.
+        second = first.copy()
+        self.assertEqual(second.aa_wo_number, first.aa_wo_number)
+
+        first.unlink()
+
+        self.assertTrue(job.exists(), "the work went with the wrong sheet")
+        self.assertTrue(second.exists())
+
+    def test_cancelling_a_transfer_does_not_touch_the_work(self):
+        """Odoo cancels transfers of its own accord - a replanned route, an
+        order cancelled elsewhere - and the order's own cancel already takes
+        the work with it. Only an outright deletion means "this job is off"."""
+        order = self._order()
+        job = self._jobs(order)
+
+        order.picking_ids.action_cancel()
+
+        self.assertTrue(job.exists(), "a cancelled transfer deleted the work")
+        self.assertNotEqual(job.state, "cancel")
+
+    def test_a_transfer_with_no_wo_number_takes_nothing_with_it(self):
+        """A transfer that is not one of this shop's work sheets has no W/O
+        number, and deleting it must not reach into manufacturing at all."""
+        order = self._order()
+        job = self._jobs(order)
+        loose = self.env["stock.picking"].create({
+            "picking_type_id": self.env.ref("stock.picking_type_out").id,
+            "location_id": self.env.ref("stock.stock_location_stock").id,
+            "location_dest_id": self.env.ref("stock.stock_location_customers").id,
+        })
+
+        loose.unlink()
+
+        self.assertTrue(job.exists())

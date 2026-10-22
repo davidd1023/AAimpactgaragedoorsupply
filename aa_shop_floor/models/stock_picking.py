@@ -52,6 +52,46 @@ class StockPicking(models.Model):
             picking.aa_order_status = Markup('<div class="d-flex flex-wrap">%s</div>') % badges
 
 
+    # --- the work sheet being torn down -----------------------------------
+
+    def unlink(self):
+        """Deleting a W/O transfer takes that W/O's manufacturing with it.
+
+        THE PATH NONE OF THE OTHER SIX FIXES TOUCHED. The owner's log settled
+        it: four jobs on W/O #221, all confirmed, with the Order column
+        reading "live". He had deleted the work order and the SALE ORDER was
+        still there - so what he deletes is neither the order (hooked) nor
+        Odoo's work order (hooked), but the TRANSFER named W/O #221, and
+        nothing in this codebase connected that to manufacturing.
+
+        Reproduced before writing this: delete the transfer and the order
+        stays `sale`, the job stays `confirmed`, and no transfer is left
+        carrying that number. Which is exactly his four rows.
+
+        ONLY WHEN NO TRANSFER IS LEFT FOR THAT W/O. An order can carry
+        several - a pick and a delivery - and deleting one of them is not the
+        end of the job. When the last one goes there is no sheet left to make
+        anything against, so the jobs go too.
+
+        DELETED, NOT CANCELLED, because deleting is what was done to the
+        sheet, and because "off the board" is not what he has been asking for
+        these six attempts: "i press delete to get rid of them".
+
+        CANCELLING A TRANSFER DOES NOT DO THIS. Odoo cancels transfers of its
+        own accord - when an order is cancelled, when a route is replanned -
+        and the order's own cancel already takes the work with it. Only an
+        outright deletion of the last sheet is read as "this job is off".
+        """
+        numbers = {
+            picking.aa_wo_number for picking in self if picking.aa_wo_number
+        }
+        result = super().unlink()
+
+        for number in numbers:
+            self.env["mrp.production"]._aa_clear_work_for_wo_number(number)
+
+        return result
+
 class StockMove(models.Model):
     _inherit = "stock.move"
 
@@ -71,3 +111,4 @@ class StockMove(models.Model):
             text = move.description_picking or ""
             if options and text.startswith(options):
                 move.description_picking = text[len(options):].strip()
+
