@@ -114,12 +114,51 @@ then choose the other sizes or color"* - with the TYPE of part staying separate
 decided the same day, the hand on the product too: *"hands should be on the same
 product, so another choice for rh or lh on the individual product"*.
 
-81 products became 15. The table that says which old product becomes which
-variant is `spring_engineering/models/variant_families.py`, GENERATED from his
-own catalogue export; the engine is `models/product_variant_merge.py` and it
-runs once, from `migrations/19.0.2.49.0/post-migration.py`. It rehearses first
-and logs both passes; a family that does not add up is left alone and named.
-`spring_engineering.variant_merge_hold` set to 1 makes it rehearse only.
+89 products became 15, verified working by the owner on 2026-10-22. The table
+that says which old product becomes which variant is
+`spring_engineering/models/variant_families.py`; the engine is
+`models/product_variant_merge.py`, which ran once from
+`migrations/19.0.2.49.0/post-migration.py`.
+
+**TO RUN IT AGAIN, USE THE SCREEN, NOT A DEPLOY.** Inventory > Configuration >
+Catalogue Merge rehearses every family - performs them and rolls them back -
+and shows the result with the reason under anything left alone; a "Merge for
+real" button does it. THE MIGRATION WILL NOT RUN A SECOND TIME, because Odoo
+only runs a migration for a version above the one the database holds and his is
+long past 19.0.2.49.0. That screen is the only way in now, and it is why it
+exists: the first real run merged one family of fifteen and the second thirteen,
+and each round of fixes would otherwise have needed its own deploy.
+`spring_engineering.variant_merge_hold` set to 1 makes a deploy rehearse only.
+
+### What his own database taught this, and must not be undone
+
+- **OPEN WORK FOLLOWS THE STOCK; IT DOES NOT BLOCK IT.** The first rehearsal
+  refused THIRTEEN of fifteen families because W/O #204, #207, #208, #209 and
+  AAM/MO/00072 held brackets and hinges. A working shop always has open work
+  orders, so "validate or cancel them first" was a refusal that could never
+  come right. An open move is unreserved, repointed and reserved again. Only a
+  move somebody is part way through validating (`picked`) still refuses - that
+  would throw away a count a person made at the rack.
+- **A FAMILY NEED NOT BE SQUARE.** His hinges run #1-#9 and the Galvanized ones
+  stop at #7, so nine sizes by three colours is 27 combinations over 25
+  products. The two he has never stocked are ARCHIVED, which Odoo reads as
+  "this combination does not exist" (`_is_combination_possible`). Refusing such
+  a family - an earlier draft did - would have left four hinge sizes as
+  separate products. To start selling a #8 Galvanized, un-archive that variant.
+- **HINGE #8 AND #9 ARE ASSUMED TO BE THE SAME PART as #1-#7**, because the
+  part numbers continue the same CH1411 series. They were not in the export the
+  table was built from; the rehearsal named them as strays and they were added.
+  Four lines to delete in `variant_families.py` if that is ever wrong.
+- **A BARCODE IS MOVED, NOT COPIED.** It is unique per company and the old
+  product is still active when the new variant is written, so copying one
+  killed the Torsion Solid Shaft family with "Barcode CH-SH02-10FT6 already
+  assigned".
+- **VENDOR TAXES DIFFERING IS A NOTE; CUSTOMER TAXES DIFFERING IS A REFUSAL.**
+  Both hinge families were refused because #8 and #9 carry a different purchase
+  tax from #1-#7 - an accident of how they were entered, not a fact about
+  hinges, and not worth leaving 43 products unmerged over. A customer tax, a
+  unit or a product type differing still refuses: that would change what a
+  customer is charged or re-measure the product.
 
 Facts that came out of his export and should not be re-derived by guessing:
 
@@ -131,7 +170,8 @@ Facts that came out of his export and should not be re-derived by guessing:
   grouped by SKU at all.
 - **Colour never moves a price; size nearly always does.** The merge prices a
   variant as the product's price plus an extra per size, and refuses a family
-  where two colours of one size disagree.
+  where two colours of one size disagree. Every variant's price is checked
+  against its old product's before the family is committed.
 - **Exactly one part is split by hand**: the spring anchor bracket. EBPs are
   sold "( Pair )", the Canimex drums are named by size.
 - Tracks, drums, cables and cones are deliberately NOT folded in yet. Tracks are
