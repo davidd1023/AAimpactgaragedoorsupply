@@ -115,17 +115,6 @@ class WorkOutlivingItsOrderCase(TransactionCase):
 
     # --- deleting the work order -----------------------------------------
 
-    def test_deleting_the_only_work_order_cancels_its_station_job(self):
-        """HIS OWN DIAGNOSIS. The manufacturing order was sticking around."""
-        order = self._order()
-        job = self._jobs(order)
-
-        job.workorder_ids.unlink()
-
-        self.assertTrue(job.exists(), "the job was deleted, not cancelled")
-        self.assertEqual(job.state, "cancel", "the job stayed on the board")
-        self.assertFalse(self._on_the_board(order))
-
     def test_an_ordinary_manufacturing_order_keeps_its_own_counsel(self):
         """One operation deleted off a route is a change to the route, not the
         end of the job - so a manufacturing order that is not one of this
@@ -283,3 +272,93 @@ class WorkOutlivingItsOrderCase(TransactionCase):
 
         self.assertTrue(job.exists(), "a finished job was deleted")
         self.assertEqual(job.state, "done")
+
+    # --- the two buttons he actually presses ------------------------------
+
+    def _work_order(self, order):
+        job = self._jobs(order)
+        self.assertTrue(job.workorder_ids, "the fixture made no work order")
+
+        return job, job.workorder_ids[:1]
+
+    def test_cancelling_the_work_order_cancels_its_station_job(self):
+        """Owner, 2026-10-22: "pressing cancel on the work order doesnt work
+        either", from Manufacturing > Operations > Work Orders.
+
+        MEASURED FIRST: Odoo leaves the job in "to_close" when its last
+        operation is cancelled - live, and on the board - with that cancelled
+        work order still attached. Which is also why an earlier version of
+        this, asking for an EMPTY work order list, could never fire."""
+        order = self._order()
+        job, workorder = self._work_order(order)
+
+        workorder.action_cancel()
+
+        self.assertEqual(workorder.state, "cancel")
+        self.assertEqual(job.state, "cancel", "the job stayed on the board")
+        self.assertFalse(self._on_the_board(order))
+
+    def test_deleting_the_work_order_deletes_its_station_job(self):
+        """And Delete means gone, not cancelled - off the board is not the
+        same as off the Manufacturing list."""
+        order = self._order()
+        job, workorder = self._work_order(order)
+
+        workorder.unlink()
+
+        self.assertFalse(job.exists(), "the job was only cancelled")
+        self.assertFalse(self._on_the_board(order))
+
+    def test_a_job_with_work_still_on_it_is_left_alone(self):
+        """Two benches, one cancelled: the job is still somebody's afternoon."""
+        order = self._order()
+        job, workorder = self._work_order(order)
+        second = self.env["mrp.workorder"].with_context(
+            aa_keep_workcenter=True).create({
+                "name": "Second bench", "production_id": job.id,
+                "product_uom_id": job.product_uom_id.id,
+                "workcenter_id": workorder.workcenter_id.id})
+
+        workorder.action_cancel()
+
+        self.assertTrue(job.exists())
+        self.assertNotEqual(job.state, "cancel",
+                            "a job with work left on it was closed")
+        self.assertEqual(second.state, "ready")
+
+    def test_a_job_that_was_made_is_never_closed_behind_somebody(self):
+        """One work order done and another cancelled: something was made, and
+        that happened whatever became of the paperwork."""
+        order = self._order()
+        job, workorder = self._work_order(order)
+        second = self.env["mrp.workorder"].with_context(
+            aa_keep_workcenter=True).create({
+                "name": "Second bench", "production_id": job.id,
+                "product_uom_id": job.product_uom_id.id,
+                "workcenter_id": workorder.workcenter_id.id})
+        second.write({"state": "done"})
+
+        workorder.action_cancel()
+
+        self.assertTrue(job.exists())
+        self.assertNotEqual(job.state, "cancel")
+
+    def test_an_ordinary_job_is_not_closed_by_cancelling_its_operation(self):
+        """Not a station job: not ours to finish off."""
+        station = self.env["mrp.workcenter"].search([], limit=1) \
+            or self.env["mrp.workcenter"].create({"name": "Bench"})
+        product = self.env["product.product"].create({
+            "name": "Hand made two", "type": "consu", "is_storable": True})
+        production = self.env["mrp.production"].create({
+            "product_id": product.id, "product_qty": 1.0})
+        workorder = self.env["mrp.workorder"].with_context(
+            aa_keep_workcenter=True).create({
+                "name": "Do it", "production_id": production.id,
+                "product_uom_id": production.product_uom_id.id,
+                "workcenter_id": station.id})
+        production.action_confirm()
+
+        workorder.action_cancel()
+
+        self.assertTrue(production.exists())
+        self.assertNotEqual(production.state, "cancel")
