@@ -488,17 +488,17 @@ class TestVariantMerge(TransactionCase):
             )
 
     def test_the_flag_angle_survives_the_merge_and_does_not_wander(self):
-        """Two sizes, both in the track's finish, and the old lookup picked
-        5.9" by alphabet. After the merge both are one product and ordering by
-        name separates nothing - so the pick has to be deliberate, and it has
-        to be the SAME one every time."""
+        """Two sizes, both in the track's finish. After the merge both are one
+        product and ordering by name separates nothing, so the pick has to be
+        deliberate - the track's size decides it - and it has to be the SAME
+        one every time it is asked."""
         made = self._flag_angles()
-        before = self.env["sale.order"]._track_prep_flag_for_colour("Black")
+        before = self.env["sale.order"]._track_prep_flag_for_colour("Black", "2")
         self.assertEqual(before, made['Flag Angle 5.9" Black'].product_variant_id)
 
         self._merge("Flag Angle")
 
-        after = self.env["sale.order"]._track_prep_flag_for_colour("Black")
+        after = self.env["sale.order"]._track_prep_flag_for_colour("Black", "2")
         self.assertTrue(after, "the flag angle was lost in the merge")
         self.assertEqual(after._aa_chosen_colour(), "Black")
         self.assertEqual(
@@ -511,7 +511,8 @@ class TestVariantMerge(TransactionCase):
         # felt like returning.
         for _ in range(3):
             self.assertEqual(
-                self.env["sale.order"]._track_prep_flag_for_colour("Black"), after)
+                self.env["sale.order"]._track_prep_flag_for_colour("Black", "2"),
+                after)
 
     def test_the_choice_text_is_just_the_name_before_a_merge(self):
         """Everything above leans on _aa_choice_text reading the same on an
@@ -825,20 +826,18 @@ class TestVariantMerge(TransactionCase):
             self._variant("Spring Anchor Bracket", Hand="RH", Colour="White"),
         )
 
-    def test_the_flag_angle_pick_is_alphabetical_before_a_merge(self):
-        """The lookup this replaced ordered by NAME. Created in reverse order,
-        an id-ordered pick would answer 6-3/8" where the old code answered
-        5.9" - a different part, in the window between the deploy and the
-        migration."""
-        backwards = {}
+    def test_nothing_is_picked_when_the_track_does_not_say_its_size(self):
+        """TWO SIZES AND NOTHING TO CHOOSE BY. The old lookup answered 5.9" in
+        this case, by alphabet. Now that the size is the track's to decide, a
+        track that does not state one gets no flag angle rather than a coin
+        toss - the preparation refuses itself and says to call."""
         for size in ('6-3/8"', '5.9"'):          # deliberately out of order
             for colour in ("Black", "White"):
-                name = "Flag Angle %s %s" % (size, colour)
-                backwards[name] = self._product(name, price=9.1, stock=10.0)
+                self._product("Flag Angle %s %s" % (size, colour),
+                              price=9.1, stock=10.0)
 
-        found = self.env["sale.order"]._track_prep_flag_for_colour("Black")
-
-        self.assertEqual(found, backwards['Flag Angle 5.9" Black'].product_variant_id)
+        self.assertFalse(
+            self.env["sale.order"]._track_prep_flag_for_colour("Black", None))
 
     def test_the_report_counts_an_already_merged_family_as_done(self):
         self._anchor_brackets()
@@ -852,17 +851,16 @@ class TestVariantMerge(TransactionCase):
 
     # --- the flag angle size, now that the owner has said -----------------
 
-    def test_a_prepared_track_takes_the_5_9_flag_angle(self):
-        """Owner, 2026-10-22: "every track takes 5.9" currently, that other
-        size is for other things". It was getting that by alphabet; now it is
-        asked for by size, on both sides of the merge."""
+    def test_a_2_inch_track_takes_the_5_9_flag_angle(self):
+        """Owner, 2026-10-22: a 2" track takes the 5.9". It was getting that by
+        alphabet; now it is asked for by size, on both sides of the merge."""
         self._flag_angles()
 
-        before = self.env["sale.order"]._track_prep_flag_for_colour("White")
+        before = self.env["sale.order"]._track_prep_flag_for_colour("White", "2")
         self.assertIn("5.9", before._aa_choice_text())
 
         self._merge("Flag Angle")
-        after = self.env["sale.order"]._track_prep_flag_for_colour("White")
+        after = self.env["sale.order"]._track_prep_flag_for_colour("White", "2")
 
         self.assertEqual(
             after.product_template_attribute_value_ids.filtered(
@@ -880,7 +878,7 @@ class TestVariantMerge(TransactionCase):
         for colour in ("Black", "White"):
             self._product("Flag Angle 6-3/8\" %s" % colour, price=9.22, stock=10.0)
 
-        found = self.env["sale.order"]._track_prep_flag_for_colour("Black")
+        found = self.env["sale.order"]._track_prep_flag_for_colour("Black", "2")
 
         self.assertFalse(found, "the wrong flag angle was substituted")
 
@@ -893,7 +891,7 @@ class TestVariantMerge(TransactionCase):
             str(other.product_variant_id.id))
 
         self.assertEqual(
-            self.env["sale.order"]._track_prep_flag_for_colour("Black"),
+            self.env["sale.order"]._track_prep_flag_for_colour("Black", "2"),
             other.product_variant_id,
         )
 
@@ -904,7 +902,7 @@ class TestVariantMerge(TransactionCase):
         self._flag_angles()
         self._product('Flag Angle 4-1/2" Black', price=8.0, stock=10.0)
 
-        found = self.env["sale.order"]._track_prep_flag_for_colour("Black")
+        found = self.env["sale.order"]._track_prep_flag_for_colour("Black", "2")
 
         self.assertIn("5.9", found._aa_choice_text())
 
@@ -925,6 +923,75 @@ class TestVariantMerge(TransactionCase):
         self._product("Flag Angle - Black", price=9.1, stock=10.0)
         self._product('Flag Angle 5.9" Black', price=9.1, stock=10.0)
 
-        found = self.env["sale.order"]._track_prep_flag_for_colour("Black")
+        found = self.env["sale.order"]._track_prep_flag_for_colour("Black", "2")
 
         self.assertIn("5.9", found._aa_choice_text())
+
+    def test_a_3_inch_track_takes_the_6_3_8_flag_angle(self):
+        """Owner, 2026-10-22: "3" do infact use 6-3/8"". The size now comes
+        off the track, so this is the pairing both ways round."""
+        self._flag_angles()
+
+        for size, expect in (("2", "5.9"), ("3", "6-3/8")):
+            found = self.env["sale.order"]._track_prep_flag_for_colour(
+                "Black", size)
+            self.assertIn(
+                expect, found._aa_choice_text(),
+                'a %s" track was given the wrong flag angle' % size)
+
+        self._merge("Flag Angle")
+
+        for size, expect in (("2", '5.9"'), ("3", '6-3/8"')):
+            found = self.env["sale.order"]._track_prep_flag_for_colour(
+                "Black", size)
+            self.assertEqual(
+                found.product_template_attribute_value_ids.filtered(
+                    lambda v: v.attribute_id.name == "Flag Angle Size").name,
+                expect,
+                'a %s" track was given the wrong flag angle after the merge'
+                % size)
+
+    def test_the_track_size_is_read_off_its_name_and_its_part_number(self):
+        """The catalogue says it twice - the name leads with it and the part
+        number carries it - and the length in the middle of the name must not
+        be read as a size."""
+        read = self.env["sale.order"]._track_prep_track_size_from_name
+
+        self.assertEqual(read('2" Vertical Track 100" - 9\' Door Height Black'), "2")
+        self.assertEqual(read('3" Vertical Track 76" - 7\' Door Height White'), "3")
+        self.assertEqual(read('[CH-VT-3"] 3" Vertical Track 88" - 8\' Door Height'), "3")
+        self.assertEqual(read('2" Horizontal Track -  120" White'), "2")
+        self.assertEqual(read("CH-VT-2-2 Vertical Track 76-7 door height black"), "2")
+        # A length is not a size, and a track that does not say gets no guess.
+        self.assertIsNone(read("Vertical Track 100 inch Black"))
+        self.assertIsNone(read("Spring Anchor Bracket RH Black"))
+
+    def test_a_whole_prepared_3_inch_track_gets_the_long_flag_angle(self):
+        """END TO END, through the function the cart and the product page both
+        call, rather than the lookup on its own."""
+        self._jamb_brackets()
+        self._flag_angles()
+        track = self._product('3" Vertical Track 76" - 7\' Door Height Black',
+                              code='CH-VT-3"', price=120.74)
+
+        wanted, warning = self.env["sale.order"]._track_prep_requirements(
+            track.product_variant_id)
+
+        self.assertFalse(warning, warning)
+        flag = wanted["flag"][0]
+        self.assertIn("6-3/8", flag._aa_choice_text())
+        self.assertEqual(flag._aa_chosen_colour() or "Black", "Black")
+
+    def test_the_warning_names_the_size_it_wanted(self):
+        """"Flag Angle White" sends somebody looking at two products; the
+        message says which one is missing."""
+        self._jamb_brackets()
+        self._product('Flag Angle 5.9" Black', price=9.1, stock=10.0)
+        track = self._product('3" Vertical Track 76" - 7\' Door Height Black',
+                              code='CH-VT-3"', price=120.74)
+
+        wanted, warning = self.env["sale.order"]._track_prep_requirements(
+            track.product_variant_id)
+
+        self.assertFalse(wanted)
+        self.assertIn('Flag Angle 6-3/8" Black', warning)

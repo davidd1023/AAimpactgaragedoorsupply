@@ -148,18 +148,28 @@ restored a backup on 2026-10-19 and watched the page change back.
 A merge needs a migration, a migration needs an update, and an update there
 costs him his front page.
 
-### A prepared track takes the 5.9" flag angle (owner, 2026-10-22)
+### The flag angle matches the TRACK'S SIZE (owner, 2026-10-22)
 
-*"every track takes 5.9" currently, that other size is for other things."*
+A **2" track takes the 5.9"**, a **3" track takes the 6-3/8"** - *"3\" do infact
+use 6-3/8\", so could you make it so that 3\" tracks automatically use the
+6-3/8\" and the 2\" tracks use 5.9\"."*
 
-It was getting that answer by ALPHABET - the lookup ordered its matches by name
-and 5.9 sorts before 6-3/8 - which held only while the catalogue had exactly two
-sizes spelled exactly that way. It is now asked for by size
-(`TRACK_PREP_FLAG_SIZE_RE` in `spring_engineering/models/sale_order.py`), and if
-there is no 5.9" the preparation refuses itself rather than substituting the
-other size, because the other size is for other things. The setting
-`spring_engineering.track_prep_flag_product_id` still answers for a catalogue
-that has no 5.9" at all.
+He first said every track takes the 5.9" and corrected it an hour later after
+looking it up, so the earlier wording in this file was wrong for an hour. The
+live site has been sending 5.9" to EVERY prepared track - not by rule, but
+because the lookup ordered its matches by name and 5.9 sorts before 6-3/8. **So
+3" prepared tracks already shipped carry the short angle and are wrong on the
+job.**
+
+`TRACK_PREP_FLAG_BY_TRACK_SIZE` in `spring_engineering/models/sale_order.py`
+holds the pairing, and the track's size is read off its name or its part number
+(`_track_prep_track_size_from_name` - the name leads with it, `CH-VT-3"` carries
+it, and the length in the middle of the name is deliberately not read as a
+size). Three tiers, in order: the angle stating this track's size wins; failing
+that one that states NO size (the tolerance is for spellings - "Flag Angle -
+Black"); and an angle stating the OTHER size is never substituted, because it
+does not fit. A track that does not say what size it is gets no guess. The
+setting `spring_engineering.track_prep_flag_product_id` is still the last word.
 
 ## Git
 
