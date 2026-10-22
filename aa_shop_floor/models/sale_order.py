@@ -73,8 +73,19 @@ class SaleOrder(models.Model):
         Jobs already stranded that way are swept up by their own screen,
         Manufacturing > Work for deleted orders, because no hook can reach
         them: their order is not there to be cancelled again.
+
+        AND THEY ARE DELETED, NOT JUST CANCELLED, because that is what the
+        order itself is having done to it (owner, 2026-10-22: "i press delete
+        to get rid of them, after that the manufacturing orders are still
+        there"). A cancelled job is kept when an order is CANCELLED - the
+        order is still there for the history to hang on. When the order is
+        deleted there is nothing left to hang it on: a cancelled job pointing
+        at an order number that answers to nothing is just litter in the
+        Manufacturing list.
         """
+        jobs = self._aa_station_jobs()
         self._aa_cancel_station_productions()
+        jobs.exists()._aa_delete_station_jobs()
 
         return super().unlink()
 

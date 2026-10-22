@@ -33,14 +33,17 @@ class ShopFloorOrphanCleanup(models.TransientModel):
             _("%s job(s) for orders that have been deleted or cancelled:",
               len(jobs)),
             "",
-            "%-16s %-10s %-9s %s" % (
-                _("Job"), _("W/O"), _("State"), _("What, and which order")),
+            "%-16s %-10s %-9s %-9s %s" % (
+                _("Job"), _("W/O"), _("State"), _("Order"),
+                _("What, and which order")),
         ]
         lines += [job._aa_describe_for_cleanup() for job in jobs]
         lines += ["", _(
-            "Cancelling these takes them off the Shop Floor. Nothing is"
-            " deleted: a cancelled job is still a record of what was asked"
-            " for.")]
+            "Jobs whose order was DELETED are deleted with it - there is no"
+            " order left to keep a record against. Jobs whose order still"
+            " stands and was cancelled are cancelled beside it, so the two"
+            " records say the same thing. A job already made is never"
+            " touched.")]
 
         return "\n".join(lines)
 
@@ -51,26 +54,46 @@ class ShopFloorOrphanCleanup(models.TransientModel):
         return self._aa_reopen()
 
     def action_clear(self):
-        """Cancel them, one at a time, and say what happened."""
+        """Clear them, matching what happened to the order they were for.
+
+        AN ORDER THAT WAS DELETED LEAVES NOTHING TO KEEP A RECORD AGAINST, so
+        its jobs are deleted too - otherwise the Manufacturing list fills with
+        cancelled jobs pointing at order numbers that answer to nothing. An
+        order that was CANCELLED is still there, so its jobs are cancelled and
+        kept beside it.
+        """
         self.ensure_one()
         jobs = self.env["mrp.production"]._aa_orphan_station_jobs()
-        done, stuck = [], []
+        deleted, cancelled, stuck = [], [], []
 
         for job in jobs:
-            # ONE THAT WILL NOT CANCEL MUST NOT STOP THE REST. A job that has
+            name = job.name
+            order_deleted = job._aa_order_fate() == "deleted"
+
+            # ONE THAT WILL NOT GO MUST NOT STOP THE REST. A job that has
             # already consumed something can refuse, and the other eleven
             # should still come off the board.
             try:
                 with self.env.cr.savepoint():
-                    job.sudo().action_cancel()
-                done.append(job.name)
+                    if order_deleted:
+                        job.sudo().unlink()
+                        deleted.append(name)
+                    else:
+                        job.sudo().action_cancel()
+                        cancelled.append(name)
             except Exception as error:
-                stuck.append("%s (%s)" % (job.name, error))
+                stuck.append("%s (%s)" % (name, error))
 
-        said = [_("Cancelled %s job(s).", len(done))]
+        said = [_("Deleted %(deleted)s job(s), cancelled %(cancelled)s.",
+                  deleted=len(deleted), cancelled=len(cancelled))]
 
-        if done:
-            said.append(", ".join(done))
+        if deleted:
+            said.append(_("Deleted, with the orders that are gone: %s",
+                          ", ".join(deleted)))
+
+        if cancelled:
+            said.append(_("Cancelled, beside the orders that still stand: %s",
+                          ", ".join(cancelled)))
 
         if stuck:
             said += ["", _("These would not cancel and need closing by hand:")]
