@@ -149,6 +149,39 @@ class MrpProduction(models.Model):
             " came from a sale" % self.origin
 
     @api.model
+    def _aa_clear_work_for_wo_number(self, number):
+        """Delete the unfinished manufacturing for one W/O, if its last work
+        sheet has gone.
+
+        Called when a W/O transfer is deleted. It checks for itself that no
+        transfer is left carrying the number, so a shop with a pick AND a
+        delivery does not lose its manufacturing when one of the two is
+        tidied away.
+        """
+        if not number:
+            return self.browse()
+
+        left = self.env["stock.picking"].sudo().search_count(
+            [("aa_wo_number", "=", number)])
+
+        if left:
+            return self.browse()
+
+        jobs = self.sudo().search([
+            ("aa_wo_number", "=", number),
+            ("state", "not in", ("done", "cancel")),
+        ]).filtered(
+            lambda job: not any(w.state == "done" for w in job.workorder_ids)
+        )
+
+        gone = jobs._aa_delete_station_jobs()
+
+        if gone:
+            self._aa_tell_the_shop_floor()
+
+        return gone
+
+    @api.model
     def _aa_cleanup_survey(self, limit=300):
         """Every job that is not finished, with what will become of it.
 
