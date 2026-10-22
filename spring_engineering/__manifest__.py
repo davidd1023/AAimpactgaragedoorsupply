@@ -20,7 +20,7 @@
     # load, and a field declared in Python has no column behind it. That is
     # exactly how main and Prod both reached 19.0.2.28.0 carrying different
     # code. Every number since is deliberately ahead of what Prod holds.
-    'version': '19.0.2.49.0',
+    'version': '19.0.2.50.0',
     'category': 'Engineering',
     'summary': 'Spring engineering calculator',
     # Odoo warns on every registry load without this.
@@ -34,11 +34,13 @@
         # and a link that proves it.
         'auth_signup'],
     'data': [
+        'security/ir.model.access.csv',
         'data/mail_template_confirm_email.xml',
         'data/track_prep_data.xml',
         'data/website_wishlist_data.xml',
         'data/trim_data.xml',
         'data/variant_attributes_data.xml',
+        'views/variant_merge_views.xml',
         'views/spring_engineering_views.xml',
         'views/spring_engineering_templates.xml',
         'views/custom_torsion_spring_templates.xml',

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE MERGE'S REPORT, AS A SCREEN RATHER THAN A LOG FILE.
+
+       The migration logs what it did, and on the first deploy that was not
+       enough: the catalogue came back unchanged and nothing inside Odoo could
+       say whether the migration had not run at all or had run and refused
+       every family. This answers that in one click, and changes nothing by
+       being looked at. -->
+
+  <record id="view_variant_merge_rehearsal" model="ir.ui.view">
+    <field name="name">aa.variant.merge.rehearsal.form</field>
+    <field name="model">aa.variant.merge.rehearsal</field>
+    <field name="arch" type="xml">
+      <form string="Catalogue Merge">
+
+        <div class="alert alert-info" role="status" invisible="done">
+          <strong>Nothing has been changed.</strong>
+          This is a rehearsal: every family is merged and then rolled back, so
+          the report below is what actually happened rather than a guess. A
+          family listed as <em>skipped</em> has the reason underneath it.
+        </div>
+
+        <div class="alert alert-warning" role="status" invisible="not done">
+          <strong>The catalogue has been merged.</strong>
+          The products folded in are archived, not deleted, and their stock was
+          moved to the matching variant by inventory adjustment.
+        </div>
+
+        <group>
+          <field name="done" invisible="1"/>
+          <field name="report" nolabel="1" widget="text"
+                 style="font-family: monospace; white-space: pre;"/>
+        </group>
+
+        <footer>
+          <button name="action_rehearse" type="object" string="Rehearse again"
+                  class="btn-primary"/>
+          <!-- NOT the primary button, and it says what it does. -->
+          <button name="action_merge_for_real" type="object"
+                  string="Merge for real" class="btn-secondary"
+                  confirm="This will fold every family that adds up into one
+                           product each, move their stock onto the new variants
+                           and archive the old products. Families that do not
+                           add up are left alone. Continue?"/>
+          <button string="Close" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_variant_merge_rehearsal" model="ir.actions.act_window">
+    <field name="name">Catalogue Merge</field>
+    <field name="res_model">aa.variant.merge.rehearsal</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <!-- UNDER INVENTORY'S CONFIGURATION, because this is about products and
+       their stock, and restricted to the managers who can already change
+       either. -->
+  <menuitem id="menu_variant_merge_rehearsal"
+            name="Catalogue Merge"
+            parent="stock.menu_stock_config_settings"
+            action="action_variant_merge_rehearsal"
+            groups="stock.group_stock_manager"
+            sequence="95"/>
+
+</odoo>

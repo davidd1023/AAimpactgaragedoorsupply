@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_variant_merge_rehearsal_manager,aa.variant.merge.rehearsal stock manager,model_aa_variant_merge_rehearsal,stock.group_stock_manager,1,1,1,1
+access_variant_merge_rehearsal_system,aa.variant.merge.rehearsal settings,model_aa_variant_merge_rehearsal,base.group_system,1,1,1,1
