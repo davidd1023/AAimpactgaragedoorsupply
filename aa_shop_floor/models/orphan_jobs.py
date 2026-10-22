@@ -61,6 +61,66 @@ class MrpProduction(models.Model):
 
         return "deleted"
 
+    def _aa_cleanup_verdict(self):
+        """(verdict, reason) - what should become of this job, and why.
+
+        SAID OUT LOUD FOR EVERY JOB, including the ones nothing happens to,
+        because "nothing is happening" is exactly what the owner saw five
+        times running and neither of us could tell whether the rule was wrong
+        or the records simply did not match it (2026-10-22: "its like you are
+        not even correctly detecting the manufacturing orders").
+
+        "delete"   - its order was deleted and this job came from a sale.
+        "cancel"   - its order is there and cancelled; cancel this beside it.
+        "unsure"   - its order cannot be found AND nothing on the job says it
+                     came from a sale at all. It may be a replenishment, or a
+                     job somebody raised by hand. Not deleted on a guess - it
+                     is listed, and clearing it is a separate, ticked choice.
+        "leave"    - with the reason, which is the line worth reading when the
+                     screen appears to do nothing.
+        """
+        self.ensure_one()
+
+        if self.state == "done":
+            return "leave", "already made"
+
+        if any(w.state == "done" for w in self.workorder_ids):
+            return "leave", "work has been done on it"
+
+        fate = self._aa_order_fate()
+
+        if fate == "live":
+            return "leave", "its order is still live"
+
+        if fate == "cancelled":
+            if self.state == "cancel":
+                return "leave", "already cancelled beside its order"
+
+            return "cancel", "its order was cancelled"
+
+        # The order is gone. Is this job ours - raised from a sale?
+        if self.aa_station_kind or self.aa_sale_line_id.exists():
+            return "delete", "its order was deleted"
+
+        if not self.origin:
+            return "unsure", "it names no order at all, and nothing on it" \
+                " says it came from a sale"
+
+        return "unsure", "no order answers to %s, and nothing on it says it" \
+            " came from a sale" % self.origin
+
+    @api.model
+    def _aa_cleanup_survey(self, limit=300):
+        """Every job that is not finished, with what will become of it.
+
+        The point is the ones that are LEFT ALONE: this is the screen that has
+        to be able to say why nothing happened.
+        """
+        jobs = self.search([("state", "!=", "done")], order="id desc",
+                           limit=limit)
+
+        return [(job, ) + job._aa_cleanup_verdict() for job in jobs]
+
     @api.model
     def _aa_orphan_station_jobs(self):
         """Every station job whose order is cancelled or gone.

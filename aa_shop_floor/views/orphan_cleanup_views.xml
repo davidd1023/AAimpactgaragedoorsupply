@@ -15,21 +15,25 @@
 
         <div class="alert alert-info" role="status">
           <strong>Nothing has been changed yet.</strong>
-          These are Shop Floor jobs whose order has been deleted or cancelled.
-          Cancelling them takes them off the board; nothing is deleted, because
-          a cancelled job is still a record of what was asked for.
+          Every unfinished manufacturing order is listed below with what will
+          become of it - including the ones being left alone, and why. A job
+          whose order was DELETED is deleted with it; one whose order still
+          stands and was cancelled is cancelled beside it; a job that has been
+          made is never touched.
         </div>
 
         <group>
-          <field name="job_count" invisible="1"/>
+          <field name="job_count" readonly="1"/>
+          <field name="unsure_count" readonly="1"/>
+          <field name="include_unsure" invisible="unsure_count == 0"/>
           <field name="report" nolabel="1" widget="text"
                  style="font-family: monospace; white-space: pre;"/>
         </group>
 
         <footer>
           <button name="action_clear" type="object"
-                  string="Take them off the board" class="btn-primary"
-                  invisible="job_count == 0"
+                  string="Clear them" class="btn-primary"
+                  invisible="job_count == 0 and unsure_count == 0"
                   confirm="Cancel every job listed above? Their orders have
                            been deleted or cancelled, so nobody is waiting for
                            them."/>
