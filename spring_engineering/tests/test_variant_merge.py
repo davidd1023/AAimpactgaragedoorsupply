@@ -648,3 +648,87 @@ class TestVariantMerge(TransactionCase):
 
         priced = [p for p in report["problems"] if "cannot be priced" in p]
         self.assertEqual(len(priced), 1, report["problems"])
+
+    def test_a_quoted_price_is_not_rewritten_by_the_merge(self):
+        """A draft quotation is repointed at the variant that now holds the
+        stock. Writing a product id on a line recomputes its price, and a
+        price somebody has already been QUOTED - a discount, a hand-typed
+        figure - must not move because we tidied the catalogue underneath it.
+        """
+        made = self._anchor_brackets()
+        variant = made["Spring Anchor Bracket RH White"].product_variant_id
+        partner = self.env["res.partner"].create({"name": "Quote Holder"})
+        order = self.env["sale.order"].create({
+            "partner_id": partner.id,
+            "order_line": [(0, 0, {
+                "product_id": variant.id,
+                "product_uom_qty": 3,
+                "price_unit": 4.25,      # agreed on the phone, not list
+            })],
+        })
+        self.assertEqual(order.order_line.price_unit, 4.25)
+
+        self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(
+            order.order_line.price_unit, 4.25,
+            "the merge rewrote a price the customer had been quoted",
+        )
+        self.assertEqual(order.order_line.product_uom_qty, 3)
+
+    def test_a_vendor_price_follows_the_part_it_was_for(self):
+        """A vendor line usually hangs off the TEMPLATE, so repointing by
+        variant id misses it and it is stranded on an archived product: the
+        reordering rule still fires and there is no price to buy at. Worse,
+        the base's own line would be left applying to every colour."""
+        made = self._anchor_brackets()
+        vendor = self.env["res.partner"].create({"name": "Canimex Test"})
+        for name, price in (("Spring Anchor Bracket RH Black", 3.01),
+                            ("Spring Anchor Bracket LH White", 3.44)):
+            self.env["product.supplierinfo"].create({
+                "partner_id": vendor.id,
+                "product_tmpl_id": made[name].id,
+                "price": price,
+            })
+
+        self._merge("Spring Anchor Bracket")
+
+        for hand, colour, price in (("RH", "Black", 3.01), ("LH", "White", 3.44)):
+            variant = self._variant(
+                "Spring Anchor Bracket", Hand=hand, Colour=colour)
+            lines = self.env["product.supplierinfo"].search([
+                ("product_id", "=", variant.id)])
+            self.assertEqual(len(lines), 1, "%s %s lost its vendor price" % (hand, colour))
+            self.assertAlmostEqual(lines.price, price, 2)
+
+        # And nothing is left speaking for the whole product.
+        survivor = self._survivor("Spring Anchor Bracket")
+        loose = self.env["product.supplierinfo"].search([
+            ("product_tmpl_id", "=", survivor.id), ("product_id", "=", False)])
+        self.assertFalse(
+            loose, "a vendor line is still priced for every colour at once")
+
+    def test_the_merged_product_keeps_every_shop_category_it_was_in(self):
+        made = self._anchor_brackets()
+        hardware = self.env["product.public.category"].create({"name": "T Hardware"})
+        brackets = self.env["product.public.category"].create({"name": "T Brackets"})
+        made["Spring Anchor Bracket RH Black"].public_categ_ids = [(6, 0, hardware.ids)]
+        made["Spring Anchor Bracket LH White"].public_categ_ids = [(6, 0, brackets.ids)]
+
+        self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(
+            set(self._survivor("Spring Anchor Bracket").public_categ_ids.ids),
+            {hardware.id, brackets.id},
+        )
+
+    def test_a_lot_tracked_family_is_refused(self):
+        """A quant carries its lot, and a lot belongs to one product, so the
+        stock of a tracked product cannot be moved this way. Say so."""
+        made = self._anchor_brackets()
+        made["Spring Anchor Bracket LH Black"].tracking = "lot"
+
+        report = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(report["state"], "skipped", report)
+        self.assertTrue(any("tracked" in p for p in report["problems"]), report)

@@ -76,15 +76,23 @@ REMAP_ALWAYS = (
     ("mrp.bom", "product_id"),
     ("stock.warehouse.orderpoint", "product_id"),
     ("product.pricelist.item", "product_id"),
-    ("product.supplierinfo", "product_id"),
     ("stock.putaway.rule", "product_id"),
 )
 
 # Open paperwork, repointed so that confirming it does not ship an archived
 # product with no stock on it. Anything further along is left alone.
+#
+# AND THE FIGURES ON IT ARE PUT BACK AFTERWARDS, which is the whole reason
+# each entry carries a list of fields. Writing a product id on an order line
+# recomputes its price from the pricelist: a quotation with 4.25 agreed on the
+# phone came back out of an early version of this at 6.219. A price somebody
+# has already been QUOTED must not move because we tidied the catalogue
+# underneath it, and the description must go on saying what they were sent.
 REMAP_IF_OPEN = (
-    ("sale.order.line", "product_id", "order_id.state", ("draft", "sent")),
-    ("purchase.order.line", "product_id", "order_id.state", ("draft", "sent")),
+    ("sale.order.line", "product_id", "order_id.state", ("draft", "sent"),
+     ("name", "price_unit", "discount", "product_uom_qty", "tax_ids")),
+    ("purchase.order.line", "product_id", "order_id.state", ("draft", "sent"),
+     ("name", "price_unit", "discount", "product_qty", "taxes_id")),
 )
 
 
@@ -293,6 +301,20 @@ class ProductTemplate(models.Model):
                 report["notes"].append(
                     "part number %s is on %d of these products" % (code, len(names))
                 )
+
+        # NOT LOT OR SERIAL TRACKED. The stock is moved by recreating its
+        # quants on the new variant, and a quant carries its lot - but a lot
+        # belongs to ONE product, so the old product's lot numbers cannot
+        # follow it. None of these families is tracked today; if one ever is,
+        # this says so rather than inventing lot numbers.
+        tracked = sorted(
+            name for name, tmpl in olds.items() if tmpl.tracking != "none"
+        )
+        if tracked:
+            report["problems"].append(
+                "lot or serial tracked, so the stock cannot be moved by hand:"
+                " %s" % ", ".join(tracked)
+            )
 
         # NOTHING RESERVED OR IN FLIGHT. We are about to move the stock to
         # another product; a picking that has not gone out has a claim on it.
@@ -600,7 +622,47 @@ class ProductTemplate(models.Model):
             })
             new.action_apply_inventory()
 
+        self._aa_move_vendor_lines(entry, target, report)
         self._aa_repoint(entry["variant"], target, report)
+
+    @api.model
+    def _aa_move_vendor_lines(self, entry, target, report):
+        """The vendor prices for one old product, onto its new variant.
+
+        WHY THIS IS NOT IN THE REMAP TABLE. A vendor line usually hangs off the
+        TEMPLATE with no variant at all (product_tmpl_id set, product_id
+        false), which is how Odoo stores "this is what this part costs from
+        this supplier". Repointing by variant id would miss every one of them,
+        and the lines would be stranded on an archived template: the reordering
+        rules would still fire and there would be no vendor price to buy at.
+
+        So each old product's lines become VARIANT-SPECIFIC on the surviving
+        product. That includes the base's own, which would otherwise be the one
+        template-level line left applying to every colour - a white bracket
+        quietly bought at the black one's price.
+        """
+        Supplier = self.env["product.supplierinfo"]
+        lines = Supplier.search([
+            "|",
+            ("product_id", "=", entry["variant"].id),
+            "&", ("product_tmpl_id", "=", entry["template"].id),
+            ("product_id", "=", False),
+        ])
+        for line in lines:
+            if line.product_tmpl_id == target.product_tmpl_id:
+                # The base's own line: it is already on the right template, it
+                # just has to stop speaking for all the other colours.
+                line.product_id = target.id
+            else:
+                line.copy({
+                    "product_tmpl_id": target.product_tmpl_id.id,
+                    "product_id": target.id,
+                })
+        if lines:
+            report["notes"].append(
+                "%s: %d vendor price line(s) moved onto the variant"
+                % (entry["variant"].display_name, len(lines))
+            )
 
     @api.model
     def _aa_repoint(self, old, new, report):
@@ -617,14 +679,26 @@ class ProductTemplate(models.Model):
                 records.write({field: new.id})
                 moved[model] = moved.get(model, 0) + len(records)
 
-        for model, field, state_field, states in REMAP_IF_OPEN:
+        for model, field, state_field, states, preserve in REMAP_IF_OPEN:
             if model not in self.env:
                 continue
             records = self.env[model].search(
                 [(field, "=", old.id), (state_field, "in", states)]
             )
+            for record in records:
+                # Read the figures, repoint, write the figures back. The second
+                # write is what beats the recompute the first one triggers.
+                kept = {
+                    name: record[name]
+                    for name in preserve
+                    if name in record._fields
+                }
+                record.write({field: new.id})
+                record.write({
+                    name: (value.ids if hasattr(value, "ids") else value)
+                    for name, value in kept.items()
+                })
             if records:
-                records.write({field: new.id})
                 moved[model] = moved.get(model, 0) + len(records)
 
         # A SETTING THAT NAMES A PRODUCT. The flag angle for prepared tracks is
@@ -677,6 +751,18 @@ class ProductTemplate(models.Model):
             tmpl.is_published for tmpl in olds.values()
         )
         base.is_published = published
+
+        # THE SHOP CATEGORIES OF ALL OF THEM, not just the base's. The base is
+        # chosen for its stock, and if a sibling sat in a category it did not,
+        # the merged product would quietly drop out of that part of the shop.
+        categories = base.public_categ_ids
+        for tmpl in olds.values():
+            categories |= tmpl.public_categ_ids
+        if categories != base.public_categ_ids:
+            base.public_categ_ids = [(6, 0, categories.ids)]
+            report["notes"].append(
+                "shop categories: %s" % ", ".join(sorted(categories.mapped("name")))
+            )
 
         for name, tmpl in olds.items():
             if tmpl == base:
