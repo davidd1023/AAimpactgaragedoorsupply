@@ -849,3 +849,82 @@ class TestVariantMerge(TransactionCase):
 
         self.assertIn("1 of 1 families merged",
                       self.env["product.template"]._aa_merge_report(reports))
+
+    # --- the flag angle size, now that the owner has said -----------------
+
+    def test_a_prepared_track_takes_the_5_9_flag_angle(self):
+        """Owner, 2026-10-22: "every track takes 5.9" currently, that other
+        size is for other things". It was getting that by alphabet; now it is
+        asked for by size, on both sides of the merge."""
+        self._flag_angles()
+
+        before = self.env["sale.order"]._track_prep_flag_for_colour("White")
+        self.assertIn("5.9", before._aa_choice_text())
+
+        self._merge("Flag Angle")
+        after = self.env["sale.order"]._track_prep_flag_for_colour("White")
+
+        self.assertEqual(
+            after.product_template_attribute_value_ids.filtered(
+                lambda v: v.attribute_id.name == "Flag Angle Size").name,
+            '5.9"',
+        )
+        self.assertEqual(after._aa_chosen_colour(), "White")
+
+    def test_the_other_size_is_never_sent_instead(self):
+        """THE WHOLE POINT OF ASKING BY SIZE. If the 5.9" is missing, the
+        6-3/8" is not a substitute - it is for other things - so nothing is
+        returned and the preparation refuses itself and tells the customer to
+        call. A wrong part that fits nothing is worse than an order we have to
+        finish by hand."""
+        for colour in ("Black", "White"):
+            self._product("Flag Angle 6-3/8\" %s" % colour, price=9.22, stock=10.0)
+
+        found = self.env["sale.order"]._track_prep_flag_for_colour("Black")
+
+        self.assertFalse(found, "the wrong flag angle was substituted")
+
+    def test_the_setting_still_answers_when_there_is_no_5_9(self):
+        """The escape hatch stays: a catalogue with no 5.9" at all can still
+        name the part in Settings."""
+        other = self._product('Flag Angle 6-3/8" Black', price=9.22, stock=10.0)
+        self.env["ir.config_parameter"].sudo().set_param(
+            "spring_engineering.track_prep_flag_product_id",
+            str(other.product_variant_id.id))
+
+        self.assertEqual(
+            self.env["sale.order"]._track_prep_flag_for_colour("Black"),
+            other.product_variant_id,
+        )
+
+    def test_a_third_size_cannot_quietly_take_over(self):
+        """The failure this guards against: a size added to the catalogue, or
+        the attribute's values reordered, used to change which part every
+        prepared track was sent."""
+        self._flag_angles()
+        self._product('Flag Angle 4-1/2" Black', price=8.0, stock=10.0)
+
+        found = self.env["sale.order"]._track_prep_flag_for_colour("Black")
+
+        self.assertIn("5.9", found._aa_choice_text())
+
+    def test_a_flag_angle_that_names_no_size_is_still_used(self):
+        """The tolerance this lookup has always had is for SPELLINGS, not for
+        sizes: "Flag Angle - Black" does not state the wrong size, it states
+        none, and refusing it would take the whole preparation down. The first
+        draft of the 5.9" rule did exactly that."""
+        plain = self._product("Flag Angle - Black", price=9.1, stock=10.0)
+
+        self.assertEqual(
+            self.env["sale.order"]._track_prep_flag_for_colour("Black"),
+            plain.product_variant_id,
+        )
+
+    def test_a_stated_size_beats_an_unstated_one(self):
+        """With both in the catalogue, the one that says 5.9" wins."""
+        self._product("Flag Angle - Black", price=9.1, stock=10.0)
+        self._product('Flag Angle 5.9" Black', price=9.1, stock=10.0)
+
+        found = self.env["sale.order"]._track_prep_flag_for_colour("Black")
+
+        self.assertIn("5.9", found._aa_choice_text())

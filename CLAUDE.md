@@ -105,6 +105,62 @@ drum, track, lift, door size, weight) and each prepared lift cable pair gets a
 stop per cable). The station BoMs are NORMAL, template-level, with no components:
 the delivery still explodes the kits' and cables' own phantom BoMs.
 
+## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
+
+*"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one
+product on the store, but in the individual product page people will be able to
+then choose the other sizes or color"* - with the TYPE of part staying separate
+(*"spring anchor bracket and top brackets will remain different products"*) and,
+decided the same day, the hand on the product too: *"hands should be on the same
+product, so another choice for rh or lh on the individual product"*.
+
+81 products became 15. The table that says which old product becomes which
+variant is `spring_engineering/models/variant_families.py`, GENERATED from his
+own catalogue export; the engine is `models/product_variant_merge.py` and it
+runs once, from `migrations/19.0.2.49.0/post-migration.py`. It rehearses first
+and logs both passes; a family that does not add up is left alone and named.
+`spring_engineering.variant_merge_hold` set to 1 makes it rehearse only.
+
+Facts that came out of his export and should not be re-derived by guessing:
+
+- **His internal references already group the families.** All four anchor
+  brackets are `CH1119D`, all eight jamb brackets `CH1108`, all six EBPs
+  `CH1128`. Part numbers are kept PER VARIANT, because hinges have one per size
+  (`CH1411-1`..`-7`), and Cut Down Hinge is offset - #1 is CH1407 and #5 is
+  CH1411, which collides with the Hinge family, so that one family cannot be
+  grouped by SKU at all.
+- **Colour never moves a price; size nearly always does.** The merge prices a
+  variant as the product's price plus an extra per size, and refuses a family
+  where two colours of one size disagree.
+- **Exactly one part is split by hand**: the spring anchor bracket. EBPs are
+  sold "( Pair )", the Canimex drums are named by size.
+- Tracks, drums, cables and cones are deliberately NOT folded in yet. Tracks are
+  read by name all over the shop floor code and are their own job. 3" Lock IS
+  folded in.
+
+### Why this is NOT in garage_door_supply
+
+That module owns `views/website_homepage.xml`, which replaces the whole of
+`//div[@id='wrap']` and carries no `noupdate`, so EVERY update of it puts the
+shipped hero back over whatever has been done in the website builder - the owner
+restored a backup on 2026-10-19 and watched the page change back.
+`aa_dealer_orders/__manifest__.py` refuses to depend on it for the same reason.
+A merge needs a migration, a migration needs an update, and an update there
+costs him his front page.
+
+### A prepared track takes the 5.9" flag angle (owner, 2026-10-22)
+
+*"every track takes 5.9" currently, that other size is for other things."*
+
+It was getting that answer by ALPHABET - the lookup ordered its matches by name
+and 5.9 sorts before 6-3/8 - which held only while the catalogue had exactly two
+sizes spelled exactly that way. It is now asked for by size
+(`TRACK_PREP_FLAG_SIZE_RE` in `spring_engineering/models/sale_order.py`), and if
+there is no 5.9" the preparation refuses itself rather than substituting the
+other size, because the other size is for other things. The setting
+`spring_engineering.track_prep_flag_product_id` still answers for a catalogue
+that has no 5.9" at all.
+
 ## Git
 
 Never `git push`. Use `odoosh-push`.

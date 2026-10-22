@@ -14,6 +14,22 @@ from .sale_order_line import FASTENER_ROLES
 # set up - without the code needing to know which products those are.
 PREPARED = "prepared"
 
+# THE FLAG ANGLE A PREPARED TRACK TAKES, by size (owner, 2026-10-22: "every
+# track takes 5.9" currently, that other size is for other things").
+#
+# It is written down here because until today it was not written down anywhere:
+# the lookup ordered its matches by name and 5.9 sorts before 6-3/8, so the
+# right part was being sent by alphabet. That held only while the catalogue had
+# exactly two sizes spelled exactly that way - a third size, or the colours and
+# sizes being folded into one product with its values in another order, and the
+# shop would have started sending the 6-3/8" to every prepared track with
+# nothing on any screen to say so.
+#
+# "Currently" is the owner's word, so this is the one line to change. The
+# setting (spring_engineering.track_prep_flag_product_id) still answers for a
+# catalogue that has no 5.9" at all.
+TRACK_PREP_FLAG_SIZE_RE = r"5\.9(?!\d)"
+
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
@@ -452,6 +468,22 @@ class SaleOrder(models.Model):
         """The flag angle matching a cart line's track."""
         return self._track_prep_flag_for_colour(self._track_prep_colour(line))
 
+    def _track_prep_flag_states_a_size(self, text, colour):
+        """Does this flag angle say what size it is?
+
+        The question is asked so that a catalogue which does not state a size -
+        "Flag Angle - Black" - keeps being matched, while one that states the
+        WRONG size is refused rather than substituted. Take the words every
+        flag angle has out of the name, take the finish out, and see whether a
+        measurement is left.
+        """
+        rest = re.sub(r"\bflag\b|\bangles?\b", "", text or "", flags=re.I)
+
+        if colour:
+            rest = re.sub(r"\b%s\b" % re.escape(colour), "", rest, flags=re.I)
+
+        return bool(re.search(r"\d", rest))
+
     def _track_prep_flag_for_colour(self, colour):
         """The flag angle in the track's own finish.
 
@@ -486,14 +518,40 @@ class SaleOrder(models.Model):
                         and re.search(r"\b%s\b" % re.escape(colour), name, re.I):
                     candidates |= product
 
-            # TWO SIZES, BOTH IN THIS FINISH, and nothing here knows which a
-            # prepared track takes - the owner has not said yet, and the old
-            # lookup never asked: ordering by name gave it 5.9" by alphabet.
-            # _aa_pick_stable gives the same answer deliberately rather than by
-            # accident, and the setting below overrides it.
-            if candidates:
-                return candidates._aa_pick_stable()
+            # THE 5.9" ONE, AND ONLY THAT ONE (owner, 2026-10-22: "every track
+            # takes 5.9" currently, that other size is for other things").
+            #
+            # It had been getting that answer by alphabet - the old lookup
+            # ordered by name and 5.9 sorts before 6-3/8 - which was right
+            # entirely by luck. Asking for the size by name instead means
+            # reordering the attribute's values, or adding a third size to the
+            # catalogue, cannot quietly change which part a customer is sent.
+            sized = candidates.filtered(
+                lambda p: re.search(
+                    TRACK_PREP_FLAG_SIZE_RE, p._aa_choice_text()))
 
+            if sized:
+                return sized._aa_pick_stable()
+
+            # A FLAG ANGLE THAT NAMES NO SIZE IS STILL A FLAG ANGLE. The
+            # tolerance this lookup has always had is for spellings - "Flag
+            # Angle - Black", "FLAG ANGLE BLACK", "Black Flag Angle" - and a
+            # catalogue that does not state a size is not stating the wrong
+            # one. Refusing those would have been a regression, and it is
+            # what the first draft of this rule did.
+            unsized = candidates.filtered(
+                lambda p: not self._track_prep_flag_states_a_size(
+                    p._aa_choice_text(), colour))
+
+            if unsized:
+                return unsized._aa_pick_stable()
+
+            # WHAT IS LEFT IS A FLAG ANGLE THAT STATES A DIFFERENT SIZE, and
+            # that is the one thing not to send: it is for other things (owner,
+            # 2026-10-22). Fall through to the setting, and if that is empty
+            # the preparation refuses itself and tells the customer to call.
+            # A wrong part that fits nothing is worse than an order we have to
+            # finish by hand.
         return self._track_prep_configured_part("flag")
 
     # --- keeping the parts in step with the track -----------------------------
