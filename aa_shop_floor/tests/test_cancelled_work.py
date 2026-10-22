@@ -212,18 +212,50 @@ class WorkOutlivingItsOrderCase(TransactionCase):
         self.assertEqual(wizard.job_count, 1)
         self.assertEqual(job.state, "confirmed", "looking changed something")
 
-    def test_the_screen_takes_them_off_the_board(self):
+    def test_the_screen_deletes_work_whose_order_was_deleted(self):
+        """DELETED, not cancelled. Owner, 2026-10-22: "i press delete to get
+        rid of them, after that the manufacturing orders are still there" -
+        a job cancelled beside an order number that answers to nothing is
+        litter in the Manufacturing list."""
         job = self._strand()
         wizard = self.env["aa.shop.floor.cleanup"].create({})
 
         wizard.action_clear()
 
-        self.assertEqual(job.state, "cancel")
+        self.assertFalse(job.exists(), "the job was only cancelled")
         self.assertEqual(wizard.job_count, 0)
-        self.assertIn("Cancelled 1 job", wizard.report)
+        self.assertIn("Deleted 1", wizard.report)
 
-    def test_deleting_an_order_takes_its_work_with_it(self):
-        """The hook, so that nothing new ever joins the strandees.
+    def test_the_screen_only_cancels_work_whose_order_still_stands(self):
+        """A cancelled order is still there to keep the record beside, so its
+        job is cancelled and kept."""
+        order = self._order()
+        job = self._jobs(order)
+        order.write({"state": "cancel"})
+
+        self.env["aa.shop.floor.cleanup"].create({}).action_clear()
+
+        self.assertTrue(job.exists(), "a job was deleted out from beside its order")
+        self.assertEqual(job.state, "cancel")
+
+    def test_litter_left_by_the_earlier_fix_is_swept_up_too(self):
+        """A job my own cancel hook took off the board, whose order was then
+        deleted. It is off the Shop Floor already and still a row in the
+        Manufacturing list naming an order that cannot be opened."""
+        order = self._order()
+        job = self._jobs(order)
+        order._action_cancel()
+        self.assertEqual(job.state, "cancel", "the fixture is not the litter")
+        job.write({"aa_sale_line_id": False, "origin": "S09998"})
+
+        self.env["aa.shop.floor.cleanup"].create({}).action_clear()
+
+        self.assertFalse(job.exists(), "the litter was left behind")
+
+    def test_deleting_an_order_deletes_its_work(self):
+        """THE ONE HE ASKED FOR. "i am making kits in the shop, the ordering
+        them, afterwards i press delete to get rid of them, after that the
+        manufacturing orders are still there."
 
         The order is put into cancel the way the old code left it - a plain
         write, with no hook firing - so that what is being tested is the
@@ -231,8 +263,23 @@ class WorkOutlivingItsOrderCase(TransactionCase):
         """
         order = self._order()
         job = self._jobs(order)
+        self.assertTrue(job, "the fixture made no job")
         order.write({"state": "cancel"})
 
         order.unlink()
 
-        self.assertEqual(job.state, "cancel", "a new orphan was created")
+        self.assertFalse(job.exists(), "the job outlived the order's deletion")
+
+    def test_work_already_made_survives_the_order_being_deleted(self):
+        """A job that was MADE is a record of something that happened,
+        whatever became of the paperwork - so it is kept, and the delete is
+        not held up by it."""
+        order = self._order()
+        job = self._jobs(order)
+        job.write({"state": "done"})
+        order.write({"state": "cancel"})
+
+        order.unlink()
+
+        self.assertTrue(job.exists(), "a finished job was deleted")
+        self.assertEqual(job.state, "done")
