@@ -59,6 +59,25 @@ class SaleOrder(models.Model):
 
         return result
 
+    def unlink(self):
+        """And an order DELETED outright takes its work with it too.
+
+        Odoo will not delete a confirmed order, so in principle this has
+        already happened on the cancel. In principle: an order cancelled
+        before that hook existed still has live jobs behind it, and deleting
+        it is the last moment anybody can find them - once the order is gone
+        the job's sale line is set to null and all that is left is an origin
+        naming an order that cannot be found. Which is exactly the state the
+        owner photographed on 2026-10-22, W/O #213.
+
+        Jobs already stranded that way are swept up by their own screen,
+        Manufacturing > Work for deleted orders, because no hook can reach
+        them: their order is not there to be cancelled again.
+        """
+        self._aa_cancel_station_productions()
+
+        return super().unlink()
+
     def _aa_station_jobs(self):
         """This order's unfinished manufacturing, at any station.
 

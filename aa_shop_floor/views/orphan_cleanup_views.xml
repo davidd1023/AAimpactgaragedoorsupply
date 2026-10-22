@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- CLEARING WORK WHOSE ORDER IS GONE.
+
+       A hook cannot reach a job orphaned before the hook existed: the order
+       it belonged to is not there to be cancelled again. This is how those
+       are swept up - deliberately, and after looking at them. -->
+
+  <record id="view_shop_floor_cleanup" model="ir.ui.view">
+    <field name="name">aa.shop.floor.cleanup.form</field>
+    <field name="model">aa.shop.floor.cleanup</field>
+    <field name="arch" type="xml">
+      <form string="Work for orders that are gone">
+
+        <div class="alert alert-info" role="status">
+          <strong>Nothing has been changed yet.</strong>
+          These are Shop Floor jobs whose order has been deleted or cancelled.
+          Cancelling them takes them off the board; nothing is deleted, because
+          a cancelled job is still a record of what was asked for.
+        </div>
+
+        <group>
+          <field name="job_count" invisible="1"/>
+          <field name="report" nolabel="1" widget="text"
+                 style="font-family: monospace; white-space: pre;"/>
+        </group>
+
+        <footer>
+          <button name="action_clear" type="object"
+                  string="Take them off the board" class="btn-primary"
+                  invisible="job_count == 0"
+                  confirm="Cancel every job listed above? Their orders have
+                           been deleted or cancelled, so nobody is waiting for
+                           them."/>
+          <button name="action_look_again" type="object" string="Look again"
+                  class="btn-secondary"/>
+          <button string="Close" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="action_shop_floor_cleanup" model="ir.actions.act_window">
+    <field name="name">Work for deleted orders</field>
+    <field name="res_model">aa.shop.floor.cleanup</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <menuitem id="menu_shop_floor_cleanup"
+            name="Work for deleted orders"
+            parent="mrp.menu_mrp_manufacturing"
+            action="action_shop_floor_cleanup"
+            groups="mrp.group_mrp_manager"
+            sequence="95"/>
+
+</odoo>

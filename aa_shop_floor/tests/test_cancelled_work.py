@@ -147,3 +147,92 @@ class WorkOutlivingItsOrderCase(TransactionCase):
 
         self.assertEqual(production.state, "confirmed")
         self.assertFalse(production.aa_station_kind)
+
+    # --- and the work already stranded, which no hook can reach -----------
+
+    def _strand(self):
+        """A job left exactly as the owner photographed it.
+
+        BUILT THE WAY THE STATE REALLY ARISES, not by cancelling and
+        un-cancelling: when the order goes, Odoo sets the job's sale line to
+        null and leaves the origin naming an order that cannot be found. The
+        job itself is untouched - still confirmed, with live moves - which is
+        why it is still on the board and why it can still be cancelled. An
+        earlier version of this fixture cancelled the order first, which
+        cancelled the job's moves, and then nothing could cancel it again.
+        """
+        order = self._order()
+        job = self._jobs(order)
+        job.write({"aa_sale_line_id": False, "origin": "S09999"})
+
+        self.assertFalse(
+            self.env["sale.order"].search([("name", "=", "S09999")]),
+            "the fixture's missing order is not missing")
+
+        return job
+
+    def test_a_job_whose_order_was_deleted_is_found(self):
+        job = self._strand()
+
+        orphans = self.env["mrp.production"]._aa_orphan_station_jobs()
+
+        self.assertIn(job, orphans)
+        self.assertFalse(job.aa_sale_line_id,
+                         "the fixture is not the state he photographed")
+
+    def test_a_job_whose_order_still_stands_is_not_touched(self):
+        """THE TEST THAT MATTERS MOST HERE. Sweeping up must not take live
+        work with it."""
+        order = self._order()
+        job = self._jobs(order)
+
+        orphans = self.env["mrp.production"]._aa_orphan_station_jobs()
+
+        self.assertNotIn(job, orphans)
+        self.assertEqual(order.state, "sale")
+
+    def test_a_hand_made_job_is_not_read_as_abandoned(self):
+        """A manufacturing order nobody raised from a sale has no order
+        behind it by nature, and is not ours to cancel."""
+        product = self.env["product.product"].create({
+            "name": "Hand made", "type": "consu", "is_storable": True})
+        production = self.env["mrp.production"].create({
+            "product_id": product.id, "product_qty": 1.0})
+        production.action_confirm()
+
+        self.assertNotIn(
+            production, self.env["mrp.production"]._aa_orphan_station_jobs())
+
+    def test_the_screen_lists_them_and_changes_nothing(self):
+        job = self._strand()
+
+        wizard = self.env["aa.shop.floor.cleanup"].create({})
+
+        self.assertIn(job.name, wizard.report)
+        self.assertEqual(wizard.job_count, 1)
+        self.assertEqual(job.state, "confirmed", "looking changed something")
+
+    def test_the_screen_takes_them_off_the_board(self):
+        job = self._strand()
+        wizard = self.env["aa.shop.floor.cleanup"].create({})
+
+        wizard.action_clear()
+
+        self.assertEqual(job.state, "cancel")
+        self.assertEqual(wizard.job_count, 0)
+        self.assertIn("Cancelled 1 job", wizard.report)
+
+    def test_deleting_an_order_takes_its_work_with_it(self):
+        """The hook, so that nothing new ever joins the strandees.
+
+        The order is put into cancel the way the old code left it - a plain
+        write, with no hook firing - so that what is being tested is the
+        DELETE and not the cancel.
+        """
+        order = self._order()
+        job = self._jobs(order)
+        order.write({"state": "cancel"})
+
+        order.unlink()
+
+        self.assertEqual(job.state, "cancel", "a new orphan was created")
