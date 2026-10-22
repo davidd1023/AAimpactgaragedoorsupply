@@ -98,8 +98,20 @@ class Catalog:
             # three old products said it in their names ("Black Trims"). Asked
             # of the variant first, because that is the answer that cannot be
             # thrown off by how a name happens to be spelled.
-            chosen = p._aa_chosen_colour()
-            if chosen in TRIM_COLOURS:
+            # ONLY FOR THE TRIMS. The same search brings back tracks and
+            # cables, and asking THEM for a colour would register a white
+            # vertical track as a trims product and drop it from the tracks -
+            # a kit would come back with "no prepared track" and three
+            # "Plastic Trims" lines that were tracks. Tracks have no colour
+            # attribute today and are the next thing the owner means to fold
+            # in (variant_families), so this gate is the difference between
+            # that change being safe and it being a very confusing morning.
+            # THE TEMPLATE'S NAME, not the display name: a merged trims
+            # variant displays as "Trims (Black)", which ends with neither.
+            tmpl_name = (p.product_tmpl_id.name or '').strip()
+            is_trims = tmpl_name == 'Trims' or tmpl_name.endswith(' Trims')
+            chosen = p._aa_chosen_colour() if is_trims else ''
+            if is_trims and chosen in TRIM_COLOURS:
                 self.trims[chosen] = p
                 continue
             if name.endswith(' Trims') and name.split(' ')[0] in TRIM_COLOURS:

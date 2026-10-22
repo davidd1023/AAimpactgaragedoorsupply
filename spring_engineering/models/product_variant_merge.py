@@ -73,10 +73,27 @@ MOVES_IN_THE_WAY = ("draft", "waiting", "confirmed", "partially_available", "ass
 # must go on saying it, pointing at the archived product.
 REMAP_ALWAYS = (
     ("mrp.bom.line", "product_id"),
-    ("mrp.bom", "product_id"),
     ("stock.warehouse.orderpoint", "product_id"),
-    ("product.pricelist.item", "product_id"),
     ("stock.putaway.rule", "product_id"),
+    # A CUSTOMER'S WISHLIST. spring_engineering ships the wishlist feature and
+    # drops any wish whose product is unpublished, so every wish for one of
+    # the 81 folded products would quietly empty when they are archived.
+    ("product.wishlist", "product_id"),
+)
+
+# Records that carry the TEMPLATE as well as the variant, and are broken by
+# moving one without the other. product.pricelist.item and product.supplierinfo
+# get their own handling because most of them name no variant at all.
+REMAP_WITH_TEMPLATE = (
+    ("mrp.bom", "product_id", "product_tmpl_id"),
+)
+
+# Operational records that go on pointing at the archived product, counted so
+# the number is a decision rather than a discovery. They read a product for
+# its name, which an archived product still has.
+REPORT_ONLY = (
+    ("work.station.item", "product_id"),
+    ("door.work.order.item", "product_id"),
 )
 
 # Open paperwork, repointed so that confirming it does not ship an archived
@@ -141,7 +158,14 @@ class ProductTemplate(models.Model):
             for note in r["notes"]:
                 lines.append("        - %s" % note)
 
-        done = sum(1 for r in reports if r["state"] in ("merged", "rehearsed"))
+        # "already merged" COUNTS AS DONE, because the migration's own line
+        # counts it that way and a report saying "0 of 15" directly above a
+        # log line saying 15 is exactly the sort of thing somebody comes back
+        # to weeks later when a count looks wrong.
+        done = sum(
+            1 for r in reports
+            if r["state"] in ("merged", "rehearsed", "already merged")
+        )
         skipped = [r["survivor"] for r in reports if r["state"] == "skipped"]
         lines.append("  %d of %d families merged" % (done, len(reports)))
         if skipped:
@@ -181,9 +205,16 @@ class ProductTemplate(models.Model):
                     raise _FamilyRolledBack()
         except _FamilyRolledBack:
             report["state"] = "rehearsed"
-        except (UserError, ValueError) as exc:
+        except Exception as exc:  # noqa: BLE001 - deliberate, see below
+            # EVERYTHING, not just UserError. This runs as a migration: an
+            # IntegrityError from some record we repointed, or a KeyError from
+            # a field a future version renamed, would otherwise climb out of
+            # here and fail the whole module update on Prod halfway through an
+            # upgrade. The savepoint has already undone this family, and the
+            # contract in the docstring is that the other fourteen go ahead.
             report["state"] = "skipped"
             report["problems"].append("merge failed, rolled back: %s" % exc)
+            _logger.exception("Variant merge failed for %s", spec["survivor"])
         else:
             report["state"] = "merged"
 
@@ -272,12 +303,19 @@ class ProductTemplate(models.Model):
         # THE SAME KIND OF THING THROUGHOUT. A different unit or a different
         # tax is not a variant of a product, it is a different product, and
         # folding them would quietly reprice or re-measure one of them.
+        # EVERY FIELD IS CHECKED FOR EXISTENCE FIRST. uom_po_id was on this
+        # list for an hour and is not a field in 19 - the purchase unit went
+        # away - and a KeyError here would have taken down the whole merge
+        # rather than one comparison. A version that renames a field should
+        # cost us a check, not the catalogue.
         for field, label in (
             ("uom_id", "unit"),
             ("type", "type"),
             ("taxes_id", "customer taxes"),
             ("supplier_taxes_id", "vendor taxes"),
         ):
+            if any(field not in t._fields for t in olds.values()):
+                continue
             seen = {tuple(sorted(t[field].ids)) if t._fields[field].type
                     in ("many2many", "one2many") else t[field]
                     for t in olds.values()}
@@ -296,10 +334,17 @@ class ProductTemplate(models.Model):
             if code:
                 codes.setdefault(code, []).append(name)
         for code, names in codes.items():
-            combos = {tuple(sorted(spec["products"][n].items())) for n in names}
-            if len(combos) != len(names):
+            if len(names) > 1:
+                # NOT A PROBLEM - it is how this catalogue is built, and the
+                # part numbers are kept per variant. It is said out loud
+                # because after the merge one SKU covers several variants, so
+                # anything that looks a part up by `default_code` with limit=1
+                # gets whichever one the database returns: the fallback in
+                # sale_order.py BRACKET_CODES, for one.
                 report["notes"].append(
-                    "part number %s is on %d of these products" % (code, len(names))
+                    "part number %s covers %d variants, so a lookup by part"
+                    " number alone cannot tell them apart"
+                    % (code, len(names))
                 )
 
         # NOT LOT OR SERIAL TRACKED. The stock is moved by recreating its
@@ -429,6 +474,16 @@ class ProductTemplate(models.Model):
         if not plan:
             raise UserError("the family cannot be priced by attribute")
 
+        # COST IS PER COMPANY in Odoo, and this carries the one the migration
+        # is running as. One company is all he has; if that ever changes, the
+        # others' costs would be left on the archived products, so it says so
+        # rather than leaving it to be discovered in a margin report.
+        if self.env["res.company"].sudo().search_count([]) > 1:
+            report["notes"].append(
+                "more than one company: only %s's costs are carried over"
+                % self.env.company.name
+            )
+
         snapshot = self._aa_snapshot(olds)
         self._aa_zero_stock(snapshot)
 
@@ -442,6 +497,20 @@ class ProductTemplate(models.Model):
         report["variants"] = len(
             base.with_context(active_test=True).product_variant_ids
         )
+
+        # THE REFUSAL BOTH DOCSTRINGS PROMISE, which until now was only ever
+        # checked by hand while the table was written. Odoo creates a variant
+        # for EVERY combination of the values, so a family with a hole in it -
+        # LH/Black, LH/White, RH/Black and no RH/White - produces a fourth
+        # variant that no old product becomes: priced, offered in the shop,
+        # and carrying no stock, no part number and no picture. Every family is
+        # square today; this is what keeps that true.
+        if report["variants"] != len(olds):
+            raise UserError(
+                "%d products but %d variants - the family is not square, so"
+                " the shop would offer a combination that was never stocked"
+                % (len(olds), report["variants"])
+            )
 
         for name, combo in spec["products"].items():
             if name not in olds:
@@ -467,6 +536,13 @@ class ProductTemplate(models.Model):
             snapshot[name] = {
                 "template": tmpl,
                 "variant": variant,
+                # ITS NAME, READ NOW. Odoo's _unlink_or_archive DELETES the
+                # base's original variant when nothing references it, which is
+                # the case for a base that stood at zero stock - and then
+                # reading display_name off it raises MissingError, which is a
+                # UserError, which would have skipped the family with "Record
+                # does not exist".
+                "label": variant.display_name,
                 "default_code": variant.default_code or tmpl.default_code,
                 "barcode": variant.barcode,
                 "standard_price": variant.standard_price,
@@ -623,7 +699,8 @@ class ProductTemplate(models.Model):
             new.action_apply_inventory()
 
         self._aa_move_vendor_lines(entry, target, report)
-        self._aa_repoint(entry["variant"], target, report)
+        self._aa_move_pricelist_rules(entry, target, report)
+        self._aa_repoint(entry["variant"], target, report, entry["label"])
 
     @api.model
     def _aa_move_vendor_lines(self, entry, target, report):
@@ -661,12 +738,53 @@ class ProductTemplate(models.Model):
         if lines:
             report["notes"].append(
                 "%s: %d vendor price line(s) moved onto the variant"
-                % (entry["variant"].display_name, len(lines))
+                % (entry["label"], len(lines))
             )
 
     @api.model
-    def _aa_repoint(self, old, new, report):
+    def _aa_move_pricelist_rules(self, entry, target, report):
+        """One old product's pricelist rules, onto its new variant.
+
+        THE SAME TRAP AS THE VENDOR LINES, and worse because it is money a
+        customer is charged. A rule names a product in one of two shapes:
+        "1_product" carries the TEMPLATE and no variant, "0_product_variant"
+        carries BOTH. So repointing product_id alone:
+
+          * misses every template-level rule - each sibling's is stranded on
+            its archived template, while the BASE's survives on the surviving
+            template and starts applying to every variant. A #16 jamb bracket
+            would be sold at the #10 rule's price;
+          * half-moves every variant-level rule - product_tmpl_id is left on
+            the archived template, and _get_applicable_rules_domain requires
+            product_tmpl_id to be among the products' templates, so the rule
+            silently stops matching and a dealer's special price disappears.
+
+        Each rule therefore becomes variant-specific on the surviving product,
+        with BOTH fields set.
+        """
+        Item = self.env["product.pricelist.item"]
+        rules = Item.search([
+            "|",
+            ("product_id", "=", entry["variant"].id),
+            "&", ("product_tmpl_id", "=", entry["template"].id),
+            ("product_id", "=", False),
+        ])
+        for rule in rules:
+            rule.write({
+                "applied_on": "0_product_variant",
+                "product_tmpl_id": target.product_tmpl_id.id,
+                "product_id": target.id,
+            })
+        if rules:
+            report["notes"].append(
+                "%s: %d pricelist rule(s) moved onto the variant"
+                % (entry["label"], len(rules))
+            )
+
+    @api.model
+    def _aa_repoint(self, old, new, report, label=None):
         """Everything that pointed at the old variant now points at the new."""
+        label = label or old.display_name
         moved = {}
 
         for model, field in REMAP_ALWAYS:
@@ -677,6 +795,24 @@ class ProductTemplate(models.Model):
             )
             if records:
                 records.write({field: new.id})
+                moved[model] = moved.get(model, 0) + len(records)
+
+        for model, field, template_field in REMAP_WITH_TEMPLATE:
+            if model not in self.env:
+                continue
+            records = self.env[model].with_context(active_test=False).search(
+                [(field, "=", old.id)]
+            )
+            if records:
+                # BOTH FIELDS OR NEITHER. A BoM whose output is a variant also
+                # names that variant's template, and moving one without the
+                # other leaves a record whose own domain it breaks: _bom_find
+                # keys on the template, so the merged variant would have no
+                # BoM and the old one would be orphaned.
+                records.write({
+                    field: new.id,
+                    template_field: new.product_tmpl_id.id,
+                })
                 moved[model] = moved.get(model, 0) + len(records)
 
         for model, field, state_field, states, preserve in REMAP_IF_OPEN:
@@ -715,24 +851,50 @@ class ProductTemplate(models.Model):
         if moved:
             report["notes"].append(
                 "%s: repointed %s"
-                % (old.display_name,
+                % (label,
                    ", ".join("%d %s" % (n, m) for m, n in sorted(moved.items())))
             )
 
         # WHAT IS LEFT POINTING AT THE ARCHIVED PRODUCT, said out loud. Done
         # deliveries and invoiced lines are meant to stay where they are; this
         # is here so the number is a decision and not a surprise.
+        for model, field in REPORT_ONLY:
+            if model not in self.env:
+                continue
+            left = self.env[model].with_context(active_test=False).search_count(
+                [(field, "=", old.id)]
+            )
+            if left:
+                report["notes"].append(
+                    "%s: %d %s left pointing at the archived product"
+                    % (label, left, model)
+                )
+
         history = self.env["stock.move"].search_count([("product_id", "=", old.id)])
         if history:
             report["notes"].append(
                 "%s: %d historical stock moves left on the archived product"
-                % (old.display_name, history)
+                % (label, history)
             )
 
     @api.model
     def _aa_check_prices(self, spec, olds, base, report):
         """Every new variant must cost what its old product cost."""
         rounding = self.env.company.currency_id.rounding
+        # THE REFUSAL BOTH DOCSTRINGS PROMISE, which until now was only ever
+        # checked by hand while the table was written. Odoo creates a variant
+        # for EVERY combination of the values, so a family with a hole in it -
+        # LH/Black, LH/White, RH/Black and no RH/White - produces a fourth
+        # variant that no old product becomes: priced, offered in the shop,
+        # and carrying no stock, no part number and no picture. Every family is
+        # square today; this is what keeps that true.
+        if report["variants"] != len(olds):
+            raise UserError(
+                "%d products but %d variants - the family is not square, so"
+                " the shop would offer a combination that was never stocked"
+                % (len(olds), report["variants"])
+            )
+
         for name, combo in spec["products"].items():
             if name not in olds:
                 continue
@@ -830,6 +992,14 @@ class ProductProduct(models.Model):
             key=lambda p: (
                 [v.product_attribute_value_id.sequence
                  for v in p.product_template_attribute_value_ids],
+                # THE NAME, BEFORE THE ID. On an unmerged catalogue there are
+                # no values to sort by, and without this the pick would fall
+                # to the lowest id - which is not what the code this replaced
+                # did. It ordered by name. That difference would land in the
+                # window between this deploy and the migration, and for good
+                # if a family is ever skipped: two black flag angles, and the
+                # one that answers flips to whichever was created first.
+                p.name or "",
                 p.id,
             )
         )[:1]

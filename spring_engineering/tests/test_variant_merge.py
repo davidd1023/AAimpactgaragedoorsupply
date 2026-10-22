@@ -732,3 +732,120 @@ class TestVariantMerge(TransactionCase):
 
         self.assertEqual(report["state"], "skipped", report)
         self.assertTrue(any("tracked" in p for p in report["problems"]), report)
+
+    # --- what a code review turned up -------------------------------------
+
+    def test_a_pricelist_rule_follows_the_exact_product_it_priced(self):
+        """MONEY A CUSTOMER IS CHARGED. A rule names a product as a template
+        with no variant, or as both. Moving only the variant leaves the
+        base's rule applying to every colour and every other rule stranded on
+        an archived template - a #16 bracket sold at the #10 rule's price."""
+        made = self._jamb_brackets()
+        pricelist = self.env["product.pricelist"].create({"name": "T Dealer"})
+        for name, price in (("Jamb Bracket # 10 Black", 0.90),
+                            ("Jamb Bracket # 16 White", 1.45)):
+            self.env["product.pricelist.item"].create({
+                "pricelist_id": pricelist.id,
+                "applied_on": "1_product",
+                "product_tmpl_id": made[name].id,
+                "compute_price": "fixed",
+                "fixed_price": price,
+            })
+
+        self._merge("Jamb Bracket")
+
+        cheap = self._variant("Jamb Bracket", **{
+            "Bracket Size": "#10", "Colour": "Black"})
+        dear = self._variant("Jamb Bracket", **{
+            "Bracket Size": "#16", "Colour": "White"})
+        untouched = self._variant("Jamb Bracket", **{
+            "Bracket Size": "#16", "Colour": "Black"})
+
+        self.assertAlmostEqual(
+            pricelist._get_product_price(cheap, 1.0), 0.90, 2)
+        self.assertAlmostEqual(
+            pricelist._get_product_price(dear, 1.0), 1.45, 2)
+        # AND NOT APPLIED TO EVERYTHING: the #16 Black had no rule, so it must
+        # still be its own price and not the #10 rule's 0.90.
+        self.assertAlmostEqual(
+            pricelist._get_product_price(untouched, 1.0), 1.91, 2)
+
+    def test_a_bom_for_one_variant_keeps_its_template_in_step(self):
+        """A BoM whose output is a variant names the variant AND its template.
+        Move one without the other and _bom_find, which keys on the template,
+        finds nothing: the merged part has no BoM and the old one is orphaned.
+        """
+        made = self._anchor_brackets()
+        old = made["Spring Anchor Bracket LH Black"]
+        bom = self.env["mrp.bom"].create({
+            "product_tmpl_id": old.id,
+            "product_id": old.product_variant_id.id,
+            "type": "normal",
+        })
+
+        self._merge("Spring Anchor Bracket")
+
+        want = self._variant("Spring Anchor Bracket", Hand="LH", Colour="Black")
+        self.assertEqual(bom.product_id, want)
+        self.assertEqual(bom.product_tmpl_id, want.product_tmpl_id)
+        self.assertEqual(
+            self.env["mrp.bom"]._bom_find(want)[want], bom,
+            "the merged part cannot find its own BoM")
+
+    def test_a_family_with_a_hole_in_it_is_refused(self):
+        """Odoo builds a variant for every COMBINATION, so a family missing
+        one would offer a priced bracket that was never stocked. Both
+        docstrings promised this refusal; now it exists."""
+        made = self._anchor_brackets()
+        # the catalogue no longer has an RH White - somebody renamed it
+        made["Spring Anchor Bracket RH White"].name = "Anchor RH White, retired"
+
+        report = self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(report["state"], "skipped", report)
+        for tmpl in made.values():
+            self.assertFalse(tmpl.attribute_line_ids, tmpl.name)
+
+    def test_a_customers_wish_follows_the_product(self):
+        """The wishlist drops any wish whose product is unpublished, so a wish
+        for one of the folded products would silently empty."""
+        made = self._anchor_brackets()
+        variant = made["Spring Anchor Bracket RH White"].product_variant_id
+        partner = self.env["res.partner"].create({"name": "Wisher"})
+        wish = self.env["product.wishlist"].create({
+            "partner_id": partner.id,
+            "product_id": variant.id,
+            "website_id": self.env["website"].search([], limit=1).id,
+        })
+
+        self._merge("Spring Anchor Bracket")
+
+        self.assertEqual(
+            wish.product_id,
+            self._variant("Spring Anchor Bracket", Hand="RH", Colour="White"),
+        )
+
+    def test_the_flag_angle_pick_is_alphabetical_before_a_merge(self):
+        """The lookup this replaced ordered by NAME. Created in reverse order,
+        an id-ordered pick would answer 6-3/8" where the old code answered
+        5.9" - a different part, in the window between the deploy and the
+        migration."""
+        backwards = {}
+        for size in ('6-3/8"', '5.9"'):          # deliberately out of order
+            for colour in ("Black", "White"):
+                name = "Flag Angle %s %s" % (size, colour)
+                backwards[name] = self._product(name, price=9.1, stock=10.0)
+
+        found = self.env["sale.order"]._track_prep_flag_for_colour("Black")
+
+        self.assertEqual(found, backwards['Flag Angle 5.9" Black'].product_variant_id)
+
+    def test_the_report_counts_an_already_merged_family_as_done(self):
+        self._anchor_brackets()
+        self._merge("Spring Anchor Bracket")
+
+        reports = self.env["product.template"]._aa_merge_variant_families(
+            dry_run=False, only=["Spring Anchor Bracket"])
+
+        self.assertIn("1 of 1 families merged",
+                      self.env["product.template"]._aa_merge_report(reports))
