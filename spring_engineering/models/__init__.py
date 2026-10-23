@@ -12,3 +12,4 @@ from . import cart_cost
 from . import product_variant_merge
 from . import variant_merge_wizard
 from . import track_facts
+from . import track_families
