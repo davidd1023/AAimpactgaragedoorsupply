@@ -808,7 +808,20 @@ class ProductTemplate(models.Model):
             # Clearing it from the old product first also means scanning that
             # barcode at the counter finds the variant that now holds the
             # stock, which is the only useful answer.
-            entry["variant"].barcode = False
+            #
+            # ONLY IF THERE IS STILL AN OLD PRODUCT TO CLEAR IT FROM. Odoo
+            # DELETES the base's original variant rather than archiving it
+            # when nothing references it - no stock, no moves, no history -
+            # and this write then raised "Record does not exist or has been
+            # deleted", taking the whole family down with it. That is what
+            # happened to his 2" Horizontal Tracks on 2026-10-23: eight
+            # products rolled back over a barcode. A barcode whose product is
+            # gone cannot collide with anything, so it simply moves.
+            old = entry["variant"].exists()
+
+            if old:
+                old.barcode = False
+
             values["barcode"] = entry["barcode"]
         if entry["weight"]:
             values["weight"] = entry["weight"]

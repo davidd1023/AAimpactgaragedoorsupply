@@ -1243,3 +1243,37 @@ class TestVariantMerge(TransactionCase):
         self.assertEqual(white.default_code, "CH-CD03")
         self.assertEqual(self._on_hand(black), black_before)
         self.assertEqual(self._on_hand(white), 24.0)
+
+    def test_a_barcode_on_a_base_with_no_history_does_not_kill_the_family(self):
+        """HIS 2" HORIZONTAL TRACKS, 2026-10-23: "merge failed, rolled back:
+        Record does not exist or has been deleted. (Record:
+        product.product(102,))".
+
+        Moving a barcode means clearing it off the old variant first. But Odoo
+        DELETES the base's original variant rather than archiving it when
+        nothing references it - no stock, no moves, no history - and writing
+        to a deleted record raises. The whole family then rolls back over a
+        barcode.
+        """
+        for length, colour in (("96", "Black"), ("96", "White"),
+                               ("108", "Black"), ("108", "White")):
+            # NO STOCK anywhere: that is what makes Odoo delete the base's
+            # original variant instead of keeping it archived. And a barcode
+            # on EVERY one of them, as his tracks have - an earlier version of
+            # this test put one on a single product that happened not to be
+            # the base, and so proved nothing.
+            made = self._product('2" Horizontal Track - %s" %s' % (length, colour),
+                                 code='CH-HT-2"', price=122.75)
+            made.product_variant_id.barcode = "BC-HT-2-%s-%s" % (length, colour)
+
+        report = self._merge('2" Horizontal Track')
+
+        self.assertEqual(report["state"], "merged", report)
+        merged = self._survivor('2" Horizontal Track')
+        self.assertEqual(len(self._live_variants('2" Horizontal Track')), 4)
+        self.assertEqual(
+            sorted(merged.with_context(active_test=True).product_variant_ids
+                   .mapped("barcode")),
+            ["BC-HT-2-108-Black", "BC-HT-2-108-White",
+             "BC-HT-2-96-Black", "BC-HT-2-96-White"],
+            "a barcode did not reach the variant that now holds the stock")
