@@ -148,7 +148,13 @@ class ProductTemplate(models.Model):
         the dangerous call should be the one you have to type out.
         """
         reports = []
-        for spec in FAMILIES:
+
+        # THE TABLE, AND THE FAMILIES READ OFF THE CATALOGUE. The tracks are
+        # not listed by name - theirs are too irregular to transcribe safely
+        # and he keeps adding lengths - so they are assembled from what is
+        # actually there (models/track_families.py) and merged by this same
+        # engine, with the same refusals and the same report.
+        for spec in list(FAMILIES) + self._aa_track_families():
             if only and spec["survivor"] not in only:
                 continue
             reports.append(self._aa_merge_one_family(spec, dry_run=dry_run))
@@ -515,9 +521,18 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _aa_family_values(self, spec, attr):
-        """The values one family uses for one attribute, in page order."""
+        """The values one family uses for one attribute, in page order.
+
+        THE FAMILY'S OWN ORDER WINS where it has one. A discovered family -
+        the tracks - carries its lengths already sorted by the inches, which
+        is an order no declared list could hold: he adds lengths.
+        """
         used = {combo[attr] for combo in spec["products"].values()}
-        return [v for v in ATTRIBUTE_VALUES[attr] if v in used]
+        order = spec.get("value_order", {}).get(attr) or ATTRIBUTE_VALUES.get(
+            attr, ())
+        ordered = [value for value in order if value in used]
+
+        return ordered + sorted(used - set(ordered))
 
     @api.model
     def _aa_note_unmapped_siblings(self, spec, olds, report):
@@ -741,10 +756,8 @@ class ProductTemplate(models.Model):
         8'6" before 10'6" - orders no sort would give us.
         """
         found = self.env["product.attribute.value"]
-        order = {
-            name: position
-            for position, name in enumerate(ATTRIBUTE_VALUES[attr_xmlid])
-        }
+        declared = ATTRIBUTE_VALUES.get(attr_xmlid) or names
+        order = {name: position for position, name in enumerate(declared)}
         for name in names:
             value = self.env["product.attribute.value"].search([
                 ("attribute_id", "=", attribute.id),
@@ -754,7 +767,7 @@ class ProductTemplate(models.Model):
                 value = self.env["product.attribute.value"].create({
                     "attribute_id": attribute.id,
                     "name": name,
-                    "sequence": order[name],
+                    "sequence": order.get(name, len(order)),
                 })
             found |= value
         return found
