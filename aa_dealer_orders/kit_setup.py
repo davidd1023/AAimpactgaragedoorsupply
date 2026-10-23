@@ -106,7 +106,11 @@ def refresh_prepared_costs(env):
         ('sale_ok', '=', True),
         ('name', 'not ilike', 'RAW'),
         '|', '|',
-        ('name', 'ilike', 'Horizontal Track -'),
+        # 'Horizontal Track' without the dash: a folded track is named
+        # '2" Horizontal Track' and its length is a variant value, so the
+        # dash the old names carried is no longer there to match on. RAW
+        # is still excluded above.
+        ('name', 'ilike', 'Horizontal Track'),
         ('name', 'ilike', 'Vertical Track'),
         ('name', 'ilike', 'Lift Cable'),
     ])

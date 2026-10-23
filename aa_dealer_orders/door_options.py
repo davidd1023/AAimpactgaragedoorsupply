@@ -70,7 +70,11 @@ class Catalog:
         products = env['product.product'].sudo().search([
             ('sale_ok', '=', True),
             '|', '|',
-            ('name', 'ilike', 'Horizontal Track -'),
+            # WITHOUT THE DASH. A folded track is named '2" Horizontal
+            # Track' and its length is a variant value, so searching for the
+            # dash the old names carried would find none of them. RAW is
+            # skipped in the loop below, as it always was.
+            ('name', 'ilike', 'Horizontal Track'),
             ('name', 'ilike', 'Vertical Track'),
             ('name', 'ilike', 'Lift Cable'),
         ]) | env['product.product'].sudo().search([
@@ -92,6 +96,20 @@ class Catalog:
             # 'Lift Cable 5/32" Pair - Prepared (8' Door, 3" Track (15R))'
             name = (p.display_name or '').strip()
             if 'RAW' in name:
+                continue
+
+            # TRACKS ARE READ OFF THE VARIANT. Their size, length and finish
+            # moved out of the name when the tracks were folded into one
+            # product per size and type (owner, 2026-10-23), so the anchored
+            # patterns below can no longer see them. _aa_track_facts reads
+            # either shape, and the patterns stay underneath for a catalogue
+            # that has not been merged yet and for anything it cannot read.
+            facts = p._aa_track_facts()
+
+            if facts:
+                row = (facts['size'], int(facts['length']), facts['colour'], p)
+                (self.horizontal if facts['kind'] == 'horizontal'
+                 else self.vertical).append(row)
                 continue
             # THE COLOUR, from wherever this catalogue keeps it. A merged Trims
             # product says it in its variant values ("Trims (Black)"); the

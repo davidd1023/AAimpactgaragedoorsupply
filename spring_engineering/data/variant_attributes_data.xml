@@ -135,6 +135,21 @@
       <field name="sequence">34</field>
     </record>
 
+    <!-- A TRACK'S LENGTH, which is its own attribute rather than the shaft's.
+         They would read alike on a page - both labelled Length - and must not
+         share a list: a shaft comes in 8'6" and a track in 96", and offering
+         either one the other's sizes is how somebody orders a track that does
+         not exist. A vertical track's value carries the door height it is for
+         ("76\" - 7' Door Height"), because that is what the catalogue has
+         always said and what the shop floor reads back out of it. -->
+    <record id="attribute_track_length" model="product.attribute">
+      <field name="name">Length</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">always</field>
+      <field name="visibility">hidden</field>
+      <field name="sequence">36</field>
+    </record>
+
     <record id="attribute_shaft_length" model="product.attribute">
       <field name="name">Length</field>
       <field name="display_type">radio</field>

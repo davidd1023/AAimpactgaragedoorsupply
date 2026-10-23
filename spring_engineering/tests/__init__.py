@@ -14,3 +14,4 @@ from . import test_signup_email
 from . import test_wire_stock
 from . import test_cart_cost
 from . import test_variant_merge
+from . import test_track_facts

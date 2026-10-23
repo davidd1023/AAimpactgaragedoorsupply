@@ -31,8 +31,6 @@ from odoo.exceptions import AccessError
 from odoo.tools.misc import hmac
 
 from .mrp_production import (
-    HORIZONTAL_TRACK,
-    VERTICAL_TRACK,
     id_label,
     inches_label,
     qty_label,
@@ -469,15 +467,15 @@ class MrpProduction(models.Model):
             if CABLE_NAME.search(name):
                 continue
 
-            horizontal = HORIZONTAL_TRACK.match(name)
-            vertical = VERTICAL_TRACK.match(name)
+            # READ OFF THE VARIANT, the same way the bench card does: a
+            # track's size and length moved out of its name when the tracks
+            # were folded into one product per size and type (owner,
+            # 2026-10-23). _aa_track_facts reads either shape.
+            facts = line.product_id._aa_track_facts()
 
-            if horizontal:
-                size, length, _colour = horizontal.groups()
-                said.append('%s" Horizontal %s"' % (size, length))
-            elif vertical:
-                size, length, _door, _colour = vertical.groups()
-                said.append('%s" Vertical %s"' % (size, length))
+            if facts:
+                said.append('%s" %s %g"' % (
+                    facts["size"], facts["kind"].title(), facts["length"]))
             elif TRACK_NAME.search(name):
                 said.append(name)
 
