@@ -36,9 +36,18 @@ WHAT THE OWNER DECIDED (2026-10-21, all three in his words):
     the individual product" - so LH and RH collapse too, on the one product
     that has them.
 
-Tracks, drums, cables and cones are deliberately NOT here. They have the same
-colour-split shape and the owner left them out: tracks especially are read by
-name all over the shop floor code and are their own job.
+THE DRUMS WERE ADDED ON 2026-10-23, by colour ONLY: "only merge them by color,
+so we will have each drum separate like d400-96, d400-144, and d575-120hl will
+all still be seperate". That is the safe half of the job he first asked for.
+Folding the MODELS together as well would have broken the high-lift kits -
+aa_dealer_orders/kit_setup.py finds a drum with `name ilike 'D525-54'` and
+swaps it into a kit's BoM - because the model would have left the name and
+moved into a variant value. Keeping one product per model keeps the model in
+the name, so none of that machinery notices. D800-120 HL has no colour and so
+nothing to merge.
+
+Tracks, cables and cones are still deliberately NOT here. Tracks especially are
+read by name all over the shop floor code and are their own job.
 
 THE BASE IS THE PRODUCT THAT SURVIVES. Its record keeps the page, the images,
 the website category and whatever history it carries, and the other rows of
@@ -260,6 +269,51 @@ FAMILIES = (
             'Torsion Solid Shaft 10\'6"': {'attribute_shaft_length': '10\'6"'},
             'Torsion Solid Shaft 8\'6"': {'attribute_shaft_length': '8\'6"'},
             'Torsion Solid Shaft 9\'6"': {'attribute_shaft_length': '9\'6"'},
+        },
+    },
+    {
+        "survivor": 'Canimex D400-96',
+        "base": 'Canimex D400-96 Black',
+        "attributes": ('attribute_finish_colour',),
+        "products": {
+            'Canimex D400-96 Black': {'attribute_finish_colour': 'Black'},
+            'Canimex D400-96 White': {'attribute_finish_colour': 'White'},
+        },
+    },
+    {
+        "survivor": 'Canimex D400-144',
+        "base": 'Canimex D400-144 Black',
+        "attributes": ('attribute_finish_colour',),
+        "products": {
+            'Canimex D400-144 Black': {'attribute_finish_colour': 'Black'},
+            'Canimex D400-144 White': {'attribute_finish_colour': 'White'},
+        },
+    },
+    {
+        "survivor": 'Canimex D525-216',
+        "base": 'Canimex D525-216 Black',
+        "attributes": ('attribute_finish_colour',),
+        "products": {
+            'Canimex D525-216 Black': {'attribute_finish_colour': 'Black'},
+            'Canimex D525-216 White': {'attribute_finish_colour': 'White'},
+        },
+    },
+    {
+        "survivor": 'Canimex D525-54 HL',
+        "base": 'Canimex D525-54 HL Black',
+        "attributes": ('attribute_finish_colour',),
+        "products": {
+            'Canimex D525-54 HL Black': {'attribute_finish_colour': 'Black'},
+            'Canimex D525-54 HL White': {'attribute_finish_colour': 'White'},
+        },
+    },
+    {
+        "survivor": 'Canimex D575-120 HL',
+        "base": 'Canimex D575-120 HL Black',
+        "attributes": ('attribute_finish_colour',),
+        "products": {
+            'Canimex D575-120 HL Black': {'attribute_finish_colour': 'Black'},
+            'Canimex D575-120 HL White': {'attribute_finish_colour': 'White'},
         },
     },
 )

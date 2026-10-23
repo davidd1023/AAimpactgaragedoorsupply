@@ -1168,3 +1168,78 @@ class TestVariantMerge(TransactionCase):
 
         self.assertEqual(again["state"], "already merged")
         self.assertEqual(again["variants"], 4, again)
+
+    # --- the drums, merged by colour only ---------------------------------
+
+    def _drums(self):
+        """His five drum models, each in two colours, with their own part
+        numbers - and the model in the NAME, which is what the kit machinery
+        reads."""
+        made = {}
+        for model, code, price in (
+            ("Canimex D400-96", "CH-CD02", 6.64),
+            ("Canimex D400-144", "CH-CD03", 12.00),
+            ("Canimex D525-216", "CH-CD04", 22.31),
+            ("Canimex D525-54 HL", 'CH-CD06 54"', 39.47),
+            ("Canimex D575-120 HL", 'CH-CD07 120"', 51.48),
+        ):
+            for colour, stock in (("Black", 56.0), ("White", 24.0)):
+                name = "%s %s" % (model, colour)
+                made[name] = self._product(
+                    name, code=code, price=price, cost=price / 2, stock=stock)
+        return made
+
+    def test_each_drum_model_stays_its_own_product(self):
+        """Owner, 2026-10-23: "only merge them by color, so we will have each
+        drum separate like d400-96, d400-144, and d575-120hl will all still be
+        seperate"."""
+        self._drums()
+
+        for model in ("Canimex D400-96", "Canimex D400-144", "Canimex D525-216",
+                      "Canimex D525-54 HL", "Canimex D575-120 HL"):
+            report = self._merge(model)
+            self.assertEqual(report["state"], "merged", report)
+            self.assertEqual(len(self._live_variants(model)), 2, model)
+            self.assertEqual(
+                sorted(self._survivor(model).attribute_line_ids
+                       .attribute_id.mapped("name")),
+                ["Colour"], model)
+
+    def test_a_high_lift_kit_can_still_find_its_drum_by_name(self):
+        """THE HAZARD THIS GROUPING AVOIDS. kit_setup.py swaps the right drum
+        into a high-lift kit's BoM with `name ilike 'D525-54'`, and matches
+        BoM lines with `code in product.name`. Folding the MODELS together
+        would have moved the model out of the name and into a variant value,
+        and that lookup would have found nothing - leaving a high-lift kit
+        with the standard drum and no error anywhere."""
+        self._drums()
+        self._merge("Canimex D525-54 HL")
+
+        found = self.env["product.product"].search(
+            [("name", "ilike", "D525-54"), ("active", "=", True)])
+
+        self.assertEqual(len(found), 2, "the kit lookup lost its drum")
+        for variant in found:
+            self.assertIn("D525-54", variant.name,
+                          "the model left the product name")
+
+        # and _pick_drum tells the colours apart by display name
+        black = found.filtered(lambda p: "Black" in p.display_name)
+        white = found.filtered(lambda p: "White" in p.display_name)
+        self.assertEqual(len(black), 1)
+        self.assertEqual(len(white), 1)
+        self.assertNotEqual(black, white)
+
+    def test_a_drum_keeps_its_part_number_and_its_stock(self):
+        made = self._drums()
+        black_before = self._on_hand(
+            made["Canimex D400-144 Black"].product_variant_id)
+
+        self._merge("Canimex D400-144")
+
+        black = self._variant("Canimex D400-144", Colour="Black")
+        white = self._variant("Canimex D400-144", Colour="White")
+        self.assertEqual(black.default_code, "CH-CD03")
+        self.assertEqual(white.default_code, "CH-CD03")
+        self.assertEqual(self._on_hand(black), black_before)
+        self.assertEqual(self._on_hand(white), 24.0)
