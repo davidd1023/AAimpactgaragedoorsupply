@@ -11,3 +11,4 @@ from . import sale_order
 from . import cart_cost
 from . import product_variant_merge
 from . import variant_merge_wizard
+from . import track_facts

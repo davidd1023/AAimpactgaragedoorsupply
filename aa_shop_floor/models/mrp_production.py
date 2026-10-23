@@ -9,11 +9,12 @@ ID_LABELS = {2.625: '2 5/8"', 3.75: '3 3/4"', 5.25: '5 1/4"', 6.0: '6"'}
 FILLER_ID = 5.25
 
 # Finished stock springs: SPR-262-2.625-R
-# Prepared track products, as named in the catalogue:
-#   3" Horizontal Track - 108" White
-#   3" Vertical Track 88" - 8' Door Height White
-HORIZONTAL_TRACK = re.compile(r'^(\d)" Horizontal Track -\s+(\d+)" (White|Black)$')
-VERTICAL_TRACK = re.compile(r'^(\d)" Vertical Track (\d+)" - (\d+)\' Door Height (White|Black)$')
+# Prepared tracks are read by product.product._aa_track_facts
+# (spring_engineering/models/track_facts.py), which takes either shape: the
+# old name - 3" Horizontal Track - 108" White - or the folded product with
+# its length and finish as variant values. The anchored patterns that used to
+# live here could only read the first, and a track whose facts cannot be read
+# gets no bench card at all.
 # The raw stock they are cut from: 3" Horizontal Track RAW - 9'6" White
 RAW_LENGTH = re.compile(r"RAW\s*-\s*(\d+)'\s*(?:(\d+)\")?")
 
@@ -168,19 +169,26 @@ class MrpProduction(models.Model):
     # lag screws). Each MO unit is one LH + RH pair.
 
     def _aa_track_rows(self):
-        name = (self.product_id.with_context(display_default_code=False).display_name or "").strip()
-        horizontal = HORIZONTAL_TRACK.match(name)
-        vertical = VERTICAL_TRACK.match(name)
-        if not (horizontal or vertical):
+        # READ OFF THE VARIANT, NOT OFF THE NAME. The size, length and finish
+        # of a track moved into variant values when the tracks were folded
+        # into one product per size and type (owner, 2026-10-23), and the
+        # anchored patterns above stopped matching. _aa_track_facts reads
+        # either shape - the old name or the new variant - which is what lets
+        # the floor keep cutting correctly on both sides of the migration.
+        # The LENGTH here is the length a bench cuts to.
+        facts = self.product_id._aa_track_facts()
+
+        if not facts:
             return []
+
         pairs = self.product_qty or 1.0
-        if horizontal:
-            size, length, colour = horizontal.groups()
+        size, length, colour = facts["size"], facts["length"], facts["colour"]
+
+        if facts["kind"] == "horizontal":
             rows = [("Track", '%s" Horizontal · %s' % (size, colour))]
         else:
-            size, length, door, colour = vertical.groups()
-            rows = [("Track", '%s" Vertical · %s' % (size, colour)), ("Door height", "%s'" % door)]
-        length = float(length)
+            rows = [("Track", '%s" Vertical · %s' % (size, colour)),
+                    ("Door height", "%s'" % facts["door"])]
 
         raw = self.move_raw_ids.filtered(lambda m: "RAW" in (m.product_id.name or ""))[:1]
         hit = raw and RAW_LENGTH.search(raw.product_id.name or "")

@@ -160,3 +160,64 @@ class TestDealerPagesAfterTheMerge(TransactionCase):
 
         self.assertEqual(len(offered), 1)
         self.assertEqual(offered[0][2], "", "it offered a finish it has not got")
+
+    # --- the dealer's track catalogue, on both sides of the merge ---------
+
+    def _track(self, name, code=None):
+        return self._product(name, code=code, price=120.0)
+
+    def test_the_dealer_catalogue_finds_todays_tracks(self):
+        """Proved on today's shape first, so a failure afterwards is the
+        merge's fault and not a test that never worked."""
+        self._track('2" Horizontal Track -  120" White', code='CH-HT-2"')
+        self._track('3" Vertical Track 76" - 7\' Door Height Black',
+                    code='CH-VT-3"')
+
+        catalog = Catalog(self.env)
+
+        self.assertIn(("2", 120, "White"),
+                      [row[:3] for row in catalog.horizontal])
+        self.assertIn(("3", 76, "Black"),
+                      [row[:3] for row in catalog.vertical])
+
+    def test_the_dealer_catalogue_finds_folded_tracks(self):
+        """One product per size and type, with the length and finish as
+        variant values. Without this the Quick Order answers "no prepared
+        track" for every door."""
+        template = self.env["product.template"].create({
+            "name": '2" Horizontal Track', "default_code": 'CH-HT-2"',
+            "type": "consu", "is_storable": True, "list_price": 122.75,
+            "sale_ok": True})
+        for ref, values in (
+            ("spring_engineering.attribute_finish_colour", ["Black", "White"]),
+            ("spring_engineering.attribute_track_length", ['96"', '120"']),
+        ):
+            attribute = self.env.ref(ref)
+            options = self.env["product.attribute.value"]
+            for name in values:
+                options |= self.env["product.attribute.value"].search([
+                    ("attribute_id", "=", attribute.id), ("name", "=", name)
+                ], limit=1) or self.env["product.attribute.value"].create({
+                    "attribute_id": attribute.id, "name": name})
+            self.env["product.template.attribute.line"].create({
+                "product_tmpl_id": template.id, "attribute_id": attribute.id,
+                "value_ids": [(6, 0, options.ids)]})
+        template.invalidate_recordset()
+
+        catalog = Catalog(self.env)
+        found = [row[:3] for row in catalog.horizontal]
+
+        self.assertEqual(len(template.product_variant_ids), 4)
+        for want in (("2", 96, "Black"), ("2", 96, "White"),
+                     ("2", 120, "Black"), ("2", 120, "White")):
+            self.assertIn(want, found, found)
+
+    def test_raw_track_stock_never_enters_the_catalogue(self):
+        """RAW is what a track is cut from, and the owner kept it out of the
+        merge. Offering one to a dealer would sell uncut stock as a door's
+        track."""
+        self._track('3" Horizontal Track RAW - 9\'6" Galvanized')
+
+        catalog = Catalog(self.env)
+
+        self.assertFalse(catalog.horizontal, catalog.horizontal)
