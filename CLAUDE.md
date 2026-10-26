@@ -294,6 +294,15 @@ three.js still comes from jsDelivr, which is free and not a subscription. It
 can move to HostGator too via `data-three` / `data-gltf-loader`, with no code
 change.
 
+### The colour choices fold away (owner, 2026-10-26)
+
+*"on mobile the choices block the visibility of the door so being able to hide
+them to see the door fully would be better."* The arrow at the right of the
+panel folds it to just itself in the corner. What is selected is still named
+along the top of the frame, so hiding the chips loses nothing. It starts
+OPEN - the choices are the point of the page, and a viewer that opens with
+them hidden does not look like a configurator.
+
 ### THE PRODUCT PAGES ARE ELEMENTOR, SO THE BLOCK CARRIES NO `<script src>`
 
 An Elementor HTML widget does not have its markup parsed with the page: it is

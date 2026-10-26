@@ -126,6 +126,11 @@
     return node;
   }
 
+  var CHEVRON =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
+    ' stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"' +
+    ' aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>';
+
   var EXPAND_ICON =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"' +
     ' stroke-linecap="square" aria-hidden="true">' +
@@ -186,7 +191,26 @@
     expandBtn.innerHTML = EXPAND_ICON;
     expandBtn.setAttribute("aria-label", "Fullscreen");
 
+    /* THE CHOICES FOLD AWAY (owner, 2026-10-26: "on mobile the choices block
+     * the visibility of the door so being able to hide them to see the door
+     * fully would be better"). Folded, the panel shrinks to the arrow alone
+     * and the door has the whole frame; what is currently selected is still
+     * named along the top, so nothing is lost by hiding them. */
     var panel = el("div", "aadp__panel", host);
+    var groups = el("div", "aadp__groups", panel);
+
+    var fold = el("button", "aadp__fold", panel);
+    fold.type = "button";
+    fold.innerHTML = CHEVRON;
+    fold.id = "aadp-fold";
+    fold.setAttribute("aria-expanded", "true");
+    fold.setAttribute("aria-label", "Hide the colour choices");
+    fold.addEventListener("click", function () {
+      var folded = host.classList.toggle("aadp--folded");
+      fold.setAttribute("aria-expanded", folded ? "false" : "true");
+      fold.setAttribute("aria-label",
+        folded ? "Show the colour choices" : "Hide the colour choices");
+    });
     var loader = el("div", "aadp__loading", host);
     var loaderText = el("p", "aadp__loading-text", loader);
     loaderText.textContent = "Loading the door…";
@@ -301,7 +325,7 @@
     /* ---- chips ------------------------------------------------------ */
 
     function group(title, choices, initial, onPick) {
-      var wrap = el("div", "aadp__group", panel);
+      var wrap = el("div", "aadp__group", groups);
       var head = el("span", "aadp__group-label", wrap);
       head.textContent = title;
       var chips = el("div", "aadp__chips", wrap);

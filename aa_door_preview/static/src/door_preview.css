@@ -97,8 +97,8 @@
   right: 12px;
   bottom: 12px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 14px 30px;
+  align-items: center;
+  gap: 12px;
   padding: 13px 15px 14px;
   background: rgba(14, 17, 20, 0.58);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -106,6 +106,53 @@
   backdrop-filter: blur(10px);
   border-radius: 3px;
 }
+
+.aadp__groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 30px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The arrow that folds them away. It is the one control that must stay
+ * reachable when everything else is hidden, so it is the panel's own child
+ * rather than an overlay on top of it. */
+.aadp__fold {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 2px;
+  color: #eef1f3;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.aadp__fold:hover { background: rgba(255, 255, 255, 0.15); }
+
+.aadp__fold svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  transition: transform 170ms ease;
+}
+
+/* Folded: the panel is just the arrow, down in the corner, and the door has
+ * the whole frame. */
+.aadp--folded .aadp__panel {
+  right: auto;
+  padding: 7px;
+}
+
+.aadp--folded .aadp__groups { display: none; }
+.aadp--folded .aadp__fold svg { transform: rotate(180deg); }
 
 .aadp__group {
   display: flex;
@@ -204,10 +251,11 @@
   .aadp { height: clamp(360px, 58vh, 520px); }
   .aadp__panel { gap: 11px 18px; padding: 11px 12px 12px; }
   .aadp__chip { height: 28px; font-size: 12.5px; padding: 0 9px 0 8px; }
-  .aadp__readout { font-size: 10px; right: 100px; }
+  .aadp__readout { font-size: 10px; right: 148px; }
   .aadp__tool { font-size: 11px; padding: 0 9px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aadp__chip { transition: none; }
+  .aadp__chip,
+  .aadp__fold svg { transition: none; }
 }

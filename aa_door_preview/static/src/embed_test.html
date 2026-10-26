@@ -9,7 +9,7 @@
 <body>
 
 <!-- =====================================================================
-     SERIES 1200 DOOR PREVIEW            build 803865c6
+     SERIES 1200 DOOR PREVIEW            build 0ca4fe2a
      Paste this whole block into the Elementor HTML widget on the product
      page, in place of the current viewer.
 
@@ -124,8 +124,8 @@
   right: 12px;
   bottom: 12px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 14px 30px;
+  align-items: center;
+  gap: 12px;
   padding: 13px 15px 14px;
   background: rgba(14, 17, 20, 0.58);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -133,6 +133,53 @@
   backdrop-filter: blur(10px);
   border-radius: 3px;
 }
+
+.aadp__groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 30px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The arrow that folds them away. It is the one control that must stay
+ * reachable when everything else is hidden, so it is the panel's own child
+ * rather than an overlay on top of it. */
+.aadp__fold {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 2px;
+  color: #eef1f3;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.aadp__fold:hover { background: rgba(255, 255, 255, 0.15); }
+
+.aadp__fold svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  transition: transform 170ms ease;
+}
+
+/* Folded: the panel is just the arrow, down in the corner, and the door has
+ * the whole frame. */
+.aadp--folded .aadp__panel {
+  right: auto;
+  padding: 7px;
+}
+
+.aadp--folded .aadp__groups { display: none; }
+.aadp--folded .aadp__fold svg { transform: rotate(180deg); }
 
 .aadp__group {
   display: flex;
@@ -231,12 +278,13 @@
   .aadp { height: clamp(360px, 58vh, 520px); }
   .aadp__panel { gap: 11px 18px; padding: 11px 12px 12px; }
   .aadp__chip { height: 28px; font-size: 12.5px; padding: 0 9px 0 8px; }
-  .aadp__readout { font-size: 10px; right: 100px; }
+  .aadp__readout { font-size: 10px; right: 148px; }
   .aadp__tool { font-size: 11px; padding: 0 9px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aadp__chip { transition: none; }
+  .aadp__chip,
+  .aadp__fold svg { transition: none; }
 }
 </style>
 
@@ -375,6 +423,11 @@
     return node;
   }
 
+  var CHEVRON =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
+    ' stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"' +
+    ' aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>';
+
   var EXPAND_ICON =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"' +
     ' stroke-linecap="square" aria-hidden="true">' +
@@ -435,7 +488,26 @@
     expandBtn.innerHTML = EXPAND_ICON;
     expandBtn.setAttribute("aria-label", "Fullscreen");
 
+    /* THE CHOICES FOLD AWAY (owner, 2026-10-26: "on mobile the choices block
+     * the visibility of the door so being able to hide them to see the door
+     * fully would be better"). Folded, the panel shrinks to the arrow alone
+     * and the door has the whole frame; what is currently selected is still
+     * named along the top, so nothing is lost by hiding them. */
     var panel = el("div", "aadp__panel", host);
+    var groups = el("div", "aadp__groups", panel);
+
+    var fold = el("button", "aadp__fold", panel);
+    fold.type = "button";
+    fold.innerHTML = CHEVRON;
+    fold.id = "aadp-fold";
+    fold.setAttribute("aria-expanded", "true");
+    fold.setAttribute("aria-label", "Hide the colour choices");
+    fold.addEventListener("click", function () {
+      var folded = host.classList.toggle("aadp--folded");
+      fold.setAttribute("aria-expanded", folded ? "false" : "true");
+      fold.setAttribute("aria-label",
+        folded ? "Show the colour choices" : "Hide the colour choices");
+    });
     var loader = el("div", "aadp__loading", host);
     var loaderText = el("p", "aadp__loading-text", loader);
     loaderText.textContent = "Loading the door…";
@@ -550,7 +622,7 @@
     /* ---- chips ------------------------------------------------------ */
 
     function group(title, choices, initial, onPick) {
-      var wrap = el("div", "aadp__group", panel);
+      var wrap = el("div", "aadp__group", groups);
       var head = el("span", "aadp__group-label", wrap);
       head.textContent = title;
       var chips = el("div", "aadp__chips", wrap);
@@ -907,7 +979,7 @@
  * and a stale copy of this block looks exactly like a fix that did not work -
  * which cost a round trip on 2026-10-26. The test pages print this, so an old
  * copy announces itself instead of being guessed at. */
-if (window.AADoorPreview) { window.AADoorPreview.built = "803865c6"; }
+if (window.AADoorPreview) { window.AADoorPreview.built = "0ca4fe2a"; }
 </script>
 
 </body>
