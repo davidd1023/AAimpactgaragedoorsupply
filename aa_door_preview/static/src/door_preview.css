@@ -1,0 +1,208 @@
+/* The Series 1200 preview. Everything is scoped under .aadp and sets its own
+ * box-sizing, font and colours, because this has to survive being dropped
+ * into a WordPress theme that knows nothing about it. */
+
+.aadp {
+  position: relative;
+  width: 100%;
+  height: clamp(400px, 64vh, 640px);
+  overflow: hidden;
+  border-radius: 3px;
+  background:
+    radial-gradient(120% 90% at 50% 8%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(176deg, #495158 0%, #2a3036 46%, #101316 100%);
+  font-family: "Archivo", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #eef1f3;
+  -webkit-font-smoothing: antialiased;
+}
+
+.aadp *,
+.aadp *::before,
+.aadp *::after { box-sizing: border-box; }
+
+.aadp--expanded {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  height: auto;
+  border-radius: 0;
+}
+
+.aadp__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.aadp__canvas.aadp--dragging { cursor: grabbing; }
+
+.aadp__readout {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  right: 190px;
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.62);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.aadp__tools {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.aadp__tool {
+  font-family: "Archivo Narrow", "Archivo", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #eef1f3;
+  background: rgba(14, 17, 20, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-radius: 2px;
+  height: 34px;
+  padding: 0 12px;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.aadp__tool:hover { background: rgba(14, 17, 20, 0.8); }
+.aadp__tool--icon { width: 34px; padding: 0; }
+.aadp__tool svg { width: 15px; height: 15px; display: block; }
+
+.aadp__panel {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 30px;
+  padding: 13px 15px 14px;
+  background: rgba(14, 17, 20, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 3px;
+}
+
+.aadp__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.aadp__group-label {
+  font-family: "Archivo Narrow", "Archivo", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #a8b2b9;
+}
+
+.aadp__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.aadp__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 11px 0 9px;
+  margin: 0;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  color: #eef1f3;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  text-transform: none;
+  text-shadow: none;
+  box-shadow: none;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.aadp__chip:hover { background: rgba(255, 255, 255, 0.12); }
+
+.aadp__chip[aria-checked="true"] {
+  border-color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.aadp__dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  flex: none;
+}
+
+.aadp__loading,
+.aadp--failed .aadp__message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  background: rgba(16, 19, 22, 0.55);
+}
+
+.aadp__loading-text,
+.aadp__message {
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+}
+
+.aadp__loading[hidden] { display: none; }
+
+.aadp :focus-visible {
+  outline: 2px solid #c48c48;
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .aadp { height: clamp(360px, 58vh, 520px); }
+  .aadp__panel { gap: 11px 18px; padding: 11px 12px 12px; }
+  .aadp__chip { height: 28px; font-size: 12.5px; padding: 0 9px 0 8px; }
+  .aadp__readout { font-size: 10px; right: 100px; }
+  .aadp__tool { font-size: 11px; padding: 0 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aadp__chip { transition: none; }
+}

@@ -211,6 +211,56 @@ Black"); and an angle stating the OTHER size is never substituted, because it
 does not fit. A track that does not say what size it is gets no guess. The
 setting `spring_engineering.track_prep_flag_product_id` is still the last word.
 
+## The website door preview (`aa_door_preview`)
+
+The 3D viewer on the product pages of aaimpactgaragedoor.com, which is
+**WordPress on HostGator, not Odoo** - asked which site it should run on, the
+owner chose the WordPress one (2026-10-26). So the deliverable is a plain
+self-contained bundle, and `README.md` in that module has the embed snippet and
+the file list for whoever has cPanel. **I write it; somebody else places it.**
+
+It is in this repository anyway because the container is ephemeral, and
+because Odoo serves the test page on a real origin at
+`/aa_door_preview/static/src/preview.html`. The module has no models, no views
+and no data - installing it changes nothing, and the manifest exists only so
+the addons path serves the folder.
+
+### ONE MODEL, THE COLOURS SWAPPED IN THE BROWSER
+
+His Sirv account holds **one `.glb` per combination** of frame finish and
+glass colour: thirteen files, 8.84 MB each and 10.01 MB for the woodgrain
+ones, about **118 MB**, and clicking a colour downloads a whole new door.
+
+It does not need to. Every one of those files is the SAME single mesh - one
+node, seven primitives, identical to within a few dozen bytes - differing only
+in what its materials are set to, and the materials are named by role. So one
+file is loaded, kept, and recoloured, which covers all twenty combinations.
+
+**SEVEN COMBINATIONS ANSWER 404 ON THE LIVE SITE**: White frame with White,
+Green, Bronze or Grey glass; Bronze with White; Wood with Clear or White. They
+have no file, so they cannot be shown today. He has not been told this by
+anyone else and it is the strongest argument for the rewrite.
+
+Facts read out of his own files on 2026-10-26, not to be re-derived by guessing:
+
+- **glTF `baseColorFactor` is LINEAR.** Every colour goes in through
+  `Color.fromArray`, never a hex string - a hex would come out roughly twice
+  as bright. The full table of base colours, metalness, roughness and
+  transmission is in that module's `README.md`.
+- **`Frame_bronze` is dark in EVERY file**, the white and the woodgrain ones
+  included (0.02 linear, near black), so it is a trim piece and not the frame.
+  It is left alone; painting it would change a door he has already approved.
+- **His Wood files put woodgrain on one frame piece and leave the other dark
+  bronze.** The viewer makes the whole frame woodgrain, which is the
+  consistent reading - **unconfirmed, and `FRAME_RE` is where to change it.**
+- `Frane_Black` is a typo in his Black files. `FRAME_RE` matches `fra[mn]e`,
+  so it is picked up either way.
+- `Blue_Circle` and `White_Circle` are unidentified and left untouched.
+- **three.js r137.5 and its GLTFLoader are self-hosted** in `static/lib/`.
+  Nothing comes from a CDN, so no third party can break his product pages; the
+  only outside request is the model itself, and Sirv sends
+  `access-control-allow-origin: *`.
+
 ## Git
 
 Never `git push`. Use `odoosh-push`.
