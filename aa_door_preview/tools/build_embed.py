@@ -387,11 +387,18 @@ def main():
     if re.search(r"</\s*style", css, re.I):
         sys.exit("the stylesheet contains a closing style tag")
 
-    # THE BUILD ID IS A HASH OF THE SOURCES, not a clock. A timestamp would
-    # make every run a change in the repository even when nothing moved;
-    # a hash identifies the build and stays put until the viewer actually
-    # differs.
-    stamp = hashlib.sha256((css + js).encode("utf-8")).hexdigest()[:8]
+    # THE BUILD ID IS A HASH OF EVERYTHING THE BLOCK CARRIES, not a clock. A
+    # timestamp would make every run a change in the repository even when
+    # nothing moved; a hash identifies the build and stays put until the block
+    # actually differs.
+    #
+    # THE URLS ARE IN IT. They were not at first, and so moving the model and
+    # texture off Sirv produced a materially different block under the same
+    # id - from the one safeguard whose whole job is to tell two versions
+    # apart.
+    stamp = hashlib.sha256("\n".join([
+        css, js, MODEL_URL, WOOD_URL, THREE_CDN, LOADER_CDN,
+    ]).encode("utf-8")).hexdigest()[:8]
 
     out = TEMPLATE % {
         "css": css, "js": js, "fonts": FONTS, "three": THREE_CDN,
