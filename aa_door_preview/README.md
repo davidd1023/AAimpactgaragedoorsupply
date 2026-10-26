@@ -97,33 +97,68 @@ so it is reproduced rather than corrected.
 
 ## Putting it on WordPress
 
-Four files go up, into one folder, by whoever has cPanel or FTP:
+**One upload and one paste.** No FTP, no theme files, no plugin.
 
-    door_preview.js      the viewer
-    door_preview.css     its styles
-    woodgrain.jpg        208 KB, re-encoded from the PNG inside Wood_Green.glb
-    three.min.js         three.js r137.5
-    GLTFLoader.js        its glTF loader
+1. **Upload the texture.** Save `woodgrain.jpg` from this module and put it in
+   the Sirv account beside the models, as `3d/woodgrain.jpg` - the same
+   drag-and-drop that put the `.glb` files there. It is the only file that has
+   to be hosted, and if it is missing everything still works; the Wood finish
+   just comes out plain brown instead of grained.
+2. **Paste the block.** `static/src/wordpress_embed.txt` is the whole viewer -
+   stylesheet, markup and script in one block - ready for a Custom HTML block
+   on the product page, in place of the current viewer. It is served as
+   `text/plain` so it can be opened and copied straight out of a browser.
 
-Then the embed, in a Custom HTML block or the page template:
+The same block goes on **all three series pages** (owner, 2026-10-26: "all 3
+doors use the same model so we can use the same thing for all three"), and
+because all three point at the same model URL a visitor downloads it once and
+the browser serves the other two from cache.
+
+Should a series offer less than the full range, narrow it per page without
+touching any file:
 
 ```html
-<link rel="stylesheet" href="/path/to/door_preview.css">
 <div data-aa-door-preview
      data-model="https://davidaaigd.sirv.com/3d/White_Clear.glb"
-     data-wood="/path/to/woodgrain.jpg"></div>
-<script src="/path/to/three.min.js"></script>
-<script src="/path/to/GLTFLoader.js"></script>
-<script src="/path/to/door_preview.js"></script>
+     data-wood="https://davidaaigd.sirv.com/3d/woodgrain.jpg"
+     data-frames="white,black"
+     data-glasses="clear,grey"></div>
 ```
 
-Any element with `data-aa-door-preview` is picked up on load. Nothing is
-fetched from a CDN, so there is no third party that can break it; the only
-external request is the model itself, from Sirv, which sends
-`access-control-allow-origin: *`.
+Any element with `data-aa-door-preview` is picked up on load. An empty or
+unrecognised list offers everything rather than nothing.
+
+### Do not edit the snippet
+
+It is **generated** from `door_preview.css` and `door_preview.js`. Editing it
+by hand is how it comes to differ from the viewer it was made from, and then a
+fix made here stays broken on the website. Edit the module and run:
+
+    python3 aa_door_preview/tools/build_embed.py
+
+which rewrites `wordpress_embed.txt` and `embed_test.html` - a page that is
+nothing but the snippet, so the exact thing about to be pasted can be looked
+at working first.
+
+### What loads from where
+
+Only two files come from outside: three.js and its glTF loader, pinned to
+r137.5 on jsDelivr. They could be inlined too, but 600 KB in a page editor is
+a bad afternoon, and they could be uploaded to Sirv except that whether a
+media service returns `application/javascript` for a `.js` file is not worth
+finding out on a live product page. An image it will certainly serve.
+
+The model itself comes from Sirv, which sends `access-control-allow-origin: *`.
 
 Everything is scoped under `.aadp` and sets its own box-sizing, font and
 colours, because a WordPress theme knows nothing about it.
+
+### Two test pages on the Odoo build
+
+| page | what it proves |
+|---|---|
+| `static/src/preview.html` | the viewer, with the libraries served from this module |
+| `static/src/embed_test.html` | the snippet itself, over the real CDN and the real texture URL |
 
 ### Two improvements worth making later
 

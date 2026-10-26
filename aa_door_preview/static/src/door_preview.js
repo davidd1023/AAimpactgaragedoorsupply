@@ -51,8 +51,14 @@
       linear: [0.0204, 0.0201, 0.0195],         metalness: 0.179, roughness: 0.450 },
     { id: "black",  name: "Black",  swatch: "#111214",
       linear: [0, 0, 0],                        metalness: 0.282, roughness: 0.095 },
+    /* The linear value is the AVERAGE of the woodgrain texture, used on its
+     * own if that image cannot be fetched - so a wrong texture path leaves a
+     * brown door rather than a white one that silently looks like the White
+     * finish. Cleared to white once the image is in, because glTF multiplies
+     * the map by the base colour. */
     { id: "wood",   name: "Wood",   swatch: "#b65c14",
-      texture: true,                            metalness: 0.282, roughness: 0.418 }
+      texture: true, linear: [0.566, 0.111, 0.004],
+      metalness: 0.282, roughness: 0.418 }
   ];
 
   var GLASSES = [
@@ -128,6 +134,28 @@
     var woodUrl = options.wood || host.getAttribute("data-wood") || "./woodgrain.jpg";
     var showMissing = (host.getAttribute("data-flag-missing") || "") === "1";
 
+    /* THE SAME BLOCK GOES ON ALL THREE SERIES PAGES (owner, 2026-10-26: "all
+     * 3 doors use the same model so we can use the same thing for all
+     * three"), and the same model URL across the three means a visitor
+     * downloads it once and the browser caches it for the other two.
+     *
+     * Should a series not offer the full range, data-frames and data-glasses
+     * narrow the choices for that page alone - data-frames="white,black" -
+     * with no change to this file. An unrecognised or empty list offers
+     * everything rather than nothing. */
+    function narrow(attr, all) {
+      var raw = String(options[attr] || host.getAttribute("data-" + attr) || "");
+      if (!raw.trim()) { return all; }
+      var wanted = raw.toLowerCase().split(/[\s,]+/);
+      var kept = all.filter(function (choice) {
+        return wanted.indexOf(choice.id) !== -1;
+      });
+      return kept.length ? kept : all;
+    }
+
+    var frames = narrow("frames", FRAMES);
+    var glasses = narrow("glasses", GLASSES);
+
     if (!THREE || !THREE.GLTFLoader) {
       host.classList.add("aadp", "aadp--failed");
       el("p", "aadp__message", host).textContent =
@@ -201,8 +229,8 @@
     var frameMats = [];
     var glassMats = [];
     var woodTexture = null;
-    var frame = FRAMES[0];
-    var glass = GLASSES[0];
+    var frame = frames[0];
+    var glass = glasses[0];
 
     var HOME = { azimuth: -0.38, polar: 1.44, zoom: 1 };
     var want = { azimuth: HOME.azimuth, polar: HOME.polar, zoom: HOME.zoom };
@@ -215,17 +243,27 @@
 
     function applyFrame(choice) {
       frame = choice;
-      if (choice.texture) {
-        if (!woodTexture) {
-          woodTexture = new THREE.TextureLoader().load(woodUrl);
-          woodTexture.flipY = false;                 /* glTF UV convention */
-          woodTexture.encoding = THREE.sRGBEncoding;
-          woodTexture.wrapS = woodTexture.wrapT = THREE.RepeatWrapping;
-        }
+
+      if (choice.texture && !woodTexture) {
+        woodTexture = new THREE.TextureLoader().load(woodUrl, function () {
+          /* Arrived: stop tinting underneath it. */
+          frameMats.forEach(function (m) {
+            if (m.map === woodTexture) {
+              m.color.setRGB(1, 1, 1);
+              m.needsUpdate = true;
+            }
+          });
+        });
+        woodTexture.flipY = false;                   /* glTF UV convention */
+        woodTexture.encoding = THREE.sRGBEncoding;
+        woodTexture.wrapS = woodTexture.wrapT = THREE.RepeatWrapping;
       }
+
+      var textureIsIn = !!(choice.texture && woodTexture && woodTexture.image);
+
       frameMats.forEach(function (m) {
         m.map = choice.texture ? woodTexture : null;
-        if (choice.texture) {
+        if (textureIsIn) {
           m.color.setRGB(1, 1, 1);
         } else {
           m.color.fromArray(choice.linear);
@@ -287,8 +325,8 @@
       });
     }
 
-    group("Frame finish", FRAMES, 0, applyFrame);
-    group("Glass", GLASSES, 0, applyGlass);
+    group("Frame finish", frames, 0, applyFrame);
+    group("Glass", glasses, 0, applyGlass);
 
     /* ---- the model -------------------------------------------------- */
 
@@ -352,8 +390,8 @@
        * bottom of the frame does not sit over the door. */
       target.y += span.y * 0.06;
 
-      applyFrame(FRAMES[0]);
-      applyGlass(GLASSES[0]);
+      applyFrame(frames[0]);
+      applyGlass(glasses[0]);
       resize();
       loader.hidden = true;
 
@@ -512,10 +550,10 @@
 
     return {
       setFrame: function (id) {
-        FRAMES.forEach(function (f) { if (f.id === id) { applyFrame(f); } });
+        frames.forEach(function (f) { if (f.id === id) { applyFrame(f); } });
       },
       setGlass: function (id) {
-        GLASSES.forEach(function (g) { if (g.id === id) { applyGlass(g); } });
+        glasses.forEach(function (g) { if (g.id === id) { applyGlass(g); } });
       }
     };
   }
