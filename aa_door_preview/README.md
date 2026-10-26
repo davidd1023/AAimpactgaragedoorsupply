@@ -180,6 +180,13 @@ re-rendered as it is edited will not mount twice; the element is marked
 | `static/src/preview.html` | the viewer, with the libraries served from this module |
 | `static/src/embed_test.html` | the snippet itself, over the real CDN and the real texture URL |
 | `static/src/elementor_test.html` | the snippet injected as `innerHTML` with its scripts re-run - **the way it failed**, so the fix is testable without pasting into a live page |
+| `static/src/copy.html` | one button that puts the whole block on the clipboard, with the build id and the five steps - **the page to send him** |
+
+Every one of them fetches with caching off. A browser handing back a stale
+`wordpress_embed.txt` made a working fix read as a failure once already; the
+block states its build id in its own header and reports it as
+`AADoorPreview.built`, and the test page says outright when it has been given
+an old copy.
 
 ### Two improvements worth making later
 

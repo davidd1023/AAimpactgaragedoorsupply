@@ -158,6 +158,104 @@ fetch("./wordpress_embed.txt?t=" + Date.now(), { cache: "no-store" })
 """
 
 
+COPY_PAGE = """<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Copy the Series 1200 block</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0c0f12; color: #e6eaed;
+         font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 28px 20px 48px;
+          display: flex; flex-direction: column; gap: 16px; }
+  h1 { font-size: 24px; letter-spacing: -0.01em; margin: 0; }
+  p { margin: 0; color: #9aa4ac; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  button { font: 600 15px/1 system-ui, sans-serif; color: #0c0f12;
+           background: #e6eaed; border: 0; border-radius: 3px;
+           padding: 14px 22px; cursor: pointer; }
+  button:hover { background: #fff; }
+  button:disabled { background: #3c7a52; color: #fff; cursor: default; }
+  .id { font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+        letter-spacing: 0.08em; text-transform: uppercase; color: #727c84; }
+  textarea { width: 100%; height: 280px; box-sizing: border-box;
+             background: #14181c; color: #9aa4ac; border: 1px solid #262d33;
+             border-radius: 3px; padding: 12px;
+             font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+             line-height: 1.5; resize: vertical; }
+  ol { margin: 0; padding-left: 20px; color: #9aa4ac; }
+  li { margin-bottom: 6px; }
+  li b { color: #e6eaed; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>The Series 1200 block</h1>
+  <p class="id" id="stamp">Loading&hellip;</p>
+
+  <div class="row">
+    <button id="copy" type="button">Copy the block</button>
+    <span class="id" id="said"></span>
+  </div>
+
+  <ol>
+    <li>In Elementor, open the <b>HTML widget</b> on the product page.</li>
+    <li>Select everything that is in it and <b>delete it</b>.</li>
+    <li><b>Paste</b>, then Update.</li>
+    <li>Delete the old <b>powered by Sirv</b> widget above it.</li>
+    <li>Same block on all three series pages &mdash; nothing to change.</li>
+  </ol>
+
+  <textarea id="block" readonly spellcheck="false"></textarea>
+
+</div>
+<script>
+var block = document.getElementById("block");
+var copy = document.getElementById("copy");
+var said = document.getElementById("said");
+
+fetch("./wordpress_embed.txt?t=" + Date.now(), { cache: "no-store" })
+.then(function (r) { return r.text(); })
+.then(function (text) {
+  block.value = text;
+  var m = text.match(/build ([0-9a-f]{8})/);
+  document.getElementById("stamp").textContent =
+    (m ? "Build " + m[1] : "Build unknown") +
+    " \\u00b7 " + Math.round(text.length / 1024) + " KB";
+}).catch(function (e) {
+  document.getElementById("stamp").textContent = "Could not load: " + e.message;
+});
+
+copy.addEventListener("click", function () {
+  /* The textarea is the fallback for a browser that will not hand over the
+   * clipboard - selecting it leaves the whole block selected, which is the
+   * thing he needs either way. */
+  block.focus();
+  block.select();
+  var done = function () {
+    copy.disabled = true;
+    copy.textContent = "Copied";
+    said.textContent = "now paste it into the HTML widget";
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(block.value).then(done, function () {
+      document.execCommand("copy");
+      done();
+    });
+  } else {
+    document.execCommand("copy");
+    done();
+  }
+});
+</script>
+</body>
+</html>
+"""
+
+
 def read(name):
     with open(os.path.join(SRC, name), "r", encoding="utf-8") as fh:
         return fh.read().strip()
@@ -220,6 +318,15 @@ def main():
     path = os.path.join(SRC, "elementor_test.html")
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(ELEMENTOR_TEST)
+
+    print("wrote %s" % path)
+
+    # AND THE PAGE HE ACTUALLY USES: one button that puts the whole block on
+    # the clipboard. Selecting 30 KB of text by hand and missing the last
+    # line is a failure that looks like a bug in the viewer.
+    path = os.path.join(SRC, "copy.html")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(COPY_PAGE)
 
     print("wrote %s" % path)
 
