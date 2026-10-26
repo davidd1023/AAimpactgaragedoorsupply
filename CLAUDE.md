@@ -228,18 +228,23 @@ the addons path serves the folder.
 ### ONE MODEL, THE COLOURS SWAPPED IN THE BROWSER
 
 His Sirv account holds **one `.glb` per combination** of frame finish and
-glass colour: thirteen files, 8.84 MB each and 10.01 MB for the woodgrain
-ones, about **118 MB**, and clicking a colour downloads a whole new door.
+glass colour: all twenty, 8.84 MB each and 10.01 MB for the woodgrain ones,
+about **180 MB**, and clicking a colour downloads a whole new door.
 
 It does not need to. Every one of those files is the SAME single mesh - one
 node, seven primitives, identical to within a few dozen bytes - differing only
 in what its materials are set to, and the materials are named by role. So one
 file is loaded, kept, and recoloured, which covers all twenty combinations.
 
-**SEVEN COMBINATIONS ANSWER 404 ON THE LIVE SITE**: White frame with White,
-Green, Bronze or Grey glass; Bronze with White; Wood with Clear or White. They
-have no file, so they cannot be shown today. He has not been told this by
-anyone else and it is the strongest argument for the rewrite.
+**A CORRECTION, AND A LESSON.** I told him seven combinations answered 404 on
+his live site and called it the strongest argument for the rewrite. IT WAS
+WRONG. The file names are inconsistently cased - `White_Clear.glb` but
+`White_green.glb`, `Wood_Grey.glb` but `Wood_white.glb` - and I had probed one
+casing and read the 404s as missing files. All twenty exist; his viewer works.
+
+A probe that assumes a naming convention is not evidence about what exists.
+The real case for one model is 180 MB against 9 MB and instant switching, and
+that needed no invented bug to stand up.
 
 Facts read out of his own files on 2026-10-26, not to be re-derived by guessing:
 
@@ -270,7 +275,7 @@ money so as long as this program you made works without them then we are
 good."*
 
 So **nothing may depend on Sirv.** The viewer needs exactly ONE of the
-thirteen models - the rest existed only because the old viewer wanted a file
+twenty models - the rest existed only because the old viewer wanted a file
 per colour - so what moves is `White_Clear.glb` (8.8 MB) and `woodgrain.jpg`,
 into a folder on HostGator, with the block's `data-model` and `data-wood`
 pointed at them. `copy.html` has boxes for both and rewrites the block, so

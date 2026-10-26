@@ -1,5 +1,5 @@
 <!-- =====================================================================
-     SERIES 1200 DOOR PREVIEW            build e63e1ced
+     SERIES 1200 DOOR PREVIEW            build 803865c6
      Paste this whole block into the Elementor HTML widget on the product
      page, in place of the current viewer.
 
@@ -241,8 +241,8 @@
  *
  * What the live site does today (read off davidaaigd.sirv.com/3d/ on
  * 2026-10-26): one .glb PER COMBINATION of frame finish and glass colour.
- * Thirteen files, ~8.8 MB each for the painted ones and ~10.0 MB for the
- * woodgrain ones, about 118 MB in all, and clicking a colour downloads a
+ * Twenty files, ~8.8 MB each for the painted ones and ~10.0 MB for the
+ * woodgrain ones, about 180 MB in all, and clicking a colour downloads a
  * whole new door.
  *
  * It does not need to. Every one of those files holds the SAME single mesh -
@@ -261,9 +261,7 @@
  *     White_Circle      ditto
  *
  * So: load one file, keep it, and set colours on the materials. One 8.8 MB
- * download instead of thirteen, every colour change instant, and all twenty
- * combinations work - including the SEVEN that have no file on Sirv today and
- * therefore cannot be shown on the live site at all.
+ * download instead of twenty, and every colour change instant.
  *
  * The numbers below are not invented. Every base colour, metalness,
  * roughness and transmission factor was read out of the glTF material
@@ -332,14 +330,6 @@
       linear: [0.3771, 0.3771, 0.3771],         transmission: 0.578, roughness: 0.063 }
   ];
 
-  /* The combinations with no .glb on Sirv as of 2026-10-26. Picking one of
-   * these on the live site asks for a file that answers 404. They are shown
-   * here because one model can render them. */
-  var NO_FILE_TODAY = {
-    "white_white": 1, "white_green": 1, "white_bronze": 1, "white_grey": 1,
-    "bronze_white": 1, "wood_clear": 1, "wood_white": 1
-  };
-
   var DEFAULT_MODEL = "https://davidaaigd.sirv.com/3d/White_Clear.glb";
 
   /* ---- a studio environment, generated rather than downloaded --------- */
@@ -390,7 +380,6 @@
 
     var modelUrl = options.model || host.getAttribute("data-model") || DEFAULT_MODEL;
     var woodUrl = options.wood || host.getAttribute("data-wood") || "./woodgrain.jpg";
-    var showMissing = (host.getAttribute("data-flag-missing") || "") === "1";
 
     /* THE SAME BLOCK GOES ON ALL THREE SERIES PAGES (owner, 2026-10-26: "all
      * 3 doors use the same model so we can use the same thing for all
@@ -545,11 +534,7 @@
     }
 
     function label() {
-      var text = frame.name + " frame · " + glass.name + " glass";
-      if (showMissing && NO_FILE_TODAY[frame.id + "_" + glass.id]) {
-        text += " · no .glb for this on Sirv today";
-      }
-      readout.textContent = text;
+      readout.textContent = frame.name + " frame · " + glass.name + " glass";
     }
 
     /* ---- chips ------------------------------------------------------ */
@@ -898,8 +883,7 @@
     mount: mount,
     boot: boot,
     FRAMES: FRAMES,
-    GLASSES: GLASSES,
-    NO_FILE_TODAY: NO_FILE_TODAY
+    GLASSES: GLASSES
   };
 
   if (document.readyState === "loading") {
@@ -913,5 +897,5 @@
  * and a stale copy of this block looks exactly like a fix that did not work -
  * which cost a round trip on 2026-10-26. The test pages print this, so an old
  * copy announces itself instead of being guessed at. */
-if (window.AADoorPreview) { window.AADoorPreview.built = "e63e1ced"; }
+if (window.AADoorPreview) { window.AADoorPreview.built = "803865c6"; }
 </script>

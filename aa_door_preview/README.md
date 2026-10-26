@@ -16,26 +16,23 @@ folder.
 
 Read off `davidaaigd.sirv.com/3d/` on 2026-10-26. The current viewer is Sirv's,
 and it holds **one `.glb` per combination** of frame finish and glass colour:
-
-| | Clear | White | Green | Bronze | Grey |
-|---|---|---|---|---|---|
-| **White** | 8.84 MB | — | — | — | — |
-| **Black** | 8.84 MB | 8.84 MB | 8.84 MB | 8.84 MB | 8.84 MB |
-| **Bronze** | 8.84 MB | — | 8.84 MB | 8.84 MB | 8.84 MB |
-| **Wood** | — | — | 10.01 MB | 10.01 MB | 10.01 MB |
-
-Thirteen files, about **118 MB**, and clicking a colour downloads a whole new
+all twenty of them, 8.84 MB each for the painted ones and 10.01 MB for the
+woodgrain, about **180 MB** in all. Clicking a colour downloads a whole new
 door.
 
-**The seven dashes answer HTTP 404.** White frame with anything but Clear
-glass, Bronze with White, and Wood with Clear or White cannot be shown on the
-live site at all. Worth knowing before anything else is decided.
+**A CORRECTION.** This file first said seven of those combinations were
+missing and answered 404. They were not. The names are inconsistently cased -
+`White_Clear.glb` but `White_green.glb`, `Wood_Grey.glb` but `Wood_white.glb` -
+and the probe that found them had tried one casing. All twenty exist and the
+live viewer works. The argument for one model was never that his site was
+broken; it is 180 MB against 9 MB, and instant switching against a download
+per click.
 
 ## Why one file is enough
 
-Every one of those models is the **same single mesh** - one node, one mesh,
-seven primitives, identical to within a few dozen bytes - and differs only in
-what its materials are set to. Blender glTF exporter 4.1, no Draco, geometry
+Every one of those twenty models is the **same single mesh** - one node, one
+mesh, seven primitives, identical to within a few dozen bytes - and differs
+only in what its materials are set to. Blender glTF exporter 4.1, no Draco, geometry
 in the BIN chunk, and only the woodgrain files carry a texture (a 1024x1024
 PNG, 1.17 MB, which is the whole of the 1.2 MB difference).
 
@@ -50,8 +47,7 @@ The materials are named by role, which is the part that makes this work:
 | `Blue_Circle`, `White_Circle` | unidentified - a badge or a decal | left alone |
 
 So: load one model, keep it, and set colours on its materials. One 8.8 MB
-download instead of thirteen, every colour change instant, and all twenty
-combinations render - the seven missing ones included.
+download instead of twenty, and every colour change instant.
 
 ## The numbers, as read out of his files
 
@@ -102,14 +98,14 @@ money so as long as this program you made works without them then we are
 good."*
 
 It does, and this is the whole of what that takes. **The viewer needs exactly
-one of the thirteen models** - everything else was only there because the old
-viewer wanted a separate file per colour - so what has to move off Sirv is two
-files totalling 9 MB.
+one of the twenty models** - the rest were only there because the old viewer
+wanted a separate file per colour - so what has to move off Sirv is two files
+totalling 9 MB.
 
 **Do this while the Sirv account is still live:**
 
 1. Download `https://davidaaigd.sirv.com/3d/White_Clear.glb` (8.8 MB). Worth
-   taking a copy of the other twelve as well, as a backup - they are not
+   taking a copy of the other nineteen as well, as a backup - they are not
    needed, but they cannot be fetched again afterwards.
 2. In cPanel, File Manager, `public_html`, make a folder - say `door-preview`.
 3. Upload `White_Clear.glb` and `woodgrain.jpg` into it.

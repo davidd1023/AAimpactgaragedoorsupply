@@ -66,13 +66,13 @@
   </header>
 
   <!-- ====================================================================
-       THIS DIV AND THE FOUR SCRIPT TAGS AT THE BOTTOM ARE THE WHOLE THING.
-       Everything else on this page is scaffolding for looking at it.
+       THIS DIV IS THE WHOLE THING. Everything else on this page is
+       scaffolding for looking at it; the block that goes on the website
+       carries its own script and is built by tools/build_embed.py.
        ==================================================================== -->
   <div data-aa-door-preview
        data-model="https://davidaaigd.sirv.com/3d/White_Clear.glb"
-       data-wood="./woodgrain.jpg"
-       data-flag-missing="1"></div>
+       data-wood="./woodgrain.jpg"></div>
 
   <section class="notes">
     <div class="note">
@@ -80,15 +80,12 @@
       <ul>
         <li>Your own <code>White_Clear.glb</code>, loaded once</li>
         <li>Colours set on the model's materials, so switching is instant</li>
-        <li>All <b>20</b> combinations, from one 8.8&nbsp;MB download instead of 118&nbsp;MB</li>
+        <li>All <b>20</b> combinations, from one 8.8&nbsp;MB download instead of 180&nbsp;MB</li>
       </ul>
     </div>
     <div class="note note--ask">
       <h2>Please check these</h2>
       <ul>
-        <li><b>Seven combinations have no file on Sirv</b> &mdash; White with White, Green,
-            Bronze or Grey glass; Bronze with White; Wood with Clear or White.
-            <span>They are marked in the readout. On the live site they 404.</span></li>
         <li><b>Wood.</b> Your Wood files put woodgrain on one frame piece and leave the
             other dark bronze. This one makes the whole frame woodgrain.
             <span>Which is right?</span></li>
@@ -103,11 +100,11 @@
     <div class="note">
       <h2>For HostGator</h2>
       <ul>
-        <li>Four files: <code>door_preview.js</code>, <code>door_preview.css</code>,
-            <code>woodgrain.jpg</code>, and three.js</li>
-        <li>Nothing loads from a CDN &mdash; <span>no third party to break it</span></li>
-        <li>The embed is one <code>&lt;div&gt;</code> and four
-            <code>&lt;script&gt;</code> tags</li>
+        <li><b>Two files uploaded</b>: the model and <code>woodgrain.jpg</code>,
+            into <code>/door-preview/</code></li>
+        <li><b>One block pasted</b> into the Elementor HTML widget &mdash;
+            <span>stylesheet, markup and script in one</span></li>
+        <li>Nothing else. Sirv can go.</li>
       </ul>
     </div>
   </section>
