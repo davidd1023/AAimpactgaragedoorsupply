@@ -263,6 +263,32 @@ Facts read out of his own files on 2026-10-26, not to be re-derived by guessing:
   product page. The model itself comes from Sirv, which sends
   `access-control-allow-origin: *`.
 
+### SIRV IS BEING CANCELLED (owner, 2026-10-26)
+
+*"we dont want to be using sirv, we want to unsubscribe from them to save
+money so as long as this program you made works without them then we are
+good."*
+
+So **nothing may depend on Sirv.** The viewer needs exactly ONE of the
+thirteen models - the rest existed only because the old viewer wanted a file
+per colour - so what moves is `White_Clear.glb` (8.8 MB) and `woodgrain.jpg`,
+into a folder on HostGator, with the block's `data-model` and `data-wood`
+pointed at them. `copy.html` has boxes for both and rewrites the block, so
+nobody hand-edits 30 KB of pasted markup.
+
+Paths must be **root-relative** (`/door-preview/White_Clear.glb`): a bare
+relative path would resolve against `/products/series-1200/` and 404. The
+content type does not matter - GLTFLoader reads an array buffer - so no MIME
+configuration is needed, and same-origin means no CORS at all.
+
+**Download the files before the account is cancelled.** Afterwards they cannot
+be fetched again, and the only copy of the texture in this repository is the
+re-encoded JPEG.
+
+three.js still comes from jsDelivr, which is free and not a subscription. It
+can move to HostGator too via `data-three` / `data-gltf-loader`, with no code
+change.
+
 ### THE PRODUCT PAGES ARE ELEMENTOR, SO THE BLOCK CARRIES NO `<script src>`
 
 An Elementor HTML widget does not have its markup parsed with the page: it is

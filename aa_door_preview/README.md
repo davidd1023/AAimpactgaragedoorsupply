@@ -95,6 +95,51 @@ so it is reproduced rather than corrected.
    `fra[mn]e` so it is picked up either way. Worth fixing at the source if
    those files are ever re-exported.
 
+## GETTING OFF SIRV (owner, 2026-10-26)
+
+*"we dont want to be using sirv, we want to unsubscribe from them to save
+money so as long as this program you made works without them then we are
+good."*
+
+It does, and this is the whole of what that takes. **The viewer needs exactly
+one of the thirteen models** - everything else was only there because the old
+viewer wanted a separate file per colour - so what has to move off Sirv is two
+files totalling 9 MB.
+
+**Do this while the Sirv account is still live:**
+
+1. Download `https://davidaaigd.sirv.com/3d/White_Clear.glb` (8.8 MB). Worth
+   taking a copy of the other twelve as well, as a backup - they are not
+   needed, but they cannot be fetched again afterwards.
+2. In cPanel, File Manager, `public_html`, make a folder - say `door-preview`.
+3. Upload `White_Clear.glb` and `woodgrain.jpg` into it.
+4. Check it is served: open
+   `https://aaimpactgaragedoor.com/door-preview/White_Clear.glb`. It should
+   download. If it answers "Not Acceptable" or 403 that is HostGator's
+   mod_security, and an `.htaccess` in that folder fixes it.
+5. In `copy.html`, set the two paths to `/door-preview/White_Clear.glb` and
+   `/door-preview/woodgrain.jpg`, copy the block, paste it on all three pages.
+6. Cancel Sirv.
+
+**Root-relative, starting with `/`.** A path like `door-preview/x.glb` would
+resolve against `/products/series-1200/` and 404; a leading slash is right on
+every page and on either protocol.
+
+**The content type does not matter.** GLTFLoader fetches the model as an array
+buffer, so a server calling it `application/octet-stream`, or anything else,
+loads perfectly well. No MIME configuration is needed.
+
+Same origin also means **no CORS**, which is one fewer thing that can fail
+than the Sirv arrangement it replaces.
+
+### three.js too, if nothing third-party is wanted
+
+jsDelivr is free and not a subscription, so it is not what the Sirv bill was
+about. But if the preference is that nothing at all comes from outside, upload
+`static/lib/three.min.js` and `static/lib/GLTFLoader.js` into the same folder
+and put their paths in the other two boxes on `copy.html`. The viewer takes
+them from `data-three` and `data-gltf-loader` with no code change.
+
 ## Putting it on WordPress
 
 **One upload and one paste.** No FTP, no theme files, no plugin.
@@ -180,7 +225,7 @@ re-rendered as it is edited will not mount twice; the element is marked
 | `static/src/preview.html` | the viewer, with the libraries served from this module |
 | `static/src/embed_test.html` | the snippet itself, over the real CDN and the real texture URL |
 | `static/src/elementor_test.html` | the snippet injected as `innerHTML` with its scripts re-run - **the way it failed**, so the fix is testable without pasting into a live page |
-| `static/src/copy.html` | one button that puts the whole block on the clipboard, with the build id and the five steps - **the page to send him** |
+| `static/src/copy.html` | one button that puts the whole block on the clipboard, with the build id, the five steps, and boxes for where the model and texture live - **the page to send him** |
 
 Every one of them fetches with caching off. A browser handing back a stale
 `wordpress_embed.txt` made a working fix read as a failure once already; the

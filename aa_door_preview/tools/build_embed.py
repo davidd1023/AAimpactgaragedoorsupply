@@ -168,19 +168,32 @@ COPY_PAGE = """<!doctype html>
   :root { color-scheme: dark; }
   body { margin: 0; background: #0c0f12; color: #e6eaed;
          font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  .wrap { max-width: 820px; margin: 0 auto; padding: 28px 20px 48px;
-          display: flex; flex-direction: column; gap: 16px; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 28px 20px 48px;
+          display: flex; flex-direction: column; gap: 18px; }
   h1 { font-size: 24px; letter-spacing: -0.01em; margin: 0; }
+  h2 { font-size: 12px; letter-spacing: 0.13em; text-transform: uppercase;
+       color: #727c84; margin: 0 0 10px; font-weight: 600; }
   p { margin: 0; color: #9aa4ac; }
+  .card { background: #14181c; border: 1px solid #262d33; border-radius: 3px;
+          padding: 16px 18px 18px; }
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  label { font-size: 13px; color: #e6eaed; font-weight: 500; }
+  label span { color: #727c84; font-weight: 400; }
+  input { background: #0c0f12; color: #e6eaed; border: 1px solid #262d33;
+          border-radius: 3px; padding: 9px 10px; width: 100%;
+          box-sizing: border-box;
+          font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  input:focus { outline: 2px solid #c48c48; outline-offset: 1px; }
   .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
   button { font: 600 15px/1 system-ui, sans-serif; color: #0c0f12;
            background: #e6eaed; border: 0; border-radius: 3px;
            padding: 14px 22px; cursor: pointer; }
   button:hover { background: #fff; }
-  button:disabled { background: #3c7a52; color: #fff; cursor: default; }
+  button.done { background: #3c7a52; color: #fff; }
   .id { font-family: ui-monospace, Menlo, monospace; font-size: 12px;
         letter-spacing: 0.08em; text-transform: uppercase; color: #727c84; }
-  textarea { width: 100%; height: 280px; box-sizing: border-box;
+  textarea { width: 100%; height: 240px; box-sizing: border-box;
              background: #14181c; color: #9aa4ac; border: 1px solid #262d33;
              border-radius: 3px; padding: 12px;
              font-family: ui-monospace, Menlo, monospace; font-size: 11px;
@@ -188,6 +201,8 @@ COPY_PAGE = """<!doctype html>
   ol { margin: 0; padding-left: 20px; color: #9aa4ac; }
   li { margin-bottom: 6px; }
   li b { color: #e6eaed; font-weight: 600; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+         color: #c48c48; }
 </style>
 </head>
 <body>
@@ -195,6 +210,30 @@ COPY_PAGE = """<!doctype html>
 
   <h1>The Series 1200 block</h1>
   <p class="id" id="stamp">Loading&hellip;</p>
+
+  <div class="card">
+    <h2>Where the files live</h2>
+    <p style="margin-bottom:14px">Change these and the block below changes with
+      them. A path starting with <code>/</code> is on your own server.</p>
+
+    <div class="field">
+      <label for="model">The door model <span>&mdash; .glb, 8.8 MB</span></label>
+      <input id="model" type="text" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="wood">The woodgrain <span>&mdash; .jpg, 208 KB</span></label>
+      <input id="wood" type="text" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="three">three.js <span>&mdash; optional, a free CDN by
+        default</span></label>
+      <input id="three" type="text" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="loader">Its glTF loader <span>&mdash; optional</span></label>
+      <input id="loader" type="text" spellcheck="false">
+    </div>
+  </div>
 
   <div class="row">
     <button id="copy" type="button">Copy the block</button>
@@ -213,30 +252,73 @@ COPY_PAGE = """<!doctype html>
 
 </div>
 <script>
+var raw = "";
 var block = document.getElementById("block");
 var copy = document.getElementById("copy");
 var said = document.getElementById("said");
+var fields = {
+  model: document.getElementById("model"),
+  wood: document.getElementById("wood"),
+  three: document.getElementById("three"),
+  loader: document.getElementById("loader")
+};
+var attribute = { model: "data-model", wood: "data-wood",
+                  three: "data-three", loader: "data-gltf-loader" };
+var original = {};
+
+function reading(text, attr) {
+  var found = text.match(new RegExp(attr + '="([^"]*)"'));
+  return found ? found[1] : "";
+}
+
+/* A PLAIN STRING SWAP, not a swap of the attribute alone, so the URL in the
+ * block's own header comment changes with it. A block that says one thing in
+ * its instructions and another in its markup is how the wrong file gets
+ * uploaded. */
+function render() {
+  var text = raw;
+  Object.keys(fields).forEach(function (key) {
+    var now = fields[key].value.trim();
+    var was = original[key];
+    if (now && was && now !== was) { text = text.split(was).join(now); }
+  });
+  block.value = text;
+  reset();
+}
+
+function reset() {
+  copy.disabled = false;
+  copy.className = "";
+  copy.textContent = "Copy the block";
+  said.textContent = "";
+}
 
 fetch("./wordpress_embed.txt?t=" + Date.now(), { cache: "no-store" })
 .then(function (r) { return r.text(); })
 .then(function (text) {
-  block.value = text;
+  raw = text;
+  Object.keys(fields).forEach(function (key) {
+    original[key] = reading(text, attribute[key]);
+    fields[key].value = original[key];
+    fields[key].addEventListener("input", render);
+  });
   var m = text.match(/build ([0-9a-f]{8})/);
   document.getElementById("stamp").textContent =
     (m ? "Build " + m[1] : "Build unknown") +
     " \\u00b7 " + Math.round(text.length / 1024) + " KB";
+  render();
 }).catch(function (e) {
   document.getElementById("stamp").textContent = "Could not load: " + e.message;
 });
 
 copy.addEventListener("click", function () {
-  /* The textarea is the fallback for a browser that will not hand over the
-   * clipboard - selecting it leaves the whole block selected, which is the
+  /* Selecting the textarea is the fallback for a browser that will not hand
+   * over the clipboard - it leaves the whole block selected, which is the
    * thing he needs either way. */
   block.focus();
   block.select();
   var done = function () {
-    copy.disabled = true;
+    copy.className = "done";
     copy.textContent = "Copied";
     said.textContent = "now paste it into the HTML widget";
   };
