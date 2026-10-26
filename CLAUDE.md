@@ -318,6 +318,23 @@ along the top of the frame, so hiding the chips loses nothing. It starts
 OPEN - the choices are the point of the page, and a viewer that opens with
 them hidden does not look like a configurator.
 
+### ONE ELEMENTOR TEMPLATE SERVES ALL THREE SERIES PAGES
+
+The viewer block lives in the Theme Builder template **"Product Single
+Page"**, not in the three pages, so pasting it once reaches
+`/products/series-1200/`, `-1600/` and `-1800/` together. The old Sirv
+widgets were in that template too, which is why deleting them while editing
+the 1200 took them off all three at once.
+
+Expect that whenever a change seems to have applied to pages nobody touched -
+it is the template, and it is correct. Anything genuinely per-series goes on
+the page, or on the block as `data-frames` / `data-glasses`.
+
+**Verified clean on 2026-10-26**, every page reachable from the homepage
+crawled: no page requests Sirv. `scripts.sirv.com/sirvjs/v3/sirv.js` is
+Sirv's public library and answers 200 without an account, so the leftover
+widget would not have broken anything - it was 590 KB a visit for nothing.
+
 ### THE PRODUCT PAGES ARE ELEMENTOR, SO THE BLOCK CARRIES NO `<script src>`
 
 An Elementor HTML widget does not have its markup parsed with the page: it is
