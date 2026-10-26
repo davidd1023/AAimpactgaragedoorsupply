@@ -25,8 +25,13 @@
  * widget's markup is inserted after the page has loaded.
  *
  * It is the path the first attempt failed on. If the door appears here, it
- * will appear in an Elementor HTML widget. */
-fetch("./wordpress_embed.txt").then(function (r) {
+ * will appear in an Elementor HTML widget.
+ *
+ * AND NEVER THE CACHED COPY. This page exists to say whether a change works,
+ * and a browser handing back yesterday's .txt makes it say the opposite -
+ * which is exactly how the second attempt was read as a second failure. */
+fetch("./wordpress_embed.txt?t=" + Date.now(), { cache: "no-store" })
+.then(function (r) {
   if (!r.ok) { throw new Error("HTTP " + r.status); }
   return r.text();
 }).then(function (html) {
@@ -44,9 +49,12 @@ fetch("./wordpress_embed.txt").then(function (r) {
     document.head.appendChild(fresh);
   }
 
+  var built = (window.AADoorPreview && window.AADoorPreview.built) || "unknown";
   document.getElementById("bar").textContent =
-    "Injected as innerHTML, " + scripts.length +
-    " script block(s) re-run. The door below came through that.";
+    "Injected as innerHTML \u00b7 " + scripts.length +
+    " script block re-run \u00b7 build " + built +
+    (scripts.length === 1 ? "" :
+      " \u2014 EXPECTED 1 BLOCK, THIS IS A STALE COPY");
 }).catch(function (e) {
   document.getElementById("bar").textContent =
     "Could not fetch the block: " + e.message;

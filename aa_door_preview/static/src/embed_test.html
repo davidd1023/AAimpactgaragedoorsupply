@@ -9,9 +9,9 @@
 <body>
 
 <!-- =====================================================================
-     SERIES 1200 DOOR PREVIEW
-     Paste this whole block into a Custom HTML block on the product page,
-     in place of the current viewer.
+     SERIES 1200 DOOR PREVIEW            build 8699fb58
+     Paste this whole block into the Elementor HTML widget on the product
+     page, in place of the current viewer.
 
      Before it will work, one file has to be uploaded:
          woodgrain.jpg  ->  https://davidaaigd.sirv.com/3d/woodgrain.jpg
@@ -907,6 +907,12 @@
     boot();
   }
 })(window);
+
+/* WHICH BUILD THIS IS. A browser caches a .txt as happily as anything else,
+ * and a stale copy of this block looks exactly like a fix that did not work -
+ * which cost a round trip on 2026-10-26. The test pages print this, so an old
+ * copy announces itself instead of being guessed at. */
+if (window.AADoorPreview) { window.AADoorPreview.built = "8699fb58"; }
 </script>
 
 </body>

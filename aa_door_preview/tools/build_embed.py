@@ -32,6 +32,7 @@ live product page. An image it will certainly serve correctly. So: scripts
 from jsDelivr, pinned to an exact version, and the texture next to his models.
 """
 
+import hashlib
 import os
 import re
 import sys
@@ -52,9 +53,9 @@ FONTS = ("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600"
          "&family=IBM+Plex+Mono:wght@400;500&display=swap")
 
 TEMPLATE = """<!-- =====================================================================
-     SERIES 1200 DOOR PREVIEW
-     Paste this whole block into a Custom HTML block on the product page,
-     in place of the current viewer.
+     SERIES 1200 DOOR PREVIEW            build %(stamp)s
+     Paste this whole block into the Elementor HTML widget on the product
+     page, in place of the current viewer.
 
      Before it will work, one file has to be uploaded:
          woodgrain.jpg  ->  %(wood)s
@@ -79,6 +80,12 @@ TEMPLATE = """<!-- =============================================================
 
 <script>
 %(js)s
+
+/* WHICH BUILD THIS IS. A browser caches a .txt as happily as anything else,
+ * and a stale copy of this block looks exactly like a fix that did not work -
+ * which cost a round trip on 2026-10-26. The test pages print this, so an old
+ * copy announces itself instead of being guessed at. */
+if (window.AADoorPreview) { window.AADoorPreview.built = "%(stamp)s"; }
 </script>
 """
 
@@ -110,8 +117,13 @@ ELEMENTOR_TEST = """<!doctype html>
  * widget's markup is inserted after the page has loaded.
  *
  * It is the path the first attempt failed on. If the door appears here, it
- * will appear in an Elementor HTML widget. */
-fetch("./wordpress_embed.txt").then(function (r) {
+ * will appear in an Elementor HTML widget.
+ *
+ * AND NEVER THE CACHED COPY. This page exists to say whether a change works,
+ * and a browser handing back yesterday's .txt makes it say the opposite -
+ * which is exactly how the second attempt was read as a second failure. */
+fetch("./wordpress_embed.txt?t=" + Date.now(), { cache: "no-store" })
+.then(function (r) {
   if (!r.ok) { throw new Error("HTTP " + r.status); }
   return r.text();
 }).then(function (html) {
@@ -129,9 +141,12 @@ fetch("./wordpress_embed.txt").then(function (r) {
     document.head.appendChild(fresh);
   }
 
+  var built = (window.AADoorPreview && window.AADoorPreview.built) || "unknown";
   document.getElementById("bar").textContent =
-    "Injected as innerHTML, " + scripts.length +
-    " script block(s) re-run. The door below came through that.";
+    "Injected as innerHTML \\u00b7 " + scripts.length +
+    " script block re-run \\u00b7 build " + built +
+    (scripts.length === 1 ? "" :
+      " \\u2014 EXPECTED 1 BLOCK, THIS IS A STALE COPY");
 }).catch(function (e) {
   document.getElementById("bar").textContent =
     "Could not fetch the block: " + e.message;
@@ -161,16 +176,24 @@ def main():
     if re.search(r"</\s*style", css, re.I):
         sys.exit("the stylesheet contains a closing style tag")
 
+    # THE BUILD ID IS A HASH OF THE SOURCES, not a clock. A timestamp would
+    # make every run a change in the repository even when nothing moved;
+    # a hash identifies the build and stays put until the viewer actually
+    # differs.
+    stamp = hashlib.sha256((css + js).encode("utf-8")).hexdigest()[:8]
+
     out = TEMPLATE % {
         "css": css, "js": js, "fonts": FONTS, "three": THREE_CDN,
         "loader": LOADER_CDN, "model": MODEL_URL, "wood": WOOD_URL,
+        "stamp": stamp,
     }
 
     path = os.path.join(SRC, "wordpress_embed.txt")
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(out)
 
-    print("wrote %s (%.1f KB)" % (path, len(out.encode("utf-8")) / 1024.0))
+    print("wrote %s (%.1f KB, build %s)"
+          % (path, len(out.encode("utf-8")) / 1024.0, stamp))
 
     # AND A PAGE THAT IS NOTHING BUT THAT SNIPPET, so the thing he is about to
     # paste can be looked at working - over the real CDN, with the real
