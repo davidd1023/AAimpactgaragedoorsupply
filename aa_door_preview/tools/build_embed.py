@@ -16,10 +16,17 @@ website. Run this instead:
 It writes static/src/wordpress_embed.txt - .txt, not .html, so that opening it
 in a browser shows the text to copy instead of running it.
 
-WHY THE TWO LIBRARY FILES STILL COME FROM A CDN. Everything else is inline,
-and three.js could be too, but it is 600 KB and a 600 KB block is a page
-editor's idea of a bad afternoon. It could equally be uploaded alongside the
-texture - except that Sirv is a media service and whether it returns
+NO <script src> TAGS IN THE SNIPPET. The site is Elementor, and an Elementor
+HTML widget has its markup INJECTED into the page rather than parsed with it -
+and setting innerHTML never executes an external script. So the two library
+tags this block used to carry simply did not run, and the viewer reported that
+it could not load its renderer (owner, 2026-10-26). The viewer now appends
+those scripts itself, which does execute them, whoever injected the markup.
+
+WHY THE LIBRARIES STILL COME FROM A CDN. Everything else is inline, and
+three.js could be too, but it is 600 KB and a 600 KB block is a page editor's
+idea of a bad afternoon. It could equally be uploaded alongside the texture -
+except that Sirv is a media service and whether it returns
 application/javascript for a .js file is not something worth finding out on a
 live product page. An image it will certainly serve correctly. So: scripts
 from jsDelivr, pinned to an exact version, and the texture next to his models.
@@ -66,13 +73,73 @@ TEMPLATE = """<!-- =============================================================
 
 <div data-aa-door-preview
      data-model="%(model)s"
-     data-wood="%(wood)s"></div>
+     data-wood="%(wood)s"
+     data-three="%(three)s"
+     data-gltf-loader="%(loader)s"></div>
 
-<script src="%(three)s"></script>
-<script src="%(loader)s"></script>
 <script>
 %(js)s
 </script>
+"""
+
+
+ELEMENTOR_TEST = """<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Series 1200 - Elementor injection test</title>
+<style>
+  body { margin: 0; background: #0c0f12; color: #9aa4ac;
+         font: 13px/1.5 ui-monospace, Menlo, monospace; }
+  .bar { padding: 10px 16px; border-bottom: 1px solid #262d33;
+         letter-spacing: 0.06em; text-transform: uppercase; }
+  .slot { padding: 16px; }
+</style>
+</head>
+<body>
+
+<p class="bar" id="bar">Injecting the block the way an Elementor HTML widget
+ does&hellip;</p>
+<div class="slot"><div id="slot"></div></div>
+
+<script>
+/* NOT how a normal page loads a script. This is deliberately the awkward
+ * path: set innerHTML - which runs nothing at all - then pick the scripts
+ * back out and re-run them, which is what Elementor and jQuery do when a
+ * widget's markup is inserted after the page has loaded.
+ *
+ * It is the path the first attempt failed on. If the door appears here, it
+ * will appear in an Elementor HTML widget. */
+fetch("./wordpress_embed.txt").then(function (r) {
+  if (!r.ok) { throw new Error("HTTP " + r.status); }
+  return r.text();
+}).then(function (html) {
+  var slot = document.getElementById("slot");
+  slot.innerHTML = html;
+
+  var scripts = slot.querySelectorAll("script");
+  for (var i = 0; i < scripts.length; i++) {
+    var old = scripts[i];
+    var fresh = document.createElement("script");
+    if (old.src) { fresh.src = old.src; } else {
+      fresh.textContent = old.textContent;
+    }
+    old.parentNode.removeChild(old);
+    document.head.appendChild(fresh);
+  }
+
+  document.getElementById("bar").textContent =
+    "Injected as innerHTML, " + scripts.length +
+    " script block(s) re-run. The door below came through that.";
+}).catch(function (e) {
+  document.getElementById("bar").textContent =
+    "Could not fetch the block: " + e.message;
+});
+</script>
+
+</body>
+</html>
 """
 
 
@@ -119,6 +186,17 @@ def main():
     path = os.path.join(SRC, "embed_test.html")
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(page)
+
+    print("wrote %s" % path)
+
+    # AND A PAGE THAT INJECTS THE SNIPPET THE WAY ELEMENTOR DOES, because
+    # that is the way it failed. An Elementor HTML widget does not have its
+    # markup parsed with the page; it is set as innerHTML, which runs no
+    # scripts at all, and then the scripts are picked back out and re-run.
+    # Pasting into the editor to find out is a slow way to test it.
+    path = os.path.join(SRC, "elementor_test.html")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(ELEMENTOR_TEST)
 
     print("wrote %s" % path)
 

@@ -35,7 +35,26 @@
 (function (global) {
   "use strict";
 
-  var THREE = global.THREE;
+  /* RESOLVED WHEN THE LIBRARIES ARE IN, NOT WHEN THIS FILE IS PARSED.
+   *
+   * The site is Elementor, and an Elementor HTML widget has its markup
+   * injected into the page after loading rather than parsed with it. A
+   * <script src> that arrives that way is NOT run by the browser - setting
+   * innerHTML never executes external scripts - so three.js can easily turn
+   * up after this file, or not at all. A THREE captured here at parse time
+   * would then stay undefined for ever, which is precisely the "could not
+   * load its renderer" the owner saw on 2026-10-26.
+   *
+   * So the libraries are not left to script tags at all: this file loads
+   * them itself, in order, and mounts when they are in. Appending a script
+   * element does execute it, whoever injected the markup and whenever. */
+  var THREE = null;
+
+  var LIB = {
+    three: "https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.min.js",
+    loader: "https://cdn.jsdelivr.net/npm/three@0.137.5/" +
+            "examples/js/loaders/GLTFLoader.js"
+  };
 
   /* Which materials are the door's frame, and which are left as they came.
    * Frame_bronze is dark (0.02 linear, near black) in ALL of his files,
@@ -156,10 +175,10 @@
     var frames = narrow("frames", FRAMES);
     var glasses = narrow("glasses", GLASSES);
 
+    THREE = THREE || global.THREE;
+
     if (!THREE || !THREE.GLTFLoader) {
-      host.classList.add("aadp", "aadp--failed");
-      el("p", "aadp__message", host).textContent =
-        "The 3D preview could not load its renderer.";
+      fail(host, THREE ? LIB.loader : LIB.three);
       return null;
     }
 
@@ -558,21 +577,89 @@
     };
   }
 
-  function auto() {
-    var hosts = document.querySelectorAll("[data-aa-door-preview]");
-    for (var i = 0; i < hosts.length; i++) { mount(hosts[i], {}); }
+  /* ---- saying so when a library will not come ------------------------- */
+
+  function fail(host, src) {
+    host.classList.add("aadp", "aadp--failed");
+    var note = el("p", "aadp__message", host);
+    note.textContent = "The 3D preview could not load " + src;
+  }
+
+  /* ---- fetching the libraries ----------------------------------------- */
+
+  var asked = {};
+
+  function loadScript(src, done, failed) {
+    if (asked[src]) {
+      asked[src].push({ done: done, failed: failed });
+      return;
+    }
+    asked[src] = [{ done: done, failed: failed }];
+
+    function tell(which, arg) {
+      asked[src].forEach(function (waiter) {
+        if (waiter[which]) { waiter[which](arg); }
+      });
+    }
+
+    var tag = document.createElement("script");
+    tag.src = src;
+    tag.async = false;
+    tag.onload = function () { tell("done"); };
+    tag.onerror = function () { tell("failed", src); };
+    (document.head || document.documentElement).appendChild(tag);
+  }
+
+  function withLibraries(done, failed) {
+    /* Already on the page - a <script src> in a normally parsed document,
+     * which is how the test pages in this module load them. */
+    if (global.THREE && global.THREE.GLTFLoader) { done(); return; }
+    if (global.THREE) { loadScript(LIB.loader, done, failed); return; }
+
+    loadScript(LIB.three, function () {
+      loadScript(LIB.loader, done, failed);
+    }, failed);
+  }
+
+  /* ---- start ----------------------------------------------------------- */
+
+  function boot() {
+    var found = document.querySelectorAll("[data-aa-door-preview]");
+    var hosts = [];
+
+    for (var i = 0; i < found.length; i++) {
+      /* Elementor re-renders a widget as it is edited, and this file can be
+       * run again with the same element still on the page. Mounting twice
+       * would stack a second canvas on the first. */
+      if (found[i].getAttribute("data-aa-mounted")) { continue; }
+      found[i].setAttribute("data-aa-mounted", "1");
+      hosts.push(found[i]);
+    }
+
+    if (!hosts.length) { return; }
+
+    LIB.three = hosts[0].getAttribute("data-three") || LIB.three;
+    LIB.loader = hosts[0].getAttribute("data-gltf-loader") || LIB.loader;
+
+    withLibraries(function () {
+      THREE = global.THREE;
+      hosts.forEach(function (host) { mount(host, {}); });
+    }, function (src) {
+      hosts.forEach(function (host) { fail(host, src); });
+    });
   }
 
   global.AADoorPreview = {
     mount: mount,
+    boot: boot,
     FRAMES: FRAMES,
     GLASSES: GLASSES,
     NO_FILE_TODAY: NO_FILE_TODAY
   };
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", auto);
+    document.addEventListener("DOMContentLoaded", boot);
   } else {
-    auto();
+    boot();
   }
 })(window);

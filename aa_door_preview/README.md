@@ -105,9 +105,10 @@ so it is reproduced rather than corrected.
    to be hosted, and if it is missing everything still works; the Wood finish
    just comes out plain brown instead of grained.
 2. **Paste the block.** `static/src/wordpress_embed.txt` is the whole viewer -
-   stylesheet, markup and script in one block - ready for a Custom HTML block
-   on the product page, in place of the current viewer. It is served as
-   `text/plain` so it can be opened and copied straight out of a browser.
+   stylesheet, markup and script in one block - ready for the **Elementor HTML
+   widget** on the product page, in place of the current Sirv viewer. It is
+   served as `text/plain` so it can be opened and copied straight out of a
+   browser.
 
 The same block goes on **all three series pages** (owner, 2026-10-26: "all 3
 doors use the same model so we can use the same thing for all three"), and
@@ -140,6 +141,23 @@ which rewrites `wordpress_embed.txt` and `embed_test.html` - a page that is
 nothing but the snippet, so the exact thing about to be pasted can be looked
 at working first.
 
+### THE SNIPPET CARRIES NO `<script src>` TAGS, AND MUST NOT
+
+The product pages are **Elementor**, and an Elementor HTML widget does not
+have its markup parsed with the page: it is set as `innerHTML`, and setting
+`innerHTML` **never executes an external script**. The inline script is picked
+back out and re-run, which is why the first attempt showed the viewer's own
+"could not load its renderer" message - its code was running, and three.js had
+never arrived (owner, 2026-10-26).
+
+So `door_preview.js` appends those library scripts itself, which does execute
+them whoever injected the markup and whenever. `var THREE` is left null until
+they are in, rather than read at parse time, because at parse time there is
+nothing to read. The URLs can be overridden per page with `data-three` and
+`data-gltf-loader`.
+
+Adding script tags back to the snippet would restore the bug.
+
 ### What loads from where
 
 Only two files come from outside: three.js and its glTF loader, pinned to
@@ -151,14 +169,17 @@ finding out on a live product page. An image it will certainly serve.
 The model itself comes from Sirv, which sends `access-control-allow-origin: *`.
 
 Everything is scoped under `.aadp` and sets its own box-sizing, font and
-colours, because a WordPress theme knows nothing about it.
+colours, because a WordPress theme knows nothing about it. A widget that is
+re-rendered as it is edited will not mount twice; the element is marked
+`data-aa-mounted` once it has one.
 
-### Two test pages on the Odoo build
+### Three test pages on the Odoo build
 
 | page | what it proves |
 |---|---|
 | `static/src/preview.html` | the viewer, with the libraries served from this module |
 | `static/src/embed_test.html` | the snippet itself, over the real CDN and the real texture URL |
+| `static/src/elementor_test.html` | the snippet injected as `innerHTML` with its scripts re-run - **the way it failed**, so the fix is testable without pasting into a live page |
 
 ### Two improvements worth making later
 

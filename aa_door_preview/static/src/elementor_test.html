@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Series 1200 - Elementor injection test</title>
+<style>
+  body { margin: 0; background: #0c0f12; color: #9aa4ac;
+         font: 13px/1.5 ui-monospace, Menlo, monospace; }
+  .bar { padding: 10px 16px; border-bottom: 1px solid #262d33;
+         letter-spacing: 0.06em; text-transform: uppercase; }
+  .slot { padding: 16px; }
+</style>
+</head>
+<body>
+
+<p class="bar" id="bar">Injecting the block the way an Elementor HTML widget
+ does&hellip;</p>
+<div class="slot"><div id="slot"></div></div>
+
+<script>
+/* NOT how a normal page loads a script. This is deliberately the awkward
+ * path: set innerHTML - which runs nothing at all - then pick the scripts
+ * back out and re-run them, which is what Elementor and jQuery do when a
+ * widget's markup is inserted after the page has loaded.
+ *
+ * It is the path the first attempt failed on. If the door appears here, it
+ * will appear in an Elementor HTML widget. */
+fetch("./wordpress_embed.txt").then(function (r) {
+  if (!r.ok) { throw new Error("HTTP " + r.status); }
+  return r.text();
+}).then(function (html) {
+  var slot = document.getElementById("slot");
+  slot.innerHTML = html;
+
+  var scripts = slot.querySelectorAll("script");
+  for (var i = 0; i < scripts.length; i++) {
+    var old = scripts[i];
+    var fresh = document.createElement("script");
+    if (old.src) { fresh.src = old.src; } else {
+      fresh.textContent = old.textContent;
+    }
+    old.parentNode.removeChild(old);
+    document.head.appendChild(fresh);
+  }
+
+  document.getElementById("bar").textContent =
+    "Injected as innerHTML, " + scripts.length +
+    " script block(s) re-run. The door below came through that.";
+}).catch(function (e) {
+  document.getElementById("bar").textContent =
+    "Could not fetch the block: " + e.message;
+});
+</script>
+
+</body>
+</html>
