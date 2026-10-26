@@ -37,7 +37,7 @@
     <xpath expr="//div[@id='div_zip']" position="attributes">
       <attribute name="class" add="d-none" separator=" "/>
     </xpath>
-    <xpath expr="//div[@id='div_zip'][not(contains(@class, 'd-none'))]"
+    <xpath expr="//div[@id='div_zip'][not(hasclass('d-none'))]"
            position="attributes">
       <attribute name="class" add="d-none" separator=" "/>
     </xpath>
