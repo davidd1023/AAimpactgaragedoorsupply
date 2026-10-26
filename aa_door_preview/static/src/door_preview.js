@@ -1,7 +1,7 @@
 /* THE SERIES 1200 PREVIEW: ONE MODEL, THE COLOURS SWAPPED IN THE BROWSER.
  *
- * What the live site does today (read off davidaaigd.sirv.com/3d/ on
- * 2026-10-26): one .glb PER COMBINATION of frame finish and glass colour.
+ * What the site did before this (read off his media account on 2026-10-26,
+ * since cancelled): one .glb PER COMBINATION of frame finish and glass colour.
  * Twenty files, ~8.8 MB each for the painted ones and ~10.0 MB for the
  * woodgrain ones, about 180 MB in all, and clicking a colour downloads a
  * whole new door.
@@ -91,7 +91,12 @@
       linear: [0.3771, 0.3771, 0.3771],         transmission: 0.578, roughness: 0.063 }
   ];
 
-  var DEFAULT_MODEL = "https://davidaaigd.sirv.com/3d/White_Clear.glb";
+  /* Only reached if the element carries no data-model. It names his own
+   * server, not the media account that hosted these files until 2026-10-26 -
+   * a fallback pointing at a cancelled subscription is a page that breaks
+   * later, quietly, for whoever forgets the attribute. */
+  var DEFAULT_MODEL = "/door-preview/White_Clear.glb";
+  var DEFAULT_WOOD = "/door-preview/woodgrain.jpg";
 
   /* ---- a studio environment, generated rather than downloaded --------- */
 
@@ -145,7 +150,7 @@
     options = options || {};
 
     var modelUrl = options.model || host.getAttribute("data-model") || DEFAULT_MODEL;
-    var woodUrl = options.wood || host.getAttribute("data-wood") || "./woodgrain.jpg";
+    var woodUrl = options.wood || host.getAttribute("data-wood") || DEFAULT_WOOD;
 
     /* THE SAME BLOCK GOES ON ALL THREE SERIES PAGES (owner, 2026-10-26: "all
      * 3 doors use the same model so we can use the same thing for all
