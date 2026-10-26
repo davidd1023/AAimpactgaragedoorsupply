@@ -181,11 +181,16 @@
 .aadp__loading-text,
 .aadp__message {
   margin: 0;
+  max-width: 90%;
   font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   font-size: 12px;
   letter-spacing: 0.06em;
+  line-height: 1.6;
   color: rgba(255, 255, 255, 0.72);
   text-transform: uppercase;
+  /* These now carry a URL, which has no spaces to wrap at. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .aadp__loading[hidden] { display: none; }

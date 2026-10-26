@@ -422,8 +422,14 @@
         loaderText.textContent = "Loading the door… " +
           (progress.loaded / 1048576).toFixed(1) + " MB";
       }
-    }, function () {
-      loaderText.textContent = "That model could not be loaded.";
+    }, function (err) {
+      /* NAME THE FILE AND SAY WHAT THE SERVER SAID. "That model could not be
+       * loaded" sent us looking at the viewer when the answer was that the
+       * .glb had never been uploaded (2026-10-26). three's loader reports the
+       * status in its message, so a 404 is readable off the page itself. */
+      var why = (err && (err.message || err.type)) || "";
+      loaderText.textContent = "Could not load " + modelUrl +
+        (why ? " — " + why : "");
     });
 
     /* ---- orbit ------------------------------------------------------ */

@@ -1,5 +1,5 @@
 <!-- =====================================================================
-     SERIES 1200 DOOR PREVIEW            build 8699fb58
+     SERIES 1200 DOOR PREVIEW            build e63e1ced
      Paste this whole block into the Elementor HTML widget on the product
      page, in place of the current viewer.
 
@@ -198,11 +198,16 @@
 .aadp__loading-text,
 .aadp__message {
   margin: 0;
+  max-width: 90%;
   font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   font-size: 12px;
   letter-spacing: 0.06em;
+  line-height: 1.6;
   color: rgba(255, 255, 255, 0.72);
   text-transform: uppercase;
+  /* These now carry a URL, which has no spaces to wrap at. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .aadp__loading[hidden] { display: none; }
@@ -656,8 +661,14 @@
         loaderText.textContent = "Loading the door… " +
           (progress.loaded / 1048576).toFixed(1) + " MB";
       }
-    }, function () {
-      loaderText.textContent = "That model could not be loaded.";
+    }, function (err) {
+      /* NAME THE FILE AND SAY WHAT THE SERVER SAID. "That model could not be
+       * loaded" sent us looking at the viewer when the answer was that the
+       * .glb had never been uploaded (2026-10-26). three's loader reports the
+       * status in its message, so a 404 is readable off the page itself. */
+      var why = (err && (err.message || err.type)) || "";
+      loaderText.textContent = "Could not load " + modelUrl +
+        (why ? " — " + why : "");
     });
 
     /* ---- orbit ------------------------------------------------------ */
@@ -902,5 +913,5 @@
  * and a stale copy of this block looks exactly like a fix that did not work -
  * which cost a round trip on 2026-10-26. The test pages print this, so an old
  * copy announces itself instead of being guessed at. */
-if (window.AADoorPreview) { window.AADoorPreview.built = "8699fb58"; }
+if (window.AADoorPreview) { window.AADoorPreview.built = "e63e1ced"; }
 </script>
