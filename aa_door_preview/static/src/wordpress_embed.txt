@@ -4,7 +4,7 @@
      page, in place of the current viewer.
 
      Before it will work, one file has to be uploaded:
-         woodgrain.jpg  ->  https://davidaaigd.sirv.com/3d/woodgrain.jpg
+         woodgrain.jpg  ->  /door-preview/woodgrain.jpg
      Nothing else needs uploading. If that file is missing everything still
      works; the Wood finish just comes out plain brown instead of grained.
 
@@ -279,8 +279,8 @@
 </style>
 
 <div data-aa-door-preview
-     data-model="https://davidaaigd.sirv.com/3d/White_Clear.glb"
-     data-wood="https://davidaaigd.sirv.com/3d/woodgrain.jpg"
+     data-model="/door-preview/White_Clear.glb"
+     data-wood="/door-preview/woodgrain.jpg"
      data-three="https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.min.js"
      data-gltf-loader="https://cdn.jsdelivr.net/npm/three@0.137.5/examples/js/loaders/GLTFLoader.js"></div>
 

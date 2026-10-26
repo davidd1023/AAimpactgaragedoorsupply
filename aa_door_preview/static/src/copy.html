@@ -43,6 +43,12 @@
   li b { color: #e6eaed; font-weight: 600; }
   code { font-family: ui-monospace, Menlo, monospace; font-size: 12px;
          color: #c48c48; }
+  /* SAYS WHERE THE BLOCK WILL POINT, right where the button is. The boxes
+   * above are easy not to look at, and a block quietly pointing at the old
+   * host is how all three product pages went back to Sirv on 2026-10-26. */
+  .confirm { font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+             line-height: 1.7; color: #9aa4ac; overflow-wrap: anywhere; }
+  .confirm b { color: #e6eaed; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -79,6 +85,8 @@
     <button id="copy" type="button">Copy the block</button>
     <span class="id" id="said"></span>
   </div>
+
+  <p class="confirm" id="confirm"></p>
 
   <ol>
     <li>In Elementor, open the <b>HTML widget</b> on the product page.</li>
@@ -123,7 +131,15 @@ function render() {
     if (now && was && now !== was) { text = text.split(was).join(now); }
   });
   block.value = text;
+  document.getElementById("confirm").innerHTML =
+    "This block loads the door from <b>" + esc(fields.model.value.trim()) +
+    "</b><br>and the woodgrain from <b>" + esc(fields.wood.value.trim()) +
+    "</b>";
   reset();
+}
+
+function esc(v) {
+  return v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function reset() {

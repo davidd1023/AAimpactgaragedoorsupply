@@ -30,7 +30,7 @@
  * AND NEVER THE CACHED COPY. This page exists to say whether a change works,
  * and a browser handing back yesterday's .txt makes it say the opposite -
  * which is exactly how the second attempt was read as a second failure. */
-fetch("./wordpress_embed.txt?t=" + Date.now(), { cache: "no-store" })
+fetch("./embed_local.txt?t=" + Date.now(), { cache: "no-store" })
 .then(function (r) {
   if (!r.ok) { throw new Error("HTTP " + r.status); }
   return r.text();

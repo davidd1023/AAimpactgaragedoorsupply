@@ -45,8 +45,23 @@ THREE_CDN = "https://cdn.jsdelivr.net/npm/three@%s/build/three.min.js" % THREE_V
 LOADER_CDN = ("https://cdn.jsdelivr.net/npm/three@%s/examples/js/loaders/"
               "GLTFLoader.js" % THREE_VERSION)
 
-MODEL_URL = "https://davidaaigd.sirv.com/3d/White_Clear.glb"
-WOOD_URL = "https://davidaaigd.sirv.com/3d/woodgrain.jpg"
+# WHERE THE FILES LIVE ON HIS OWN SERVER. These were Sirv URLs until
+# 2026-10-26, when he moved both files to HostGator in order to cancel that
+# subscription - and the defaults being the old host was a trap: copy.html
+# pre-fills from them, so re-copying the block silently sent all three
+# product pages back to Sirv without anybody touching those boxes. The
+# default has to be the destination, not the thing being decommissioned.
+#
+# ROOT-RELATIVE. A bare relative path would resolve against
+# /products/series-1200/ and 404.
+MODEL_URL = "/door-preview/White_Clear.glb"
+WOOD_URL = "/door-preview/woodgrain.jpg"
+
+# The test pages are served from the Odoo build, where /door-preview/ does
+# not exist, and his server sends no CORS headers so they cannot borrow his.
+# They use the copies kept beside them in this module instead.
+TEST_MODEL_URL = "./White_Clear.glb"
+TEST_WOOD_URL = "./woodgrain.jpg"
 
 FONTS = ("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600"
          "&family=Archivo+Narrow:wght@500;600"
@@ -122,7 +137,7 @@ ELEMENTOR_TEST = """<!doctype html>
  * AND NEVER THE CACHED COPY. This page exists to say whether a change works,
  * and a browser handing back yesterday's .txt makes it say the opposite -
  * which is exactly how the second attempt was read as a second failure. */
-fetch("./wordpress_embed.txt?t=" + Date.now(), { cache: "no-store" })
+fetch("./embed_local.txt?t=" + Date.now(), { cache: "no-store" })
 .then(function (r) {
   if (!r.ok) { throw new Error("HTTP " + r.status); }
   return r.text();
@@ -203,6 +218,12 @@ COPY_PAGE = """<!doctype html>
   li b { color: #e6eaed; font-weight: 600; }
   code { font-family: ui-monospace, Menlo, monospace; font-size: 12px;
          color: #c48c48; }
+  /* SAYS WHERE THE BLOCK WILL POINT, right where the button is. The boxes
+   * above are easy not to look at, and a block quietly pointing at the old
+   * host is how all three product pages went back to Sirv on 2026-10-26. */
+  .confirm { font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+             line-height: 1.7; color: #9aa4ac; overflow-wrap: anywhere; }
+  .confirm b { color: #e6eaed; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -239,6 +260,8 @@ COPY_PAGE = """<!doctype html>
     <button id="copy" type="button">Copy the block</button>
     <span class="id" id="said"></span>
   </div>
+
+  <p class="confirm" id="confirm"></p>
 
   <ol>
     <li>In Elementor, open the <b>HTML widget</b> on the product page.</li>
@@ -283,7 +306,15 @@ function render() {
     if (now && was && now !== was) { text = text.split(was).join(now); }
   });
   block.value = text;
+  document.getElementById("confirm").innerHTML =
+    "This block loads the door from <b>" + esc(fields.model.value.trim()) +
+    "</b><br>and the woodgrain from <b>" + esc(fields.wood.value.trim()) +
+    "</b>";
   reset();
+}
+
+function esc(v) {
+  return v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function reset() {
@@ -376,15 +407,18 @@ def main():
           % (path, len(out.encode("utf-8")) / 1024.0, stamp))
 
     # AND A PAGE THAT IS NOTHING BUT THAT SNIPPET, so the thing he is about to
-    # paste can be looked at working - over the real CDN, with the real
-    # texture URL - before it goes anywhere near a product page.
+    # paste can be looked at working before it goes anywhere near a product
+    # page - pointed at this module's own copies of the model and texture,
+    # since the live site's paths mean nothing here.
+    local = out.replace(MODEL_URL, TEST_MODEL_URL).replace(WOOD_URL,
+                                                           TEST_WOOD_URL)
     page = ("<!doctype html>\n<html lang=\"en\">\n<head>\n"
             "<meta charset=\"utf-8\">\n"
             "<meta name=\"viewport\" content=\"width=device-width,"
             " initial-scale=1\">\n"
             "<title>Series 1200 embed test</title>\n"
             "<style>body{margin:0;background:#0c0f12}</style>\n"
-            "</head>\n<body>\n\n" + out + "\n</body>\n</html>\n")
+            "</head>\n<body>\n\n" + local + "\n</body>\n</html>\n")
 
     path = os.path.join(SRC, "embed_test.html")
     with open(path, "w", encoding="utf-8") as fh:
@@ -397,6 +431,14 @@ def main():
     # markup parsed with the page; it is set as innerHTML, which runs no
     # scripts at all, and then the scripts are picked back out and re-run.
     # Pasting into the editor to find out is a slow way to test it.
+    # The injection test fetches a block, and on this origin it has to be the
+    # one pointed at the local copies.
+    path = os.path.join(SRC, "embed_local.txt")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(local)
+
+    print("wrote %s" % path)
+
     path = os.path.join(SRC, "elementor_test.html")
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(ELEMENTOR_TEST)

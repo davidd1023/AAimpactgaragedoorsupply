@@ -286,6 +286,21 @@ relative path would resolve against `/products/series-1200/` and 404. The
 content type does not matter - GLTFLoader reads an array buffer - so no MIME
 configuration is needed, and same-origin means no CORS at all.
 
+**THE BUILDER'S DEFAULTS ARE HIS SERVER, NOT SIRV, AND THAT MATTERS.**
+`copy.html` pre-fills its boxes from the block's own defaults, so while those
+defaults were Sirv URLs, re-copying the block to pick up a new feature sent
+all three product pages silently back to Sirv - which is exactly what happened
+on 2026-10-26, and would have taken the site down with the subscription. A
+default must be the destination, never the thing being decommissioned. The
+copy page now also states underneath the button where the block it just made
+will load from.
+
+A copy of `White_Clear.glb` is kept in `static/src/`. His server sends no CORS
+headers, so the test pages cannot borrow the live files, and the alternative
+was depending on the service being cancelled in order to test the thing that
+removes the dependency on it. It is also a second copy of an asset he would
+otherwise hold in one place.
+
 **Download the files before the account is cancelled.** Afterwards they cannot
 be fetched again, and the only copy of the texture in this repository is the
 re-encoded JPEG.
