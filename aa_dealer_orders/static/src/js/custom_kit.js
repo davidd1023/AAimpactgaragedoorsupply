@@ -629,6 +629,7 @@ class CustomKitPage {
             this.total.textContent = result.count
                 ? `${result.count} part${result.count === 1 ? "" : "s"} — ${CURRENCY(this.symbol, result.total || 0)}`
                 : "";
+            this.showPrice(result.total || 0);
 
             // SAID ON THE PAGE when the server would not take something that
             // was offered, instead of a kit that is quietly short.
@@ -646,6 +647,41 @@ class CustomKitPage {
 
             throw error;
         }
+    }
+
+    /* THE PRICE AT THE TOP OF THE PAGE FOLLOWS THE KIT.
+     *
+     * Owner, 2026-10-27: *"the store doesnt detect that items have been added
+     * to the kit so it still believes the price is zero."* The button is fixed
+     * on the server - see `custom_kit_zero_price.py` - but a page that goes on
+     * saying $0.00 while the builder underneath it says $236.91 is still
+     * telling the customer something untrue, and it is the headline price they
+     * will remember when the cart disagrees.
+     *
+     * DISPLAY ONLY. Nothing is priced from this: the cart is built on the
+     * server from what the session remembers, and this number is read from the
+     * answer that same call returned. If the element is not there - a theme, a
+     * page somebody has rebuilt in the editor - nothing happens, because a
+     * viewer that throws here would take the whole builder down with it.
+     */
+    showPrice(total) {
+        const span = document.querySelector(
+            ".product_price .oe_currency_value, .oe_price .oe_currency_value");
+
+        if (!span) {
+            return;
+        }
+
+        if (this.priceAsBuilt === undefined) {
+            this.priceAsBuilt = span.textContent;
+        }
+
+        /* Nothing chosen puts back exactly what the page was rendered with,
+         * rather than a zero formatted by this file - the server's formatting
+         * is the one the rest of the shop uses. */
+        span.textContent = total
+            ? CURRENCY("", total).trim()
+            : this.priceAsBuilt;
     }
 
     warn(message) {

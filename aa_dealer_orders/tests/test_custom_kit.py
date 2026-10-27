@@ -13,6 +13,7 @@ may be chosen; and the parts add up, one order line each.
 
 import json
 
+from odoo.addons.http_routing.tests.common import MockRequest
 from odoo.tests.common import HttpCase, tagged
 
 
@@ -1150,3 +1151,128 @@ class CustomKitCase(HttpCase):
             with self.subTest(script=name):
                 self.assertIn('readyState', source,
                               "it only waits for an event that may have passed")
+
+
+@tagged("post_install", "-at_install")
+class CustomKitZeroPriceCase(HttpCase):
+    """A KIT THAT COSTS NOTHING UNTIL YOU PUT SOMETHING IN IT.
+
+    Owner, 2026-10-27: *"there is a custom kit that should normally cost 0$
+    until you start adding items, the problem is that the store doesnt detect
+    that items have been added to the kit so it still believes the price is
+    zero, and when you try to buy an item that costs 0$ it gives you a contact
+    us button instead of an add to cart button."*
+
+    The kit is priced at nothing ON PURPOSE - the parts carry the money, each
+    on its own line (owner, 2026-10-20) - so the fix is not a price. It is
+    Odoo's zero-price rule, which it enforces in five places that do not share
+    a hook. Finding four and missing the fifth would be worse than finding
+    none: the customer gets further each time and still cannot pay.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.website = self.env["website"].search([], limit=1)
+        self.website.prevent_zero_price_sale = True
+        self.kit = self.env.ref("aa_dealer_orders.product_custom_kit")
+        self.kit.write({"is_published": True, "list_price": 0.0})
+
+    def _offers_contact_us(self, product):
+        """Does this product's page show Contact Us instead of Add to Cart?
+
+        READ OFF THE PAGE, not off `_get_combination_info` - which cannot be
+        called under MockRequest at all, because the mocked pricelist comes
+        back as a Mock and Odoo unpacks it. And the page is the thing he is
+        looking at.
+
+        Asked precisely: Odoo keeps BOTH blocks in the markup and hides one
+        with `d-none`, and the words "Contact Us" are in the site menu of
+        every page in the shop - which is why a plain `assertNotIn` for them
+        failed on a page that was working.
+        """
+        page = self.url_open(product.website_url).text
+        at = page.find('id="contact_us_wrapper"')
+
+        self.assertNotEqual(at, -1, "the page has no contact-us block at all")
+
+        return "d-none" not in page[at:at + 400]
+
+    def test_the_page_offers_add_to_cart_and_not_contact_us(self):
+        """THE ONE HE REPORTED."""
+        self.assertFalse(self._offers_contact_us(self.kit),
+                         "the kit page is still offering Contact Us")
+
+    def test_an_ordinary_zero_priced_product_is_still_refused(self):
+        """The setting is a good rule and the shop keeps it. Only the kit is
+        excused, because only the kit's parts carry its money."""
+        plain = self.env["product.template"].create({
+            "name": "Somebody forgot to price this",
+            "type": "consu", "is_published": True, "list_price": 0.0,
+            "website_published": True})
+
+        self.assertTrue(self._offers_contact_us(plain),
+                        "an unpriced product became buyable for nothing")
+
+    def test_the_server_lets_the_kit_into_a_cart(self):
+        """Behind the button. A page that showed Add to Cart and a server
+        that refused it would be the same bug one step later."""
+        with MockRequest(self.env, website=self.website):
+            self.assertTrue(
+                self.kit.product_variant_id._is_add_to_cart_allowed())
+
+    def test_the_line_is_not_refused_while_being_added(self):
+        """`_check_validity` raises UserError on a line totalling nothing."""
+        order = self.env["sale.order"].create({
+            "partner_id": self.env.ref("base.public_partner").id,
+            "website_id": self.website.id,
+            "order_line": [(0, 0, {
+                "product_id": self.kit.product_variant_id.id,
+                "product_uom_qty": 1, "price_unit": 0.0})],
+        })
+
+        order.order_line._check_validity()      # must not raise
+
+    def test_a_full_cart_can_still_be_paid_for(self):
+        """THE ONE THAT WOULD HAVE BEEN MISSED. `_get_zero_priced_lines` is
+        not about adding to the cart at all - it blocks CHECKOUT, so without
+        it the customer gets the kit and its parts in and is then refused at
+        the payment step with nothing on screen to say why."""
+        part = self.env["product.template"].create({
+            "name": "A roller for the kit", "type": "consu",
+            "is_published": True, "list_price": 9.0})
+        order = self.env["sale.order"].create({
+            "partner_id": self.env.ref("base.public_partner").id,
+            "website_id": self.website.id,
+            "order_line": [
+                (0, 0, {"product_id": self.kit.product_variant_id.id,
+                        "product_uom_qty": 1, "price_unit": 0.0}),
+                (0, 0, {"product_id": part.product_variant_id.id,
+                        "product_uom_qty": 1, "price_unit": 9.0}),
+            ],
+        })
+
+        self.assertFalse(order._get_zero_priced_lines(),
+                         "the cart could not have been paid for")
+
+    def test_an_ordinary_zero_priced_line_still_blocks_checkout(self):
+        plain = self.env["product.template"].create({
+            "name": "Unpriced", "type": "consu", "is_published": True,
+            "list_price": 0.0})
+        order = self.env["sale.order"].create({
+            "partner_id": self.env.ref("base.public_partner").id,
+            "website_id": self.website.id,
+            "order_line": [(0, 0, {
+                "product_id": plain.product_variant_id.id,
+                "product_uom_qty": 1, "price_unit": 0.0})],
+        })
+
+        self.assertTrue(order._get_zero_priced_lines())
+
+    def test_the_kit_page_shows_the_add_to_cart_button(self):
+        """Over HTTP, because every assertion above is a model call and the
+        thing he is looking at is a page. A route test caught exactly this
+        class of miss on the pickup slots a day ago."""
+        page = self.url_open(self.kit.website_url).text
+
+        self.assertIn('id="aa_custom_kit"', page, "the builder is not there")
+        self.assertIn("add_to_cart", page, "there is no Add to Cart button")
