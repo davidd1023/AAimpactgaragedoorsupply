@@ -41,14 +41,14 @@ class ShopAddonsCase(TransactionCase):
             "public_categ_ids": [(6, 0, [self.categories[category].id])],
         })
 
-    def _labels(self, product):
-        return [group["label"] for group in product._aa_addon_groups()]
+    def _shown(self, product):
+        """The one pool the page will draw (owner, 2026-10-27: "just one pool
+        of products not multiple categories")."""
+        return product._aa_addon_picks().get(
+            "products", self.env["product.template"])
 
-    def _group(self, product, label):
-        for group in product._aa_addon_groups():
-            if group["label"] == label:
-                return group
-        return None
+    def _note(self, product):
+        return product._aa_addon_picks().get("note", "")
 
     # --- which products get a block at all ---------------------------------
 
@@ -100,7 +100,7 @@ class ShopAddonsCase(TransactionCase):
         kit, _categ = self._his_kit()
 
         self.assertEqual(kit._aa_addon_role(), "kit")
-        self.assertTrue(kit._aa_addon_groups(),
+        self.assertTrue(self._shown(kit),
                         "his own kit still draws nothing under it")
 
     def test_a_kit_named_one_is_a_kit_even_with_no_category(self):
@@ -134,13 +134,13 @@ class ShopAddonsCase(TransactionCase):
         match found almost nothing. "Cables" now finds "Lift Cables"."""
         self.categories["Cables"].name = "Lift Cables"
 
-        self.assertIn("Cables", self._labels(self.kit))
+        self.assertIn(self.cable, self._shown(self.kit))
 
     def test_a_singular_category_is_found_too(self):
         """"Trims" dropped to "trim" finds "Trim Molding"."""
         self.categories["Trims"].name = "Trim Molding"
 
-        self.assertIn("Trims", self._labels(self.kit))
+        self.assertIn(self.trim, self._shown(self.kit))
 
     def test_the_check_screen_says_what_a_page_will_draw(self):
         """Answering "i dont see them" by crawling his website is not a way to
@@ -150,8 +150,8 @@ class ShopAddonsCase(TransactionCase):
             "name": "A hinge", "type": "consu", "is_published": True})
 
         self.assertIn("not read as a kit", plain.aa_addon_summary)
-        self.assertIn("Cables", kit.aa_addon_summary)
-        self.assertIn("whole families", kit.aa_addon_summary)
+        self.assertIn("products", kit.aa_addon_summary)
+        self.assertIn("a spread of the families", kit.aa_addon_summary)
 
     def test_the_check_screen_lists_the_kits(self):
         kit, _categ = self._his_kit()
@@ -166,15 +166,39 @@ class ShopAddonsCase(TransactionCase):
         """A hinge is not a kit, and a row of add-ons under every product in
         the shop is noise."""
         self.assertFalse(self.cable._aa_addon_role())
-        self.assertEqual(self.cable._aa_addon_groups(), [])
+        self.assertEqual(self.cable._aa_addon_picks(), {})
 
     # --- whose answer wins -------------------------------------------------
 
     def test_with_nothing_picked_it_falls_back_to_the_families(self):
         """A kit nobody has got to yet still shows the right KINDS, rather
-        than an empty space under it."""
-        self.assertEqual(self._labels(self.kit),
-                         ["Cones", "Cables", "Tracks", "Trims"])
+        than an empty space under it - ONE POOL, taken in turns round the
+        families so it is a spread and not eight cones."""
+        shown = self._shown(self.kit)
+
+        for product in (self.cone, self.cable, self.track, self.trim):
+            self.assertIn(product, shown,
+                          "%s was pushed off the end of the pool" % product.name)
+
+    def test_the_pool_is_capped_so_a_page_is_not_a_catalogue(self):
+        """Owner, 2026-10-27: "that way we dont show too many products in the
+        recommendations." It was four headings with up to eight under each."""
+        for n in range(12):
+            self._product("Lift Cable %d" % n, "Cables")
+
+        self.env["ir.config_parameter"].sudo().set_param(
+            "aa_shop_addons.shown", "4")
+
+        self.assertEqual(len(self._shown(self.kit)), 4)
+
+    def test_how_many_to_show_can_be_moved_without_a_deploy(self):
+        """"Too many" is his judgement, not a number for the code."""
+        self.assertEqual(self.env["product.template"]._aa_addon_shown(), 8)
+
+        self.env["ir.config_parameter"].sudo().set_param(
+            "aa_shop_addons.shown", "3")
+
+        self.assertEqual(self.env["product.template"]._aa_addon_shown(), 3)
 
     def test_what_he_picked_beats_the_families(self):
         """THE WHOLE POINT. Asked how a kit should know its add-ons, the
@@ -183,17 +207,14 @@ class ShopAddonsCase(TransactionCase):
         kept: "we only want the alternative products choice"."""
         self.kit.alternative_product_ids = [(6, 0, self.cable.ids)]
 
-        self.assertEqual(self._labels(self.kit), ["Cables"])
-        self.assertEqual(self._group(self.kit, "Cables")["products"],
-                         self.cable)
+        self.assertEqual(self._shown(self.kit), self.cable)
 
-    def test_his_pick_is_sorted_into_the_families_by_itself(self):
-        """Setting one must not also mean saying which heading it
-        belongs under - the product already says, by the category it is in."""
+    def test_his_pick_is_shown_whole_and_in_one_row(self):
+        """No headings to sort it into any more - what he set is what shows."""
         self.kit.alternative_product_ids = [
             (6, 0, (self.cable | self.track).ids)]
 
-        self.assertEqual(self._labels(self.kit), ["Cables", "Tracks"])
+        self.assertEqual(self._shown(self.kit), self.cable | self.track)
 
     def test_something_in_no_family_is_still_shown(self):
         """Otherwise the field would lie: he set a product and the page
@@ -202,8 +223,7 @@ class ShopAddonsCase(TransactionCase):
             "name": "Weatherseal", "type": "consu", "is_published": True})
         self.kit.alternative_product_ids = [(6, 0, odd.ids)]
 
-        self.assertEqual(self._labels(self.kit), ["Also needed"])
-        self.assertEqual(self._group(self.kit, "Also needed")["products"], odd)
+        self.assertEqual(self._shown(self.kit), odd)
 
     def test_an_unpublished_pick_is_left_off(self):
         """It cannot be bought, so a card leading to nothing is worse than
@@ -211,7 +231,8 @@ class ShopAddonsCase(TransactionCase):
         hidden = self._product("Not for sale", "Cables", published=False)
         self.kit.alternative_product_ids = [(6, 0, hidden.ids)]
 
-        self.assertEqual(self._labels(self.kit), [])
+        self.assertEqual(self._shown(self.kit),
+                         self.env["product.template"])
 
     # --- the cones note ----------------------------------------------------
 
@@ -226,15 +247,15 @@ class ShopAddonsCase(TransactionCase):
         if not spring:
             self.skipTest("spring_engineering is not installed here")
 
-        cones = self._group(spring, "Cones")
-
-        self.assertTrue(cones, "the spring page showed no cones at all")
-        self.assertIn("Already included", cones["note"])
+        self.assertIn(self.cone, self._shown(spring),
+                      "the spring page showed no cones at all")
+        self.assertIn("Already included", self._note(spring))
 
     def test_a_kit_does_not_claim_its_cones_are_included(self):
         """A hardware kit has no spring in it and no cones with it, so the
         warning would be a lie."""
-        self.assertEqual(self._group(self.kit, "Cones")["note"], "")
+        self.assertIn(self.cone, self._shown(self.kit))
+        self.assertEqual(self._note(self.kit), "")
 
     # --- the fallback can be pointed somewhere else ------------------------
 
@@ -244,12 +265,12 @@ class ShopAddonsCase(TransactionCase):
         the case the word check cannot reach, and it must not need a deploy."""
         self.categories["Cables"].name = "Flexible Steel Rope"
 
-        self.assertNotIn("Cables", self._labels(self.kit))
+        self.assertNotIn(self.cable, self._shown(self.kit))
 
         self.env["ir.config_parameter"].sudo().set_param(
             "aa_shop_addons.category_cables", self.categories["Cables"].id)
 
-        self.assertIn("Cables", self._labels(self.kit))
+        self.assertIn(self.cable, self._shown(self.kit))
 
 
 @tagged("post_install", "-at_install")
@@ -310,8 +331,7 @@ class LearnedAddonsCase(ShopAddonsCase):
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows.addon_tmpl_id, self.cable)
         self.assertEqual(rows.orders, 2)
-        self.assertEqual(self._group(self.kit, "Cables")["products"],
-                         self.cable)
+        self.assertEqual(self._shown(self.kit), self.cable)
 
     def test_the_count_beats_the_families(self):
         """The point of counting. Before, a kit nobody had got to showed every
@@ -322,7 +342,7 @@ class LearnedAddonsCase(ShopAddonsCase):
         self._order([self.kit, self.cable])
         self._rebuild()
 
-        shown = self._group(self.kit, "Cables")["products"]
+        shown = self._shown(self.kit)
 
         self.assertEqual(shown, self.cable)
         self.assertNotIn(other, shown, "the family fallback is still running")
@@ -349,9 +369,7 @@ class LearnedAddonsCase(ShopAddonsCase):
         self._rebuild()
         self.kit.alternative_product_ids = [(6, 0, self.track.ids)]
 
-        self.assertEqual(self._labels(self.kit), ["Tracks"])
-        self.assertEqual(self._group(self.kit, "Tracks")["products"],
-                         self.track)
+        self.assertEqual(self._shown(self.kit), self.track)
 
     def test_a_roller_he_would_never_have_gone_looking_for(self):
         """His four families were an answer about cones, cables, tracks and
@@ -364,10 +382,9 @@ class LearnedAddonsCase(ShopAddonsCase):
         self._order([self.kit, roller])
         self._rebuild()
 
-        self.assertEqual(self._labels(self.kit), ["Often bought with this"])
-        self.assertEqual(
-            self._group(self.kit, "Often bought with this")["products"],
-            roller)
+        self.assertEqual(self._shown(self.kit), roller,
+                         "a roller fits none of the four families and would"
+                         " have been dropped when there were headings")
 
     # --- what must not be counted -----------------------------------------
 
@@ -378,8 +395,8 @@ class LearnedAddonsCase(ShopAddonsCase):
         self._order([self.kit, self.cable])
 
         self.assertFalse(self._rebuild())
-        self.assertEqual(self._labels(self.kit),
-                         ["Cones", "Cables", "Tracks", "Trims"])
+        self.assertIn(self.cone, self._shown(self.kit),
+                      "it did not fall back to the families")
 
     def test_a_quotation_nobody_accepted_does_not_count(self):
         """Somebody thinking out loud at a keyboard is not a sale."""

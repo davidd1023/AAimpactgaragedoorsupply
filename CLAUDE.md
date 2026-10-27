@@ -239,10 +239,31 @@ DELIVERY CHARGE or down payment (services and anything unpublished are out,
 which excludes the plastic filler by the rule that already makes it
 unpublished).
 
-A recommendation fitting NONE of the four families is shown under "Often
-bought with this" rather than dropped - his families were an answer about
+### ONE POOL, NOT A HEADING PER FAMILY (owner, 2026-10-27)
+
+*"i want the recommendations to be just one pool of products not multiple
+categories, that way we dont show too many products in the recommendations."*
+
+It was four headings with up to eight products under each, which on a kit page
+is a second catalogue rather than a recommendation. Now it is ONE short row,
+capped by the setting **"Add-ons to show"** (`aa_shop_addons.shown`, default 8
+- two rows of four on a desktop), because "too many" is his judgement and not
+a number for the code.
+
+**THE FALLBACK POOL IS TAKEN IN TURNS ROUND THE FAMILIES**, and that is the
+one place flattening four lists into one needs care: taken in sequence, a pool
+of eight off his catalogue would be eight cones and nothing else, every cable
+and track pushed off the end by whichever family happened to be listed first.
+
+The families now do nothing but decide what is ELIGIBLE. A recommendation
+fitting none of them is simply in the pool - his families were an answer about
 cones, cables, tracks and trims, and his order book also knows about rollers
 and hinges, which are the ones nobody would have gone looking for.
+
+**THE CONES NOTE LOST ITS HEADING** and now sits under the section, shown only
+when a cone is actually in the pool - asked by category OR BY NAME, because
+his live catalogue has no Cones category at all and a warning that never
+appears is worse than one that turns up beside a cone wrench.
 
 **THE REVIEW SCREEN IS Website > Configuration > Recommended Add-ons**, every
 pair with the number of his own orders behind it, grouped by product - one page
@@ -619,6 +640,33 @@ Facts read out of his own files on 2026-10-26, not to be re-derived by guessing:
   it); White restores what the file was built with, captured on load rather
   than typed in. Both materials were checked against the mesh first: they sit
   on the back face, at both side edges, up the height of the door.
+- **THE "SMALL FLOATING SQUARES" ARE A PRIMITIVE, NOT A MATERIAL**, and
+  reasoning from the material list alone got it wrong once. Owner,
+  2026-10-27: *"there are some small floating squares on the front side of
+  the door ... change the color of those squares to always be black, unless
+  the door is white in which case they should be white, just like the
+  rollers"* - and he OFFERED A PICTURE. I declined it and reasoned instead:
+  of the six materials, three are already recoloured and `Frame_bronze` is
+  the bottom seal, so `Silver` was the only one left and the only one whose
+  colour never changed. Painting it turned every hinge, bracket and the track
+  black - *"what you changed the color of was all the parts which is not what
+  i wanted"* - and the square in the picture he then sent is WOODGRAIN. Frame
+  material. **TAKE THE PICTURE WHEN IT IS OFFERED.**
+  His mesh carries the frame material TWICE: one primitive of 8,083 vertices
+  is the real frame, centred and 2.0 thick, and another of 3,791 is TEN
+  BLOCKS AND NOTHING ELSE - five up the left edge, five up the right, one at
+  each section joint - reaching out to 3.8 where the face is at 1.0. They
+  stand a whole door-thickness proud of it, which is why they look detached.
+  They are found BY SHAPE: the biggest frame mesh is the door, and any other
+  frame mesh reaching well beyond it along the door's own thin axis is one of
+  these (measured 0.106 past the face against a 0.038 threshold). No axis
+  names and no primitive indices are written down, so a different model
+  measures itself. **The material is CLONED first** - glTF shares one between
+  the door and the squares, and three.js hands back the same object, so
+  painting it in place paints the whole door. **The map is cleared too**, or
+  a woodgrain door keeps woodgrain squares. **White is WRITTEN, not
+  restored**, unlike the rollers: the point is to stop them taking the
+  finish.
 - **three.js r137.5 and its GLTFLoader are self-hosted** in `static/lib/` for
   the test pages, and come from a pinned jsDelivr URL in the pasted block -
   600 KB inline is a page editor's bad afternoon, and whether Sirv returns

@@ -16,6 +16,20 @@ then the families.
 | 2 | **his own order book** - products bought on the same orders | when the field is empty and the counting found something |
 | 3 | the four **families** by website category | when neither of the above has an answer |
 
+Whichever tier answers, the result is **ONE POOL** - owner, 2026-10-27: *"i
+want the recommendations to be just one pool of products not multiple
+categories, that way we dont show too many products in the recommendations."*
+It was four headings with up to eight products under each, which on a kit page
+was a second catalogue rather than a recommendation. Now it is one short row,
+capped by **Website → Configuration → Settings → Add-ons to show** (eight by
+default: two rows of four on a desktop).
+
+The families no longer put headings on the page - they only decide what is
+eligible, and the pool is **taken in turns round them**. That matters: taken in
+sequence, a pool of eight off his catalogue would be eight cones and nothing
+else, every cable and track pushed off the end by whichever family happened to
+be listed first.
+
 A hardware kit knows its series and its panel count and nothing else. What
 picks one cable out of twelve is the door height and the drum; what picks one
 track is the height, the track size and the colour. None of those live on the
@@ -82,8 +96,9 @@ the list, because a setting nobody can try is a setting nobody touches.
 
 His four families were an answer about cones, cables, tracks and trims. His
 order book also knows about rollers, hinges and drums, and **those are the ones
-nobody would have gone looking for** - so a recommendation that fits none of
-the four families is shown under *Often bought with this* rather than dropped.
+nobody would have gone looking for**. They are not dropped for fitting no
+family - since the pool became one row there is no family heading to drop them
+from, which is a second reason the single pool is the better shape.
 
 ### Setting them, per kit
 
@@ -104,10 +119,9 @@ which is where these go. Accessory feeds the cart; Optional feeds a quotation.
 Hidden, not deleted - whatever is in them is still there and still works for
 anything that reads it. `views/product_views.xml` is the whole of it.
 
-Twelve kits, `HK-1200-4P` through `HK-1800-7P`. Whatever is listed there is
-what appears under that kit, **grouped automatically** by the website category
-each product is already in - so adding a cable never also means saying it
-belongs under "Cables".
+Whatever is listed there is what appears under that product, in the order the
+field holds them, capped by *Add-ons to show*. Nothing has to be said about
+which heading anything belongs under, because there are no headings.
 
 That field is Odoo's own and holds **product templates**, so one entry covers
 a track with all twenty of its length-and-colour combinations behind it.
@@ -146,6 +160,12 @@ Asked whether to drop them, the owner said to keep them and say so: *"show
 them but make it obvious that the cones are included so customers dont make
 the mistake of buying when they dont need one."* So the spring page carries
 the note and a kit page does not, because on a kit it would be a lie.
+
+It used to hang off the Cones heading. With one pool it sits under the section
+and appears only when a cone is actually in what is being shown - asked by
+category **or by name**, because his live catalogue has no Cones category at
+all and a warning that never appears is worse than one that turns up beside a
+cone wrench.
 
 ## What shows a block
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "AA Shop Add-ons",
-    "version": "19.0.2.1.0",
+    "version": "19.0.2.2.0",
     "summary": "Cones, cables, tracks and trims shown under a kit or a spring",
     "description": """
 THE EXTRAS A CUSTOMER STILL NEEDS, UNDER THE THING THEY ARE LOOKING AT.

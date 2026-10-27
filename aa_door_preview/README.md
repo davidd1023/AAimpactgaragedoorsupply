@@ -95,6 +95,44 @@ so it is reproduced rather than corrected.
 4. **`Frane_Black`** is a typo in the Black files. Harmless; `FRAME_RE` matches
    `fra[mn]e` so it is picked up either way. Worth fixing at the source if
    those files are ever re-exported.
+5. **The "small floating squares" are a PRIMITIVE, not a material** (owner,
+   2026-10-27, with a screenshot: *"there are some small floating squares on the
+   front side of the door ... change the color of those squares to always be
+   black, unless the door is white in which case they should be white, just like
+   the rollers"*).
+
+   **The first attempt got this wrong** by reasoning from the material list
+   alone: `Silver` was the only material never recoloured, so `Silver` looked
+   like the answer, and painting it turned every hinge, bracket and the track
+   black. His reply - *"what you changed the color of was all the parts which is
+   not what i wanted"* - came with the picture, and the square in it is
+   **woodgrain**. Frame material. A material-shaped answer was never going to
+   reach it.
+
+   His mesh carries the frame material **twice**:
+
+   | primitive | what it is | extent across the door's thin axis |
+   |---|---|---|
+   | the big one, 8,083 verts | the real frame - stiles and rails | centred, 2.0 thick |
+   | the other, 3,791 verts | **ten blocks and nothing else** - five up the left edge, five up the right, one at each section joint | reaches out to 3.8, where the face is at 1.0 |
+
+   So they stand a whole door-thickness proud of the face, which is exactly why
+   they read as squares hanging in the air.
+
+   - **They are found by SHAPE, not by name.** The biggest frame mesh is the
+     door; any other frame mesh reaching well beyond it along the door's own
+     thin axis is one of these. No axis names, no vertex counts and no
+     primitive indices are written down, so a different model measures itself -
+     the same rule the lite bars are placed by. Measured: they reach **0.106**
+     past the face where the threshold is **0.038**, so the margin is close to
+     three times over.
+   - **The material is CLONED first.** glTF shares one material between the
+     door and the squares and three.js hands back the same object for both, so
+     painting it where it stands would paint the whole door black.
+   - **The map is cleared as well as the colour**, or a woodgrain door would
+     keep woodgrain squares.
+   - **White is written, not restored**, unlike the rollers - the point is to
+     stop them taking the door's finish.
 
 ## GETTING OFF SIRV (owner, 2026-10-26)
 
