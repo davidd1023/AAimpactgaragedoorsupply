@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "AA Pickup Slots",
-    "version": "19.0.2.0.0",
+    "version": "19.0.2.1.0",
     "summary": "A pickup day and time window chosen at checkout, carried to the floor",
     "description": """
 WHEN THE CUSTOMER IS COMING TO COLLECT.
@@ -16,9 +16,9 @@ Three answers he gave when asked:
   * THE LEAD TIME STARTS THE NEXT WORKING DAY and takes two whole ones, so an
     order placed Monday is collectable from THURSDAY, and one placed Friday
     from Wednesday.
-  * TWO-HOUR WINDOWS - 8-10, 10-12, 12-2, 2-4:30 - which are tight enough to
-    plan the counter around and wide enough that nobody is late by ten
-    minutes.
+  * ANY HALF HOUR FROM 7:00 AM TO 4:00 PM, revised the same day from the
+    two-hour windows this first shipped with: "the customer should be able to
+    choose anytime between 7 and 4."
   * PICKUP ORDERS ONLY, AND REQUIRED. Anything being delivered is never
     asked; anything being collected cannot be paid for without a slot, so
     nothing reaches Dispatch blank for somebody to chase by telephone.

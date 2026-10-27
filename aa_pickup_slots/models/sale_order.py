@@ -217,12 +217,35 @@ class SaleOrder(models.Model):
         Order sheet prints without reaching back through the sale.
         """
         result = super()._action_confirm()
-
-        for order in self:
-            if order.aa_pickup_label and order.picking_ids:
-                order.picking_ids.write({
-                    "aa_pickup_date": order.aa_pickup_date,
-                    "aa_pickup_time": order.aa_pickup_time,
-                })
+        self._aa_push_pickup_to_transfers()
 
         return result
+
+    def write(self, vals):
+        """A SLOT MOVED AFTER CONFIRMATION GOES DOWN TO THE TRANSFERS.
+
+        The transfer keeps its own copy so Dispatch can sort by it, and a copy
+        that is only written once goes stale the first time somebody telephones
+        to say they will come Friday instead. Dispatch would then be reading
+        the old day off the screen while the sale order says another - which is
+        worse than having no column at all.
+        """
+        result = super().write(vals)
+
+        if "aa_pickup_date" in vals or "aa_pickup_time" in vals:
+            self._aa_push_pickup_to_transfers()
+
+        return result
+
+    def _aa_push_pickup_to_transfers(self):
+        """Write the day and time onto the transfers still to go out."""
+        for order in self:
+            pickings = order.picking_ids._aa_open_for_pickup()
+
+            if not pickings:
+                continue
+
+            pickings.write({
+                "aa_pickup_date": order.aa_pickup_date,
+                "aa_pickup_time": order.aa_pickup_time,
+            })

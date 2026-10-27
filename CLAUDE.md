@@ -287,11 +287,30 @@ which is exactly what a crash looks like and what a handled answer does not.
 `request.cart` is already sudo'd, which is why Odoo's own delivery controller
 names it `order_sudo`.
 
-**THE TRANSFER STORES ITS OWN COPY of the day and time**, written at
-confirmation. The Dispatch list is a list of transfers and the first thing
-anybody wants is to SORT BY the pickup time - who is coming this morning - and
-a related field through `sale_id` cannot be ordered on in the database. The
-trade is that a slot changed after confirmation needs writing again.
+**THE TRANSFER STORES ITS OWN COPY of the day and time.** The Dispatch list is
+a list of transfers and the first thing anybody wants is to SORT BY the pickup
+time - who is coming this morning - and a related field through `sale_id`
+cannot be ordered on in the database.
+
+**IT IS KEPT IN STEP IN THREE PLACES, and writing it once was not enough**
+(owner, 2026-10-27: *"i dont see the scheduled pickup date on the dispatch
+screen, it showed up in manufacturing but not in dispatch"*). `_action_confirm`
+puts it on; `sale.order.write` pushes a slot MOVED afterwards down, because
+Dispatch reading Thursday while the order says Friday is worse than no column;
+and `stock.picking.create` fills a BACKORDER from its order, because a
+backorder is made by COPYING and these fields are `copy=False` - which is right
+for a duplicated order and wrong for the half the customer comes back for.
+Transfers already DONE or CANCELLED are never rewritten: what was on the
+paperwork is a record. The 19.0.2.1.0 migration fills in the open ones.
+
+**THE DISPATCH COLUMN IS NOT `optional`.** That was the whole of what he could
+not see: an `optional="show"` column is shown only to somebody who has never
+touched that list's column chooser, and anybody who has keeps the set they
+saved - so a column added afterwards arrives HIDDEN behind the toggle at the
+right-hand end. He has touched it; that list carries Dispatched and the
+work-station badges. A column nobody can find is a column that is not there.
+`Pickup Day`, the raw date, stays optional and exists for SORTING, because the
+label reads "Fri 30 Oct" and sorts Friday before Monday.
 
 Closed days (holidays) are a setting under Website > Configuration >
 Settings; a mistyped date is ignored rather than raising, because a checkout
