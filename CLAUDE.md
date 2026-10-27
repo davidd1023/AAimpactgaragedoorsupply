@@ -335,7 +335,14 @@ Facts read out of his own files on 2026-10-26, not to be re-derived by guessing:
   consistent reading - **unconfirmed, and `FRAME_RE` is where to change it.**
 - `Frane_Black` is a typo in his Black files. `FRAME_RE` matches `fra[mn]e`,
   so it is picked up either way.
-- `Blue_Circle` and `White_Circle` are unidentified and left untouched.
+- **`Blue_Circle` and `White_Circle` are the ROLLERS** - owner, 2026-10-27:
+  *"the rollers are the circular objects on the side of the door ... all
+  colors except white should have black rollers"*. So every finish but White
+  sets them near-black (`BLACK_ROLLER`, 0.02 linear rather than 0, because a
+  pure-black non-metal under a soft light is a silhouette with no shape in
+  it); White restores what the file was built with, captured on load rather
+  than typed in. Both materials were checked against the mesh first: they sit
+  on the back face, at both side edges, up the height of the door.
 - **three.js r137.5 and its GLTFLoader are self-hosted** in `static/lib/` for
   the test pages, and come from a pinned jsDelivr URL in the pasted block -
   600 KB inline is a page editor's bad afternoon, and whether Sirv returns

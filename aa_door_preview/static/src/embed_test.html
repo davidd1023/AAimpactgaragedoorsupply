@@ -9,7 +9,7 @@
 <body>
 
 <!-- =====================================================================
-     SERIES 1200 DOOR PREVIEW            build ed40c005
+     SERIES 1200 DOOR PREVIEW            build 32a1f7a8
      Paste this whole block into the Elementor HTML widget on the product
      page, in place of the current viewer.
 
@@ -315,8 +315,8 @@
  *     Frame_bronze      a piece that is DARK in every
  *                       one of his files                 left alone
  *     Glass_clear ...   the glazing                      recoloured
- *     Blue_Circle       unidentified - a badge?          left alone
- *     White_Circle      ditto
+ *     Blue_Circle       the rollers, inner part          black unless White
+ *     White_Circle      the rollers, the wheels          black unless White
  *
  * So: load one file, keep it, and set colours on the materials. One 8.8 MB
  * download instead of twenty, and every colour change instant.
@@ -357,6 +357,20 @@
    * the frame - painting it would change a door he has already approved. */
   var FRAME_RE = /^fra[mn]e_(white|black|woodgrain)$/i;
   var GLASS_RE = /^glass/i;
+
+  /* THE ROLLERS - the wheels down each side of the door that run in the
+   * track. Named Blue_Circle and White_Circle in his files, which is why
+   * they went unidentified for a day; the owner named them on 2026-10-27.
+   *
+   * Two materials, one part: measured off the mesh, both sit on the back
+   * face, at both side edges, running up the height of the door - which is
+   * where rollers are and nothing else is. So both take the colour. */
+  var ROLLER_RE = /circle/i;
+
+  /* Not pure black. These are not metal, and a 0,0,0 non-metal under a soft
+   * studio light is a silhouette with no shape in it - the wheel reads as a
+   * hole. Nearly black still catches the highlight that makes it round. */
+  var BLACK_ROLLER = [0.02, 0.02, 0.02];
 
   var FRAMES = [
     { id: "white",  name: "White",  swatch: "#f1f1ef",
@@ -562,6 +576,7 @@
 
     var frameMats = [];
     var glassMats = [];
+    var rollerMats = [];
     var woodTexture = null;
     var frame = frames[0];
     var glass = glasses[0];
@@ -606,7 +621,26 @@
         m.roughness = choice.roughness;
         m.needsUpdate = true;
       });
+
+      applyRollers(choice);
       label();
+    }
+
+    /* THE ROLLERS FOLLOW THE FRAME (owner, 2026-10-27: "all colors except
+     * white should have black rollers"). White keeps the rollers his model
+     * was built with - restored from what they came in as, rather than
+     * guessed at, so this cannot drift from the file. */
+    function applyRollers(choice) {
+      var white = choice.id === "white";
+
+      rollerMats.forEach(function (m) {
+        if (white) {
+          m.color.copy(m.userData.aaAsBuilt);
+        } else {
+          m.color.fromArray(BLACK_ROLLER);
+        }
+        m.needsUpdate = true;
+      });
     }
 
     function applyGlass(choice) {
@@ -680,6 +714,16 @@
           } else if (FRAME_RE.test(name)) {
             m.envMapIntensity = 0.9;
             if (frameMats.indexOf(m) === -1) { frameMats.push(m); }
+          } else if (ROLLER_RE.test(name)) {
+            m.envMapIntensity = 0.85;
+
+            if (rollerMats.indexOf(m) === -1) {
+              /* KEPT BEFORE ANYTHING IS WRITTEN OVER IT. The White finish
+               * restores these, and the only honest source for "what the
+               * rollers look like" is the file they arrived in. */
+              m.userData.aaAsBuilt = m.color.clone();
+              rollerMats.push(m);
+            }
           } else {
             m.envMapIntensity = 0.85;
           }
@@ -984,7 +1028,7 @@
  * and a stale copy of this block looks exactly like a fix that did not work -
  * which cost a round trip on 2026-10-26. The test pages print this, so an old
  * copy announces itself instead of being guessed at. */
-if (window.AADoorPreview) { window.AADoorPreview.built = "ed40c005"; }
+if (window.AADoorPreview) { window.AADoorPreview.built = "32a1f7a8"; }
 </script>
 
 </body>
