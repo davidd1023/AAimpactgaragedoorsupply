@@ -619,6 +619,26 @@ Facts read out of his own files on 2026-10-26, not to be re-derived by guessing:
   it); White restores what the file was built with, captured on load rather
   than typed in. Both materials were checked against the mesh first: they sit
   on the back face, at both side edges, up the height of the door.
+- **`Silver` IS THE "SMALL FLOATING SQUARES"** - owner, 2026-10-27: *"there
+  are some small floating squares on the front side of the door ... change
+  the color of those squares to always be black, unless the door is white in
+  which case they should be white, just like the rollers."* FOUND BY
+  MEASURING, NOT FROM A PICTURE he offered: of the six materials, three were
+  already recoloured and `Frame_bronze` is one thin strip across the bottom
+  edge, so `Silver` was the only one left - and the only one whose colour
+  never changed with the door (0.75 grey at 0.98 metalness, chrome against
+  every finish). It is where he said, too: the ONLY geometry standing in
+  front of the door's face is at the two side edges, FIVE PIECES UP EACH
+  SIDE, one per section joint, made of `Silver` and the frame material
+  together - the frame half already took the door's colour and the Silver
+  half stayed bright. **It paints ALL of `Silver`** - 172,775 vertices of
+  hinges, brackets and track, most of it behind the door - because a
+  primitive cannot be half painted without cutting the mesh apart. **The
+  METALNESS is dropped** to the frame's own, which is the half that matters:
+  a black material at 0.98 metalness is not black, it is a mirror, and the
+  squares would come back dark chrome instead of bright. **White is WRITTEN,
+  not restored**, unlike the rollers - restoring what this one was built with
+  would put the chrome back, which is the thing he asked to be rid of.
 - **three.js r137.5 and its GLTFLoader are self-hosted** in `static/lib/` for
   the test pages, and come from a pinned jsDelivr URL in the pasted block -
   600 KB inline is a page editor's bad afternoon, and whether Sirv returns

@@ -11,7 +11,7 @@
  * only in what its materials are set to. The materials are named by role,
  * which is what makes this possible:
  *
- *     Silver            the hardware and track          left alone
+ *     Silver            the hardware and track          black unless White
  *     Frame_white       the door's frame                 recoloured
  *     Frane_Black       ditto, in the Black files        (his typo, matched)
  *     Frame_woodgrain   ditto, with a texture
@@ -74,6 +74,40 @@
    * studio light is a silhouette with no shape in it - the wheel reads as a
    * hole. Nearly black still catches the highlight that makes it round. */
   var BLACK_ROLLER = [0.02, 0.02, 0.02];
+
+  /* THE HARDWARE - "some small floating squares on the front side of the
+   * door" (owner, 2026-10-27), to go "always black, unless the door is white
+   * in which case they should be white, just like the rollers".
+   *
+   * THE MATERIAL IS `Silver`, and it was found by measuring rather than by
+   * looking at a picture. Of the six materials in his file, three are already
+   * recoloured (frame, glass, rollers) and `Frame_bronze` is the bottom seal -
+   * one thin strip across the full width at the very bottom edge, not
+   * squares. `Silver` is the only one left, and it is the only one whose
+   * colour never changed with the door: a 0.75 grey at 0.98 metalness, which
+   * is shiny chrome against every finish he offers.
+   *
+   * AND IT IS WHERE HE SAYS IT IS. The only geometry standing in FRONT of the
+   * door's face is at the two side edges, five pieces up each side - one at
+   * every section joint - and it is made of `Silver` and the frame material
+   * together. The frame half already took the door's colour; the Silver half
+   * stayed chrome, which is exactly a row of small bright squares that look
+   * like they are floating.
+   *
+   * THIS PAINTS ALL OF IT, not only the squares. `Silver` is one primitive of
+   * 172,775 vertices covering the hinges, brackets and track, most of it
+   * BEHIND the door - and a primitive cannot be half painted without cutting
+   * his mesh apart. Black hardware on a black door is right anyway, and it is
+   * the rule he gave.
+   *
+   * NOT METAL ANY MORE, which is the half of this that matters. A black
+   * material at 0.98 metalness is not black - it is a mirror, and it would
+   * come back as dark chrome squares in place of bright ones. They take the
+   * frame's own finish so they read as part of the door. */
+  var HARDWARE_RE = /^silver$/i;
+  var BLACK_HARDWARE = [0.02, 0.02, 0.02];
+  var WHITE_HARDWARE = [1, 1, 1];
+  var HARDWARE_FINISH = { metalness: 0.282, roughness: 0.550 };
 
   var FRAMES = [
     { id: "white",  name: "White",  swatch: "#f1f1ef",
@@ -292,6 +326,7 @@
     var frameMats = [];
     var glassMats = [];
     var rollerMats = [];
+    var hardwareMats = [];
     var glassMeshes = [];
     var frameMeshes = [];
     var woodTexture = null;
@@ -346,7 +381,28 @@
       });
 
       applyRollers(choice);
+      applyHardware(choice);
       label();
+    }
+
+    /* THE HARDWARE FOLLOWS THE FRAME THE SAME WAY (owner, 2026-10-27, of the
+     * small squares along the front edges: "always be black, unless the door
+     * is white in which case they should be white, just like the rollers").
+     *
+     * WHITE IS WRITTEN, NOT RESTORED, and that is the one place this differs
+     * from the rollers. The rollers put back what the file was built with,
+     * because that is a door he has already approved. Putting back what this
+     * was built with would put the chrome back, which is the thing he asked
+     * to be rid of - so White means white. */
+    function applyHardware(choice) {
+      var white = choice.id === "white";
+
+      hardwareMats.forEach(function (m) {
+        m.color.fromArray(white ? WHITE_HARDWARE : BLACK_HARDWARE);
+        m.metalness = HARDWARE_FINISH.metalness;
+        m.roughness = HARDWARE_FINISH.roughness;
+        m.needsUpdate = true;
+      });
     }
 
     /* THE ROLLERS FOLLOW THE FRAME (owner, 2026-10-27: "all colors except
@@ -665,6 +721,9 @@
               m.userData.aaAsBuilt = m.color.clone();
               rollerMats.push(m);
             }
+          } else if (HARDWARE_RE.test(name)) {
+            m.envMapIntensity = 0.85;
+            if (hardwareMats.indexOf(m) === -1) { hardwareMats.push(m); }
           } else {
             m.envMapIntensity = 0.85;
           }

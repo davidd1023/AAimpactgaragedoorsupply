@@ -40,7 +40,7 @@ The materials are named by role, which is the part that makes this work:
 
 | material | what it is | this viewer |
 |---|---|---|
-| `Silver` | hardware and track, metalness 0.98 | left alone |
+| `Silver` | hardware and track, metalness 0.98 as built | **black unless the frame is White**, and no longer metal |
 | `Frame_white` / `Frane_Black` / `Frame_woodgrain` | the door's frame | **recoloured** |
 | `Frame_bronze` | a piece that is dark (0.02 linear) in *every* one of his files, white and woodgrain included | left alone |
 | `Glass_clear` / `_White` / `_green` / `_bronze` / `_grey` | the glazing, `KHR_materials_transmission` | **recoloured** |
@@ -95,6 +95,32 @@ so it is reproduced rather than corrected.
 4. **`Frane_Black`** is a typo in the Black files. Harmless; `FRAME_RE` matches
    `fra[mn]e` so it is picked up either way. Worth fixing at the source if
    those files are ever re-exported.
+5. **`Silver` is the "small floating squares"** (owner, 2026-10-27: *"there are
+   some small floating squares on the front side of the door ... change the
+   color of those squares to always be black, unless the door is white in which
+   case they should be white, just like the rollers"*), and it was identified by
+   measuring, not from a picture. Of the six materials, three were already
+   recoloured and `Frame_bronze` is one thin strip across the bottom edge - not
+   squares. `Silver` was the only one left, and the only one whose colour never
+   changed with the door: a 0.75 grey at 0.98 metalness, chrome against every
+   finish. It is also exactly where he said: **the only geometry standing in
+   front of the door's face is at the two side edges, five pieces up each side,
+   one per section joint**, made of `Silver` and the frame material together -
+   the frame half already took the door's colour and the Silver half stayed
+   bright.
+
+   Two things to know before changing it:
+
+   - **It paints all of `Silver`, not only the squares.** That primitive is
+     172,775 vertices covering the hinges, brackets and track, most of it
+     *behind* the door, and a primitive cannot be half painted without cutting
+     the mesh apart. Black hardware on a black door is right anyway.
+   - **The metalness is dropped to the frame's own**, which is the half that
+     matters. A black material at 0.98 metalness is not black, it is a mirror -
+     the squares would come back as dark chrome instead of bright chrome.
+   - **White is written, not restored**, unlike the rollers. Restoring what
+     this material was built with would put the chrome back, which is the thing
+     he asked to be rid of.
 
 ## GETTING OFF SIRV (owner, 2026-10-26)
 
