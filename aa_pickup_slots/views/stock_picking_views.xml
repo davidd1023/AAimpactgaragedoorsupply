@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- IN DISPATCH. The list is stock.picking, and the column is the stored
+       label rather than a related field, so somebody can sort the morning's
+       collections to the top. -->
+  <record id="vpicktree_aa_pickup" model="ir.ui.view">
+    <field name="name">stock.picking.list.aa.pickup.slot</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.vpicktree"/>
+    <field name="arch" type="xml">
+      <field name="state" position="before">
+        <field name="aa_pickup_date" string="Pickup Day" optional="show"/>
+        <field name="aa_pickup_label" string="Pickup" optional="show"/>
+      </field>
+    </field>
+  </record>
+
+  <record id="view_picking_form_aa_pickup" model="ir.ui.view">
+    <field name="name">stock.picking.form.aa.pickup.slot</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_form"/>
+    <field name="arch" type="xml">
+      <field name="scheduled_date" position="after">
+        <field name="aa_pickup_label" invisible="not aa_pickup_label"/>
+      </field>
+    </field>
+  </record>
+
+  <record id="view_picking_internal_search_aa_pickup" model="ir.ui.view">
+    <field name="name">stock.picking.search.aa.pickup.slot</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+    <field name="arch" type="xml">
+      <filter name="starred" position="after">
+        <separator/>
+        <filter name="aa_pickup_today" string="Collected today"
+                domain="[('aa_pickup_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+        <filter name="aa_pickup_set" string="Being collected"
+                domain="[('aa_pickup_date', '!=', False)]"/>
+      </filter>
+    </field>
+  </record>
+
+</odoo>

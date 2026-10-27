@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="res_config_settings_view_form_aa_pickup" model="ir.ui.view">
+    <field name="name">res.config.settings.form.aa.pickup.slots</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//block[@id='website_info_settings']" position="after">
+        <block title="Pickup Slots" id="aa_pickup_slots_settings">
+          <setting string="Days closed for pickup"
+                   help="Dates the counter is shut, beyond Saturdays and
+                         Sundays - as 2026-12-25, 2026-12-26. They are neither
+                         counted towards the two working days nor offered to a
+                         customer to collect on.">
+            <field name="aa_pickup_closed_days"
+                   placeholder="2026-12-25, 2026-12-26"/>
+          </setting>
+        </block>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>
