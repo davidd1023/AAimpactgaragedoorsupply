@@ -335,6 +335,47 @@ that his Prod catalogue is not what this repo's hooks create.
 
 **NOT IN `garage_door_supply`**, for the homepage reason below.
 
+## The Custom Kit costs nothing, and must still be buyable (`aa_dealer_orders`)
+
+Owner, 2026-10-27: *"there is a custom kit that should normally cost 0$ until
+you start adding items, the problem is that the store doesnt detect that items
+have been added to the kit so it still believes the price is zero, and when you
+try to buy an item that costs 0$ it gives you a contact us button instead of an
+add to cart button."*
+
+**THE $0 IS DELIBERATE AND STAYS.** The parts carry the money, each on its own
+line (owner, 2026-10-20), so the kit line is a HEADING - `custom_kit_data.xml`
+says so - and a price on it would charge for the kit ON TOP of the parts.
+
+What was wrong is ODOO'S ZERO-PRICE RULE. The website setting "Hide 'Add To
+Cart' when price = 0" is a good rule and the shop keeps it; it just asks the
+PRODUCT what it costs, and this product's honest answer is nothing.
+
+**ODOO ENFORCES IT IN FIVE PLACES AND THEY SHARE NO HOOK**, all answered in
+`custom_kit_zero_price.py`, keyed on the one `aa_custom_kit` boolean:
+`_get_combination_info` (the Contact Us button), `_is_add_to_cart_allowed`
+(the server's own refusal), `_website_show_quick_add` on BOTH the template and
+the variant (the shop grid), `sale.order.line._check_validity` (raised while
+adding) and **`sale.order._get_zero_priced_lines`, which blocks CHECKOUT**.
+Finding four and missing the fifth would have been worse than finding none:
+the customer gets further each time and still cannot pay.
+
+Odoo's own exemption hook, `_get_product_types_allow_zero_price()`, is keyed on
+`service_tracking` and only two of the five consult it, so it does not fit.
+
+**`_get_combination_info` CANNOT BE CALLED UNDER `MockRequest`** - the mocked
+pricelist comes back as a Mock and Odoo unpacks it two frames down
+(`cannot unpack non-iterable Mock object`). Test it over HTTP instead, which
+is the better test anyway. And **"Contact Us" appears in the site menu of
+every page**, so a bare `assertNotIn` passes nothing: Odoo keeps both blocks
+in the markup and hides one, so the assertion is `d-none` on
+`#contact_us_wrapper`.
+
+**The headline price follows the builder** (`showPrice` in `custom_kit.js`).
+Display only - the cart is priced on the server from what the session
+remembers - but a page saying $0.00 over a builder saying $236.91 is telling
+the customer something untrue.
+
 ## Pickup slots (`aa_pickup_slots`)
 
 Owner, 2026-10-27: *"At checkout, the customer picks a pickup day and time
