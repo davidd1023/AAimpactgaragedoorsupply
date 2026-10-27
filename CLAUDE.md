@@ -140,6 +140,46 @@ ever, and a back office order typed by hand has no transaction, so both keep
 their confirmation. `super()` is still called, on a narrowed recordset, so
 nothing else that hooks the method is lost.
 
+### ONE CANCELLATION EMAIL PER ORDER, WHOEVER CANCELS IT
+
+Owner, 2026-10-27: *"i need you to make it so the user gets an email when
+their order is cancelled, specifically when it gets cancelled on
+manufacturing, i dont want to send multiple emails if i also have to cancel it
+again in the sales module or some other module that isn't manufacturing."*
+
+So the rule is not "send from manufacturing" - it is **send once per order,
+from whichever place gets there first**. `aa_cancel_email_sent` on sale.order
+is the stamp, written the moment the mail goes, and every path asks the same
+`_aa_send_cancellation_email()`. A flag rather than searching the chatter,
+because a message that failed to send still leaves a message.
+
+Three ways in, all in `work_order_sheet/models/order_cancelled_email.py`:
+`sale.order._action_cancel` (Sales, and everything that is not a job), the
+cancel-and-refund wizard, and `mrp.production.action_cancel` - which also
+catches the Shop Floor, since cancelling a work order there settles its
+station job through `action_cancel` too.
+
+**AN ORDER IS NOT ONE JOB.** Confirming it raises a Springs job, a Pack
+hardware kit job and a Cut lift cables job, and Odoo's route may add a
+prepared track job. Asked whether the email should go on the first job
+cancelled or the last, the owner chose **when nothing is left being made**. A
+job already DONE does not count as nothing: something was built, so that case
+stays quiet and is left to a Sales cancellation.
+
+Jobs DELETED rather than cancelled send nothing - deletion is cleanup, and the
+Shop-floor cleanup screen deletes jobs whose order has gone, where there is
+nobody to email.
+
+**THE WIZARD HOLDS THE EMAIL BACK.** It cancels the shop floor jobs FIRST and
+refunds afterwards, so without `aa_hold_cancel_email` on its first three steps
+the "$X refunded" email would go out before the refund had been attempted, and
+be a promise if it then failed.
+
+**Orders already cancelled were stamped by the 19.0.1.40.0 migration.** His
+database has orders cancelled weeks ago whose jobs still stand open, and the
+first use of the cleanup screen after this deployed would otherwise have told
+a dozen customers that a September order is cancelled.
+
 ## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
 
 *"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one
