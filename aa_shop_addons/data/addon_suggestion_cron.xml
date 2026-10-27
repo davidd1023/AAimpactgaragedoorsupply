@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+    <!-- NIGHTLY, because the order book changes every day and nobody should
+         have to remember to press a button for the website to keep up. That
+         is the whole of what he asked for: "this way i wont have to
+         individually go into every products page".
+
+         noupdate so that an interval somebody changes - or a job somebody
+         switches off - is not put back by the next deploy. -->
+    <record id="cron_aa_addon_suggestions" model="ir.cron">
+      <field name="name">Website: count which add-ons sell together</field>
+      <field name="model_id" ref="model_aa_addon_suggestion"/>
+      <field name="state">code</field>
+      <field name="code">model._aa_cron_rebuild()</field>
+      <field name="interval_number">1</field>
+      <field name="interval_type">days</field>
+      <field name="active" eval="True"/>
+    </record>
+
+  </data>
+</odoo>

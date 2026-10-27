@@ -210,7 +210,55 @@ works for anything that reads it. Alternative Products is also a Many2many of
 TEMPLATES rather than variants, so one entry covers a track with all twenty
 combinations behind it.
 
-The families are the FALLBACK, found by website category name (`Cones`,
+### THEN HE ASKED FOR IT WITHOUT THE TYPING (owner, 2026-10-27)
+
+*"could you automate a system that will recommend additional products the same
+way that the alternative product thing works. this way i wont have to
+individually go into every products page to seach which products i should
+recommend alongside it."*
+
+**HE HAD ALREADY ANSWERED IT, AT THE COUNTER, ALL YEAR.** "Which cable should
+go with this kit" is an engineering question nothing here can answer - that is
+still true and is why there is no rule. But **"which cable do people who buy
+this kit buy" is a COUNTING question**, and the answer is in `sale_order_line`.
+So `aa.addon.suggestion` counts, every night, the products that appear on the
+SAME orders as each kit and the spring. Nothing is guessed: it cannot
+recommend something nobody has bought alongside, which is exactly why it can
+be trusted with a page nobody has reviewed.
+
+**THREE TIERS, IN THIS ORDER**: what HE picked (unchanged, still right by
+definition), then what his ORDERS say, then the families. His pick is never
+overruled by a count.
+
+Four things the count refuses to be fooled by, each of which would otherwise
+put a product on the website on the strength of nothing: a QUOTATION nobody
+accepted (`sale` and `done` only), a CANCELLED order, TWO LINES of the same
+product on one order (counted over DISTINCT orders, and over TEMPLATES, so two
+lengths of one track count once - the common case since the merge), and a
+DELIVERY CHARGE or down payment (services and anything unpublished are out,
+which excludes the plastic filler by the rule that already makes it
+unpublished).
+
+A recommendation fitting NONE of the four families is shown under "Often
+bought with this" rather than dropped - his families were an answer about
+cones, cables, tracks and trims, and his order book also knows about rollers
+and hinges, which are the ones nobody would have gone looking for.
+
+**THE REVIEW SCREEN IS Website > Configuration > Recommended Add-ons**, every
+pair with the number of his own orders behind it, grouped by product - one page
+instead of twelve, which is the whole of what he asked for. "Orders before
+recommending" is a SETTING (default 2, because one is an anecdote) with a
+button beside it that counts again and opens the list, because a setting
+nobody can try is a setting nobody touches.
+
+Two things that cost a run each: **raw SQL must `flush_all()` first** (it reads
+the database, not the ORM's pending writes - six tests failed on an order
+confirmed a moment earlier), and **an unset `ir.config_parameter` reads as
+`False`, where `int(False)` is a perfectly good 0** - which clamped to 1 and
+made every coincidence a recommendation. The deploy's own log line said "at 1
+orders or more".
+
+The families are the LAST FALLBACK, found by website category name (`Cones`,
 `Cables`, `Tracks`, `Trims`) with four settings under Website >
 Configuration > Settings to point elsewhere. **The fallback is for an EMPTY
 field, not an empty result**: a kit with one accessory set that happens to be
