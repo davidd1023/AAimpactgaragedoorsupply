@@ -303,3 +303,91 @@ class MrpWorkorder(models.Model):
             })
 
         return {"days": result, "more": len(ordered) > wanted}
+
+
+# --- HOW LONG JOBS TAKE, inside the Shop Floor -------------------------------
+#
+# Owner, 2026-10-27: the time report "has to be in the shop floor module
+# itself, it would be best on the history option which is found when you click
+# the 3 bars on the top right". So it is a third tab in the History dialog,
+# beside By day and Recent orders, rather than a menu in the back office
+# nobody at a bench can reach.
+#
+# ADMINS ONLY, decided on the server. The tab is hidden for everybody else,
+# but hiding a button is not a lock - these methods refuse as well, because
+# what a man takes to do his work is not for the men beside him.
+
+#: The periods the tab offers, in days.
+TIME_PERIODS = (7, 30, 90)
+
+#: How the rows may be grouped. Worker-and-task first, because it is the
+#: question that was asked: how long does Michel take per spring order.
+TIME_GROUPS = {
+    "worker_task": ["employee_id", "station_kind"],
+    "worker": ["employee_id"],
+    "task": ["station_kind"],
+    "day": ["day:day"],
+}
+
+
+class MrpWorkorderStationTimes(models.Model):
+    _inherit = "mrp.workorder"
+
+    @api.model
+    def aa_station_times_allowed(self):
+        """Whether to show the tab at all."""
+        return self.env.user.has_group("base.group_system")
+
+    @api.model
+    def aa_station_times(self, days=30, group="worker_task"):
+        """Averages for the History dialog's Times tab.
+
+        :return: {allowed, rows: [{label, average, jobs, total}], period}
+        """
+        if not self.env.user.has_group("base.group_system"):
+            return {"allowed": False, "rows": []}
+
+        days = days if days in TIME_PERIODS else 30
+        groupby = TIME_GROUPS.get(group) or TIME_GROUPS["worker_task"]
+        since = fields.Date.context_today(self) - timedelta(days=days)
+
+        rows = self.env["aa.station.time"]._read_group(
+            [("day", ">=", since)],
+            groupby,
+            ["minutes:avg", "total_minutes:sum", "__count"],
+        )
+
+        out = []
+
+        for row in rows:
+            keys = row[:len(groupby)]
+            average, total, count = row[len(groupby):]
+            out.append({
+                "label": self._aa_times_label(groupby, keys),
+                "average": self._aa_duration_words(average or 0),
+                "minutes": round(average or 0, 1),
+                "jobs": count,
+                "total": self._aa_duration_words(total or 0),
+            })
+
+        # LONGEST FIRST. The reason somebody opens this is to find where the
+        # time is going, and that is the top of the list.
+        out.sort(key=lambda entry: entry["minutes"], reverse=True)
+
+        return {"allowed": True, "rows": out, "days": days, "group": group}
+
+    @api.model
+    def _aa_times_label(self, groupby, keys):
+        """"Michel · Spring", "Michel", "Spring", "Mon 26 Oct"."""
+        kinds = dict(self.env["aa.station.time"]._fields["station_kind"].selection)
+        parts = []
+
+        for field, key in zip(groupby, keys):
+            if field == "employee_id":
+                parts.append(key.display_name if key else "Nobody signed in")
+            elif field == "station_kind":
+                parts.append(kinds.get(key, key or "Other"))
+            elif field.startswith("day"):
+                parts.append(key.strftime("%a %-d %b") if key else "")
+
+        return " · ".join(part for part in parts if part)

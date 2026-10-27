@@ -311,10 +311,22 @@ Owner, 2026-10-27: *"A dashboard from the timer history: average time per task
 type, per worker, per day. Done when: you can see how long Michel takes per
 spring order. (Only visible for admins)."*
 
-**Manufacturing > Reporting > Station Time**, beside Shop Floor History,
-`groups="base.group_system"` on the menu AND a read-only ACL - what a man
-takes to do his work is not for the men beside him. Pivot by default: workers
-down the side, tasks across the top, average minutes in the cells.
+**IT LIVES IN THE SHOP FLOOR, on the History dialog** - owner, 2026-10-27,
+correcting where I first put it: *"it has to be in the shop floor module
+itself, it would be best on the history option which is found when you click
+the 3 bars on the top right."* A tablet bolted to a bench cannot reach a
+Reporting menu in the back office. So it is a third tab, **Times**, beside By
+day and Recent orders, with rows grouped Worker & task / Worker / Task / Day
+and a 7 / 30 / 90 day period. **Worker & task is the default** because that is
+the question - "Michel · Spring, 40 min, 12 jobs" answers it in one line.
+
+A pivot also exists at Manufacturing > Reporting > Station Time for deeper
+digging. He did not ask for it; it is one menuitem to delete if it is clutter.
+
+**ADMINS ONLY, THREE TIMES OVER**: the tab is hidden unless
+`aa_station_times_allowed()` says so, both server methods refuse a non-admin,
+and the model's ACL is read-only to `base.group_system`. Hiding a button is
+not a lock - what a man takes to do his work is not for the men beside him.
 
 **IT READS THE TIMER LOG, NOT THE WORK ORDER**, and that is forced rather than
 chosen. Shop Floor History lists `mrp.workorder` and shows `duration`, which

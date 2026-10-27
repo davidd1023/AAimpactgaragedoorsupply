@@ -40,9 +40,23 @@ export class AaShopFloorHistoryDialog extends Component {
             days: [],
             more: false,
             dayLimit: 7,
+            // TIMES (owner, 2026-10-27): "average time per task type, per
+            // worker, per day", asked for here rather than in the back
+            // office because a tablet bolted to a bench cannot reach a
+            // Reporting menu.
+            timesAllowed: false,
+            times: [],
+            timeDays: 30,
+            timeGroup: "worker_task",
         });
 
         onWillStart(async () => {
+            // Whether to show the tab at all. The server refuses as well -
+            // hiding a button is not a lock.
+            this.state.timesAllowed = await this.orm.call(
+                "mrp.workorder", "aa_station_times_allowed", []
+            );
+
             if (this.state.mode === "day") {
                 await this.loadDays();
             } else {
@@ -75,10 +89,34 @@ export class AaShopFloorHistoryDialog extends Component {
         this.state.loading = false;
     }
 
+    async loadTimes() {
+        this.state.loading = true;
+        const result = await this.orm.call(
+            "mrp.workorder",
+            "aa_station_times",
+            [],
+            { days: this.state.timeDays, group: this.state.timeGroup }
+        );
+        this.state.times = result.rows || [];
+        this.state.loading = false;
+    }
+
+    async setTimePeriod(days) {
+        this.state.timeDays = days;
+        await this.loadTimes();
+    }
+
+    async setTimeGroup(group) {
+        this.state.timeGroup = group;
+        await this.loadTimes();
+    }
+
     async setMode(mode) {
         this.state.mode = mode;
         if (mode === "day") {
             await this.loadDays();
+        } else if (mode === "times") {
+            await this.loadTimes();
         } else {
             await this.loadRecent();
         }
