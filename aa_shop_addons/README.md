@@ -17,8 +17,13 @@ Accessory Products field** - right by definition, because he set it.
 
 ### Setting them, per kit
 
-> Inventory (or Sales) → Products → open the kit → **Sales** tab →
-> **eCommerce** → **Accessory Products**
+> Sales (or Inventory) → Products → open the kit → **Sales** tab →
+> **Upsell & Cross-Sell** → **Accessory Products**
+
+The group is called *Upsell & Cross-Sell*, not eCommerce - an earlier version
+of this file said eCommerce and sent the owner looking for a section that does
+not exist. The tab is hidden altogether unless the product has **Can be Sold**
+ticked, which is the other reason it can look missing.
 
 Twelve kits, `HK-1200-4P` through `HK-1800-7P`. Whatever is listed there is
 what appears under that kit, **grouped automatically** by the website category

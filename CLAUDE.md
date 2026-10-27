@@ -191,8 +191,14 @@ its panel count and nothing else; what picks one cable out of twelve is the
 door height and the drum, and what picks one track is the height, the track
 size and the colour. Asked whether to guess, show the families, or choose
 himself, he chose to choose - so the list is **Odoo's own Accessory Products
-field** on each of the twelve kits (Sales tab > eCommerce). Right by
-definition, and it also fills the cart's suggested accessories for free.
+field** on each of the twelve kits. Right by definition, and it also fills
+the cart's suggested accessories for free.
+
+**IT IS ON THE SALES TAB UNDER "UPSELL & CROSS-SELL"**, and it is hidden
+entirely unless the product has `sale_ok` ticked. I first wrote "Sales tab >
+eCommerce", which is not a section that exists, and he went looking for it on
+Prod and could not find it. The field is ODOO'S OWN and has always been there -
+nothing of ours has to be deployed before he can fill it in.
 
 The families are the FALLBACK, found by website category name (`Cones`,
 `Cables`, `Tracks`, `Trims`) with four settings under Website >
