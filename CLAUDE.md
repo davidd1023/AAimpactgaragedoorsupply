@@ -350,6 +350,38 @@ Facts read out of his own files on 2026-10-26, not to be re-derived by guessing:
   product page. The model itself comes from Sirv, which sends
   `access-control-allow-origin: *`.
 
+### LITES ARE DRAWN, NOT MODELLED (owner, 2026-10-27)
+
+*"make a test where i can see how it would look like choosing between 1-4
+lites with 1 being the default"* - with four screenshots of his order form's
+"Number of Lites". **Lites are panes ACROSS one section**, and the door is
+always four sections tall.
+
+**ONE IS WHAT HIS MODEL ALREADY IS.** Measured before any of it was written:
+every opening in the `.glb` is clear - four sections, each a single unbroken
+pane, no vertical divider anywhere. So 1 draws nothing and 2, 3 and 4 add
+one, two and three bars per section. Had it been the other way about - a
+centre stile to take OUT - it would have meant splitting his mesh apart,
+which is a different job entirely.
+
+The bars are three.js boxes using the frame's own material, so they take the
+finish and the woodgrain for free. **They are not his geometry**: dead on they
+are indistinguishable, up close at an angle they are plainer than a real
+stile. Fine for picturing a door, and if somebody is to ORDER from the
+picture it wants a properly modelled `.glb` per layout - one file per layout,
+not twenty, because the colours are swapped in the browser.
+
+**THE AXES ARE WORKED OUT, NEVER NAMED.** His file is Blender's Z-up and the
+node holding the mesh carries a quarter turn that swaps two axes on the way
+in, so the door's height is the file's Z but the world's Y. Writing either
+set of axis names into the code would be wrong half the time and silently so -
+the bars would come out lying across the door like extra rails. So
+`measureOpenings` identifies all three by what they look like: THROUGH the
+door is the thinnest, UP is the one the sections stack along (more than one
+pair of glass edges), ACROSS is the remaining one. Everything else - the
+openings, the rail thickness that sets the bar width, the frame depth - is
+measured off the model too, so a different door measures itself.
+
 ### SIRV IS BEING CANCELLED (owner, 2026-10-26)
 
 *"we dont want to be using sirv, we want to unsubscribe from them to save

@@ -205,6 +205,10 @@
   background: rgba(255, 255, 255, 0.16);
 }
 
+/* A chip with no colour to show - the lite count - needs its own breathing
+   room where the swatch would have been. */
+.aadp__chip--plain { padding: 0 13px; min-width: 38px; justify-content: center; }
+
 .aadp__dot {
   width: 15px;
   height: 15px;
