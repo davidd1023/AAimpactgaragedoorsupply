@@ -105,6 +105,81 @@ drum, track, lift, door size, weight) and each prepared lift cable pair gets a
 stop per cable). The station BoMs are NORMAL, template-level, with no components:
 the delivery still explodes the kits' and cables' own phantom BoMs.
 
+## Customer emails (`work_order_sheet`)
+
+All four the customer can receive are in one file,
+`work_order_sheet/data/customer_emails.xml` (owner, 2026-10-19: "review every
+email the customer receives" should be one thing to read): the order
+confirmation, the invoice, "ready to collect" and the cancellation. Two of the
+four are **Odoo's own records re-written in place**, so they cannot be
+abandoned - dropping the override brings Odoo's generic wall of table back
+rather than silence. `_aa_own_customer_emails` clears the `noupdate` flag on
+them, without which the bodies below do nothing at all.
+
+### THE ORDER-CONFIRMED EMAIL IS NOT SENT FOR AN ORDER ALREADY PAID
+
+Owner, 2026-10-27, having placed S00070: *"when making an order i got 2 emails
+about the invoice ... i need you to make it so that email is no longer sent"* -
+the invoice being the one to keep.
+
+He is right that they duplicate. A website order is paid at checkout, so Odoo
+confirms it and raises the invoice in the same breath, and the customer gets a
+confirmation carrying the quotation PDF and an invoice carrying the invoice
+PDF, moments apart.
+
+**BUT IT IS NOT ONLY A WEBSITE EMAIL.** A dealer placing a Quick Order charged
+to account gets it too, and that order raises NO invoice at the time - so for
+a dealer it is the only acknowledgement until "ready to collect" days later.
+Asked, the owner chose to stop it **only where the invoice follows**.
+
+So `_send_order_confirmation_mail` in
+`work_order_sheet/models/order_confirmation_email.py` asks **"has this order
+already been paid"** - a transaction in `done` or `authorized` - and not "is
+this the website". A dealer's on-account transaction sits at `pending` for
+ever, and a back office order typed by hand has no transaction, so both keep
+their confirmation. `super()` is still called, on a narrowed recordset, so
+nothing else that hooks the method is lost.
+
+### ONE CANCELLATION EMAIL PER ORDER, WHOEVER CANCELS IT
+
+Owner, 2026-10-27: *"i need you to make it so the user gets an email when
+their order is cancelled, specifically when it gets cancelled on
+manufacturing, i dont want to send multiple emails if i also have to cancel it
+again in the sales module or some other module that isn't manufacturing."*
+
+So the rule is not "send from manufacturing" - it is **send once per order,
+from whichever place gets there first**. `aa_cancel_email_sent` on sale.order
+is the stamp, written the moment the mail goes, and every path asks the same
+`_aa_send_cancellation_email()`. A flag rather than searching the chatter,
+because a message that failed to send still leaves a message.
+
+Three ways in, all in `work_order_sheet/models/order_cancelled_email.py`:
+`sale.order._action_cancel` (Sales, and everything that is not a job), the
+cancel-and-refund wizard, and `mrp.production.action_cancel` - which also
+catches the Shop Floor, since cancelling a work order there settles its
+station job through `action_cancel` too.
+
+**AN ORDER IS NOT ONE JOB.** Confirming it raises a Springs job, a Pack
+hardware kit job and a Cut lift cables job, and Odoo's route may add a
+prepared track job. Asked whether the email should go on the first job
+cancelled or the last, the owner chose **when nothing is left being made**. A
+job already DONE does not count as nothing: something was built, so that case
+stays quiet and is left to a Sales cancellation.
+
+Jobs DELETED rather than cancelled send nothing - deletion is cleanup, and the
+Shop-floor cleanup screen deletes jobs whose order has gone, where there is
+nobody to email.
+
+**THE WIZARD HOLDS THE EMAIL BACK.** It cancels the shop floor jobs FIRST and
+refunds afterwards, so without `aa_hold_cancel_email` on its first three steps
+the "$X refunded" email would go out before the refund had been attempted, and
+be a promise if it then failed.
+
+**Orders already cancelled were stamped by the 19.0.1.40.0 migration.** His
+database has orders cancelled weeks ago whose jobs still stand open, and the
+first use of the cleanup screen after this deployed would otherwise have told
+a dozen customers that a September order is cancelled.
+
 ## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
 
 *"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one
@@ -210,6 +285,149 @@ that one that states NO size (the tolerance is for spellings - "Flag Angle -
 Black"); and an angle stating the OTHER size is never substituted, because it
 does not fit. A track that does not say what size it is gets no guess. The
 setting `spring_engineering.track_prep_flag_product_id` is still the last word.
+
+## The website door preview (`aa_door_preview`)
+
+The 3D viewer on the product pages of aaimpactgaragedoor.com, which is
+**WordPress on HostGator, not Odoo** - asked which site it should run on, the
+owner chose the WordPress one (2026-10-26). So the deliverable is a plain
+self-contained bundle, and `README.md` in that module has the embed snippet and
+the file list for whoever has cPanel. **I write it; somebody else places it.**
+
+It is in this repository anyway because the container is ephemeral, and
+because Odoo serves the test page on a real origin at
+`/aa_door_preview/static/src/preview.html`. The module has no models, no views
+and no data - installing it changes nothing, and the manifest exists only so
+the addons path serves the folder.
+
+### ONE MODEL, THE COLOURS SWAPPED IN THE BROWSER
+
+His Sirv account holds **one `.glb` per combination** of frame finish and
+glass colour: all twenty, 8.84 MB each and 10.01 MB for the woodgrain ones,
+about **180 MB**, and clicking a colour downloads a whole new door.
+
+It does not need to. Every one of those files is the SAME single mesh - one
+node, seven primitives, identical to within a few dozen bytes - differing only
+in what its materials are set to, and the materials are named by role. So one
+file is loaded, kept, and recoloured, which covers all twenty combinations.
+
+**A CORRECTION, AND A LESSON.** I told him seven combinations answered 404 on
+his live site and called it the strongest argument for the rewrite. IT WAS
+WRONG. The file names are inconsistently cased - `White_Clear.glb` but
+`White_green.glb`, `Wood_Grey.glb` but `Wood_white.glb` - and I had probed one
+casing and read the 404s as missing files. All twenty exist; his viewer works.
+
+A probe that assumes a naming convention is not evidence about what exists.
+The real case for one model is 180 MB against 9 MB and instant switching, and
+that needed no invented bug to stand up.
+
+Facts read out of his own files on 2026-10-26, not to be re-derived by guessing:
+
+- **glTF `baseColorFactor` is LINEAR.** Every colour goes in through
+  `Color.fromArray`, never a hex string - a hex would come out roughly twice
+  as bright. The full table of base colours, metalness, roughness and
+  transmission is in that module's `README.md`.
+- **`Frame_bronze` is dark in EVERY file**, the white and the woodgrain ones
+  included (0.02 linear, near black), so it is a trim piece and not the frame.
+  It is left alone; painting it would change a door he has already approved.
+- **His Wood files put woodgrain on one frame piece and leave the other dark
+  bronze.** The viewer makes the whole frame woodgrain, which is the
+  consistent reading - **unconfirmed, and `FRAME_RE` is where to change it.**
+- `Frane_Black` is a typo in his Black files. `FRAME_RE` matches `fra[mn]e`,
+  so it is picked up either way.
+- `Blue_Circle` and `White_Circle` are unidentified and left untouched.
+- **three.js r137.5 and its GLTFLoader are self-hosted** in `static/lib/` for
+  the test pages, and come from a pinned jsDelivr URL in the pasted block -
+  600 KB inline is a page editor's bad afternoon, and whether Sirv returns
+  `application/javascript` for a `.js` file is not worth finding out on a live
+  product page. The model itself comes from Sirv, which sends
+  `access-control-allow-origin: *`.
+
+### SIRV IS BEING CANCELLED (owner, 2026-10-26)
+
+*"we dont want to be using sirv, we want to unsubscribe from them to save
+money so as long as this program you made works without them then we are
+good."*
+
+So **nothing may depend on Sirv.** The viewer needs exactly ONE of the
+twenty models - the rest existed only because the old viewer wanted a file
+per colour - so what moves is `White_Clear.glb` (8.8 MB) and `woodgrain.jpg`,
+into a folder on HostGator, with the block's `data-model` and `data-wood`
+pointed at them. `copy.html` has boxes for both and rewrites the block, so
+nobody hand-edits 30 KB of pasted markup.
+
+Paths must be **root-relative** (`/door-preview/White_Clear.glb`): a bare
+relative path would resolve against `/products/series-1200/` and 404. The
+content type does not matter - GLTFLoader reads an array buffer - so no MIME
+configuration is needed, and same-origin means no CORS at all.
+
+**THE BUILDER'S DEFAULTS ARE HIS SERVER, NOT SIRV, AND THAT MATTERS.**
+`copy.html` pre-fills its boxes from the block's own defaults, so while those
+defaults were Sirv URLs, re-copying the block to pick up a new feature sent
+all three product pages silently back to Sirv - which is exactly what happened
+on 2026-10-26, and would have taken the site down with the subscription. A
+default must be the destination, never the thing being decommissioned. The
+copy page now also states underneath the button where the block it just made
+will load from.
+
+A copy of `White_Clear.glb` is kept in `static/src/`. His server sends no CORS
+headers, so the test pages cannot borrow the live files, and the alternative
+was depending on the service being cancelled in order to test the thing that
+removes the dependency on it. It is also a second copy of an asset he would
+otherwise hold in one place.
+
+**Download the files before the account is cancelled.** Afterwards they cannot
+be fetched again, and the only copy of the texture in this repository is the
+re-encoded JPEG.
+
+three.js still comes from jsDelivr, which is free and not a subscription. It
+can move to HostGator too via `data-three` / `data-gltf-loader`, with no code
+change.
+
+### The colour choices fold away (owner, 2026-10-26)
+
+*"on mobile the choices block the visibility of the door so being able to hide
+them to see the door fully would be better."* The arrow at the right of the
+panel folds it to just itself in the corner. What is selected is still named
+along the top of the frame, so hiding the chips loses nothing. It starts
+OPEN - the choices are the point of the page, and a viewer that opens with
+them hidden does not look like a configurator.
+
+### ONE ELEMENTOR TEMPLATE SERVES ALL THREE SERIES PAGES
+
+The viewer block lives in the Theme Builder template **"Product Single
+Page"**, not in the three pages, so pasting it once reaches
+`/products/series-1200/`, `-1600/` and `-1800/` together. The old Sirv
+widgets were in that template too, which is why deleting them while editing
+the 1200 took them off all three at once.
+
+Expect that whenever a change seems to have applied to pages nobody touched -
+it is the template, and it is correct. Anything genuinely per-series goes on
+the page, or on the block as `data-frames` / `data-glasses`.
+
+**Verified clean on 2026-10-26**, every page reachable from the homepage
+crawled: no page requests Sirv. `scripts.sirv.com/sirvjs/v3/sirv.js` is
+Sirv's public library and answers 200 without an account, so the leftover
+widget would not have broken anything - it was 590 KB a visit for nothing.
+
+### THE PRODUCT PAGES ARE ELEMENTOR, SO THE BLOCK CARRIES NO `<script src>`
+
+An Elementor HTML widget does not have its markup parsed with the page: it is
+set as `innerHTML`, and setting `innerHTML` **never executes an external
+script**. The inline script is picked back out and re-run. So the first
+attempt showed the viewer's own "could not load its renderer" message - its
+code was running fine and three.js had simply never arrived (owner,
+2026-10-26, with a screenshot of the Elementor editor).
+
+`door_preview.js` therefore appends the library scripts itself, and leaves
+`var THREE` null until they are in rather than reading it at parse time, when
+there is nothing to read. **Putting script tags back in the snippet restores
+the bug.** `static/src/elementor_test.html` reproduces that injection path on
+purpose, so this never has to be diagnosed from a live page again.
+
+The whole block is GENERATED by `tools/build_embed.py` from the stylesheet and
+the script. Editing it by hand is how the website comes to differ from the
+module, and then a fix made here stays broken there.
 
 ## Git
 

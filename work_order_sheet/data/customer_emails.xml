@@ -70,7 +70,15 @@
   <!-- 1. THE ORDER CONFIRMATION. Odoo's own is a wall of generated table; this
           says the order is in, what it is called here, and where to collect
           it. The quotation report is still attached, which is where the
-          customer looks for the figures. -->
+          customer looks for the figures.
+
+          NOT SENT FOR AN ORDER PAID AT CHECKOUT (owner, 2026-10-27: "i got 2
+          emails about the invoice"). A paid order raises its invoice at once,
+          and that email says the same thing moments later. A dealer's
+          on-account order raises no invoice, so it still gets this one. The
+          rule is in models/order_confirmation_email.py; the wording stays
+          here because the record is Odoo's own and leaving it alone would
+          only mean Odoo's generic version goes out instead. -->
   <record id="sale.mail_template_sale_confirmation" model="mail.template">
     <field name="subject">Order {{ object.name }} is confirmed{{ object._aa_email_wo_label() and ' - %s' % object._aa_email_wo_label() or '' }}</field>
     <field name="lang">en_US</field>

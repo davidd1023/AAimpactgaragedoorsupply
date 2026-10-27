@@ -6,5 +6,7 @@ from . import res_config_settings
 from . import sale_order_cancel
 from . import wo_number
 from . import email_letterhead
+from . import order_confirmation_email
+from . import order_cancelled_email
 from . import dispatched
 from . import auto_dispatch
