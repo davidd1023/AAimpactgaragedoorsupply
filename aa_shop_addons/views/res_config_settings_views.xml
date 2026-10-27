@@ -36,6 +36,28 @@
               </div>
             </div>
           </setting>
+
+          <!-- THE AUTOMATIC PART (owner, 2026-10-27): "automate a system that
+               will recommend additional products ... this way i wont have to
+               individually go into every products page". One number and one
+               button; the counting itself happens every night. -->
+          <setting string="Recommend from your own orders"
+                   help="Under every kit and the custom spring, recommend the
+                         products your own orders say are bought alongside.
+                         Counted every night. A product with its own
+                         Alternative Products set still shows those instead.">
+            <div class="content-group mt-2">
+              <div class="row">
+                <label for="aa_addon_min_orders" class="col-6 col-lg-5 o_light_label"/>
+                <field name="aa_addon_min_orders" class="oe_inline"/>
+              </div>
+              <div class="mt-2">
+                <button name="action_aa_addon_rebuild" type="object"
+                        string="Count the orders now and show me"
+                        class="btn-link" icon="fa-refresh"/>
+              </div>
+            </div>
+          </setting>
         </block>
       </xpath>
 

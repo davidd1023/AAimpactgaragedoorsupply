@@ -20,10 +20,24 @@ one place to fill in rather than three that look alike (owner, 2026-10-27:
 "we only want the alternative products choice"). It is a Many2many of
 TEMPLATES rather than variants, which is also what this shows.
 
-THE FAMILIES ARE THE FALLBACK. A kit he has not got to yet shows the right
-KINDS - here are the cables, here are the tracks - rather than an empty space
-under it. That way the page is never blank and never wrong, it is just less
-specific until somebody makes it specific.
+THEN HE ASKED FOR IT WITHOUT THE TYPING (2026-10-27): *"could you automate a
+system that will recommend additional products the same way that the
+alternative product thing works. this way i wont have to individually go into
+every products page."* So there are now THREE tiers, in this order:
+
+  1. WHAT HE PICKED, if he picked anything. Unchanged, and still right by
+     definition.
+  2. WHAT HIS OWN ORDERS SAY, counted from `sale_order_line` - see
+     `addon_suggestion.py`. Not a rule about garage doors: a rule about his
+     shop. It cannot recommend something nobody has bought alongside, which
+     is exactly why it can be trusted with a page nobody has reviewed.
+  3. THE FAMILIES, as before.
+
+THE FAMILIES ARE THE LAST FALLBACK. A kit nobody has got to AND nobody has
+bought twice shows the right KINDS - here are the cables, here are the tracks -
+rather than an empty space under it. That way the page is never blank and never
+wrong, it is just less specific until either he or the order book makes it
+specific.
 
 TEMPLATES ARE SHOWN, NOT VARIANTS. A track is one product with twenty
 length-and-colour combinations behind it (the catalogue merge, 2026-10-21), so
@@ -110,6 +124,32 @@ class ProductTemplate(models.Model):
 
         return categories.search([("name", "=ilike", label)], limit=1)
 
+    def _aa_addon_source(self):
+        """("picked" | "learned" | "families", the products or None).
+
+        THE ORDER IS THE WHOLE DESIGN. His own pick first, because he said so.
+        Then what his orders have been saying all year, which is the automatic
+        part he asked for. Then the families, which are never wrong and never
+        specific.
+        """
+        self.ensure_one()
+
+        # WHETHER HE CHOSE, NOT WHETHER THE CHOICE SURVIVED. A kit with one
+        # product set that happens to be unpublished has still been got to,
+        # and falling back there would answer his one deliberate pick with
+        # every cable in the catalogue. The fallback is for an EMPTY field.
+        if self.alternative_product_ids:
+            return "picked", self.alternative_product_ids.filtered(
+                lambda product: product.is_published
+                and product.id != self.id)
+
+        learned = self.env["aa.addon.suggestion"]._aa_for(self)
+
+        if learned:
+            return "learned", learned
+
+        return "families", None
+
     def _aa_addon_groups(self):
         """[{key, label, note, products, category}] to show under this page.
 
@@ -123,13 +163,7 @@ class ProductTemplate(models.Model):
         if not role:
             return []
 
-        # WHETHER HE CHOSE, NOT WHETHER THE CHOICE SURVIVED. A kit with one
-        # product set that happens to be unpublished has still been got to,
-        # and falling back there would answer his one deliberate pick with
-        # every cable in the catalogue. The fallback is for an EMPTY field.
-        chosen = self.alternative_product_ids
-        picked = chosen.filtered(
-            lambda product: product.is_published and product.id != self.id)
+        source, picked = self._aa_addon_source()
         groups = []
 
         for key, label in FAMILIES:
@@ -138,10 +172,12 @@ class ProductTemplate(models.Model):
             if not category:
                 continue
 
-            if chosen:
-                # HIS CHOICE, SORTED INTO FAMILIES. The grouping is by the
+            if picked is not None:
+                # SORTED INTO FAMILIES, whoever chose. The grouping is by the
                 # website category the product is already in, so adding one
-                # never also means saying which heading it goes under.
+                # never also means saying which heading it goes under - and a
+                # learned list keeps its order inside each family, commonest
+                # first, because `filtered` does not reshuffle a recordset.
                 products = picked.filtered(lambda p: category in p.public_categ_ids)
             else:
                 products = self.env["product.template"].search([
@@ -163,10 +199,15 @@ class ProductTemplate(models.Model):
                 "category": category,
             })
 
-        # ANYTHING HE PICKED THAT IS IN NONE OF THE FAMILIES still belongs on
-        # the page. Dropping it silently would make the field lie: he set a
-        # product and the page did not show it.
-        if chosen:
+        # ANYTHING IN NONE OF THE FAMILIES still belongs on the page.
+        #
+        # For a list HE set, dropping one silently would make the field lie:
+        # he put a product in and the page did not show it. For a LEARNED
+        # list it is more than that - the four families were his answer to a
+        # question about cones, cables, tracks and trims, and his order book
+        # knows about rollers, hinges and drums as well. Those are the ones
+        # he would never have gone looking for.
+        if picked is not None:
             placed = self.env["product.template"]
 
             for group in groups:
@@ -177,7 +218,8 @@ class ProductTemplate(models.Model):
             if rest:
                 groups.append({
                     "key": "other",
-                    "label": "Also needed",
+                    "label": "Also needed" if source == "picked"
+                             else "Often bought with this",
                     "note": "",
                     "products": rest[:SHOWN],
                     "more": len(rest) > SHOWN,
