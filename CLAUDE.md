@@ -233,6 +233,48 @@ not follow the SKU.
 
 **NOT IN `garage_door_supply`**, for the homepage reason below.
 
+## Pickup slots (`aa_pickup_slots`)
+
+Owner, 2026-10-27: *"At checkout, the customer picks a pickup day and time
+window, and it shows on the Work Order and in Dispatch ... Our lead time is 2
+labor days, after those 2 days they choose when to pick up."*
+
+Three answers he gave when asked, each of which changed what got built:
+
+- **THE LEAD TIME STARTS THE NEXT WORKING DAY AND TAKES TWO WHOLE ONES.** An
+  order placed **Monday** is collectable from **THURSDAY**; one placed Friday
+  starts Monday and is collectable Wednesday. The day the order is placed
+  never counts - an order placed at ten to five has had none of it.
+- **TWO-HOUR WINDOWS**: 8-10, 10-12, 12-2, 2-4:30.
+- **PICKUP ORDERS ONLY, AND REQUIRED.** A delivery is never asked; a
+  collection cannot be PAID FOR without a slot, so nothing reaches Dispatch
+  blank for somebody to chase by telephone.
+
+**A CHECKBOX SAYS WHICH DELIVERY METHODS ARE COLLECTIONS** - `aa_is_pickup`
+on `delivery.carrier`, ticked once at install for anything that already reads
+as one (`in_store`, or a name with *pickup* / *pick up* / *collect* in it) and
+his after that. **No name matching at runtime**: a rule that cannot be turned
+off is worse than a box somebody ticks, because the day "Pickup rate for
+freight" is added it would start demanding slots with no way to refuse.
+
+**THE TRANSFER STORES ITS OWN COPY of the day and window**, written at
+confirmation. The Dispatch list is a list of transfers and the first thing
+anybody wants is to SORT BY the pickup time - who is coming this morning - and
+a related field through `sale_id` cannot be ordered on in the database. The
+trade is that a slot changed after confirmation needs writing again.
+
+Closed days (holidays) are a setting under Website > Configuration >
+Settings; a mistyped date is ignored rather than raising, because a checkout
+that 500s over a fat-fingered holiday is worse than a day staying open.
+
+**A TEST THAT PASSED FOR THE WRONG REASON, and the lesson.** The one proving
+payment is refused without a slot used a bare `assertRaises(ValidationError)`
+and passed because ODOO'S OWN check - "the delivery method is not compatible
+with your delivery address" - raised first, our code never running. It asserts
+the message now, and the carrier in the fixture is `website_published` so
+Odoo's checks pass and ours is actually reached. `super()` is called FIRST on
+purpose: there is no point asking for a slot on a cart that is broken anyway.
+
 ## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
 
 *"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one
