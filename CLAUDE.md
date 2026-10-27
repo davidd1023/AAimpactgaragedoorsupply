@@ -619,26 +619,33 @@ Facts read out of his own files on 2026-10-26, not to be re-derived by guessing:
   it); White restores what the file was built with, captured on load rather
   than typed in. Both materials were checked against the mesh first: they sit
   on the back face, at both side edges, up the height of the door.
-- **`Silver` IS THE "SMALL FLOATING SQUARES"** - owner, 2026-10-27: *"there
-  are some small floating squares on the front side of the door ... change
-  the color of those squares to always be black, unless the door is white in
-  which case they should be white, just like the rollers."* FOUND BY
-  MEASURING, NOT FROM A PICTURE he offered: of the six materials, three were
-  already recoloured and `Frame_bronze` is one thin strip across the bottom
-  edge, so `Silver` was the only one left - and the only one whose colour
-  never changed with the door (0.75 grey at 0.98 metalness, chrome against
-  every finish). It is where he said, too: the ONLY geometry standing in
-  front of the door's face is at the two side edges, FIVE PIECES UP EACH
-  SIDE, one per section joint, made of `Silver` and the frame material
-  together - the frame half already took the door's colour and the Silver
-  half stayed bright. **It paints ALL of `Silver`** - 172,775 vertices of
-  hinges, brackets and track, most of it behind the door - because a
-  primitive cannot be half painted without cutting the mesh apart. **The
-  METALNESS is dropped** to the frame's own, which is the half that matters:
-  a black material at 0.98 metalness is not black, it is a mirror, and the
-  squares would come back dark chrome instead of bright. **White is WRITTEN,
-  not restored**, unlike the rollers - restoring what this one was built with
-  would put the chrome back, which is the thing he asked to be rid of.
+- **THE "SMALL FLOATING SQUARES" ARE A PRIMITIVE, NOT A MATERIAL**, and
+  reasoning from the material list alone got it wrong once. Owner,
+  2026-10-27: *"there are some small floating squares on the front side of
+  the door ... change the color of those squares to always be black, unless
+  the door is white in which case they should be white, just like the
+  rollers"* - and he OFFERED A PICTURE. I declined it and reasoned instead:
+  of the six materials, three are already recoloured and `Frame_bronze` is
+  the bottom seal, so `Silver` was the only one left and the only one whose
+  colour never changed. Painting it turned every hinge, bracket and the track
+  black - *"what you changed the color of was all the parts which is not what
+  i wanted"* - and the square in the picture he then sent is WOODGRAIN. Frame
+  material. **TAKE THE PICTURE WHEN IT IS OFFERED.**
+  His mesh carries the frame material TWICE: one primitive of 8,083 vertices
+  is the real frame, centred and 2.0 thick, and another of 3,791 is TEN
+  BLOCKS AND NOTHING ELSE - five up the left edge, five up the right, one at
+  each section joint - reaching out to 3.8 where the face is at 1.0. They
+  stand a whole door-thickness proud of it, which is why they look detached.
+  They are found BY SHAPE: the biggest frame mesh is the door, and any other
+  frame mesh reaching well beyond it along the door's own thin axis is one of
+  these (measured 0.106 past the face against a 0.038 threshold). No axis
+  names and no primitive indices are written down, so a different model
+  measures itself. **The material is CLONED first** - glTF shares one between
+  the door and the squares, and three.js hands back the same object, so
+  painting it in place paints the whole door. **The map is cleared too**, or
+  a woodgrain door keeps woodgrain squares. **White is WRITTEN, not
+  restored**, unlike the rollers: the point is to stop them taking the
+  finish.
 - **three.js r137.5 and its GLTFLoader are self-hosted** in `static/lib/` for
   the test pages, and come from a pinned jsDelivr URL in the pasted block -
   600 KB inline is a page editor's bad afternoon, and whether Sirv returns

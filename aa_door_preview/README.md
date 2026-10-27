@@ -40,7 +40,7 @@ The materials are named by role, which is the part that makes this work:
 
 | material | what it is | this viewer |
 |---|---|---|
-| `Silver` | hardware and track, metalness 0.98 as built | **black unless the frame is White**, and no longer metal |
+| `Silver` | hardware and track, metalness 0.98 | left alone |
 | `Frame_white` / `Frane_Black` / `Frame_woodgrain` | the door's frame | **recoloured** |
 | `Frame_bronze` | a piece that is dark (0.02 linear) in *every* one of his files, white and woodgrain included | left alone |
 | `Glass_clear` / `_White` / `_green` / `_bronze` / `_grey` | the glazing, `KHR_materials_transmission` | **recoloured** |
@@ -95,32 +95,44 @@ so it is reproduced rather than corrected.
 4. **`Frane_Black`** is a typo in the Black files. Harmless; `FRAME_RE` matches
    `fra[mn]e` so it is picked up either way. Worth fixing at the source if
    those files are ever re-exported.
-5. **`Silver` is the "small floating squares"** (owner, 2026-10-27: *"there are
-   some small floating squares on the front side of the door ... change the
-   color of those squares to always be black, unless the door is white in which
-   case they should be white, just like the rollers"*), and it was identified by
-   measuring, not from a picture. Of the six materials, three were already
-   recoloured and `Frame_bronze` is one thin strip across the bottom edge - not
-   squares. `Silver` was the only one left, and the only one whose colour never
-   changed with the door: a 0.75 grey at 0.98 metalness, chrome against every
-   finish. It is also exactly where he said: **the only geometry standing in
-   front of the door's face is at the two side edges, five pieces up each side,
-   one per section joint**, made of `Silver` and the frame material together -
-   the frame half already took the door's colour and the Silver half stayed
-   bright.
+5. **The "small floating squares" are a PRIMITIVE, not a material** (owner,
+   2026-10-27, with a screenshot: *"there are some small floating squares on the
+   front side of the door ... change the color of those squares to always be
+   black, unless the door is white in which case they should be white, just like
+   the rollers"*).
 
-   Two things to know before changing it:
+   **The first attempt got this wrong** by reasoning from the material list
+   alone: `Silver` was the only material never recoloured, so `Silver` looked
+   like the answer, and painting it turned every hinge, bracket and the track
+   black. His reply - *"what you changed the color of was all the parts which is
+   not what i wanted"* - came with the picture, and the square in it is
+   **woodgrain**. Frame material. A material-shaped answer was never going to
+   reach it.
 
-   - **It paints all of `Silver`, not only the squares.** That primitive is
-     172,775 vertices covering the hinges, brackets and track, most of it
-     *behind* the door, and a primitive cannot be half painted without cutting
-     the mesh apart. Black hardware on a black door is right anyway.
-   - **The metalness is dropped to the frame's own**, which is the half that
-     matters. A black material at 0.98 metalness is not black, it is a mirror -
-     the squares would come back as dark chrome instead of bright chrome.
-   - **White is written, not restored**, unlike the rollers. Restoring what
-     this material was built with would put the chrome back, which is the thing
-     he asked to be rid of.
+   His mesh carries the frame material **twice**:
+
+   | primitive | what it is | extent across the door's thin axis |
+   |---|---|---|
+   | the big one, 8,083 verts | the real frame - stiles and rails | centred, 2.0 thick |
+   | the other, 3,791 verts | **ten blocks and nothing else** - five up the left edge, five up the right, one at each section joint | reaches out to 3.8, where the face is at 1.0 |
+
+   So they stand a whole door-thickness proud of the face, which is exactly why
+   they read as squares hanging in the air.
+
+   - **They are found by SHAPE, not by name.** The biggest frame mesh is the
+     door; any other frame mesh reaching well beyond it along the door's own
+     thin axis is one of these. No axis names, no vertex counts and no
+     primitive indices are written down, so a different model measures itself -
+     the same rule the lite bars are placed by. Measured: they reach **0.106**
+     past the face where the threshold is **0.038**, so the margin is close to
+     three times over.
+   - **The material is CLONED first.** glTF shares one material between the
+     door and the squares and three.js hands back the same object for both, so
+     painting it where it stands would paint the whole door black.
+   - **The map is cleared as well as the colour**, or a woodgrain door would
+     keep woodgrain squares.
+   - **White is written, not restored**, unlike the rollers - the point is to
+     stop them taking the door's finish.
 
 ## GETTING OFF SIRV (owner, 2026-10-26)
 

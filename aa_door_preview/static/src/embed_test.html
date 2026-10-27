@@ -9,7 +9,7 @@
 <body>
 
 <!-- =====================================================================
-     SERIES 1200 DOOR PREVIEW            build e3816038
+     SERIES 1200 DOOR PREVIEW            build 433e56d9
      Paste this whole block into the Elementor HTML widget on the product
      page, in place of the current viewer.
 
@@ -312,7 +312,7 @@
  * only in what its materials are set to. The materials are named by role,
  * which is what makes this possible:
  *
- *     Silver            the hardware and track          black unless White
+ *     Silver            the hardware and track          left alone
  *     Frame_white       the door's frame                 recoloured
  *     Frane_Black       ditto, in the Black files        (his typo, matched)
  *     Frame_woodgrain   ditto, with a texture
@@ -376,39 +376,42 @@
    * hole. Nearly black still catches the highlight that makes it round. */
   var BLACK_ROLLER = [0.02, 0.02, 0.02];
 
-  /* THE HARDWARE - "some small floating squares on the front side of the
-   * door" (owner, 2026-10-27), to go "always black, unless the door is white
-   * in which case they should be white, just like the rollers".
+  /* THE SMALL SQUARES THAT LOOK LIKE THEY ARE FLOATING IN FRONT OF THE DOOR.
    *
-   * THE MATERIAL IS `Silver`, and it was found by measuring rather than by
-   * looking at a picture. Of the six materials in his file, three are already
-   * recoloured (frame, glass, rollers) and `Frame_bronze` is the bottom seal -
-   * one thin strip across the full width at the very bottom edge, not
-   * squares. `Silver` is the only one left, and it is the only one whose
-   * colour never changed with the door: a 0.75 grey at 0.98 metalness, which
-   * is shiny chrome against every finish he offers.
+   * Owner, 2026-10-27, with a screenshot: *"there are some small floating
+   * squares on the front side of the door ... change the color of those
+   * squares to always be black, unless the door is white in which case they
+   * should be white, just like the rollers."*
    *
-   * AND IT IS WHERE HE SAYS IT IS. The only geometry standing in FRONT of the
-   * door's face is at the two side edges, five pieces up each side - one at
-   * every section joint - and it is made of `Silver` and the frame material
-   * together. The frame half already took the door's colour; the Silver half
-   * stayed chrome, which is exactly a row of small bright squares that look
-   * like they are floating.
+   * THEY ARE NOT A MATERIAL OF THEIR OWN, which is the whole difficulty, and
+   * the first attempt at this painted the `Silver` hardware instead - all of
+   * it, the hinges and the track included - which is not what he asked for
+   * and he said so.
    *
-   * THIS PAINTS ALL OF IT, not only the squares. `Silver` is one primitive of
-   * 172,775 vertices covering the hinges, brackets and track, most of it
-   * BEHIND the door - and a primitive cannot be half painted without cutting
-   * his mesh apart. Black hardware on a black door is right anyway, and it is
-   * the rule he gave.
+   * They are a PRIMITIVE. His mesh holds the frame material twice: one
+   * primitive is the real frame, centred on the door and 2.0 thick, and the
+   * other is TEN SMALL BLOCKS and nothing else - five up the left edge and
+   * five up the right, one at each section joint, each about 2 x 2 x 4.6 and
+   * reaching out to X 3.8 where the door's own face is at 1.0. They stand a
+   * whole door-thickness proud of it, which is why they read as detached
+   * squares hanging in the air.
    *
-   * NOT METAL ANY MORE, which is the half of this that matters. A black
-   * material at 0.98 metalness is not black - it is a mirror, and it would
-   * come back as dark chrome squares in place of bright ones. They take the
-   * frame's own finish so they read as part of the door. */
-  var HARDWARE_RE = /^silver$/i;
-  var BLACK_HARDWARE = [0.02, 0.02, 0.02];
-  var WHITE_HARDWARE = [1, 1, 1];
-  var HARDWARE_FINISH = { metalness: 0.282, roughness: 0.550 };
+   * SO THEY ARE FOUND BY SHAPE, NOT BY NAME. Among the frame's meshes, the
+   * biggest one is the door; any other that reaches well beyond it, along
+   * the door's own thin axis, is one of these. That needs no axis names and
+   * no vertex counts typed in here, so a different model measures itself -
+   * the same rule the lite bars are placed by.
+   *
+   * Their material is CLONED before it is painted. glTF shares one material
+   * between both primitives and three.js hands back the same object for
+   * both, so painting it in place would paint the whole door black. */
+  var BLACK_FLOATER = [0.02, 0.02, 0.02];
+  var WHITE_FLOATER = [1, 1, 1];
+
+  /* How far beyond the door's own face a piece has to reach before it counts
+   * as one of them, as a fraction of the door's thickness. Half: these reach
+   * 1.4 times it, and nothing else reaches at all. */
+  var FLOATER_SLACK = 0.5;
 
   var FRAMES = [
     { id: "white",  name: "White",  swatch: "#f1f1ef",
@@ -627,7 +630,8 @@
     var frameMats = [];
     var glassMats = [];
     var rollerMats = [];
-    var hardwareMats = [];
+    var floaterMeshes = [];
+    var floaterMats = [];
     var glassMeshes = [];
     var frameMeshes = [];
     var woodTexture = null;
@@ -682,28 +686,99 @@
       });
 
       applyRollers(choice);
-      applyHardware(choice);
+      applyFloaters(choice);
       label();
     }
 
-    /* THE HARDWARE FOLLOWS THE FRAME THE SAME WAY (owner, 2026-10-27, of the
-     * small squares along the front edges: "always be black, unless the door
-     * is white in which case they should be white, just like the rollers").
+    /* THE FLOATING SQUARES FOLLOW THE SAME RULE AS THE ROLLERS (owner,
+     * 2026-10-27: "always be black, unless the door is white in which case
+     * they should be white, just like the rollers").
      *
-     * WHITE IS WRITTEN, NOT RESTORED, and that is the one place this differs
-     * from the rollers. The rollers put back what the file was built with,
-     * because that is a door he has already approved. Putting back what this
-     * was built with would put the chrome back, which is the thing he asked
-     * to be rid of - so White means white. */
-    function applyHardware(choice) {
+     * AND THEY NEVER TAKE THE WOODGRAIN. They are the frame's material by
+     * accident of how the model was built, not because they are frame - the
+     * screenshot that started this is of a woodgrain one - so the map is
+     * cleared as well as the colour. Leaving the texture on would put a wood
+     * square back on a black door. */
+    function applyFloaters(choice) {
       var white = choice.id === "white";
 
-      hardwareMats.forEach(function (m) {
-        m.color.fromArray(white ? WHITE_HARDWARE : BLACK_HARDWARE);
-        m.metalness = HARDWARE_FINISH.metalness;
-        m.roughness = HARDWARE_FINISH.roughness;
+      floaterMats.forEach(function (m) {
+        m.map = null;
+        m.color.fromArray(white ? WHITE_FLOATER : BLACK_FLOATER);
         m.needsUpdate = true;
       });
+    }
+
+    /* WHICH OF THE FRAME'S MESHES ARE THE SQUARES, worked out from the model.
+     *
+     * The biggest frame mesh is the door. Anything else carrying the frame's
+     * material that reaches well beyond it along the door's own thin axis is
+     * standing proud of the face, and that is what these are: ten blocks at
+     * the section joints, five up each side edge, reaching out past the face
+     * by nearly the thickness of the door again.
+     *
+     * Done once, after the model is in the scene and its matrices are up to
+     * date, and BEFORE the first colour is applied - so the frame list never
+     * holds a material that is about to be painted black. */
+    function findFloaters() {
+      if (frameMeshes.length < 2) { return; }
+
+      var main = frameMeshes[0];
+
+      frameMeshes.forEach(function (mesh) {
+        if (vertexCount(mesh) > vertexCount(main)) { main = mesh; }
+      });
+
+      var door = new THREE.Box3().setFromObject(main);
+      var size = door.getSize(new THREE.Vector3());
+      var axis = thinnestAxis(size);
+      var slack = size[axis] * FLOATER_SLACK;
+      var frame = [];
+
+      frameMeshes.forEach(function (mesh) {
+        var box = new THREE.Box3().setFromObject(mesh);
+        var proud = Math.max(box.max[axis] - door.max[axis],
+                             door.min[axis] - box.min[axis]);
+
+        if (mesh === main || proud <= slack) {
+          frame.push(mesh);
+          return;
+        }
+
+        /* CLONED. glTF shares one material between the door and these, and
+         * three.js hands back the same object for both - so painting it
+         * where it stands would paint the whole door black. */
+        mesh.material = mesh.material.clone();
+        floaterMeshes.push(mesh);
+
+        if (floaterMats.indexOf(mesh.material) === -1) {
+          floaterMats.push(mesh.material);
+        }
+      });
+
+      /* Rebuilt rather than spliced, so this is right whether or not the
+       * loader happened to share the material in the first place. */
+      frameMeshes.length = 0;
+      frameMats.length = 0;
+      frame.forEach(function (mesh) {
+        frameMeshes.push(mesh);
+        if (frameMats.indexOf(mesh.material) === -1) {
+          frameMats.push(mesh.material);
+        }
+      });
+    }
+
+    function vertexCount(mesh) {
+      var position = mesh.geometry && mesh.geometry.attributes &&
+                     mesh.geometry.attributes.position;
+
+      return position ? position.count : 0;
+    }
+
+    function thinnestAxis(size) {
+      if (size.x <= size.y && size.x <= size.z) { return "x"; }
+
+      return size.y <= size.z ? "y" : "z";
     }
 
     /* THE ROLLERS FOLLOW THE FRAME (owner, 2026-10-27: "all colors except
@@ -1022,9 +1097,6 @@
               m.userData.aaAsBuilt = m.color.clone();
               rollerMats.push(m);
             }
-          } else if (HARDWARE_RE.test(name)) {
-            m.envMapIntensity = 0.85;
-            if (hardwareMats.indexOf(m) === -1) { hardwareMats.push(m); }
           } else {
             m.envMapIntensity = 0.85;
           }
@@ -1073,6 +1145,7 @@
       liteGroup = new THREE.Group();
       scene.add(liteGroup);
 
+      findFloaters();
       applyFrame(frames[0]);
       applyGlass(glasses[0]);
       applyLites(lites);   /* draws nothing at 1, which is the model as built */
@@ -1338,7 +1411,7 @@
  * and a stale copy of this block looks exactly like a fix that did not work -
  * which cost a round trip on 2026-10-26. The test pages print this, so an old
  * copy announces itself instead of being guessed at. */
-if (window.AADoorPreview) { window.AADoorPreview.built = "e3816038"; }
+if (window.AADoorPreview) { window.AADoorPreview.built = "433e56d9"; }
 </script>
 
 </body>
