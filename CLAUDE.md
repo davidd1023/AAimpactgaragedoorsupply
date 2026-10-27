@@ -190,15 +190,25 @@ its correct add-ons."*
 its panel count and nothing else; what picks one cable out of twelve is the
 door height and the drum, and what picks one track is the height, the track
 size and the colour. Asked whether to guess, show the families, or choose
-himself, he chose to choose - so the list is **Odoo's own Accessory Products
-field** on each of the twelve kits. Right by definition, and it also fills
-the cart's suggested accessories for free.
+himself, he chose to choose - so the list is **Odoo's own Alternative
+Products field** on each of the twelve kits. Right by definition.
 
 **IT IS ON THE SALES TAB UNDER "UPSELL & CROSS-SELL"**, and it is hidden
 entirely unless the product has `sale_ok` ticked. I first wrote "Sales tab >
 eCommerce", which is not a section that exists, and he went looking for it on
 Prod and could not find it. The field is ODOO'S OWN and has always been there -
 nothing of ours has to be deployed before he can fill it in.
+
+**ONE BOX IN THAT GROUP, NOT THREE** (owner, 2026-10-27: *"we only want the
+alternative products choice, you can get rid of the other two, that being
+optional products and accesory products"*). This first used Accessory
+Products; Alternative is the better fit anyway, because Odoo's own help for it
+says those products "show up on the product page", which is where these go -
+Accessory feeds the CART and Optional feeds a QUOTATION. The other two are
+HIDDEN, not deleted, by `views/product_views.xml`; whatever is in them still
+works for anything that reads it. Alternative Products is also a Many2many of
+TEMPLATES rather than variants, so one entry covers a track with all twenty
+combinations behind it.
 
 The families are the FALLBACK, found by website category name (`Cones`,
 `Cables`, `Tracks`, `Trims`) with four settings under Website >

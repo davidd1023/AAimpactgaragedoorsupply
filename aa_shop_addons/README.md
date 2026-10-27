@@ -13,25 +13,34 @@ picks one track is the height, the track size and the colour. None of those
 live on the kit, so any rule the code invented would be confidently wrong.
 
 Asked, the owner chose to set them himself, so the list is **Odoo's own
-Accessory Products field** - right by definition, because he set it.
+Alternative Products field** - right by definition, because he set it.
 
 ### Setting them, per kit
 
 > Sales (or Inventory) → Products → open the kit → **Sales** tab →
-> **Upsell & Cross-Sell** → **Accessory Products**
+> **Upsell & Cross-Sell** → **Alternative Products**
 
 The group is called *Upsell & Cross-Sell*, not eCommerce - an earlier version
 of this file said eCommerce and sent the owner looking for a section that does
 not exist. The tab is hidden altogether unless the product has **Can be Sold**
 ticked, which is the other reason it can look missing.
 
+**There is only one box in that group now.** It shipped with three that all
+look like the same question - Alternative, Accessory and Optional Products -
+and the owner had the other two hidden (2026-10-27): *"we only want the
+alternative products choice."* Alternative is also the right one on its own
+merits: Odoo's help for it says those products "show up on the product page",
+which is where these go. Accessory feeds the cart; Optional feeds a quotation.
+Hidden, not deleted - whatever is in them is still there and still works for
+anything that reads it. `views/product_views.xml` is the whole of it.
+
 Twelve kits, `HK-1200-4P` through `HK-1800-7P`. Whatever is listed there is
 what appears under that kit, **grouped automatically** by the website category
 each product is already in - so adding a cable never also means saying it
 belongs under "Cables".
 
-That field is Odoo's own, so the products also appear as suggested accessories
-in the cart. That is a bonus, not a side effect to undo.
+That field is Odoo's own and holds **product templates**, so one entry covers
+a track with all twenty of its length-and-colour combinations behind it.
 
 ## The fallback
 

@@ -91,28 +91,28 @@ class ShopAddonsCase(TransactionCase):
     def test_what_he_picked_beats_the_families(self):
         """THE WHOLE POINT. Asked how a kit should know its add-ons, the
         owner chose to set them himself - so a kit with a list shows that
-        list and nothing else."""
-        self.kit.accessory_product_ids = [
-            (6, 0, self.cable.product_variant_id.ids)]
+        list and nothing else. Alternative Products, which is the one box he
+        kept: "we only want the alternative products choice"."""
+        self.kit.alternative_product_ids = [(6, 0, self.cable.ids)]
 
         self.assertEqual(self._labels(self.kit), ["Cables"])
         self.assertEqual(self._group(self.kit, "Cables")["products"],
                          self.cable)
 
     def test_his_pick_is_sorted_into_the_families_by_itself(self):
-        """Setting an accessory must not also mean saying which heading it
+        """Setting one must not also mean saying which heading it
         belongs under - the product already says, by the category it is in."""
-        self.kit.accessory_product_ids = [(6, 0, (
-            self.cable.product_variant_id | self.track.product_variant_id).ids)]
+        self.kit.alternative_product_ids = [
+            (6, 0, (self.cable | self.track).ids)]
 
         self.assertEqual(self._labels(self.kit), ["Cables", "Tracks"])
 
     def test_something_in_no_family_is_still_shown(self):
-        """Otherwise the field would lie: he set an accessory and the page
+        """Otherwise the field would lie: he set a product and the page
         did not show it."""
         odd = self.env["product.template"].create({
             "name": "Weatherseal", "type": "consu", "is_published": True})
-        self.kit.accessory_product_ids = [(6, 0, odd.product_variant_id.ids)]
+        self.kit.alternative_product_ids = [(6, 0, odd.ids)]
 
         self.assertEqual(self._labels(self.kit), ["Also needed"])
         self.assertEqual(self._group(self.kit, "Also needed")["products"], odd)
@@ -121,8 +121,7 @@ class ShopAddonsCase(TransactionCase):
         """It cannot be bought, so a card leading to nothing is worse than
         no card."""
         hidden = self._product("Not for sale", "Cables", published=False)
-        self.kit.accessory_product_ids = [
-            (6, 0, hidden.product_variant_id.ids)]
+        self.kit.alternative_product_ids = [(6, 0, hidden.ids)]
 
         self.assertEqual(self._labels(self.kit), [])
 
