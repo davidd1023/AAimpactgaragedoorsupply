@@ -275,9 +275,42 @@ note and a kit does not, where it would be a lie.
 
 Templates are shown, not variants - a track is one product with twenty
 combinations behind it since the merge, and twenty near-identical cards under
-a kit is not a recommendation. A kit is recognised by an `HK-` part number OR
-a category saying Hardware Kit, two marks because one added by hand later may
-not follow the SKU.
+a kit is not a recommendation.
+
+### HIS KITS ARE NOT `HK-` ANYTHING, AND THAT MADE IT ALL INVISIBLE
+
+Owner, 2026-10-27: *"i dont see the recommended products under the kits, and
+yes i did put the categories in the garage door add-ons in the settings."*
+
+**His live catalogue has FOUR kits - `AA-1200`, `AA-1600`, `AA-1800` and
+`AA-Custom` - in the WEBSITE category "Hardware Kits", and not one carries an
+`HK-` part number.** This shipped looking for the twelve
+`HK-<series>-<panels>P` products `garage_door_supply/hooks.py` creates, which
+the shop does not sell. Nothing was read as a kit, every page drew nothing,
+and no amount of setting the four family categories could have helped.
+
+So a kit is now recognised by FOUR marks: the website category set in
+Settings ("Hardware kits category", key
+`aa_shop_addons.category_kits`), then the words *hardware kit* in the NAME, in
+the product category or in any website category, then the `HK-` SKU last. **A
+product that says "Hardware Kit" in its name is a hardware kit** - refusing to
+read the name and demanding a part number was the mistake.
+
+**THREE OF THE FOUR FAMILIES DO NOT EXIST ON HIS SITE.** The same crawl listed
+his website categories: Drums, EBF, Hardware Kits, Hinges, Misc, Motors, Nuts
+& Bolts, Rollers, Shafts, Springs, Tracks. Only *Tracks* matched - there is no
+Cones, no Cables, no Trims. So the family lookup no longer insists on the
+exact name: exact first, then the word (*Cables* finds *Lift Cables*), then
+the singular (*Trims* finds *Trim Molding*), with the setting still the last
+word. His cones and cables are presumably under Springs and Misc; tier 2 does
+not care, because anything in no family goes under "Often bought with this".
+
+**WEBSITE > CONFIGURATION > ADD-ONS CHECK answers "why do I not see them"** -
+one line per product saying what its page will draw and where it came from.
+It exists because answering that question once meant crawling the live site
+with curl to find out what his products are actually called. **Read that
+screen before theorising** about anything of this sort again - and remember
+that his Prod catalogue is not what this repo's hooks create.
 
 **NOT IN `garage_door_supply`**, for the homepage reason below.
 

@@ -61,6 +61,34 @@
     </field>
   </record>
 
+  <!-- THE CHECK SCREEN. "i dont see the recommended products under the kits"
+       (owner, 2026-10-27) took crawling his live website to answer - his
+       kits are in a website category called Hardware Kits and carry no HK-
+       part number, so nothing was read as a kit at all. One line per product
+       saying what its page will draw, and where it came from, so that
+       question answers itself next time. -->
+  <record id="view_product_addon_check_list" model="ir.ui.view">
+    <field name="name">product.template.list.aa.addon.check</field>
+    <field name="model">product.template</field>
+    <field name="arch" type="xml">
+      <list string="Add-ons check" create="false">
+        <field name="name"/>
+        <field name="default_code" string="Part number" optional="show"/>
+        <field name="public_categ_ids" widget="many2many_tags"
+               string="Website categories"/>
+        <field name="is_published" string="Published"/>
+        <field name="aa_addon_summary" string="Will show on the page"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_aa_addon_check" model="ir.actions.server">
+    <field name="name">Add-ons Check</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="state">code</field>
+    <field name="code">action = model.action_aa_addon_check()</field>
+  </record>
+
   <!-- NOT `website.menu_website_configuration`, which is the Website app's
        ROOT menu despite the name - that put the entry beside Site and
        eCommerce. The Configuration submenu is
@@ -70,6 +98,13 @@
             parent="website.menu_website_global_configuration"
             action="action_aa_addon_suggestion"
             sequence="90"
+            groups="base.group_system"/>
+
+  <menuitem id="menu_aa_addon_check"
+            name="Add-ons Check"
+            parent="website.menu_website_global_configuration"
+            action="action_aa_addon_check"
+            sequence="91"
             groups="base.group_system"/>
 
 </odoo>

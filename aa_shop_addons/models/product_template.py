@@ -45,7 +45,7 @@ listing variants would put twenty near-identical cards under a kit. One card
 leads to the page where the choice is made.
 """
 
-from odoo import api, models
+from odoo import api, fields, models
 
 #: The families, in the order they read under a product. Cones first because
 #: on a spring page they carry a warning rather than an invitation.
@@ -57,6 +57,17 @@ FAMILIES = [
 ]
 
 SETTING = "aa_shop_addons.category_%s"
+
+#: THE CATEGORY THAT MARKS A KIT, and it had to become a setting like the
+#: other four. His live catalogue has four kits - AA-1200, AA-1600, AA-1800
+#: and AA-Custom - in the WEBSITE category "Hardware Kits", and not one of
+#: them carries an `HK-` part number. The twelve `HK-<series>-<panels>P`
+#: products this was written against are not what the shop sells.
+KIT_SETTING = "aa_shop_addons.category_kits"
+
+#: What a kit calls itself, wherever it says so. Matched as a substring, so
+#: "Hardware Kit" and "Hardware Kits" both count.
+KIT_WORDS = "hardware kit"
 
 #: How many to show per family before pointing at the rest.
 SHOWN = 8
@@ -77,13 +88,7 @@ class ProductTemplate(models.Model):
     _inherit = "product.template"
 
     def _aa_addon_role(self):
-        """"kit", "spring", or False for everything else.
-
-        A kit is known by its part number - every one of them is HK-<series>-
-        <panels>P (garage_door_supply/hooks.py) - or by sitting in a category
-        that says Hardware Kit. Two marks rather than one, because a kit
-        added by hand later may well not follow the SKU.
-        """
+        """"kit", "spring", or False for everything else."""
         self.ensure_one()
 
         spring = self.env.ref(
@@ -92,37 +97,99 @@ class ProductTemplate(models.Model):
         if spring and spring == self:
             return "spring"
 
-        code = (self.default_code or "").upper()
+        return "kit" if self._aa_is_kit() else False
 
-        if code.startswith("HK-"):
-            return "kit"
+    def _aa_is_kit(self):
+        """Does this product say, anywhere, that it is a hardware kit?
 
-        where = self.categ_id.complete_name or ""
+        FOUR MARKS, AND THE FIRST ONE ALONE WAS WRONG. This shipped looking
+        for an `HK-<series>-<panels>P` part number, because that is what
+        `garage_door_supply/hooks.py` creates. HIS SHOP DOES NOT SELL THOSE.
+        The live catalogue has four kits - AA-1200, AA-1600, AA-1800 and
+        AA-Custom - in the website category "Hardware Kits", so the block
+        drew nothing on any of them and he quite reasonably reported that the
+        feature did not work (owner, 2026-10-27: "i dont see the recommended
+        products under the kits").
 
-        if "hardware kit" in where.lower():
-            return "kit"
+        So: the website category he can point at in Settings, then the word
+        itself in either category or in the product's own name, then the SKU
+        last. A product that says "Hardware Kit" in its name is a hardware
+        kit; refusing to read the name and demanding a part number instead
+        was the mistake.
+        """
+        self.ensure_one()
 
-        return False
+        chosen = self._aa_kit_category()
+
+        if chosen and chosen in self.public_categ_ids:
+            return True
+
+        said = [self.name or "", self.categ_id.complete_name or ""]
+        said += [category.name or "" for category in self.public_categ_ids]
+
+        if any(KIT_WORDS in where.lower() for where in said):
+            return True
+
+        return (self.default_code or "").upper().startswith("HK-")
+
+    @api.model
+    def _aa_kit_category(self):
+        """The website category that marks a kit, if one is set.
+
+        A setting for the same reason as the other four: a name lookup is a
+        guess, and the word check below covers the obvious names anyway, so
+        this exists for a catalogue that calls them something else entirely.
+        """
+        chosen = self.env["ir.config_parameter"].sudo().get_param(KIT_SETTING)
+
+        if not chosen:
+            return self.env["product.public.category"]
+
+        try:
+            return self.env["product.public.category"].sudo().browse(
+                int(chosen)).exists()
+        except (TypeError, ValueError):
+            return self.env["product.public.category"]
 
     @api.model
     def _aa_addon_category(self, key, label):
         """The website category a family falls back to.
 
         A setting first, because a name lookup is a guess and a guess that
-        cannot be corrected without a deploy is a bad guess. The name is what
-        it falls back to, so this works out of the box on a catalogue whose
-        categories are called the obvious thing.
+        cannot be corrected without a deploy is a bad guess.
+
+        THE NAME MATCH IS NOT EXACT, and that is from his own catalogue. It
+        was `=ilike "Cables"`, and his live site has no category by that name
+        - nor Cones, nor Trims. Only Tracks matched, out of four. So the
+        exact name is tried first, then the word on its own: "Cables" finds
+        "Lift Cables", and "Trims" dropped to "trim" finds "Trim" singular.
+        The setting is still the last word for a category called something
+        that shares no word at all.
         """
         categories = self.env["product.public.category"].sudo()
         chosen = self.env["ir.config_parameter"].sudo().get_param(SETTING % key)
 
         if chosen:
-            found = categories.browse(int(chosen)).exists()
+            try:
+                found = categories.browse(int(chosen)).exists()
+            except (TypeError, ValueError):
+                found = categories
 
             if found:
                 return found
 
-        return categories.search([("name", "=ilike", label)], limit=1)
+        exact = categories.search([("name", "=ilike", label)], limit=1)
+
+        if exact:
+            return exact
+
+        for word in (label, label.rstrip("sS")):
+            loose = categories.search([("name", "ilike", word)], limit=1)
+
+            if loose:
+                return loose
+
+        return categories
 
     def _aa_addon_source(self):
         """("picked" | "learned" | "families", the products or None).
@@ -227,6 +294,71 @@ class ProductTemplate(models.Model):
                 })
 
         return groups
+
+    # --- "why do I not see them" ------------------------------------------
+
+    aa_addon_summary = fields.Char(
+        string="Will show", compute="_compute_aa_addon_summary",
+        help="What the add-ons block under this product would draw right now.")
+
+    @api.depends("alternative_product_ids")
+    def _compute_aa_addon_summary(self):
+        """ONE LINE SAYING WHAT THE PAGE WILL DO, AND WHERE IT CAME FROM.
+
+        This exists because answering "i dont see the recommended products
+        under the kits" took crawling his live website to discover that his
+        kits are not called what this module expected. That is not a way to
+        answer the same question twice.
+        """
+        for product in self:
+            role = product._aa_addon_role()
+
+            if not role:
+                product.aa_addon_summary = "No block - not read as a kit"
+                continue
+
+            source, _picked = product._aa_addon_source()
+            groups = product._aa_addon_groups()
+            where = {
+                "picked": "you picked these",
+                "learned": "from your orders",
+                "families": "whole families - nothing picked, nothing counted",
+            }[source]
+
+            if not groups:
+                product.aa_addon_summary = (
+                    "Nothing to show - no add-on categories were found")
+                continue
+
+            product.aa_addon_summary = "%s (%s)" % (
+                ", ".join("%s %s" % (group["label"], len(group["products"]))
+                          for group in groups),
+                where)
+
+    @api.model
+    def action_aa_addon_check(self):
+        """Every product that gets a block, and what it will draw."""
+        subjects = self.env["aa.addon.suggestion"]._aa_subjects()
+
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Add-ons Check",
+            "res_model": "product.template",
+            "view_mode": "list",
+            "views": [(self.env.ref(
+                "aa_shop_addons.view_product_addon_check_list").id, "list")],
+            "domain": [("id", "in", subjects.ids)],
+            "context": {"create": False},
+            "help": """
+                <p class="o_view_nocontent_smiling_face">No product is read as
+                   a kit or a spring</p>
+                <p>Nothing on the site will show an add-ons block. A product is
+                   read as a kit when its name, its product category or one of
+                   its website categories says "Hardware Kit" - or when you
+                   point at the right website category under Website &gt;
+                   Configuration &gt; Settings &gt; Garage Door Add-ons.</p>
+            """,
+        }
 
     def _aa_addon_price(self):
         """What to print under an add-on's name, honouring the pricelist.
