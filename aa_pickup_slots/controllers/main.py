@@ -22,12 +22,15 @@ class AAPickupSlotController(http.Controller):
     @http.route("/shop/pickup_slot", type="jsonrpc", auth="public",
                 website=True)
     def aa_set_pickup_slot(self, date=None, time=None, **kwargs):
-        order = request.website.sale_get_order()
+        # ODOO 19 PUTS THE CART ON THE REQUEST. `website.sale_get_order()` is
+        # gone - it raised AttributeError the moment a customer picked a date
+        # on the live site (owner, 2026-10-27), and no test had ever called
+        # this route to find out. `request.cart` is already sudo'd, which is
+        # why Odoo's own delivery controller names it order_sudo.
+        order = request.cart
 
         if not order:
             return {"error": "no-cart"}
-
-        order = order.sudo()
         allowed = {day.isoformat() for day, _label in order._aa_pickup_choices()}
         values = {}
 

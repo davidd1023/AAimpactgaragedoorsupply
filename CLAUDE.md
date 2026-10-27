@@ -278,6 +278,15 @@ on. Both are overridden. The checkout button is disabled too (both of them -
 there is one for mobile and one for desktop), as a courtesy rather than the
 lock.
 
+**THE CART IS `request.cart` IN ODOO 19.** `website.sale_get_order()` is
+gone, and the controller used it - so the route raised AttributeError the
+instant a customer picked a date on the live site, with twenty-nine passing
+tests behind it. THEY ALL TESTED MODELS AND NONE CALLED THE ROUTE. There are
+now three that do, over HTTP, watching for a top-level JSON-RPC `error`,
+which is exactly what a crash looks like and what a handled answer does not.
+`request.cart` is already sudo'd, which is why Odoo's own delivery controller
+names it `order_sudo`.
+
 **THE TRANSFER STORES ITS OWN COPY of the day and time**, written at
 confirmation. The Dispatch list is a list of transfers and the first thing
 anybody wants is to SORT BY the pickup time - who is coming this morning - and
