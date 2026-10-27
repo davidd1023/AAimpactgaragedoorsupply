@@ -208,6 +208,86 @@ class PickupSlotCase(TransactionCase):
         for picking in self.order.picking_ids:
             self.assertFalse(picking.aa_pickup_label)
 
+    # --- THE COPY ON THE TRANSFER HAS TO STAY TRUE ------------------------
+    #
+    # Owner, 2026-10-27: "i dont see the scheduled pickup date on the dispatch
+    # screen." A stored copy written once is a copy that goes stale, and a
+    # Dispatch column showing the wrong day is worse than no column at all.
+
+    def _confirmed_pickup(self, time=7.5):
+        self.order.carrier_id = self.pickup
+        self.order.aa_pickup_date = self.order._aa_earliest_pickup()
+        self.order.aa_pickup_time = time
+        self.order.action_confirm()
+
+        return self.order.picking_ids
+
+    def test_a_slot_moved_after_confirmation_reaches_the_transfer(self):
+        """Somebody telephones to say Friday instead. Dispatch must not go on
+        reading Thursday off the screen."""
+        pickings = self._confirmed_pickup()
+        first = self.order.aa_pickup_date
+
+        later = [day for day, _l in self.order._aa_pickup_choices()
+                 if day > first][0]
+        self.order.write({"aa_pickup_date": later, "aa_pickup_time": 14.0})
+
+        self.assertTrue(pickings)
+        for picking in pickings:
+            self.assertEqual(picking.aa_pickup_date, later)
+            self.assertEqual(picking.aa_pickup_label,
+                             self.order.aa_pickup_label)
+
+    def test_a_backorder_carries_the_slot_too(self):
+        """A backorder is the same order's remaining half, and the customer is
+        coming for it on the day they said. It is made by COPYING, and these
+        fields are copy=False - so without help it arrives blank, which is
+        exactly the column he could not find."""
+        pickings = self._confirmed_pickup()
+        delivery = pickings.filtered(
+            lambda p: p.picking_type_code == "outgoing")[:1] or pickings[:1]
+
+        backorder = delivery.copy({"backorder_id": delivery.id})
+
+        self.assertEqual(backorder.sale_id, self.order,
+                         "the copy lost its order, so this proves nothing")
+        self.assertEqual(backorder.aa_pickup_date, self.order.aa_pickup_date)
+        self.assertEqual(backorder.aa_pickup_label,
+                         self.order.aa_pickup_label)
+
+    def test_a_transfer_no_longer_going_out_is_left_as_it_was(self):
+        """What was on the paperwork is a record, not a field to tidy up."""
+        pickings = self._confirmed_pickup()
+        cancelled = pickings[0]
+        cancelled.action_cancel()
+        was = cancelled.aa_pickup_date
+
+        later = [day for day, _l in self.order._aa_pickup_choices()
+                 if day > was][0]
+        self.order.aa_pickup_date = later
+
+        self.assertEqual(cancelled.state, "cancel")
+        self.assertEqual(cancelled.aa_pickup_date, was)
+
+    def test_the_pickup_column_cannot_be_hidden_away(self):
+        """IT IS NOT OPTIONAL, and that is the whole fix. An optional column
+        added to a list somebody has already configured arrives HIDDEN behind
+        the toggle at the right-hand end, which is how "it showed up in
+        manufacturing but not in dispatch" happens."""
+        from lxml import etree
+
+        arch = etree.fromstring(self.env["stock.picking"].get_view(
+            view_id=self.env.ref("stock.vpicktree").id,
+            view_type="list")["arch"])
+        column = arch.xpath("//field[@name='aa_pickup_label']")
+
+        self.assertTrue(
+            column, "the Pickup column is not on the transfers list at all")
+        self.assertFalse(
+            column[0].get("optional"),
+            "the Pickup column is optional again, so a saved column"
+            " preference can hide it")
+
 
 @tagged("post_install", "-at_install")
 class PickupSlotPageCase(HttpCase):

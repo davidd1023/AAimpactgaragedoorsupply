@@ -2,16 +2,29 @@
 <odoo>
 
   <!-- IN DISPATCH. The list is stock.picking, and the column is the stored
-       label rather than a related field, so somebody can sort the morning's
-       collections to the top. -->
+       label rather than a related field, so Dispatch reads the day off the
+       screen without reaching back through the sale.
+
+       NOT OPTIONAL, and that is the point (owner, 2026-10-27: "i dont see the
+       scheduled pickup date on the dispatch screen, it showed up in
+       manufacturing but not in dispatch"). An `optional="show"` column is
+       only shown to somebody who has never touched that list's column
+       chooser; anybody who has - and he has, this list carries Dispatched,
+       the work station badges and the rest - keeps the set they saved, and a
+       column added afterwards arrives HIDDEN behind the little toggle at the
+       right-hand end. A column nobody can find is a column that is not
+       there. The day somebody is coming to collect is not a preference. -->
   <record id="vpicktree_aa_pickup" model="ir.ui.view">
     <field name="name">stock.picking.list.aa.pickup.slot</field>
     <field name="model">stock.picking</field>
     <field name="inherit_id" ref="stock.vpicktree"/>
     <field name="arch" type="xml">
       <field name="state" position="before">
-        <field name="aa_pickup_date" string="Pickup Day" optional="show"/>
-        <field name="aa_pickup_label" string="Pickup" optional="show"/>
+        <field name="aa_pickup_label" string="Pickup"/>
+        <!-- The sortable one: a label reads "Fri 30 Oct" and sorts Friday
+             before Monday, which is no use to anybody wanting to know who is
+             coming first. -->
+        <field name="aa_pickup_date" string="Pickup Day" optional="hide"/>
       </field>
     </field>
   </record>
@@ -39,6 +52,13 @@
         <filter name="aa_pickup_set" string="Being collected"
                 domain="[('aa_pickup_date', '!=', False)]"/>
       </filter>
+      <!-- Grouped by the DATE, which is the one that orders properly. A
+           filter carrying a group_by lands in the Group By menu wherever it
+           sits in the arch, so this needs no xpath into Odoo's own group. -->
+      <field name="name" position="after">
+        <filter name="aa_pickup_day_group" string="Pickup Day"
+                context="{'group_by': 'aa_pickup_date'}"/>
+      </field>
     </field>
   </record>
 

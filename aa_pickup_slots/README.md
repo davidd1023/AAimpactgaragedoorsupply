@@ -1,7 +1,7 @@
 # Pickup slots
 
-A pickup day and two-hour window, chosen at checkout, carried through to the
-Work Order sheet and the Dispatch list.
+A pickup day and time, chosen at checkout, carried through to the Work Order
+sheet and the Dispatch list.
 
 Owner, 2026-10-27: *"At checkout, the customer picks a pickup day and time
 window, and it shows on the Work Order and in Dispatch. Done when: the chosen
@@ -50,18 +50,52 @@ to say no.
 | Sales order form | **Pickup**, beside the delivery date |
 | Sales order list | a **Pickup** column |
 | Work Order sheet | a **Pickup** row in the WHEN block, in red like the deadline |
-| Dispatch / transfers list | **Pickup Day** and **Pickup** columns, both sortable |
-| Transfers filters | *Collected today* and *Being collected* |
+| Dispatch / transfers list | a **Pickup** column that is always there, plus **Pickup Day** for sorting |
+| Transfers filters | *Collected today*, *Being collected*, and group by **Pickup Day** |
 
-### Why the transfer stores its own copy
+### The Dispatch column is NOT optional, and that is deliberate
+
+Owner, 2026-10-27: *"i dont see the scheduled pickup date on the dispatch
+screen, it showed up in manufacturing but not in dispatch."*
+
+It was there - as an `optional="show"` column, which is only shown to somebody
+who has **never touched that list's column chooser**. Anyone who has keeps the
+set they saved, and a column added to the module afterwards arrives **hidden**
+behind the little toggle at the right-hand end of the header. He has: this list
+carries Dispatched, the work-station badges and the rest.
+
+A column nobody can find is a column that is not there. The day somebody is
+driving over to collect their order is not a display preference, so **Pickup**
+has no `optional` at all. `Pickup Day`, the raw date, stays optional - it is
+there for sorting, because the label reads "Fri 30 Oct" and sorts Friday before
+Monday.
+
+### Why the transfer stores its own copy, and how it is kept true
 
 The Dispatch list is a list of transfers, and the first thing anybody wants to
 do with a pickup time is **sort by it** - who is coming this morning. A related
 field reaching through `sale_id` cannot be ordered on in the database, so the
-day and window are written onto the transfers when the order is confirmed.
+day and window are **written onto the transfers**.
 
-The trade: a slot changed after confirmation needs writing to the transfer
-again. That is the price of a column that sorts.
+A stored copy written once goes stale, and the first cut wrote it once, at
+confirmation. That left two holes:
+
+- **A backorder carried nothing.** Odoo makes one by copying the transfer, and
+  these fields are `copy=False` - rightly, so duplicating an order does not
+  inherit somebody else's collection day. But a backorder is the same order's
+  remaining half, and it is what the customer actually comes back for. It
+  showed a blank Pickup column. `stock.picking.create` now fills it from the
+  sale order whenever it is not given.
+- **A slot moved after confirmation stayed on the old day.** Somebody
+  telephones to say Friday instead; Dispatch went on reading Thursday off the
+  screen while the sale order said otherwise, which is worse than no column.
+  `sale.order.write` now pushes the change down.
+
+Transfers already **done or cancelled are left alone**: what was on the
+paperwork when it went out of the door is a record, not a field to tidy up.
+The `19.0.2.1.0` migration fills in any transfer standing open whose order has
+a slot, so the backorders already out there come right without anybody having
+to touch the order again.
 
 ## Days the counter is shut
 
