@@ -12,6 +12,25 @@
 
       <xpath expr="//block[@id='website_info_settings']" position="after">
         <block title="Garage Door Add-ons" id="aa_shop_addons_settings">
+
+          <!-- WHICH PRODUCTS GET A BLOCK AT ALL. First, because a wrong
+               answer here means nothing shows anywhere and every other
+               setting on this page is beside the point - which is exactly
+               what happened. -->
+          <setting string="Which products are hardware kits"
+                   help="A product is read as a kit when its name, its product
+                         category or one of its website categories says
+                         'Hardware Kit'. Set this only if yours are called
+                         something else. Website > Configuration > Add-ons
+                         Check lists what each product will show.">
+            <div class="content-group mt-2">
+              <div class="row">
+                <label for="aa_addon_categ_kits_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_kits_id" options="{'no_create': True}"/>
+              </div>
+            </div>
+          </setting>
+
           <setting string="Where the add-ons come from"
                    help="Shown under every hardware kit and under the custom
                          spring. A product with its own Accessory Products set

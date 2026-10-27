@@ -151,12 +151,45 @@ the note and a kit page does not, because on a kit it would be a lie.
 
 | | how it is recognised |
 |---|---|
-| a kit | part number begins `HK-`, **or** its product category says Hardware Kit |
+| a kit | the **website category** set in Settings, **or** the words *hardware kit* in its name, its product category or any of its website categories, **or** a part number beginning `HK-` |
 | the spring | it is `spring_engineering.product_custom_spring` |
 | anything else | nothing - a row of add-ons under every hinge in the shop is noise |
 
-Two marks for a kit rather than one, because a kit added by hand later may well
-not follow the SKU.
+### This was wrong, and it made the whole feature invisible
+
+Owner, 2026-10-27: *"i dont see the recommended products under the kits, and
+yes i did put the categories in the garage door add-ons in the settings."*
+
+It shipped looking for an `HK-<series>-<panels>P` part number, because that is
+what `garage_door_supply/hooks.py` creates. **His shop does not sell those.**
+The live catalogue has four kits - `AA-1200`, `AA-1600`, `AA-1800` and
+`AA-Custom` - sitting in the **website** category *Hardware Kits*, and not one
+of them carries an `HK-` code. So nothing was read as a kit, every page drew
+nothing, and no amount of setting the four family categories could have helped.
+
+The same crawl found that **three of the four families do not exist as
+categories on his site at all**: it has Drums, EBF, Hardware Kits, Hinges,
+Misc, Motors, Nuts & Bolts, Rollers, Shafts, Springs and Tracks. Only *Tracks*
+matched. So the family lookup no longer insists on the exact name - it tries
+the exact name, then the word (*Cables* finds *Lift Cables*), then the singular
+(*Trims* finds *Trim Molding*) - and the setting remains the last word for a
+category sharing no word at all.
+
+**A product that says "Hardware Kit" in its name is a hardware kit.** Refusing
+to read the name and demanding a part number instead was the mistake.
+
+## Why don't I see them
+
+> Website → Configuration → **Add-ons Check**
+
+One line per product that gets a block, saying **what its page will draw and
+where it came from** - "Cables 3, Tracks 8 (from your orders)", or "No block -
+not read as a kit", or "Nothing to show - no add-on categories were found".
+
+This exists because answering *"i dont see the recommended products under the
+kits"* meant crawling the live website to discover that his kits are not shaped
+the way this module assumed. That is not a way to answer the same question
+twice.
 
 ## Notes for whoever changes this
 

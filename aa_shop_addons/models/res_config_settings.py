@@ -18,7 +18,7 @@ it when there is enough to be choosy.
 from odoo import fields, models
 
 from .addon_suggestion import MIN_ORDERS, MIN_ORDERS_SETTING
-from .product_template import FAMILIES, SETTING
+from .product_template import FAMILIES, KIT_SETTING, SETTING
 
 
 class ResConfigSettings(models.TransientModel):
@@ -36,6 +36,15 @@ class ResConfigSettings(models.TransientModel):
     aa_addon_categ_trims_id = fields.Many2one(
         "product.public.category", string="Trims category",
         config_parameter=SETTING % "trims")
+
+    #: WHICH PRODUCTS GET A BLOCK AT ALL. His kits sit in the website
+    #: category "Hardware Kits" and carry no HK- part number, which is why
+    #: nothing showed under any of them until the word itself was read off
+    #: the name and the categories. This is for a catalogue that calls them
+    #: something sharing no word with "hardware kit".
+    aa_addon_categ_kits_id = fields.Many2one(
+        "product.public.category", string="Hardware kits category",
+        config_parameter=KIT_SETTING)
 
     aa_addon_min_orders = fields.Integer(
         string="Orders before recommending", default=MIN_ORDERS,

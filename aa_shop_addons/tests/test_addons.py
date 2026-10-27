@@ -74,6 +74,94 @@ class ShopAddonsCase(TransactionCase):
 
         self.assertEqual(spring._aa_addon_role(), "spring")
 
+    # --- HIS OWN KITS, which are not the ones this was written against ----
+    #
+    # Owner, 2026-10-27: "i dont see the recommended products under the kits,
+    # and yes i did put the categories in the garage door add-ons in the
+    # settings." Answering it meant crawling the live site, where the kits
+    # turned out to be AA-1200, AA-1600, AA-1800 and AA-Custom, in the WEBSITE
+    # category "Hardware Kits", with no HK- part number anywhere. The feature
+    # had never drawn a thing, because nothing was read as a kit at all.
+
+    def _his_kit(self):
+        kits = self.env["product.public.category"].create(
+            {"name": "Hardware Kits"})
+
+        return self.env["product.template"].create({
+            "name": "AA-1200 Hardware Kit",
+            "type": "consu", "list_price": 180.0, "is_published": True,
+            "public_categ_ids": [(6, 0, kits.ids)],
+        }), kits
+
+    def test_his_own_kit_is_read_as_a_kit(self):
+        """THE ONE THAT SETTLES IT. No HK- code, no product category saying
+        kit - just the website category and the name, which are what his
+        catalogue actually has."""
+        kit, _categ = self._his_kit()
+
+        self.assertEqual(kit._aa_addon_role(), "kit")
+        self.assertTrue(kit._aa_addon_groups(),
+                        "his own kit still draws nothing under it")
+
+    def test_a_kit_named_one_is_a_kit_even_with_no_category(self):
+        """A product that says "Hardware Kit" in its name is a hardware kit.
+        Refusing to read the name and demanding a part number was the
+        mistake."""
+        bare = self.env["product.template"].create({
+            "name": "AA-Custom Custom Kit - Hardware Kit", "type": "consu",
+            "is_published": True})
+
+        self.assertEqual(bare._aa_addon_role(), "kit")
+
+    def test_the_kits_category_can_be_pointed_at(self):
+        """For a catalogue that calls them something sharing no word with
+        "hardware kit" at all."""
+        odd = self.env["product.public.category"].create({"name": "Bundles"})
+        kit = self.env["product.template"].create({
+            "name": "AA-1600", "type": "consu", "is_published": True,
+            "public_categ_ids": [(6, 0, odd.ids)]})
+
+        self.assertFalse(kit._aa_addon_role())
+
+        self.env["ir.config_parameter"].sudo().set_param(
+            "aa_shop_addons.category_kits", odd.id)
+
+        self.assertEqual(kit._aa_addon_role(), "kit")
+
+    def test_a_family_category_need_not_be_named_exactly(self):
+        """HIS SITE HAS NO "Cables" CATEGORY. It has none called Cones or
+        Trims either - only Tracks matched, one of four - so an exact name
+        match found almost nothing. "Cables" now finds "Lift Cables"."""
+        self.categories["Cables"].name = "Lift Cables"
+
+        self.assertIn("Cables", self._labels(self.kit))
+
+    def test_a_singular_category_is_found_too(self):
+        """"Trims" dropped to "trim" finds "Trim Molding"."""
+        self.categories["Trims"].name = "Trim Molding"
+
+        self.assertIn("Trims", self._labels(self.kit))
+
+    def test_the_check_screen_says_what_a_page_will_draw(self):
+        """Answering "i dont see them" by crawling his website is not a way to
+        answer the same question twice."""
+        kit, _categ = self._his_kit()
+        plain = self.env["product.template"].create({
+            "name": "A hinge", "type": "consu", "is_published": True})
+
+        self.assertIn("not read as a kit", plain.aa_addon_summary)
+        self.assertIn("Cables", kit.aa_addon_summary)
+        self.assertIn("whole families", kit.aa_addon_summary)
+
+    def test_the_check_screen_lists_the_kits(self):
+        kit, _categ = self._his_kit()
+        action = self.env["product.template"].action_aa_addon_check()
+        listed = self.env["product.template"].search(action["domain"])
+
+        self.assertIn(kit, listed)
+        self.assertIn(self.kit, listed)
+        self.assertNotIn(self.cable, listed)
+
     def test_an_ordinary_product_gets_nothing(self):
         """A hinge is not a kit, and a row of add-ons under every product in
         the shop is noise."""
@@ -150,10 +238,11 @@ class ShopAddonsCase(TransactionCase):
 
     # --- the fallback can be pointed somewhere else ------------------------
 
-    def test_a_category_called_something_else_can_be_set(self):
-        """His cables live under "Lift Cables" rather than "Cables" on some
-        catalogues, and that must not need a deploy to fix."""
-        self.categories["Cables"].name = "Lift Cables"
+    def test_a_category_sharing_no_word_can_still_be_set(self):
+        """"Lift Cables" is found by itself now - see
+        test_a_family_category_need_not_be_named_exactly. The setting is for
+        the case the word check cannot reach, and it must not need a deploy."""
+        self.categories["Cables"].name = "Flexible Steel Rope"
 
         self.assertNotIn("Cables", self._labels(self.kit))
 
