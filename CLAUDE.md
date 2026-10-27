@@ -105,6 +105,41 @@ drum, track, lift, door size, weight) and each prepared lift cable pair gets a
 stop per cable). The station BoMs are NORMAL, template-level, with no components:
 the delivery still explodes the kits' and cables' own phantom BoMs.
 
+## Customer emails (`work_order_sheet`)
+
+All four the customer can receive are in one file,
+`work_order_sheet/data/customer_emails.xml` (owner, 2026-10-19: "review every
+email the customer receives" should be one thing to read): the order
+confirmation, the invoice, "ready to collect" and the cancellation. Two of the
+four are **Odoo's own records re-written in place**, so they cannot be
+abandoned - dropping the override brings Odoo's generic wall of table back
+rather than silence. `_aa_own_customer_emails` clears the `noupdate` flag on
+them, without which the bodies below do nothing at all.
+
+### THE ORDER-CONFIRMED EMAIL IS NOT SENT FOR AN ORDER ALREADY PAID
+
+Owner, 2026-10-27, having placed S00070: *"when making an order i got 2 emails
+about the invoice ... i need you to make it so that email is no longer sent"* -
+the invoice being the one to keep.
+
+He is right that they duplicate. A website order is paid at checkout, so Odoo
+confirms it and raises the invoice in the same breath, and the customer gets a
+confirmation carrying the quotation PDF and an invoice carrying the invoice
+PDF, moments apart.
+
+**BUT IT IS NOT ONLY A WEBSITE EMAIL.** A dealer placing a Quick Order charged
+to account gets it too, and that order raises NO invoice at the time - so for
+a dealer it is the only acknowledgement until "ready to collect" days later.
+Asked, the owner chose to stop it **only where the invoice follows**.
+
+So `_send_order_confirmation_mail` in
+`work_order_sheet/models/order_confirmation_email.py` asks **"has this order
+already been paid"** - a transaction in `done` or `authorized` - and not "is
+this the website". A dealer's on-account transaction sits at `pending` for
+ever, and a back office order typed by hand has no transaction, so both keep
+their confirmation. `super()` is still called, on a narrowed recordset, so
+nothing else that hooks the method is lost.
+
 ## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
 
 *"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one

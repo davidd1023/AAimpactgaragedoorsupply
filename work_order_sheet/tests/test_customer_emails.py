@@ -10,6 +10,8 @@ XML parses. All four end with one shared block, and the test that matters most
 is the one that renders every one of them and finds all four things in each.
 """
 
+from unittest.mock import patch
+
 from odoo import fields
 from odoo.tests.common import TransactionCase, tagged
 
@@ -231,6 +233,63 @@ class CustomerEmailsCase(TransactionCase):
             [("model", "=", "sale.order"), ("res_id", "=", self.order.id)])
         self.assertTrue(mails, "the customer was not told it was cancelled")
         self.assertIn("cancelled", (mails[0].subject or "").lower())
+
+    # --- not two emails for one order ----------------------------------------
+
+    def _confirmations(self):
+        return self.env["mail.message"].search([
+            ("model", "=", "sale.order"),
+            ("res_id", "=", self.order.id),
+            ("subject", "ilike", "is confirmed"),
+        ])
+
+    def test_an_order_nobody_has_paid_still_gets_its_confirmation(self):
+        """THE DEALER CASE. A Quick Order charged to account raises no invoice,
+        so this email is the only thing that tells the dealer it landed. Asked
+        whether to stop it for everybody, the owner kept it for them."""
+        self.order._send_order_confirmation_mail()
+
+        self.assertTrue(self._confirmations(),
+                        "a dealer on account was told nothing at all")
+
+    def test_an_order_already_paid_gets_no_confirmation(self):
+        """Owner, 2026-10-27: "i got 2 emails about the invoice". An order paid
+        at checkout is invoiced in the same breath, and that email says the
+        same thing - so this one is the duplicate and does not go."""
+        with patch.object(type(self.order), "_aa_paid_online",
+                          lambda order: True):
+            self.order._send_order_confirmation_mail()
+
+        self.assertFalse(self._confirmations(),
+                         "the customer got the order email as well as the"
+                         " invoice, which is what he complained about")
+
+    def test_an_order_with_no_payment_is_not_paid_online(self):
+        self.assertFalse(self.order._aa_paid_online())
+
+    def test_a_transaction_that_went_through_counts_as_paid(self):
+        """The half the mock above cannot prove: that a real paid order is
+        actually recognised as one. Guards the field and state names, which
+        are the only way this silently stops working."""
+        provider = self.env["payment.provider"].search([], limit=1)
+        method = self.env["payment.method"].search([], limit=1)
+
+        if not (provider and method):
+            self.skipTest("no payment provider in this database")
+
+        self.env["payment.transaction"].create({
+            "provider_id": provider.id,
+            "payment_method_id": method.id,
+            "reference": "AA-TEST-PAID",
+            "amount": self.order.amount_total,
+            "currency_id": self.order.currency_id.id,
+            "partner_id": self.customer.id,
+            "sale_order_ids": [(6, 0, self.order.ids)],
+            "state": "done",
+        })
+        self.order.invalidate_recordset()
+
+        self.assertTrue(self.order._aa_paid_online())
 
     # --- and nothing generic left --------------------------------------------
 
