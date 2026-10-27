@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- STATION TIME (owner, 2026-10-27): "average time per task type, per
+       worker, per day. Done when: you can see how long Michel takes per
+       spring order."
+
+       The pivot is the answer to that sentence: workers down the side, tasks
+       across the top, average minutes in the cells. -->
+
+  <record id="aa_station_time_pivot" model="ir.ui.view">
+    <field name="name">aa.station.time.pivot</field>
+    <field name="model">aa.station.time</field>
+    <field name="arch" type="xml">
+      <pivot string="Station Time" sample="1">
+        <field name="employee_id" type="row"/>
+        <field name="station_kind" type="col"/>
+        <field name="minutes" type="measure" widget="float_time"/>
+      </pivot>
+    </field>
+  </record>
+
+  <record id="aa_station_time_graph" model="ir.ui.view">
+    <field name="name">aa.station.time.graph</field>
+    <field name="model">aa.station.time</field>
+    <field name="arch" type="xml">
+      <graph string="Station Time" type="bar" sample="1">
+        <field name="employee_id"/>
+        <field name="station_kind"/>
+        <field name="minutes" type="measure"/>
+      </graph>
+    </field>
+  </record>
+
+  <record id="aa_station_time_list" model="ir.ui.view">
+    <field name="name">aa.station.time.list</field>
+    <field name="model">aa.station.time</field>
+    <field name="arch" type="xml">
+      <list string="Station Time" create="0" edit="0" delete="0">
+        <field name="day"/>
+        <field name="employee_id"/>
+        <field name="station_kind"/>
+        <field name="wo_number"/>
+        <field name="order_ref" optional="show"/>
+        <field name="product_id" optional="hide"/>
+        <field name="workcenter_id" string="Station" optional="hide"/>
+        <field name="minutes" string="Time" widget="float_time" sum="Total"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="aa_station_time_search" model="ir.ui.view">
+    <field name="name">aa.station.time.search</field>
+    <field name="model">aa.station.time</field>
+    <field name="arch" type="xml">
+      <search string="Station Time">
+        <field name="employee_id" string="Worker"/>
+        <field name="order_ref" string="Order"/>
+        <field name="wo_number" string="W/O #"/>
+        <field name="production_id"/>
+
+        <filter name="aa_springs" string="Springs"
+                domain="[('station_kind', '=', 'spring')]"/>
+        <filter name="aa_kits" string="Hardware kits"
+                domain="[('station_kind', '=', 'kit')]"/>
+        <filter name="aa_cables" string="Lift cables"
+                domain="[('station_kind', '=', 'cable')]"/>
+        <separator/>
+        <filter name="aa_this_week" string="This week"
+                domain="[('day', '&gt;=', (context_today() + relativedelta(weeks=-1, days=1)).strftime('%Y-%m-%d'))]"/>
+        <filter name="aa_this_month" string="Last 30 days"
+                domain="[('day', '&gt;=', (context_today() + relativedelta(days=-30)).strftime('%Y-%m-%d'))]"/>
+
+        <!-- No `expand` and no `string` on this group: Odoo 19's search
+             schema rejects both, and the view will not load with them. -->
+        <group>
+          <filter name="aa_by_worker" string="Worker" domain="[]"
+                  context="{'group_by': 'employee_id'}"/>
+          <filter name="aa_by_task" string="Task" domain="[]"
+                  context="{'group_by': 'station_kind'}"/>
+          <filter name="aa_by_day" string="Day" domain="[]"
+                  context="{'group_by': 'day'}"/>
+          <filter name="aa_by_station" string="Station" domain="[]"
+                  context="{'group_by': 'workcenter_id'}"/>
+          <filter name="aa_by_order" string="Order" domain="[]"
+                  context="{'group_by': 'order_ref'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <record id="aa_station_time_action" model="ir.actions.act_window">
+    <field name="name">Station Time</field>
+    <field name="res_model">aa.station.time</field>
+    <field name="view_mode">pivot,graph,list</field>
+    <field name="search_view_id" ref="aa_station_time_search"/>
+    <field name="context">{'search_default_aa_by_worker': 1, 'search_default_aa_by_task': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Nobody has clocked any time yet</p>
+      <p>
+        Every finished stretch of work at a Shop Floor station shows here, by
+        the worker who did it. One row is one worker on one job, so the
+        average is an average per job rather than per button press.
+      </p>
+    </field>
+  </record>
+
+  <!-- ADMINS ONLY (owner, 2026-10-27). Beside Shop Floor History, which is
+       the same clock read a level up. -->
+  <menuitem id="aa_station_time_menu"
+            name="Station Time"
+            parent="mrp.menu_mrp_reporting"
+            action="aa_station_time_action"
+            groups="base.group_system"
+            sequence="6"/>
+
+</odoo>

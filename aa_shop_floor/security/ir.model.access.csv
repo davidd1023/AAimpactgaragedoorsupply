@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_shop_floor_cleanup_manager,aa.shop.floor.cleanup manufacturing manager,model_aa_shop_floor_cleanup,mrp.group_mrp_manager,1,1,1,1
+access_aa_station_time_admin,aa.station.time administrator,model_aa_station_time,base.group_system,1,0,0,0

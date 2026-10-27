@@ -305,6 +305,45 @@ the message now, and the carrier in the fixture is `website_published` so
 Odoo's checks pass and ours is actually reached. `super()` is called FIRST on
 purpose: there is no point asking for a slot on a cart that is broken anyway.
 
+## Station Time report (`aa_shop_floor`)
+
+Owner, 2026-10-27: *"A dashboard from the timer history: average time per task
+type, per worker, per day. Done when: you can see how long Michel takes per
+spring order. (Only visible for admins)."*
+
+**Manufacturing > Reporting > Station Time**, beside Shop Floor History,
+`groups="base.group_system"` on the menu AND a read-only ACL - what a man
+takes to do his work is not for the men beside him. Pivot by default: workers
+down the side, tasks across the top, average minutes in the cells.
+
+**IT READS THE TIMER LOG, NOT THE WORK ORDER**, and that is forced rather than
+chosen. Shop Floor History lists `mrp.workorder` and shows `duration`, which
+is the same clock - but a work order carries `employee_ids`, a MANY-TO-MANY,
+and "how long does Michel take" cannot be grouped out of one. The log,
+`mrp.workcenter.productivity`, carries `employee_id`, one per entry.
+
+**ONE ROW PER WORKER PER JOB, summed from the entries.** A man who starts a
+spring, breaks for lunch and finishes after leaves THREE entries; three rows
+would make the average a third of the truth. So the average is over JOBS,
+which is the question asked.
+
+Deliberately excluded: **timers still running** (a duration still growing
+averages in as however far into it somebody is) and **anything but productive
+loss type** (Odoo logs a breakdown against the same work order, and counting
+it would be a lie about Michel). A job with no `aa_station_kind` - a prepared
+track from Odoo's own route - is kept as "Other" rather than dropped.
+
+The day is the UTC date of the first entry. The shop works 7:00-4:00 Eastern,
+which is 11:00-20:00 UTC, the same calendar day either way; a night shift
+would need a timezone here.
+
+Two things about Odoo 19 that cost a build each:
+
+- **`mrp.workorder.product_id` IS NOT STORED**, so there is no column to
+  select in the SQL view. The product comes off the production.
+- **A search view's group-by `<group>` takes neither `expand` nor `string`**
+  in 19. Both are rejected by the RELAX NG schema and the view will not load.
+
 ## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
 
 *"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one
