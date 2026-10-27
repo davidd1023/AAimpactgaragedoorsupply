@@ -452,6 +452,32 @@ def main():
 
     print("wrote %s" % path)
 
+    # AND THE HAND-WRITTEN TEST PAGE GETS THE BUILD ID TOO.
+    #
+    # It loads door_preview.js directly rather than through the block, so
+    # nothing in it said which version was running - and a browser holding
+    # yesterday's script made a fix that worked look like a fix that did
+    # not, twice in one day (2026-10-26 and again on the 27th). The query
+    # string changes whenever the file does, so the browser has to fetch it,
+    # and the id is printed at the top where it can be read off a screenshot.
+    path = os.path.join(SRC, "preview.html")
+
+    with open(path, "r", encoding="utf-8") as fh:
+        page = fh.read()
+
+    page = re.sub(r'(href="\./door_preview\.css)(\?v=[0-9a-f]+)?"',
+                  r'\1?v=%s"' % stamp, page)
+    page = re.sub(r'(src="\./door_preview\.js)(\?v=[0-9a-f]+)?"',
+                  r'\1?v=%s"' % stamp, page)
+    page = re.sub(r'<p class="stamp">.*?</p>',
+                  '<p class="stamp">Build %s &middot; test page</p>' % stamp,
+                  page, flags=re.S)
+
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(page)
+
+    print("stamped %s" % path)
+
     # AND THE PAGE HE ACTUALLY USES: one button that puts the whole block on
     # the clipboard. Selecting 30 KB of text by hand and missing the last
     # line is a failure that looks like a bug in the viewer.
