@@ -178,3 +178,92 @@ class StationTimeCase(TransactionCase):
 
         with self.assertRaises(AccessError):
             self.env["aa.station.time"].with_user(nosy).search([])
+
+
+@tagged("post_install", "-at_install")
+class StationTimesInTheShopFloorCase(StationTimeCase):
+    """THE TAB IN THE SHOP FLOOR'S HISTORY DIALOG.
+
+    Owner, 2026-10-27: it "has to be in the shop floor module itself, it would
+    be best on the history option which is found when you click the 3 bars on
+    the top right" - because a tablet bolted to a bench cannot reach a
+    Reporting menu in the back office.
+    """
+
+    def _times(self, **kwargs):
+        return self.env["mrp.workorder"].aa_station_times(**kwargs)
+
+    def test_worker_and_task_answers_the_question_in_one_line(self):
+        """"How long does Michel take per spring order" should be a row that
+        says so, not two lookups."""
+        self._clock(self._job(), self.michel, 30)
+        self._clock(self._job(), self.michel, 50)
+
+        rows = {row["label"]: row for row in self._times()["rows"]}
+
+        self.assertIn("Michel · Spring", rows)
+        self.assertEqual(rows["Michel · Spring"]["jobs"], 2)
+        self.assertEqual(rows["Michel · Spring"]["average"], "40 min")
+
+    def test_the_longest_is_at_the_top(self):
+        """Somebody opens this to find where the time goes."""
+        self._clock(self._job(kind="kit"), self.michel, 5)
+        self._clock(self._job(kind="spring"), self.michel, 55)
+
+        rows = self._times()["rows"]
+
+        self.assertEqual(rows[0]["label"], "Michel · Spring")
+
+    def test_it_can_be_grouped_the_other_ways_he_asked_for(self):
+        self._clock(self._job(kind="spring"), self.michel, 30)
+        self._clock(self._job(kind="kit"), self.jorge, 10)
+
+        by_worker = [r["label"] for r in self._times(group="worker")["rows"]]
+        by_task = [r["label"] for r in self._times(group="task")["rows"]]
+        by_day = self._times(group="day")["rows"]
+
+        self.assertEqual(sorted(by_worker), ["Jorge", "Michel"])
+        self.assertEqual(sorted(by_task), ["Hardware Kit", "Spring"])
+        self.assertTrue(by_day and by_day[0]["label"])
+
+    def test_the_period_actually_narrows_it(self):
+        from datetime import datetime as when
+
+        self._clock(self._job(), self.michel, 30,
+                    day=when(2026, 10, 26, 13, 0))
+        old = self._clock(self._job(), self.michel, 90,
+                          day=when(2020, 1, 6, 13, 0))
+
+        self.assertTrue(old)
+        labels = [r["average"] for r in self._times(days=7)["rows"]]
+
+        self.assertNotIn("1 h 30 min", labels,
+                         "a job from 2020 was counted in the last week")
+
+    def test_a_nonsense_period_falls_back_rather_than_failing(self):
+        self._clock(self._job(), self.michel, 30)
+
+        self.assertEqual(self._times(days=999)["days"], 30)
+
+    # --- admins only, on the server as well as in the menu ----------------
+
+    def test_an_ordinary_employee_is_refused_by_the_server(self):
+        """The tab is hidden for them, but hiding a button is not a lock."""
+        nosy = self.env["res.users"].create({
+            "name": "A fitter", "login": "aa_nosy_times",
+            "group_ids": [(6, 0, [self.env.ref("base.group_user").id])]})
+        self._clock(self._job(), self.michel, 30)
+
+        answer = self.env["mrp.workorder"].with_user(nosy).aa_station_times()
+
+        self.assertFalse(answer["allowed"])
+        self.assertEqual(answer["rows"], [])
+
+    def test_the_tab_is_offered_to_an_admin_and_not_to_a_fitter(self):
+        nosy = self.env["res.users"].create({
+            "name": "Another fitter", "login": "aa_nosy_tab",
+            "group_ids": [(6, 0, [self.env.ref("base.group_user").id])]})
+
+        self.assertTrue(self.env["mrp.workorder"].aa_station_times_allowed())
+        self.assertFalse(
+            self.env["mrp.workorder"].with_user(nosy).aa_station_times_allowed())
