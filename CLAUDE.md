@@ -245,7 +245,13 @@ Three answers he gave when asked, each of which changed what got built:
   order placed **Monday** is collectable from **THURSDAY**; one placed Friday
   starts Monday and is collectable Wednesday. The day the order is placed
   never counts - an order placed at ten to five has had none of it.
-- **TWO-HOUR WINDOWS**: 8-10, 10-12, 12-2, 2-4:30.
+- **ANY HALF HOUR FROM 7:00 AM TO 4:00 PM.** He first chose two-hour windows
+  and revised it the same day - *"the customer should be able to choose
+  anytime between 7 and 4, but dont make it a dropdown ... let them choose a
+  larger range of time"* - so the time is stored as an HOUR OF THE DAY (7.0,
+  7.5, 16.0) rather than one of four codes, and the open hours are a setting.
+  The 19.0.2.0.0 pre-migration moves anything booked under the old windows to
+  the START of the window it chose, which is what the customer was told.
 - **PICKUP ORDERS ONLY, AND REQUIRED.** A delivery is never asked; a
   collection cannot be PAID FOR without a slot, so nothing reaches Dispatch
   blank for somebody to chase by telephone.
@@ -257,7 +263,22 @@ his after that. **No name matching at runtime**: a rule that cannot be turned
 off is worse than a box somebody ticks, because the day "Pickup rate for
 freight" is added it would start demanding slots with no way to refuse.
 
-**THE TRANSFER STORES ITS OWN COPY of the day and window**, written at
+**THE CHECKOUT CONTROLS ARE A CALENDAR AND A GRID OF TIMES**, neither a
+dropdown (owner, 2026-10-27). The calendar is drawn in the browser from the
+days the SERVER says are allowed, sent down as `data-days`, so a square that
+can be clicked is a day that will be accepted - one list, so they cannot
+drift apart.
+
+**`_check_cart_is_ready_to_be_paid` IS NOT THE GATE.** It is only reached on
+the zero-total path in Odoo 19, so a pickup order with something to pay
+walked straight past it - owner: *"currently they dont need to do either to
+proceed."* The hook the payment page consults is
+**`_get_shop_payment_errors`**, which is what `/shop/payment/validate` raises
+on. Both are overridden. The checkout button is disabled too (both of them -
+there is one for mobile and one for desktop), as a courtesy rather than the
+lock.
+
+**THE TRANSFER STORES ITS OWN COPY of the day and time**, written at
 confirmation. The Dispatch list is a list of transfers and the first thing
 anybody wants is to SORT BY the pickup time - who is coming this morning - and
 a related field through `sale_id` cannot be ordered on in the database. The
@@ -586,7 +607,15 @@ ephemeral: uncommitted work is lost on a rebuild, which is the whole reason for
 the instruction.
 
 TEST IT FIRST. "A change" means one that has been updated into the database and
-had its tests run, not one that merely saves. A broken commit is worse than an
+had its tests run, not one that merely saves.
+
+**WHEN THE HOST IS LOADED, RUN THE TESTS WITHOUT `-u`.** This container shares
+a machine that has been seen at load 28, where `odoo-bin -u <module>
+--test-enable` took FOURTEEN MINUTES to get through the module update and was
+then killed by its own timeout, twice, before a single test ran. Once the
+schema is current, `odoo-bin --test-tags /<module> --stop-after-init --no-http`
+skips the update entirely and answers in under a minute. It found a NameError
+in seconds that two abandoned runs never reached. A broken commit is worse than an
 uncommitted one, because it reaches Prod the next time main is merged.
 
 The push lands on this build's branch (`main`). Prod is still the owner's own

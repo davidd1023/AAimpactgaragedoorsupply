@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "AA Pickup Slots",
-    "version": "19.0.1.0.0",
+    "version": "19.0.2.0.0",
     "summary": "A pickup day and time window chosen at checkout, carried to the floor",
     "description": """
 WHEN THE CUSTOMER IS COMING TO COLLECT.
@@ -36,6 +36,7 @@ Three answers he gave when asked:
     ],
     "assets": {
         "web.assets_frontend": [
+            "aa_pickup_slots/static/src/scss/pickup_slot.scss",
             "aa_pickup_slots/static/src/js/pickup_slot.js",
         ],
     },

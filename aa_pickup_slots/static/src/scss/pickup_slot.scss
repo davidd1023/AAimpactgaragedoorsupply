@@ -1,0 +1,91 @@
+// The pop-up calendar. Small enough to keep here rather than lean on a
+// library: a month grid is seven columns and some disabled buttons.
+.aa-cal {
+    position: absolute;
+    z-index: 1060;
+    top: 100%;
+    left: 0;
+    min-width: 19rem;
+    margin-top: .25rem;
+
+    &__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .5rem;
+        margin-bottom: .25rem;
+    }
+
+    &__month { font-weight: 600; }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+    }
+
+    &__dow {
+        text-align: center;
+        font-size: .7rem;
+        text-transform: uppercase;
+        color: var(--bs-secondary-color, #6c757d);
+        padding: .2rem 0;
+    }
+
+    &__day {
+        border: 0;
+        background: transparent;
+        border-radius: .25rem;
+        padding: .4rem 0;
+        font-size: .875rem;
+        line-height: 1;
+
+        // A day nobody is here. Visibly there, plainly not an option.
+        &:disabled {
+            color: var(--bs-secondary-color, #adb5bd);
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
+        &:not(:disabled) {
+            cursor: pointer;
+
+            &:hover,
+            &:focus-visible { background: var(--bs-secondary-bg, #e9ecef); }
+        }
+
+        &--chosen {
+            background: var(--bs-primary, #0d6efd) !important;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        &--empty { visibility: hidden; }
+    }
+}
+
+// The times. A wrapped grid of small buttons rather than a dropdown, so the
+// whole open day is visible at once (owner, 2026-10-27).
+.aa-times {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.2rem, 1fr));
+    gap: .3rem;
+
+    &__pick {
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        background: transparent;
+        padding: .3rem .25rem;
+        font-size: .8125rem;
+        line-height: 1.2;
+        white-space: nowrap;
+
+        &:hover { background: var(--bs-secondary-bg, #e9ecef); }
+
+        &[aria-checked="true"] {
+            background: var(--bs-primary, #0d6efd);
+            border-color: var(--bs-primary, #0d6efd);
+            color: #fff;
+            font-weight: 600;
+        }
+    }
+}

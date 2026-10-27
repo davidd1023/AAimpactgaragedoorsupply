@@ -13,7 +13,7 @@ trade for a column that sorts.
 
 from odoo import api, fields, models
 
-from .sale_order import SLOT_LABELS, SLOTS
+from .pickup_time import time_label
 
 
 class StockPicking(models.Model):
@@ -21,12 +21,12 @@ class StockPicking(models.Model):
 
     aa_pickup_date = fields.Date(
         string="Pickup Day", copy=False, index=True)
-    aa_pickup_slot = fields.Selection(
-        SLOTS, string="Pickup Time", copy=False)
+    aa_pickup_time = fields.Float(
+        string="Pickup Time", copy=False, digits=(4, 2))
     aa_pickup_label = fields.Char(
         string="Pickup", compute="_compute_aa_pickup_label", store=True)
 
-    @api.depends("aa_pickup_date", "aa_pickup_slot")
+    @api.depends("aa_pickup_date", "aa_pickup_time")
     def _compute_aa_pickup_label(self):
         for picking in self:
             if not picking.aa_pickup_date:
@@ -34,6 +34,6 @@ class StockPicking(models.Model):
                 continue
 
             day = picking.aa_pickup_date.strftime("%a %-d %b")
-            window = SLOT_LABELS.get(picking.aa_pickup_slot)
-            picking.aa_pickup_label = (
-                "%s, %s" % (day, window) if window else day)
+            at = (time_label(picking.aa_pickup_time)
+                  if picking.aa_pickup_time else "")
+            picking.aa_pickup_label = "%s, %s" % (day, at) if at else day

@@ -14,6 +14,7 @@ day their order is not made yet.
 
 from datetime import date
 
+from odoo.addons.http_routing.tests.common import MockRequest
 from odoo.exceptions import ValidationError
 from odoo.tests.common import HttpCase, TransactionCase, tagged
 
@@ -129,7 +130,7 @@ class PickupSlotCase(TransactionCase):
     def test_a_pickup_order_with_a_slot_is_happy(self):
         self.order.carrier_id = self.pickup
         self.order.aa_pickup_date = self.order._aa_earliest_pickup()
-        self.order.aa_pickup_slot = "10"
+        self.order.aa_pickup_time = 10.0
 
         self.assertFalse(self.order._aa_pickup_problem())
 
@@ -138,7 +139,7 @@ class PickupSlotCase(TransactionCase):
         date of their own choosing."""
         self.order.carrier_id = self.pickup
         self.order.aa_pickup_date = date.today()
-        self.order.aa_pickup_slot = "10"
+        self.order.aa_pickup_time = 10.0
 
         self.assertIn("no longer available", self.order._aa_pickup_problem())
 
@@ -163,7 +164,7 @@ class PickupSlotCase(TransactionCase):
         Odoo makes of the cart is its own business."""
         self.order.carrier_id = self.pickup
         self.order.aa_pickup_date = self.order._aa_earliest_pickup()
-        self.order.aa_pickup_slot = "12"
+        self.order.aa_pickup_time = 12.5
 
         try:
             self.order._check_cart_is_ready_to_be_paid()
@@ -175,10 +176,10 @@ class PickupSlotCase(TransactionCase):
 
     def test_the_label_reads_as_one_line(self):
         self.order.aa_pickup_date = date(2026, 10, 29)
-        self.order.aa_pickup_slot = "14"
+        self.order.aa_pickup_time = 14.0
 
         self.assertEqual(self.order.aa_pickup_label,
-                         "Thu 29 Oct, 2:00 PM - 4:30 PM")
+                         "Thu 29 Oct, 2:00 PM")
 
     def test_an_order_with_no_slot_has_no_label(self):
         self.assertFalse(self.order.aa_pickup_label)
@@ -188,7 +189,7 @@ class PickupSlotCase(TransactionCase):
         the Dispatch list is a list of transfers."""
         self.order.carrier_id = self.pickup
         self.order.aa_pickup_date = self.order._aa_earliest_pickup()
-        self.order.aa_pickup_slot = "08"
+        self.order.aa_pickup_time = 7.5
         self.order.action_confirm()
 
         pickings = self.order.picking_ids
@@ -225,5 +226,162 @@ class PickupSlotPageCase(HttpCase):
         arch = self.env.ref("website_sale.checkout").get_combined_arch()
 
         self.assertIn("aa_pickup_slot", arch)
-        self.assertIn("aa_pickup_day", arch)
-        self.assertIn("aa_pickup_window", arch)
+        self.assertIn("aa_pickup_day_button", arch)
+        self.assertIn("aa_pickup_calendar", arch)
+        self.assertIn("aa_pickup_times", arch)
+
+
+@tagged("post_install", "-at_install")
+class PickupGateCase(TransactionCase):
+    """THE GATE THAT ACTUALLY STOPS THEM.
+
+    Owner, 2026-10-27: "currently they dont need to do either to proceed."
+    He was right. `_check_cart_is_ready_to_be_paid` is only reached on the
+    zero-total path in Odoo 19, so a pickup order with something to pay
+    walked straight past it. `_get_shop_payment_errors` is the one the
+    payment page consults and the one /shop/payment/validate raises on.
+    """
+
+    def setUp(self):
+        super().setUp()
+        from odoo.addons.aa_pickup_slots.controllers.main import (
+            AAWebsiteSalePickup,
+        )
+        self.controller = AAWebsiteSalePickup()
+        self.customer = self.env["res.partner"].create({
+            "name": "Hector", "email": "hector@example.com",
+            "street": "2550 W 60th Pl", "city": "Hialeah", "zip": "33016",
+            "country_id": self.env.ref("base.us").id})
+        self.product = self.env["product.product"].create({
+            "name": "A thing", "type": "consu", "is_storable": True,
+            "list_price": 100.0})
+        self.pickup = self.env["delivery.carrier"].create({
+            "name": "Pickup - Medley Warehouse", "aa_is_pickup": True,
+            "website_published": True,
+            "product_id": self.env["product.product"].create({
+                "name": "Pickup", "type": "service"}).id})
+        self.order = self.env["sale.order"].create({
+            "partner_id": self.customer.id,
+            "carrier_id": self.pickup.id,
+            "order_line": [(0, 0, {"product_id": self.product.id,
+                                   "product_uom_qty": 1})]})
+
+    def _titles(self):
+        """The errors the payment page would show.
+
+        Inside a MockRequest because the base implementation reaches for
+        `request.website` - `website_published` is a computed field whose
+        search needs one. Calling the controller bare raised
+        "'NoneType' object has no attribute 'uid'" and, worse, returned an
+        EMPTY list, which would have made a test pass by finding nothing.
+        """
+        website = self.env["website"].search([], limit=1)
+
+        with MockRequest(self.env, website=website):
+            errors = self.controller._get_shop_payment_errors(self.order)
+
+        return [title for title, _msg in errors]
+
+    def test_a_pickup_with_no_slot_is_an_error_on_the_payment_page(self):
+        self.assertIn("Pickup time needed", self._titles())
+
+    def test_a_booked_pickup_is_not(self):
+        self.order.aa_pickup_date = self.order._aa_earliest_pickup()
+        self.order.aa_pickup_time = 10.0
+
+        self.assertNotIn("Pickup time needed", self._titles())
+
+    def test_odoo_s_own_errors_still_come_through(self):
+        """super() is called, so nothing Odoo would have said is lost.
+
+        EVERY carrier is unpublished, not just ours: the database has others
+        and leaving them published meant Odoo found a shipping method, said
+        nothing, and this passed or failed for reasons of its own."""
+        self.order.aa_pickup_date = self.order._aa_earliest_pickup()
+        self.order.aa_pickup_time = 10.0
+        self.env["delivery.carrier"].search([]).write(
+            {"website_published": False})
+
+        self.assertTrue(self._titles(),
+                        "Odoo's own shipping error went missing")
+
+    def test_the_calendar_is_given_the_same_days_the_server_allows(self):
+        """The squares that can be clicked and the days that are accepted are
+        one list, so they cannot drift apart."""
+        import json
+
+        offered = json.loads(self.order._aa_pickup_days_json())
+        allowed = [day.isoformat()
+                   for day, _label in self.order._aa_pickup_choices()]
+
+        self.assertEqual(offered, allowed)
+        self.assertTrue(offered, "the calendar would have nothing to show")
+
+
+@tagged("post_install", "-at_install")
+class PickupTimesCase(TransactionCase):
+    """THE TIMES ON OFFER, after he widened them.
+
+    Owner, 2026-10-27: "the customer should be able to choose anytime between
+    7 and 4, but dont make it a dropdown ... let them choose a larger range of
+    time." So the four two-hour windows became half hours across the open day.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.order = self.env["sale.order"].create({
+            "partner_id": self.env["res.partner"].create({"name": "H"}).id})
+
+    def _times(self):
+        return [value for value, _label in self.order._aa_pickup_time_choices()]
+
+    def test_the_day_runs_from_seven_to_four(self):
+        times = self._times()
+
+        self.assertEqual(times[0], 7.0)
+        self.assertEqual(times[-1], 16.0)
+
+    def test_they_come_in_half_hours(self):
+        times = self._times()
+
+        self.assertEqual(len(times), 19, times)
+        self.assertIn(7.5, times)
+        self.assertIn(12.5, times)
+
+    def test_the_hours_can_be_moved_without_a_deploy(self):
+        """He has already changed them once."""
+        self.env["ir.config_parameter"].sudo().set_param(
+            "aa_pickup_slots.open_from", "9.0")
+        self.env["ir.config_parameter"].sudo().set_param(
+            "aa_pickup_slots.open_to", "11.0")
+
+        self.assertEqual(self._times(), [9.0, 9.5, 10.0, 10.5, 11.0])
+
+    def test_hours_typed_backwards_fall_back_rather_than_offer_nothing(self):
+        self.env["ir.config_parameter"].sudo().set_param(
+            "aa_pickup_slots.open_from", "16.0")
+        self.env["ir.config_parameter"].sudo().set_param(
+            "aa_pickup_slots.open_to", "7.0")
+
+        self.assertEqual(self._times()[0], 7.0)
+        self.assertEqual(self._times()[-1], 16.0)
+
+    def test_the_labels_read_as_a_person_would_say_them(self):
+        labels = dict(self.order._aa_pickup_time_choices())
+
+        self.assertEqual(labels[7.0], "7:00 AM")
+        self.assertEqual(labels[7.5], "7:30 AM")
+        self.assertEqual(labels[12.0], "12:00 PM")
+        self.assertEqual(labels[12.5], "12:30 PM")
+        self.assertEqual(labels[16.0], "4:00 PM")
+
+    def test_a_time_we_are_shut_is_refused(self):
+        pickup = self.env["delivery.carrier"].create({
+            "name": "Pickup", "aa_is_pickup": True,
+            "product_id": self.env["product.product"].create(
+                {"name": "P", "type": "service"}).id})
+        self.order.carrier_id = pickup
+        self.order.aa_pickup_date = self.order._aa_earliest_pickup()
+        self.order.aa_pickup_time = 22.0
+
+        self.assertIn("not open at that time", self.order._aa_pickup_problem())
