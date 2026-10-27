@@ -12,6 +12,7 @@ appearing in a list; getting Friday wrong means a customer driving over on a
 day their order is not made yet.
 """
 
+import json
 from datetime import date
 
 from odoo.addons.http_routing.tests.common import MockRequest
@@ -385,3 +386,47 @@ class PickupTimesCase(TransactionCase):
         self.order.aa_pickup_time = 22.0
 
         self.assertIn("not open at that time", self.order._aa_pickup_problem())
+
+
+@tagged("post_install", "-at_install")
+class PickupRouteCase(HttpCase):
+    """THE ROUTE THE PAGE ACTUALLY CALLS.
+
+    Everything else tests models. This calls /shop/pickup_slot over HTTP,
+    because the first version of it used `website.sale_get_order()` - gone in
+    Odoo 19 - and blew up with AttributeError the moment a customer picked a
+    date on the live site. Twenty-nine passing tests never touched it.
+
+    A handled answer comes back as a RESULT. A crash comes back with a
+    top-level "error", which is the thing being watched for here.
+    """
+
+    def _call(self, **params):
+        response = self.url_open(
+            "/shop/pickup_slot",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": params}),
+            headers={"Content-Type": "application/json"})
+
+        self.assertEqual(response.status_code, 200)
+
+        return response.json()
+
+    def test_the_route_answers_instead_of_exploding(self):
+        payload = self._call(date="", time=0)
+
+        self.assertNotIn("error", payload,
+                         "the route raised: %s" % payload.get("error"))
+        self.assertIn("result", payload)
+
+    def test_with_no_cart_it_says_so_politely(self):
+        payload = self._call(date="2026-12-01", time=10.0)
+
+        self.assertNotIn("error", payload)
+        self.assertEqual(payload["result"].get("error"), "no-cart")
+
+    def test_a_nonsense_time_does_not_raise(self):
+        """float("half past ten") must not reach the customer as a 500."""
+        payload = self._call(date="", time="half past ten")
+
+        self.assertNotIn("error", payload)
