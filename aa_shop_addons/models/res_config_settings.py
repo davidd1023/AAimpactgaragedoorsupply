@@ -18,7 +18,8 @@ it when there is enough to be choosy.
 from odoo import fields, models
 
 from .addon_suggestion import MIN_ORDERS, MIN_ORDERS_SETTING
-from .product_template import FAMILIES, KIT_SETTING, SETTING
+from .product_template import (FAMILIES, KIT_SETTING, SETTING, SHOWN,
+                               SHOWN_SETTING)
 
 
 class ResConfigSettings(models.TransientModel):
@@ -45,6 +46,14 @@ class ResConfigSettings(models.TransientModel):
     aa_addon_categ_kits_id = fields.Many2one(
         "product.public.category", string="Hardware kits category",
         config_parameter=KIT_SETTING)
+
+    #: ONE POOL, AND NOT TOO MANY OF IT (owner, 2026-10-27). "Too many" is
+    #: his judgement, so it is a setting rather than a number in the code.
+    aa_addon_shown = fields.Integer(
+        string="Add-ons to show", default=SHOWN,
+        config_parameter=SHOWN_SETTING,
+        help="How many products to show under a kit or the spring, in one"
+             " pool. Eight is two rows of four on a desktop.")
 
     aa_addon_min_orders = fields.Integer(
         string="Orders before recommending", default=MIN_ORDERS,

@@ -70,6 +70,10 @@
                 <label for="aa_addon_min_orders" class="col-6 col-lg-5 o_light_label"/>
                 <field name="aa_addon_min_orders" class="oe_inline"/>
               </div>
+              <div class="row">
+                <label for="aa_addon_shown" class="col-6 col-lg-5 o_light_label"/>
+                <field name="aa_addon_shown" class="oe_inline"/>
+              </div>
               <div class="mt-2">
                 <button name="action_aa_addon_rebuild" type="object"
                         string="Count the orders now and show me"

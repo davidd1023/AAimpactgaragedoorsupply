@@ -69,8 +69,12 @@ KIT_SETTING = "aa_shop_addons.category_kits"
 #: "Hardware Kit" and "Hardware Kits" both count.
 KIT_WORDS = "hardware kit"
 
-#: How many to show per family before pointing at the rest.
+#: How many to show, in ONE pool (owner, 2026-10-27: "just one pool of
+#: products not multiple categories, that way we dont show too many products
+#: in the recommendations"). Eight is two rows of four on a desktop and four
+#: rows of two on a telephone.
 SHOWN = 8
+SHOWN_SETTING = "aa_shop_addons.shown"
 
 #: Set on the SPRING page only. His calculator prices the cone set for the
 #: chosen I.D. into the spring itself, at cost - so a customer configuring a
@@ -217,21 +221,68 @@ class ProductTemplate(models.Model):
 
         return "families", None
 
-    def _aa_addon_groups(self):
-        """[{key, label, note, products, category}] to show under this page.
+    def _aa_addon_picks(self):
+        """{products, note} - ONE POOL, not a heading per family.
 
-        Empty for anything that is not a kit or a spring, and for a kit whose
-        families are all empty - the block draws nothing rather than a row of
-        headings with nothing under them.
+        Owner, 2026-10-27: *"i want the recommendations to be just one pool of
+        products not multiple categories, that way we dont show too many
+        products in the recommendations."*
+
+        It was four headings with up to eight products under each, which on a
+        kit page was a second catalogue rather than a recommendation. Now it
+        is one short row, capped by a setting, and the families do nothing but
+        decide what is eligible.
+
+        Empty for anything that is not a kit or a spring, and for a kit with
+        nothing to show - the block draws nothing rather than a heading with
+        an empty space under it.
         """
         self.ensure_one()
         role = self._aa_addon_role()
 
         if not role:
-            return []
+            return {}
 
         source, picked = self._aa_addon_source()
-        groups = []
+        shown = self._aa_addon_shown()
+        products = picked[:shown] if picked is not None else self._aa_family_pool(shown)
+
+        if not products:
+            return {}
+
+        return {
+            "source": source,
+            "products": products,
+            "note": self._aa_cones_note(role, products),
+        }
+
+    @api.model
+    def _aa_addon_shown(self):
+        """How many to show. A setting, because "too many" is his judgement
+        and not a number to need a deploy for."""
+        raw = self.env["ir.config_parameter"].sudo().get_param(SHOWN_SETTING)
+
+        if not raw:
+            return SHOWN
+
+        try:
+            return max(1, int(raw))
+        except (TypeError, ValueError):
+            return SHOWN
+
+    def _aa_family_pool(self, shown):
+        """The last fallback, TAKEN IN TURNS ROUND THE FAMILIES.
+
+        This is the one place where flattening four lists into one needs care.
+        Taken in sequence, a pool of eight off a catalogue like his would be
+        eight cones and nothing else - every cable, track and trim pushed off
+        the end by whichever family happened to be listed first. So one is
+        taken from each family in turn until the pool is full, which gives a
+        spread of what a customer might still need. That is the whole point of
+        a fallback: not specific, but never silly.
+        """
+        self.ensure_one()
+        queues = []
 
         for key, label in FAMILIES:
             category = self._aa_addon_category(key, label)
@@ -239,61 +290,61 @@ class ProductTemplate(models.Model):
             if not category:
                 continue
 
-            if picked is not None:
-                # SORTED INTO FAMILIES, whoever chose. The grouping is by the
-                # website category the product is already in, so adding one
-                # never also means saying which heading it goes under - and a
-                # learned list keeps its order inside each family, commonest
-                # first, because `filtered` does not reshuffle a recordset.
-                products = picked.filtered(lambda p: category in p.public_categ_ids)
-            else:
-                products = self.env["product.template"].search([
-                    ("public_categ_ids", "child_of", category.id),
-                    ("is_published", "=", True),
-                    ("id", "!=", self.id),
-                ], limit=SHOWN + 1)
+            found = self.env["product.template"].search([
+                ("public_categ_ids", "child_of", category.id),
+                ("is_published", "=", True),
+                ("id", "!=", self.id),
+            ], limit=shown)
 
-            if not products:
-                continue
+            if found:
+                queues.append(list(found))
 
-            groups.append({
-                "key": key,
-                "label": label,
-                "note": CONES_INCLUDED if (key == "cones" and role == "spring")
-                        else "",
-                "products": products[:SHOWN],
-                "more": len(products) > SHOWN,
-                "category": category,
-            })
+        pool = self.env["product.template"]
+        taken = True
 
-        # ANYTHING IN NONE OF THE FAMILIES still belongs on the page.
-        #
-        # For a list HE set, dropping one silently would make the field lie:
-        # he put a product in and the page did not show it. For a LEARNED
-        # list it is more than that - the four families were his answer to a
-        # question about cones, cables, tracks and trims, and his order book
-        # knows about rollers, hinges and drums as well. Those are the ones
-        # he would never have gone looking for.
-        if picked is not None:
-            placed = self.env["product.template"]
+        while taken and len(pool) < shown:
+            taken = False
 
-            for group in groups:
-                placed |= group["products"]
+            for queue in queues:
+                if not queue or len(pool) >= shown:
+                    continue
 
-            rest = picked - placed
+                product = queue.pop(0)
+                taken = True
 
-            if rest:
-                groups.append({
-                    "key": "other",
-                    "label": "Also needed" if source == "picked"
-                             else "Often bought with this",
-                    "note": "",
-                    "products": rest[:SHOWN],
-                    "more": len(rest) > SHOWN,
-                    "category": False,
-                })
+                if product not in pool:
+                    pool |= product
 
-        return groups
+        return pool
+
+    def _aa_cones_note(self, role, products):
+        """The cones warning, now that there is no Cones heading to hang it on.
+
+        Owner, 2026-10-27: *"show them but make it obvious that the cones are
+        included so customers dont make the mistake of buying when they dont
+        need one."* The calculator prices the cone set for the chosen I.D.
+        into the spring itself, so a customer configuring one is already
+        buying cones.
+
+        It hung off the Cones group before. With one pool it has to ask
+        whether a cone is actually in what is being shown - and it asks by
+        category OR by name, because his live catalogue has no Cones category
+        at all and a warning that never appears is worse than one that
+        occasionally appears beside a cone wrench.
+        """
+        if role != "spring":
+            return ""
+
+        category = self._aa_addon_category("cones", "Cones")
+
+        for product in products:
+            if category and category in product.public_categ_ids:
+                return CONES_INCLUDED
+
+            if "cone" in (product.name or "").lower():
+                return CONES_INCLUDED
+
+        return ""
 
     # --- "why do I not see them" ------------------------------------------
 
@@ -317,23 +368,22 @@ class ProductTemplate(models.Model):
                 product.aa_addon_summary = "No block - not read as a kit"
                 continue
 
-            source, _picked = product._aa_addon_source()
-            groups = product._aa_addon_groups()
+            picks = product._aa_addon_picks()
+
+            if not picks:
+                product.aa_addon_summary = (
+                    "Nothing to show - no add-on products were found")
+                continue
+
             where = {
                 "picked": "you picked these",
                 "learned": "from your orders",
-                "families": "whole families - nothing picked, nothing counted",
-            }[source]
+                "families": "a spread of the families - nothing picked,"
+                            " nothing counted",
+            }[picks["source"]]
 
-            if not groups:
-                product.aa_addon_summary = (
-                    "Nothing to show - no add-on categories were found")
-                continue
-
-            product.aa_addon_summary = "%s (%s)" % (
-                ", ".join("%s %s" % (group["label"], len(group["products"]))
-                          for group in groups),
-                where)
+            product.aa_addon_summary = "%s products (%s)" % (
+                len(picks["products"]), where)
 
     @api.model
     def action_aa_addon_check(self):

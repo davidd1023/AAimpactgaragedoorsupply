@@ -239,10 +239,31 @@ DELIVERY CHARGE or down payment (services and anything unpublished are out,
 which excludes the plastic filler by the rule that already makes it
 unpublished).
 
-A recommendation fitting NONE of the four families is shown under "Often
-bought with this" rather than dropped - his families were an answer about
+### ONE POOL, NOT A HEADING PER FAMILY (owner, 2026-10-27)
+
+*"i want the recommendations to be just one pool of products not multiple
+categories, that way we dont show too many products in the recommendations."*
+
+It was four headings with up to eight products under each, which on a kit page
+is a second catalogue rather than a recommendation. Now it is ONE short row,
+capped by the setting **"Add-ons to show"** (`aa_shop_addons.shown`, default 8
+- two rows of four on a desktop), because "too many" is his judgement and not
+a number for the code.
+
+**THE FALLBACK POOL IS TAKEN IN TURNS ROUND THE FAMILIES**, and that is the
+one place flattening four lists into one needs care: taken in sequence, a pool
+of eight off his catalogue would be eight cones and nothing else, every cable
+and track pushed off the end by whichever family happened to be listed first.
+
+The families now do nothing but decide what is ELIGIBLE. A recommendation
+fitting none of them is simply in the pool - his families were an answer about
 cones, cables, tracks and trims, and his order book also knows about rollers
 and hinges, which are the ones nobody would have gone looking for.
+
+**THE CONES NOTE LOST ITS HEADING** and now sits under the section, shown only
+when a cone is actually in the pool - asked by category OR BY NAME, because
+his live catalogue has no Cones category at all and a warning that never
+appears is worse than one that turns up beside a cone wrench.
 
 **THE REVIEW SCREEN IS Website > Configuration > Recommended Add-ons**, every
 pair with the number of his own orders behind it, grouped by product - one page
