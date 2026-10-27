@@ -18,8 +18,8 @@
  *     Frame_bronze      a piece that is DARK in every
  *                       one of his files                 left alone
  *     Glass_clear ...   the glazing                      recoloured
- *     Blue_Circle       unidentified - a badge?          left alone
- *     White_Circle      ditto
+ *     Blue_Circle       the rollers, inner part          black unless White
+ *     White_Circle      the rollers, the wheels          black unless White
  *
  * So: load one file, keep it, and set colours on the materials. One 8.8 MB
  * download instead of twenty, and every colour change instant.
@@ -61,6 +61,20 @@
   var FRAME_RE = /^fra[mn]e_(white|black|woodgrain)$/i;
   var GLASS_RE = /^glass/i;
 
+  /* THE ROLLERS - the wheels down each side of the door that run in the
+   * track. Named Blue_Circle and White_Circle in his files, which is why
+   * they went unidentified for a day; the owner named them on 2026-10-27.
+   *
+   * Two materials, one part: measured off the mesh, both sit on the back
+   * face, at both side edges, running up the height of the door - which is
+   * where rollers are and nothing else is. So both take the colour. */
+  var ROLLER_RE = /circle/i;
+
+  /* Not pure black. These are not metal, and a 0,0,0 non-metal under a soft
+   * studio light is a silhouette with no shape in it - the wheel reads as a
+   * hole. Nearly black still catches the highlight that makes it round. */
+  var BLACK_ROLLER = [0.02, 0.02, 0.02];
+
   var FRAMES = [
     { id: "white",  name: "White",  swatch: "#f1f1ef",
       linear: [1, 1, 1],                        metalness: 0.282, roughness: 0.550 },
@@ -90,6 +104,18 @@
     { id: "grey",   name: "Grey",   swatch: "#a4a4a4",
       linear: [0.3771, 0.3771, 0.3771],         transmission: 0.578, roughness: 0.063 }
   ];
+
+  /* HOW MANY PANES ACROSS EACH SECTION (owner, 2026-10-27, with four
+   * screenshots of his order form: "Number of Lites", 1 to 4, and the door
+   * always four sections tall).
+   *
+   * ONE IS WHAT THE MODEL ALREADY IS. Measured before any of this was
+   * written: every opening in his .glb is clear - four sections, each a
+   * single unbroken pane, no vertical divider anywhere. So 1 adds nothing
+   * and 2, 3 and 4 add one, two and three bars per section, which is the
+   * easy direction. Had it been the other way round - a centre stile to
+   * take OUT - this would have meant splitting his mesh apart. */
+  var LITES = [1, 2, 3, 4];
 
   /* Only reached if the element carries no data-model. It names his own
    * server, not the media account that hosted these files until 2026-10-26 -
@@ -265,7 +291,16 @@
 
     var frameMats = [];
     var glassMats = [];
+    var rollerMats = [];
+    var glassMeshes = [];
+    var frameMeshes = [];
     var woodTexture = null;
+
+    /* The lite bars and what they need to know to be drawn: the openings
+     * measured off the model, not typed in here. */
+    var liteGroup = null;
+    var openings = null;
+    var lites = LITES[0];
     var frame = frames[0];
     var glass = glasses[0];
 
@@ -309,6 +344,223 @@
         m.roughness = choice.roughness;
         m.needsUpdate = true;
       });
+
+      applyRollers(choice);
+      label();
+    }
+
+    /* THE ROLLERS FOLLOW THE FRAME (owner, 2026-10-27: "all colors except
+     * white should have black rollers"). White keeps the rollers his model
+     * was built with - restored from what they came in as, rather than
+     * guessed at, so this cannot drift from the file. */
+    function applyRollers(choice) {
+      var white = choice.id === "white";
+
+      rollerMats.forEach(function (m) {
+        if (white) {
+          m.color.copy(m.userData.aaAsBuilt);
+        } else {
+          m.color.fromArray(BLACK_ROLLER);
+        }
+        m.needsUpdate = true;
+      });
+    }
+
+    /* THE OPENINGS, READ OFF THE GLASS ITSELF.
+     *
+     * Nothing here is a number typed from his drawing. The glass is four
+     * flat sheets, so their own vertices say where each opening starts and
+     * ends, and the bars are placed by dividing that span. A model with five
+     * sections, or a wider door, measures itself and still works.
+     *
+     * AND IT WORKS OUT WHICH WAY IS UP, rather than assuming. His file is
+     * Blender's Z-up, and the node that holds the mesh carries a quarter
+     * turn that swaps two axes on the way into the scene - so the door's
+     * height is the file's Z but the world's Y. Writing either set of axis
+     * names into this code would be wrong half the time and silently so:
+     * the bars would come out lying across the door like extra rails. The
+     * three axes are therefore identified by what they look like.
+     *
+     * In WORLD space, after the door has been placed, because the bars are
+     * added to the scene rather than to the model - the model carries its
+     * own transforms and borrowing them would be one more thing to get
+     * wrong for no gain, since nothing moves after this. */
+    function measureOpenings() {
+      var points = [];
+      var bounds = new THREE.Box3();
+      var vertex = new THREE.Vector3();
+
+      glassMeshes.forEach(function (mesh) {
+        var position = mesh.geometry.getAttribute("position");
+
+        for (var i = 0; i < position.count; i++) {
+          vertex.fromBufferAttribute(position, i).applyMatrix4(mesh.matrixWorld);
+          bounds.expandByPoint(vertex);
+          points.push(vertex.clone());
+        }
+      });
+
+      if (!points.length) { return null; }
+
+      var size = bounds.getSize(new THREE.Vector3());
+      var spans = [size.x, size.y, size.z];
+      var biggest = Math.max(spans[0], spans[1], spans[2]);
+      var tolerance = biggest * 0.01;
+
+      /* THROUGH the door is the way it is thinnest. A sheet of glass is
+       * barely thick at all, whichever way the model was built. */
+      var through = spans.indexOf(Math.min(spans[0], spans[1], spans[2]));
+      var others = [0, 1, 2].filter(function (axis) { return axis !== through; });
+
+      /* The distinct places the glass starts and stops along an axis. Two
+       * readings per opening - where it begins and where it ends. */
+      function edgesAlong(axis) {
+        var values = points.map(function (p) { return p.getComponent(axis); });
+        var edges = [];
+        values.sort(function (a, b) { return a - b; });
+        values.forEach(function (v) {
+          if (!edges.length || Math.abs(v - edges[edges.length - 1]) > tolerance) {
+            edges.push(v);
+          }
+        });
+        return edges;
+      }
+
+      var first = edgesAlong(others[0]);
+      var second = edgesAlong(others[1]);
+
+      /* UP is the way the sections stack, and stacking is what leaves more
+       * than one pair of edges. Across the door each pane runs the whole
+       * width, so that axis reads exactly two. */
+      var upIsFirst = first.length > second.length ||
+        (first.length === second.length && spans[others[0]] <= spans[others[1]]);
+      var up = upIsFirst ? others[0] : others[1];
+      var across = upIsFirst ? others[1] : others[0];
+      var edges = upIsFirst ? first : second;
+
+      var rows = [];
+      for (var i = 0; i + 1 < edges.length; i += 2) {
+        rows.push({ from: edges[i], to: edges[i + 1] });
+      }
+
+      if (!rows.length) { return null; }
+
+      /* As wide as the gap between two openings - which is the rail, and
+       * the only honest guide to how thick this door's own members are. */
+      var rail = rows.length > 1
+        ? Math.abs(rows[1].from - rows[0].to)
+        : Math.abs(rows[0].to - rows[0].from) * 0.08;
+
+      /* AND AS DEEP AS THAT SAME RAIL, measured on it.
+       *
+       * NOT the frame's bounding box, which was the first attempt. That box
+       * reaches around the whole door and takes in the hinge lugs and the
+       * back seal: on his model it came out 0.182 deep and sitting 0.053 off
+       * centre, where a rail is 0.075 and dead centred. So the bars were two
+       * and a half times too deep and stood proud of the face - owner,
+       * 2026-10-27, "the lites are jutting out a bit on the front which looks
+       * a little ugly". Flush at the back, because the error was all one way.
+       *
+       * A rail is the same member as a lite bar, turned the other way, so
+       * what it measures is exactly the right answer. Sampled between the
+       * first two openings and away from the ends, so no end stile or corner
+       * is caught in with it. */
+      var near = Infinity;
+      var far = -Infinity;
+      var point = new THREE.Vector3();
+
+      if (rows.length > 1) {
+        var bandFrom = Math.min(rows[0].to, rows[1].from);
+        var bandTo = Math.max(rows[0].to, rows[1].from);
+        var midAcross =
+          (bounds.min.getComponent(across) + bounds.max.getComponent(across)) / 2;
+        var reach =
+          (bounds.max.getComponent(across) - bounds.min.getComponent(across)) * 0.3;
+
+        frameMeshes.forEach(function (mesh) {
+          var position = mesh.geometry.getAttribute("position");
+
+          for (var i = 0; i < position.count; i++) {
+            point.fromBufferAttribute(position, i).applyMatrix4(mesh.matrixWorld);
+
+            if (point.getComponent(up) < bandFrom ||
+                point.getComponent(up) > bandTo) { continue; }
+            if (Math.abs(point.getComponent(across) - midAcross) > reach) { continue; }
+
+            var depthHere = point.getComponent(through);
+            if (depthHere < near) { near = depthHere; }
+            if (depthHere > far) { far = depthHere; }
+          }
+        });
+      }
+
+      if (!(far > near)) {
+        /* One opening, or a frame shaped in some way this cannot read. The
+         * bounding box is wrong but it is better than nothing drawn. */
+        var frameBox = new THREE.Box3();
+        frameMeshes.forEach(function (mesh) { frameBox.expandByObject(mesh); });
+        near = frameBox.min.getComponent(through);
+        far = frameBox.max.getComponent(through);
+      }
+
+      return {
+        up: up,
+        across: across,
+        through: through,
+        rows: rows,
+        left: bounds.min.getComponent(across),
+        right: bounds.max.getComponent(across),
+        depth: Math.max(far - near, biggest * 0.002),
+        middle: (far + near) / 2,
+        thickness: rail || biggest * 0.015
+      };
+    }
+
+    /* The bars themselves. 1 draws none, which is his model untouched. */
+    function applyLites(count) {
+      lites = count;
+
+      if (!liteGroup || !openings) { label(); return; }
+
+      while (liteGroup.children.length) {
+        var gone = liteGroup.children.pop();
+        gone.geometry.dispose();
+        liteGroup.remove(gone);
+      }
+
+      if (count > 1) {
+        var width = openings.right - openings.left;
+        var material = frameMats[0] || null;
+        var size = new THREE.Vector3();
+        var where = new THREE.Vector3();
+
+        openings.rows.forEach(function (row) {
+          /* A touch taller than the opening, so it tucks behind the rails
+           * rather than stopping a hair short of them - which reads as a
+           * gap from any angle but dead on. */
+          var height = Math.abs(row.to - row.from) + openings.thickness;
+
+          size.setComponent(openings.through, openings.depth);
+          size.setComponent(openings.across, openings.thickness);
+          size.setComponent(openings.up, height);
+
+          for (var i = 1; i < count; i++) {
+            var bar = new THREE.Mesh(
+              new THREE.BoxGeometry(size.x, size.y, size.z), material);
+
+            where.setComponent(openings.through, openings.middle);
+            where.setComponent(openings.across,
+                               openings.left + width * i / count);
+            where.setComponent(openings.up, (row.from + row.to) / 2);
+
+            bar.position.copy(where);
+            bar.castShadow = true;
+            bar.receiveShadow = true;
+            liteGroup.add(bar);
+          }
+        });
+      }
+
       label();
     }
 
@@ -324,7 +576,8 @@
     }
 
     function label() {
-      readout.textContent = frame.name + " frame · " + glass.name + " glass";
+      readout.textContent = frame.name + " frame · " + glass.name + " glass · "
+        + lites + (lites === 1 ? " lite" : " lites");
     }
 
     /* ---- chips ------------------------------------------------------ */
@@ -344,8 +597,13 @@
         b.id = "aadp-" + title.toLowerCase().replace(/[^a-z]+/g, "-") + "-" + choice.id;
         b.setAttribute("role", "radio");
         b.setAttribute("aria-checked", index === initial ? "true" : "false");
-        var dot = el("span", "aadp__dot", b);
-        dot.style.background = choice.swatch;
+        if (choice.swatch) {
+          var dot = el("span", "aadp__dot", b);
+          dot.style.background = choice.swatch;
+        } else {
+          b.classList.add("aadp__chip--plain");
+        }
+
         b.appendChild(document.createTextNode(choice.name));
         b.addEventListener("click", function () {
           buttons.forEach(function (other) {
@@ -358,8 +616,20 @@
       });
     }
 
+    /* ONE IS THE DEFAULT (owner, 2026-10-27: "1-4 lites with 1 being the
+     * default"), which is also the door exactly as his model was built. */
+    var liteChoices = LITES.map(function (n) {
+      return { id: String(n), name: String(n), count: n };
+    });
+    var wanted = parseInt(host.getAttribute("data-lites"), 10);
+    var liteStart = LITES.indexOf(wanted) === -1 ? 0 : LITES.indexOf(wanted);
+    lites = LITES[liteStart];
+
     group("Frame finish", frames, 0, applyFrame);
     group("Glass", glasses, 0, applyGlass);
+    group("Lites", liteChoices, liteStart, function (choice) {
+      applyLites(choice.count);
+    });
 
     /* ---- the model -------------------------------------------------- */
 
@@ -380,9 +650,21 @@
             m.transparent = true;
             m.side = THREE.DoubleSide;
             if (glassMats.indexOf(m) === -1) { glassMats.push(m); }
+            if (glassMeshes.indexOf(node) === -1) { glassMeshes.push(node); }
           } else if (FRAME_RE.test(name)) {
             m.envMapIntensity = 0.9;
             if (frameMats.indexOf(m) === -1) { frameMats.push(m); }
+            if (frameMeshes.indexOf(node) === -1) { frameMeshes.push(node); }
+          } else if (ROLLER_RE.test(name)) {
+            m.envMapIntensity = 0.85;
+
+            if (rollerMats.indexOf(m) === -1) {
+              /* KEPT BEFORE ANYTHING IS WRITTEN OVER IT. The White finish
+               * restores these, and the only honest source for "what the
+               * rollers look like" is the file they arrived in. */
+              m.userData.aaAsBuilt = m.color.clone();
+              rollerMats.push(m);
+            }
           } else {
             m.envMapIntensity = 0.85;
           }
@@ -423,8 +705,17 @@
        * bottom of the frame does not sit over the door. */
       target.y += span.y * 0.06;
 
+      /* Measured AFTER the model is in the scene and standing on the
+       * floor, so the bars are built in the same world the door is in. */
+      scene.updateMatrixWorld(true);
+      openings = measureOpenings();
+
+      liteGroup = new THREE.Group();
+      scene.add(liteGroup);
+
       applyFrame(frames[0]);
       applyGlass(glasses[0]);
+      applyLites(lites);   /* draws nothing at 1, which is the model as built */
       resize();
       loader.hidden = true;
 

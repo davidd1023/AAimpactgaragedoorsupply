@@ -44,7 +44,7 @@ The materials are named by role, which is the part that makes this work:
 | `Frame_white` / `Frane_Black` / `Frame_woodgrain` | the door's frame | **recoloured** |
 | `Frame_bronze` | a piece that is dark (0.02 linear) in *every* one of his files, white and woodgrain included | left alone |
 | `Glass_clear` / `_White` / `_green` / `_bronze` / `_grey` | the glazing, `KHR_materials_transmission` | **recoloured** |
-| `Blue_Circle`, `White_Circle` | unidentified - a badge or a decal | left alone |
+| `Blue_Circle`, `White_Circle` | **the rollers** - the wheels down each side that run in the track | **black unless the frame is White** |
 
 So: load one model, keep it, and set colours on its materials. One 8.8 MB
 download instead of twenty, and every colour change instant.
@@ -86,7 +86,12 @@ so it is reproduced rather than corrected.
    deliberate, `FRAME_RE` in `door_preview.js` is where to change it.
 2. **`Frame_bronze`** is dark in every file, so it is treated as trim and left
    alone. If it is meant to take the finish, add it to `FRAME_RE`.
-3. **`Blue_Circle` and `White_Circle`** - nobody has said what they are.
+3. **`Blue_Circle` and `White_Circle` are the rollers** (owner, 2026-10-27:
+   "the rollers are the circular objects on the side of the door"), and every
+   finish but White now gets them in black. White keeps whatever the file was
+   built with. Confirmed against the mesh before changing anything: both
+   materials sit on the back face, at both side edges, running up the height
+   of the door, which is where rollers are and nothing else is.
 4. **`Frane_Black`** is a typo in the Black files. Harmless; `FRAME_RE` matches
    `fra[mn]e` so it is picked up either way. Worth fixing at the source if
    those files are ever re-exported.
