@@ -10,7 +10,15 @@ cable out of twelve is the door height and the drum; what picks one track is
 the height, the track size and the colour; what picks a trim is the colour.
 None of those are on the kit. Asked whether to guess them, show the families,
 or let him choose, the owner chose to choose - so the list is Odoo's own
-Accessory Products field, which is right by definition because he set it.
+**Alternative Products** field, which is right by definition because he set it.
+
+ALTERNATIVE, NOT ACCESSORY. This first read Accessory Products, which is
+Odoo's cross-sell field and shows in the CART. Odoo's own help for Alternative
+Products says "those products show up on the product page", which is where he
+asked for these, and he has since had the other two boxes hidden so there is
+one place to fill in rather than three that look alike (owner, 2026-10-27:
+"we only want the alternative products choice"). It is a Many2many of
+TEMPLATES rather than variants, which is also what this shows.
 
 THE FAMILIES ARE THE FALLBACK. A kit he has not got to yet shows the right
 KINDS - here are the cables, here are the tracks - rather than an empty space
@@ -116,12 +124,12 @@ class ProductTemplate(models.Model):
             return []
 
         # WHETHER HE CHOSE, NOT WHETHER THE CHOICE SURVIVED. A kit with one
-        # accessory set that happens to be unpublished has still been got to,
+        # product set that happens to be unpublished has still been got to,
         # and falling back there would answer his one deliberate pick with
         # every cable in the catalogue. The fallback is for an EMPTY field.
-        chosen = self.accessory_product_ids
-        picked = chosen.product_tmpl_id.filtered(
-            lambda product: product.is_published)
+        chosen = self.alternative_product_ids
+        picked = chosen.filtered(
+            lambda product: product.is_published and product.id != self.id)
         groups = []
 
         for key, label in FAMILIES:
@@ -132,9 +140,8 @@ class ProductTemplate(models.Model):
 
             if chosen:
                 # HIS CHOICE, SORTED INTO FAMILIES. The grouping is by the
-                # website category the product is already in, so adding an
-                # accessory never also means saying which heading it goes
-                # under.
+                # website category the product is already in, so adding one
+                # never also means saying which heading it goes under.
                 products = picked.filtered(lambda p: category in p.public_categ_ids)
             else:
                 products = self.env["product.template"].search([
@@ -157,8 +164,8 @@ class ProductTemplate(models.Model):
             })
 
         # ANYTHING HE PICKED THAT IS IN NONE OF THE FAMILIES still belongs on
-        # the page. Dropping it silently would make the field lie: he set an
-        # accessory and the page did not show it.
+        # the page. Dropping it silently would make the field lie: he set a
+        # product and the page did not show it.
         if chosen:
             placed = self.env["product.template"]
 

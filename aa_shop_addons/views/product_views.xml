@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ONE BOX, NOT THREE.
+
+       "Upsell & Cross-Sell" ships with three fields that all look like the
+       same question: Alternative Products, Accessory Products and Optional
+       Products. Owner, 2026-10-27, having found them: "we only want the
+       alternative products choice, you can get rid of the other two, that
+       being optional products and accesory products."
+
+       ALTERNATIVE is the one that stays, and it is the right one: Odoo's own
+       help for it says "those products show up on the product page", which is
+       where he asked for the add-ons. Accessory Products feeds the cart and
+       Optional Products feeds a quotation - neither is what anybody filling
+       this in for a hardware kit is trying to say.
+
+       HIDDEN, NOT DELETED. Whatever is in them stays in the database and
+       keeps working for anything that reads it; they are simply not three
+       near-identical boxes to choose between any more. Undoing this is
+       deleting this file. -->
+
+  <record id="product_template_form_view" model="ir.ui.view">
+    <field name="name">product.template.form.aa.one.upsell.box</field>
+    <field name="model">product.template</field>
+    <field name="inherit_id" ref="product.product_template_form_view"/>
+    <field name="arch" type="xml">
+
+      <field name="accessory_product_ids" position="attributes">
+        <attribute name="invisible">1</attribute>
+      </field>
+
+      <field name="optional_product_ids" position="attributes">
+        <attribute name="invisible">1</attribute>
+      </field>
+
+      <!-- It is no longer one of three, so it can say what it is for. -->
+      <field name="alternative_product_ids" position="attributes">
+        <attribute name="placeholder">Shown under this product on the shop page</attribute>
+      </field>
+
+    </field>
+  </record>
+
+</odoo>
