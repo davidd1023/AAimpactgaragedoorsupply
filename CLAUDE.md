@@ -364,6 +364,16 @@ one, two and three bars per section. Had it been the other way about - a
 centre stile to take OUT - it would have meant splitting his mesh apart,
 which is a different job entirely.
 
+**A BAR IS AS DEEP AS A RAIL, MEASURED ON ONE.** The first attempt sized it
+from the frame's bounding box, which reaches around the whole door and takes
+in the hinge lugs and the back seal: 0.182 deep and 0.053 off centre, where a
+rail is 0.075 and dead centred. So the bars came out two and a half times too
+deep and stood proud of the face - owner, 2026-10-27, *"the lites are jutting
+out a bit on the front which looks a little ugly"* - and flush at the back,
+because the error was all one way. A rail is the same member as a lite bar
+turned the other way, so sampling one between the first two openings, away
+from the ends, is exactly the right answer.
+
 The bars are three.js boxes using the frame's own material, so they take the
 finish and the woodgrain for free. **They are not his geometry**: dead on they
 are indistinguishable, up close at an angle they are plainer than a real

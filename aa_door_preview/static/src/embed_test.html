@@ -9,7 +9,7 @@
 <body>
 
 <!-- =====================================================================
-     SERIES 1200 DOOR PREVIEW            build 6983e18b
+     SERIES 1200 DOOR PREVIEW            build 2abc5ed5
      Paste this whole block into the Elementor HTML widget on the product
      page, in place of the current viewer.
 
@@ -746,18 +746,63 @@
 
       if (!rows.length) { return null; }
 
-      /* The bar is as deep as the frame, and as wide as the gap between two
-       * openings - which is the rail, and the only honest guide to how
-       * thick this door's own members are. */
-      var frameBox = new THREE.Box3();
-      frameMeshes.forEach(function (mesh) { frameBox.expandByObject(mesh); });
-
+      /* As wide as the gap between two openings - which is the rail, and
+       * the only honest guide to how thick this door's own members are. */
       var rail = rows.length > 1
         ? Math.abs(rows[1].from - rows[0].to)
         : Math.abs(rows[0].to - rows[0].from) * 0.08;
 
-      var frameSize = frameBox.getSize(new THREE.Vector3());
-      var frameMid = frameBox.getCenter(new THREE.Vector3());
+      /* AND AS DEEP AS THAT SAME RAIL, measured on it.
+       *
+       * NOT the frame's bounding box, which was the first attempt. That box
+       * reaches around the whole door and takes in the hinge lugs and the
+       * back seal: on his model it came out 0.182 deep and sitting 0.053 off
+       * centre, where a rail is 0.075 and dead centred. So the bars were two
+       * and a half times too deep and stood proud of the face - owner,
+       * 2026-10-27, "the lites are jutting out a bit on the front which looks
+       * a little ugly". Flush at the back, because the error was all one way.
+       *
+       * A rail is the same member as a lite bar, turned the other way, so
+       * what it measures is exactly the right answer. Sampled between the
+       * first two openings and away from the ends, so no end stile or corner
+       * is caught in with it. */
+      var near = Infinity;
+      var far = -Infinity;
+      var point = new THREE.Vector3();
+
+      if (rows.length > 1) {
+        var bandFrom = Math.min(rows[0].to, rows[1].from);
+        var bandTo = Math.max(rows[0].to, rows[1].from);
+        var midAcross =
+          (bounds.min.getComponent(across) + bounds.max.getComponent(across)) / 2;
+        var reach =
+          (bounds.max.getComponent(across) - bounds.min.getComponent(across)) * 0.3;
+
+        frameMeshes.forEach(function (mesh) {
+          var position = mesh.geometry.getAttribute("position");
+
+          for (var i = 0; i < position.count; i++) {
+            point.fromBufferAttribute(position, i).applyMatrix4(mesh.matrixWorld);
+
+            if (point.getComponent(up) < bandFrom ||
+                point.getComponent(up) > bandTo) { continue; }
+            if (Math.abs(point.getComponent(across) - midAcross) > reach) { continue; }
+
+            var depthHere = point.getComponent(through);
+            if (depthHere < near) { near = depthHere; }
+            if (depthHere > far) { far = depthHere; }
+          }
+        });
+      }
+
+      if (!(far > near)) {
+        /* One opening, or a frame shaped in some way this cannot read. The
+         * bounding box is wrong but it is better than nothing drawn. */
+        var frameBox = new THREE.Box3();
+        frameMeshes.forEach(function (mesh) { frameBox.expandByObject(mesh); });
+        near = frameBox.min.getComponent(through);
+        far = frameBox.max.getComponent(through);
+      }
 
       return {
         up: up,
@@ -766,8 +811,8 @@
         rows: rows,
         left: bounds.min.getComponent(across),
         right: bounds.max.getComponent(across),
-        depth: Math.max(frameSize.getComponent(through), biggest * 0.002),
-        middle: frameMid.getComponent(through),
+        depth: Math.max(far - near, biggest * 0.002),
+        middle: (far + near) / 2,
         thickness: rail || biggest * 0.015
       };
     }
@@ -1234,7 +1279,7 @@
  * and a stale copy of this block looks exactly like a fix that did not work -
  * which cost a round trip on 2026-10-26. The test pages print this, so an old
  * copy announces itself instead of being guessed at. */
-if (window.AADoorPreview) { window.AADoorPreview.built = "6983e18b"; }
+if (window.AADoorPreview) { window.AADoorPreview.built = "2abc5ed5"; }
 </script>
 
 </body>
