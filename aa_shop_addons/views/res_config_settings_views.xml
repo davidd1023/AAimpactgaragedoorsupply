@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ONLY THE FALLBACK IS CONFIGURED HERE. A kit with its own Accessory
+       Products set never looks at these. They exist so that a category
+       called something other than the obvious word does not mean a deploy. -->
+  <record id="res_config_settings_view_form" model="ir.ui.view">
+    <field name="name">res.config.settings.form.aa.shop.addons</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+
+      <xpath expr="//block[@id='website_info_settings']" position="after">
+        <block title="Garage Door Add-ons" id="aa_shop_addons_settings">
+          <setting string="Where the add-ons come from"
+                   help="Shown under every hardware kit and under the custom
+                         spring. A product with its own Accessory Products set
+                         shows those instead - these categories are only the
+                         fallback, so a page is never blank.">
+            <div class="content-group mt-2">
+              <div class="row">
+                <label for="aa_addon_categ_cones_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_cones_id" options="{'no_create': True}"/>
+              </div>
+              <div class="row">
+                <label for="aa_addon_categ_cables_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_cables_id" options="{'no_create': True}"/>
+              </div>
+              <div class="row">
+                <label for="aa_addon_categ_tracks_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_tracks_id" options="{'no_create': True}"/>
+              </div>
+              <div class="row">
+                <label for="aa_addon_categ_trims_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_trims_id" options="{'no_create': True}"/>
+              </div>
+            </div>
+          </setting>
+        </block>
+      </xpath>
+
+    </field>
+  </record>
+
+</odoo>

@@ -180,6 +180,43 @@ database has orders cancelled weeks ago whose jobs still stand open, and the
 first use of the cleanup screen after this deployed would otherwise have told
 a dozen customers that a September order is cancelled.
 
+## Shop add-ons under a kit or a spring (`aa_shop_addons`)
+
+Owner, 2026-10-27: *"On every kit and spring page, show the matching add-ons
+(cones, cables, tracks, trims) below the product. Done when: each kit shows
+its correct add-ons."*
+
+**WHAT MAKES ONE CORRECT IS HIS CALL, NOT A RULE.** A kit knows its series and
+its panel count and nothing else; what picks one cable out of twelve is the
+door height and the drum, and what picks one track is the height, the track
+size and the colour. Asked whether to guess, show the families, or choose
+himself, he chose to choose - so the list is **Odoo's own Accessory Products
+field** on each of the twelve kits (Sales tab > eCommerce). Right by
+definition, and it also fills the cart's suggested accessories for free.
+
+The families are the FALLBACK, found by website category name (`Cones`,
+`Cables`, `Tracks`, `Trims`) with four settings under Website >
+Configuration > Settings to point elsewhere. **The fallback is for an EMPTY
+field, not an empty result**: a kit with one accessory set that happens to be
+unpublished has still been got to, and falling back there would answer one
+deliberate choice with every cable in the catalogue. A test holds that down,
+because the first draft got it wrong.
+
+**CONES ARE SHOWN ON THE SPRING PAGE WITH A WARNING.** The calculator prices
+the cone set for the chosen I.D. into the spring itself, so a customer
+configuring one is already buying cones. Asked whether to drop them: *"show
+them but make it obvious that the cones are included so customers dont make
+the mistake of buying when they dont need one."* So the spring carries the
+note and a kit does not, where it would be a lie.
+
+Templates are shown, not variants - a track is one product with twenty
+combinations behind it since the merge, and twenty near-identical cards under
+a kit is not a recommendation. A kit is recognised by an `HK-` part number OR
+a category saying Hardware Kit, two marks because one added by hand later may
+not follow the SKU.
+
+**NOT IN `garage_door_supply`**, for the homepage reason below.
+
 ## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
 
 *"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one
