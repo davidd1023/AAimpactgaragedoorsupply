@@ -17,24 +17,16 @@ closed days are a setting, because a holiday is a date somebody has to type in
 and no rule can know it.
 """
 
+import json
 from datetime import timedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-#: Two-hour windows inside the 8:00 to 4:30 the shop keeps. His choice, asked
-#: on 2026-10-27: tight enough to plan the counter around, wide enough that
-#: nobody is late by ten minutes.
-SLOTS = [
-    ("08", "8:00 AM - 10:00 AM"),
-    ("10", "10:00 AM - 12:00 PM"),
-    ("12", "12:00 PM - 2:00 PM"),
-    ("14", "2:00 PM - 4:30 PM"),
-]
+from .pickup_time import is_a_pickup_time, pickup_times, time_label
 
-SLOT_LABELS = dict(SLOTS)
-
-#: Whole working days the shop needs before anything can be collected.
+#: Whole working days the shop needs before anything can be collected. Two,
+#: and the day the order was placed is not one of them.
 LEAD_DAYS = 2
 
 #: How far ahead the customer may book.
@@ -49,14 +41,14 @@ class SaleOrder(models.Model):
     aa_pickup_date = fields.Date(
         string="Pickup Day", copy=False, index=True,
         help="The day the customer said they would collect this order.")
-    aa_pickup_slot = fields.Selection(
-        SLOTS, string="Pickup Time", copy=False,
-        help="The two-hour window the customer chose.")
+    aa_pickup_time = fields.Float(
+        string="Pickup Time", copy=False, digits=(4, 2),
+        help="The time of day the customer said they would come, in hours.")
     aa_pickup_label = fields.Char(
         string="Pickup", compute="_compute_aa_pickup_label", store=True,
         help="The day and window as one line, for the Work Order and Dispatch.")
 
-    @api.depends("aa_pickup_date", "aa_pickup_slot")
+    @api.depends("aa_pickup_date", "aa_pickup_time")
     def _compute_aa_pickup_label(self):
         for order in self:
             order.aa_pickup_label = order._aa_pickup_text()
@@ -74,9 +66,9 @@ class SaleOrder(models.Model):
             return False
 
         day = self.aa_pickup_date.strftime("%a %-d %b")
-        window = SLOT_LABELS.get(self.aa_pickup_slot)
+        at = time_label(self.aa_pickup_time) if self.aa_pickup_time else ""
 
-        return "%s, %s" % (day, window) if window else day
+        return "%s, %s" % (day, at) if at else day
 
     # --- is this one being collected -------------------------------------
 
@@ -156,8 +148,22 @@ class SaleOrder(models.Model):
 
         return days
 
-    def _aa_pickup_slot_choices(self):
-        return list(SLOTS)
+    def _aa_pickup_time_choices(self):
+        """[(7.0, "7:00 AM"), ...] across the hours the counter is open."""
+        return pickup_times(self.env)
+
+    def _aa_pickup_days_json(self):
+        """The selectable days as a JSON list, for the calendar to read.
+
+        The calendar is drawn in the browser and has to know which squares
+        may be clicked. Sending the days rather than a rule keeps the two
+        from ever disagreeing: a day the server would refuse is a day the
+        calendar cannot offer.
+        """
+        self.ensure_one()
+
+        return json.dumps(
+            [day.isoformat() for day, _label in self._aa_pickup_choices()])
 
     # --- it cannot be paid for without one -------------------------------
 
@@ -168,9 +174,12 @@ class SaleOrder(models.Model):
         if not self._aa_is_pickup():
             return False
 
-        if not self.aa_pickup_date or not self.aa_pickup_slot:
+        if not self.aa_pickup_date or not self.aa_pickup_time:
             return _("Please choose the day and time you will collect this"
                      " order.")
+
+        if not is_a_pickup_time(self.env, self.aa_pickup_time):
+            return _("We are not open at that time. Please choose another.")
 
         allowed = [day for day, _label in self._aa_pickup_choices()]
 
@@ -213,7 +222,7 @@ class SaleOrder(models.Model):
             if order.aa_pickup_label and order.picking_ids:
                 order.picking_ids.write({
                     "aa_pickup_date": order.aa_pickup_date,
-                    "aa_pickup_slot": order.aa_pickup_slot,
+                    "aa_pickup_time": order.aa_pickup_time,
                 })
 
         return result

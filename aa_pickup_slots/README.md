@@ -17,8 +17,13 @@ order placed **Monday** is collectable from **Thursday**; one placed **Friday**
 starts Monday and is collectable **Wednesday**. The day the order is placed
 never counts - an order placed at ten to five has had none of it.
 
-**Two-hour windows**: 8-10, 10-12, 12-2, 2-4:30. Tight enough to plan the
-counter around, wide enough that nobody is late by ten minutes.
+**Any half hour from 7:00 AM to 4:00 PM.** He first chose two-hour windows,
+then revised it the same day: *"the customer should be able to choose anytime
+between 7 and 4, but dont make it a dropdown find some other option to make it
+look good and let them choose a larger range of time."* So the time is stored
+as an **hour of the day** - 7.0, 7.5, 16.0 - rather than one of four codes,
+and the open hours are a setting, because a number that has moved once will
+move again.
 
 **Pickup orders only, and required.** Anything being delivered is never asked.
 Anything being collected cannot be paid for without a slot, so nothing reaches
@@ -41,7 +46,7 @@ to say no.
 
 | where | what shows |
 |---|---|
-| Checkout | the question, under the delivery methods, only when collecting |
+| Checkout | a **calendar** for the day and a **grid of times**, under the delivery methods, only when collecting |
 | Sales order form | **Pickup**, beside the delivery date |
 | Sales order list | a **Pickup** column |
 | Work Order sheet | a **Pickup** row in the WHEN block, in red like the deadline |
@@ -67,6 +72,35 @@ Comma-separated, as `2026-12-25, 2026-12-26`. They are neither counted towards
 the two working days nor offered to a customer. A date somebody mistypes is
 ignored rather than raising - a checkout that 500s over a fat-fingered holiday
 is a worse fault than a day staying open.
+
+## The two controls
+
+**The day is a pop-up calendar**, not a list of dates (owner, 2026-10-27).
+It is drawn in the browser from the days the server says are allowed - sent
+down as `data-days` - so **a square that can be clicked is a day that will be
+accepted**. There is one list, so the two cannot drift apart. Weekends,
+closed days and anything inside the lead time are greyed and unclickable, and
+the month arrows stop at the months that actually hold a selectable day
+rather than letting somebody page into an empty grid for ever.
+
+**The time is a grid of buttons**, not a dropdown. Nineteen half hours wrap
+into a block that reads at a glance; a dropdown that long is a scroll.
+
+## Nothing can be confirmed without both
+
+Owner, 2026-10-27: *"the customer needs to pick a date and time before they
+can confirm their order, currently they dont need to do either to proceed."*
+He was right, and the reason is worth knowing:
+
+**`_check_cart_is_ready_to_be_paid` is only reached on the zero-total path**
+in Odoo 19. A pickup order with something to pay walked straight past it. The
+hook the payment page actually consults is **`_get_shop_payment_errors`**, and
+that is what `/shop/payment/validate` raises on. Both are overridden now.
+
+The checkout button is also disabled until both are answered - both of them,
+since there is one for mobile and one for desktop. That is a courtesy, not
+the lock: being told at the payment step that you should have answered a
+question two pages ago is no way to buy anything.
 
 ## Notes for whoever changes this
 
