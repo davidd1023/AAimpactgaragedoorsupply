@@ -51,6 +51,11 @@
       .aa_btn { display: block; width: 100%; margin-top: 14px; padding: 16px;
                 font-size: 20px; font-weight: bold; color: #fff;
                 background: #156c2e; border: 0; border-radius: 10px; }
+      .aa_signin_wrap { margin-top: 22px; text-align: center; }
+      .aa_signin { display: inline-block; padding: 10px 16px; font-size: 14px;
+                   color: #714B67; text-decoration: none;
+                   border: 1px solid #d6dbe1; border-radius: 8px;
+                   background: #fff; }
       .aa_btn_dead { background: #9aa4ae; }
       .section { margin: 22px 0 8px; font-size: 14px; color: #5a6b7c;
                  text-transform: uppercase; letter-spacing: .04em; }
@@ -157,6 +162,31 @@
           </form>
         </t>
       </t>
+
+      <!-- THE DESK, WITH NOTHING TO DISPATCH. Drawing nothing at all was
+           the fault: on a two-step warehouse the outgoing delivery does not
+           exist until the internal pick is validated, so a packed box
+           scanned by the right person showed no Dispatch section and no
+           reason for it. -->
+      <t t-if="dispatch_none">
+        <div class="section">Dispatch</div>
+        <div class="aa_bad"><t t-esc="dispatch_none"/></div>
+      </t>
+
+      <!-- AND FOR A PHONE THAT IS NOT SIGNED IN. The team scans with
+           "a phone or tablet" (owner, 2026-10-28): a shared tablet signs in
+           once and keeps the Dispatch panel above, but a phone out of
+           somebody's pocket never has, and drew the figures with no sign
+           that dispatch existed at all. One line, and signing in comes back
+           to this sticker.
+
+           Shown to the PUBLIC only - a dealer or a fitter already signed in
+           would not get the panel by signing in again. -->
+      <div t-if="dispatch_sign_in" class="aa_signin_wrap">
+        <a class="aa_signin" t-att-href="dispatch_sign_in">
+          Staff: sign in to dispatch this order
+        </a>
+      </div>
     </main>
 
     <footer>

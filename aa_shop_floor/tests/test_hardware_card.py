@@ -804,6 +804,36 @@ class StickerDispatchCase(HardwareCardCase):
         self.assertNotIn("Mark Dispatched", page.text)
         self.assertNotIn("Payment", page.text)
 
+    def test_a_phone_that_is_not_signed_in_is_shown_the_way_to_dispatch(self):
+        """THE WHOLE POINT OF IT, nearly missed: *"At pickup, the team scans
+        the box sticker with a phone or tablet."*
+
+        A shared tablet signs in once and keeps the panel. A PHONE OUT OF
+        SOMEBODY'S POCKET never has - and it drew the door's figures with no
+        sign that dispatch existed, so nobody would think to sign in for a
+        button they have never seen. The same lesson as the refusal page an
+        hour before it.
+        """
+        job, _out = self._ready_job()
+
+        page = self.url_open(self._box_url(job))
+
+        self.assertIn("sign in to dispatch", page.text)
+        self.assertIn(quote(self._box_url(job), safe=""), page.text,
+                      "signing in has to come back to this sticker")
+        # STILL NOT THE PANEL ITSELF. A link is an invitation; the figures
+        # are not given away to anybody who has not been let in.
+        self.assertNotIn("Mark Dispatched", page.text)
+
+    def test_the_dispatch_desk_is_not_asked_to_sign_in_again(self):
+        job, _out = self._ready_job()
+        self.authenticate("aa_sticker_desk", self.PASSWORD)
+
+        page = self.url_open(self._box_url(job))
+
+        self.assertIn("Mark Dispatched", page.text)
+        self.assertNotIn("sign in to dispatch", page.text)
+
     def test_the_desk_sees_the_panel_on_the_same_link(self):
         job, out = self._ready_job()
         self.authenticate("aa_sticker_desk", self.PASSWORD)
@@ -1327,3 +1357,60 @@ class StickerLinkHostSettingCase(HttpCase):
             "web.base.url.freeze", "True")
 
         self.assertTrue(self._settings().aa_sticker_link_frozen)
+
+
+@tagged("post_install", "-at_install")
+class NothingToDispatchCase(StickerDispatchCase):
+    """A PACKED BOX WITH NO DELIVERY BEHIND IT YET.
+
+    HIS WAREHOUSE DELIVERS IN TWO STEPS (`pick_ship`): confirming an order
+    makes an INTERNAL pick, and the outgoing delivery does not exist until
+    that pick is validated. So the likeliest thing at the counter is a box
+    that is genuinely packed, scanned by genuinely the right person, with no
+    transfer to press a button on - and that drew NO DISPATCH SECTION AND NO
+    REASON, which is indistinguishable from not being allowed to see one.
+    """
+
+    def _job_with_no_delivery_yet(self):
+        """Confirmed, so the job exists - and the pick left unvalidated, so
+        the outgoing delivery does not."""
+        order = self._confirm(self._order_a_kit())
+        job = self._kit_job(order)
+
+        self.assertFalse(
+            order.picking_ids.filtered(
+                lambda p: p.picking_type_code == "outgoing"),
+            "the fixture already has a delivery, so it proves nothing")
+
+        return job
+
+    def test_the_desk_is_told_there_is_nothing_to_dispatch(self):
+        job = self._job_with_no_delivery_yet()
+        self.authenticate("aa_sticker_desk", self.PASSWORD)
+
+        page = self.url_open(self._box_url(job))
+
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("Nothing to dispatch yet", page.text)
+        self.assertIn("internal pick", page.text)
+        self.assertNotIn("Mark Dispatched", page.text)
+
+    def test_the_door_s_figures_are_still_there(self):
+        """The reason it is a note and not a refusal: whoever scanned it may
+        have wanted the spring and the drum, not the button."""
+        job = self._job_with_no_delivery_yet()
+        self.authenticate("aa_sticker_desk", self.PASSWORD)
+
+        page = self.url_open(self._box_url(job))
+
+        self.assertIn("D400-96", page.text)
+
+    def test_a_visitor_is_told_nothing_of_the_sort(self):
+        """Whether an order has a delivery raised is none of their business,
+        and they are offered the sign-in like anybody else."""
+        job = self._job_with_no_delivery_yet()
+
+        page = self.url_open(self._box_url(job))
+
+        self.assertNotIn("Nothing to dispatch", page.text)
+        self.assertIn("sign in to dispatch", page.text)

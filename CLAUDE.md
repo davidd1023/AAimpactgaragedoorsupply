@@ -612,6 +612,32 @@ Three things he decided when asked, each of which changed the build:
   and the Work Order Sheet is the only thing to scan. One line to remove from
   `report/dispatch_qr.xml` if he ever wants the forms bare.
 
+**DOES IT DO WHAT HE ASKED? Checked clause by clause, 2026-10-28**, when he
+asked exactly that - and two gaps came out of the asking, both the same
+mistake as the 404:
+
+- *"the team scans ... with a phone or tablet"* - A SHARED TABLET signs in
+  once and keeps the panel; A PHONE OUT OF A POCKET never has, and drew the
+  door's figures with NO SIGN THAT DISPATCH EXISTED. Nobody signs in for a
+  button they have never seen. One discreet line now - "Staff: sign in to
+  dispatch this order" - returning to that same sticker, shown to the PUBLIC
+  only, because a dealer or fitter already signed in would not get the panel
+  by signing in again.
+- *"marks it Dispatched"* - A PACKED BOX WITH NO DELIVERY RAISED YET drew no
+  Dispatch section at all, which looks identical to not being allowed one.
+  **On `pick_ship` the outgoing delivery does not exist until the internal
+  pick is validated**, so this is the likeliest thing to happen at the
+  counter, not a corner. It now says so.
+- *"Odoo opens that order"* - IT OPENS THE BOX, not the sale order form: the
+  W/O number, the door, the kit and its figures, with Payment / Stations /
+  Delivery under them. Deliberate - a phone at a counter wants the box, and
+  the sale order form on a phone is unusable - but it is not literally what
+  he wrote, and he has been told.
+- *"checks every station is done"* - it checks every job on the order, and
+  WARNS rather than blocks, which is his own earlier decision. Two taps then,
+  not one.
+- *"the invoice is paid"* - blocks, no override, re-checked in the route.
+
 **IT IS NOT A PUBLIC LINK, unlike the box sticker.** `/box/...` only reads a
 door's figures out loud; this one MARKS AN ORDER COLLECTED, and a public
 version would let anybody who photographed a form empty the dispatch list. It
