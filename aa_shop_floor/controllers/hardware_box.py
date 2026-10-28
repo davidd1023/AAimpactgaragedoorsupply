@@ -143,6 +143,8 @@ class HardwareBox(http.Controller):
             "card": card,
             "company": production.company_id,
             "dispatch": None,
+            "dispatch_none": None,
+            "dispatch_sign_in": None,
             "notice": notice,
             "problem": problem,
             "production": production,
@@ -154,6 +156,41 @@ class HardwareBox(http.Controller):
 
             if picking:
                 values["dispatch"] = picking._aa_dispatch_scan_state()
+            else:
+                # NO TRANSFER TO DISPATCH, AND IT DREW NOTHING AT ALL - which
+                # on a two-step warehouse is the likeliest thing to happen at
+                # the counter. HIS WAREHOUSE DELIVERS IN TWO STEPS
+                # (`pick_ship`): confirming an order makes an INTERNAL pick,
+                # and the outgoing delivery does not exist until that pick is
+                # validated. So a box can be packed, scanned by the right
+                # person, and the whole Dispatch section simply not appear.
+                #
+                # A man holding a box needs to be told which, out of a
+                # missing transfer and a missing permission, he is looking
+                # at - and silence says neither.
+                values["dispatch_none"] = _(
+                    "Nothing to dispatch yet: this order has no outgoing"
+                    " delivery. On a two-step warehouse the delivery appears"
+                    " once the internal pick is validated.")
+
+        elif request.env.user._is_public():
+            # A TEAM MEMBER'S OWN PHONE IS NOT SIGNED IN - owner, 2026-10-28,
+            # of the whole point of this: *"At pickup, the team scans the box
+            # sticker with a phone or tablet."* A shared tablet signs in once
+            # and keeps the panel; a phone somebody pulls out of a pocket
+            # never has, so it drew the door's figures and NO SIGN THAT
+            # DISPATCH EXISTED. Nobody would guess to sign in for a button
+            # they have never seen.
+            #
+            # The same lesson as the refusal page an hour earlier: a phone at
+            # the counter is a stranger. One discreet line, and signing in
+            # comes back to this very sticker.
+            #
+            # PUBLIC ONLY. A dealer or a fitter with a portal login is
+            # already signed in and signing in again would not give them the
+            # panel, so offering it would be a promise that cannot be kept.
+            values["dispatch_sign_in"] = "/web/login?redirect=%s" % url_quote(
+                request.httprequest.full_path.rstrip("?"), safe="")
 
         return values
 
