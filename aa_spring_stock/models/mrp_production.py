@@ -74,6 +74,24 @@ class MrpProduction(models.Model):
             if not spec:
                 continue
             problems = []
+            # THE LINES THIS CODE MEANT TO MAKE, per move.
+            #
+            # ODOO RESERVES THE MOMENT THE DEMAND GOES UP. Raising
+            # `move.product_uom_qty` on a confirmed move makes Odoo assign it
+            # straight away, off whichever quant it likes - and then the
+            # deliberate line below was added ON TOP, so a 60" spring stood
+            # 120" reserved against a 60" demand. Found 2026-10-28 while
+            # building the run-out figure, which reads free inches and was
+            # being told half the floor was spoken for.
+            #
+            # Consuming was never wrong - the existing tests prove the right
+            # inches come off at `done` - so this never lost material. What it
+            # did was hide good coil: `_aa_coil_pieces` offers
+            # `quantity - reserved_quantity`, so a piece with plenty left
+            # looked too short, pushing the next order onto the Floor, then
+            # the Boxes, and eventually logging "No piece is long enough" with
+            # a full coil on the rack.
+            ours = {}
             for cut in spring_cuts(spec, production.product_qty):
                 values = {
                     "production_id": production.id,
@@ -98,8 +116,14 @@ class MrpProduction(models.Model):
                     continue
                 source, available, _lot, quant = piece
                 move = production._aa_coil_move(product)
+                mine = ours.setdefault(move.id, self.env["stock.move.line"].sudo().browse())
                 move.product_uom_qty += cut["length"]
-                self.env["stock.move.line"].sudo().create({
+                # WHATEVER ODOO JUST RESERVED BY ITSELF, which is a guess at
+                # the lot. This code has already chosen the piece - by the
+                # owner's own order of preference - so Odoo's guess is
+                # REPLACED rather than added to.
+                (move.move_line_ids - mine).unlink()
+                line = self.env["stock.move.line"].sudo().create({
                     "move_id": move.id,
                     "product_id": product.id,
                     "product_uom_id": product.uom_id.id,
@@ -108,6 +132,7 @@ class MrpProduction(models.Model):
                     "location_dest_id": move.location_dest_id.id,
                     "quantity": cut["length"],
                 })
+                ours[move.id] = mine | line
                 values.update(lot_id=quant.lot_id.id, source=source,
                               remaining=round(available - cut["length"], 2))
                 Cut.create(values)
