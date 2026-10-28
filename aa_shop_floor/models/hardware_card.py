@@ -55,6 +55,55 @@ CABLE_NAME = re.compile(r"\blift\s*cable\b", re.I)
 # Any track, for the lines whose name the two exact patterns do not match.
 TRACK_NAME = re.compile(r"\btrack\b", re.I)
 
+# TURNS AT FULL WIND, PER DRUM, for an order whose spec never stored them
+# (owner, 2026-10-28: "turns must be there"). Orders priced before the
+# calculator posted its turns carry the spring but not the turns, and the
+# bench still has to wind it. These are the SAME coefficients the calculator
+# uses - `DRUMS[...].turnsCurve` in spring_engineering.js - so the card says
+# what the calculator would have said: 7' on a D400-96 is 7.9, as S00041
+# stored. Standard lift only; a high-lift door is worked out on other curves
+# and gets no guess.
+#     turns = a*H + b + c/H + d/H^2 + e/H^3 + f/H^4      (H in feet)
+DRUM_TURNS = {
+    "D400-96": (0.926270103, 1.182458766, 1.622498182,
+                1.457531341, 3.164283001, 5.912155063),
+    "D400-144": (0.918018474, 1.224217309, 0.903742416,
+                 6.136653231, -11.978871764, 24.691717891),
+    "D525-216": (0.702285693, 0.936356104, 0.999506286,
+                 3.138832124, -3.937059973, 13.452757892),
+}
+
+# Below this the curve's inverse powers take over; the calculator clamps too.
+TURNS_MIN_FEET = 3.0
+
+DRUM_SIZE = re.compile(r"\bD\s*(\d{3})\s*-\s*(\d+)\b", re.I)
+HEIGHT_TEXT = re.compile(r"(\d+(?:\.\d+)?)\s*'\s*(?:(\d+(?:\.\d+)?)\s*\")?")
+
+
+def drum_turns(drum, height_in):
+    """Turns at full wind for a standard-lift door, or 0 if unknown."""
+    match = DRUM_SIZE.search(drum or "")
+    curve = match and DRUM_TURNS.get("D%s-%s" % match.groups())
+
+    if not curve or not height_in:
+        return 0.0
+
+    height = max(float(height_in) / 12.0, TURNS_MIN_FEET)
+    a, b, c, d, e, f = curve
+
+    return (a * height + b + c / height + d / height ** 2
+            + e / height ** 3 + f / height ** 4)
+
+
+def height_inches(text):
+    """7' 0" -> 84.0, or 0 when the text says no height."""
+    match = HEIGHT_TEXT.search(text or "")
+
+    if not match:
+        return 0.0
+
+    return float(match.group(1)) * 12 + float(match.group(2) or 0)
+
 
 def feet_label(inches):
     """108 -> 9' 0", 100.5 -> 8' 4 1/2". How a door is spoken.
@@ -253,15 +302,22 @@ class MrpProduction(models.Model):
         rows = []
 
         # THE OWNER'S OWN ORDER, as he listed them: spring and turns, drum,
-        # colour, lift, cable, track. The door itself is not one of the six -
+        # colour, cable, then the track's lift and lengths. The door itself is not one of the six -
         # it is the heading the six belong to - so it is in the card above
         # rather than in this list.
+        # THE LIFT SITS WITH THE TRACK (owner, 2026-10-28: "tracks lift type
+        # and lengths"): the lift is a fact about the track, so the two read
+        # together at the bottom. "Hardware Color" the same day - plain
+        # "Color" left the packer asking colour of what.
+        drum = self._aa_card_drum(kit, specs, notes)
+        lift = self._aa_card_lift(kit, notes, lines)
+
         for label, value in (
-            *self._aa_card_spring_rows(lines, specs),
-            ("Drum", self._aa_card_drum(kit, specs, notes)),
-            ("Color", self._aa_card_colour(kit)),
-            ("Lift", self._aa_card_lift(kit, notes, lines)),
+            *self._aa_card_spring_rows(lines, specs, kit, drum, lift),
+            ("Drum", drum),
+            ("Hardware Color", self._aa_card_colour(kit)),
             ("Cable", self._aa_card_cable(lines)),
+            ("Track Lift", lift),
             ("Track", self._aa_card_track(lines)),
         ):
             if value:
@@ -288,7 +344,7 @@ class MrpProduction(models.Model):
 
         return specs
 
-    def _aa_card_spring_rows(self, lines, specs):
+    def _aa_card_spring_rows(self, lines, specs, kit=None, drum="", lift=""):
         """The spring, written the way the shop writes it, and its turns.
 
         A DUPLEX PAIR IS TWO ROWS, because it is two springs wound to one
@@ -310,11 +366,14 @@ class MrpProduction(models.Model):
                     wire_label(item["wire"]), id_label(item["id"]),
                     inches_label(item["length"]))))
 
-            if spec.get("turns"):
+            turns = spec.get("turns") or self._aa_card_turns(
+                line, spec, kit, drum, lift)
+
+            if turns:
                 # To a tenth, which is what the reference prints and what the
                 # calculator showed whoever priced this order.
                 rows.append(("Turns", "%s at full wind" % qty_label(
-                    round(float(spec["turns"]), 1))))
+                    round(float(turns), 1))))
 
             hands = []
 
@@ -338,6 +397,24 @@ class MrpProduction(models.Model):
                         display_default_code=False).display_name))
 
         return rows
+
+    def _aa_card_turns(self, line, spec, kit, drum, lift):
+        """Turns worked out from the drum and door height, for a spec that
+        never stored them. Standard lift only - see DRUM_TURNS."""
+        if lift and lift != "Standard":
+            return 0.0
+
+        if line.aa_door_hi_lift_in:
+            return 0.0
+
+        door = spec.get("door") if isinstance(spec.get("door"), dict) else {}
+        height = (
+            (kit and kit.aa_door_height_in)
+            or line.aa_door_height_in
+            or height_inches(door.get("height") or spec.get("doorHeight"))
+        )
+
+        return drum_turns(spec.get("drum") or drum, height)
 
     def _aa_card_drum(self, kit, specs, notes):
         """The drum the spring figures were worked out on.
