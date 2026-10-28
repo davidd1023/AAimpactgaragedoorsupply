@@ -40,6 +40,18 @@
       td { padding: 12px 14px 12px 0; font-size: 19px; font-weight: bold;
            vertical-align: top; }
       tr + tr th, tr + tr td { border-top: 1px solid #e6e9ed; }
+      .aa_green { color: #156c2e; }
+      .aa_red { color: #a4262c; }
+      .aa_ok { background: #e8f5ec; border: 1px solid #9bd3ad; color: #10401f;
+               border-radius: 10px; padding: 12px 14px; margin: 10px 0;
+               font-weight: bold; }
+      .aa_bad { background: #fdeaea; border: 1px solid #e5a3a5; color: #7a1d20;
+                border-radius: 10px; padding: 12px 14px; margin: 10px 0;
+                font-weight: bold; }
+      .aa_btn { display: block; width: 100%; margin-top: 14px; padding: 16px;
+                font-size: 20px; font-weight: bold; color: #fff;
+                background: #156c2e; border: 0; border-radius: 10px; }
+      .aa_btn_dead { background: #9aa4ae; }
       .section { margin: 22px 0 8px; font-size: 14px; color: #5a6b7c;
                  text-transform: uppercase; letter-spacing: .04em; }
       footer { color: #5a6b7c; font-size: 14px; padding: 18px;
@@ -84,11 +96,101 @@
           </t>
         </table>
       </t>
+      <!-- THE DISPATCH PANEL (owner, 2026-10-28: "actually the qr code is
+           supposed to be on the sticker"). Drawn only for somebody signed in
+           on the dispatch desk - a fitter on a ladder, a driver or the
+           customer scanning the same code sees the door's figures above and
+           nothing of this. -->
+      <t t-if="dispatch">
+        <div class="section">Dispatch</div>
+
+        <div t-if="notice" class="aa_ok"><t t-esc="notice"/></div>
+        <div t-if="problem" class="aa_bad"><t t-esc="problem"/></div>
+
+        <table>
+          <tr>
+            <th>Payment</th>
+            <td t-attf-class="#{'aa_green' if dispatch['paid'] else 'aa_red'}">
+              <t t-esc="dispatch['payment']"/>
+            </td>
+          </tr>
+          <tr>
+            <th>Stations</th>
+            <td t-attf-class="#{'aa_green' if dispatch['finished'] else 'aa_red'}">
+              <t t-if="dispatch['finished']">All finished</t>
+              <t t-else="">
+                Still open:
+                <t t-esc="', '.join(dispatch['open_jobs'])"/>
+              </t>
+            </td>
+          </tr>
+          <tr>
+            <th>Delivery</th>
+            <td><t t-esc="dispatch['picking'].name"/></td>
+          </tr>
+        </table>
+
+        <t t-if="dispatch['already']">
+          <div class="aa_ok">
+            Dispatched by <t t-esc="dispatch['picking'].aa_dispatched_by.name"/>.
+          </div>
+        </t>
+        <t t-elif="not dispatch['paid']">
+          <button class="aa_btn aa_btn_dead" disabled="disabled">
+            Cannot dispatch - not paid
+          </button>
+        </t>
+        <t t-elif="not dispatch['ready']">
+          <button class="aa_btn aa_btn_dead" disabled="disabled">
+            Not ready to go out
+          </button>
+        </t>
+        <t t-else="">
+          <form method="post"
+                t-attf-action="/box/#{production.id}/#{token}/dispatch">
+            <input type="hidden" name="csrf_token"
+                   t-att-value="request.csrf_token()"/>
+            <button type="submit" class="aa_btn"
+                    t-att-onclick="'return confirm(&quot;A station is still open. Dispatch anyway?&quot;);' if dispatch['needs_confirm'] else None">
+              Mark Dispatched
+            </button>
+          </form>
+        </t>
+      </t>
     </main>
 
     <footer>
       <t t-esc="company.name"/>
     </footer>
+  </body>
+</html>
+  </template>
+
+
+  <!-- WHY A STICKER WOULD NOT OPEN, for somebody who works here.
+       Owner, 2026-10-28: "when i try scanning the qr code on the sticker it
+       leads to a not found page" - and the page would not say which of four
+       reasons it was. A stranger still gets the bare 404. -->
+  <template id="hardware_box_refused" name="Hardware box - cannot open">&lt;!DOCTYPE html&gt;
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Sticker will not open</title>
+    <style>
+      body { margin: 0; font-family: Arial, Helvetica, sans-serif;
+             background: #f4f5f7; color: #111; font-size: 17px; }
+      main { padding: 24px 16px; max-width: 620px; margin: 0 auto; }
+      h1 { font-size: 22px; margin: 0 0 14px; }
+      .why { background: #fff; border: 1px solid #d6dbe1; border-radius: 10px;
+             padding: 16px; line-height: 1.5; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>This sticker will not open</h1>
+      <div class="why"><t t-esc="why"/></div>
+    </main>
   </body>
 </html>
   </template>

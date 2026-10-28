@@ -14,6 +14,7 @@ it makes the manufacturing order, and the card is read off that.
 import json
 from unittest.mock import patch
 
+from odoo import fields
 from odoo.tests.common import HttpCase, tagged
 
 
@@ -710,3 +711,214 @@ class StickerSizeCase(HardwareCardCase):
                 report.report_name, job.ids)
         self.assertEqual(kind, "pdf")
         self.assertTrue(pdf.startswith(b"%PDF"))
+
+
+@tagged("post_install", "-at_install")
+class StickerDispatchCase(HardwareCardCase):
+    """THE STICKER DISPATCHES (owner, 2026-10-28).
+
+    *"actually the qr code is supposed to be on the sticker."* The sticker
+    already carried a QR and it already opened a page, so nothing new is
+    printed on a 1 1/4 inch label: that page now also offers the Dispatch
+    panel - to somebody signed in on the dispatch desk, and to nobody else.
+
+    What is worth holding down here is the SPLIT. A fitter on a ladder and
+    the dispatch desk scan the same code and must not see the same page.
+    """
+
+    PASSWORD = "aa-sticker-dispatch"
+
+    def setUp(self):
+        super().setUp()
+        self.desk = self.env["res.users"].create({
+            "name": "The dispatch desk",
+            "login": "aa_sticker_desk",
+            "password": self.PASSWORD,
+            "group_ids": [(6, 0, [
+                self.env.ref("base.group_user").id,
+                self.env.ref("stock.group_stock_user").id])],
+        })
+
+    def _box_url(self, job):
+        return "/box/%d/%s" % (job.id, job._aa_box_token())
+
+    def _ready_job(self, paid=True):
+        """A kit job whose order has an outgoing delivery standing ready.
+
+        PAID BY DEFAULT, because unpaid is the one thing that kills the
+        button outright and almost every test here wants to see it drawn.
+        """
+        order = self._confirm(self._order_a_kit())
+        job = self._kit_job(order)
+
+        if paid:
+            invoice = order._create_invoices()
+            invoice.action_post()
+            self.env["account.payment.register"].with_context(
+                active_model="account.move", active_ids=invoice.ids
+            ).create({
+                "payment_date": fields.Date.context_today(invoice),
+            }).action_create_payments()
+
+        pick = order.picking_ids.filtered(
+            lambda p: p.picking_type_code == "internal")
+
+        for move in pick.move_ids:
+            move.quantity = move.product_uom_qty
+
+        pick.button_validate()
+        order.invalidate_recordset()
+
+        out = order.picking_ids.filtered(
+            lambda p: p.picking_type_code == "outgoing")[:1]
+        out.action_assign()
+
+        for move in out.move_ids:
+            move.quantity = move.product_uom_qty
+
+        return job, out
+
+    # --- the split --------------------------------------------------------
+
+    def test_the_public_sees_the_door_and_no_dispatch(self):
+        """THE ONE THAT MATTERS. Reading a door's figures is harmless;
+        marking an order collected is not, and the same code does both."""
+        job, _out = self._ready_job()
+
+        page = self.url_open(self._box_url(job))
+
+        self.assertEqual(page.status_code, 200)
+        self.assertNotIn("Mark Dispatched", page.text)
+        self.assertNotIn("Payment", page.text)
+
+    def test_the_desk_sees_the_panel_on_the_same_link(self):
+        job, out = self._ready_job()
+        self.authenticate("aa_sticker_desk", self.PASSWORD)
+
+        page = self.url_open(self._box_url(job)).text
+
+        self.assertIn("Mark Dispatched", page)
+        self.assertIn("Payment", page)
+        self.assertIn(out.name, page)
+
+    def test_the_box_joins_itself_to_the_right_delivery(self):
+        """A box belongs to a JOB and the button belongs to a TRANSFER; the
+        two are joined through the sale order."""
+        job, out = self._ready_job()
+
+        self.assertEqual(job._aa_dispatch_picking(), out)
+
+    def test_the_desk_can_dispatch_from_the_sticker(self):
+        import re
+
+        job, out = self._ready_job()
+        self.authenticate("aa_sticker_desk", self.PASSWORD)
+        page = self.url_open(self._box_url(job)).text
+        token = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', page)
+
+        self.assertTrue(token, "the panel offered no button to press")
+
+        answer = self.url_open(self._box_url(job) + "/dispatch",
+                               data={"csrf_token": token.group(1)})
+
+        self.assertEqual(answer.status_code, 200)
+        self.assertTrue(out.aa_dispatched_on, "nothing was recorded")
+        self.assertEqual(out.aa_dispatched_by, self.desk)
+
+    def test_a_visitor_cannot_post_to_it(self):
+        """The panel is not drawn for them, and a button that is not drawn is
+        not a lock."""
+        job, out = self._ready_job()
+
+        self.url_open(self._box_url(job) + "/dispatch", data={"x": "1"})
+
+        self.assertFalse(out.aa_dispatched_on)
+
+    def test_the_sticker_still_carries_one_qr_and_only_one(self):
+        """A second code on a 1 1/4 inch label would be two codes a phone has
+        to choose between, and every sticker already on a shelf would be the
+        wrong one."""
+        job, _out = self._ready_job()
+        html = self.env["ir.actions.report"]._render_qweb_html(
+            "aa_shop_floor.report_hardware_sticker", job.ids)[0].decode()
+
+        self.assertEqual(html.count("barcode_type=QR"), 1)
+        # PERCENT-ENCODED in the image URL, because the whole link is one
+        # query parameter - so the box path is looked for the way it is
+        # actually written on the label.
+        self.assertIn("%%2Fbox%%2F%d%%2F" % job.id, html)
+
+
+@tagged("post_install", "-at_install")
+class StickerWillNotOpenCase(StickerDispatchCase):
+    """WHY A STICKER WOULD NOT OPEN.
+
+    Owner, 2026-10-28: *"when i try scanning the qr code on the sticker it
+    leads to a not found page."* The route refuses for FOUR different reasons
+    and used to say "Not Found" to all of them, which at a counter is no help
+    at all.
+
+    The reason is shown to somebody who WORKS HERE and never to a stranger -
+    who would otherwise be reading the answer to a question they should not
+    be asking.
+    """
+
+    def _staff(self):
+        self.authenticate("aa_sticker_desk", self.PASSWORD)
+
+    def test_a_stranger_still_gets_nothing_but_a_404(self):
+        """THE LINE THIS DOES NOT CROSS."""
+        job, _out = self._ready_job()
+
+        answer = self.url_open("/box/%d/%s" % (job.id, "0" * 24))
+
+        self.assertEqual(answer.status_code, 404)
+        # ESCAPED IN THE PAGE: t-esc turns the apostrophe into &#39;, so the
+        # phrase is looked for the way it is actually written out.
+        self.assertNotIn("signed", answer.text)
+
+    def test_staff_are_told_the_token_is_wrong(self):
+        """THE LIKELIEST CAUSE BY FAR: a sticker printed from one database
+        scanned against another. The link is signed with the database's own
+        secret, so it can never open anywhere else."""
+        job, _out = self._ready_job()
+        self._staff()
+
+        answer = self.url_open("/box/%d/%s" % (job.id, "0" * 24))
+
+        self.assertEqual(answer.status_code, 200)
+        self.assertIn("is not this job", answer.text)
+        self.assertIn("database", answer.text)
+
+    def test_staff_are_told_when_the_job_is_gone(self):
+        job, _out = self._ready_job()
+        token = job._aa_box_token()
+        missing = job.id
+        self._staff()
+
+        answer = self.url_open("/box/%d/%s" % (missing + 10 ** 7, token))
+
+        self.assertEqual(answer.status_code, 200)
+        self.assertIn("no job", answer.text)
+
+    def test_staff_are_told_when_it_is_not_a_kit_job(self):
+        job, _out = self._ready_job()
+        spring = self.env["mrp.production"].create({
+            "product_id": job.product_id.id, "product_qty": 1.0})
+        spring.aa_station_kind = "spring"
+        self._staff()
+
+        answer = self.url_open(
+            "/box/%d/%s" % (spring.id, spring._aa_box_token()))
+
+        self.assertEqual(answer.status_code, 200)
+        self.assertIn("not a hardware kit", answer.text)
+
+    def test_a_good_sticker_still_opens(self):
+        """The whole point of the above is that the ones that work, work."""
+        job, _out = self._ready_job()
+
+        answer = self.url_open(self._box_url(job))
+
+        self.assertEqual(answer.status_code, 200)
+        self.assertNotIn("will not open", answer.text)
