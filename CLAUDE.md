@@ -342,6 +342,11 @@ them but make it obvious that the cones are included so customers dont make
 the mistake of buying when they dont need one."* So the spring carries the
 note and a kit does not, where it would be a lie.
 
+**THE WORDING IS HIS, WORD FOR WORD** (2026-10-28): *"Cones are already
+included with your spring."* It is `CONES_INCLUDED` in
+`models/product_template.py`; the tests compare against the constant rather
+than quoting it, so changing the sentence again is one line and no test edit.
+
 Templates are shown, not variants - a track is one product with twenty
 combinations behind it since the merge, and twenty near-identical cards under
 a kit is not a recommendation.

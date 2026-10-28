@@ -158,7 +158,13 @@ row of them underneath reads as something missing from the order.
 
 Asked whether to drop them, the owner said to keep them and say so: *"show
 them but make it obvious that the cones are included so customers dont make
-the mistake of buying when they dont need one."* So the spring page carries
+the mistake of buying when they dont need one."*
+
+**The sentence is his, word for word** (2026-10-28): *"Cones are already
+included with your spring."* It carried a second sentence of mine about when a
+customer would need a set; he took it off. It is `CONES_INCLUDED` in
+`models/product_template.py`, and the tests compare against that constant
+rather than quoting it, so changing the wording again is one line. So the spring page carries
 the note and a kit page does not, because on a kit it would be a lie.
 
 It used to hang off the Cones heading. With one pool it sits under the section

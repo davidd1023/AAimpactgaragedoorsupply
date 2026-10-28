@@ -7,6 +7,9 @@ cones note, which exists so a customer does not buy a second set of cones
 they are already paying for.
 """
 
+from odoo.addons.aa_shop_addons.models.product_template import (
+    CONES_INCLUDED,
+)
 from odoo.tests.common import HttpCase, TransactionCase, tagged
 
 
@@ -249,7 +252,7 @@ class ShopAddonsCase(TransactionCase):
 
         self.assertIn(self.cone, self._shown(spring),
                       "the spring page showed no cones at all")
-        self.assertIn("Already included", self._note(spring))
+        self.assertEqual(CONES_INCLUDED, self._note(spring))
 
     def test_a_kit_does_not_claim_its_cones_are_included(self):
         """A hardware kit has no spring in it and no cones with it, so the
@@ -619,7 +622,7 @@ class SpringPagesCase(ShopAddonsCase):
     def test_a_real_spring_still_warns_about_its_cones(self):
         pair = self._in_springs('Torsion Spring Pair .250 x 2 5/8" I.D.')
 
-        self.assertIn("Already included", self._note(pair))
+        self.assertEqual(CONES_INCLUDED, self._note(pair))
 
 
 @tagged("post_install", "-at_install")
