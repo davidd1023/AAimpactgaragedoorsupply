@@ -922,3 +922,44 @@ class StickerWillNotOpenCase(StickerDispatchCase):
 
         self.assertEqual(answer.status_code, 200)
         self.assertNotIn("will not open", answer.text)
+
+
+@tagged("post_install", "-at_install")
+class BoxLinkIsVisibleCase(StickerDispatchCase):
+    """THE LINK, WHERE SOMEBODY CAN READ IT.
+
+    Owner, 2026-10-28: *"i still get the not found page when scanning the
+    sticker on my phone."* The link existed as a computed field and was shown
+    NOWHERE, so the only way to see what a sticker held was to point a camera
+    at it - which cannot tell a bad token from a bad host from a bad camera.
+    """
+
+    def test_the_job_form_shows_the_sticker_link(self):
+        job, _out = self._ready_job()
+        arch = self.env["mrp.production"].with_context(
+            studio_or_dev=False).get_view(
+            view_id=self.env.ref("mrp.mrp_production_form_view").id,
+            view_type="form")["arch"]
+
+        self.assertIn("aa_box_url", arch,
+                      "there is still no way to read the link but to scan it")
+        self.assertTrue(job.aa_box_url)
+
+    def test_the_link_is_the_one_the_sticker_prints(self):
+        """Whatever is on the form has to be the same string the QR holds, or
+        it answers a different question from the one being asked."""
+        job, _out = self._ready_job()
+        html = self.env["ir.actions.report"]._render_qweb_html(
+            "aa_shop_floor.report_hardware_sticker", job.ids)[0].decode()
+
+        from urllib.parse import quote
+
+        self.assertIn(quote(job.aa_box_url, safe=""), html)
+
+    def test_the_link_says_which_site_it_will_open(self):
+        """A sticker printed where `web.base.url` is wrong points at a host
+        that will never serve it - and that is invisible in a QR code and
+        obvious in a link."""
+        job, _out = self._ready_job()
+
+        self.assertIn(job.get_base_url(), job.aa_box_url)

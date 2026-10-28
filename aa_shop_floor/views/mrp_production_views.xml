@@ -10,6 +10,17 @@
                     <group>
                         <field name="aa_sale_line_id" readonly="1"/>
                         <field name="aa_shop_spec" readonly="1"/>
+                        <!-- THE STICKER'S LINK, WHERE SOMEBODY CAN SEE IT.
+                             Owner, 2026-10-28: "i still get the not found
+                             page when scanning the sticker on my phone" -
+                             and there was no way to read the link except by
+                             pointing a camera at it, so nobody could tell a
+                             bad token from a bad host from a bad camera.
+                             Clicking it here opens exactly what the QR code
+                             holds, from a browser already signed in. -->
+                        <field name="aa_box_url" widget="url" readonly="1"
+                               invisible="aa_station_kind != 'kit'"
+                               string="Box sticker link"/>
                     </group>
                 </page>
             </xpath>

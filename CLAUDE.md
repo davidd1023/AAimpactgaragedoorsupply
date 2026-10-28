@@ -642,7 +642,23 @@ asking.
 **THE LIKELIEST CAUSE IS THE DATABASE.** The token is `hmac(...)` over the
 DATABASE SECRET, so a sticker printed on the test site can never open on the
 live one, and the other way about. The host in the link is
-`get_base_url()`, which differs too.
+`get_base_url()` - so a database whose **`web.base.url` is wrong** prints
+stickers pointing at a site that will never serve them, which is invisible in
+a QR code.
+
+**AND THE LINK IS NOW ON THE JOB** (Manufacturing > the kit job > Shop Floor
+tab > "Box sticker link"). `aa_box_url` existed as a computed field and was
+shown NOWHERE, so the only way to read what a sticker held was to point a
+camera at it - which cannot tell a bad token from a bad host from a bad
+camera. Clicking it opens exactly what the QR holds, from a browser already
+signed in.
+
+**WHAT THE ROUND TRIP IS NOT**: checked when the 404 persisted - the sticker
+report, the token and the controller are `mrp.production` end to end
+(`report/hardware_sticker.xml` has `model=mrp.production`, the token lives on
+`MrpProduction`, and the route browses `mrp.production`). There is no
+production/work-order id mix-up, and the 63 commits merged from Prod touch
+nothing named `box_url`, `box_token`, `barcode_type` or `get_base_url`.
 
 **HOW TO TELL A LIVE ROUTE FROM A MISSING ONE** without any access: fetch a
 URL that route would refuse. The controller's own `request.not_found()` is a
