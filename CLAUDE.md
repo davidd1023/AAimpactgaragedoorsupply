@@ -569,6 +569,56 @@ A test asserts the shape the browser trips over: **any
 `data-bs-dismiss="alert"` with no `.alert` ancestor**, read out of the
 rendered page with lxml.
 
+### SCAN THE QR TO DISPATCH (owner, 2026-10-28)
+
+*"At pickup, the team scans the box sticker with a phone or tablet. Odoo opens
+that order, checks every station is done and the invoice is paid, and marks it
+Dispatched in one tap. the qr should be on one of the form that is printed out
+at dispatch."*
+
+**THE ACTION ALREADY EXISTED.** `action_aa_dispatched` has been the one button
+since 2026-10-19. What is new is a way to reach it from a phone and two checks
+worth making while somebody is holding the box.
+
+Three things he decided when asked, each of which changed the build:
+
+- **UNPAID BLOCKS, with no override** - the button is dead and says why.
+  Checked again in the route, not only on the page that drew the button: a
+  page can be open since this morning and a form can be posted to directly.
+- **AN OPEN STATION ONLY WARNS** and can be gone past with a second tap,
+  because a foreman can see the box is packed and the system is sometimes
+  behind the shop.
+- **A DEALER ON ACCOUNT PASSES THE PAYMENT CHECK**, saying ON ACCOUNT rather
+  than UNPAID. A Quick Order raises no invoice at the time, so the rule would
+  otherwise have blocked every dealer collection there is. Read through
+  `_fields` because `aa_order_on_account` belongs to `aa_dealer_orders`.
+- **THE QR GOES ON BOTH PRINTED FORMS** - the Work Order Sheet and the
+  Delivery Confirmation. Whichever sheet is in somebody's hand is the one
+  they scan.
+
+**IT IS NOT A PUBLIC LINK, unlike the box sticker.** `/box/...` only reads a
+door's figures out loud; this one MARKS AN ORDER COLLECTED, and a public
+version would let anybody who photographed a form empty the dispatch list. It
+asks for a login and `stock.group_stock_user`. The token stays as well - a URL
+that is only an id is a URL somebody edits.
+
+**THE CHECKS READ WITH SUDO; THE DISPATCH DOES NOT.** A dispatch clerk has
+stock rights and nothing else, so the first build answered **403** the instant
+the page asked whether an invoice was paid. Being told "paid" is not the same
+as being allowed to open the ledger. The dispatch itself is still done as the
+person standing there, so `aa_dispatched_by` means something.
+
+**HIS WAREHOUSE DELIVERS IN TWO STEPS (`pick_ship`)** - a fact worth keeping.
+Confirming an order makes an INTERNAL pick and nothing else; the outgoing
+delivery, which is the only kind `action_aa_dispatched` will touch, appears
+once that pick is validated. Any fixture that wants a dispatchable transfer
+has to validate the pick first.
+
+**`url_open(url, data={})` SENDS A GET.** An empty dict is falsy, so Odoo's
+helper does not post - which reads as a 405 and looks like a routing fault for
+half an hour. Post a real session csrf token instead; it belongs to the
+session rather than to one form, so it can be taken off any page that has one.
+
 ## Pickup slots (`aa_pickup_slots`)
 
 Owner, 2026-10-27: *"At checkout, the customer picks a pickup day and time

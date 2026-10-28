@@ -24,8 +24,17 @@ class TestKitSpring(HttpCase):
     which is exactly why this looked like a kit problem for so long.
     """
 
+    # SINGLE, not the Duplex this carried until 2026-10-28. A duplex is no
+    # longer sold - "we do not currently manufacture custom duplex springs" -
+    # so the kit's own pricing route refuses one and this fixture was quoting
+    # the refusal rather than booking a spring. `springs: 2` is still two
+    # springs on the DOOR, a left and a right; what has gone is the NEST.
+    #
+    # Missed when the other four fixtures were converted that morning,
+    # because only spring_engineering, aa_shop_floor and aa_dealer_orders
+    # were run - not this module.
     SPEC = {
-        "assembly": "Duplex",
+        "assembly": "Single",
         "springs": 2,
         "drum": "CANIMEX/TF D400-96",
         "cycles": "10,000",
@@ -34,8 +43,7 @@ class TestKitSpring(HttpCase):
         "doorWidth": "9' 0\"",
         "hiLift": 0,
         "springsSpec": [
-            {"role": "Outer", "wire": 0.2625, "id": 6.0, "length": 32.5},
-            {"role": "Inner", "wire": 0.2253, "id": 3.75, "length": 31.25},
+            {"role": "Spring", "wire": 0.2625, "id": 6.0, "length": 32.5},
         ],
     }
 
@@ -138,7 +146,7 @@ class TestKitSpring(HttpCase):
         self.assertTrue(spring, "the kit booked no spring assembly")
 
         text = spring.name or ""
-        self.assertIn("Duplex, 2 springs", text)
+        self.assertIn("Single, 2 springs", text)
         self.assertIn('0.2625" wire', text)
         self.assertIn('32.5" long', text)
         self.assertIn("355 lb", text)
@@ -193,7 +201,11 @@ class TestKitSpring(HttpCase):
         spring = [line for line in pages["Springs"] if line["spring"]]
         self.assertTrue(spring, "the Springs page carries no specification")
         self.assertEqual(spring[0]["kind"], "spring")
-        self.assertEqual(len(spring[0]["spring"]["springs"]), 2)
+        # ONE SPECIFICATION ROW, not two. This asserted 2 while the fixture
+        # was a Duplex, where the two rows are the OUTER and the INNER of one
+        # nest - not the two springs on the door, which are the same spring
+        # wound each way. A Single has one row to wind from.
+        self.assertEqual(len(spring[0]["spring"]["springs"]), 1)
 
     def test_the_door_weight_is_the_door_and_not_the_drums_rating(self):
         """THE 530 lb BUG. The Drum option is labelled with what the drum can

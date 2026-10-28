@@ -12,7 +12,7 @@
     # button and this branch's merge. 1.37.0 clears both, so a database holding
     # either 1.36.0 still upgrades. Prod's 1.35.0 migration scripts continue to
     # run for anything below them.
-    'version': '19.0.1.40.0',
+    'version': '19.0.1.41.0',
     'summary': "Print a work order, and sort its work onto the benches",
     'description': """
 Adds a printable sheet to a work order - the transfer the shop sees under
@@ -79,6 +79,8 @@ machinery it does not use.
         'views/stock_picking_views.xml',
         'views/wo_number_views.xml',
         'views/dispatched_views.xml',
+        'views/dispatch_scan_templates.xml',
+        'report/dispatch_qr.xml',
         # THE WORK STATIONS, PUT AWAY FOR NOW - the owner's instruction,
         # 2026-10-14: the shop floor module does the same job. Nothing is
         # deleted; these three simply do not load, and a migration archives
