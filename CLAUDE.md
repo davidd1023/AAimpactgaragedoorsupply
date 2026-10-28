@@ -669,7 +669,24 @@ never notice that the label points somewhere else. `StickerHostCase` now
 renders the report, digs the URL out of the QR's own `/report/barcode/`
 query, and fetches it.
 
-**THE FIX IS HIS, ON PROD**: set `web.base.url` to
+**HE PRINTED A SECOND STICKER AND IT WAS THE SAME** - owner, 2026-10-28:
+*"im still getting not found on my phone, heres the link:
+https://aaimpactgaragedoorsupply.com/box/132/bc5f7388a4bf525d6680b92e"*. Job
+132, W/O #235, apex again: 404 there, 200 on `www`. Nothing had changed
+because THE FAULT IS NOT IN THE CODE and the setting had not been touched -
+and nothing of ours was on Prod either, main being unmerged. Worth
+remembering that a code fix cannot answer a configuration fault, however many
+times it is pushed.
+
+**SO THE FIX IS A BUTTON NOW**: Manufacturing > Settings > Hardware Station >
+"Sticker QR links" shows the host the stickers carry, warns when it is not
+the address being read or is not frozen, and **"Use this site for sticker
+links"** sets it from the ADDRESS BAR and freezes it in one click. Read,
+never typed: the host somebody is looking at Odoo through is right by
+definition, and a hostname anybody has to type is another week of this. It
+refuses outside a browser rather than writing an empty host.
+
+**THE FIX BY HAND, which needs no deploy**: set `web.base.url` to
 `https://www.aaimpactgaragedoorsupply.com` AND set `web.base.url.freeze` to
 `True`, both in Settings > Technical > System Parameters. Without the freeze
 Odoo rewrites that host to whichever one an administrator last signed in

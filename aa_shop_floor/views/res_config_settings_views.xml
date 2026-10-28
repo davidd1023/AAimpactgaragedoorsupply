@@ -30,6 +30,47 @@
               </div>
             </div>
           </setting>
+
+          <!-- WHERE THE STICKER'S QR CODE POINTS, which is what three days
+               of "the sticker leads to a not found page" turned out to be:
+               web.base.url was the apex domain, which is not Odoo. Putting
+               it here, with a button that reads the host out of the address
+               bar, means nobody has to find Technical > System Parameters or
+               type a hostname correctly. -->
+          <setting id="aa_sticker_link_host"
+                   string="Sticker QR links"
+                   help="The site a scanned sticker opens. It must be the address you reach Odoo on, or every sticker printed points somewhere that cannot serve it - which cannot be seen by looking at a QR code.">
+            <div class="text-muted">
+              Stickers are printed pointing at
+              <b><field name="aa_sticker_link_host" class="oe_inline" readonly="1"/></b>
+            </div>
+
+            <div class="alert alert-warning mt-2 mb-0" role="alert"
+                 invisible="not aa_sticker_link_wrong">
+              That is not the address you are reading this on
+              (<b><field name="aa_sticker_link_here" class="oe_inline" readonly="1"/></b>),
+              so stickers are being printed with a link that will not open.
+            </div>
+
+            <div class="alert alert-warning mt-2 mb-0" role="alert"
+                 invisible="aa_sticker_link_frozen">
+              This host is <b>not frozen</b>, so Odoo will change it to
+              whichever site an administrator next signs in from - and every
+              sticker printed after that points at the wrong place.
+            </div>
+
+            <div class="mt-2">
+              <button type="object"
+                      name="action_aa_sticker_use_this_site"
+                      string="Use this site for sticker links"
+                      class="btn btn-primary"/>
+              <div class="text-muted small mt-1">
+                Sets the link host to the address in your browser and freezes
+                it. Stickers already printed keep the old link until they are
+                printed again.
+              </div>
+            </div>
+          </setting>
         </block>
       </xpath>
     </field>
