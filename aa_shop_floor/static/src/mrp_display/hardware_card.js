@@ -84,6 +84,14 @@ patch(MrpDisplayRecord.prototype, {
         }
     },
 
+    aaProductionId() {
+        const record = this.props.record;
+
+        return record.resModel === "mrp.production"
+            ? record.resId
+            : record.data.production_id.id;
+    },
+
     aaOpenHardwareCard() {
         const card = this.aaHardwareCard();
 
@@ -91,12 +99,22 @@ patch(MrpDisplayRecord.prototype, {
             return;
         }
 
-        const record = this.props.record;
-        const productionId =
-            record.resModel === "mrp.production"
-                ? record.resId
-                : record.data.production_id.id;
+        this.aaDialog.add(AaHardwareCardDialog, {
+            card,
+            productionId: this.aaProductionId(),
+        });
+    },
 
-        this.aaDialog.add(AaHardwareCardDialog, { card, productionId });
+    // THE PRINT BUTTON ON THE CARD (owner, 2026-10-28): the same PDF the
+    // dialog's Print sticker opens, in a tab of its own so the tablet's print
+    // dialog can reach the label printer.
+    aaPrintSticker() {
+        if (!this.aaHardwareCard()) {
+            return;
+        }
+        window.open(
+            `/report/pdf/aa_shop_floor.report_hardware_sticker/${this.aaProductionId()}`,
+            "_blank"
+        );
     },
 });
