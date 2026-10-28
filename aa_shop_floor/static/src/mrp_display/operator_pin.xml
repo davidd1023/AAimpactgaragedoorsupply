@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- CHANGE PIN, beside History in the Shop Floor's menu. Admins only. -->
+    <t t-inherit="mrp_workorder.MrpDisplay.BurgerMenu" t-inherit-mode="extension">
+        <xpath expr="//button[@t-on-click='onClickRefresh']/.." position="after">
+            <li t-if="aaIsAdmin">
+                <button class="dropdown-item py-2" t-on-click="() => this.aaOpenOperatorPins()">
+                    <i class="fa fa-key me-2" role="img"/>Change PIN
+                </button>
+            </li>
+        </xpath>
+    </t>
+
+    <t t-name="aa_shop_floor.OperatorPinDialog">
+        <Dialog title="'Operator PINs'" size="'md'">
+            <div t-if="state.loading" class="text-center py-4">
+                <i class="fa fa-circle-o-notch fa-spin fa-2x"/>
+            </div>
+            <t t-else="">
+                <p class="text-muted mb-3">
+                    Type a new PIN (at least 4 digits) and press Save. The old PIN stops working at once.
+                </p>
+                <div t-foreach="state.operators" t-as="operator" t-key="operator.id"
+                     class="d-flex align-items-center gap-2 py-2 border-bottom">
+                    <div class="flex-grow-1">
+                        <div class="fw-bold" t-esc="operator.name"/>
+                        <small t-if="operator.has_pin" class="text-success">PIN set</small>
+                        <small t-else="" class="text-warning">No PIN</small>
+                    </div>
+                    <input type="password" inputmode="numeric" autocomplete="new-password"
+                           class="form-control" style="max-width: 9rem;"
+                           placeholder="New PIN"
+                           t-att-value="state.typed[operator.id] or ''"
+                           t-on-input="(ev) => this.onInput(operator, ev)"/>
+                    <button class="btn btn-primary"
+                            t-att-disabled="state.saving or (state.typed[operator.id] or '').length &lt; 4"
+                            t-on-click="() => this.save(operator)">Save</button>
+                </div>
+            </t>
+            <t t-set-slot="footer">
+                <button class="btn btn-secondary" t-on-click="props.close">Close</button>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>

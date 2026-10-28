@@ -634,6 +634,31 @@ Two things about Odoo 19 that cost a build each:
 - **A search view's group-by `<group>` takes neither `expand` nor `string`**
   in 19. Both are rejected by the RELAX NG schema and the view will not load.
 
+## Operator PINs on the Shop Floor (`aa_shop_floor`, owner, 2026-10-28)
+
+*"as admin I should have the option to change Jorge's and Michel's work-station
+PIN, and if I have the admin account I don't need to type the PIN to get into
+their users, and I should be able to do on their work stations the same as
+they do."*
+
+**AN ADMIN (`base.group_system`) SIGNS IN AS ANY OPERATOR WITHOUT THE PIN.**
+`hr.employee.login` / `logout` are overridden in `models/operator_pin.py` to
+hand in the employee's own PIN for an admin, so Odoo carries on exactly as if
+it had been typed: the operator is signed in, his timers run under his name,
+and the admin can do everything at that station that he can.
+**`pin_validation` is deliberately NOT overridden** - the Attendance kiosk and
+anything else that asks for a PIN keeps asking.
+
+**THIS ONLY WORKS IF THE WORKERS' DEVICES ARE NOT ON AN ADMIN LOGIN.** Owner,
+same day: "admin will have his own device and michel and jorge another one
+each". In staging the only internal logins were Administrator and Supply
+Admin, BOTH admins - a worker tablet on either would skip every PIN for
+whoever stands at it. The worker devices need a non-admin login.
+
+**CHANGE PIN is in the Shop Floor's menu, beside History**, admins only
+(hidden by `user.isSystem`, refused on the server too). Digits only, at least
+4. The list never carries a PIN back to the browser, only whether one is set.
+
 ## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
 
 *"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one
