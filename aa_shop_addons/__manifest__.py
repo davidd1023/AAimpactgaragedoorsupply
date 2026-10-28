@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "AA Shop Add-ons",
-    "version": "19.0.2.2.0",
+    "version": "19.0.2.3.0",
     "summary": "Cones, cables, tracks and trims shown under a kit or a spring",
     "description": """
 THE EXTRAS A CUSTOMER STILL NEEDS, UNDER THE THING THEY ARE LOOKING AT.
@@ -41,7 +41,10 @@ and every update of it puts the shipped hero back over the website builder.
     "category": "Website/Website",
     "author": "AA Impact Garage Door Supply",
     "license": "LGPL-3",
-    "depends": ["website_sale"],
+    # spring_engineering: the custom spring is configured on two
+    # standalone pages rather than a shop page, so the block is called
+    # into them by name - see views/spring_page_templates.xml.
+    "depends": ["website_sale", "spring_engineering"],
     "data": [
         "security/ir.model.access.csv",
         "data/addon_suggestion_cron.xml",
@@ -49,6 +52,7 @@ and every update of it puts the shipped hero back over the website builder.
         "views/res_config_settings_views.xml",
         "views/product_views.xml",
         "views/product_addons_templates.xml",
+        "views/spring_page_templates.xml",
     ],
     "installable": True,
     "application": False,
