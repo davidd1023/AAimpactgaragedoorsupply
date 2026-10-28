@@ -141,3 +141,38 @@ class ShopFloorLiveCase(TransactionCase):
 
         self.assertEqual(production.state, "cancel")
         self.assertEqual(workorder.state, "cancel")
+
+    # --- and about a job DELETED rather than cancelled ------------------------
+
+    def test_deleting_a_job_tells_the_shop_floor_to_look_again(self):
+        """Owner, 2026-10-22: "if i delete the work order in manufacturing, the
+        assignments in shop floor are still there."
+
+        The same half that was missing for a cancel, missing again for a
+        delete. The records really are gone - Odoo takes the work orders with
+        the order - but the board had only ever been told about cancels, so a
+        deleted job sat on the tablet exactly like a cancel that did not work.
+        """
+        production, _workorder = self._job()
+        sent = self._capture()
+        production.unlink()
+
+        self.assertTrue(sent, "nobody told the Shop Floor about the deletion")
+        self.assertEqual({kind for _to, kind in sent},
+                         {"aa_shop_floor_changed"})
+
+    def test_deleting_one_work_order_tells_it_too(self):
+        """A single bench's job taken off an order that otherwise stands."""
+        _production, workorder = self._job()
+        sent = self._capture()
+        workorder.unlink()
+
+        self.assertTrue(sent, "nobody told the Shop Floor")
+
+    def test_deleting_a_job_really_takes_its_work_orders_with_it(self):
+        """Said out loud because it is what somebody will suspect first, and
+        it is not what is wrong: the rows do go."""
+        production, workorder = self._job()
+        production.unlink()
+
+        self.assertFalse(workorder.exists())

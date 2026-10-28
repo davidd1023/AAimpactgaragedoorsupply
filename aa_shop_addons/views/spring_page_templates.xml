@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE CUSTOM SPRING PAGES, WHICH ARE NOT SHOP PAGES.
+
+       Owner, 2026-10-28: *"recommended products only works with kits, springs
+       doesnt currently show anything in terms of recommendations, by the way
+       this is specifically for custom springs and the published items in the
+       spring category."*
+
+       HE WAS RIGHT AND THE REASON WAS STRUCTURAL. The block is an inherit of
+       `website_sale.product`, and a custom spring is not bought from a product
+       page at all - it is configured on two standalone website pages,
+       /custom-torsion-spring and /spring-calculator, which call
+       `website.layout` directly. No amount of recognising the product could
+       have put a block on a page that never renders the template carrying it.
+
+       So the block is called here instead, on the product the calculator
+       books: `spring_engineering.product_custom_spring`. Inside the page's own
+       container, above the builder's drop zone where there is one, so a
+       customer reads it after the thing they came to configure.
+
+       The stock spring products in the shop need none of this - they are
+       ordinary product pages, and all they needed was to be RECOGNISED, which
+       is `_aa_spring_category` in product_template.py. -->
+
+  <template id="custom_torsion_spring_addons"
+            name="Add-ons under the custom torsion spring"
+            inherit_id="spring_engineering.custom_torsion_spring_page">
+    <xpath expr="//form[@id='aa_cts_form']/.." position="inside">
+      <t t-set="aa_addons_product"
+         t-value="env['product.template']._aa_custom_spring()"/>
+      <t t-if="aa_addons_product" t-call="aa_shop_addons.addons_block"/>
+    </xpath>
+  </template>
+
+  <template id="spring_calculator_addons"
+            name="Add-ons under the spring calculator"
+            inherit_id="spring_engineering.calculator_page">
+    <xpath expr="//owl-component[@name='spring_engineering.calculator']/.."
+           position="inside">
+      <t t-set="aa_addons_product"
+         t-value="env['product.template']._aa_custom_spring()"/>
+      <t t-if="aa_addons_product" t-call="aa_shop_addons.addons_block"/>
+    </xpath>
+  </template>
+
+</odoo>

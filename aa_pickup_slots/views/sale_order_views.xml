@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ON THE ORDER ITSELF, beside the dates, because "the chosen slot appears
+       on the order" is half of what he asked for. Readonly: it is the
+       customer's answer, and changing it here would not tell them. -->
+  <record id="view_order_form_aa_pickup" model="ir.ui.view">
+    <field name="name">sale.order.form.aa.pickup.slot</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+      <field name="commitment_date" position="after">
+        <field name="aa_pickup_label" invisible="not aa_pickup_label"/>
+      </field>
+    </field>
+  </record>
+
+  <record id="view_order_tree_aa_pickup" model="ir.ui.view">
+    <field name="name">sale.order.list.aa.pickup.slot</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_tree"/>
+    <field name="arch" type="xml">
+      <field name="state" position="before">
+        <field name="aa_pickup_label" string="Pickup" optional="show"/>
+      </field>
+    </field>
+  </record>
+
+  <!-- The flag that says a delivery method is a collection. -->
+  <record id="view_delivery_carrier_form_aa_pickup" model="ir.ui.view">
+    <field name="name">delivery.carrier.form.aa.pickup</field>
+    <field name="model">delivery.carrier</field>
+    <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
+    <field name="arch" type="xml">
+      <field name="integration_level" position="after">
+        <field name="aa_is_pickup"/>
+      </field>
+    </field>
+  </record>
+
+</odoo>

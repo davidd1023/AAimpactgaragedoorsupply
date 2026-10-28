@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE QUESTION GOES UNDER THE DELIVERY METHODS, where the customer has
+       just said how the order is leaving - so "when will you collect it"
+       follows "I am collecting it" rather than arriving out of nowhere.
+
+       IT IS ALWAYS RENDERED, and hidden when the chosen method is not a
+       collection. Odoo swaps delivery methods without reloading the page, so
+       a block that only existed server-side when a pickup was already chosen
+       would never appear for somebody who picks one after the page loads. -->
+
+  <template id="checkout_pickup_slot" inherit_id="website_sale.checkout"
+            name="Pickup day and time at checkout">
+
+    <xpath expr="//t[@t-call='website_sale.delivery_form']" position="after">
+      <t t-set="aa_pickup_methods"
+         t-value="request.env['delivery.carrier'].sudo().search([('aa_is_pickup', '=', True)])"/>
+      <t t-set="aa_days" t-value="order._aa_pickup_choices()"/>
+
+      <div id="aa_pickup_slot"
+           class="mt-4 d-none"
+           t-att-data-pickup-ids="aa_pickup_methods.ids"
+           t-att-data-days="order._aa_pickup_days_json()">
+        <h5 class="mb-1">When will you collect it?</h5>
+
+        <p class="text-muted small mb-3">
+          We need two working days to make your order, so the earliest we can
+          have it ready is
+          <strong t-out="aa_days and aa_days[0][1] or ''"/>.
+        </p>
+
+        <div class="row g-3">
+          <!-- A CALENDAR, NOT A LIST (owner, 2026-10-27: "instead of a
+               dropdown list of dates, we want ... a calendar pops up and you
+               pick a valid date on it"). The hidden input is what gets saved
+               and what the rest of this already understood; the button is
+               what somebody looks at, and the grid is drawn in the browser
+               from the days the server says are allowed. -->
+          <div class="col-12 col-md-7 position-relative">
+            <label class="form-label small" for="aa_pickup_day_button">Day</label>
+            <input type="hidden" id="aa_pickup_day" name="aa_pickup_day"
+                   t-att-value="order.aa_pickup_date or ''"/>
+            <button type="button" id="aa_pickup_day_button"
+                    class="form-select text-start"
+                    aria-haspopup="dialog" aria-expanded="false">
+              <t t-if="order.aa_pickup_date"
+                 t-out="order.aa_pickup_date.strftime('%A %-d %B')"/>
+              <t t-else="">Choose a day...</t>
+            </button>
+            <div id="aa_pickup_calendar" class="aa-cal shadow border rounded bg-white p-2 d-none"
+                 role="dialog" aria-label="Choose a pickup day"/>
+          </div>
+
+          <!-- TIMES AS BUTTONS, NOT A DROPDOWN (owner, 2026-10-27: "dont
+               make it a dropdown find some other option to make it look good
+               and let them choose a larger range of time"). Nineteen half
+               hours across the open day wrap into a grid that reads at a
+               glance; a dropdown that long is a scroll. -->
+          <div class="col-12 col-md-5">
+            <label class="form-label small" for="aa_pickup_times">Time</label>
+            <input type="hidden" id="aa_pickup_time" name="aa_pickup_time"
+                   t-att-value="order.aa_pickup_time or ''"/>
+            <div id="aa_pickup_times" class="aa-times" role="radiogroup"
+                 aria-label="Pickup time">
+              <t t-foreach="order._aa_pickup_time_choices()" t-as="aa_time">
+                <button type="button" class="aa-times__pick btn btn-sm"
+                        t-att-data-time="aa_time[0]"
+                        role="radio"
+                        t-att-aria-checked="'true' if order.aa_pickup_time and abs(order.aa_pickup_time - aa_time[0]) &lt; 0.001 else 'false'"
+                        t-out="aa_time[1]"/>
+              </t>
+            </div>
+          </div>
+        </div>
+
+        <div id="aa_pickup_warning"
+             class="alert alert-warning py-2 px-3 small mt-3 d-none"
+             role="alert"/>
+
+        <p class="text-muted small mt-2 mb-0">
+          Collect at <t t-out="order.company_id.name"/>,
+          <t t-out="order.company_id.aa_pickup_hours or ''"/>.
+        </p>
+      </div>
+    </xpath>
+
+  </template>
+
+</odoo>

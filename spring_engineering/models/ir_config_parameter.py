@@ -1,6 +1,6 @@
 from odoo import api, models
 
-from ..pricing import STEEL_PRICE_PER_LB
+from ..pricing import STEEL_COST_PER_LB, STEEL_PRICE_PER_LB
 
 # The figures the module ships with. The markup is a percentage; the labour
 # charge is currency, flat per assembly. Both are read by controllers/main.py,
@@ -11,6 +11,12 @@ DEFAULTS = {
     # The steel rate's default comes from pricing.py so there is one place it is
     # written down, rather than a second copy here that could drift from it.
     "spring_engineering.steel_per_lb": str(STEEL_PRICE_PER_LB),
+    # WHAT THE STEEL COSTS, as against what it sells for. Nothing a customer
+    # sees is priced from it - it is what the staff-only cost line on the cart
+    # works a spring out from - so a missing row costs a figure on a staff
+    # page rather than quoting wrongly, and pricing.py holds its default for
+    # the same reason it holds the sell rate's.
+    "spring_engineering.steel_cost_per_lb": str(STEEL_COST_PER_LB),
 }
 
 

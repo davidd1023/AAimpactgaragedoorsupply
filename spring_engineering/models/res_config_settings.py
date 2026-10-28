@@ -31,6 +31,10 @@ class ResConfigSettings(models.TransientModel):
         params.set_param(
             "spring_engineering.steel_per_lb", str(self.spring_steel_per_lb or 0.0)
         )
+        params.set_param(
+            "spring_engineering.steel_cost_per_lb",
+            str(self.spring_steel_cost_per_lb or 0.0),
+        )
 
     # THE STEEL RATE, which unlike the markup and the labour charge is not a
     # secret - it is a published commodity price, and the owner asked for it to
@@ -43,6 +47,24 @@ class ResConfigSettings(models.TransientModel):
              "Not marked up. Charged on every spring, using the weights the "
              "calculator shows. Cones and filler are charged on top, at cost "
              "plus the markup.",
+    )
+
+    # WHAT THE STEEL COSTS, which is a second figure and not a division of the
+    # first. The rate above is a SELL price with the winding labour and the
+    # margin already in it, so no arithmetic on it can produce a cost.
+    #
+    # NOTHING A CUSTOMER SEES IS PRICED FROM THIS. It is used by the staff-only
+    # cost line on the cart, to work a custom spring out the same way the quote
+    # works its price out - the same weights, the same cone prices, this rate in
+    # place of the sell rate.
+    spring_steel_cost_per_lb = fields.Float(
+        string="Spring steel cost per pound",
+        config_parameter="spring_engineering.steel_cost_per_lb",
+        help="What a pound of spring steel COSTS us, before winding and "
+             "margin. Used only for the cost figure staff see on the cart - "
+             "never for a price a customer is quoted. Left at nothing, a "
+             "custom spring is reported as having no cost set rather than "
+             "being counted at the price of its cones alone.",
     )
 
     # THE MINIMUM ORDER, which is a rule of the SITE rather than a number used

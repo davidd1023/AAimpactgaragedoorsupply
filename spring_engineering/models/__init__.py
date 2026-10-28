@@ -8,3 +8,8 @@ from . import product_template
 from . import product_wishlist
 from . import sale_order_line
 from . import sale_order
+from . import cart_cost
+from . import product_variant_merge
+from . import variant_merge_wizard
+from . import track_facts
+from . import track_families

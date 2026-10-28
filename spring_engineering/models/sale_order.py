@@ -14,6 +14,25 @@ from .sale_order_line import FASTENER_ROLES
 # set up - without the code needing to know which products those are.
 PREPARED = "prepared"
 
+# WHICH FLAG ANGLE A PREPARED TRACK TAKES: the one that fits its track (owner,
+# 2026-10-22, after looking it up - "3" do infact use 6-3/8", so could you make
+# it so that 3" tracks automatically use the 6-3/8" and the 2" tracks use
+# 5.9""). A 2" track takes the 5.9", a 3" track the 6-3/8".
+#
+# THE SHOP HAS BEEN SENDING 5.9" TO EVERY TRACK, which is what the owner saw
+# when he tested. Not by rule: the lookup ordered its matches by name and 5.9
+# sorts before 6-3/8, so a 3" prepared track has been getting the short angle
+# by alphabet. Anything already shipped that way is wrong on the job.
+#
+# {track size: (how that flag angle's size is spelled, what to call it)}. The
+# regexes are loose about the separator because a catalogue spells a fraction
+# several ways; the labels are for the message a customer reads when the part
+# is missing, so they are spelled the way the owner spells them.
+TRACK_PREP_FLAG_BY_TRACK_SIZE = {
+    "2": (r"5\s*\.\s*9(?!\d)", '5.9"'),
+    "3": (r"6\s*-?\s*3\s*/\s*8", '6-3/8"'),
+}
+
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
@@ -353,12 +372,17 @@ class SaleOrder(models.Model):
                 return found
 
         # 2. Anything that reads like a jamb bracket of this size in this
-        #    finish. Ordered by name so a catalogue holding two candidates
-        #    resolves the same way on every order rather than by chance.
+        #    finish - including, since the colours and sizes were folded into
+        #    one product (owner, 2026-10-21), a VARIANT of one. The size and
+        #    the finish used to be in the name and are now values on the
+        #    variant, so the reading is done on _aa_choice_text: the name with
+        #    the chosen values on the end. Before the merge that is just the
+        #    name, which is why this one path serves both.
         wanted = int(size)
+        candidates = Product.browse()
 
-        for product in Product.search([("name", "ilike", "jamb")], order="name"):
-            name = product.name or ""
+        for product in Product.search([("name", "ilike", "jamb")]):
+            name = product._aa_choice_text()
 
             if not re.search(r"\bbracket\b", name, re.I):
                 continue
@@ -369,7 +393,13 @@ class SaleOrder(models.Model):
                 continue
 
             if self._track_prep_declared_size(name) == wanted:
-                return product
+                candidates |= product
+
+        # ONE ANSWER, ALWAYS THE SAME ONE. This used to order by name and take
+        # the first, which no longer separates anything: every variant of a
+        # product carries its product's name.
+        if candidates:
+            return candidates._aa_pick_stable()
 
         # 3. The catalogue part numbers, for a database carrying
         #    garage_door_supply's data instead of the owner's own products.
@@ -384,6 +414,19 @@ class SaleOrder(models.Model):
         return Product.search(
             [("name", "=ilike", "J-%s Jamb Bracket" % size)], limit=1
         )
+
+    def _track_prep_flag_name(self, colour, track_size=None):
+        """What the lookup wanted, phrased so a person can search for it.
+
+        With the size in it when the track stated one, because "Flag Angle
+        White" sends somebody looking at two products and this says which.
+        """
+        wanted = TRACK_PREP_FLAG_BY_TRACK_SIZE.get(track_size or "")
+
+        if wanted:
+            return "Flag Angle %s %s" % (wanted[1], colour)
+
+        return "Flag Angle %s" % colour
 
     def _track_prep_bracket_name(self, size, colour):
         """What the lookup wanted, phrased so a person can search for it."""
@@ -423,6 +466,37 @@ class SaleOrder(models.Model):
 
         return None
 
+    # HOW A TRACK SAYS WHAT SIZE IT IS, in the two places it says it: the name
+    # leads with it ('2" Vertical Track 100" - 9\' Door Height Black') and the
+    # part number carries it (CH-VT-2", CH-HT-3"). The code is tried as well as
+    # the name because a name can be retitled, and because the display name a
+    # line carries starts with the reference in brackets.
+    #
+    # The 100" in the middle of that name is why this is anchored on the words
+    # "Vertical"/"Horizontal Track" rather than on "the first number": a track
+    # states its length in inches too, and reading that as a track size would
+    # ask for a 100" flag angle.
+    _TRACK_SIZE_PATTERNS = (
+        r"(\d)\s*\"\s*(?:Vertical|Horizontal)\s+Track",
+        r"\b(?:CH-)?[VH]T-\s*(\d)",
+    )
+
+    def _track_prep_track_size_from_name(self, name):
+        """The track's size - "2" or "3" - or None if it does not say.
+
+        None is not a default: nothing guesses between the two flag angles,
+        because the one that does not fit is for other things. A track whose
+        size cannot be read falls back to a flag angle that states no size at
+        all, and failing that to the setting.
+        """
+        for pattern in self._TRACK_SIZE_PATTERNS:
+            hit = re.search(pattern, name or "", re.I)
+
+            if hit and hit.group(1) in TRACK_PREP_FLAG_BY_TRACK_SIZE:
+                return hit.group(1)
+
+        return None
+
     def _track_prep_configured_part(self, key):
         """The product named in the settings for this role, or an empty set."""
         ref = self.env["ir.config_parameter"].sudo().get_param(
@@ -438,16 +512,42 @@ class SaleOrder(models.Model):
             return self.env["product.product"]
 
     def _track_prep_flag_product(self, line):
-        """The flag angle matching a cart line's track."""
-        return self._track_prep_flag_for_colour(self._track_prep_colour(line))
+        """The flag angle matching a cart line's track - finish AND size."""
+        name = line.product_id.display_name or ""
 
-    def _track_prep_flag_for_colour(self, colour):
-        """The flag angle in the track's own finish.
+        return self._track_prep_flag_for_colour(
+            self._track_prep_colour(line),
+            self._track_prep_track_size_from_name(name),
+        )
 
-        Looked up BY NAME rather than configured, because there is one per
-        colour and the right one depends on the track rather than on a setting.
-        The setting stays as a fallback for a track whose finish is a colour
-        these products do not cover.
+    def _track_prep_flag_states_a_size(self, text, colour):
+        """Does this flag angle say what size it is?
+
+        The question is asked so that a catalogue which does not state a size -
+        "Flag Angle - Black" - keeps being matched, while one that states the
+        WRONG size is refused rather than substituted. Take the words every
+        flag angle has out of the name, take the finish out, and see whether a
+        measurement is left.
+        """
+        rest = re.sub(r"\bflag\b|\bangles?\b", "", text or "", flags=re.I)
+
+        if colour:
+            rest = re.sub(r"\b%s\b" % re.escape(colour), "", rest, flags=re.I)
+
+        return bool(re.search(r"\d", rest))
+
+    def _track_prep_flag_for_colour(self, colour, track_size=None):
+        """The flag angle in the track's own finish AND of its own size.
+
+        Looked up BY NAME rather than configured, because the right one depends
+        on the track rather than on a setting: its finish has to match, and so
+        does its size - a 2" track takes the 5.9", a 3" track the 6-3/8"
+        (owner, 2026-10-22). The setting stays as a fallback for a track these
+        products do not cover.
+
+        `track_size` of None means the track did not say. Nothing guesses
+        between the two sizes in that case, because the one that does not fit
+        is for other things.
         """
         if colour:
             Product = self.env["product.product"].sudo()
@@ -462,13 +562,54 @@ class SaleOrder(models.Model):
             # that is not found takes the whole preparation down with it, so
             # "Flag Angle - Black" costing the customer every bracket on the
             # order is not a trade the strict lookup was ever worth making.
-            for product in Product.search([("name", "ilike", "flag")], order="name"):
-                name = product.name or ""
+            #
+            # AND THE SAME READING: the finish moved off the name and onto the
+            # variant when the two flag angle sizes became one product, so this
+            # reads the name with the chosen values on the end.
+            candidates = Product.browse()
+
+            for product in Product.search([("name", "ilike", "flag")]):
+                name = product._aa_choice_text()
 
                 if re.search(r"\bangle\b", name, re.I) \
                         and re.search(r"\b%s\b" % re.escape(colour), name, re.I):
-                    return product
+                    candidates |= product
 
+            # THE 5.9" ONE, AND ONLY THAT ONE (owner, 2026-10-22: "every track
+            # takes 5.9" currently, that other size is for other things").
+            #
+            # It had been getting that answer by alphabet - the old lookup
+            # ordered by name and 5.9 sorts before 6-3/8 - which was right
+            # entirely by luck. Asking for the size by name instead means
+            # reordering the attribute's values, or adding a third size to the
+            # catalogue, cannot quietly change which part a customer is sent.
+            wanted = TRACK_PREP_FLAG_BY_TRACK_SIZE.get(track_size or "")
+
+            if wanted:
+                sized = candidates.filtered(
+                    lambda p: re.search(wanted[0], p._aa_choice_text()))
+
+                if sized:
+                    return sized._aa_pick_stable()
+
+            # A FLAG ANGLE THAT NAMES NO SIZE IS STILL A FLAG ANGLE. The
+            # tolerance this lookup has always had is for spellings - "Flag
+            # Angle - Black", "FLAG ANGLE BLACK", "Black Flag Angle" - and a
+            # catalogue that does not state a size is not stating the wrong
+            # one. Refusing those would have been a regression, and it is
+            # what the first draft of this rule did.
+            unsized = candidates.filtered(
+                lambda p: not self._track_prep_flag_states_a_size(
+                    p._aa_choice_text(), colour))
+
+            if unsized:
+                return unsized._aa_pick_stable()
+
+            # WHAT IS LEFT STATES A SIZE THAT IS NOT THIS TRACK'S, and that is
+            # the one thing not to send - a 5.9" angle on a 3" track does not
+            # fit. Fall through to the setting, and if that is empty the
+            # preparation refuses itself and tells the customer to call. An
+            # order finished by hand beats a part that bolts to nothing.
         return self._track_prep_configured_part("flag")
 
     # --- keeping the parts in step with the track -----------------------------
@@ -496,6 +637,8 @@ class SaleOrder(models.Model):
             )
 
         colour = self._track_prep_colour_from_name(product.display_name or "")
+        track_size = self._track_prep_track_size_from_name(
+            product.display_name or "")
 
         if not colour:
             return {}, _(
@@ -517,7 +660,7 @@ class SaleOrder(models.Model):
 
         wanted = {
             "flag": (
-                self._track_prep_flag_for_colour(colour),
+                self._track_prep_flag_for_colour(colour, track_size),
                 self.FLAG_ANGLES_PER_TRACK * qty,
             ),
         }
@@ -541,7 +684,7 @@ class SaleOrder(models.Model):
             wants = ", ".join(sorted(
                 self._track_prep_bracket_name(key.replace("jamb_", ""), colour)
                 if key.startswith("jamb_")
-                else "Flag Angle %s" % colour
+                else self._track_prep_flag_name(colour, track_size)
                 for key in missing
             ))
 

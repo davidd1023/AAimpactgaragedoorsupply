@@ -70,12 +70,22 @@ class Catalog:
         products = env['product.product'].sudo().search([
             ('sale_ok', '=', True),
             '|', '|',
-            ('name', 'ilike', 'Horizontal Track -'),
+            # WITHOUT THE DASH. A folded track is named '2" Horizontal
+            # Track' and its length is a variant value, so searching for the
+            # dash the old names carried would find none of them. RAW is
+            # skipped in the loop below, as it always was.
+            ('name', 'ilike', 'Horizontal Track'),
             ('name', 'ilike', 'Vertical Track'),
             ('name', 'ilike', 'Lift Cable'),
         ]) | env['product.product'].sudo().search([
             ('sale_ok', '=', True),
-            ('name', 'in', [f'{c} Trims' for c in TRIM_COLOURS]),
+            # THREE PRODUCTS OR ONE, depending on whether the colours have been
+            # folded in yet (owner, 2026-10-21): "White Trims", "Bronze Trims"
+            # and "Black Trims" became one "Trims" with a colour to choose.
+            # Both shapes are searched for, because the code has to work on the
+            # database as it is today and as it will be after the migration.
+            '|', ('name', 'in', [f'{c} Trims' for c in TRIM_COLOURS]),
+            ('name', '=', 'Trims'),
         ])
         self.horizontal = []  # (size, length, color, product)
         self.vertical = []
@@ -86,6 +96,41 @@ class Catalog:
             # 'Lift Cable 5/32" Pair - Prepared (8' Door, 3" Track (15R))'
             name = (p.display_name or '').strip()
             if 'RAW' in name:
+                continue
+
+            # TRACKS ARE READ OFF THE VARIANT. Their size, length and finish
+            # moved out of the name when the tracks were folded into one
+            # product per size and type (owner, 2026-10-23), so the anchored
+            # patterns below can no longer see them. _aa_track_facts reads
+            # either shape, and the patterns stay underneath for a catalogue
+            # that has not been merged yet and for anything it cannot read.
+            facts = p._aa_track_facts()
+
+            if facts:
+                row = (facts['size'], int(facts['length']), facts['colour'], p)
+                (self.horizontal if facts['kind'] == 'horizontal'
+                 else self.vertical).append(row)
+                continue
+            # THE COLOUR, from wherever this catalogue keeps it. A merged Trims
+            # product says it in its variant values ("Trims (Black)"); the
+            # three old products said it in their names ("Black Trims"). Asked
+            # of the variant first, because that is the answer that cannot be
+            # thrown off by how a name happens to be spelled.
+            # ONLY FOR THE TRIMS. The same search brings back tracks and
+            # cables, and asking THEM for a colour would register a white
+            # vertical track as a trims product and drop it from the tracks -
+            # a kit would come back with "no prepared track" and three
+            # "Plastic Trims" lines that were tracks. Tracks have no colour
+            # attribute today and are the next thing the owner means to fold
+            # in (variant_families), so this gate is the difference between
+            # that change being safe and it being a very confusing morning.
+            # THE TEMPLATE'S NAME, not the display name: a merged trims
+            # variant displays as "Trims (Black)", which ends with neither.
+            tmpl_name = (p.product_tmpl_id.name or '').strip()
+            is_trims = tmpl_name == 'Trims' or tmpl_name.endswith(' Trims')
+            chosen = p._aa_chosen_colour() if is_trims else ''
+            if is_trims and chosen in TRIM_COLOURS:
+                self.trims[chosen] = p
                 continue
             if name.endswith(' Trims') and name.split(' ')[0] in TRIM_COLOURS:
                 self.trims[name.split(' ')[0]] = p

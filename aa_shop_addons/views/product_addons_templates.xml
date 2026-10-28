@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- UNDER THE PRODUCT, NOT BESIDE IT. The owner asked for the add-ons
+       "below the product", and #product_full_description is the last thing
+       the page puts there before the builder's own drop zone - so this sits
+       after the description and before anything he has dragged in.
+
+       ONE POOL, ONE ROW (owner, 2026-10-27: "i want the recommendations to be
+       just one pool of products not multiple categories, that way we dont
+       show too many products in the recommendations"). It was four headings
+       with up to eight under each, which on a kit page was a second catalogue
+       rather than a recommendation. -->
+  <template id="product_addons"
+            name="Add-ons under a kit or a spring"
+            inherit_id="website_sale.product">
+
+    <xpath expr="//div[@id='product_full_description']" position="after">
+      <t t-set="aa_addons_product" t-value="product"/>
+      <t t-call="aa_shop_addons.addons_block"/>
+    </xpath>
+
+  </template>
+
+
+  <!-- THE BLOCK ITSELF, CALLABLE, because it is wanted in three places now.
+       Owner, 2026-10-28: "recommended products only works with kits, springs
+       doesnt currently show anything in terms of recommendations, by the way
+       this is specifically for custom springs and the published items in the
+       spring category."
+
+       THE CUSTOM SPRING IS NOT A SHOP PAGE AT ALL. It is two standalone
+       website pages - /custom-torsion-spring and /spring-calculator - which
+       do not call `website_sale.product`, so an inherit of that page could
+       never have reached them however the product was recognised. That is why
+       nothing showed under a spring and why no setting would have helped.
+
+       The caller sets `aa_addons_product`. -->
+  <template id="addons_block" name="Add-ons for a product">
+    <t t-set="aa_addons" t-value="aa_addons_product.sudo()._aa_addon_picks()"/>
+
+  <section t-if="aa_addons"
+           id="aa_shop_addons"
+           class="container mt-5 pt-4 border-top">
+    <h2 class="h4 mb-1">You may also need</h2>
+    <p class="text-muted small mb-3">
+      The parts that go with this
+      <t t-out="aa_addons_product.sudo()._aa_addon_role() == 'spring' and 'spring' or 'kit'"/>.
+    </p>
+
+    <!-- THE CONES NOTE. On a spring page the cones are already in the
+         price, so this is a warning and not an offer - said plainly,
+         because the owner's worry was a customer buying a second set they
+         do not need. It used to hang off the Cones heading; with one pool
+         it sits under the section and only appears when a cone is
+         actually in what is being shown. -->
+    <div t-if="aa_addons['note']"
+         class="alert alert-info py-2 px-3 small mb-3"
+         role="note">
+      <i class="fa fa-info-circle me-1" aria-hidden="true"/>
+      <t t-out="aa_addons['note']"/>
+    </div>
+
+    <div class="row g-3">
+      <t t-foreach="aa_addons['products']" t-as="aa_addon">
+        <div class="col-6 col-md-4 col-lg-3">
+          <a class="d-block h-100 text-decoration-none text-reset border rounded p-2"
+             t-att-href="aa_addon.website_url">
+            <div class="ratio ratio-1x1 mb-2 overflow-hidden">
+              <img class="w-100 h-100"
+                   style="object-fit: contain;"
+                   t-attf-src="/web/image/product.template/#{aa_addon.id}/image_256"
+                   t-att-alt="aa_addon.name"
+                   loading="lazy"/>
+            </div>
+            <div class="small fw-medium lh-sm" t-out="aa_addon.name"/>
+            <t t-set="aa_price" t-value="aa_addon._aa_addon_price()"/>
+            <div t-if="aa_price" class="small text-muted mt-1">
+              <t t-out="aa_price"
+                 t-options="{'widget': 'monetary',
+                             'display_currency': website.currency_id}"/>
+            </div>
+          </a>
+        </div>
+      </t>
+    </div>
+  </section>
+  </template>
+
+</odoo>

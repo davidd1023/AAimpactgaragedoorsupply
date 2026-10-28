@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="res_config_settings_view_form_aa_pickup" model="ir.ui.view">
+    <field name="name">res.config.settings.form.aa.pickup.slots</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//block[@id='website_info_settings']" position="after">
+        <block title="Pickup Slots" id="aa_pickup_slots_settings">
+          <setting string="Days closed for pickup"
+                   help="Dates the counter is shut, beyond Saturdays and
+                         Sundays - as 2026-12-25, 2026-12-26. They are neither
+                         counted towards the two working days nor offered to a
+                         customer to collect on.">
+            <field name="aa_pickup_closed_days"
+                   placeholder="2026-12-25, 2026-12-26"/>
+          </setting>
+          <setting string="When the counter is open"
+                   help="The times a customer may choose between, in half
+                         hours. 7.0 is 7:00 AM and 16.0 is 4:00 PM.">
+            <div class="content-group mt-2">
+              <div class="row">
+                <label for="aa_pickup_open_from" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_pickup_open_from" widget="float_time"/>
+              </div>
+              <div class="row">
+                <label for="aa_pickup_open_to" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_pickup_open_to" widget="float_time"/>
+              </div>
+            </div>
+          </setting>
+        </block>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

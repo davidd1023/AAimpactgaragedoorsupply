@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ONLY THE FALLBACK IS CONFIGURED HERE. A kit with its own Accessory
+       Products set never looks at these. They exist so that a category
+       called something other than the obvious word does not mean a deploy. -->
+  <record id="res_config_settings_view_form" model="ir.ui.view">
+    <field name="name">res.config.settings.form.aa.shop.addons</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+
+      <xpath expr="//block[@id='website_info_settings']" position="after">
+        <block title="Garage Door Add-ons" id="aa_shop_addons_settings">
+
+          <!-- WHICH PRODUCTS GET A BLOCK AT ALL. First, because a wrong
+               answer here means nothing shows anywhere and every other
+               setting on this page is beside the point - which is exactly
+               what happened. -->
+          <setting string="Which products get add-ons"
+                   help="A kit is read from its name, its product category or
+                         any of its website categories saying 'Hardware Kit'.
+                         A spring page is the custom spring plus every
+                         published product in the Springs category. Set these
+                         only if yours are called something else. Website >
+                         Configuration > Add-ons Check lists what each product
+                         will show.">
+            <div class="content-group mt-2">
+              <div class="row">
+                <label for="aa_addon_categ_kits_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_kits_id" options="{'no_create': True}"/>
+              </div>
+              <div class="row">
+                <label for="aa_addon_categ_springs_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_springs_id" options="{'no_create': True}"/>
+              </div>
+            </div>
+          </setting>
+
+          <setting string="Where the add-ons come from"
+                   help="Shown under every kit and every spring page. A
+                         product with its own Alternative Products set shows
+                         those instead, and so does one the order counting has
+                         an answer for - these categories are only the last
+                         fallback, so a page is never blank.">
+            <div class="content-group mt-2">
+              <div class="row">
+                <label for="aa_addon_categ_cones_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_cones_id" options="{'no_create': True}"/>
+              </div>
+              <div class="row">
+                <label for="aa_addon_categ_cables_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_cables_id" options="{'no_create': True}"/>
+              </div>
+              <div class="row">
+                <label for="aa_addon_categ_tracks_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_tracks_id" options="{'no_create': True}"/>
+              </div>
+              <div class="row">
+                <label for="aa_addon_categ_trims_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_trims_id" options="{'no_create': True}"/>
+              </div>
+            </div>
+          </setting>
+
+          <!-- THE AUTOMATIC PART (owner, 2026-10-27): "automate a system that
+               will recommend additional products ... this way i wont have to
+               individually go into every products page". One number and one
+               button; the counting itself happens every night. -->
+          <setting string="Recommend from your own orders"
+                   help="Under every kit and the custom spring, recommend the
+                         products your own orders say are bought alongside.
+                         Counted every night. A product with its own
+                         Alternative Products set still shows those instead.">
+            <div class="content-group mt-2">
+              <div class="row">
+                <label for="aa_addon_min_orders" class="col-6 col-lg-5 o_light_label"/>
+                <field name="aa_addon_min_orders" class="oe_inline"/>
+              </div>
+              <div class="row">
+                <label for="aa_addon_shown" class="col-6 col-lg-5 o_light_label"/>
+                <field name="aa_addon_shown" class="oe_inline"/>
+              </div>
+              <div class="mt-2">
+                <button name="action_aa_addon_rebuild" type="object"
+                        string="Count the orders now and show me"
+                        class="btn-link" icon="fa-refresh"/>
+              </div>
+            </div>
+          </setting>
+        </block>
+      </xpath>
+
+    </field>
+  </record>
+
+</odoo>

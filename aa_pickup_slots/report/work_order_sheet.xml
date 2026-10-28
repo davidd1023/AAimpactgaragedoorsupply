@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- ON THE WORK ORDER SHEET, in the WHEN block beside Deadline and
+       Scheduled - which is where somebody on the floor already looks to find
+       out when this has to be done by. In red like the deadline, because for
+       a collection that is what it is. -->
+  <template id="work_order_sheet_pickup"
+            inherit_id="work_order_sheet.report_work_order_sheet"
+            name="Pickup slot on the Work Order sheet">
+
+    <!-- Anchored on the Scheduled row's own field rather than on the word
+         "Operation", so a reworded label does not silently drop this. -->
+    <xpath expr="//span[@t-field='o.scheduled_date']/../.." position="after">
+      <tr t-if="o.aa_pickup_label">
+        <td style="padding:2px 16px 2px 0;color:#666;">Pickup</td>
+        <td style="padding:2px 0;font-weight:800;color:#C0272D;font-size:16px;"
+            t-out="o.aa_pickup_label"/>
+      </tr>
+    </xpath>
+
+  </template>
+
+</odoo>

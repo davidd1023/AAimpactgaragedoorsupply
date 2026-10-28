@@ -577,6 +577,10 @@ class AAKitCart(AAOptionPricing, Cart):
     def add_to_cart(self, product_template_id, product_id, quantity=1.0, uom_id=None,
                     product_custom_attribute_values=None, no_variant_attribute_value_ids=None,
                     linked_products=None, **kwargs):
+        # TAKEN OUT OF kwargs BEFORE super(), because everything left in there
+        # is handed down to _cart_add and on into the line values, and this is
+        # ours to read rather than Odoo's to carry.
+        custom_parts = kwargs.pop('aa_custom_parts', None)
         template = self._shop_kit(product_template_id)
         no_variant = request.env['product.template.attribute.value'].sudo().browse(
             [int(v) for v in no_variant_attribute_value_ids or []]).exists()
@@ -604,6 +608,26 @@ class AAKitCart(AAOptionPricing, Cart):
                                                  door, qty, Catalog(request.env))
             plan = (variant, door, qty, extras, notes)
 
+        # AN EMPTY CUSTOM KIT IS A BOX OF NOTHING, AND IT IS REFUSED HERE.
+        #
+        # Owner, 2026-10-28: "you shouldnt be able to add the custom kit to the
+        # cart when there is nothing on it."
+        #
+        # BEFORE super(), so nothing is created and then tidied up. The kit
+        # line is written by Odoo's own route and the parts are hung off it
+        # afterwards, so a check made after the fact would have to delete a
+        # line a customer had just been told was added.
+        #
+        # It is also the LOCK rather than the courtesy: the button on the page
+        # is disabled while the kit is empty, but a button is not a lock, and
+        # /shop/cart/update can be posted to by anybody.
+        empty_kit = self._custom_kit(product_template_id)
+
+        if empty_kit and not self._aa_custom_kit_picked(empty_kit, custom_parts):
+            raise UserError(_(
+                "Choose at least one part before adding this kit to your"
+                " cart."))
+
         result = super().add_to_cart(
             product_template_id, product_id, quantity=quantity, uom_id=uom_id,
             product_custom_attribute_values=product_custom_attribute_values,
@@ -611,9 +635,7 @@ class AAKitCart(AAOptionPricing, Cart):
             linked_products=linked_products, **kwargs)
 
         if plan:
-            self._aa_add_extras(*plan)
-            order = request.cart
-            result['cart_quantity'] = order.cart_quantity
+            self._aa_popup(result, self._aa_add_extras(*plan))
 
         # A CUSTOM KIT'S PARTS GO IN THE SAME WAY the extras above do: as their
         # own lines, hung off the kit line, every one of them a real product.
@@ -626,8 +648,11 @@ class AAKitCart(AAOptionPricing, Cart):
                 and not line.linked_line_id)[-1:]
 
             if kit_line:
-                self._aa_add_custom_parts(custom, kit_line, max(1, int(quantity or 1)))
-                result['cart_quantity'] = order.cart_quantity
+                added = self._aa_add_custom_parts(
+                    custom, kit_line, max(1, int(quantity or 1)),
+                    posted=custom_parts)
+                added.setdefault(kit_line.id, kit_line.product_uom_qty)
+                self._aa_popup(result, added)
 
         return result
 
@@ -683,13 +708,48 @@ class AAKitCart(AAOptionPricing, Cart):
 
         qty = max(1, int(qty or 1))
         picked = self._aa_custom_kit_chosen(template, parts)
+
+        # STORED BEFORE ANYTHING IS PRICED, and this order is the whole point.
+        #
+        # THE FAULT IT FIXES, 2026-10-20: the owner started a kit from AA 1200,
+        # watched the page fill with its parts, added it to the cart and got
+        # the kit plus ONE galvanised hinge at quantity one - which is not a
+        # quantity any parts list holds, but exactly what an earlier Add click
+        # had put in the page. The kit was booked from an OLDER call.
+        #
+        # Because the store used to be the last thing this route did, after a
+        # loop that reaches into pricelists, dealer rules and uoms for every
+        # part. One product that cannot be priced raised, the route ended
+        # before the store, the session kept what the last call had left in
+        # it, and the cart was booked from that - silently, because the page
+        # only loses its total.
+        #
+        # What the customer chose is now written down first. Pricing is
+        # display; losing it costs a figure on a page, and losing this costs
+        # the order.
+        stored = request.session.get(CUSTOM_KIT_KEY) or {}
+        stored[str(template.id)] = [
+            {'variant_id': variant.id, 'quantity': quantity}
+            for variant, quantity in picked]
+        request.session[CUSTOM_KIT_KEY] = stored
+
         partner = request.env.user.partner_id
         empty = request.env['product.template.attribute.value']
         rows = []
         total = 0.0
 
         for variant, quantity in picked:
-            unit = self._unit_price(partner, variant, empty, quantity * qty)
+            # AND ONE PART THAT CANNOT BE PRICED DOES NOT TAKE THE REST WITH
+            # IT: it is shown without a figure rather than being dropped, and
+            # the cart prices it properly in any case.
+            try:
+                unit = self._unit_price(partner, variant, empty, quantity * qty)
+            except Exception:
+                _logger.exception(
+                    "aa_dealer_orders: %s could not be priced for a custom kit",
+                    variant.display_name)
+                unit = 0.0
+
             line = round(unit * quantity, 2)
             total += line
             rows.append({
@@ -700,35 +760,132 @@ class AAKitCart(AAOptionPricing, Cart):
                 'price': line,
             })
 
-        # KEPT AS THE BROWSER MEANT IT, not as it was priced: the cart books
-        # from this, and a price worked out now would be a price worked out
-        # before the customer changed their mind.
-        stored = request.session.get(CUSTOM_KIT_KEY) or {}
-        stored[str(template.id)] = [
-            {'variant_id': variant.id, 'quantity': quantity}
-            for variant, quantity in picked]
-        request.session[CUSTOM_KIT_KEY] = stored
+        # `sent` lets the page say so when something it offered was refused
+        # here, instead of quietly showing a shorter kit than was built.
+        return {'parts': rows, 'total': round(total, 2), 'count': len(rows),
+                'sent': len(parts or [])}
 
-        return {'parts': rows, 'total': round(total, 2), 'count': len(rows)}
+    @staticmethod
+    def _aa_posted_parts(posted):
+        """The parts list as the Add to Cart request carried it, if it did.
 
-    def _aa_add_custom_parts(self, template, kit_line, qty):
-        """Book each chosen part as its own line, under the kit line."""
-        chosen = (request.session.get(CUSTOM_KIT_KEY) or {}).get(str(template.id))
-        picked = self._aa_custom_kit_chosen(template, chosen)
+        WHY IT COMES THIS WAY NOW, 2026-10-20. An ordinary AA kit's extras are
+        ticked attributes posted IN the cart request, which is why those have
+        always worked. A custom kit's parts were posted earlier, to the pricing
+        route, and kept in the session - and on production that list was not
+        there when the cart request ran. The page now sends it with the
+        request, the same way the working kits send theirs.
+        """
+        if not posted:
+            return None
+
+        if isinstance(posted, str):
+            try:
+                posted = json.loads(posted)
+            except ValueError:
+                _logger.warning(
+                    "aa_dealer_orders: a custom kit arrived with a parts list "
+                    "that is not JSON")
+
+                return None
+
+        return posted if isinstance(posted, list) else None
+
+    def _aa_custom_kit_picked(self, template, posted=None):
+        """[(variant, quantity)] - what is actually in this kit right now.
+
+        ONE ANSWER, ASKED TWICE: the guard in `add_to_cart` that refuses an
+        empty kit and the packing below must agree about what "empty" means,
+        or the cart gets a kit the guard thought had parts in it.
+
+        The list comes from the cart request if it carried one, and from the
+        session otherwise - the page leaves it there when it prices the kit,
+        because /shop/cart/add is Odoo's own route and has no room for it.
+        """
+        chosen = self._aa_posted_parts(posted)
+        source = "the cart request"
+
+        if chosen is None:
+            chosen = (request.session.get(CUSTOM_KIT_KEY) or {}).get(
+                str(template.id))
+            source = "the session"
+
+        _logger.info(
+            "aa_dealer_orders: custom kit %s reads %s part(s) from %s",
+            template.display_name, len(chosen or []), source)
+
+        return self._aa_custom_kit_chosen(template, chosen)
+
+    def _aa_add_custom_parts(self, template, kit_line, qty, posted=None):
+        """Book each chosen part as its own line, under the kit line.
+
+        Returns {line id: quantity added} so the popup can say what went in.
+        """
+        picked = self._aa_custom_kit_picked(template, posted)
+        added = {}
 
         if not picked:
-            return
+            # SHOULD NOW BE UNREACHABLE: `add_to_cart` refuses an empty kit
+            # before Odoo creates the line. Kept, and still shouted about,
+            # because the two read the same list a moment apart and a kit line
+            # already written is not a thing to leave in a cart quietly.
+            _logger.warning(
+                "aa_dealer_orders: %s reached the cart with no parts at all",
+                template.display_name)
+
+            return added
 
         order = request.cart
 
         for variant, quantity in picked:
-            order._cart_add(
+            # aa_kit_parts: the contents of a kit are built to order, so the
+            # shop's out-of-stock rule does not throw them out. See
+            # sale_order._verify_updated_quantity in custom_kit.py.
+            booked = order.with_context(aa_kit_parts=True)._cart_add(
                 product_id=variant.id,
                 quantity=quantity * qty,
                 linked_line_id=kit_line.id,
             )
 
+            if booked.get('line_id'):
+                added[booked['line_id']] = booked.get('quantity') or quantity * qty
+            else:
+                # NEVER AGAIN IN SILENCE: core returns the reason it would not
+                # take a line, and this used to be dropped on the floor.
+                _logger.warning(
+                    "aa_dealer_orders: %s was refused by the cart for a custom "
+                    "kit (%s)", variant.display_name, booked.get('warning') or "")
+
         order._verify_cart_after_update()
+
+        return added
+
+    def _aa_popup(self, result, added):
+        """Make the "added to your cart" popup say what actually went in.
+
+        THE FAULT THIS FIXES, 2026-10-20: "when i put the kit into the cart,
+        the only things that pop up are the kit at 1$ and a galvanized hinge
+        #1 ... none of the items i added to the kit are getting added into the
+        cart."
+
+        They were going in. Core builds notification_info out of the lines IT
+        added and returns it, and both kit paths in this file add their lines
+        AFTER that - so the popup named the kit and nothing else, and read as
+        if the parts had been dropped. The cart page had them all along; the
+        popup was the only thing lying. It is rebuilt here from the lines that
+        were really booked.
+        """
+        order = request.cart
+
+        if not order or not added:
+            return
+
+        information = result.get('notification_info') or {}
+        result['notification_info'] = {
+            **self._get_cart_notification_information(order, added),
+            'warning': information.get('warning'),
+        }
+        result['cart_quantity'] = order.cart_quantity
 
     def _aa_sync_kit_note(self, variant, door, notes):
         """Keep the kit line's door note in step with the page.
@@ -796,24 +953,36 @@ class AAKitCart(AAOptionPricing, Cart):
         line.aa_write_door(self._aa_door_numbers(door), note=info)
 
     def _aa_add_extras(self, variant, door, qty, extras, notes):
+        """Returns {line id: quantity added}, the kit line included, so the
+        popup can name the springs and tracks that went in with the kit."""
         order = request.cart
+        added = {}
         if not order:
-            return
+            return added
         kit_line = order.order_line.filtered(lambda l: l.product_id == variant).sorted('id')[-1:]
         info = " | ".join(filter(None, [self._line_note(door)] + notes))
         if kit_line and info:
             self._aa_store_door(kit_line, door, info)
+        if kit_line:
+            added[kit_line.id] = kit_line.product_uom_qty
         for extra in extras:
             if extra.get('quote'):
                 before = order.order_line
                 booked = add_assembly_lines(order, extra['quote'], qty=qty, note="Springs for the kit above")
                 if booked.get('error'):
                     raise UserError(booked['error'])
-                (order.order_line - before).write({'linked_line_id': kit_line.id})
+                fresh = order.order_line - before
+                fresh.write({'linked_line_id': kit_line.id})
+                added.update({line.id: line.product_uom_qty for line in fresh})
                 continue
-            order.with_context(skip_cart_verification=True)._cart_add(
+            booked = order.with_context(
+                skip_cart_verification=True, aa_kit_parts=True)._cart_add(
                 product_id=extra['product'].id,
                 quantity=extra['qty'] * qty,
                 linked_line_id=kit_line.id,
             )
+            if booked.get('line_id'):
+                added[booked['line_id']] = booked.get('quantity') or extra['qty'] * qty
         order._verify_cart_after_update()
+
+        return added

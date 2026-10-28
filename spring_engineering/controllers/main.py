@@ -118,6 +118,32 @@ MARKUP_KEY = "spring_engineering.markup_percent"
 ASSEMBLIES = ("Single", "Duplex", "Triplex")
 SPRING_ROLES = ("Inner", "Middle", "Outer", "Spring")
 
+# WHAT THE SHOP WILL NOT WIND, however well the calculator sizes it.
+#
+# Owner, 2026-10-28: "for duplex springs we will leave the option there for
+# people who want to use it, but customers will no longer be able to add
+# duplex springs to the cart, instead give them a message on the page that
+# will say something like we do not currently manufacture custom duplex
+# springs."
+#
+# SEPARATE FROM `ASSEMBLIES`, which says what this code can WORK OUT. The
+# calculator still computes a duplex pair, still prices it and still shows the
+# figures - that was asked for in the same breath. This says only what may be
+# bought, so turning duplex back on is deleting one word rather than finding
+# everywhere it was refused.
+#
+# IN `quote_assembly` RATHER THAN IN THE ROUTE, because the calculator's own
+# Add to Cart is not the only way in: the dealer Quick Order prices springs
+# through here too, and a spring the shop cannot make is one it cannot make
+# for a dealer either. The dealer page shows the refusal as a note against the
+# line, which is what it does with every other reason a spring cannot be
+# quoted.
+UNBUILDABLE_ASSEMBLIES = ("Duplex",)
+NOT_MANUFACTURED = (
+    "We do not currently manufacture custom %s springs. Please call us on"
+    " 786-238-7640 and we will tell you what we can do for this door."
+)
+
 # The heaviest door any drum here is rated for is 2200 lb; the ceiling is a sanity
 # bound on the text, not an engineering limit, and the reference's own maximum
 # cycle target is 350,000.
@@ -363,6 +389,12 @@ def quote_assembly(spec, factor=None):
 
     if assembly not in ASSEMBLIES:
         return {"error": "That is not an assembly we build."}
+
+    # THE LOCK, of which the page's Contact Us button is only the courtesy.
+    # This route is public and takes a posted specification, so "the button
+    # was not shown" stops nobody.
+    if assembly in UNBUILDABLE_ASSEMBLIES:
+        return {"error": NOT_MANUFACTURED % assembly.lower()}
 
     weight = _as_int(spec.get("doorWeight"), 1, MAX_DOOR_WEIGHT)
 

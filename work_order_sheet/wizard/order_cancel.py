@@ -234,11 +234,20 @@ class OrderCancel(models.TransientModel):
                 paid=self._money(self.amount_paid),
                 asked=self._money(self.amount_refund)))
 
+        # THE CUSTOMER IS TOLD LAST, not when the first job comes off the
+        # floor. Cancelling the shop floor jobs is now itself a reason to
+        # send the cancellation email, and the three steps below it can still
+        # fail - so an email sent at step 1 could promise a refund that never
+        # happened. Held until _cancel_order, which knows what was given back.
+        refunded = self._money(self.amount_refund) \
+            if self.amount_refund and self.can_refund else ""
+        held = self.with_context(aa_hold_cancel_email=True)
+
         done = []
-        done += self._cancel_shop_floor()
-        done += self._undo_transfers()
-        done += self._refund()
-        done += self._cancel_order()
+        done += held._cancel_shop_floor()
+        done += held._undo_transfers()
+        done += held._refund()
+        done += self.with_context(aa_refunded=refunded)._cancel_order()
         self._log(done)
 
         return {
@@ -394,18 +403,18 @@ class OrderCancel(models.TransientModel):
         (owner, 2026-10-19: it is one of the four emails a customer gets).
         """
         order = self.order_id
+
+        # SENT BY _action_cancel NOW, not here, because this is no longer the
+        # only way an order gets cancelled (models/order_cancelled_email.py).
+        # One sender, one stamp on the order, so cancelling again in Sales or
+        # in Manufacturing cannot send the same news twice.
         order.sudo()._action_cancel()
-        template = self.env.ref(
-            "work_order_sheet.mail_template_order_cancelled",
-            raise_if_not_found=False)
 
-        if template and order.partner_id.email:
-            refunded = self._money(self.amount_refund) \
-                if self.amount_refund and self.can_refund else ""
-            template.sudo().with_context(aa_refunded=refunded).send_mail(
-                order.id, force_send=True)
+        if order.aa_cancel_email_sent:
+            return [_("Cancelled %s, and told the customer.", order.name)]
 
-        return [_("Cancelled %s, and told the customer.", order.name)]
+        return [_("Cancelled %s. There is no email address on file, so "
+                  "nobody was told.", order.name)]
 
     def _log(self, done):
         """The whole procedure, written on the order, with who and why."""

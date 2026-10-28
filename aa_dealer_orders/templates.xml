@@ -41,10 +41,28 @@
          as data rather than as markup, so the page is built from what the
          catalogue says today. -->
     <template id="product_page_custom_kit" inherit_id="website_sale.product" name="Custom kit builder">
-        <xpath expr="//div[hasclass('o_wsale_product_details_content_section_cta')]" position="before">
+        <!-- ABOVE THE PRODUCT'S OWN ATTRIBUTES, so the trims sit at the bottom
+             of the page just over Add to Cart (owner, 2026-10-20: "move the
+             trims to the bottom"). Odoo's own attribute block is left exactly
+             where it is - it lives inside the add-to-cart form and carries the
+             chosen trim with it - and the builder is put in front of it
+             instead.
+
+             Matched on t-attf-class rather than with hasclass(): the section's
+             class is computed, so there is no plain class attribute to match. -->
+        <xpath expr="//div[contains(@t-attf-class, 'o_wsale_product_details_content_section_attributes')]"
+               position="before">
             <div t-if="product.aa_custom_kit" id="aa_custom_kit" class="mb-4 d-none"
                  t-att-data-template-id="product.id"
                  t-att-data-kit="product._aa_custom_kit_json()"/>
+            <!-- WHICH CODE THIS PAGE IS RUNNING, for staff and nobody else.
+                 A customer never sees it; the method returns nothing at all
+                 unless the viewer is signed in as an employee. -->
+            <t t-set="aa_kit_build"
+               t-value="product.aa_custom_kit and product._aa_custom_kit_build()"/>
+            <div t-if="aa_kit_build" class="text-muted small mb-3">
+                Custom Kit build <t t-esc="aa_kit_build"/> (staff only)
+            </div>
         </xpath>
     </template>
 

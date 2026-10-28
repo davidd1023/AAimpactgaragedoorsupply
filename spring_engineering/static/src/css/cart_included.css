@@ -8,3 +8,24 @@
 .o_aa_included [aria-expanded="true"] .fa-caret-right {
     transform: rotate(90deg);
 }
+
+/* The staff-only cost row folds the same way, so it turns the same caret. */
+.o_aa_cart_cost .fa-caret-right {
+    transition: transform 0.15s ease-out;
+}
+
+.o_aa_cart_cost [aria-expanded="true"] .fa-caret-right {
+    transform: rotate(90deg);
+}
+
+/* THE CARET IS ALWAYS THERE (owner, 2026-10-21).
+   It used to fade in on hover, which meant the employee had to find a control
+   that was not visibly there - and on a touch screen there is no hover to
+   find it with. It is now shown at rest, at every width and on every device.
+
+   WHAT IS STILL HIDDEN IS THE FIGURE, behind the fold the caret opens, and
+   the whole row is still built in Python only for an internal user: a
+   customer gets no caret and no cost because the row is never rendered. */
+.o_aa_cart_cost .o_aa_cost_toggle {
+    opacity: 0.65;
+}

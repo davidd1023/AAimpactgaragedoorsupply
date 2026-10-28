@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE REVIEW SCREEN. He asked not to have to visit every product page,
+       so this is the one page that shows what every product would recommend
+       and why - the number of his own orders behind each line. Nothing has to
+       be done here; it is for looking at, and for the one line somebody
+       disagrees with, which is fixed by setting Alternative Products on that
+       product and having it win outright. -->
+  <record id="view_aa_addon_suggestion_list" model="ir.ui.view">
+    <field name="name">aa.addon.suggestion.list</field>
+    <field name="model">aa.addon.suggestion</field>
+    <field name="arch" type="xml">
+      <list string="Recommended add-ons" create="false" edit="false"
+            default_order="product_tmpl_id, orders desc">
+        <header>
+          <button name="action_aa_rebuild" type="object"
+                  string="Count the orders again" class="btn-primary"/>
+        </header>
+        <field name="product_tmpl_id"/>
+        <field name="addon_tmpl_id"/>
+        <field name="orders" sum="Orders"/>
+        <field name="computed_on" optional="hide"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_aa_addon_suggestion_search" model="ir.ui.view">
+    <field name="name">aa.addon.suggestion.search</field>
+    <field name="model">aa.addon.suggestion</field>
+    <field name="arch" type="xml">
+      <search string="Recommended add-ons">
+        <field name="product_tmpl_id"/>
+        <field name="addon_tmpl_id"/>
+        <filter name="aa_group_product" string="Shown under"
+                context="{'group_by': 'product_tmpl_id'}"/>
+        <filter name="aa_group_addon" string="Recommended"
+                context="{'group_by': 'addon_tmpl_id'}"/>
+      </search>
+    </field>
+  </record>
+
+  <record id="action_aa_addon_suggestion" model="ir.actions.act_window">
+    <field name="name">Recommended Add-ons</field>
+    <field name="res_model">aa.addon.suggestion</field>
+    <field name="view_mode">list</field>
+    <field name="context">{'search_default_aa_group_product': 1}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Nothing counted yet</p>
+      <p>
+        These are worked out from your own orders: a product is recommended
+        under another once enough of your orders have carried both. Press
+        <b>Count the orders again</b> to build the list now - it is also
+        rebuilt every night.
+      </p>
+      <p>
+        An empty list means no two products have been bought together often
+        enough yet. The product pages fall back to showing the cones, cables,
+        tracks and trims families until they have.
+      </p>
+    </field>
+  </record>
+
+  <!-- THE CHECK SCREEN. "i dont see the recommended products under the kits"
+       (owner, 2026-10-27) took crawling his live website to answer - his
+       kits are in a website category called Hardware Kits and carry no HK-
+       part number, so nothing was read as a kit at all. One line per product
+       saying what its page will draw, and where it came from, so that
+       question answers itself next time. -->
+  <record id="view_product_addon_check_list" model="ir.ui.view">
+    <field name="name">product.template.list.aa.addon.check</field>
+    <field name="model">product.template</field>
+    <field name="arch" type="xml">
+      <list string="Add-ons check" create="false">
+        <field name="name"/>
+        <field name="default_code" string="Part number" optional="show"/>
+        <field name="public_categ_ids" widget="many2many_tags"
+               string="Website categories"/>
+        <field name="is_published" string="Published"/>
+        <field name="aa_addon_summary" string="Will show on the page"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_aa_addon_check" model="ir.actions.server">
+    <field name="name">Add-ons Check</field>
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="state">code</field>
+    <field name="code">action = model.action_aa_addon_check()</field>
+  </record>
+
+  <!-- NOT `website.menu_website_configuration`, which is the Website app's
+       ROOT menu despite the name - that put the entry beside Site and
+       eCommerce. The Configuration submenu is
+       `menu_website_global_configuration`. -->
+  <menuitem id="menu_aa_addon_suggestion"
+            name="Recommended Add-ons"
+            parent="website.menu_website_global_configuration"
+            action="action_aa_addon_suggestion"
+            sequence="90"
+            groups="base.group_system"/>
+
+  <menuitem id="menu_aa_addon_check"
+            name="Add-ons Check"
+            parent="website.menu_website_global_configuration"
+            action="action_aa_addon_check"
+            sequence="91"
+            groups="base.group_system"/>
+
+</odoo>

@@ -33,6 +33,7 @@ variants where it has them, and otherwise as the product it is.
 """
 
 import json
+import re
 
 from odoo import api, fields, models
 
@@ -43,6 +44,51 @@ COLOUR_ATTRIBUTES = ("finish color", "finish colour", "color", "colour")
 # Never offered in a custom kit, whatever anybody ticks: these are sized from a
 # door and sold against one (owner, 2026-10-20).
 NEVER_IN_A_CUSTOM_KIT = ("spring", "track", "cable")
+
+# THE FINISHES THIS TRADE SELLS, longest first so "desert tan" is read as one
+# colour and not as "tan". Used to recognise that two products are the same
+# part in two colours - which is how this catalogue is built, there being no
+# finish attribute on a hinge - and nothing is grouped unless a sibling with
+# the same name in another colour is actually there to group it with.
+COLOUR_WORDS = (
+    "desert tan", "sandstone", "terratone", "chocolate", "galvanized",
+    "galvanised", "almond", "bronze", "walnut", "wicker", "silver", "copper",
+    "primed", "white", "black", "brown", "clay", "gray", "grey", "zinc",
+    "tan",
+)
+
+
+class SaleOrder(models.Model):
+    _inherit = "sale.order"
+
+    def _verify_updated_quantity(self, order_line, product_id, new_qty, uom_id, **kwargs):
+        """A KIT'S PARTS ARE BUILT TO ORDER, so the shop's out-of-stock rule
+        does not apply to them.
+
+        THE FAULT THIS FIXES, 2026-10-20: the owner built a 13-part kit, the
+        page priced it at $236.91, he added it to the cart and got the kit by
+        itself. The parts WERE sent, stored and read back - and then dropped
+        one by one, here.
+
+        website_sale_stock refuses a storable product that is not in stock:
+        "%s has not been added to your cart since it is not available", with
+        the quantity clamped to zero and no line created. Every part of that
+        kit is a part AA Impact fits to order rather than keeps on a shelf, so
+        every one of them was refused. The one hinge that did get through on
+        an earlier attempt was the one with stock on hand, which is what made
+        it look as if the list were being lost.
+
+        THE RULE IS NOT REMOVED, it is scoped: it still applies to anything a
+        customer buys on its own. It is passed over only for lines this
+        module's kit pages book as the contents of a kit, which is how a
+        phantom-BoM kit already behaves - nobody is stopped from ordering an
+        AA 1200 because a hinge inside it shows zero.
+        """
+        if self.env.context.get("aa_kit_parts"):
+            return new_qty, ""
+
+        return super()._verify_updated_quantity(
+            order_line, product_id, new_qty, uom_id, **kwargs)
 
 
 class ProductTemplate(models.Model):
@@ -80,7 +126,16 @@ class ProductTemplate(models.Model):
             word in (part.name or "").lower() for word in NEVER_IN_A_CUSTOM_KIT))
 
     def _aa_custom_kit_colours(self):
-        """[(variant id, label)] - the finishes this part comes in.
+        """[(variant id, label, finish)] - the variants this part comes in.
+
+        THE LABEL AND THE FINISH ARE NOT THE SAME THING, and conflating them
+        is what put a hundred entries in the kit's colour box (owner,
+        2026-10-22: "the custom kits color option ... is showing a lot of
+        options when it should only show 3"). The LABEL has to name the whole
+        variant - "#3 Black" - or the per-part dropdown cannot be read. The
+        FINISH is the colour alone, and it is what the ONE COLOUR FOR THE
+        WHOLE KIT box offers, so that box lists three finishes rather than
+        every size in every colour.
 
         ITS OWN VARIANTS WHERE IT HAS THEM. A product with a Finish Color
         attribute offers its colours; one whose colour is in its name is
@@ -91,17 +146,35 @@ class ProductTemplate(models.Model):
         variants = self.sudo().product_variant_ids
 
         if len(variants) <= 1:
-            return [(variants[:1].id, "")] if variants else []
+            return [(variants[:1].id, "", "")] if variants else []
 
         colours = []
 
         for variant in variants:
-            finish = variant.product_template_attribute_value_ids.filtered(
+            values = variant.product_template_attribute_value_ids
+            finish = values.filtered(
                 lambda value: (value.attribute_id.name or "").strip().lower()
                 in COLOUR_ATTRIBUTES)
-            colours.append((variant.id, finish[:1].name or
-                            ", ".join(variant.product_template_attribute_value_ids
-                                      .mapped("name"))))
+
+            # EVERY OTHER CHOICE GOES IN THE LABEL TOO, or the list cannot be
+            # read. Since the catalogue's colours and sizes were folded into
+            # one product each (owner, 2026-10-21) a hinge is ONE product with
+            # 21 variants, and labelling them by finish alone offered the
+            # dealer "Black" seven times over - whereupon picking Black got
+            # him whichever SIZE happened to come first. "#3 Black" says which
+            # one he is choosing. A part that only comes in colours reads
+            # exactly as it did before.
+            others = values - finish
+            label = " ".join(part for part in (
+                ", ".join(others.mapped("name")),
+                finish[:1].name or "",
+            ) if part)
+
+            colours.append((
+                variant.id,
+                label or ", ".join(values.mapped("name")),
+                finish[:1].name or "",
+            ))
 
         return colours
 
@@ -138,10 +211,82 @@ class ProductTemplate(models.Model):
 
         return "none", "Other parts"
 
+    def _aa_colour_in_name(self):
+        """(what the part is, what colour it is) read off the product's name.
+
+        WHY THIS EXISTS, 2026-10-20: the colour dropdown did not appear, and
+        the reason is that nothing in this catalogue has a finish ATTRIBUTE.
+        A white hinge and a black hinge are two separate products with the
+        colour written in the name, so there was no part with two colours for
+        the page to offer - and the parts a kit fills itself with were the
+        white ones, which is what the owner was changing a row at a time.
+
+        ("", "") is returned for a name that is only a colour, and for a
+        product whose name holds no colour at all, which are both left alone.
+        """
+        self.ensure_one()
+        name = (self.name or "").strip()
+
+        for word in COLOUR_WORDS:
+            found = re.search(r"\b%s\b" % re.escape(word), name, re.IGNORECASE)
+
+            if not found:
+                continue
+
+            stem = "%s %s" % (name[:found.start()], name[found.end():])
+            stem = re.sub(r"\s+", " ", stem).strip(" -,/()")
+
+            return stem, found.group(0).title()
+
+        return "", ""
+
+    def _aa_custom_kit_build(self):
+        """The installed version of this module - for staff, on the page.
+
+        WHICH IS NOT TRIVIA, 2026-10-20: three faults in a row were reported
+        against a build that did not have the code being discussed. Production
+        carries whatever has been merged into it, a dev build carries whatever
+        was last pushed, and nothing on the page said which. Now it does, to
+        anybody signed in as staff and to nobody else.
+        """
+        self.ensure_one()
+
+        if not self.env.user.has_group("base.group_user"):
+            return ""
+
+        module = self.env["ir.module.module"].sudo().search(
+            [("name", "=", "aa_dealer_orders")], limit=1)
+
+        return module.installed_version or ""
+
+    def _aa_custom_kit_part_json(self, name, colours):
+        """One row of the page: a part, under a name, in these colours."""
+        self.ensure_one()
+
+        # THE PAGE IS SPLIT UP BY THIS (owner, 2026-10-20: "one list for
+        # hinges, one for shafts"). The key does the grouping and the name is
+        # only the heading, because two categories under different parents can
+        # share a name.
+        shelf, shelf_name = self._aa_custom_kit_shelf()
+
+        return {
+            "template_id": self.id,
+            "name": name,
+            "code": self.default_code or "",
+            "category_id": shelf,
+            "category": shelf_name,
+            "price": round(self.list_price, 2),
+            # finish is the colour ALONE, for the one-colour-for-the-whole-kit
+            # box; label names the whole variant, for the per-part dropdown.
+            "colours": [{"id": variant_id, "label": label, "finish": finish}
+                        for variant_id, label, finish in colours],
+        }
+
     def _aa_custom_kit_json(self):
         """Everything the page needs, as data: the parts and the kits to start from."""
         self.ensure_one()
-        parts = []
+        rows = []
+        families = {}
 
         for part in self._aa_custom_kit_parts():
             colours = part._aa_custom_kit_colours()
@@ -149,22 +294,60 @@ class ProductTemplate(models.Model):
             if not colours:
                 continue
 
-            # THE PAGE IS SPLIT UP BY THIS (owner, 2026-10-20: "one list for
-            # hinges, one for shafts"). The key does the grouping and the name
-            # is only the heading, because two categories under different
-            # parents can share a name.
-            shelf, shelf_name = part._aa_custom_kit_shelf()
+            stem, colour = part._aa_colour_in_name()
 
-            parts.append({
-                "template_id": part.id,
-                "name": part.name,
-                "code": part.default_code or "",
-                "category_id": shelf,
-                "category": shelf_name,
-                "price": round(part.list_price, 2),
-                "colours": [{"id": variant_id, "label": label}
-                            for variant_id, label in colours],
-            })
+            # A part with real finish variants already offers them itself, and
+            # a product with no colour in its name is just that product.
+            if len(colours) > 1 or not colour or not stem:
+                rows.append((part, part.name, colours))
+
+                continue
+
+            key = re.sub(r"[^a-z0-9]+", "", stem.lower())
+            families.setdefault(key, {"stem": stem, "members": []})
+            families[key]["members"].append((part, colour, colours[0][0]))
+
+        parts = [part._aa_custom_kit_part_json(name, colours)
+                 for part, name, colours in rows]
+
+        for family in families.values():
+            members = family["members"]
+
+            # ONE PRODUCT PER COLOUR. A catalogue can hold the same name
+            # twice, and a dropdown offering Galvanized, Galvanized and White
+            # asks the customer a question with no answer.
+            seen = {}
+
+            for part, colour, variant_id in members:
+                seen.setdefault(colour, variant_id)
+
+            # ONE ROW, IN BOTH COLOURS, when the catalogue really does have
+            # the same part twice: "11ga #8 Hinge White" and "... Black"
+            # become "11ga #8 Hinge" with a colour to pick, which is also
+            # half as many rows to read.
+            if len(seen) > 1:
+                parts.append(members[0][0]._aa_custom_kit_part_json(
+                    family["stem"],
+                    [(variant_id, colour, colour)
+                     for colour, variant_id in seen.items()]))
+
+                # AND NOTHING DISAPPEARS: a second product of a colour that is
+                # already taken is still offered, under its own name.
+                for part, colour, variant_id in members:
+                    if seen[colour] != variant_id:
+                        parts.append(part._aa_custom_kit_part_json(
+                            part.name, [(variant_id, "", "")]))
+
+                continue
+
+            # A FAMILY OF ONE COLOUR IS NEVER RENAMED. There is nothing to
+            # switch to, so "Zinc Plated Bolt" stays what it is called rather
+            # than becoming a "Plated Bolt" that comes in zinc.
+            for part, _colour, variant_id in members:
+                parts.append(
+                    part._aa_custom_kit_part_json(part.name, [(variant_id, "", "")]))
+
+        parts.sort(key=lambda row: row["name"])
 
         return json.dumps({
             "parts": parts,

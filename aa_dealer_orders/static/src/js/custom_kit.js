@@ -1,4 +1,5 @@
 /** @odoo-module **/
+
 // BUILD YOUR OWN KIT (owner, 2026-10-20): "customer can decide almost
 // everything and can add and remove things from their kit".
 //
@@ -15,6 +16,9 @@
 
 const CURRENCY = (symbol, amount) =>
     `${symbol}${amount.toFixed(2)}`;
+
+// What the Add to Cart button says it is waiting for while the kit is empty.
+const EMPTY_KIT = "Choose at least one part before adding this kit to your cart.";
 
 function el(tag, attrs = {}, text = "") {
     const node = document.createElement(tag);
@@ -42,6 +46,8 @@ class CustomKitPage {
         this.symbol = this.data.currency || "$";
         // variant id -> quantity. The whole state of the page.
         this.chosen = new Map();
+        // "" means every part in whatever colour it is listed in.
+        this.colour = "";
         this.render();
         this.fillFromBase();
     }
@@ -87,6 +93,72 @@ class CustomKitPage {
             (last(a) - last(b)) || a.label.localeCompare(b.label));
     }
 
+    colourLabels() {
+        // The finishes this catalogue actually sells, commonest first, counted
+        // over the parts that come in more than one. A product whose colour is
+        // in its name has a single variant and no finish to offer, so it is
+        // not counted and the kit colour cannot move it.
+        //
+        // THE FINISH, NOT THE LABEL. A label names the whole variant - "#3
+        // Black" - because the per-part dropdown has to be readable now that
+        // a hinge is one product with 25 variants. Counting labels here put
+        // every size of every colour in this box: owner, 2026-10-22, "showing
+        // a lot of options when it should only show 3".
+        const counts = new Map();
+
+        for (const part of this.parts) {
+            if (part.colours.length < 2) {
+                continue;
+            }
+
+            for (const colour of part.colours) {
+                if (colour.finish) {
+                    counts.set(colour.finish, (counts.get(colour.finish) || 0) + 1);
+                }
+            }
+        }
+
+        return [...counts.entries()]
+            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+            .map(([label]) => label);
+    }
+
+    variantFor(part, fallbackId) {
+        // The kit colour where this part comes in it, and otherwise whatever
+        // it already was - a part that is only made in galvanised stays
+        // galvanised rather than disappearing from the kit.
+        if (this.colour) {
+            // Matched on the FINISH, for the same reason the box lists
+            // finishes: "Black" has to find the black one whatever size it is.
+            const match = part.colours.find(
+                (colour) => colour.finish === this.colour);
+
+            if (match) {
+                return match.id;
+            }
+        }
+
+        return fallbackId === undefined ? part.colours[0].id : fallbackId;
+    }
+
+    setColour(label) {
+        this.colour = label;
+        const moved = new Map();
+
+        for (const [variantId, quantity] of this.chosen) {
+            const part = this.partFor(variantId);
+            const id = part ? this.variantFor(part, variantId) : variantId;
+
+            // SUMMED, not overwritten: a kit holding the white and the black
+            // of one part becomes that many of the one colour.
+            moved.set(id, (moved.get(id) || 0) + quantity);
+        }
+
+        this.chosen = moved;
+        this.rebuildShelves();
+        this.draw();
+    }
+
     quantityOf(part) {
         return part.colours.reduce(
             (sum, colour) => sum + (this.chosen.get(colour.id) || 0), 0);
@@ -107,12 +179,14 @@ class CustomKitPage {
             return;
         }
 
+        const row = el("div",
+            { class: "d-flex align-items-center flex-wrap gap-2 mb-3" });
+
         // Start from an existing kit, which is the fastest way to a kit for a
         // door we do not have one for.
         const bases = this.data.bases || [];
 
         if (bases.length) {
-            const row = el("div", { class: "d-flex align-items-center gap-2 mb-3" });
             row.appendChild(el("label", { class: "form-label mb-0" }, "Start from"));
             this.baseSelect = el("select", { class: "form-select w-auto" });
             this.baseSelect.appendChild(el("option", { value: "" }, "Empty kit"));
@@ -125,6 +199,37 @@ class CustomKitPage {
 
             this.baseSelect.addEventListener("change", () => this.fillFromBase());
             row.appendChild(this.baseSelect);
+        }
+
+        // ONE COLOUR FOR THE WHOLE KIT (owner, 2026-10-20: "the build your kit
+        // makes it so all items added are white so you should add an option to
+        // change the auto added products to a different color").
+        //
+        // Starting from an existing kit fills the rows from that kit's own
+        // parts list, and those are the white ones, so every automatic row
+        // came out white and had to be changed one at a time. This moves the
+        // lot - and sets what a part is added in from here on.
+        const colours = this.colourLabels();
+
+        if (colours.length) {
+            row.appendChild(el("label",
+                { class: "form-label mb-0 ms-md-3" }, "Color"));
+            this.colourSelect = el("select", { class: "form-select w-auto" });
+            this.colourSelect.appendChild(el("option", { value: "" }, "As listed"));
+
+            for (const label of colours) {
+                this.colourSelect.appendChild(
+                    el("option", { value: label }, label));
+            }
+
+            this.colourSelect.addEventListener("change",
+                () => this.setColour(this.colourSelect.value));
+            row.appendChild(this.colourSelect);
+            row.appendChild(el("span", { class: "text-muted small" },
+                "applies to every part that comes in it"));
+        }
+
+        if (row.childNodes.length) {
             this.root.appendChild(row);
         }
 
@@ -135,6 +240,11 @@ class CustomKitPage {
 
         this.total = el("div", { class: "fw-bold mt-2" });
         this.root.appendChild(this.total);
+
+        // LOCKED FROM THE START, because a kit begins empty and the first
+        // pricing call has not been made yet. Unlocked by the first answer
+        // that says a part is in it.
+        this.lockAddToCart(true, EMPTY_KIT);
 
         this.root.appendChild(this.catalogue());
     }
@@ -233,17 +343,24 @@ class CustomKitPage {
         row.appendChild(el("span", { class: "flex-grow-1" },
             part.code ? `${part.name} (${part.code})` : part.name));
 
-        // Which colour the Add button adds. The quantity and the colour can
-        // both be changed afterwards, in the kit itself.
-        let variantId = part.colours[0].id;
+        // Which colour the Add button adds: the kit colour when this part
+        // comes in it. The quantity and the colour can both be changed
+        // afterwards, in the kit itself.
+        let variantId = this.variantFor(part);
 
         if (part.colours.length > 1) {
             const colour = el("select",
-                { class: "form-select form-select-sm w-auto", "aria-label": "Colour" });
+                { class: "form-select form-select-sm w-auto", "aria-label": "Color" });
 
             for (const option of part.colours) {
-                colour.appendChild(el("option",
-                    { value: String(option.id) }, option.label));
+                const node = el("option",
+                    { value: String(option.id) }, option.label);
+
+                if (option.id === variantId) {
+                    node.setAttribute("selected", "selected");
+                }
+
+                colour.appendChild(node);
             }
 
             colour.addEventListener("change",
@@ -263,6 +380,26 @@ class CustomKitPage {
         this.offers.push({ part, node: mark });
 
         return row;
+    }
+
+    rebuildShelves() {
+        // After a colour change, every Add button adds the new colour and
+        // every row's dropdown shows it, so the rows that were already built
+        // are thrown away and built again.
+        this.offers = [];
+
+        for (const entry of this.panels || []) {
+            entry.body.innerHTML = "";
+            entry.filled = false;
+
+            if (entry.open) {
+                entry.filled = true;
+
+                for (const part of entry.category.parts) {
+                    entry.body.appendChild(this.offerFor(part));
+                }
+            }
+        }
     }
 
     filter(term) {
@@ -327,12 +464,17 @@ class CustomKitPage {
         if (base) {
             for (const [variantId, quantity] of Object.entries(base.parts || {})) {
                 const number = parseInt(variantId, 10);
+                const part = this.partFor(number);
 
                 // Only what this page actually offers: a kit's BoM can hold
                 // parts nobody has ticked, and a row the customer cannot see
                 // is a row they cannot remove.
-                if (this.partFor(number)) {
-                    this.chosen.set(number, quantity);
+                if (part) {
+                    // IN THE KIT'S COLOUR, not the colour the kit we copied
+                    // happens to be built in. These are the rows the owner
+                    // was changing one at a time.
+                    const id = this.variantFor(part, number);
+                    this.chosen.set(id, (this.chosen.get(id) || 0) + quantity);
                 }
             }
         }
@@ -428,47 +570,159 @@ class CustomKitPage {
 
     // --- pricing, which is also what tells the server what is in the kit ------
 
-    async price() {
-        const parts = [...this.chosen].map(([variant_id, quantity]) =>
-            ({ variant_id, quantity }));
-        const response = await fetch("/aa/custom-kit/price", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                jsonrpc: "2.0", method: "call",
-                params: { template_id: this.templateId, parts, qty: 1 },
-            }),
-        });
-        const result = (await response.json()).result || {};
+    price() {
+        // ONE AT A TIME, IN ORDER. Every change used to fire its own call and
+        // they raced: the server keeps the last list it is told about, so an
+        // older call landing late replaced the kit with an earlier version of
+        // itself - and the cart books from exactly that. Chaining them means
+        // the call the Add to Cart click waits for is the last one there is.
+        this.queue = (this.queue || Promise.resolve())
+            .catch(() => {})
+            .then(() => this.sendPrice());
 
-        this.total.textContent = result.count
-            ? `${result.count} part${result.count === 1 ? "" : "s"} — ${CURRENCY(this.symbol, result.total || 0)}`
-            : "";
+        return this.queue;
+    }
+
+    lockAddToCart(locked, why) {
+        // BOOTSTRAP'S OWN DISABLED STATE, which puts pointer-events: none on
+        // the button, so the click cannot happen at all while the kit is in
+        // mid-air. No listener of ours sits on Odoo's button; when it is
+        // enabled, its click is Odoo's alone.
+        const button = document.querySelector("#add_to_cart");
+
+        if (!button) {
+            return;
+        }
+
+        button.classList.toggle("disabled", Boolean(locked));
+        button.setAttribute("aria-disabled", locked ? "true" : "false");
+
+        if (why) {
+            button.setAttribute("title", why);
+        } else {
+            button.removeAttribute("title");
+        }
+    }
+
+    get partsList() {
+        return [...this.chosen].map(([variant_id, quantity]) =>
+            ({ variant_id, quantity }));
+    }
+
+    async sendPrice() {
+        const parts = this.partsList;
+        // ON THE PAGE ITSELF, where the Add to Cart request picks it up. This
+        // is what the patch at the top of this file reads, and it is written
+        // before the call goes out rather than after it comes back: the cart
+        // must carry the kit even if this call never lands.
+        this.root.dataset.aaParts = JSON.stringify(parts);
+        this.lockAddToCart(true, "Saving your kit…");
+
+        try {
+            const response = await fetch("/aa/custom-kit/price", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    jsonrpc: "2.0", method: "call",
+                    params: { template_id: this.templateId, parts, qty: 1 },
+                }),
+            });
+            const body = await response.json();
+            const result = body.result || {};
+
+            if (body.error || !response.ok) {
+                throw new Error(body.error ? JSON.stringify(body.error) : response.status);
+            }
+
+            this.total.textContent = result.count
+                ? `${result.count} part${result.count === 1 ? "" : "s"} — ${CURRENCY(this.symbol, result.total || 0)}`
+                : "";
+            this.showPrice(result.total || 0);
+
+            // SAID ON THE PAGE when the server would not take something that
+            // was offered, instead of a kit that is quietly short.
+            const refused = parts.length - (result.count || 0);
+            this.warn(refused > 0
+                ? `${refused} part${refused === 1 ? "" : "s"} could not be added to this kit.`
+                : "");
+            // AN EMPTY KIT CANNOT BE ADDED (owner, 2026-10-28: "you shouldnt
+            // be able to add the custom kit to the cart when there is nothing
+            // on it"). The server refuses it outright - this is so the
+            // customer is told before they click rather than after.
+            this.lockAddToCart(!result.count, result.count ? "" : EMPTY_KIT);
+        } catch (error) {
+            // THE BUTTON STAYS LOCKED. The kit is still on the page and still
+            // in this browser; what is not certain is that the cart knows
+            // about it, and a kit added now would be a box of nothing.
+            this.warn("Your kit could not be saved just now - change anything " +
+                      "on it, or reload the page, before adding it to the cart.");
+
+            throw error;
+        }
+    }
+
+    /* THE PRICE AT THE TOP OF THE PAGE FOLLOWS THE KIT.
+     *
+     * Owner, 2026-10-27: *"the store doesnt detect that items have been added
+     * to the kit so it still believes the price is zero."* The button is fixed
+     * on the server - see `custom_kit_zero_price.py` - but a page that goes on
+     * saying $0.00 while the builder underneath it says $236.91 is still
+     * telling the customer something untrue, and it is the headline price they
+     * will remember when the cart disagrees.
+     *
+     * DISPLAY ONLY. Nothing is priced from this: the cart is built on the
+     * server from what the session remembers, and this number is read from the
+     * answer that same call returned. If the element is not there - a theme, a
+     * page somebody has rebuilt in the editor - nothing happens, because a
+     * viewer that throws here would take the whole builder down with it.
+     */
+    showPrice(total) {
+        const span = document.querySelector(
+            ".product_price .oe_currency_value, .oe_price .oe_currency_value");
+
+        if (!span) {
+            return;
+        }
+
+        if (this.priceAsBuilt === undefined) {
+            this.priceAsBuilt = span.textContent;
+        }
+
+        /* Nothing chosen puts back exactly what the page was rendered with,
+         * rather than a zero formatted by this file - the server's formatting
+         * is the one the rest of the shop uses. */
+        span.textContent = total
+            ? CURRENCY("", total).trim()
+            : this.priceAsBuilt;
+    }
+
+    warn(message) {
+        if (!this.warning) {
+            this.warning = el("div", { class: "text-danger small mt-1" });
+            this.total.after(this.warning);
+        }
+
+        this.warning.textContent = message || "";
     }
 }
 
-// THE ADD TO CART BUTTON WAITS FOR THE PRICE CALL, exactly as the door box
-// does: the server books from what it was last told, so it has to have been
-// told before the cart route runs.
+// NOTHING TOUCHES THE ADD TO CART CLICK.
+//
+// WHAT THIS REPLACES, and why, 2026-10-20: the click used to be caught here,
+// held while the kit was sent to the server, and then let through on a second,
+// synthetic click. The production log shows exactly what that did - dozens of
+// POST /aa/custom-kit/price and, in sixteen hours, not one POST
+// /shop/cart/add. The click went in and never came out: Odoo 19 binds the
+// #add_to_cart handler straight onto that node, and a re-dispatched click
+// does not reliably reach it. The kit was never the problem; the button was.
+//
+// There is nothing to hold the click for anyway. The kit is sent on every
+// change, so the server already has it by the time anybody clicks. The one
+// gap - a click in the instant between a change and its call landing - is
+// closed by DISABLING the button while a call is in flight, which is a thing
+// done to our own page rather than to Odoo's event.
 function wire(root) {
-    const page = new CustomKitPage(root);
-    const button = document.querySelector("#add_to_cart, .js_check_product");
-
-    if (button) {
-        button.addEventListener("click", async (event) => {
-            if (button.dataset.aaCustomDone) {
-                delete button.dataset.aaCustomDone;
-
-                return;
-            }
-
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            await page.price();
-            button.dataset.aaCustomDone = "1";
-            button.click();
-        }, true);
-    }
+    return new CustomKitPage(root);
 }
 
 // RUN NOW IF THE PAGE IS ALREADY HERE. This bundle is loaded lazily, after

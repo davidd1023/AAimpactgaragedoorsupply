@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Series 1200 Preview — AA Impact Garage Door Supply</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Archivo+Narrow:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="./door_preview.css?v=433e56d9">
+<style>
+  /* This wrapper is the TEST PAGE only. On the live site the viewer is the
+     single element below and nothing else; everything here is scaffolding so
+     the thing can be looked at on its own. */
+  :root { --ink: #14181c; --ink-2: #5c656d; --ink-3: #8b949b;
+          --ground: #e8ebee; --surface: #fff; --line: #d2d8dd; --accent: #96632a; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #e6eaed; --ink-2: #9aa4ac; --ink-3: #727c84;
+            --ground: #0c0f12; --surface: #14181c; --line: #262d33; --accent: #c48c48; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink);
+         font-family: "Archivo", system-ui, -apple-system, sans-serif;
+         font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .shell { max-width: 1140px; margin: 0 auto; padding-inline: 20px;
+           padding-block: 26px 44px; display: flex; flex-direction: column; gap: 20px; }
+  .masthead { display: flex; flex-wrap: wrap; align-items: flex-end;
+              justify-content: space-between; gap: 10px 24px;
+              border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+  .eyebrow { font-family: "Archivo Narrow", sans-serif; font-weight: 600; font-size: 12px;
+             letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+             margin: 0 0 2px; }
+  h1 { font-family: "Archivo Narrow", sans-serif; font-weight: 600;
+       font-size: clamp(30px, 6vw, 42px); letter-spacing: -0.01em; line-height: 1;
+       margin: 0; text-wrap: balance; }
+  .stamp { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.06em;
+           color: var(--ink-2); text-transform: uppercase; padding-bottom: 4px; margin: 0; }
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+           gap: 1px; background: var(--line); border: 1px solid var(--line);
+           border-radius: 3px; overflow: hidden; }
+  .note { background: var(--surface); padding: 16px 18px 18px;
+          display: flex; flex-direction: column; gap: 9px; }
+  .note h2 { font-family: "Archivo Narrow", sans-serif; font-weight: 600; font-size: 12px;
+             letter-spacing: 0.13em; text-transform: uppercase; margin: 0; color: var(--ink-2); }
+  .note--ask h2 { color: var(--accent); }
+  .note ul { margin: 0; padding: 0; list-style: none;
+             display: flex; flex-direction: column; gap: 7px; }
+  .note li { font-size: 13.5px; line-height: 1.5; padding-left: 13px; position: relative; }
+  .note li::before { content: ""; position: absolute; left: 0; top: 8px;
+                     width: 5px; height: 1px; background: var(--ink-3); }
+  .note span { color: var(--ink-2); }
+  code { font-family: "IBM Plex Mono", monospace; font-size: 12px; }
+  .colophon { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.05em;
+              color: var(--ink-3); text-transform: uppercase; margin: 0; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">AA Impact Garage Door Supply</p>
+      <h1>Series 1200</h1>
+    </div>
+    <p class="stamp">Build 433e56d9 &middot; test page</p>
+  </header>
+
+  <!-- ====================================================================
+       THIS DIV IS THE WHOLE THING. Everything else on this page is
+       scaffolding for looking at it; the block that goes on the website
+       carries its own script and is built by tools/build_embed.py.
+       ==================================================================== -->
+  <div data-aa-door-preview
+       data-model="./White_Clear.glb"
+       data-wood="./woodgrain.jpg"></div>
+
+  <section class="notes">
+    <div class="note">
+      <h2>What this is</h2>
+      <ul>
+        <li>Your own <code>White_Clear.glb</code>, loaded once</li>
+        <li>Colours set on the model's materials, so switching is instant</li>
+        <li>All <b>20</b> combinations, from one 8.8&nbsp;MB download instead of 180&nbsp;MB</li>
+        <li><b>Lites 1&ndash;4</b>, drawn over the glass &mdash;
+            <span>1 is your model exactly as built</span></li>
+      </ul>
+    </div>
+    <div class="note note--ask">
+      <h2>Please check these</h2>
+      <ul>
+        <li><b>Wood.</b> Your Wood files put woodgrain on one frame piece and leave the
+            other dark bronze. This one makes the whole frame woodgrain.
+            <span>Which is right?</span></li>
+        <li>One piece stays dark in every one of your files
+            (material <code>Frame_bronze</code>), so I left it dark. Say if it should paint.</li>
+        <li><b>Rollers.</b> Every finish but White now has them black
+            &mdash; <span>White keeps the ones your file was built with.</span></li>
+        <li><b>Lites.</b> The bars are generated, not modelled &mdash;
+            <span>right from the front, plainer than a real stile up close
+            at an angle.</span></li>
+        <li><code>Frane_Black</code> is spelled wrong in your Black files
+            &mdash; <span>harmless, matched anyway.</span></li>
+      </ul>
+    </div>
+    <div class="note">
+      <h2>For HostGator</h2>
+      <ul>
+        <li><b>Two files uploaded</b>: the model and <code>woodgrain.jpg</code>,
+            into <code>/door-preview/</code></li>
+        <li><b>One block pasted</b> into the Elementor HTML widget &mdash;
+            <span>stylesheet, markup and script in one</span></li>
+        <li>Nothing else. Sirv can go.</li>
+      </ul>
+    </div>
+  </section>
+
+  <p class="colophon">Geometry and colours are his own &mdash; read from the Sirv files, 2026-10-26</p>
+</div>
+
+<script src="../lib/three.min.js"></script>
+<script src="../lib/GLTFLoader.js"></script>
+<script src="./door_preview.js?v=433e56d9"></script>
+</body>
+</html>

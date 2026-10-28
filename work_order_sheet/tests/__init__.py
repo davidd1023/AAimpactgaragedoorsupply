@@ -14,5 +14,6 @@ from . import test_wo_number
 from . import test_order_ready_alert
 from . import test_order_cancel
 from . import test_customer_emails
+from . import test_cancellation_email_once
 from . import test_dispatched
 from . import test_auto_dispatch
