@@ -12,7 +12,10 @@ it makes the manufacturing order, and the card is read off that.
 """
 
 import json
+import re
+from html import unescape
 from unittest.mock import patch
+from urllib.parse import parse_qs, quote, unquote, urlsplit
 
 from odoo import fields
 from odoo.tests.common import HttpCase, tagged
@@ -414,7 +417,14 @@ class HardwareCardCase(HttpCase):
 
         for token in ("", "x", "0" * 64, near_miss):
             response = self.url_open("/box/%d/%s" % (job.id, token or "-"))
-            self.assertEqual(response.status_code, 404, token)
+
+            # NOT A 404 ANY MORE, and that is a decision rather than a slip
+            # (2026-10-28): a phone at the counter is not signed in, so the
+            # refusal now offers a sign-in that comes back here. What matters
+            # has never been the status code - it is that THE BOX DOES NOT
+            # OPEN, which is what is asserted.
+            self.assertIn("will not open", response.text, token)
+            self.assertNotIn("D400-96", response.text, token)
 
     def test_one_box_s_link_does_not_open_another(self):
         order = self._order_a_kit()
@@ -425,7 +435,9 @@ class HardwareCardCase(HttpCase):
             [("origin", "=", order.name), ("aa_station_kind", "=", "kit")],
             order="id")
         response = self.url_open("/box/%d/%s" % (second.id, first._aa_box_token()))
-        self.assertEqual(response.status_code, 404)
+
+        self.assertIn("will not open", response.text)
+        self.assertNotIn(self.OTHER_DRUM.split()[0], response.text)
 
     def test_the_link_is_the_same_one_tomorrow(self):
         """A sticker printed today has to open next week, so the token is
@@ -866,16 +878,72 @@ class StickerWillNotOpenCase(StickerDispatchCase):
     def _staff(self):
         self.authenticate("aa_sticker_desk", self.PASSWORD)
 
-    def test_a_stranger_still_gets_nothing_but_a_404(self):
-        """THE LINE THIS DOES NOT CROSS."""
+    def test_a_stranger_is_told_nothing_but_offered_a_way_in(self):
+        """THE LINE THIS DOES NOT CROSS, and the one it now does.
+
+        A PHONE AT THE COUNTER IS A STRANGER. Nobody is signed into Odoo on
+        their own phone, so every one of the four reasons was collapsing back
+        into the bare 404 the reason page was written to replace - which is
+        why he scanned, got "not found", and was none the wiser twice over.
+
+        So the stranger's page offers a SIGN-IN that comes back to the same
+        link. It still says nothing about which of the four it was: the page
+        is identical for all of them, so it cannot be used to find out
+        whether a box exists or how close a guessed token came.
+        """
         job, _out = self._ready_job()
 
         answer = self.url_open("/box/%d/%s" % (job.id, "0" * 24))
 
-        self.assertEqual(answer.status_code, 404)
-        # ESCAPED IN THE PAGE: t-esc turns the apostrophe into &#39;, so the
-        # phrase is looked for the way it is actually written out.
-        self.assertNotIn("signed", answer.text)
+        self.assertIn("/web/login", answer.text, "no way in from a phone")
+        # NOT ONE WORD OF THE REASON. Each of the four names its own fault.
+        for leak in ("is not this job", "no job", "not a hardware kit",
+                     "database"):
+            self.assertNotIn(leak, answer.text, leak)
+
+    def test_the_stranger_s_page_is_the_same_whichever_reason_it_was(self):
+        """IF IT DIFFERED IT WOULD BE AN ORACLE - a way to sit and learn which
+        box ids exist by reading the page that refuses them."""
+        job, _out = self._ready_job()
+        spring = self.env["mrp.production"].create({
+            "product_id": job.product_id.id, "product_qty": 1.0})
+        spring.aa_station_kind = "spring"
+
+        # THE SIGN-IN LINK ECHOES THE SCANNED PATH, so it differs between
+        # three different links by definition and is not what is being
+        # compared - everything else on the page has to be identical.
+        pages = {
+            re.sub(r'href="[^"]*"', "", self.url_open(path).text)
+            for path in (
+                "/box/%d/%s" % (job.id, "0" * 24),
+                "/box/%d/%s" % (job.id + 10 ** 7, "0" * 24),
+                "/box/%d/%s" % (spring.id, spring._aa_box_token()),
+            )
+        }
+
+        self.assertEqual(len(pages), 1,
+                         "the refusal page tells a stranger them apart")
+
+    def test_the_sign_in_comes_back_to_the_link_that_was_scanned(self):
+        """Signing in and landing on a dashboard would lose the sticker, and
+        nobody is going to scan it twice to find that out."""
+        job, _out = self._ready_job()
+        path = "/box/%d/%s" % (job.id, "0" * 24)
+
+        answer = self.url_open(path)
+
+        self.assertIn(quote(path, safe=""), answer.text)
+
+    def test_staff_get_the_reason_and_not_a_sign_in_button(self):
+        """They are already in. A button inviting them to sign in again is
+        the page admitting it does not know who it is talking to."""
+        job, _out = self._ready_job()
+        self._staff()
+
+        answer = self.url_open("/box/%d/%s" % (job.id, "0" * 24))
+
+        self.assertIn("is not this job", answer.text)
+        self.assertNotIn("/web/login", answer.text)
 
     def test_staff_are_told_the_token_is_wrong(self):
         """THE LIKELIEST CAUSE BY FAR: a sticker printed from one database
@@ -952,8 +1020,6 @@ class BoxLinkIsVisibleCase(StickerDispatchCase):
         html = self.env["ir.actions.report"]._render_qweb_html(
             "aa_shop_floor.report_hardware_sticker", job.ids)[0].decode()
 
-        from urllib.parse import quote
-
         self.assertIn(quote(job.aa_box_url, safe=""), html)
 
     def test_the_link_says_which_site_it_will_open(self):
@@ -963,3 +1029,123 @@ class BoxLinkIsVisibleCase(StickerDispatchCase):
         job, _out = self._ready_job()
 
         self.assertIn(job.get_base_url(), job.aa_box_url)
+
+
+@tagged("post_install", "-at_install")
+class StickerHostCase(StickerDispatchCase):
+    """THE HOST IN THE LINK, WHICH IS WHAT WAS ACTUALLY WRONG.
+
+    Owner, 2026-10-28, after three days of *"the sticker leads to a not found
+    page"*, finally with the scanned link: *"the link it takes me to is:
+    https://aaimpactgaragedoorsupply.com/box/131/571e5b68..."*
+
+    **THAT APEX DOMAIN IS NOT ODOO.** It answers ten bytes of text/plain "Not
+    Found" to everything, `/web/login` included, and does not redirect. His
+    Odoo is at **www.**aaimpactgaragedoorsupply.com, where that very link
+    returns the box page for W/O #234. One missing `www`.
+
+    NOTHING IN THE CODE WAS WRONG - the job, the token, the route and the
+    sticker were all correct, and every test here passed throughout. THAT is
+    the hole: every one of them BUILT the link itself from
+    `_aa_box_token()`, and not one READ IT OFF THE PRINTED STICKER. A test
+    that constructs the URL it then fetches can never notice that the thing
+    on the label points somewhere else.
+    """
+
+    def _printed_link(self, job):
+        """The link as it comes off the label, dug out of the QR's own src.
+
+        The long way round ON PURPOSE: through the report, out of the
+        `/report/barcode/` query, unquoted. That is the path a phone takes,
+        and the only one that can catch a label pointing elsewhere.
+        """
+        html = self.env["ir.actions.report"]._render_qweb_html(
+            "aa_shop_floor.report_hardware_sticker", job.ids)[0].decode()
+        src = re.search(r'/report/barcode/\?([^"\']+)', html)
+
+        self.assertTrue(src, "the sticker printed no QR code at all")
+
+        value = parse_qs(unescape(src.group(1))).get("value")
+
+        self.assertTrue(value, "the QR code carries no value")
+
+        return unquote(value[0])
+
+    def test_the_link_on_the_label_is_the_link_that_opens(self):
+        """THE ONE THAT WOULD HAVE CAUGHT IT. Print the sticker, read the URL
+        out of the code, fetch it - the whole round trip, end to end."""
+        job, _out = self._ready_job()
+
+        link = self._printed_link(job)
+        path = urlsplit(link).path
+
+        self.assertEqual(path, "/box/%d/%s" % (job.id, job._aa_box_token()))
+
+        answer = self.url_open(path)
+
+        self.assertEqual(answer.status_code, 200)
+        self.assertNotIn("will not open", answer.text)
+
+    def test_the_label_carries_a_whole_absolute_link(self):
+        """A phone has no page to resolve a relative path against."""
+        job, _out = self._ready_job()
+
+        parts = urlsplit(self._printed_link(job))
+
+        self.assertIn(parts.scheme, ("http", "https"))
+        self.assertTrue(parts.netloc, "the label names no host")
+
+    def test_the_printed_host_is_whatever_the_setting_says(self):
+        """HIS FAULT, REPRODUCED. Point `web.base.url` at a host that cannot
+        serve the page and the label dutifully prints it - no error, no
+        warning, and nothing to see until somebody holds up a phone."""
+        job, _out = self._ready_job()
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url", "https://not-odoo.example.com")
+        job.invalidate_recordset()
+
+        self.assertEqual(urlsplit(self._printed_link(job)).netloc,
+                         "not-odoo.example.com")
+
+    def test_the_job_names_the_host_the_sticker_will_use(self):
+        """Which is why the host is now written beside the link, in words, on
+        the job - the one place it can be read without a camera."""
+        job, _out = self._ready_job()
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url", "https://not-odoo.example.com")
+        job.invalidate_recordset()
+
+        self.assertIn("not-odoo.example.com", job.aa_box_url_warning)
+
+    def test_an_unfrozen_host_is_warned_about(self):
+        """THE RECURRENCE, NOT THE SYMPTOM. Unless `web.base.url.freeze` is
+        set, Odoo rewrites the host to whichever one an administrator last
+        signed in from - so this comes back the next time somebody signs in
+        on a bare domain or a build URL, and comes back silently."""
+        job, _out = self._ready_job()
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url.freeze", False)
+        job.invalidate_recordset()
+
+        self.assertIn("NOT frozen", job.aa_box_url_warning)
+        self.assertIn("web.base.url.freeze", job.aa_box_url_warning)
+
+    def test_a_frozen_host_is_reported_without_a_warning(self):
+        job, _out = self._ready_job()
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url.freeze", "True")
+        job.invalidate_recordset()
+
+        self.assertIn(urlsplit(job.aa_box_url).netloc, job.aa_box_url_warning)
+        self.assertNotIn("NOT frozen", job.aa_box_url_warning)
+
+    def test_a_job_that_is_not_a_kit_says_nothing_about_hosts(self):
+        """It has no box, so it has no sticker to be wrong about."""
+        spring = self.env["mrp.production"].create({
+            "product_id": self.env["product.product"].create({
+                "name": "A spring", "type": "consu"}).id,
+            "product_qty": 1.0})
+        spring.aa_station_kind = "spring"
+
+        self.assertFalse(spring.aa_box_url)
+        self.assertFalse(spring.aa_box_url_warning)

@@ -29,6 +29,8 @@ The token is DERIVED from the database secret rather than stored (see
 _aa_box_token), so one box's link says nothing about any other's.
 """
 
+from urllib.parse import quote as url_quote
+
 from odoo import _, http
 from odoo.exceptions import UserError
 from odoo.http import request
@@ -81,12 +83,41 @@ class HardwareBox(http.Controller):
         return production, None
 
     def _refuse(self, why):
-        """A bare 404 for a stranger; a reason for somebody who works here."""
+        """The reason for somebody who works here; a way IN for everybody else.
+
+        THE REASON IS STILL STAFF-ONLY. What changed on 2026-10-28, after
+        *"i still get the not found page when scanning the sticker on my
+        phone"*, is what a STRANGER gets - and a phone at the counter is a
+        stranger, because nobody is signed into Odoo on their own phone. So
+        all four reasons were collapsing back into the bare 404 the reason
+        page was written to replace, and the man holding the box learnt
+        nothing either time.
+
+        Now it offers a sign-in that comes BACK HERE. That is one tap to the
+        reason, instead of a dead end.
+
+        It gives away no more than the bare 404 did: the page is the SAME
+        whichever of the four reasons it was, so it still cannot be used to
+        find out whether a box id exists or how close a guessed token was.
+        All it admits is that `/box/` is a route, which werkzeug's own 207
+        bytes already admitted to anybody who looked.
+        """
         if why and not request.env.user._is_public():
             return request.render("aa_shop_floor.hardware_box_refused",
-                                  {"why": why})
+                                  {"why": why, "sign_in": None})
 
-        return request.not_found()
+        return request.render("aa_shop_floor.hardware_box_refused", {
+            "why": None,
+            # `request.httprequest.full_path` rather than a rebuilt URL: the
+            # point is to come back to the link that was actually scanned,
+            # character for character, so that signing in proves something
+            # about THAT sticker.
+            # `safe=""`, or `quote` leaves the slashes alone and the path
+            # rides into the query unescaped - which worked in a browser and
+            # is still a redirect parameter that has not been quoted.
+            "sign_in": "/web/login?redirect=%s" % url_quote(
+                request.httprequest.full_path.rstrip("?"), safe=""),
+        })
 
     @http.route("/box/<int:production_id>/<string:token>", type="http",
                 auth="public", methods=["GET"], website=False, sitemap=False)

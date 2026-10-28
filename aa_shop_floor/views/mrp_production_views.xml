@@ -21,6 +21,16 @@
                         <field name="aa_box_url" widget="url" readonly="1"
                                invisible="aa_station_kind != 'kit'"
                                string="Box sticker link"/>
+
+                        <!-- AND WHICH HOST IT POINTS AT, because that was the
+                             fault: his Prod printed every sticker pointing at
+                             the apex domain, which is not Odoo and does not
+                             redirect to the www that is (owner, 2026-10-28,
+                             with the scanned link at last). A QR code cannot
+                             be proof-read, so the host has to be legible
+                             somewhere a person can look. -->
+                        <field name="aa_box_url_warning" readonly="1"
+                               invisible="aa_station_kind != 'kit'"/>
                     </group>
                 </page>
             </xpath>

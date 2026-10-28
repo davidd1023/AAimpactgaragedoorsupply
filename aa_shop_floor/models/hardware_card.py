@@ -24,7 +24,7 @@ not appear at all, and neither does its button.
 import json
 import logging
 import re
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError
@@ -138,11 +138,59 @@ class MrpProduction(models.Model):
         help="What the sticker's QR code opens. The link is the key, so it is "
              "kept from anybody the box's own figures are kept from.")
 
+    aa_box_url_warning = fields.Char(
+        string="Sticker host", compute="_compute_aa_box_url")
+
     @api.depends("aa_station_kind")
     def _compute_aa_box_url(self):
+        # THE HOST IN THE LINK IS A SETTING, AND IT WAS WRONG ON PRODUCTION.
+        #
+        # Owner, 2026-10-28: *"the link it takes me to is:
+        # https://aaimpactgaragedoorsupply.com/box/131/571e5b68..."* - and
+        # that apex domain is not Odoo at all. It answers ten bytes of
+        # text/plain "Not Found" to everything, `/web/login` included, and it
+        # does not redirect. His Odoo is at **www.**aaimpactgaragedoorsupply
+        # .com, where that very link returns the box page. One missing `www`
+        # against three days of "the sticker leads to a not found page".
+        #
+        # NOTHING IN THE CODE WAS WRONG. The job, the token, the route and
+        # the sticker were all right; `web.base.url` was the apex.
+        #
+        # AND IT CAN DRIFT BACK. Unless `web.base.url.freeze` is set, Odoo
+        # REWRITES `web.base.url` to whichever host an administrator last
+        # signed in from - so one sign-in on a bare domain, an odoo.sh build
+        # URL or an IP silently repoints every sticker printed afterwards. A
+        # QR code cannot be proof-read, which is the whole reason this went
+        # unexplained: the fault is invisible until somebody holds a phone up
+        # to a box.
+        #
+        # So the host is shown next to the link, with a warning when it is
+        # free to move. Not a correction - this cannot know which host is
+        # right, and guessing a `www` onto it would be the same mistake in
+        # the other direction.
+        frozen = self.env["ir.config_parameter"].sudo().get_param(
+            "web.base.url.freeze")
+
         for production in self:
-            production.aa_box_url = production._aa_box_url() \
-                if production.aa_station_kind == "kit" and production.id else ""
+            kit = production.aa_station_kind == "kit" and production.id
+            production.aa_box_url = production._aa_box_url() if kit else ""
+            production.aa_box_url_warning = ""
+
+            if not kit:
+                continue
+
+            host = urlsplit(production.aa_box_url or "").netloc or _("not set")
+
+            if frozen and frozen not in ("0", "False", "false"):
+                production.aa_box_url_warning = _(
+                    "Stickers are printed pointing at %s.", host)
+            else:
+                production.aa_box_url_warning = _(
+                    "Stickers are printed pointing at %s - and this host is"
+                    " NOT frozen, so Odoo will change it to whichever host an"
+                    " administrator next signs in from. Set"
+                    " web.base.url.freeze to True in Settings > Technical >"
+                    " System Parameters.", host)
 
     # NOT STORED, like the two Overview boards. The card is read when somebody
     # asks for it - a tap, a print, a scan - and it is assembled from eight
