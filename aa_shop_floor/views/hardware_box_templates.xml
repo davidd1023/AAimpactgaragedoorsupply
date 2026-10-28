@@ -184,12 +184,29 @@
       h1 { font-size: 22px; margin: 0 0 14px; }
       .why { background: #fff; border: 1px solid #d6dbe1; border-radius: 10px;
              padding: 16px; line-height: 1.5; }
+      a.signin { display: block; margin-top: 18px; padding: 14px 16px;
+                 background: #714B67; color: #fff; text-decoration: none;
+                 border-radius: 10px; text-align: center; font-weight: bold; }
+      p.note { color: #555; font-size: 15px; line-height: 1.5; }
     </style>
   </head>
   <body>
     <main>
       <h1>This sticker will not open</h1>
-      <div class="why"><t t-esc="why"/></div>
+
+      <!-- STAFF GET THE REASON, which is one of four and names the fault. -->
+      <div t-if="why" class="why"><t t-esc="why"/></div>
+
+      <!-- A PHONE AT THE COUNTER IS NOT SIGNED IN, so this is what the man
+           holding the box actually sees. It says nothing about why - the page
+           is identical for all four reasons - but it is one tap to finding
+           out, which a bare 404 never was. -->
+      <t t-if="sign_in">
+        <p class="note">
+          If you work here, sign in and this page will say why.
+        </p>
+        <a class="signin" t-att-href="sign_in">Sign in and try again</a>
+      </t>
     </main>
   </body>
 </html>

@@ -635,14 +635,66 @@ try scanning the qr code on the sticker it leads to a not found page."*
 
 `/box/...` refuses for FOUR different reasons and said "Not Found" to all of
 them, which at a counter is no help. It now carries the reason back and shows
-it **to a signed-in member of staff only**; a stranger still gets the bare
-404, because the reason is the answer to a question they should not be
-asking.
+it **to a signed-in member of staff only**.
 
-**THE LIKELIEST CAUSE IS THE DATABASE.** The token is `hmac(...)` over the
-DATABASE SECRET, so a sticker printed on the test site can never open on the
-live one, and the other way about. The host in the link is
-`get_base_url()`, which differs too.
+**A PHONE AT THE COUNTER IS A STRANGER**, which is why that first fix changed
+nothing for him: nobody is signed into Odoo on their own phone, so all four
+reasons collapsed straight back into the bare 404 the reason page was written
+to replace. A stranger now gets a page offering a **sign-in that returns to
+the same link** - one tap to the reason instead of a dead end. It still names
+none of the four: the page is IDENTICAL whichever it was, so it cannot be
+used as an oracle for which box ids exist, and a test strips the one thing
+that must differ (the echoed path) and asserts the rest is the same. All it
+admits is that `/box/` is a route, which werkzeug's own 207 bytes already
+admitted.
+
+Two old tests asserted `404` on a public refusal and were REWRITTEN, not
+patched around: the status code was never the decision - "the box does not
+open" is.
+
+**IT WAS THE HOST, AND IT WAS A MISSING `www`** - settled 2026-10-28 when he
+sent the scanned link: `https://aaimpactgaragedoorsupply.com/box/131/571e5b68...`
+
+That APEX DOMAIN IS NOT ODOO. It answers ten bytes of `text/plain` "Not
+Found" to everything, `/web/login` included, and it does **not** redirect.
+**His Odoo is at `www.aaimpactgaragedoorsupply.com`**, where that very link
+returns the box page for W/O #234. So `web.base.url` on Prod is the apex and
+every sticker ever printed points at a host that cannot serve it.
+
+**NOTHING IN THE CODE WAS WRONG.** The job, the token, the route and the
+sticker were all correct, and every test passed throughout - which is the
+lesson: every test BUILT the link from `_aa_box_token()` and not one READ IT
+OFF THE PRINTED STICKER. A test that constructs the URL it then fetches can
+never notice that the label points somewhere else. `StickerHostCase` now
+renders the report, digs the URL out of the QR's own `/report/barcode/`
+query, and fetches it.
+
+**THE FIX IS HIS, ON PROD**: set `web.base.url` to
+`https://www.aaimpactgaragedoorsupply.com` AND set `web.base.url.freeze` to
+`True`, both in Settings > Technical > System Parameters. Without the freeze
+Odoo rewrites that host to whichever one an administrator last signed in
+from, which is how it became the apex and how it will become something else
+again - silently, because a QR code cannot be proof-read. The job form now
+names the host beside the link and warns when it is not frozen. Stickers
+already on boxes stay wrong until reprinted, unless the apex is made to
+redirect to `www` at the DNS/registrar end, which fixes them all at once.
+
+**HOW TO TELL ODOO FROM NOT-ODOO at a host you cannot log into**: fetch
+`/web/login`. Odoo serves it; his apex 404s it.
+
+**AND THE LINK IS NOW ON THE JOB** (Manufacturing > the kit job > Shop Floor
+tab > "Box sticker link"). `aa_box_url` existed as a computed field and was
+shown NOWHERE, so the only way to read what a sticker held was to point a
+camera at it - which cannot tell a bad token from a bad host from a bad
+camera. Clicking it opens exactly what the QR holds, from a browser already
+signed in.
+
+**WHAT THE ROUND TRIP IS NOT**: checked when the 404 persisted - the sticker
+report, the token and the controller are `mrp.production` end to end
+(`report/hardware_sticker.xml` has `model=mrp.production`, the token lives on
+`MrpProduction`, and the route browses `mrp.production`). There is no
+production/work-order id mix-up, and the 63 commits merged from Prod touch
+nothing named `box_url`, `box_token`, `barcode_type` or `get_base_url`.
 
 **HOW TO TELL A LIVE ROUTE FROM A MISSING ONE** without any access: fetch a
 URL that route would refuse. The controller's own `request.not_found()` is a
