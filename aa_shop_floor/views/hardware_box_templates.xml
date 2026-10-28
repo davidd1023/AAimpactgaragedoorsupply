@@ -166,4 +166,33 @@
 </html>
   </template>
 
+
+  <!-- WHY A STICKER WOULD NOT OPEN, for somebody who works here.
+       Owner, 2026-10-28: "when i try scanning the qr code on the sticker it
+       leads to a not found page" - and the page would not say which of four
+       reasons it was. A stranger still gets the bare 404. -->
+  <template id="hardware_box_refused" name="Hardware box - cannot open">&lt;!DOCTYPE html&gt;
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Sticker will not open</title>
+    <style>
+      body { margin: 0; font-family: Arial, Helvetica, sans-serif;
+             background: #f4f5f7; color: #111; font-size: 17px; }
+      main { padding: 24px 16px; max-width: 620px; margin: 0 auto; }
+      h1 { font-size: 22px; margin: 0 0 14px; }
+      .why { background: #fff; border: 1px solid #d6dbe1; border-radius: 10px;
+             padding: 16px; line-height: 1.5; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>This sticker will not open</h1>
+      <div class="why"><t t-esc="why"/></div>
+    </main>
+  </body>
+</html>
+  </template>
+
 </odoo>

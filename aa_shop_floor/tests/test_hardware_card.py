@@ -821,3 +821,78 @@ class StickerDispatchCase(HardwareCardCase):
         # query parameter - so the box path is looked for the way it is
         # actually written on the label.
         self.assertIn("%%2Fbox%%2F%d%%2F" % job.id, html)
+
+
+@tagged("post_install", "-at_install")
+class StickerWillNotOpenCase(StickerDispatchCase):
+    """WHY A STICKER WOULD NOT OPEN.
+
+    Owner, 2026-10-28: *"when i try scanning the qr code on the sticker it
+    leads to a not found page."* The route refuses for FOUR different reasons
+    and used to say "Not Found" to all of them, which at a counter is no help
+    at all.
+
+    The reason is shown to somebody who WORKS HERE and never to a stranger -
+    who would otherwise be reading the answer to a question they should not
+    be asking.
+    """
+
+    def _staff(self):
+        self.authenticate("aa_sticker_desk", self.PASSWORD)
+
+    def test_a_stranger_still_gets_nothing_but_a_404(self):
+        """THE LINE THIS DOES NOT CROSS."""
+        job, _out = self._ready_job()
+
+        answer = self.url_open("/box/%d/%s" % (job.id, "0" * 24))
+
+        self.assertEqual(answer.status_code, 404)
+        # ESCAPED IN THE PAGE: t-esc turns the apostrophe into &#39;, so the
+        # phrase is looked for the way it is actually written out.
+        self.assertNotIn("signed", answer.text)
+
+    def test_staff_are_told_the_token_is_wrong(self):
+        """THE LIKELIEST CAUSE BY FAR: a sticker printed from one database
+        scanned against another. The link is signed with the database's own
+        secret, so it can never open anywhere else."""
+        job, _out = self._ready_job()
+        self._staff()
+
+        answer = self.url_open("/box/%d/%s" % (job.id, "0" * 24))
+
+        self.assertEqual(answer.status_code, 200)
+        self.assertIn("is not this job", answer.text)
+        self.assertIn("database", answer.text)
+
+    def test_staff_are_told_when_the_job_is_gone(self):
+        job, _out = self._ready_job()
+        token = job._aa_box_token()
+        missing = job.id
+        self._staff()
+
+        answer = self.url_open("/box/%d/%s" % (missing + 10 ** 7, token))
+
+        self.assertEqual(answer.status_code, 200)
+        self.assertIn("no job", answer.text)
+
+    def test_staff_are_told_when_it_is_not_a_kit_job(self):
+        job, _out = self._ready_job()
+        spring = self.env["mrp.production"].create({
+            "product_id": job.product_id.id, "product_qty": 1.0})
+        spring.aa_station_kind = "spring"
+        self._staff()
+
+        answer = self.url_open(
+            "/box/%d/%s" % (spring.id, spring._aa_box_token()))
+
+        self.assertEqual(answer.status_code, 200)
+        self.assertIn("not a hardware kit", answer.text)
+
+    def test_a_good_sticker_still_opens(self):
+        """The whole point of the above is that the ones that work, work."""
+        job, _out = self._ready_job()
+
+        answer = self.url_open(self._box_url(job))
+
+        self.assertEqual(answer.status_code, 200)
+        self.assertNotIn("will not open", answer.text)

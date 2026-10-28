@@ -43,31 +43,65 @@ class HardwareBox(http.Controller):
 
     def _production(self, production_id, token):
         """The box this link is for, or an empty set."""
+        return self._look_up(production_id, token)[0]
+
+    def _look_up(self, production_id, token):
+        """(production, why it was refused).
+
+        FOUR WAYS TO FAIL AND ONE ANSWER was the fault: a sticker that would
+        not open said "Not Found" and nothing else, which at a counter is no
+        help at all (owner, 2026-10-28: *"when i try scanning the qr code on
+        the sticker it leads to a not found page"*). The reason is now
+        carried back, and shown to a member of STAFF - never to a stranger,
+        who would be reading an answer to a question they should not be
+        asking.
+        """
+        empty = request.env["mrp.production"].sudo().browse()
         production = request.env["mrp.production"].sudo().browse(
             production_id).exists()
 
-        if not production or production.aa_station_kind != "kit":
-            return request.env["mrp.production"].sudo().browse()
+        if not production:
+            return empty, _("There is no job %s in this database. A sticker"
+                            " printed from another database - the test site,"
+                            " say - will not open here.", production_id)
+
+        if production.aa_station_kind != "kit":
+            return empty, _("Job %s is not a hardware kit (%s), so it has no"
+                            " box.", production.display_name,
+                            production.aa_station_kind or _("no station"))
 
         # Compared in constant time, so the route cannot be turned into a way
         # of measuring how close a guess was.
         if not consteq(token or "", production._aa_box_token()):
-            return request.env["mrp.production"].sudo().browse()
+            return empty, _("That code is not this job's. The link is signed"
+                            " with this database's own secret, so a sticker"
+                            " printed from the test site will never open on"
+                            " the live one, and the other way about.")
 
-        return production
+        return production, None
+
+    def _refuse(self, why):
+        """A bare 404 for a stranger; a reason for somebody who works here."""
+        if why and not request.env.user._is_public():
+            return request.render("aa_shop_floor.hardware_box_refused",
+                                  {"why": why})
+
+        return request.not_found()
 
     @http.route("/box/<int:production_id>/<string:token>", type="http",
                 auth="public", methods=["GET"], website=False, sitemap=False)
     def box(self, production_id, token, **kwargs):
-        production = self._production(production_id, token)
+        production, why = self._look_up(production_id, token)
 
         if not production:
-            return request.not_found()
+            return self._refuse(why)
 
         card = production._aa_hardware_card()
 
         if not card:
-            return request.not_found()
+            return self._refuse(
+                _("%s has no hardware card yet - nothing has been worked out"
+                  " for the box.", production.display_name))
 
         return request.render("aa_shop_floor.hardware_box_page",
                               self._values(production, card))

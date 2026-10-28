@@ -630,6 +630,26 @@ delivery, which is the only kind `action_aa_dispatched` will touch, appears
 once that pick is validated. Any fixture that wants a dispatchable transfer
 has to validate the pick first.
 
+**A STICKER THAT WILL NOT OPEN NOW SAYS WHY** - owner, 2026-10-28: *"when i
+try scanning the qr code on the sticker it leads to a not found page."*
+
+`/box/...` refuses for FOUR different reasons and said "Not Found" to all of
+them, which at a counter is no help. It now carries the reason back and shows
+it **to a signed-in member of staff only**; a stranger still gets the bare
+404, because the reason is the answer to a question they should not be
+asking.
+
+**THE LIKELIEST CAUSE IS THE DATABASE.** The token is `hmac(...)` over the
+DATABASE SECRET, so a sticker printed on the test site can never open on the
+live one, and the other way about. The host in the link is
+`get_base_url()`, which differs too.
+
+**HOW TO TELL A LIVE ROUTE FROM A MISSING ONE** without any access: fetch a
+URL that route would refuse. The controller's own `request.not_found()` is a
+BARE 207-byte werkzeug page; a path with no route at all gets Odoo's THEMED
+website 404 of 32 KB. That is how the box route was proved to be live on his
+Prod before anything was changed.
+
 **`url_open(url, data={})` SENDS A GET.** An empty dict is falsy, so Odoo's
 helper does not post - which reads as a 405 and looks like a routing fault for
 half an hour. Post a real session csrf token instead; it belongs to the
