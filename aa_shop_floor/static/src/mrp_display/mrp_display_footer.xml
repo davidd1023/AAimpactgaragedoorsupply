@@ -13,7 +13,7 @@
              station timer for the operator who is signed in. -->
         <!-- BOTH BUTTONS IN ONE INSERT, so their order on the card is written
              down rather than left to the order two xpaths happen to run in:
-             what the box is for, then Start, then Mark as Done. -->
+             what the box is for, Print, then Start, then Mark as Done. -->
         <xpath expr="//button[@t-on-click='validate']" position="before">
             <!-- What this box is for (owner, 2026-10-19). Shown whatever state
                  the job is in - the figures are as worth checking halfway
@@ -23,6 +23,14 @@
                     type="button" class="btn btn-outline-primary o_aa_card_btn"
                     t-on-click.stop="() => this.aaOpenHardwareCard()">
                 <i class="fa fa-info-circle me-1"/>What for
+            </button>
+            <!-- PRINT, ON THE CARD ITSELF (owner, 2026-10-28): the sticker
+                 for the box in one tap, without opening What for first. It
+                 prints on the size last chosen in What for / Settings. -->
+            <button t-if="aaHardwareCard()"
+                    type="button" class="btn btn-primary o_aa_print_btn"
+                    t-on-click.stop="() => this.aaPrintSticker()">
+                <i class="fa fa-print me-1"/>Print
             </button>
             <button t-if="!active and !disabled and !['done', 'cancel'].includes(props.record.data.state)"
                     type="button" class="btn btn-success o_aa_start_btn"
