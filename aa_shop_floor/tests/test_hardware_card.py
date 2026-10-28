@@ -23,7 +23,31 @@ class HardwareCardCase(HttpCase):
     # A REAL CALCULATOR SPEC, as the browser posts it - now carrying the turns
     # and the drum it was worked out on, which is the change that makes the
     # card possible at all.
+    # SINGLE, not the Duplex this carried until 2026-10-28. A duplex is no
+    # longer sold - "we do not currently manufacture custom duplex springs" -
+    # so the route refuses one and this fixture would have been quoting the
+    # refusal rather than building a card. `springs: 2` is still two springs
+    # on the door, a left and a right; what has gone is the NEST.
     SPEC = {
+        "assembly": "Single",
+        "springs": 2,
+        "drum": "CANIMEX/TF D400-96",
+        "turns": 7.5,
+        "cycles": "10,000",
+        "doorWeight": "355",
+        "doorHeight": "7' 0\"",
+        "doorWidth": "9' 0\"",
+        "hiLift": 0,
+        "springsSpec": [
+            {"role": "Spring", "wire": 0.2625, "id": 6.0, "length": 32.5},
+        ],
+    }
+
+    # THE NEST, WHICH IS NO LONGER SOLD BUT IS STILL IN HIS DATABASE.
+    # Duplex orders taken before 2026-10-28 are still on the floor and still
+    # have to print, so the card's outer/inner rows are tested against one -
+    # built with the ban lifted, which is the only way to make one now.
+    DUPLEX_SPEC = {
         "assembly": "Duplex",
         "springs": 2,
         "drum": "CANIMEX/TF D400-96",
@@ -138,6 +162,19 @@ class HardwareCardCase(HttpCase):
 
         return order
 
+    def _order_a_duplex_kit(self):
+        """An order of the kind he took before duplex was withdrawn.
+
+        The ban lives in `quote_assembly` as a module constant, so lifting it
+        here is one patch - and patching it is the point: a test that could
+        build a duplex without it would mean the ban was not really on.
+        """
+        from odoo.addons.spring_engineering.controllers import main
+
+        with patch.object(main, "UNBUILDABLE_ASSEMBLIES", ()):
+            return self._order_a_kit(
+                door=dict(self.door, spring_spec=self.DUPLEX_SPEC))
+
     def _confirm(self, order):
         order.action_confirm()
         order.invalidate_recordset()
@@ -162,7 +199,10 @@ class HardwareCardCase(HttpCase):
     # --- the six facts -------------------------------------------------------
 
     def test_the_card_says_what_the_box_is_for(self):
-        card = self._card(self._confirm(self._order_a_kit()))
+        """A DUPLEX ORDER, deliberately: the nest is no longer sold but the
+        ones already taken are still on the floor, and the card has to keep
+        printing both halves of them."""
+        card = self._card(self._confirm(self._order_a_duplex_kit()))
         rows = self._rows(card)
 
         self.assertTrue(card["order"].startswith("W/O #"), card["order"])
@@ -565,7 +605,7 @@ class StickerSizeCase(HardwareCardCase):
     def test_nothing_is_left_off_without_saying_so(self):
         """THE ROWS THAT DID NOT FIT ARE COUNTED ON THE LABEL. A sticker that
         quietly stopped after four facts would read like the whole list."""
-        job = self._kit_job(self._confirm(self._order_a_kit()))
+        job = self._kit_job(self._confirm(self._order_a_duplex_kit()))
         self._set_size("4x2")
         html = self.env["ir.actions.report"]._render_qweb_html(
             "aa_shop_floor.report_hardware_sticker", job.ids)[0].decode()

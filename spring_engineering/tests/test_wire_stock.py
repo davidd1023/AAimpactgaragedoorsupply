@@ -98,7 +98,7 @@ class WireStockCase(TransactionCase):
         assembly - Duplex has no Wire Size box and still has two wires."""
         page = self._source("xml/spring_engineering.xml")
 
-        self.assertIn("resultsVisible and unstockedWires.length", page)
+        self.assertIn("showWireStockWarning", page)
         self.assertIn("We don't currently stock", page)
         self.assertIn("stockedWireLabels", page,
                       "the page does not list what we do stock")
@@ -141,7 +141,7 @@ class WireStockCase(TransactionCase):
         """
         page = self._source("xml/spring_engineering.xml")
         swap = re.search(
-            r'<a t-if="unstockedWires.length".*?</button>', page, re.S)
+            r'<a t-if="cannotBeSold".*?</button>', page, re.S)
 
         self.assertTrue(swap, "Add to Cart is still the only button")
         self.assertIn("se-contact-us", swap.group(0))
@@ -172,3 +172,60 @@ class WireStockCase(TransactionCase):
                 # A link wearing a button's clothes needs the centring and the
                 # underline removal a <button> gets for nothing.
                 self.assertIn("se-contact-us", stylesheet)
+
+
+@tagged("post_install", "-at_install")
+class DuplexIsNotSoldCase(WireStockCase):
+    """DUPLEX IS CALCULATED BUT NOT SOLD (owner, 2026-10-28).
+
+    *"for duplex springs we will leave the option there for people who want to
+    use it, but customers will no longer be able to add duplex springs to the
+    cart, instead give them a message on the page that will say something like
+    we do not currently manufacture custom duplex springs. currently there is
+    a message for going under our available wire size, you can replace that
+    with the duplex message only for when duplex is selected."*
+
+    Read off the source the same way the wire-stock tests above are, because
+    this page is an OWL component with no JS runner in this suite - and the
+    server-side refusal, which is the part that actually holds, is tested over
+    HTTP in test_add_to_cart.py.
+    """
+
+    def test_the_option_is_still_there(self):
+        """He asked for it in the same breath: "we will leave the option there
+        for people who want to use it". Somebody sizing a duplex they already
+        own is exactly who this page is for."""
+        source = self._source("js/spring_engineering.js")
+
+        self.assertIn("Duplex", source)
+        self.assertIn("DUPLEX_PAIRS", source,
+                      "the duplex model has been taken out, not just the sale")
+
+    def test_the_page_says_we_do_not_make_them(self):
+        page = self._source("xml/spring_engineering.xml")
+
+        self.assertIn("do not currently manufacture custom duplex springs",
+                      page)
+        self.assertIn("duplexNotMade", page)
+
+    def test_it_replaces_the_wire_message_rather_than_joining_it(self):
+        """"you can replace that with the duplex message only for when duplex
+        is selected." A duplex pair often lands on a wire we do not stock
+        anyway, and two reasons we cannot sell it is one more than anybody
+        needs."""
+        source = self._source("js/spring_engineering.js")
+        gate = re.search(
+            r"get showWireStockWarning\(\) \{.*?\}", source, re.S)
+
+        self.assertTrue(gate, "the wire warning has no gate of its own")
+        self.assertIn("!this.duplexNotMade", gate.group(0),
+                      "the wire warning still shows on a duplex as well")
+
+    def test_add_to_cart_becomes_contact_us(self):
+        source = self._source("js/spring_engineering.js")
+        gate = re.search(r"get cannotBeSold\(\) \{.*?\}", source, re.S)
+
+        self.assertTrue(gate, "nothing decides whether it can be sold")
+        self.assertIn("duplexNotMade", gate.group(0))
+        self.assertIn("unstockedWires", gate.group(0),
+                      "the wire reason was dropped on the way")

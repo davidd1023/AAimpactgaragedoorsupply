@@ -28,6 +28,54 @@ reference showed by giving a different wire size for the same door.
 one took thousands of reference readings; see `spring_engineering/dev/README.md`.
 Offering a size the model cannot compute is worse than not offering it.
 
+### DUPLEX IS CALCULATED BUT NO LONGER SOLD (owner, 2026-10-28)
+
+*"for duplex springs we will leave the option there for people who want to use
+it, but customers will no longer be able to add duplex springs to the cart,
+instead give them a message on the page that will say something like we do not
+currently manufacture custom duplex springs. currently there is a message for
+going under our available wire size, you can replace that with the duplex
+message only for when duplex is selected."*
+
+**THE CALCULATOR IS UNTOUCHED.** The option stays in the dropdown, the pair is
+still worked out, the figures are still drawn - he asked for that in the same
+breath, and somebody sizing a duplex they already own is exactly who the page
+is for. What goes is the SALE.
+
+**THE LOCK IS `UNBUILDABLE_ASSEMBLIES` IN `controllers/main.py`**, checked in
+`quote_assembly` - not in the route, because the calculator's own Add to Cart
+is not the only way in: the dealer Quick Order prices springs through the same
+function, and a spring the shop cannot make it cannot make for a dealer
+either. The dealer page shows it as a note against the line. It is a separate
+tuple from `ASSEMBLIES`, which says what the code can WORK OUT, so turning
+duplex back on is deleting one word.
+
+The page's Contact Us button is the courtesy; the route is public and takes a
+posted specification, so a hidden button stops nobody.
+
+**THE MESSAGE REPLACES THE WIRE WARNING, it does not stack on it** - his
+words. A duplex pair often lands on a wire we do not stock anyway, and two
+reasons we cannot sell it is one more than anybody needs. `duplexNotMade`,
+`showWireStockWarning` (which is `!duplexNotMade && unstockedWires.length`)
+and `cannotBeSold` are the three getters; the template and the wire-stock
+tests read those names.
+
+**EVERY FIXTURE IN THE REPOSITORY QUOTED A DUPLEX**, because it was the
+richest spec to write: `spring_engineering` test_add_to_cart (the default
+`_spec()`), test_cart_cost, test_checkout_price, and `aa_shop_floor`
+test_hardware_card. All now send a Single. Note `springs: 2` is TWO SPRINGS ON
+THE DOOR - a left and a right - and `springsSpec` is the NEST; only the nest
+is withdrawn.
+
+**OLD DUPLEX ORDERS MUST STILL PRINT.** His database holds them and they are
+still on the floor, so the Hardware card's outer/inner rows are still tested -
+against an order built with the ban lifted by `patch.object`, which is now the
+only way to make one.
+
+**A PRE-EXISTING FAILURE, NOT THIS: `spring_engineering` test_bracket_fasteners
+has 5 failures and 2 errors on a clean tree** (checked by stashing). Nothing
+to do with duplex; it is about prepared-track brackets and fasteners.
+
 ### Only the three visible Single spring IDs are used
 
 Stated earlier by the owner: *"we are not using all of the single spring id's only
