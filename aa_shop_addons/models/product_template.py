@@ -69,6 +69,14 @@ KIT_SETTING = "aa_shop_addons.category_kits"
 #: "Hardware Kit" and "Hardware Kits" both count.
 KIT_WORDS = "hardware kit"
 
+#: THE CATEGORY THAT MARKS A SPRING PAGE (owner, 2026-10-28: "this is
+#: specifically for custom springs and the published items in the spring
+#: category"). Keyed on the CATEGORY and not on the name, deliberately: his
+#: catalogue has a "Spring Anchor Bracket" and a "Spring Anchor Bolt", neither
+#: of which is a spring, and a word match would have put a block on both.
+SPRING_SETTING = "aa_shop_addons.category_springs"
+SPRING_CATEGORY = "Springs"
+
 #: How many to show, in ONE pool (owner, 2026-10-27: "just one pool of
 #: products not multiple categories, that way we dont show too many products
 #: in the recommendations"). Eight is two rows of four on a desktop and four
@@ -95,13 +103,66 @@ class ProductTemplate(models.Model):
         """"kit", "spring", or False for everything else."""
         self.ensure_one()
 
-        spring = self.env.ref(
-            "spring_engineering.product_custom_spring", raise_if_not_found=False)
-
-        if spring and spring == self:
+        if self._aa_is_spring():
             return "spring"
 
         return "kit" if self._aa_is_kit() else False
+
+    def _aa_is_spring(self):
+        """The custom spring, or anything published in the Springs category.
+
+        Owner, 2026-10-28: *"this is specifically for custom springs and the
+        published items in the spring category."* Before this it was the one
+        `product_custom_spring` record and nothing else, so every spring he
+        actually sells off a shelf showed nothing underneath it.
+
+        BY CATEGORY, NOT BY NAME. His catalogue carries a "Spring Anchor
+        Bracket" and a "3/8 x 1 1/2 Hex Tap Bolt (Spring Anchor Bolt)", and
+        neither is a spring - a word match would have put a block of spring
+        add-ons on a bolt.
+        """
+        self.ensure_one()
+
+        custom = self.env.ref(
+            "spring_engineering.product_custom_spring", raise_if_not_found=False)
+
+        if custom and custom == self:
+            return True
+
+        category = self._aa_spring_category()
+
+        return bool(category and category in self.public_categ_ids)
+
+    @api.model
+    def _aa_custom_spring(self):
+        """The calculator's own product, readable by a visitor.
+
+        IT IS NOT PUBLISHED - deliberately, like the plastic filler: it is
+        not bought off a page, it is configured. So a public visitor CANNOT
+        READ IT, and the two custom-spring pages answered 403 the moment the
+        block tried, which is the kind of fault that only a test fetching the
+        page can find. Sudo here, once, rather than in a template.
+        """
+        return self.sudo().env.ref(
+            "spring_engineering.product_custom_spring",
+            raise_if_not_found=False)
+
+    @api.model
+    def _aa_spring_category(self):
+        """The website category whose published products are spring pages."""
+        categories = self.env["product.public.category"].sudo()
+        chosen = self.env["ir.config_parameter"].sudo().get_param(SPRING_SETTING)
+
+        if chosen:
+            try:
+                found = categories.browse(int(chosen)).exists()
+            except (TypeError, ValueError):
+                found = categories
+
+            if found:
+                return found
+
+        return categories.search([("name", "=ilike", SPRING_CATEGORY)], limit=1)
 
     def _aa_is_kit(self):
         """Does this product say, anywhere, that it is a hardware kit?
@@ -333,6 +394,13 @@ class ProductTemplate(models.Model):
         occasionally appears beside a cone wrench.
         """
         if role != "spring":
+            return ""
+
+        # NOT ON A CONE'S OWN PAGE. Since the Springs category became the mark
+        # of a spring page (owner, 2026-10-28) his cone sets are spring pages
+        # too - they sit in that category - and "already included with your
+        # spring" under a cone set is simply untrue.
+        if "cone" in (self.name or "").lower():
             return ""
 
         category = self._aa_addon_category("cones", "Cones")

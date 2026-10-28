@@ -537,3 +537,127 @@ class ShopAddonsPageCase(HttpCase):
 
         self.assertEqual(page.status_code, 200)
         self.assertNotIn("aa_shop_addons", page.text)
+
+
+@tagged("post_install", "-at_install")
+class SpringPagesCase(ShopAddonsCase):
+    """SPRINGS SHOWED NOTHING, AND THE REASON WAS STRUCTURAL.
+
+    Owner, 2026-10-28: *"recommended products only works with kits, springs
+    doesnt currently show anything in terms of recommendations, by the way
+    this is specifically for custom springs and the published items in the
+    spring category."*
+
+    Two separate faults behind one sentence:
+
+      * a SPRING PAGE was only ever the one `product_custom_spring` record,
+        so every spring he sells off a shelf was not recognised at all;
+      * and the custom spring is NOT A SHOP PAGE. It is configured on two
+        standalone website pages, which do not render `website_sale.product` -
+        so the block could not have appeared there however the product was
+        recognised.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.springs = self.env["product.public.category"].create(
+            {"name": "Springs"})
+
+    def _in_springs(self, name, published=True):
+        return self.env["product.template"].create({
+            "name": name, "type": "consu", "list_price": 90.0,
+            "is_published": published,
+            "public_categ_ids": [(6, 0, self.springs.ids)]})
+
+    # --- the published items in the spring category -----------------------
+
+    def test_a_published_spring_is_a_spring_page(self):
+        """THE ONE HE REPORTED. His shop sells two stock torsion spring pairs
+        and neither showed a thing."""
+        pair = self._in_springs(
+            'Torsion Spring Pair .250 x 2 5/8" I.D. x 25" R/L with Cones')
+
+        self.assertEqual(pair._aa_addon_role(), "spring")
+        self.assertTrue(self._shown(pair), "a spring page still draws nothing")
+
+    def test_a_spring_anchor_bolt_is_not_a_spring(self):
+        """WHY IT IS BY CATEGORY AND NEVER BY NAME. His catalogue carries a
+        "Spring Anchor Bracket" and a "3/8 x 1 1/2 Hex Tap Bolt (Spring Anchor
+        Bolt)", and a word match would have put spring add-ons on a bolt."""
+        bolt = self.env["product.template"].create({
+            "name": "3/8 x 1 1/2 Hex Tap Bolt (Spring Anchor Bolt)",
+            "type": "consu", "is_published": True})
+        bracket = self.env["product.template"].create({
+            "name": "Spring Anchor Bracket", "type": "consu",
+            "is_published": True})
+
+        self.assertFalse(bolt._aa_addon_role())
+        self.assertFalse(bracket._aa_addon_role())
+
+    def test_the_springs_category_can_be_pointed_at(self):
+        odd = self.env["product.public.category"].create({"name": "Torsion"})
+        coil = self.env["product.template"].create({
+            "name": "A coil", "type": "consu", "is_published": True,
+            "public_categ_ids": [(6, 0, odd.ids)]})
+
+        self.assertFalse(coil._aa_addon_role())
+
+        self.env["ir.config_parameter"].sudo().set_param(
+            "aa_shop_addons.category_springs", odd.id)
+
+        self.assertEqual(coil._aa_addon_role(), "spring")
+
+    def test_a_cone_set_does_not_claim_its_cones_are_included(self):
+        """HIS CONE SETS LIVE IN THE SPRINGS CATEGORY, so they are spring
+        pages too now - and "already included with your spring" under a cone
+        set is simply untrue."""
+        cone = self._in_springs('CONE 3.75 Cone Set 3 3/4" I.D.')
+
+        self.assertEqual(cone._aa_addon_role(), "spring")
+        self.assertEqual(self._note(cone), "")
+
+    def test_a_real_spring_still_warns_about_its_cones(self):
+        pair = self._in_springs('Torsion Spring Pair .250 x 2 5/8" I.D.')
+
+        self.assertIn("Already included", self._note(pair))
+
+
+@tagged("post_install", "-at_install")
+class SpringPageRendersCase(HttpCase):
+    """THE BLOCK HAS TO REACH THE TWO STANDALONE PAGES.
+
+    Every assertion in the class above is a model call, and the fault he
+    reported was that a TEMPLATE never ran. So these fetch the pages.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.spring = self.env.ref(
+            "spring_engineering.product_custom_spring",
+            raise_if_not_found=False)
+
+        if not self.spring:
+            self.skipTest("spring_engineering is not installed here")
+
+        # Something for the block to draw, or it correctly renders nothing.
+        cables = self.env["product.public.category"].create({"name": "Cables"})
+        self.cable = self.env["product.template"].create({
+            "name": 'Lift Cable 5/32" Pair', "type": "consu",
+            "list_price": 21.5, "is_published": True,
+            "public_categ_ids": [(6, 0, cables.ids)]})
+
+    def test_the_custom_torsion_spring_page_carries_the_block(self):
+        page = self.url_open("/custom-torsion-spring")
+
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("aa_shop_addons", page.text,
+                      "the match-a-broken-spring page shows no add-ons")
+        self.assertIn("Lift Cable", page.text)
+
+    def test_the_spring_calculator_page_carries_the_block(self):
+        page = self.url_open("/spring-calculator")
+
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("aa_shop_addons", page.text,
+                      "the calculator page shows no add-ons")
+        self.assertIn("Lift Cable", page.text)

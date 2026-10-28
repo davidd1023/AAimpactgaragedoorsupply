@@ -381,6 +381,42 @@ with curl to find out what his products are actually called. **Read that
 screen before theorising** about anything of this sort again - and remember
 that his Prod catalogue is not what this repo's hooks create.
 
+### SPRINGS SHOWED NOTHING, FOR TWO SEPARATE REASONS (owner, 2026-10-28)
+
+*"recommended products only works with kits, springs doesnt currently show
+anything in terms of recommendations, by the way this is specifically for
+custom springs and the published items in the spring category."*
+
+**ONE: THE CUSTOM SPRING IS NOT A SHOP PAGE.** It is configured on two
+STANDALONE website pages - `/custom-torsion-spring` and `/spring-calculator`,
+both calling `website.layout` directly - and the block was an inherit of
+`website_sale.product`. No amount of recognising the product could have put a
+block on a page that never renders the template carrying it. The block is now
+a CALLABLE template, `aa_shop_addons.addons_block`, taking `aa_addons_product`,
+and `views/spring_page_templates.xml` calls it into both pages. That is why
+`aa_shop_addons` now depends on `spring_engineering`.
+
+**AND THE CUSTOM SPRING PRODUCT IS NOT PUBLISHED**, deliberately, like the
+plastic filler - so a VISITOR CANNOT READ IT and both pages answered **403**
+the instant the block touched it. `_aa_custom_spring()` sudoes it once, and
+the block sudoes what it calls. Only a test that FETCHES THE PAGE finds this;
+the model-level tests all passed while the live pages were 403.
+
+**TWO: A SPRING PAGE WAS ONE RECORD.** `_aa_addon_role()` returned "spring"
+only for `product_custom_spring`, so the stock torsion spring pairs he
+actually sells showed nothing. It is now the custom spring OR anything
+published in the **Springs website category** (`aa_shop_addons.category_springs`,
+default found by the name).
+
+**BY CATEGORY AND NEVER BY NAME**, unlike kits: his catalogue carries a
+"Spring Anchor Bracket" and a "3/8 x 1 1/2 Hex Tap Bolt (Spring Anchor Bolt)",
+and a word match would have put spring add-ons on a bolt.
+
+**HIS CONE SETS LIVE IN THE SPRINGS CATEGORY**, so they are spring pages too -
+which is fine except for the cones note, and "already included with your
+spring" under a cone set is untrue. `_aa_cones_note` therefore refuses to
+fire on a product whose own name says cone.
+
 **NOT IN `garage_door_supply`**, for the homepage reason below.
 
 ## The Custom Kit costs nothing, and must still be buyable (`aa_dealer_orders`)

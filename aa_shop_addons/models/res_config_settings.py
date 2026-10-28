@@ -19,7 +19,7 @@ from odoo import fields, models
 
 from .addon_suggestion import MIN_ORDERS, MIN_ORDERS_SETTING
 from .product_template import (FAMILIES, KIT_SETTING, SETTING, SHOWN,
-                               SHOWN_SETTING)
+                               SHOWN_SETTING, SPRING_SETTING)
 
 
 class ResConfigSettings(models.TransientModel):
@@ -46,6 +46,13 @@ class ResConfigSettings(models.TransientModel):
     aa_addon_categ_kits_id = fields.Many2one(
         "product.public.category", string="Hardware kits category",
         config_parameter=KIT_SETTING)
+
+    #: WHICH PRODUCTS ARE SPRING PAGES (owner, 2026-10-28: "the published
+    #: items in the spring category"). By category and never by name: his
+    #: catalogue has a Spring Anchor Bracket and a Spring Anchor Bolt.
+    aa_addon_categ_springs_id = fields.Many2one(
+        "product.public.category", string="Springs category",
+        config_parameter=SPRING_SETTING)
 
     #: ONE POOL, AND NOT TOO MANY OF IT (owner, 2026-10-27). "Too many" is
     #: his judgement, so it is a setting rather than a number in the code.

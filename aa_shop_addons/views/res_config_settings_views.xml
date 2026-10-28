@@ -17,24 +17,31 @@
                answer here means nothing shows anywhere and every other
                setting on this page is beside the point - which is exactly
                what happened. -->
-          <setting string="Which products are hardware kits"
-                   help="A product is read as a kit when its name, its product
-                         category or one of its website categories says
-                         'Hardware Kit'. Set this only if yours are called
-                         something else. Website > Configuration > Add-ons
-                         Check lists what each product will show.">
+          <setting string="Which products get add-ons"
+                   help="A kit is read from its name, its product category or
+                         any of its website categories saying 'Hardware Kit'.
+                         A spring page is the custom spring plus every
+                         published product in the Springs category. Set these
+                         only if yours are called something else. Website >
+                         Configuration > Add-ons Check lists what each product
+                         will show.">
             <div class="content-group mt-2">
               <div class="row">
                 <label for="aa_addon_categ_kits_id" class="col-4 col-lg-3 o_light_label"/>
                 <field name="aa_addon_categ_kits_id" options="{'no_create': True}"/>
               </div>
+              <div class="row">
+                <label for="aa_addon_categ_springs_id" class="col-4 col-lg-3 o_light_label"/>
+                <field name="aa_addon_categ_springs_id" options="{'no_create': True}"/>
+              </div>
             </div>
           </setting>
 
           <setting string="Where the add-ons come from"
-                   help="Shown under every hardware kit and under the custom
-                         spring. A product with its own Accessory Products set
-                         shows those instead - these categories are only the
+                   help="Shown under every kit and every spring page. A
+                         product with its own Alternative Products set shows
+                         those instead, and so does one the order counting has
+                         an answer for - these categories are only the last
                          fallback, so a page is never blank.">
             <div class="content-group mt-2">
               <div class="row">
