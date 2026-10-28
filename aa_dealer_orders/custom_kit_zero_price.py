@@ -108,8 +108,27 @@ class ProductProduct(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
+    def _aa_kit_with_parts(self):
+        """A custom kit line that has its parts hanging off it.
+
+        `linked_line_ids` is Odoo's own back-link, and the parts are booked
+        with `linked_line_id` pointing at the kit, so this is the same answer
+        the cart itself would give.
+        """
+        self.ensure_one()
+
+        return bool(self.product_template_id._aa_sells_at_zero()
+                    and self.linked_line_ids)
+
     def _check_validity(self):
-        """Raised while the line is being added."""
+        """Raised while the line is being added.
+
+        STILL PERMISSIVE FOR THE KIT, and it has to be: this runs as the kit
+        line is written and the parts are hung off it a moment AFTER, so
+        asking for them here would refuse every kit, full ones included. The
+        empty kit is stopped before any of this, in the controller, and again
+        at checkout.
+        """
         if self.product_template_id._aa_sells_at_zero():
             return
 
@@ -126,8 +145,17 @@ class SaleOrder(models.Model):
         stops a cart being PAID FOR. Without this the customer gets the
         button, gets the kit and its parts into the cart, and is then refused
         at the payment step with nothing on the screen to tell them why.
+
+        EXCUSED ONLY WHILE THE PARTS ARE THERE (owner, 2026-10-28: "you
+        shouldnt be able to add the custom kit to the cart when there is
+        nothing on it"). The whole reason a kit line may cost nothing is that
+        the money is on the lines hanging off it - so a kit with nothing
+        hanging off it has no excuse, and is a zero-priced line like any
+        other. That also covers the case the controller cannot: a customer
+        who deletes every part out of the cart afterwards and leaves the kit
+        behind.
         """
         lines = super()._get_zero_priced_lines()
 
         return lines.filtered(
-            lambda line: not line.product_template_id._aa_sells_at_zero())
+            lambda line: not line._aa_kit_with_parts())

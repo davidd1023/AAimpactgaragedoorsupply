@@ -17,6 +17,9 @@
 const CURRENCY = (symbol, amount) =>
     `${symbol}${amount.toFixed(2)}`;
 
+// What the Add to Cart button says it is waiting for while the kit is empty.
+const EMPTY_KIT = "Choose at least one part before adding this kit to your cart.";
+
 function el(tag, attrs = {}, text = "") {
     const node = document.createElement(tag);
 
@@ -237,6 +240,11 @@ class CustomKitPage {
 
         this.total = el("div", { class: "fw-bold mt-2" });
         this.root.appendChild(this.total);
+
+        // LOCKED FROM THE START, because a kit begins empty and the first
+        // pricing call has not been made yet. Unlocked by the first answer
+        // that says a part is in it.
+        this.lockAddToCart(true, EMPTY_KIT);
 
         this.root.appendChild(this.catalogue());
     }
@@ -637,7 +645,11 @@ class CustomKitPage {
             this.warn(refused > 0
                 ? `${refused} part${refused === 1 ? "" : "s"} could not be added to this kit.`
                 : "");
-            this.lockAddToCart(false);
+            // AN EMPTY KIT CANNOT BE ADDED (owner, 2026-10-28: "you shouldnt
+            // be able to add the custom kit to the cart when there is nothing
+            // on it"). The server refuses it outright - this is so the
+            // customer is told before they click rather than after.
+            this.lockAddToCart(!result.count, result.count ? "" : EMPTY_KIT);
         } catch (error) {
             // THE BUTTON STAYS LOCKED. The kit is still on the page and still
             // in this browser; what is not certain is that the cart knows
