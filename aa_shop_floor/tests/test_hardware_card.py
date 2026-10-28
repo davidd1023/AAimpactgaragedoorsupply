@@ -216,8 +216,8 @@ class HardwareCardCase(HttpCase):
         self.assertIn(".2253", rows["Spring (inner)"])
         self.assertIn("7.5", rows["Turns"])
         self.assertEqual(rows["Drum"], "D400-96")
-        self.assertEqual(rows["Colour"], "White")
-        self.assertEqual(rows["Lift"], "Standard")
+        self.assertEqual(rows["Hardware Color"], "White")
+        self.assertEqual(rows["Track Lift"], "Standard")
 
     def test_the_turns_reach_the_order_from_the_calculator(self):
         """THE CHANGE THAT MAKES THE CARD POSSIBLE. Turns are worked out in
@@ -228,6 +228,32 @@ class HardwareCardCase(HttpCase):
         spec = json.loads(spring.spring_spec_json)
         self.assertEqual(spec["turns"], 7.5)
         self.assertEqual(spec["drum"], "CANIMEX/TF D400-96")
+
+    def test_an_order_without_turns_still_shows_them(self):
+        """"TURNS MUST BE THERE" (owner, 2026-10-28). Orders priced before the
+        calculator posted its turns stored the spring but not the turns, so
+        the card works them out from the drum and door height on the
+        calculator's own curve: 7' on a D400-96 is 7.9, the figure S00041
+        stored when the calculator did send it."""
+        spec = dict(self.SPEC)
+        spec.pop("turns")
+        order = self._order_a_kit(door=dict(self.door, spring_spec=spec))
+        rows = self._rows(self._card(self._confirm(order)))
+
+        self.assertEqual(rows.get("Turns"), "7.9 at full wind", rows)
+
+    def test_the_lift_reads_with_the_track(self):
+        """"Tracks lift type and lengths" and "the hardware color" (owner,
+        2026-10-28): the lift sits beside the track, and the colour says it
+        is the hardware's."""
+        labels = [label for label, _value in self._card(
+            self._confirm(self._order_a_kit())).get("rows", [])]
+
+        self.assertIn("Hardware Color", labels)
+        self.assertNotIn("Color", labels)
+        self.assertNotIn("Lift", labels)
+        self.assertIn("Track Lift", labels)
+        self.assertGreater(labels.index("Track Lift"), labels.index("Hardware Color"))
 
     def test_the_drum_is_still_not_written_on_the_spring(self):
         """It is ours to know, says the rule the spring description follows,
