@@ -17,3 +17,4 @@ from . import test_customer_emails
 from . import test_cancellation_email_once
 from . import test_dispatched
 from . import test_auto_dispatch
+from . import test_dispatch_scan
