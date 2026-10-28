@@ -529,13 +529,15 @@ class TestCartCostOnThePage(HttpCase):
         answer = self.url_open(
             "/spring-calculator/add-to-cart",
             data=json.dumps({"jsonrpc": "2.0", "method": "call", "params": {
+                # SINGLE, not the Duplex this used to send: a duplex is no
+                # longer sold (owner, 2026-10-28) and the route refuses it, so
+                # the fixture would have been testing the refusal. The cost
+                # line is what is under test and it does not care which.
                 "spec": {
-                    "assembly": "Duplex", "springs": 2,
+                    "assembly": "Single", "springs": 2,
                     "springsSpec": [
-                        {"role": "Outer", "wire": 0.2625, "id": 6,
-                         "length": 32.25},
-                        {"role": "Inner", "wire": 0.2253, "id": 3.75,
-                         "length": 31.25}],
+                        {"role": "Spring", "wire": 0.2625, "id": 6,
+                         "length": 32.25}],
                     "doorWeight": 355, "doorHeight": "7' 0\"",
                     "cycles": 25000}}}),
             headers={"Content-Type": "application/json"})

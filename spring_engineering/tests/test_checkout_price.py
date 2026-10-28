@@ -105,11 +105,14 @@ class TestConfiguredPriceFromTheRoute(HttpCase):
     """The same thing along the path a customer actually takes."""
 
     def test_a_quoted_assembly_survives_a_price_recomputation(self):
+        # SINGLE, not the Duplex this used to send: a duplex is no longer
+        # sold (owner, 2026-10-28) and the route refuses it. What is under
+        # test is that a quoted price survives a recomputation, which is the
+        # same question whichever assembly carries it.
         payload = {"jsonrpc": "2.0", "method": "call", "params": {"spec": {
-            "assembly": "Duplex", "springs": 2,
+            "assembly": "Single", "springs": 2,
             "springsSpec": [
-                {"role": "Outer", "wire": 0.2625, "id": 6, "length": 32.25},
-                {"role": "Inner", "wire": 0.2253, "id": 3.75, "length": 31.25}],
+                {"role": "Spring", "wire": 0.2625, "id": 6, "length": 32.25}],
             "doorWeight": 355, "doorHeight": "7' 0\"", "cycles": 25000}}}
         response = self.url_open(
             "/spring-calculator/add-to-cart", data=json.dumps(payload),

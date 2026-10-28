@@ -23,13 +23,30 @@ class TestSpringAddToCart(HttpCase):
 
         return response.json().get("result", {})
 
-    def _spec(self, **overrides):
-        spec = {
-            "assembly": "Duplex",
-            "springs": 2,
-            "springsSpec": [
+    def _duplex(self, **overrides):
+        """A nested pair - the thing the shop no longer winds."""
+        spec = self._spec(
+            assembly="Duplex",
+            springsSpec=[
                 {"role": "Outer", "wire": 0.2625, "id": 6, "length": 32.25},
                 {"role": "Inner", "wire": 0.2253, "id": 3.75, "length": 31.25},
+            ])
+        spec.update(overrides)
+
+        return spec
+
+    def _spec(self, **overrides):
+        # A SINGLE SPRING EACH SIDE, which is what this file used to call a
+        # Duplex throughout. `springs` is how many are on the DOOR, a left and
+        # a right; `springsSpec` is the NEST, one spring or an outer and an
+        # inner. The default was the nest, and the nest is no longer sold
+        # (owner, 2026-10-28), so every test here would have been testing the
+        # refusal rather than what it was written for.
+        spec = {
+            "assembly": "Single",
+            "springs": 2,
+            "springsSpec": [
+                {"role": "Spring", "wire": 0.2625, "id": 6, "length": 32.25},
             ],
             "doorWeight": 355,
             "doorHeight": "7' 0\"",
@@ -75,15 +92,44 @@ class TestSpringAddToCart(HttpCase):
         self.assertRegex(rows[-1], r"[\d,]+ lb")
         self.assertRegex(rows[-1], r"[\d,]+ cycles")
 
-    def test_both_springs_appear_with_their_own_figures(self):
-        """An outer spring wound to the inner spring's wire is scrap."""
+    def test_the_spring_appears_with_its_own_figures(self):
+        """A spring wound to the wrong wire is scrap, so the figures that
+        reach the shop floor are pinned here."""
         self._call(self._spec())
         text = self._line().name
         # 6.0, not 6: the description formats these with Python's float
         # repr. Asserted as it really is, because a test written to the
         # format I assumed would have passed while the sheet showed nothing.
-        self.assertIn('Outer: 0.2625" wire, 6.0" ID, 32.25" long', text)
-        self.assertIn('Inner: 0.2253" wire, 3.75" ID, 31.25" long', text)
+        self.assertIn('Spring: 0.2625" wire, 6.0" ID, 32.25" long', text)
+
+    # --- DUPLEX IS NOT SOLD (owner, 2026-10-28) ---------------------------
+    #
+    # "for duplex springs we will leave the option there for people who want
+    # to use it, but customers will no longer be able to add duplex springs
+    # to the cart, instead give them a message on the page that will say
+    # something like we do not currently manufacture custom duplex springs."
+
+    def test_a_duplex_cannot_be_bought(self):
+        """THE ONE THAT SETTLES IT. The page hides Add to Cart, but this
+        route is public and takes a posted specification, so a hidden button
+        stops nobody."""
+        before = self.env["sale.order.line"].search_count([])
+        result = self._call(self._duplex())
+
+        self.assertIn("error", result, result)
+        self.assertIn("do not currently manufacture", result["error"])
+        self.assertIn("duplex", result["error"])
+        self.assertEqual(self.env["sale.order.line"].search_count([]), before,
+                         "a duplex booked a line anyway")
+
+    def test_the_refusal_says_what_to_do_next(self):
+        """A refusal with no way forward is a dead end, and this customer has
+        a door that needs springs."""
+        self.assertIn("786-238-7640", self._call(self._duplex())["error"])
+
+    def test_a_single_spring_is_still_sold(self):
+        """The ban is on the nest, not on the calculator or on springs."""
+        self.assertNotIn("error", self._call(self._spec()))
 
     def test_a_single_spring_describes_one_spring(self):
         self._call(self._spec(

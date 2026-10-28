@@ -2445,6 +2445,38 @@ get wireSizeVisible() {
 // it is not changed here; what is added is the shop's side of it, which the
 // customer could not otherwise know.
 
+// --- duplex is not something we build (owner, 2026-10-28) -----------------
+//
+// "for duplex springs we will leave the option there for people who want to
+// use it, but customers will no longer be able to add duplex springs to the
+// cart, instead give them a message on the page that will say something like
+// we do not currently manufacture custom duplex springs."
+//
+// THE CALCULATOR IS UNTOUCHED. The option stays in the dropdown, the pair is
+// still worked out and the figures are still on screen - he asked for that
+// explicitly, and somebody sizing a duplex they already own is exactly who
+// the page is for. What goes is the SALE.
+//
+// It takes the place of the unstocked-wire warning rather than stacking on
+// top of it: "you can replace that with the duplex message only for when
+// duplex is selected". A duplex pair often lands on a wire we do not stock
+// anyway, and being told two reasons we cannot sell it is one more than
+// anybody needs.
+get duplexNotMade() {
+    return this.state.assembly === "Duplex";
+}
+
+// The warning area shows one message or the other, never both.
+get showWireStockWarning() {
+    return this.resultsVisible && !this.duplexNotMade
+        && this.unstockedWires.length > 0;
+}
+
+// Add to Cart becomes Contact Us for either reason.
+get cannotBeSold() {
+    return this.duplexNotMade || this.unstockedWires.length > 0;
+}
+
 get unstockedWires() {
     // Duplex carries a wire per spring and has no dropdown; everything else
     // has the one the customer can see and change.
