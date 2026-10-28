@@ -592,9 +592,25 @@ Three things he decided when asked, each of which changed the build:
   than UNPAID. A Quick Order raises no invoice at the time, so the rule would
   otherwise have blocked every dealer collection there is. Read through
   `_fields` because `aa_order_on_account` belongs to `aa_dealer_orders`.
-- **THE QR GOES ON BOTH PRINTED FORMS** - the Work Order Sheet and the
-  Delivery Confirmation. Whichever sheet is in somebody's hand is the one
-  they scan.
+- **THE QR GOES ON THE STICKER** - owner, 2026-10-28, correcting the form
+  answer he gave an hour earlier: *"actually the qr code is supposed to be on
+  the sticker."* The box sticker ALREADY had a QR and it already opened the
+  "what is in this box" page, so **nothing new is printed on a 1 1/4 inch
+  label**: that same page now also draws a Dispatch panel. ONE CODE, TWO
+  AUDIENCES - a second QR would be two codes a phone has to choose between,
+  and every sticker already on a shelf would be the wrong one.
+  **THE PANEL IS NOT PUBLIC even though the page is**: it is drawn only for
+  `stock.group_stock_user`, and `/box/<id>/<token>/dispatch` checks again
+  rather than trusting that a button was ever shown. A fitter on a ladder
+  scanning the same code still sees only the door's figures.
+  A box belongs to a JOB and the button belongs to a TRANSFER, so
+  `_aa_dispatch_picking()` joins them through the sale order and takes the
+  OUTGOING one still to go out - a part-delivered order has a done transfer
+  and a backorder, and the backorder is what somebody is standing there for.
+- **THE QR IS ALSO ON BOTH PRINTED FORMS**, kept deliberately: a sticker only
+  exists for a HARDWARE KIT job, so a spring-only order has no sticker at all
+  and the Work Order Sheet is the only thing to scan. One line to remove from
+  `report/dispatch_qr.xml` if he ever wants the forms bare.
 
 **IT IS NOT A PUBLIC LINK, unlike the box sticker.** `/box/...` only reads a
 door's figures out loud; this one MARKS AN ORDER COLLECTED, and a public
