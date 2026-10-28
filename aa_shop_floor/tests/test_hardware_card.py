@@ -18,6 +18,7 @@ from unittest.mock import patch
 from urllib.parse import parse_qs, quote, unquote, urlsplit
 
 from odoo import fields
+from odoo.exceptions import UserError
 from odoo.tests.common import HttpCase, tagged
 
 
@@ -1149,3 +1150,123 @@ class StickerHostCase(StickerDispatchCase):
 
         self.assertFalse(spring.aa_box_url)
         self.assertFalse(spring.aa_box_url_warning)
+
+
+@tagged("post_install", "-at_install")
+class StickerLinkHostSettingCase(HttpCase):
+    """THE FIX, WHERE HE CAN REACH IT.
+
+    Owner, 2026-10-28, for the third time: *"im still getting not found on my
+    phone, heres the link:
+    https://aaimpactgaragedoorsupply.com/box/132/bc5f7388a4bf525d6680b92e"* -
+    a NEW sticker, job 132, still carrying the apex domain, because the fault
+    was never in the code and `web.base.url` had not been changed.
+
+    It lives in Settings > Technical > System Parameters, which is no place
+    to send somebody to make a label work, and where a typed hostname is
+    another week of this. So Manufacturing > Settings now shows the host and
+    has a button that READS IT OFF THE ADDRESS BAR - the one address that is
+    right by definition, because he is looking at Odoo through it.
+    """
+
+    def _settings(self):
+        return self.env["res.config.settings"].create({})
+
+    def _param(self, key):
+        return self.env["ir.config_parameter"].sudo().get_param(key)
+
+    def test_the_button_points_the_links_at_the_site_it_was_pressed_on(self):
+        """THE ONE THAT MATTERS. Over HTTP, because the whole idea is reading
+        the host out of the request - there is no request in a model test and
+        it would pass while doing nothing."""
+        self.authenticate("admin", "admin")
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url", "https://the-wrong-host.example.com")
+
+        answer = self.url_open("/web/dataset/call_kw", data=json.dumps({
+            "jsonrpc": "2.0", "method": "call",
+            "params": {"model": "res.config.settings",
+                       "method": "action_aa_sticker_use_this_site",
+                       "args": [self._settings().ids], "kwargs": {}},
+        }), headers={"Content-Type": "application/json"})
+
+        self.assertNotIn("error", answer.json(), answer.text)
+        self.assertEqual(self._param("web.base.url"),
+                         self.base_url().rstrip("/"))
+
+    def test_it_freezes_the_host_as_well_as_setting_it(self):
+        """HALF THE FIX, AND THE HALF THAT WOULD HAVE BEEN FORGOTTEN. Without
+        the freeze Odoo rewrites the host to whichever site an administrator
+        next signs in from, so this comes back silently - and a QR code
+        cannot be proof-read, so nobody finds out until a phone is held up to
+        a box."""
+        self.authenticate("admin", "admin")
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url.freeze", False)
+
+        self.url_open("/web/dataset/call_kw", data=json.dumps({
+            "jsonrpc": "2.0", "method": "call",
+            "params": {"model": "res.config.settings",
+                       "method": "action_aa_sticker_use_this_site",
+                       "args": [self._settings().ids], "kwargs": {}},
+        }), headers={"Content-Type": "application/json"})
+
+        self.assertEqual(self._param("web.base.url.freeze"), "True")
+
+    def test_outside_a_browser_it_says_so_rather_than_setting_nothing(self):
+        """There is no address to read from a shell or a cron, and quietly
+        writing an empty host would be worse than this fault."""
+        with self.assertRaises(UserError):
+            self._settings().action_aa_sticker_use_this_site()
+
+    def test_the_setting_shows_the_host_the_stickers_carry(self):
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url", "https://the-wrong-host.example.com")
+
+        self.assertEqual(self._settings().aa_sticker_link_host,
+                         "https://the-wrong-host.example.com")
+
+    def test_a_host_that_is_not_this_one_is_called_out(self):
+        """HIS CASE EXACTLY: reading Odoo on www and printing the apex."""
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url", "https://aaimpactgaragedoorsupply.com")
+
+        settings = self._settings()
+
+        with patch.object(
+                type(settings), "_aa_this_site",
+                lambda _self: "https://www.aaimpactgaragedoorsupply.com"):
+            settings.invalidate_recordset()
+
+            self.assertTrue(settings.aa_sticker_link_wrong)
+
+    def test_the_right_host_is_not_called_out(self):
+        settings = self._settings()
+
+        with patch.object(type(settings), "_aa_this_site",
+                          lambda _self: "https://right.example.com"):
+            self.env["ir.config_parameter"].sudo().set_param(
+                "web.base.url", "https://right.example.com")
+            settings.invalidate_recordset()
+
+            self.assertFalse(settings.aa_sticker_link_wrong)
+
+    def test_not_knowing_where_we_are_is_not_the_same_as_being_wrong(self):
+        """A compute with no request behind it - a cron, a shell - must not
+        cry wolf. A settings page that warns for no reason is one nobody
+        believes the day it is right."""
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url", "https://whatever.example.com")
+
+        self.assertFalse(self._settings().aa_sticker_link_wrong)
+
+    def test_an_unfrozen_host_is_reported_as_unfrozen(self):
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url.freeze", False)
+
+        self.assertFalse(self._settings().aa_sticker_link_frozen)
+
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url.freeze", "True")
+
+        self.assertTrue(self._settings().aa_sticker_link_frozen)
