@@ -1295,6 +1295,88 @@ fits in each. A coil taken from a Box is moved to the Floor once cut. A piece
 left shorter than 16" is scrapped; 16" or more stays where it is. A spring
 with no matching coil never blocks the order: it is logged as a problem cut.
 
+### HOW LONG THE COIL WILL LAST (owner, 2026-10-28)
+
+*"Spring Engineering already knows the inches every order cuts. I want it to
+track the spring wire size and id inventory and send a warning somewhere that
+at the current pace of orders being made we will likely run out of material in
+x amount of days."*
+
+**NOTHING NEW IS MEASURED.** Both halves were already recorded:
+`aa.spring.cut` has logged every spring ever cut - dated, with its wire, its
+I.D. and its inches - and the quants hold what is left. The feature is one
+division, and all the work was in deciding what the two numbers mean. It is
+three columns on `aa.spring.stock.summary` (Inventory > Springs > Spring
+Inventory): **Days Left**, **Used / Day** and **Cuts** counted.
+
+Asked where to put the warning he chose **the stock screens and NO EMAIL**
+("lets not do emails for now"), and **14 days** as the line.
+
+- **ON SPRING INVENTORY, NOT ON FLOOR / RACK / BOXES.** Days-left is a figure
+  per wire and I.D. across every place; on a *Floor* row it would silently
+  include Box stock and be a number that does not belong to the row it is on.
+- **THE WORSE HAND DECIDES.** A spring takes a LH piece AND a RH piece, so a
+  size with a mountain of LH and no RH has run out - the same reasoning as the
+  pairs alert. `days_left` is the smaller of the two hands, and **Postgres
+  `LEAST` returns the smallest NON-NULL**, which is what makes a hand nobody
+  orders drop out of the comparison instead of dragging it to zero.
+- **FREE INCHES, NOT INCHES**: `quantity - reserved_quantity`. A confirmed
+  order has already reserved the piece each spring is cut from, and counting
+  those inches would promise material that is spoken for. The reservation IS
+  the planned cut, so this needs no join to the cut log.
+- **NO PACE MEANS NO ANSWER.** A size nobody has cut in the window shows
+  BLANK - not a warning, not "forever". He asked what happens at the CURRENT
+  pace; a warning on a size that never moves is the noise that costs the real
+  ones their credibility.
+- **A CUT NOBODY COULD MAKE IS STILL DEMAND.** The pace counts `done` AND
+  `short` - `short` being an order that wanted that size and found no piece
+  long enough. Leaving those out understates the pace exactly when stock is
+  tightest. They cannot double-count: a replan unlinks a cut that is not done
+  before writing the new one. `planned` is excluded, because its inches are
+  already off the free figure through the reservation.
+- **JOINED BY PRODUCT, NEVER BY THE LABELS.** `aa.spring.cut` stores
+  `inside_diameter` as the pretty label (`2 5/8"`) and `wire` as the code
+  (`262`), while the summary groups by `2.625`. Matching those Char columns
+  would line up nothing at all; the coil's `default_code` is the one spelling
+  both sides already agree on.
+- **UTC EXPLICITLY** in the window: `aa_spring_cut.date` is a naive timestamp
+  holding UTC, and bare `now()` is a timestamptz that Postgres would cast
+  using the SESSION's timezone, sliding the window by however many hours that
+  is.
+
+Both numbers are SETTINGS under **Inventory > Configuration > Settings** -
+"Warn under (days left)" (`aa_spring_stock.runout_warn_days`, 14) and
+"Measure the pace over (days)" (`aa_spring_stock.pace_days`, 30) - read LIVE
+by the SQL view, so changing one changes the screen with no module update. A
+mistyped value falls back to the default rather than taking the inventory
+screen down, the same call as the pickup holidays. The xpath anchor is
+`warehouse_setting_container`; **there is no `traceability_setting_container`
+block** in Odoo 19's stock settings, which is one install failure.
+
+`runout` lives in the DATABASE rather than in a Python compute, which is the
+only reason "Running Out" can be a search filter and the column can be
+sorted on.
+
+**IT FOUND A BUG: EVERY SPRING ORDER WAS RESERVING ITS COIL TWICE.** Raising
+`move.product_uom_qty` on a confirmed move makes Odoo assign it immediately,
+off whichever quant it likes, and `_aa_plan_coil_cuts` then added its own
+deliberate line ON TOP - 120" reserved against a 60" demand. **It never lost
+material**: the right inches come off at `done`, which the consumption tests
+prove. What it did was HIDE GOOD COIL - `_aa_coil_pieces` offers
+`quantity - reserved_quantity`, so a piece with plenty left looked too short,
+pushing the next order onto the Floor, then the Boxes, and eventually logging
+"No piece is long enough" with a full coil on the rack. Odoo's guess at the
+lot is now REPLACED rather than added to, since this code has already chosen
+the piece by his order of preference.
+
+**A PRE-EXISTING FAILURE, NOT THIS:** `test_adjust_changes_removes_and_adds_pieces`
+fails on a clean tree (checked by stashing) - `(2, 0) != (1, 1)`. Adding a
+piece of the OTHER HAND from the Adjust dialog appears to create it on the
+hand of the row the dialog was opened from, so an RH coil added there becomes
+an LH one. `action_apply` does read `line.hand` (spring_adjust.py:189), so it
+is not simply that; it was not run down because it is nothing to do with the
+run-out figure. Worth fixing - it corrupts the very stock this reports on.
+
 ### Spring boxes (owner, 2026-10-19)
 
 Springs come in big supplier boxes and stay boxed until the floor has room; box
