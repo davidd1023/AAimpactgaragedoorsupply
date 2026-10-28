@@ -37,8 +37,35 @@
     <t t-call="portal.portal_layout">
       <t t-set="breadcrumbs_searchbar" t-value="True"/>
 
-      <t t-call="portal.portal_back_in_edit_mode">
-        <t t-set="backend_url" t-value="'/odoo/action-base_setup.action_general_configuration'"/>
+      <!-- THE "BACK TO EDIT MODE" BANNER, SET THE WAY ODOO SETS IT.
+           Owner, 2026-10-28: clicking the X at the top of this page gave
+           "Cannot read properties of null (reading 'defaultPrevented')".
+
+           `portal.portal_back_in_edit_mode` is not a banner, it is the
+           CONTENTS of one: a line of text and a bare `btn-close` carrying
+           `data-bs-dismiss="alert"`. Called on its own, as it was here, that
+           button has no `.alert` above it - so Bootstrap's `Alert.close()`
+           looks for the element it is meant to dismiss, finds null, and
+           reads `defaultPrevented` off it. Every caller in Odoo's own code
+           sets it as `o_portal_fullwidth_alert` instead, which the portal
+           layout wraps in `alert alert-info alert-dismissible`, and that is
+           the alert the X is for.
+
+           AND IT WAS SHOWN TO EVERYBODY. Without the groups below, a dealer
+           reading their own certificate page was told they were looking at a
+           "preview of the customer portal" and offered a way back into a
+           back office they cannot open. Odoo restricts every one of these;
+           this one had nothing.
+
+           The link goes to THIS CUSTOMER'S contact record, which is where
+           the certificate is approved or rejected (`resale_views.xml`), not
+           to General Settings as it did - that page has nothing to do with
+           this one. -->
+      <t t-set="o_portal_fullwidth_alert" groups="base.group_user">
+        <t t-call="portal.portal_back_in_edit_mode">
+          <t t-set="backend_url"
+             t-value="'/odoo/action-base.action_partner_form/%s' % partner.id"/>
+        </t>
       </t>
 
       <div class="row mt-4 mb-2 o_aa_resale">
