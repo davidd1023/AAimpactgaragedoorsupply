@@ -61,14 +61,22 @@ class CustomKitCase(HttpCase):
     def _payload(self):
         return json.loads(self.kit._aa_custom_kit_json())
 
-    def _rpc(self, route, params):
+    def _rpc(self, route, params, raw=False):
+        """`raw` hands back the whole JSON-RPC envelope, errors included.
+
+        The default swallows them, which is right for the calls that are
+        expected to work - but a route that is SUPPOSED to refuse answers
+        with a top-level `error` and no `result` at all, and a helper that
+        returns {} for both cannot tell a refusal from an empty success.
+        """
         response = self.url_open(
             route,
             data=json.dumps({"jsonrpc": "2.0", "method": "call", "params": params}),
             headers={"Content-Type": "application/json"})
         self.assertEqual(response.status_code, 200, route)
+        body = response.json()
 
-        return response.json().get("result") or {}
+        return body if raw else (body.get("result") or {})
 
     # --- the product itself ---------------------------------------------------
 
@@ -1029,23 +1037,40 @@ class CustomKitCase(HttpCase):
 
         self.assertEqual(part.product_uom_qty, 8.0)
 
-    def test_an_empty_kit_adds_nothing_but_itself(self):
+    def test_an_empty_kit_cannot_be_added_at_all(self):
+        """Owner, 2026-10-28: *"you shouldnt be able to add the custom kit to
+        the cart when there is nothing on it."*
+
+        THIS TEST USED TO ASSERT THE OPPOSITE - that an empty kit still put
+        its own line in the cart, with nothing hanging off it. That was never
+        a decision, only what the code happened to do: the parts were added
+        after the line and an empty list simply added none. A box of nothing,
+        priced at nothing, which is exactly what he has now said no to.
+
+        Refused in the CONTROLLER, before Odoo writes the line, so there is
+        nothing to tidy up afterwards.
+        """
         self._build([])
-        self._rpc("/shop/cart/add", {
+        before = self.env["sale.order"].search_count([])
+
+        answer = self._rpc("/shop/cart/add", {
             "product_template_id": self.kit.id,
             "product_id": self.kit.product_variant_ids[:1].id,
             "quantity": 1,
-        })
+        }, raw=True)
 
-        order = self.env["sale.order"].search(
-            [("order_line.product_id", "in", self.kit.product_variant_ids.ids)],
-            order="id desc", limit=1)
-        kit_line = order.order_line.filtered(
-            lambda line: line.product_id.product_tmpl_id == self.kit)[:1]
+        self.assertIn("error", answer,
+                      "an empty kit was accepted into the cart")
+        self.assertIn(
+            "at least one part",
+            json.dumps(answer["error"]),
+            "it was refused, but not for a reason anybody can act on")
 
-        self.assertTrue(kit_line)
-        self.assertFalse(order.order_line.filtered(
-            lambda line: line.linked_line_id == kit_line))
+        lines = self.env["sale.order.line"].search(
+            [("product_id", "in", self.kit.product_variant_ids.ids)])
+
+        self.assertFalse(lines, "a kit line was written and left behind")
+        self.assertEqual(self.env["sale.order"].search_count([]), before)
 
     def test_a_silly_quantity_is_refused(self):
         hinge = self._white_hinge()
@@ -1246,13 +1271,38 @@ class CustomKitZeroPriceCase(HttpCase):
             "order_line": [
                 (0, 0, {"product_id": self.kit.product_variant_id.id,
                         "product_uom_qty": 1, "price_unit": 0.0}),
-                (0, 0, {"product_id": part.product_variant_id.id,
-                        "product_uom_qty": 1, "price_unit": 9.0}),
             ],
+        })
+        # HUNG OFF THE KIT, as the cart does it - that link is the whole
+        # reason the kit line is excused its price.
+        self.env["sale.order.line"].create({
+            "order_id": order.id,
+            "product_id": part.product_variant_id.id,
+            "product_uom_qty": 1, "price_unit": 9.0,
+            "linked_line_id": order.order_line[0].id,
         })
 
         self.assertFalse(order._get_zero_priced_lines(),
                          "the cart could not have been paid for")
+
+    def test_a_kit_left_empty_in_the_cart_cannot_be_paid_for(self):
+        """Owner, 2026-10-28: "you shouldnt be able to add the custom kit to
+        the cart when there is nothing on it."
+
+        The controller refuses an empty one at the door, but a customer can
+        also DELETE every part out of the cart afterwards and leave the kit
+        sitting there. The excuse is that the money is on the lines hanging
+        off it; with nothing hanging off it there is no excuse."""
+        order = self.env["sale.order"].create({
+            "partner_id": self.env.ref("base.public_partner").id,
+            "website_id": self.website.id,
+            "order_line": [(0, 0, {
+                "product_id": self.kit.product_variant_id.id,
+                "product_uom_qty": 1, "price_unit": 0.0})],
+        })
+
+        self.assertTrue(order._get_zero_priced_lines(),
+                        "an empty kit could have been paid for")
 
     def test_an_ordinary_zero_priced_line_still_blocks_checkout(self):
         plain = self.env["product.template"].create({

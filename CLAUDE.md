@@ -376,6 +376,38 @@ Display only - the cart is priced on the server from what the session
 remembers - but a page saying $0.00 over a builder saying $236.91 is telling
 the customer something untrue.
 
+### AND AN EMPTY ONE CANNOT BE ADDED AT ALL (owner, 2026-10-28)
+
+*"you shouldnt be able to add the custom kit to the cart when there is nothing
+on it."*
+
+**REFUSED IN THE CONTROLLER, BEFORE `super()`** - `add_to_cart` reads the
+chosen parts (from the cart request, or the session where the page left them)
+and raises if there are none, so Odoo never writes the line. Checking
+afterwards would mean deleting a line the customer had just been told was
+added. `_aa_custom_kit_picked()` is the single answer both the guard and the
+packing read, because two readings of "empty" a moment apart is how a kit gets
+in that the guard thought had parts.
+
+**AND THE EXCUSE AT CHECKOUT IS NOW CONDITIONAL.** `_get_zero_priced_lines`
+excuses a kit line only while `linked_line_ids` is non-empty - the whole
+reason it may cost nothing is that the money is on the lines hanging off it,
+so nothing hanging off it is a zero-priced line like any other. That also
+catches what the controller cannot: a customer who DELETES every part out of
+the cart and leaves the kit behind.
+
+`_check_validity` stays permissive for the kit and must: it runs as the kit
+line is written and the parts are hung off it a moment AFTER, so asking for
+them there would refuse every kit, full ones included.
+
+The button is disabled while the kit is empty, with the reason on it - a
+courtesy, not the lock.
+
+**A TEST ASSERTED THE OPPOSITE.** `test_an_empty_kit_adds_nothing_but_itself`
+held that an empty kit still put its own line in the cart. That was never a
+decision - only what the code happened to do, because the parts were added
+after the line and an empty list added none. Rewritten, not deleted.
+
 ## Pickup slots (`aa_pickup_slots`)
 
 Owner, 2026-10-27: *"At checkout, the customer picks a pickup day and time

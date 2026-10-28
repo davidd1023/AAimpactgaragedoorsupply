@@ -608,6 +608,26 @@ class AAKitCart(AAOptionPricing, Cart):
                                                  door, qty, Catalog(request.env))
             plan = (variant, door, qty, extras, notes)
 
+        # AN EMPTY CUSTOM KIT IS A BOX OF NOTHING, AND IT IS REFUSED HERE.
+        #
+        # Owner, 2026-10-28: "you shouldnt be able to add the custom kit to the
+        # cart when there is nothing on it."
+        #
+        # BEFORE super(), so nothing is created and then tidied up. The kit
+        # line is written by Odoo's own route and the parts are hung off it
+        # afterwards, so a check made after the fact would have to delete a
+        # line a customer had just been told was added.
+        #
+        # It is also the LOCK rather than the courtesy: the button on the page
+        # is disabled while the kit is empty, but a button is not a lock, and
+        # /shop/cart/update can be posted to by anybody.
+        empty_kit = self._custom_kit(product_template_id)
+
+        if empty_kit and not self._aa_custom_kit_picked(empty_kit, custom_parts):
+            raise UserError(_(
+                "Choose at least one part before adding this kit to your"
+                " cart."))
+
         result = super().add_to_cart(
             product_template_id, product_id, quantity=quantity, uom_id=uom_id,
             product_custom_attribute_values=product_custom_attribute_values,
@@ -771,32 +791,47 @@ class AAKitCart(AAOptionPricing, Cart):
 
         return posted if isinstance(posted, list) else None
 
-    def _aa_add_custom_parts(self, template, kit_line, qty, posted=None):
-        """Book each chosen part as its own line, under the kit line.
+    def _aa_custom_kit_picked(self, template, posted=None):
+        """[(variant, quantity)] - what is actually in this kit right now.
 
-        Returns {line id: quantity added} so the popup can say what went in.
+        ONE ANSWER, ASKED TWICE: the guard in `add_to_cart` that refuses an
+        empty kit and the packing below must agree about what "empty" means,
+        or the cart gets a kit the guard thought had parts in it.
+
+        The list comes from the cart request if it carried one, and from the
+        session otherwise - the page leaves it there when it prices the kit,
+        because /shop/cart/add is Odoo's own route and has no room for it.
         """
         chosen = self._aa_posted_parts(posted)
         source = "the cart request"
 
         if chosen is None:
-            chosen = (request.session.get(CUSTOM_KIT_KEY) or {}).get(str(template.id))
+            chosen = (request.session.get(CUSTOM_KIT_KEY) or {}).get(
+                str(template.id))
             source = "the session"
 
         _logger.info(
-            "aa_dealer_orders: custom kit %s is being packed with %s part(s) "
-            "from %s", template.display_name, len(chosen or []), source)
-        picked = self._aa_custom_kit_chosen(template, chosen)
+            "aa_dealer_orders: custom kit %s reads %s part(s) from %s",
+            template.display_name, len(chosen or []), source)
+
+        return self._aa_custom_kit_chosen(template, chosen)
+
+    def _aa_add_custom_parts(self, template, kit_line, qty, posted=None):
+        """Book each chosen part as its own line, under the kit line.
+
+        Returns {line id: quantity added} so the popup can say what went in.
+        """
+        picked = self._aa_custom_kit_picked(template, posted)
         added = {}
 
         if not picked:
-            # SAID OUT LOUD. A custom kit with no parts is a box of nothing,
-            # and the only reason it can happen is that the page never got its
-            # list to us - so it is worth a line in the log rather than a
-            # cart that looks deliberate.
+            # SHOULD NOW BE UNREACHABLE: `add_to_cart` refuses an empty kit
+            # before Odoo creates the line. Kept, and still shouted about,
+            # because the two read the same list a moment apart and a kit line
+            # already written is not a thing to leave in a cart quietly.
             _logger.warning(
-                "aa_dealer_orders: %s went into a cart with no parts at all "
-                "(the page had sent: %s)", template.display_name, chosen)
+                "aa_dealer_orders: %s reached the cart with no parts at all",
+                template.display_name)
 
             return added
 
