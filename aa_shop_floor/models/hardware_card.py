@@ -259,7 +259,7 @@ class MrpProduction(models.Model):
         for label, value in (
             *self._aa_card_spring_rows(lines, specs),
             ("Drum", self._aa_card_drum(kit, specs, notes)),
-            ("Colour", self._aa_card_colour(kit)),
+            ("Color", self._aa_card_colour(kit)),
             ("Lift", self._aa_card_lift(kit, notes, lines)),
             ("Cable", self._aa_card_cable(lines)),
             ("Track", self._aa_card_track(lines)),

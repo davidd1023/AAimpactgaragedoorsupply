@@ -216,7 +216,7 @@ class HardwareCardCase(HttpCase):
         self.assertIn(".2253", rows["Spring (inner)"])
         self.assertIn("7.5", rows["Turns"])
         self.assertEqual(rows["Drum"], "D400-96")
-        self.assertEqual(rows["Colour"], "White")
+        self.assertEqual(rows["Color"], "White")
         self.assertEqual(rows["Lift"], "Standard")
 
     def test_the_turns_reach_the_order_from_the_calculator(self):
