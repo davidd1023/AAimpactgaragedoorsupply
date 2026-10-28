@@ -540,6 +540,35 @@ held that an empty kit still put its own line in the cart. That was never a
 decision - only what the code happened to do, because the parts were added
 after the line and an empty list added none. Rewritten, not deleted.
 
+### THE X ON THE TAX-EXEMPT PAGE THREW A JAVASCRIPT ERROR (owner, 2026-10-28)
+
+*"when trying to click the x on the top of the tax exempt dealer status page
+i got this error ... Cannot read properties of null (reading
+'defaultPrevented')"*
+
+**`portal.portal_back_in_edit_mode` IS NOT A BANNER, IT IS THE CONTENTS OF
+ONE** - a line of text plus a bare `btn-close` carrying
+`data-bs-dismiss="alert"`. Called on its own, as `resale_templates.xml` did,
+that button has no `.alert` above it: Bootstrap's `Alert.close()` looks for
+the element it is meant to dismiss, finds null, and reads `defaultPrevented`
+off it. **Every caller in Odoo's own code sets it as
+`o_portal_fullwidth_alert`**, which the portal layout wraps in `alert
+alert-info alert-dismissible` - that is the alert the X is for.
+
+**AND IT WAS SHOWN TO EVERY PORTAL USER**, because ours carried no `groups`
+while all of Odoo's do. A dealer reading their own certificate page was told
+they were looking at a "preview of the customer portal" and offered a way
+back into a back office they cannot open. It is `base.group_user` now.
+
+The link went to GENERAL SETTINGS, which has nothing to do with the page; it
+goes to the contact record, where the certificate is actually approved or
+rejected. `/my/...` means the SIGNED-IN USER'S own partner - a member of
+staff opening that page sees their own certificate page, not a dealer's.
+
+A test asserts the shape the browser trips over: **any
+`data-bs-dismiss="alert"` with no `.alert` ancestor**, read out of the
+rendered page with lxml.
+
 ## Pickup slots (`aa_pickup_slots`)
 
 Owner, 2026-10-27: *"At checkout, the customer picks a pickup day and time
