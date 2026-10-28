@@ -15,3 +15,4 @@ from . import test_wire_stock
 from . import test_cart_cost
 from . import test_variant_merge
 from . import test_track_facts
+from . import test_shop_price

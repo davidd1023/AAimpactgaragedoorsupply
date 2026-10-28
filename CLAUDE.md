@@ -76,6 +76,49 @@ only way to make one.
 has 5 failures and 2 errors on a clean tree** (checked by stashing). Nothing
 to do with duplex; it is about prepared-track brackets and fasteners.
 
+### THE SHOP CARD AND THE PRODUCT PAGE SHOWED DIFFERENT PRICES (owner, 2026-10-28)
+
+*"kit prices aren't matching, for example the aa-1200 hardware kit says 254.39
+when you first see it on the shop page, but when you enter its product page it
+says 293.97 on its default values."*
+
+**ODOO'S OWN DOING, and two methods that were never asked the same question.**
+The SHOP GRID calls `_get_sales_prices`, which prices the TEMPLATE -
+`pricelist._compute_price_rule(template, 1)` - with NO COMBINATION, so not one
+attribute extra is in it. The PRODUCT PAGE calls `_get_combination_info`,
+which with no combination picks `_get_first_possible_combination()` and prices
+THAT VARIANT. 293.97 - 254.39 = **39.58**, which is what his AA-1200's default
+values add.
+
+**IT IS NOT ONE KIT.** Since the merge of 2026-10-21 nearly every family here
+is priced as "the product's price plus an extra per size", so the grid has
+been under-stating hinges, shafts, brackets and the rest too. A kit only made
+it visible by putting forty dollars between the two screens.
+
+`spring_engineering/models/shop_grid_price.py` overrides `_get_sales_prices`
+to ask `_get_combination_info` for the very answer the page will give.
+**NOT BY ARITHMETIC**: the number Odoo worked out has already been through the
+pricelist, the fiscal position and the tax display setting, and an extra is
+none of those - on a tax-inclusive shop, adding it would land outside the tax.
+It only runs where `_aa_has_priced_attributes()` is true, which is a field
+read, so the rest of the catalogue pays nothing.
+
+**THE PAGE IS THE ONE THAT IS RIGHT.** The card could have said "from $254.39"
+instead, which is Odoo's reading of that number - but the first price the shop
+shows should not be one the customer can never pay.
+
+**`_get_sales_prices` CANNOT BE CALLED UNDER `MockRequest` either** - it reads
+`request.pricelist` and immediately subscripts it, and the mock is not
+subscriptable. Same trap as `_get_combination_info`. The tests FETCH both
+pages, which is also where he read the two numbers.
+
+**AND THE DEV DATABASE HAS A DEMO PRICELIST taking 10% off everything**, so no
+absolute figure asserted there means anything. The fault is a DIFFERENCE
+between two screens and that survives any pricelist, so the tests compare the
+two rather than measuring either. Fixtures also need UNIQUE NAMES: the shop is
+searched by name to get a grid of one card, and two fixtures called the same
+thing put two cards there, the first answering for both.
+
 ### Only the three visible Single spring IDs are used
 
 Stated earlier by the owner: *"we are not using all of the single spring id's only
