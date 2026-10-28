@@ -686,9 +686,49 @@ never typed: the host somebody is looking at Odoo through is right by
 definition, and a hostname anybody has to type is another week of this. It
 refuses outside a browser rather than writing an empty host.
 
-**THE FIX BY HAND, which needs no deploy**: set `web.base.url` to
-`https://www.aaimpactgaragedoorsupply.com` AND set `web.base.url.freeze` to
-`True`, both in Settings > Technical > System Parameters. Without the freeze
+**AND IN THE END IT IS NO LONGER A SETTING AT ALL** - owner, 2026-10-28:
+*"i dont see any technical option in the settings."* System Parameters sits
+behind Settings > **Technical**, which does not appear unless developer mode
+is on, so the fix I kept giving him was behind a door he could not open.
+
+**A STICKER PRINTED FROM A BROWSER NOW CARRIES THAT BROWSER'S ADDRESS**
+(`_aa_sticker_base_url`). Right by construction: somebody is looking at Odoo
+through that host, so it serves Odoo, so the sticker opens. No setting to
+find, nothing to type, nothing to get wrong - and it fixes itself on every
+site, Prod, staging and dev alike.
+
+**UNLESS THE BASE URL IS FROZEN, which is the line it does not cross.**
+`web.base.url.freeze` is an administrator SAYING which host is right, and
+being overruled by whoever last pressed Print would be worse than the fault.
+Unfrozen, Odoo is already rewriting that parameter to whichever host an admin
+last signed in from - so reading the request is the SAME POLICY applied per
+label instead of per login, and strictly more accurate. A label printed in
+the BACKGROUND has no request and still falls back to the parameter, which is
+why it is still shown in Settings.
+
+**WHAT THE APEX ACTUALLY DOES** - run down before any of this was written,
+and not what "not a domain of his" first suggested: Odoo.sh redirects it to
+`www` **for `/` only, dropping the path**. So `https://aaimpact...com/` 301s
+to the www root and the domain looks perfectly healthy typed into a browser,
+while `/web/login`, `/box/132/...` and every other deep path 404 - which is
+all a sticker QR is. That is why nothing looked wrong with the domain.
+
+**IT WAS NOT ONLY THE STICKERS.** Every page of the shop was declaring
+`<link rel="canonical" href="https://aaimpactgaragedoorsupply.com/shop">`,
+which 404s - Google being told the one true URL of each page is a dead one.
+Same single cause. The canonical comes from the Website record's **Website
+Domain** field (falling back to `web.base.url`), which is in Website >
+Configuration > Settings and needs no developer mode.
+
+**THE FIX BY HAND, if it is ever wanted**: set `web.base.url` to
+`https://www.aaimpactgaragedoorsupply.com` AND `web.base.url.freeze` to
+`True`, both in Settings > Technical > System Parameters.
+
+**HOW TO TELL WHICH COMMIT PROD IS RUNNING, with no access to it**: probe a
+behaviour only one version has. `/box/<id>/<bad token>` returning the
+sign-in page with a `%2F`-quoted redirect is `343854e` and nothing earlier -
+which is how it was established that he HAD merged, twenty minutes before
+the commit he was looking for. Without the freeze
 Odoo rewrites that host to whichever one an administrator last signed in
 from, which is how it became the apex and how it will become something else
 again - silently, because a QR code cannot be proof-read. The job form now

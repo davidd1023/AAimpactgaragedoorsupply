@@ -1097,9 +1097,11 @@ class StickerHostCase(StickerDispatchCase):
         self.assertTrue(parts.netloc, "the label names no host")
 
     def test_the_printed_host_is_whatever_the_setting_says(self):
-        """HIS FAULT, REPRODUCED. Point `web.base.url` at a host that cannot
-        serve the page and the label dutifully prints it - no error, no
-        warning, and nothing to see until somebody holds up a phone."""
+        """HIS FAULT, REPRODUCED - for a label printed with NO BROWSER behind
+        it (a cron, a shell), which is the only case the parameter still
+        decides. Point `web.base.url` at a host that cannot serve the page
+        and the label dutifully prints it: no error, no warning, nothing to
+        see until somebody holds up a phone."""
         job, _out = self._ready_job()
         self.env["ir.config_parameter"].sudo().set_param(
             "web.base.url", "https://not-odoo.example.com")
@@ -1107,6 +1109,56 @@ class StickerHostCase(StickerDispatchCase):
 
         self.assertEqual(urlsplit(self._printed_link(job)).netloc,
                          "not-odoo.example.com")
+
+    def test_printing_from_a_browser_uses_that_browser_s_address(self):
+        """THE FIX THAT NEEDS NO SETTING AT ALL.
+
+        `web.base.url` lives behind Settings > Technical, which does not
+        appear without developer mode - owner, 2026-10-28: *"i dont see any
+        technical option in the settings"*. So a sticker printed from a
+        browser now carries THAT BROWSER'S address, which is right by
+        construction: somebody is looking at Odoo through it, so it serves
+        Odoo, so the sticker opens.
+
+        PRINTED THROUGH THE REPORT ROUTE, not rendered in-process, because
+        the whole point is that there is a request to read - an in-process
+        render has none and would pass while proving nothing.
+        """
+        job, _out = self._ready_job()
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url", "https://the-apex-that-404s.example.com")
+        self.authenticate("admin", "admin")
+
+        printed = self.url_open(
+            "/report/html/aa_shop_floor.report_hardware_sticker/%d" % job.id)
+
+        self.assertEqual(printed.status_code, 200)
+        value = parse_qs(unescape(re.search(
+            r'/report/barcode/\?([^"\']+)', printed.text).group(1)))["value"]
+        host = urlsplit(unquote(value[0])).netloc
+
+        self.assertNotIn("the-apex-that-404s", host,
+                         "the label still carries the stale parameter")
+        self.assertEqual(host, urlsplit(self.base_url()).netloc)
+
+    def test_a_frozen_host_is_never_overruled_by_whoever_prints(self):
+        """THE LINE THIS DOES NOT CROSS. `web.base.url.freeze` is an
+        administrator SAYING which host is right; being overruled by whoever
+        last pressed Print would be worse than the fault it fixes."""
+        job, _out = self._ready_job()
+        params = self.env["ir.config_parameter"].sudo()
+        params.set_param("web.base.url", "https://chosen.example.com")
+        params.set_param("web.base.url.freeze", "True")
+        self.authenticate("admin", "admin")
+
+        printed = self.url_open(
+            "/report/html/aa_shop_floor.report_hardware_sticker/%d" % job.id)
+
+        value = parse_qs(unescape(re.search(
+            r'/report/barcode/\?([^"\']+)', printed.text).group(1)))["value"]
+
+        self.assertEqual(urlsplit(unquote(value[0])).netloc,
+                         "chosen.example.com")
 
     def test_the_job_names_the_host_the_sticker_will_use(self):
         """Which is why the host is now written beside the link, in words, on
@@ -1118,18 +1170,23 @@ class StickerHostCase(StickerDispatchCase):
 
         self.assertIn("not-odoo.example.com", job.aa_box_url_warning)
 
-    def test_an_unfrozen_host_is_warned_about(self):
-        """THE RECURRENCE, NOT THE SYMPTOM. Unless `web.base.url.freeze` is
-        set, Odoo rewrites the host to whichever one an administrator last
-        signed in from - so this comes back the next time somebody signs in
-        on a bare domain or a build URL, and comes back silently."""
+    def test_an_unfrozen_host_says_the_label_follows_the_printer(self):
+        """NOT A WARNING ANY MORE - the behaviour, stated.
+
+        While the base URL is unfrozen the label follows whoever prints it,
+        so the host beside the link is the host in this very address bar and
+        there is nothing to warn about. What still deserves saying is the one
+        case it does not cover: a label printed in the BACKGROUND, with no
+        browser to read, falls back to the parameter.
+        """
         job, _out = self._ready_job()
         self.env["ir.config_parameter"].sudo().set_param(
             "web.base.url.freeze", False)
         job.invalidate_recordset()
 
-        self.assertIn("NOT frozen", job.aa_box_url_warning)
-        self.assertIn("web.base.url.freeze", job.aa_box_url_warning)
+        self.assertIn("follows the address of whoever prints it",
+                      job.aa_box_url_warning)
+        self.assertIn("background", job.aa_box_url_warning)
 
     def test_a_frozen_host_is_reported_without_a_warning(self):
         job, _out = self._ready_job()

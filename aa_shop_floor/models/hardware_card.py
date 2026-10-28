@@ -28,6 +28,7 @@ from urllib.parse import quote, urlsplit
 
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError
+from odoo.http import request
 from odoo.tools.misc import hmac
 
 from .mrp_production import (
@@ -182,15 +183,21 @@ class MrpProduction(models.Model):
             host = urlsplit(production.aa_box_url or "").netloc or _("not set")
 
             if frozen and frozen not in ("0", "False", "false"):
+                # AN ADMINISTRATOR HAS SAID WHICH HOST IS RIGHT, so that is
+                # the one, whoever prints and from wherever.
                 production.aa_box_url_warning = _(
-                    "Stickers are printed pointing at %s.", host)
+                    "Every sticker is printed pointing at %s (fixed).", host)
             else:
+                # UNFROZEN, so the label follows whoever prints it - which is
+                # the host in THIS address bar, and therefore the host this
+                # line is being read through. Saying it plainly beats a
+                # warning: it is the behaviour, not a fault.
                 production.aa_box_url_warning = _(
-                    "Stickers are printed pointing at %s - and this host is"
-                    " NOT frozen, so Odoo will change it to whichever host an"
-                    " administrator next signs in from. Set"
-                    " web.base.url.freeze to True in Settings > Technical >"
-                    " System Parameters.", host)
+                    "Printed from here, the sticker will point at %s - a"
+                    " sticker follows the address of whoever prints it."
+                    " Printed in the background it uses web.base.url"
+                    " instead; fix that under Manufacturing > Settings >"
+                    " Sticker QR links.", host)
 
     # NOT STORED, like the two Overview boards. The card is read when somebody
     # asks for it - a tap, a print, a scan - and it is assembled from eight
@@ -657,9 +664,52 @@ class MrpProduction(models.Model):
     def _aa_box_url(self):
         """The whole link the QR code holds."""
         self.ensure_one()
+
+        return "%s/box/%d/%s" % (
+            self._aa_sticker_base_url(), self.id, self._aa_box_token())
+
+    def _aa_sticker_base_url(self):
+        """WHICH SITE A SCANNED STICKER OPENS - and it is no longer a setting.
+
+        THE HOST WAS THE WHOLE FAULT. Owner, 2026-10-28, three times over,
+        ending with the link itself: his stickers carried
+        `aaimpactgaragedoorsupply.com`, the apex, which Odoo.sh redirects to
+        `www` **for `/` only, dropping the path** - so the domain looks
+        perfectly healthy typed into a browser and 404s every deep path,
+        which is all a sticker QR is. `web.base.url` was the apex, and that
+        parameter lives behind Settings > Technical, which does not appear
+        without developer mode (*"i dont see any technical option in the
+        settings"*).
+
+        So THE PERSON PRINTING THE LABEL DECIDES IT, without knowing they
+        have: a sticker printed from a browser carries the address THAT
+        BROWSER IS ON. Which is right by construction - somebody is looking
+        at Odoo through it, so it serves Odoo, so the sticker opens. No
+        setting to find, nothing to type, and nothing to get wrong.
+
+        **ONLY WHILE THE BASE URL IS UNFROZEN**, which is the line this does
+        not cross. `web.base.url.freeze` is an administrator SAYING which
+        host is the right one, and being overruled by whoever last pressed
+        Print would be worse than the fault. Unfrozen, Odoo is already
+        rewriting that parameter to whichever host an admin last signed in
+        from - so reading the request is the very same policy, applied per
+        label instead of per login, and strictly more accurate.
+
+        Nothing printed in the BACKGROUND has a request to read - a cron, a
+        shell, a scheduled batch - and those fall back to the parameter,
+        which is why it still matters and still gets shown in Settings.
+        """
+        self.ensure_one()
+        params = self.env["ir.config_parameter"].sudo()
+        frozen = params.get_param("web.base.url.freeze")
         base = (self.get_base_url() or "").rstrip("/")
 
-        return "%s/box/%d/%s" % (base, self.id, self._aa_box_token())
+        if frozen and frozen not in ("0", "False", "false"):
+            return base
+
+        host = request and (request.httprequest.host_url or "").rstrip("/")
+
+        return host or base
 
     # --- what the sticker is printed on ---------------------------------------
     #
