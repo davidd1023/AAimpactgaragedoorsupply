@@ -1346,6 +1346,62 @@ never loaded: the screen would call a part fine while the rack is empty.
 one-colour fixture is named `Hinge (#1)` and tests nothing about
 `(Black, #1)`. That cost a test run.
 
+### ODOO DELETED THE MINIMUMS OF EVERY WELL-STOCKED PART (owner, 2026-10-29)
+
+*"some items dont have a minimum set even though you had the information, for
+example cut down hinges says no minimum set when on the excel it says the
+minimum is 288 for some of them."*
+
+**MY BUG, AND A NASTY ONE.** `stock.warehouse.orderpoint._unlink_processed_orderpoints`
+is an `@api.autovacuum` whose entire test is:
+
+```
+create_uid == SUPERUSER_ID  AND  trigger == 'manual'  AND  qty_to_order <= 0
+```
+
+The loader wrote its rules with `sudo()` from the install hook - **superuser** -
+and `manual` by deliberate choice, so Odoo's scheduler would not order
+anything by itself. That is Odoo's own description of a throwaway rule, so the
+moment a part was AT OR ABOVE its minimum and `qty_to_order` fell to nought,
+Odoo binned it.
+
+**THE HEALTHY PARTS LOST THEIR MINIMUMS AND THE SHORT ONES KEPT THEIRS**,
+which is the worst possible half to lose: nobody looks at a part that is
+fine, so it would have gone unnoticed until something ran out with no warning
+at all. Cut Down Hinge is well stocked, which is exactly why it was one of
+them.
+
+**IT IS NOT ONLY THE NIGHTLY VACUUM**: `_get_orderpoint_action()` runs the
+same cleanup, so merely OPENING Inventory > Operations > Replenishment does
+it - which is the screen he was told to use.
+
+**THE FIX IS ONE OF THE THREE CONDITIONS, and only one can be given up.**
+`qty_to_order` is arithmetic; `trigger` must stay `manual` or 97 parts below
+their minimum would send a wall of purchase orders out overnight. So the
+rules are created BY A REAL USER (`levels_user()` - the current user if it is
+not the superuser, then `base.user_admin`, then any active internal user).
+Proved both ways on this build: superuser-owned rules vanish, admin-owned
+ones survive.
+
+**THE REPAIR IS A MIGRATION (19.0.1.1.0) IN TWO STEPS, AND THE ORDER
+MATTERS.** First `repair_doomed_rules()` rebuilds the surviving rules under a
+real user **keeping the numbers they hold**, because one may carry a minimum
+he has changed by hand and the fault was who owned the rule, not what it
+said. Then `load_levels(only_missing=True)` brings back the rules Odoo has
+already deleted, **without writing over anything still standing**.
+
+**THE REPAIR IS CONFINED TO THE PART NUMBERS IN HIS FILE.** Odoo makes
+superuser-owned `manual` orderpoints of its own as scratch rows whenever
+Replenishment is opened on a product whose forecast is negative, and deletes
+them on purpose; repairing every rule of that shape would ADOPT them and fill
+the screen with rules nobody asked for.
+
+**A `str.replace(..., 1)` HIT THE WRONG FUNCTION.** The `with_user(owner)`
+edit landed on the first `Orderpoint = ...` in the file, which was inside the
+repair helper inserted moments earlier, and the module would not load
+(`UnboundLocalError`). When a file has two identical lines, edit by line
+number or by a unique anchor.
+
 ### A NEW MODULE IS NOT INSTALLED BY MERGING (owner, 2026-10-29)
 
 *"im not seeing it in reporting"* - with a screenshot of his Prod showing
