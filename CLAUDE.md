@@ -263,11 +263,31 @@ SIBLINGS of the cover, so a `t-set` buried in one of them is in scope for the
 others by luck rather than by rule; `po` is set beside `sections`, `door` and
 `lines` where the template already sets the sheet-wide values.
 
-**IT IS NOT SEARCHABLE ON SCREEN**, deliberately not done yet: a dealer rings
-up quoting HIS PO, so finding a work order by it is the obvious next ask -
-but `client_order_ref` lives on the order, so searching transfers by it needs
-a stored related field on `stock.picking`. Worth doing when asked, not
-guessed at.
+**AND THEN ON THE SCREEN** - owner, an hour later: *"can you make the po
+visible on the work order page"*.
+
+`aa_po_number` on `stock.picking`, **STORED**, which is the whole point: a
+method can SHOW a number but not FIND one, and finding is what this is for -
+a dealer telephones about PO-44821 and nobody here knows which of ours that
+is. It is on the FORM beside the Source Document (they are the same fact told
+twice, his name for the order and ours), as a COLUMN on the Work Orders list,
+and in the SEARCH box.
+
+**THE COLUMN IS NOT `optional`**, the same call as the Dispatch pickup
+column: `optional="show"` is shown only to somebody who has never touched
+that list's column chooser, and he has touched this one - it already carries
+Dispatched and the station badges.
+
+**NO MIGRATION.** Odoo backfills a stored computed column when it adds it,
+and that was PROVED rather than assumed: blank the column by hand, call
+`env.add_to_compute(field, all_records)` - which is Odoo's own mechanism -
+and the value comes back.
+
+**ONE GAP, WRITTEN DOWN RATHER THAN PAPERED OVER**: a transfer carrying only
+a Source Document is matched to its order BY NAME, and no `depends` can reach
+back through a string, so changing the reference on such an order does not
+follow until the transfer is touched. Every dealer order has a real
+`sale_id`; this is the route-made case only.
 
 ### ONE CANCELLATION EMAIL PER ORDER, WHOEVER CANCELS IT
 

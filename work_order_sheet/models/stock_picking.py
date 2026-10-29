@@ -221,6 +221,40 @@ class StockPicking(models.Model):
 
         return self.env["sale.order"].browse()
 
+    aa_po_number = fields.Char(
+        string="PO Number", compute="_compute_aa_po_number", store=True,
+        index=True, readonly=True,
+        help="The dealer's own purchase order number, from the Quick Order. "
+             "Stored on the transfer so a work order can be found by it - a "
+             "dealer rings up quoting his PO, not ours.")
+
+    @api.depends("sale_id.client_order_ref", "origin")
+    def _compute_aa_po_number(self):
+        """STORED, WHICH IS THE WHOLE POINT.
+
+        Owner, 2026-10-29: *"can you make the po visible on the work order
+        page"* - having had it printed an hour earlier.
+
+        A method would have been enough to SHOW it, but not to FIND it, and
+        finding is what this is for: a dealer telephones about PO-44821 and
+        nobody here knows which of ours that is. `client_order_ref` lives on
+        the sale order, and a search on a related path needs a column, so the
+        answer is a stored field on the transfer.
+
+        Existing transfers fill themselves in when the column is added -
+        Odoo computes a stored field for every row it creates - so there is
+        no migration.
+
+        ONE GAP, WRITTEN DOWN RATHER THAN PAPERED OVER: a transfer that has
+        only a Source Document is matched to its order by NAME, and no
+        dependency can reach back through a string. Change the reference on
+        such an order afterwards and this does not follow until the transfer
+        is touched. Every dealer order has a real `sale_id`, so this is the
+        route-made case only.
+        """
+        for picking in self:
+            picking.aa_po_number = picking._work_order_po_number()
+
     def _work_order_po_number(self):
         """THE DEALER'S OWN PO NUMBER, or empty.
 
