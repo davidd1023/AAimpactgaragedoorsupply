@@ -289,6 +289,49 @@ back through a string, so changing the reference on such an order does not
 follow until the transfer is touched. Every dealer order has a real
 `sale_id`; this is the route-made case only.
 
+### DISPATCHED FOR THE RECORD, WITHOUT USING ANY STOCK (owner, 2026-10-29)
+
+He asked first whether it was possible - *"is there a way to mark an order as
+sent without using up inventory?"* - and then for it, in the **Actions menu**
+of the Dispatch list with thirty transfers ticked, carrying his own warning:
+*"this is only for orders that used no actual inventory and is only to be
+used for records or testing, not for real orders."*
+
+**ODOO WILL NOT LET A TRANSFER BE DONE WHILE MOVING NOTHING**, and both
+obvious ways round it were MEASURED before anything was written:
+
+- **All quantities at nought** (with `skip_sanity_check`, which is a
+  supported context key): `_action_done` CANCELS a zero-quantity move, so the
+  transfer ends up **Cancelled**, not dispatched. Stock untouched, but it is
+  not "sent".
+- **Dispatching with an empty rack**: Odoo does not block at all - it takes
+  the quant **negative** (-5 in the rehearsal). That is the opposite of what
+  he asked for.
+
+**SO EVERY LINE IS DELIVERED TO WHERE IT CAME FROM.** `line.location_dest_id
+= line.location_id`, at the full quantity, through Odoo's own
+`button_validate` - so the transfer is genuinely Done and the order genuinely
+reads as delivered - and because the source and destination are the same
+quant, the decrement and the increment are the same number. Measured: 45 on
+hand before, 45 after, 50 in the building either way.
+
+**THE CHATTER SAYS WHAT HAPPENED.** A transfer reading Done while the shelf
+never moved is a lie unless somebody wrote it down, and whoever opens that
+order in six months needs to know why its stock never went anywhere.
+
+**STOCK MANAGERS ONLY** (`group_ids` on the server action). On a real order
+this silently breaks the count of everything on it, which is what his own
+warning says; the group makes the warning true.
+
+**ONE AWKWARD TRANSFER DOES NOT ABANDON THE OTHER TWENTY-NINE** - he had
+thirty selected. Each is tried on its own and the refusals are named back.
+
+Two Odoo 19 details that each cost a load: **`ir.actions.server` has
+`group_ids`, not `groups_id`** (the module would not install), and **a
+`alert-heading` class inside an alert trips the view checker's accessibility
+rule** - every `alert-*` class wants an alert role, which a heading cannot
+carry.
+
 ### ONE CANCELLATION EMAIL PER ORDER, WHOEVER CANCELS IT
 
 Owner, 2026-10-27: *"i need you to make it so the user gets an email when
