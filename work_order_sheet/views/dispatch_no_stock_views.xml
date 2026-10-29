@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE WARNING HE ASKED FOR, in his own words, before anything happens. -->
+  <record id="view_aa_dispatch_no_stock_form" model="ir.ui.view">
+    <field name="name">aa.dispatch.no.stock.form</field>
+    <field name="model">aa.dispatch.no.stock</field>
+    <field name="arch" type="xml">
+      <form string="Dispatch Without Using Inventory">
+        <div class="alert alert-danger" role="alert">
+          <!-- NOT `alert-heading`: Odoo's view checker wants every
+               `alert-*` class to carry an alert role, and a heading inside
+               the alert cannot. A plain bold line says the same thing. -->
+          <h4 class="mb-2 fw-bold">
+            <i class="fa fa-exclamation-triangle me-2"/>Warning
+          </h4>
+          <field name="warning" nolabel="1" readonly="1"
+                 class="mb-0 fw-bold" widget="text"/>
+        </div>
+
+        <group>
+          <field name="to_do_count" string="Transfers to dispatch"/>
+          <!-- Shown only when some of the selection is already settled, so
+               nobody wonders why thirty went in and twenty-eight came out. -->
+          <field name="settled_count" string="Already done or cancelled"
+                 invisible="not settled_count"/>
+        </group>
+
+        <p class="text-muted">
+          Every line will be marked delivered to the location it came from,
+          so no stock moves. The transfer reads Dispatched and the order
+          reads delivered; the chatter records that no inventory was used.
+        </p>
+
+        <field name="picking_ids" invisible="1"/>
+
+        <footer>
+          <button name="action_confirm" type="object" class="btn-danger"
+                  string="Dispatch without using inventory"
+                  invisible="not to_do_count"/>
+          <button string="Cancel" class="btn-secondary" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <!-- IN THE ACTIONS MENU of the Dispatch list, where he asked for it. A
+       SERVER ACTION bound to the model is what puts an entry there, and it
+       takes the whole selection - he had thirty ticked in the screenshot.
+
+       STOCK MANAGERS ONLY: on a real order this silently breaks the count of
+       everything on it, which is what his own warning says. -->
+  <record id="action_aa_dispatch_no_stock" model="ir.actions.server">
+    <field name="name">Dispatch without using inventory</field>
+    <field name="model_id" ref="stock.model_stock_picking"/>
+    <field name="binding_model_id" ref="stock.model_stock_picking"/>
+    <field name="binding_view_types">list,form</field>
+    <field name="group_ids" eval="[(4, ref('stock.group_stock_manager'))]"/>
+    <field name="state">code</field>
+    <field name="code">action = records.action_aa_dispatch_no_stock_wizard()</field>
+  </record>
+
+</odoo>
