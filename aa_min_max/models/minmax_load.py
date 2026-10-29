@@ -34,7 +34,7 @@ import logging
 import os
 import re
 
-from odoo import _
+from odoo import SUPERUSER_ID, _
 
 _logger = logging.getLogger(__name__)
 
@@ -54,6 +54,108 @@ def flatten(text):
     spreadsheet and back cannot be trusted to have kept either.
     """
     return re.sub(r"[^a-z0-9]+", "", (text or "").lower())
+
+
+def levels_user(env):
+    """WHO THE REORDERING RULES MUST BELONG TO, and this is not cosmetic.
+
+    Odoo garbage-collects its own throwaway reordering rules in
+    `_unlink_processed_orderpoints`, an `@api.autovacuum` whose entire test
+    is::
+
+        create_uid == SUPERUSER_ID  AND  trigger == 'manual'
+                                    AND  qty_to_order <= 0
+
+    Creating ours with `sudo()` from the install hook made every one of them
+    fit that description exactly - superuser, and `manual` by deliberate
+    choice so Odoo's scheduler would not order anything by itself. So the
+    moment a part was AT OR ABOVE its minimum, `qty_to_order` fell to nought
+    and Odoo threw the rule away. **The healthy parts lost their minimums and
+    the short ones kept theirs**, which is the worst possible half to lose:
+    nobody looks at a part that is fine, so nobody would notice until it ran
+    out with no warning at all.
+
+    Owner, 2026-10-29: *"some items dont have a minimum set even though you
+    had the information, for example cut down hinges says no minimum set when
+    on the excel it says the minimum is 288 for some of them."* Cut Down Hinge
+    is well stocked, which is exactly why it was one of them.
+
+    It is not only the nightly vacuum: `_get_orderpoint_action()` calls the
+    same cleanup, so merely OPENING Inventory > Operations > Replenishment
+    does it.
+
+    The fix is one word of the three - the rules are created by a REAL USER.
+    `trigger` stays `manual`, because 97 parts below their minimum would have
+    sent a wall of purchase orders out the night this installed.
+    """
+    if env.uid != SUPERUSER_ID and env.user.active:
+        return env.user
+
+    admin = env.ref("base.user_admin", raise_if_not_found=False)
+
+    if admin and admin.active:
+        return admin
+
+    # Any real person who could have written the rule by hand.
+    somebody = env["res.users"].sudo().search(
+        [("id", "!=", SUPERUSER_ID), ("active", "=", True),
+         ("share", "=", False)], limit=1)
+
+    if somebody:
+        return somebody
+
+    _logger.warning(
+        "aa_min_max: no non-superuser to own the reordering rules; Odoo's "
+        "autovacuum will delete them once the stock is healthy")
+
+    return env.user
+
+
+def repair_doomed_rules(env, codes=None):
+    """Re-make any rule Odoo is going to throw away, keeping its numbers.
+
+    A REPAIR, NOT A RELOAD. These rules may carry a minimum he has since
+    changed by hand, so they are rebuilt with the values they hold rather
+    than with the values in the file - the fault was who owned them, not what
+    they said.
+
+    **ONLY THE PARTS IN HIS FILE.** Odoo makes superuser-owned `manual`
+    orderpoints of its own, as scratch rows, every time somebody opens
+    Replenishment for a product whose forecast has gone negative - and it
+    deletes them again on purpose. Repairing every rule of that shape would
+    ADOPT Odoo's scratch rows and make them permanent, filling the
+    Replenishment screen with rules nobody asked for. So the repair is
+    confined to the part numbers this module loaded.
+    """
+    if codes is None:
+        codes = {row["code"] for row in read_levels()}
+
+    Orderpoint = env["stock.warehouse.orderpoint"].sudo()
+    doomed = Orderpoint.with_context(active_test=False).search([
+        ("create_uid", "=", SUPERUSER_ID), ("trigger", "=", "manual"),
+        ("product_id.default_code", "in", list(codes))])
+
+    if not doomed:
+        return 0
+
+    owner = levels_user(env)
+
+    if owner.id == SUPERUSER_ID:
+        return 0
+
+    kept = [{
+        "product_id": rule.product_id.id,
+        "warehouse_id": rule.warehouse_id.id,
+        "location_id": rule.location_id.id,
+        "product_min_qty": rule.product_min_qty,
+        "product_max_qty": rule.product_max_qty,
+        "trigger": "manual",
+    } for rule in doomed]
+
+    doomed.unlink()
+    Orderpoint.with_user(owner).create(kept)
+
+    return len(kept)
 
 
 def read_levels():
@@ -127,7 +229,7 @@ def _match(env, row, by_code):
                    row["code"], len(named), row["name"])
 
 
-def load_levels(env, set_vendors=True, rows=None):
+def load_levels(env, set_vendors=True, rows=None, only_missing=False):
     """Write his minimums onto Odoo's reordering rules. Re-runnable.
 
     Returns a notification describing what happened - loaded, left alone, and
@@ -138,7 +240,10 @@ def load_levels(env, set_vendors=True, rows=None):
     # number, an ambiguous name - without shipping fixtures in the data file.
     rows = read_levels() if rows is None else rows
     Product = env["product.product"].sudo()
-    Orderpoint = env["stock.warehouse.orderpoint"].sudo()
+    # A REAL USER, NEVER THE SUPERUSER - see `levels_user`. A rule owned by
+    # OdooBot is a rule Odoo deletes the moment the part is well stocked.
+    owner = levels_user(env)
+    Orderpoint = env["stock.warehouse.orderpoint"].sudo().with_user(owner)
     warehouse = env["stock.warehouse"].search(
         [("company_id", "=", env.company.id)], limit=1)
 
@@ -179,8 +284,10 @@ def load_levels(env, set_vendors=True, rows=None):
                   "product_max_qty": row["max_qty"] or row["min_qty"]}
 
         if orderpoint:
-            if all(abs(orderpoint[key] - value) < 1e-6
-                   for key, value in values.items()):
+            # `only_missing` is for the repair: restore what was deleted
+            # without writing over a minimum he has since changed himself.
+            if only_missing or all(abs(orderpoint[key] - value) < 1e-6
+                                   for key, value in values.items()):
                 unchanged += 1
             else:
                 orderpoint.write(values)

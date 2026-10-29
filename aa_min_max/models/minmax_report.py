@@ -143,7 +143,13 @@ class AaStockMinMax(models.Model):
         if not orderpoint:
             warehouse = self.env["stock.warehouse"].search(
                 [("company_id", "=", self.env.company.id)], limit=1)
-            orderpoint = self.env["stock.warehouse.orderpoint"].create({
+            # BY A REAL USER, like every rule this module writes. A manual
+            # rule owned by the superuser is one Odoo's autovacuum deletes the
+            # moment the part is well stocked - see `levels_user`.
+            from .minmax_load import levels_user
+
+            orderpoint = self.env["stock.warehouse.orderpoint"].sudo().with_user(
+                levels_user(self.env)).create({
                 "product_id": self.product_id.id,
                 "warehouse_id": warehouse.id,
                 "location_id": warehouse.lot_stock_id.id,

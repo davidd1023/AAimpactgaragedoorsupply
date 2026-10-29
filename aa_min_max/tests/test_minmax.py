@@ -12,6 +12,7 @@ belongs to a whole family and `CH1108` alone cannot tell eight jamb brackets
 apart.
 """
 
+from odoo import SUPERUSER_ID
 from odoo.tests.common import TransactionCase, tagged
 
 from odoo.addons.aa_min_max.models.minmax_load import (
@@ -19,6 +20,7 @@ from odoo.addons.aa_min_max.models.minmax_load import (
     flatten,
     load_levels,
     read_levels,
+    repair_doomed_rules,
 )
 
 
@@ -381,3 +383,122 @@ class MinMaxCase(TransactionCase):
         self.assertEqual(rule.product_id, part)
         self.assertEqual(rule.trigger, "manual")
         self.assertAlmostEqual(rule.product_min_qty, 0.0, 2)
+
+    # --- the minimums Odoo threw away ----------------------------------------
+
+    def test_a_well_stocked_part_keeps_its_minimum(self):
+        """THE ONE THAT WOULD HAVE CAUGHT IT.
+
+        Owner, 2026-10-29: *"some items dont have a minimum set even though
+        you had the information, for example cut down hinges says no minimum
+        set when on the excel it says the minimum is 288."*
+
+        Odoo's `_unlink_processed_orderpoints` autovacuum deletes any rule
+        that is superuser-owned AND `manual` AND has nothing to order. Written
+        by `sudo()` from the install hook, every rule here fitted that exactly -
+        so the moment a part was at or above its minimum the rule vanished.
+        **The healthy parts lost their minimums and the short ones kept
+        theirs**, which is the worst half to lose: nobody looks at a part that
+        is fine.
+
+        It is not only the nightly vacuum - `_get_orderpoint_action()` runs
+        the same cleanup, so merely opening Replenishment does it.
+        """
+        part = self.a_part("Cut Down Hinge", "CH1407-KEEP", on_hand=5000)
+        load_levels(self.env, rows=[
+            self.row("CH1407-KEEP", "Cut Down Hinge", 288)])
+        self.env.flush_all()
+
+        self.env["stock.warehouse.orderpoint"]._unlink_processed_orderpoints()
+
+        self.assertTrue(self.level(part).exists(),
+                        "Odoo deleted the minimum of a well-stocked part")
+        self.assertAlmostEqual(self.report(part).min_qty, 288, 2)
+        self.assertEqual(self.report(part).status, "ok")
+
+    def test_the_rules_are_not_owned_by_the_superuser(self):
+        """Which is the whole of the fix: one of the three conditions Odoo's
+        cleanup tests for, and the only one we can give up. `trigger` must
+        stay `manual` or the scheduler orders by itself."""
+        part = self.a_part("Roller", "ROLL-OWNER")
+
+        load_levels(self.env, rows=[self.row("ROLL-OWNER", "Roller", 200)])
+
+        rule = self.level(part)
+
+        self.assertNotEqual(rule.create_uid.id, SUPERUSER_ID)
+        self.assertEqual(rule.trigger, "manual")
+
+    def test_a_part_that_still_needs_ordering_was_never_at_risk(self):
+        """The half that survived, which is why it looked like it worked."""
+        part = self.a_part("Roller", "ROLL-SHORT", on_hand=10)
+        load_levels(self.env, rows=[self.row("ROLL-SHORT", "Roller", 200)])
+        self.env.flush_all()
+
+        self.env["stock.warehouse.orderpoint"]._unlink_processed_orderpoints()
+
+        self.assertTrue(self.level(part).exists())
+
+    def test_a_rule_left_over_from_the_old_build_is_repaired(self):
+        """His Prod is full of superuser-owned rules written before this was
+        understood. They are rebuilt under a real user, KEEPING THEIR
+        NUMBERS - one may carry a minimum he has changed by hand since, and
+        the fault was who owned the rule, not what it said."""
+        part = self.a_part("Roller", "ROLL-REPAIR", on_hand=5000)
+        doomed = self.env["stock.warehouse.orderpoint"].sudo().create({
+            "product_id": part.id,
+            "warehouse_id": self.warehouse.id,
+            "location_id": self.warehouse.lot_stock_id.id,
+            "trigger": "manual",
+            "product_min_qty": 350.0, "product_max_qty": 350.0})
+
+        self.assertEqual(doomed.create_uid.id, SUPERUSER_ID)
+
+        repair_doomed_rules(self.env, codes={"ROLL-REPAIR"})
+        self.env.flush_all()
+        self.env["stock.warehouse.orderpoint"]._unlink_processed_orderpoints()
+
+        rule = self.level(part)
+
+        self.assertTrue(rule.exists(), "the repaired rule was still deleted")
+        self.assertNotEqual(rule.create_uid.id, SUPERUSER_ID)
+        self.assertAlmostEqual(rule.product_min_qty, 350.0, 2,
+                               "the repair lost the number it was holding")
+
+    def test_the_repair_leaves_odoo_s_own_scratch_rules_alone(self):
+        """Odoo makes superuser-owned `manual` rules of its own whenever
+        somebody opens Replenishment on a product whose forecast has gone
+        negative, and deletes them again on purpose. Adopting those would
+        fill the screen with rules nobody asked for."""
+        stray = self.a_part("Not in his file", "NOT-IN-FILE", on_hand=5000)
+        scratch = self.env["stock.warehouse.orderpoint"].sudo().create({
+            "product_id": stray.id,
+            "warehouse_id": self.warehouse.id,
+            "location_id": self.warehouse.lot_stock_id.id,
+            "trigger": "manual",
+            "product_min_qty": 0.0, "product_max_qty": 0.0})
+
+        repair_doomed_rules(self.env, codes={"SOMETHING-ELSE"})
+
+        self.assertTrue(scratch.exists(), "Odoo's own scratch rule was taken over")
+        self.assertEqual(scratch.create_uid.id, SUPERUSER_ID)
+
+    def test_the_repair_restores_a_minimum_that_was_already_deleted(self):
+        """The other half of the migration: a rule Odoo has already binned
+        comes back from the file, while anything still standing is left as it
+        is."""
+        part = self.a_part("Cut Down Hinge", "CH1408-GONE", on_hand=5000)
+        kept = self.a_part("Roller", "ROLL-EDITED", on_hand=5000)
+        rows = [self.row("CH1408-GONE", "Cut Down Hinge", 288),
+                self.row("ROLL-EDITED", "Roller", 200)]
+        load_levels(self.env, rows=rows)
+        # He changes one by hand, and Odoo deletes the other.
+        self.level(kept).write({"product_min_qty": 999, "product_max_qty": 999})
+        self.level(part).unlink()
+
+        load_levels(self.env, rows=rows, only_missing=True)
+
+        self.assertAlmostEqual(self.level(part).product_min_qty, 288, 2,
+                               "the deleted minimum did not come back")
+        self.assertAlmostEqual(self.level(kept).product_min_qty, 999, 2,
+                               "his own edit was written over")
