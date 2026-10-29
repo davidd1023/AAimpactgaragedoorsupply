@@ -1449,3 +1449,53 @@ class TestWorkOrderPoNumber(TransactionCase):
         self.assertGreaterEqual(
             sheet.count("PO-5150"), 2,
             "the PO appeared once, so it is on the cover only")
+
+    # --- on the screen, not only on the paper --------------------------------
+
+    def test_the_po_is_stored_on_the_transfer(self):
+        """Owner, 2026-10-29: *"can you make the po visible on the work order
+        page"*. Stored rather than computed on the fly, because a method can
+        SHOW it but not FIND it."""
+        order = self._order("PO-44821")
+
+        self.assertEqual(self._picking_for(order).aa_po_number, "PO-44821")
+
+    def test_a_work_order_can_be_found_by_the_dealers_own_number(self):
+        """THE REASON IT IS STORED. A dealer telephones about PO-44821 and
+        nobody here knows which of ours that is."""
+        wanted = self._order("PO-44821")
+        self._order("PO-00000")
+
+        found = self.env["stock.picking"].search(
+            [("aa_po_number", "=", "PO-44821")])
+
+        self.assertEqual(found, self._picking_for(wanted))
+
+    def test_changing_the_reference_updates_the_transfer(self):
+        order = self._order("PO-OLD")
+        picking = self._picking_for(order)
+
+        order.client_order_ref = "PO-NEW"
+
+        self.assertEqual(picking.aa_po_number, "PO-NEW")
+
+    def test_a_transfer_with_no_order_stores_nothing(self):
+        loose = self._loose_picking("NOT-AN-ORDER")
+
+        self.assertFalse(loose.aa_po_number)
+
+    def test_the_column_is_not_optional_so_it_is_actually_there(self):
+        """An `optional="show"` column is shown only to somebody who has never
+        touched that list's column chooser, and he has touched this one - it
+        carries Dispatched and the station badges. The pickup column cost a
+        round of exactly this."""
+        arch = self.env.ref(
+            "work_order_sheet.vpicktree_work_stations").arch
+
+        self.assertIn('name="aa_po_number"', arch)
+        self.assertNotIn('name="aa_po_number" optional', arch)
+
+    def test_it_is_on_the_transfer_form_and_in_the_search(self):
+        for view in ("work_order_sheet.view_picking_form_work_stations",
+                     "work_order_sheet.view_picking_internal_search_work_stations"):
+            self.assertIn('name="aa_po_number"', self.env.ref(view).arch, view)

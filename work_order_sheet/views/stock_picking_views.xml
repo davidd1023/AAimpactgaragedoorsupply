@@ -19,6 +19,17 @@
     <field name="inherit_id" ref="stock.view_picking_form"/>
     <field name="arch" type="xml">
 
+      <!-- THE DEALER'S PO, BESIDE OUR OWN REFERENCE (owner, 2026-10-29:
+           "can you make the po visible on the work order page"). Next to the
+           Source Document on purpose: they are the same fact told twice, his
+           name for this order and ours, and somebody holding his email needs
+           to see both at once. Hidden when there is none, because a website
+           order has no reference and an empty box invites somebody to fill
+           it in. -->
+      <xpath expr="//field[@name='origin']" position="after">
+        <field name="aa_po_number" invisible="not aa_po_number"/>
+      </xpath>
+
       <!-- THE DELIVERY NOTE THAT SIGNS ITSELF BACK, on the order it belongs
            to: the link to hand the driver, when the form was made, and what
            came back. -->
@@ -79,6 +90,14 @@
     <field name="inherit_id" ref="stock.vpicktree"/>
     <field name="arch" type="xml">
       <xpath expr="//field[@name='state']" position="before">
+        <!-- NOT `optional`. An `optional="show"` column is shown only to
+             somebody who has never touched that list's column chooser, and
+             anybody who has keeps the set they saved - so a column added
+             afterwards arrives HIDDEN behind the toggle at the right-hand
+             end. He has touched this list; it already carries Dispatched and
+             the station badges. The pickup column cost a round of exactly
+             this. -->
+        <field name="aa_po_number"/>
         <field name="dispatch_state" optional="show" widget="badge"
                decoration-success="dispatch_state == 'signed'"
                decoration-warning="dispatch_state == 'open'"/>
@@ -92,6 +111,11 @@
     <field name="inherit_id" ref="stock.view_picking_internal_search"/>
     <field name="arch" type="xml">
       <xpath expr="//search" position="inside">
+        <!-- TYPE HIS PO INTO THE SEARCH BOX. A dealer telephones about
+             PO-44821 and nobody here knows which of ours that is; this is
+             the whole reason the field is stored rather than computed on the
+             fly. -->
+        <field name="aa_po_number" string="PO Number"/>
         <filter name="dispatch_unsigned" string="Not signed for"
                 domain="[('dispatch_state', '=', 'open')]"/>
       </xpath>
