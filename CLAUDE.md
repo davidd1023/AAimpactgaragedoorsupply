@@ -1284,6 +1284,92 @@ uncommitted one, because it reaches Prod the next time main is merged.
 The push lands on this build's branch (`main`). Prod is still the owner's own
 merge - never commit to or push the `Prod` branch directly.
 
+## A minimum per part (`aa_min_max`)
+
+Owner, 2026-10-29: *"make minimum and maximum of each item, same thing we did
+for the spring in which we need to make a warning when an item is below its
+minimum so that we can make a reorder of that product. I want you to show this
+all in a new menu youll make in inventory, in the reporting tab, so that way we
+can easily see the max and min of each item. the list doesn't currently show
+the max so we can just worry about the minimum for now"* - with the filled-in
+spreadsheet attached.
+
+**HE FILLED IN 157 MINIMUMS AND LEFT 98 BLANK.** The blanks are his own rule,
+written on the workbook's "How to fill" tab: *"Leave Min and Max blank for
+parts you don't want to track."* They load as nothing at all and read as
+**Untracked**, never as below - a blank taken for nought would put every nut
+and bolt in the shop on the warning list. **Every maximum came back blank.**
+
+**THE LEVELS LIVE IN ODOO'S OWN REORDERING RULES** (`stock.warehouse.orderpoint`),
+not in two fields of ours. That is the design decision: a minimum stock level
+is not a new idea, and putting his numbers there means the reorder he is
+heading towards is **Odoo's Replenishment screen**, which counts incoming
+purchase orders and applies the supplier's lead time. A field of our own would
+have been a second truth to keep in step and would have had to be migrated
+into reordering rules the day he wanted the purchase order.
+
+**ODOO REFUSES A MAXIMUM BELOW THE MINIMUM** - "The minimum quantity must be
+less than or equal to the maximum quantity" - so "minimum only" is not
+directly storable. A blank maximum is written AS THE MINIMUM, which in Odoo's
+terms means "order just enough to get back to the minimum". **The screen then
+blanks a maximum equal to the minimum** (`NULLIF`), so the column stays empty
+exactly where he left it empty instead of showing 157 rows of a figure he
+never chose.
+
+**THE RULES ARE WRITTEN `manual`, NEVER `auto`.** An `auto` rule is picked up
+by Odoo's scheduler, which raises purchase orders by itself - and 97 of the
+157 parts are ALREADY below their minimum, so installing this with `auto`
+would have sent a wall of orders to four suppliers the same night.
+
+### A PART NUMBER NO LONGER IDENTIFIES A PART
+
+**THIRTY-TWO of the codes in his file are shared**, because of the catalogue
+merge of 2026-10-21: `CH1108` is all EIGHT jamb brackets, `CH1119D` all four
+spring anchor brackets, `CH1411-1` three colours of one hinge. Matching on the
+code alone would have put one bracket's minimum on eight **and looked like it
+worked**.
+
+So the match is code first, then the variant's own name as Odoo prints it
+(`Jamb Bracket (Black, #10)`) - the Product column of his file was generated
+FROM his Odoo, so the names agree by construction. **THREE TIERS, STRICTEST
+FIRST**: the full name, then ends-with, then contains. A loose match alone is
+how `#1` swallows `#10` - `hingeblack1` is a substring of `hingeblack10`. His
+hinges stop at #9 and his jamb brackets start at #10 so nothing collides
+today; a test holds it for the day one does.
+
+**NOTHING IS GUESSED.** A row matching no product, or still several after the
+name, is REPORTED BY NAME and not loaded - "12 rows skipped" is not something
+anybody can act on. A minimum silently on the wrong variant is worse than one
+never loaded: the screen would call a part fine while the rack is empty.
+
+**ODOO LEAVES A SINGLE-VALUE ATTRIBUTE OUT OF THE VARIANT NAME**, so a
+one-colour fixture is named `Hinge (#1)` and tests nothing about
+`(Black, #1)`. That cost a test run.
+
+### The screen
+
+**Inventory > Reporting > Min / Max Levels**, where he asked for it. It opens
+on **Below Minimum**, because "what needs ordering" is the question it exists
+to answer; every part is one click away on the Status filters.
+
+**"SHORT BY" IS THE COLUMN THAT MAKES IT USABLE.** Ninety-seven parts are
+below their minimum on day one, since the minimums cover 180 doors. A screen
+of 97 red rows in no particular order is 97 rows of undifferentiated alarm;
+sorted by how far below, the top of it is what to ring the supplier about this
+morning.
+
+A report is a DATABASE VIEW and cannot be typed into, so each row has a button
+opening its own reordering rule - the minimum he disagrees with is the one he
+wants to change there and then. Loading is re-runnable from
+`action_load_levels`; the first install does it from `post_init_hook` and sets
+`aa_min_max.levels_loaded` so a later update never undoes his edits.
+
+**HIS VENDOR COLUMN IS LOADED TOO** (Iowa Spring, CHI Hardware, Arrow
+Tru-Line, Action Industries) onto any part that names NO vendor - Odoo cannot
+raise a purchase order without one, and leaving it on the floor means asking
+him for the same thing again. **It never overwrites**: a part that already
+names a vendor is purchasing's own data, with prices and lead times behind it.
+
 ## Spring coil stock (`aa_spring_stock`)
 
 Coils are COIL-<wire>-<I.D.>-<L/R>, in inches, one lot per piece, under
