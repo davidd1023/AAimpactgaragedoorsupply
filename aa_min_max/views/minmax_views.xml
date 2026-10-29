@@ -33,7 +33,12 @@
         <field name="status" widget="badge"
                decoration-danger="status == 'below'"
                decoration-success="status == 'ok'"
+               decoration-warning="status == 'unmatched'"
                decoration-muted="status == 'untracked'"/>
+        <!-- WHY a part has no minimum, which is the question he asked twice:
+             nothing was ever given for it, or something was and could not be
+             placed. The screen used to say the same words for both. -->
+        <field name="why" string="Why No Minimum" optional="show"/>
         <!-- A REPORT CANNOT BE TYPED INTO - it is a database view - and the
              minimum he disagrees with is the one he wants to change there and
              then. -->
@@ -57,6 +62,8 @@
                 domain="[('status', 'in', ('below', 'ok'))]"/>
         <filter name="untracked" string="No Minimum Set"
                 domain="[('status', '=', 'untracked')]"/>
+        <filter name="unmatched" string="In Your File - Not Matched"
+                domain="[('status', '=', 'unmatched')]"/>
         <separator/>
         <filter name="has_vendor" string="Has a Vendor"
                 domain="[('vendor_id', '!=', False)]"/>

@@ -58,8 +58,13 @@ class AaStockMinMax(models.Model):
     status = fields.Selection([
         ("below", "Below Minimum"),
         ("ok", "OK"),
+        ("unmatched", "In Your File - Not Matched"),
         ("untracked", "No Minimum Set"),
     ], string="Status", readonly=True)
+    why = fields.Char(
+        string="Why No Minimum", readonly=True,
+        help="For a part with no minimum: whether a figure was ever given "
+             "for it, and if one was, why it could not be placed.")
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
@@ -83,6 +88,16 @@ class AaStockMinMax(models.Model):
                   FROM stock_warehouse_orderpoint op
                  WHERE op.active
                  GROUP BY op.product_id
+            ), from_file AS (
+                -- WHAT HIS FILE SAID ABOUT THIS PART, matched or not. A part
+                -- with no minimum is one of two completely different things -
+                -- nothing was ever given for it, or something was and could
+                -- not be placed - and the screen used to say the same words
+                -- for both.
+                SELECT DISTINCT ON (code) code, state, note
+                  FROM aa_minmax_level
+                 WHERE code IS NOT NULL AND code != ''
+                 ORDER BY code, (state = 'loaded') DESC, id
             ), vend AS (
                 -- The first vendor on the part, by the sequence the purchase
                 -- module already orders them in - so this agrees with whoever
@@ -111,18 +126,28 @@ class AaStockMinMax(models.Model):
                    CASE
                      -- HIS OWN RULE: blank means do not track this part, and
                      -- it must never read as nought.
+                     WHEN COALESCE(l.min_qty, 0) <= 0
+                          AND f.state = 'unmatched' THEN 'unmatched'
                      WHEN COALESCE(l.min_qty, 0) <= 0 THEN 'untracked'
                      -- "when stock gets to this number or lower" - his words
                      -- in the spreadsheet, so at the minimum IS below it.
                      WHEN COALESCE(oh.qty, 0) <= l.min_qty THEN 'below'
                      ELSE 'ok'
-                   END AS status
+                   END AS status,
+                   CASE
+                     WHEN COALESCE(l.min_qty, 0) > 0 THEN NULL
+                     WHEN f.code IS NULL THEN
+                       'No figure was given for this part in the file'
+                     WHEN f.state = 'unmatched' THEN f.note
+                     ELSE 'A minimum was loaded for this part and has gone since'
+                   END AS why
               FROM product_product pp
               JOIN product_template pt ON pt.id = pp.product_tmpl_id
               JOIN uom_uom uom ON uom.id = pt.uom_id
               LEFT JOIN on_hand oh ON oh.product_id = pp.id
               LEFT JOIN levels l ON l.product_id = pp.id
               LEFT JOIN vend v ON v.product_tmpl_id = pt.id
+              LEFT JOIN from_file f ON f.code = pp.default_code
              WHERE pp.active AND pt.active AND pt.is_storable
             )
         """ % self._table)
