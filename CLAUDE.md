@@ -1346,6 +1346,39 @@ never loaded: the screen would call a part fine while the rack is empty.
 one-colour fixture is named `Hinge (#1)` and tests nothing about
 `(Black, #1)`. That cost a test run.
 
+### A NEW MODULE IS NOT INSTALLED BY MERGING (owner, 2026-10-29)
+
+*"im not seeing it in reporting"* - with a screenshot of his Prod showing
+Stock, Locations, Moves History and Moves Analysis, and no Min / Max Levels.
+
+**MERGING A BRANCH ONLY UPDATES MODULES THAT ARE ALREADY INSTALLED.** A module
+that did not exist before sits in Apps waiting for somebody to install it, and
+nothing about a deploy says so. Every new module in this repository has needed
+that step; this is the first time it was noticed, because every earlier one was
+installed on a dev build first.
+
+**`auto_install: True` DOES NOT FIX IT ON A LIVE DATABASE.** Proved here by
+uninstalling the module and running both `-u aa_spring_stock` and `-u base`:
+neither brought it back. The auto-install decision is the SQL in
+`odoo/modules/db.py::initialize()`, and `load_modules` calls `initialize()`
+only when the database **is not yet initialised** - so it fires on a fresh
+build and never retro-installs. It is kept for new builds; it is not the
+answer.
+
+**SO THE MODULE IS AN APPLICATION**, which is: Odoo's Apps screen filters to
+applications by default, so `application: False` makes a module invisible
+there unless somebody knows to clear a filter. The one person who would have
+to is the one who asked for the screen.
+
+**A MANIFEST KEY WRITTEN TWICE IS SILENT.** The scaffold already carried
+`'application': False` and the fix added `'application': True` above it; a
+Python dict literal takes the LAST one, so the module installed and reported
+`application=False` with both lines plainly visible in the file. Read what
+Odoo loaded (`get_manifest`), not what the file appears to say.
+
+To install on Prod: **Apps > Update Apps List**, search *Min / Max*, Install.
+Once only - after that it updates with every other module.
+
 ### The screen
 
 **Inventory > Reporting > Min / Max Levels**, where he asked for it. It opens
