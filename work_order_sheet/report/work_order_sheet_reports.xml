@@ -43,6 +43,14 @@
                             Delivery <b><t t-esc="o.name"/></b>
                             <t t-if="o.origin and not o.aa_wo_number"> - order <t t-esc="o.origin"/></t>
                         </div>
+                        <!-- THE DEALER'S PO ON THE SHEET HE SIGNS. He asked
+                             for it on the work order; this is the form that
+                             goes back with him, and a PO is what a dealer
+                             reconciles a delivery against. One line to drop
+                             if it is ever unwanted. -->
+                        <div t-if="o._work_order_po_number()" style="font-size:14px;margin-top:2px;">
+                            PO <b><t t-esc="o._work_order_po_number()"/></b>
+                        </div>
                     </div>
 
                     <table style="width:100%;margin-bottom:12px;font-size:12px;">
@@ -132,6 +140,11 @@
                          facts the customer actually gave appear. -->
                     <t t-set="door" t-value="o._work_order_door()"/>
                     <t t-set="lines" t-value="o._work_order_lines()"/>
+                    <!-- SET HERE, with the rest, and not inside the cover:
+                         the station pages are siblings of it and a `t-set`
+                         buried in one of them is in scope for the others by
+                         luck rather than by rule. -->
+                    <t t-set="po" t-value="o._work_order_po_number()"/>
 
                     <!-- PLAIN ASCII THROUGHOUT. wkhtmltopdf renders these pages
                          as Latin-1 whatever the charset says, so a non-breaking
@@ -148,9 +161,21 @@
                         <div t-if="o.aa_wo_number and o.aa_wo_number != o.name" style="text-align:center;margin:0 0 2px;font-size:22px;font-weight:800;color:#1B2A6B;">
                             <t t-esc="o.aa_wo_number"/>
                         </div>
-                        <div t-if="o.origin" style="text-align:center;margin:0 0 20px;font-size:15px;color:#666;">
+                        <div t-if="o.origin" style="text-align:center;margin:0 0 2px;font-size:15px;color:#666;">
                             Order <strong t-esc="o.origin"/>
                         </div>
+                        <!-- THE DEALER'S OWN PO (owner, 2026-10-29). It is
+                             how the dealer refers to this order on his end,
+                             so it is what he quotes on the telephone and what
+                             his invoice has to match. Printed in the shop's
+                             own red, because on a counter full of paper it is
+                             the one number somebody is looking for.
+                             A website order has no reference and prints
+                             nothing - an empty label is worse than a gap. -->
+                        <div t-if="po" style="text-align:center;margin:0 0 20px;font-size:17px;font-weight:800;color:#C0272D;">
+                            PO <t t-esc="po"/>
+                        </div>
+                        <div t-if="not po and o.origin" style="margin:0 0 18px;"/>
 
                         <table style="border-collapse:collapse;width:100%;font-size:14px;margin-bottom:20px;">
                             <tr>
@@ -241,6 +266,12 @@
                         <div style="text-align:center;margin:8px 0 14px;font-size:13px;color:#666;">
                             <strong style="font-size:16px;color:#1B2A6B;" t-esc="o.name"/>
                             <t t-if="o.origin"> | Order <t t-esc="o.origin"/></t>
+                            <!-- ON EVERY STATION PAGE TOO, for the same reason
+                                 the door is: the sheet gets split up and handed
+                                 out, and a page on its own has to say which
+                                 order it belongs to in the dealer's words as
+                                 well as ours. -->
+                            <t t-if="po"> | <strong style="color:#C0272D;">PO <t t-esc="po"/></strong></t>
                             <t t-if="o.partner_id"> | <t t-esc="o.partner_id.display_name"/></t>
                             <t t-if="o.date_deadline"> | Due <span t-field="o.date_deadline" t-options="{'widget': 'date'}"/></t>
                             <t t-if="door.get('width') and door.get('height')">

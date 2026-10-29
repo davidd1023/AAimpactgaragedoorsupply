@@ -221,6 +221,33 @@ class StockPicking(models.Model):
 
         return self.env["sale.order"].browse()
 
+    def _work_order_po_number(self):
+        """THE DEALER'S OWN PO NUMBER, or empty.
+
+        Owner, 2026-10-29: *"in dealer quick order there is a po number that
+        users can input, however this number doesnt show up at all in the
+        work order."*
+
+        The Quick Order already stores it in the right place - Odoo's own
+        `client_order_ref` on the sale order (`aa_dealer_orders/controllers.py`),
+        where it is REQUIRED: a dealer cannot submit without one. So nothing
+        had to be captured or migrated; it simply was not printed.
+
+        **THE SHEET IS A TRANSFER, NOT AN ORDER**, which is why it never
+        appeared by itself: every field on it comes off `stock.picking`, and
+        the PO is two records away. `_work_order_sale_order()` is the way
+        across - it also finds the order of a transfer that carries nothing
+        but a Source Document, which a route-made one does.
+
+        An order with no reference - a website order, or one typed in the back
+        office - gives an empty string, and the sheet prints nothing rather
+        than an empty label.
+        """
+        self.ensure_one()
+        order = self._work_order_sale_order()
+
+        return (order.client_order_ref or "").strip() if order else ""
+
     def _work_order_order_line(self, move):
         """The order line behind a move, by link or by product."""
         if "sale_line_id" in move._fields and move.sale_line_id:

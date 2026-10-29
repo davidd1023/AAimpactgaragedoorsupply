@@ -231,6 +231,44 @@ ever, and a back office order typed by hand has no transaction, so both keep
 their confirmation. `super()` is still called, on a narrowed recordset, so
 nothing else that hooks the method is lost.
 
+### THE DEALER'S PO NUMBER IS ON THE WORK ORDER (owner, 2026-10-29)
+
+*"in dealer quick order there is a po number that users can input, however
+this number doesnt show up at all in the work order, can you fix that?"*
+
+**NOTHING HAD TO BE CAPTURED.** The Quick Order already stores it in Odoo's
+own `client_order_ref` on the sale order (`aa_dealer_orders/controllers.py`),
+where it is **REQUIRED** - a dealer cannot submit without one. It was simply
+never printed.
+
+**THE SHEET IS A TRANSFER, NOT AN ORDER**, which is the whole reason it never
+appeared: every field on the Work Order Sheet comes off `stock.picking`, and
+the PO is two records away. `_work_order_po_number()` crosses that with
+`_work_order_sale_order()`, which also finds the order of a transfer carrying
+nothing but a Source Document - a route-made one has no `sale_id`.
+
+It prints in THREE places: the cover, in the shop's own red because on a
+counter full of paper it is the one number somebody is hunting for; **every
+station page**, for the same reason the door's size is repeated, since the
+sheet gets split up and handed out; and the **delivery confirmation**, which
+is the form that goes back with the dealer and what he reconciles against.
+One line each to remove.
+
+An order with NO reference - a website order, or one typed in the back
+office - prints nothing rather than an empty label, which would read as a
+number somebody forgot to write down.
+
+**`t-set` AT ARTICLE SCOPE, NOT INSIDE THE COVER.** The station pages are
+SIBLINGS of the cover, so a `t-set` buried in one of them is in scope for the
+others by luck rather than by rule; `po` is set beside `sections`, `door` and
+`lines` where the template already sets the sheet-wide values.
+
+**IT IS NOT SEARCHABLE ON SCREEN**, deliberately not done yet: a dealer rings
+up quoting HIS PO, so finding a work order by it is the obvious next ask -
+but `client_order_ref` lives on the order, so searching transfers by it needs
+a stored related field on `stock.picking`. Worth doing when asked, not
+guessed at.
+
 ### ONE CANCELLATION EMAIL PER ORDER, WHOEVER CANCELS IT
 
 Owner, 2026-10-27: *"i need you to make it so the user gets an email when
