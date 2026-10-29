@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_aa_stock_minmax_user,aa.stock.minmax user,model_aa_stock_minmax,stock.group_stock_user,1,0,0,0
+access_aa_minmax_level_user,aa.minmax.level user,model_aa_minmax_level,stock.group_stock_user,1,0,0,0
+access_aa_minmax_level_manager,aa.minmax.level manager,model_aa_minmax_level,stock.group_stock_manager,1,1,1,1

@@ -502,3 +502,105 @@ class MinMaxCase(TransactionCase):
                                "the deleted minimum did not come back")
         self.assertAlmostEqual(self.level(kept).product_min_qty, 999, 2,
                                "his own edit was written over")
+
+    # --- why a part has no minimum -------------------------------------------
+
+    def test_a_part_never_mentioned_in_the_file_says_so(self):
+        """Owner, 2026-10-29: *"there are still some products missing, for
+        example the flag angles."* They were not in the file at all - and the
+        screen said "No Minimum Set", exactly as it did for the ones Odoo had
+        deleted. He cannot act on that, and neither could I: both times the
+        only way to answer was to go and read the file."""
+        part = self.a_part("Flag Angle Black", "FLAG-NONE", on_hand=50)
+        load_levels(self.env, rows=[self.row("ROLL-OTHER", "Roller", 200)])
+
+        row = self.report(part)
+
+        self.assertEqual(row.status, "untracked")
+        self.assertIn("No figure was given", row.why)
+
+    def test_a_row_that_could_not_be_matched_says_why_on_the_part(self):
+        """A SHARED part number whose name matches no variant - the jamb
+        bracket and cut-down-hinge shape. Where a number identifies exactly
+        ONE product the name is deliberately ignored, because names drift and
+        the number is already unambiguous."""
+        template = self.a_family("Jamb Bracket", "CH1108-WHY",
+                                 ["Black", "White"], ["#10", "#12"])
+        load_levels(self.env, rows=[
+            self.row("CH1108-WHY", "Jamb Bracket (Green, #10)", 200)])
+
+        row = self.report(template.product_variant_ids[0])
+
+        self.assertEqual(row.status, "unmatched")
+        self.assertTrue(row.why)
+        self.assertIn("CH1108-WHY", row.why)
+
+    def test_a_number_that_names_one_part_ignores_the_name(self):
+        """Deliberate: his file's names came out of a staging database and
+        the part may have been renamed since. The number is enough."""
+        part = self.a_part("Roller", "ROLL-RENAMED", on_hand=50)
+
+        load_levels(self.env, rows=[
+            self.row("ROLL-RENAMED", "What it used to be called", 200)])
+
+        self.assertAlmostEqual(self.level(part).product_min_qty, 200, 2)
+
+    def test_a_part_with_a_minimum_is_not_asked_why(self):
+        part = self.a_part("Roller", "ROLL-FINE", on_hand=50)
+        load_levels(self.env, rows=[self.row("ROLL-FINE", "Roller", 200)])
+
+        self.assertFalse(self.report(part).why)
+
+    def test_every_row_of_the_file_is_kept_with_its_result(self):
+        """So "never given" can be told from "given and not placed"."""
+        self.a_part("Roller", "ROLL-KEPT")
+        load_levels(self.env, rows=[
+            self.row("ROLL-KEPT", "Roller", 200),
+            self.row("NOT-A-CODE", "Nothing like it", 5)])
+
+        levels = self.env["aa.minmax.level"].search([])
+
+        self.assertEqual(len(levels), 2)
+        self.assertEqual(
+            levels.filtered(lambda l: l.code == "ROLL-KEPT").state, "loaded")
+        refused = levels.filtered(lambda l: l.code == "NOT-A-CODE")
+        self.assertEqual(refused.state, "unmatched")
+        self.assertTrue(refused.note)
+
+    def test_loading_again_does_not_double_the_file_rows(self):
+        self.a_part("Roller", "ROLL-TWICE")
+        rows = [self.row("ROLL-TWICE", "Roller", 200)]
+        load_levels(self.env, rows=rows)
+        load_levels(self.env, rows=rows)
+
+        self.assertEqual(self.env["aa.minmax.level"].search_count([]), 1)
+
+    # --- a part with no part number at all ------------------------------------
+
+    def test_a_row_with_no_part_number_is_matched_by_name(self):
+        """THE FLAG ANGLE CASE. `spring_engineering` looks them up by
+        `name =ilike "Flag Angle %s"` and never by a code, because they have
+        not got one - so a loader keyed only on part numbers could never have
+        placed them."""
+        part = self.env["product.product"].create({
+            "name": "Flag Angle Black", "is_storable": True, "type": "consu"})
+
+        load_levels(self.env, rows=[self.row("", "Flag Angle Black", 144)])
+
+        self.assertAlmostEqual(self.level(part).product_min_qty, 144, 2)
+
+    def test_two_parts_of_that_name_are_refused_rather_than_guessed(self):
+        """Without a part number narrowing the field, a loose match is being
+        asked to pick one product out of the whole catalogue."""
+        for suffix in ("5.9", "6-3/8"):
+            self.env["product.product"].create({
+                "name": "Flag Angle Black %s" % suffix,
+                "is_storable": True, "type": "consu"})
+
+        answer = load_levels(self.env, rows=[
+            self.row("", "Flag Angle Black", 144)])
+
+        self.assertIn("could not be matched", answer["params"]["message"])
+
+    def test_a_row_naming_nothing_at_all_is_skipped(self):
+        self.assertFalse([r for r in read_levels() if not r["name"]])

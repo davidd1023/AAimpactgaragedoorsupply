@@ -1402,6 +1402,48 @@ repair helper inserted moments earlier, and the module would not load
 (`UnboundLocalError`). When a file has two identical lines, edit by line
 number or by a unique anchor.
 
+### "WHY HAS THIS ONE NO MINIMUM" IS NOW ON THE SCREEN (owner, 2026-10-29)
+
+*"there are still some products missing, for example the flag angles."*
+
+**THEY WERE NEVER IN THE FILE** - and the screen said "No Minimum Set", the
+very same words it used for the ones Odoo had deleted an hour earlier. Two
+completely different problems, one sentence, and no way for him to tell them
+apart. Both times the only way to answer was for me to go and read the file.
+That is the signal to build the screen, exactly as with Add-ons Check.
+
+So every line of the file is now a record (`aa.minmax.level`, rewritten on
+each load) with what became of it, and the report carries a **Why No
+Minimum** column saying which of three things is true:
+
+- *No figure was given for this part in the file* - nothing to fix but to
+  type one;
+- the row's own reason, in words, when it was given and could not be placed;
+- *A minimum was loaded and has gone since* - which is what the superuser
+  bug looked like.
+
+**AND A PART NEED NOT HAVE A PART NUMBER.** The flag angles are why:
+`spring_engineering` finds them with `name =ilike "Flag Angle %s"` and never
+by a code, because they have not got one. The loader was keyed entirely on
+part numbers, and worse, **the extraction that built the shipped file
+REQUIRED a Code and dropped any row without one** - so a minimum he typed
+against a flag angle never even reached the repository. A row with no number
+is now matched by NAME: whole name, then ends-with, and never "contains" -
+without a number narrowing the field to a handful of variants, a loose match
+is being asked to pick one product out of the whole catalogue, and
+"Flag Angle Black" would happily find "Flag Angle Black 6-3/8". Several
+matches is a refusal, as always.
+
+**WHERE A NUMBER NAMES EXACTLY ONE PRODUCT THE NAME IS IGNORED**, which is
+deliberate and worth keeping: his file's names came out of a STAGING database
+and a part may have been renamed since. The number is already unambiguous. A
+test asserts it - the first draft of that test assumed the opposite and
+failed.
+
+**THE 98 BLANK ROWS WERE NOT SHIPPED**, only the 157 with a minimum, so the
+screen can say "not in the file" but cannot say "in the file and left blank".
+If that distinction is ever wanted, ship all 255.
+
 ### A NEW MODULE IS NOT INSTALLED BY MERGING (owner, 2026-10-29)
 
 *"im not seeing it in reporting"* - with a screenshot of his Prod showing

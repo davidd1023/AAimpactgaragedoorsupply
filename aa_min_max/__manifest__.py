@@ -1,6 +1,6 @@
 {
     'name': 'AA Min / Max Stock Levels',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.2.0',
     'summary': 'A minimum (and maximum) per part, and one screen saying what is below it',
     'description': """
 Owner, 2026-10-29: *"make minimum and maximum of each item, same thing we did

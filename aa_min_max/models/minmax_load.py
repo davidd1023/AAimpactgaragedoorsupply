@@ -164,7 +164,9 @@ def read_levels():
 
     with open(LEVELS_FILE, newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
-            if not (row.get("code") or "").strip():
+            # A ROW NEED ONLY NAME A PART. Insisting on a part number is
+            # what lost the flag angles: they have not got one.
+            if not (row.get("name") or "").strip():
                 continue
 
             def number(key):
@@ -186,8 +188,50 @@ def read_levels():
     return rows
 
 
+def _match_by_name(env, row):
+    """A part identified by its NAME, for a row with no part number.
+
+    STRICTEST FIRST, as with the code: the whole name, then ends-with. Never
+    "contains" - without a part number narrowing the field to a handful of
+    variants, a loose match is being asked to pick one product out of the
+    entire catalogue, and "Flag Angle Black" would happily find
+    "Flag Angle Black 6-3/8". Several matches is a refusal, as always.
+    """
+    wanted = flatten(row["name"])
+
+    if not wanted:
+        return None, _("the row names no part and gives no part number")
+
+    products = env["product.product"].sudo().search(
+        [("name", "ilike", row["name"])], limit=50)
+    tiers = (
+        [p for p in products if flatten(p.name) == wanted],
+        [p for p in products if flatten(p.display_name).endswith(wanted)],
+    )
+
+    for named in tiers:
+        if len(named) == 1:
+            return named[0], None
+
+        if len(named) > 1:
+            return None, _("%(count)s parts are named %(name)r and the row "
+                           "gives no part number to tell them apart",
+                           count=len(named), name=row["name"])
+
+    return None, _("no part is named %r", row["name"])
+
+
 def _match(env, row, by_code):
     """(product, why it could not be matched)."""
+    if not row["code"]:
+        # NO PART NUMBER AT ALL, which is not a broken row: plenty of his
+        # catalogue has none. The flag angles are the case that found this -
+        # `spring_engineering` looks them up by `name =ilike "Flag Angle %s"`
+        # and never by a code, because they have not got one. A loader keyed
+        # only on part numbers could never have placed them, and the row was
+        # dropped before it even reached the file.
+        return _match_by_name(env, row)
+
     candidates = by_code.get(row["code"])
 
     if not candidates:
@@ -258,9 +302,20 @@ def load_levels(env, set_vendors=True, rows=None, only_missing=False):
         by_code.setdefault(product.default_code, []).append(product)
 
     written, unchanged, refused = 0, 0, []
+    Level = env["aa.minmax.level"].sudo()
+    Level.search([]).unlink()
+    recorded = []
 
     for row in rows:
         product, why = _match(env, row, by_code)
+        recorded.append({
+            "code": row["code"], "name": row["name"],
+            "min_qty": row["min_qty"], "max_qty": row["max_qty"],
+            "vendor": row["vendor"],
+            "product_id": product.id if product else False,
+            "state": "loaded" if product else "unmatched",
+            "note": why or False,
+        })
 
         if not product:
             refused.append(why)
@@ -305,6 +360,11 @@ def load_levels(env, set_vendors=True, rows=None, only_missing=False):
 
         if set_vendors and row["vendor"]:
             _ensure_vendor(env, product, row["vendor"])
+
+    # EVERY ROW, KEPT. The screen reads this to tell "never given" apart
+    # from "given and could not be placed" - which is the difference between
+    # typing a number and fixing a name, and the screen could say neither.
+    Level.create(recorded)
 
     message = _("%(written)s levels set, %(unchanged)s already right.",
                 written=written, unchanged=unchanged)
