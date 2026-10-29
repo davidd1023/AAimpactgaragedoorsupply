@@ -1319,3 +1319,133 @@ class TestWorkOrderSheetServiceLines(TestWorkOrderSheet):
 
         self.assertIn("Custom Torsion Spring Assembly", names)
         self.assertNotIn("Pickup - Medley Warehouse", names)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderPoNumber(TransactionCase):
+    """THE DEALER'S PO NUMBER, ON THE SHEET.
+
+    Owner, 2026-10-29: *"in dealer quick order there is a po number that users
+    can input, however this number doesnt show up at all in the work order,
+    can you fix that?"*
+
+    Nothing had to be captured: the Quick Order already stores it in Odoo's
+    own `client_order_ref`, where it is REQUIRED - a dealer cannot submit
+    without one. It simply was never printed, because **the sheet is a
+    TRANSFER and the PO is two records away**.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.partner = self.env["res.partner"].create({"name": "A Dealer"})
+        self.product = self.env["product.product"].create({
+            "name": "A door part", "type": "consu", "is_storable": True})
+        self.picking_type = self.env["stock.picking.type"].search(
+            [("code", "=", "internal")], limit=1)
+
+    def _order(self, po):
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "client_order_ref": po,
+            "order_line": [(0, 0, {"product_id": self.product.id,
+                                   "product_uom_qty": 2})],
+        })
+        order.action_confirm()
+
+        return order
+
+    def _picking_for(self, order):
+        picking = order.picking_ids[:1]
+
+        self.assertTrue(picking, "the order made no transfer")
+
+        return picking
+
+    def _loose_picking(self, origin):
+        """A transfer that carries only a Source Document, as a route-made one
+        does - no `sale_id` to follow."""
+        return self.env["stock.picking"].create({
+            "picking_type_id": self.picking_type.id,
+            "partner_id": self.partner.id,
+            "origin": origin,
+            "location_id": self.env.ref("stock.stock_location_stock").id,
+            "location_dest_id": self.env.ref("stock.stock_location_output").id,
+        })
+
+    def _sheet(self, picking):
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "work_order_sheet.report_work_order_sheet", picking.ids)
+
+        return visible_text(rendered)
+
+    def _note(self, picking):
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "work_order_sheet.report_delivery_confirmation", picking.ids)
+
+        return visible_text(rendered)
+
+    # --- the sentence he wrote ------------------------------------------------
+
+    def test_the_po_number_is_printed_on_the_work_order(self):
+        """THE ONE THAT SETTLES IT."""
+        order = self._order("PO-44821")
+
+        sheet = self._sheet(self._picking_for(order))
+
+        self.assertIn("PO-44821", sheet)
+
+    def test_the_picking_can_find_the_po_through_the_order(self):
+        order = self._order("PO-44821")
+
+        self.assertEqual(
+            self._picking_for(order)._work_order_po_number(), "PO-44821")
+
+    def test_a_transfer_with_only_a_source_document_still_finds_it(self):
+        """A transfer made by a route carries no `sale_id` - only the plain
+        text of the order name in its Source Document."""
+        order = self._order("PO-99001")
+        loose = self._loose_picking(order.name)
+
+        self.assertEqual(loose._work_order_po_number(), "PO-99001")
+
+    def test_an_order_with_no_reference_prints_no_label(self):
+        """A website order has none, and an empty "PO" on a sheet is worse
+        than a gap - it reads as a number somebody forgot to write down."""
+        order = self._order("")
+
+        sheet = self._sheet(self._picking_for(order))
+
+        self.assertNotIn(" PO ", sheet)
+
+    def test_a_transfer_with_no_order_at_all_does_not_fall_over(self):
+        """A transfer typed in the back office has no order behind it."""
+        loose = self._loose_picking("NOT-AN-ORDER")
+
+        self.assertEqual(loose._work_order_po_number(), "")
+        self.assertNotIn(" PO ", self._sheet(loose))
+
+    def test_whitespace_round_a_po_is_not_printed(self):
+        order = self._order("   PO-7  ")
+
+        self.assertEqual(
+            self._picking_for(order)._work_order_po_number(), "PO-7")
+
+    # --- where else it has to appear -----------------------------------------
+
+    def test_it_is_on_the_sheet_the_dealer_signs(self):
+        """He asked for the work order; this is the form that goes back with
+        him, and a PO is what a dealer reconciles a delivery against."""
+        order = self._order("PO-31337")
+
+        self.assertIn("PO-31337", self._note(self._picking_for(order)))
+
+    def test_it_is_on_every_station_page_not_only_the_cover(self):
+        """The sheet gets split up and handed out, so a page on its own has to
+        say which order it belongs to in the dealer's words as well as ours -
+        the same reason the door's size is repeated."""
+        order = self._order("PO-5150")
+        sheet = self._sheet(self._picking_for(order))
+
+        self.assertGreaterEqual(
+            sheet.count("PO-5150"), 2,
+            "the PO appeared once, so it is on the cover only")
