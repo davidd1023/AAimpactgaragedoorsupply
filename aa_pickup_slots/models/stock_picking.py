@@ -25,7 +25,7 @@ Transfers already DONE or CANCELLED are left alone: what happened, happened.
 
 from odoo import api, fields, models
 
-from .pickup_time import time_label
+from .pickup_time import slot_in_utc, time_label
 
 
 class StockPicking(models.Model):
@@ -50,6 +50,60 @@ class StockPicking(models.Model):
                   if picking.aa_pickup_time else "")
             picking.aa_pickup_label = "%s, %s" % (day, at) if at else day
 
+    # --- the slot IS the scheduled date -----------------------------------
+
+    def _aa_pickup_datetime(self):
+        """When this transfer is due, from the slot the customer chose."""
+        self.ensure_one()
+
+        return slot_in_utc(self.env, self.aa_pickup_date, self.aa_pickup_time)
+
+    def _aa_sync_pickup_schedule(self):
+        """Put the chosen slot on Odoo's own Scheduled Date.
+
+        Owner, 2026-10-29, with a screenshot of W/O #268: *"when the customer
+        selects their order date it should be the scheduled date in the work
+        order, but currently the schedule date is the same as the time it was
+        ordered and the actual scheduled date is next to it."*
+
+        He is right that they were two things side by side. Odoo set
+        `scheduled_date` the moment the order was confirmed - which is when it
+        was ORDERED, not when anybody wants it - and this module printed the
+        real answer in the field beside it. The shop had to read the second
+        one and ignore the first.
+
+        **ONE PLACE, ON `write`.** The slot reaches a transfer by three
+        different roads - confirmation, a slot moved afterwards, and a
+        backorder copying its order - and keeping a stored copy in step
+        across three of them is exactly what went wrong with the Pickup
+        column itself. Every one of them ends in a `write` of these two
+        fields, so the rule lives there and cannot be forgotten by a fourth.
+
+        **DONE AND CANCELLED ARE LEFT ALONE**, as everywhere else here: what
+        was on the paperwork is a record.
+
+        **AND IT ONLY MOVES WHEN THE SLOT DOES.** Somebody who sets a
+        scheduled date by hand for a reason of their own keeps it; this is
+        not a rule that reaches in and overwrites planning every time the
+        transfer is saved.
+        """
+        for picking in self:
+            if picking.state in ("done", "cancel") or not picking.aa_pickup_date:
+                continue
+
+            due = picking._aa_pickup_datetime()
+
+            if due and picking.scheduled_date != due:
+                super(StockPicking, picking).write({"scheduled_date": due})
+
+    def write(self, vals):
+        result = super().write(vals)
+
+        if "aa_pickup_date" in vals or "aa_pickup_time" in vals:
+            self._aa_sync_pickup_schedule()
+
+        return result
+
     # --- a transfer born after the order was confirmed --------------------
 
     @api.model_create_multi
@@ -73,6 +127,10 @@ class StockPicking(models.Model):
                     "aa_pickup_date": order.aa_pickup_date,
                     "aa_pickup_time": order.aa_pickup_time,
                 })
+
+        # A transfer CREATED with the slot already in its values never passed
+        # through the write above, so the rule is applied here as well.
+        pickings.filtered("aa_pickup_date")._aa_sync_pickup_schedule()
 
         return pickings
 

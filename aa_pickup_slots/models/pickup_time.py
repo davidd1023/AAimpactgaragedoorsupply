@@ -15,6 +15,30 @@ THE RANGE IS A SETTING. He has already changed it once, from 8:00-4:30 to
 7:00-4:00, and a number that has moved once will move again.
 """
 
+import logging
+from datetime import datetime, time, timedelta
+
+import pytz
+
+_logger = logging.getLogger(__name__)
+
+#: WHERE THE COUNTER IS, which until now this module never had to say.
+#:
+#: Every hour in here - the 7:00 to 4:00 he chose, the label on the Dispatch
+#: list, the times offered at checkout - is SHOP LOCAL TIME, and nothing ever
+#: converted because nothing ever left that world. Writing the slot onto
+#: `scheduled_date` does leave it: that field is a naive UTC datetime, so
+#: "1:30 PM" has to be told which 1:30 PM it is.
+#:
+#: Guessing it was not good enough. This database's own candidates are a
+#: company calendar saying UTC (Odoo's default, not a statement about the
+#: shop), a blank partner timezone, and whichever timezone the person
+#: pressing the button happens to be in - a website customer could be
+#: anywhere. So it is a setting, and its default is the fact already written
+#: down: the shop works 7:00-4:00 Eastern.
+TZ_SETTING = "aa_pickup_slots.timezone"
+DEFAULT_TZ = "America/Toronto"
+
 FROM_SETTING = "aa_pickup_slots.open_from"
 TO_SETTING = "aa_pickup_slots.open_to"
 
@@ -25,6 +49,50 @@ DEFAULT_TO = 16.0
 #: Half an hour. Fine enough to be a real appointment, coarse enough that
 #: nineteen buttons still fit on a phone.
 STEP = 0.5
+
+
+def shop_timezone(env):
+    """The counter's own timezone, or Eastern.
+
+    A mistyped zone falls back rather than raising, the same call as the
+    closed days: a transfer that cannot be saved over a fat-fingered setting
+    is worse than one scheduled an hour out.
+    """
+    name = (env["ir.config_parameter"].sudo().get_param(TZ_SETTING)
+            or "").strip()
+
+    try:
+        return pytz.timezone(name or DEFAULT_TZ)
+    except pytz.UnknownTimeZoneError:
+        _logger.warning("aa_pickup_slots: %r is not a timezone; using %s",
+                        name, DEFAULT_TZ)
+
+        return pytz.timezone(DEFAULT_TZ)
+
+
+def slot_in_utc(env, day, hour):
+    """A pickup day and hour-of-day as the naive UTC datetime Odoo stores.
+
+    DST IS THE WHOLE REASON THIS IS NOT ARITHMETIC. 1:30 PM on a day in July
+    and 1:30 PM on a day in November are an hour apart in UTC, and the shop
+    says 1:30 PM both times.
+    """
+    if not day:
+        return False
+
+    if not hour:
+        # A day with no time - a back-office order, since a customer cannot
+        # pay without choosing one. Taken as the counter opening, which is
+        # the earliest they could be there.
+        hour = opening_hours(env)[0]
+
+    hours = int(hour)
+    minutes = int(round((hour - hours) * 60))
+    local = datetime.combine(day, time()) + timedelta(hours=hours,
+                                                      minutes=minutes)
+
+    return shop_timezone(env).localize(local).astimezone(
+        pytz.UTC).replace(tzinfo=None)
 
 
 def _as_float(raw, fallback):
