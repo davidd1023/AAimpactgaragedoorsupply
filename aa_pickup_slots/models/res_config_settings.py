@@ -2,8 +2,10 @@
 
 from odoo import fields, models
 
+from odoo.addons.base.models.res_partner import _tz_get
+
 from .pickup_time import (
-    DEFAULT_FROM, DEFAULT_TO, FROM_SETTING, TO_SETTING,
+    DEFAULT_FROM, DEFAULT_TO, DEFAULT_TZ, FROM_SETTING, TO_SETTING, TZ_SETTING,
 )
 from .sale_order import CLOSED_SETTING
 
@@ -17,6 +19,13 @@ class ResConfigSettings(models.TransientModel):
         help="Dates the counter is shut, beyond Saturdays and Sundays, as "
              "2026-12-25, 2026-12-26. They are neither counted as labour "
              "days nor offered to a customer to collect on.")
+
+    aa_pickup_timezone = fields.Selection(
+        _tz_get, string="Counter timezone", config_parameter=TZ_SETTING,
+        default=DEFAULT_TZ,
+        help="Where the counter is. The opening hours above and every pickup "
+             "time a customer chooses are in this timezone; it is what turns "
+             "a chosen 1:30 PM into the Scheduled Date on the work order.")
 
     aa_pickup_open_from = fields.Float(
         string="Counter opens", config_parameter=FROM_SETTING,

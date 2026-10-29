@@ -918,6 +918,59 @@ for a duplicated order and wrong for the half the customer comes back for.
 Transfers already DONE or CANCELLED are never rewritten: what was on the
 paperwork is a record. The 19.0.2.1.0 migration fills in the open ones.
 
+### THE SLOT IS NOW THE SCHEDULED DATE (owner, 2026-10-29)
+
+*"when the customer selects their order date it should be the scheduled date
+in the work order, but currently the schedule date is the same as the time it
+was ordered and the actual scheduled date is next to it"* - with a screenshot
+of W/O #268 showing **Scheduled Date: Oct 29, 12:01 PM** and, in the field
+beside it, **Mon 9 Nov, 1:30 PM**.
+
+He is right that they were two things side by side. Odoo sets
+`scheduled_date` when the order is CONFIRMED - the moment it was ordered -
+and this module printed the real answer next to it in `aa_pickup_label`, so
+the shop had to read the second and ignore the first. Now the slot IS the
+scheduled date and the two agree.
+
+**ONE PLACE, ON `stock.picking.write`.** The slot reaches a transfer by three
+roads - confirmation, a slot moved afterwards, a backorder copying its order
+- and keeping a stored copy in step across three of them is exactly what went
+wrong with the Pickup column itself. All three end in a write of those two
+fields, so the rule lives there and a fourth road cannot forget it. `create`
+covers a transfer born with the slot already in its values.
+
+**DONE AND CANCELLED ARE LEFT ALONE**, and it only moves when the SLOT moves -
+somebody who sets a scheduled date by hand keeps it.
+
+### THE MODULE HAD NO TIMEZONE, AND NOW IT NEEDS ONE
+
+Every hour in `aa_pickup_slots` - the 7:00 to 4:00 he chose, the label, the
+times offered at checkout - is SHOP LOCAL TIME, and nothing ever converted
+because nothing ever left that world. `scheduled_date` is a naive **UTC**
+datetime, so "1:30 PM" suddenly has to say which 1:30 PM it is.
+
+**GUESSING WAS NOT GOOD ENOUGH, and the database was asked before deciding.**
+Its candidates are a company calendar saying `UTC` (Odoo's default, not a
+statement about the shop), a blank partner timezone, and the timezone of
+whoever presses the button - which for a website customer could be anywhere.
+So it is a SETTING, `aa_pickup_slots.timezone`, beside the opening hours it
+belongs with, defaulting to **America/Toronto** - the fact already written
+down here, that the shop works 7:00-4:00 Eastern. A mistyped zone falls back
+rather than raising, the same call as the closed days.
+
+**DST IS WHY THIS IS NOT ARITHMETIC**: 1:30 PM in July is 17:30 UTC and 1:30
+PM in November is 18:30, and the shop says 1:30 PM both times. A test asserts
+both.
+
+**`stock.picking.state` IS A STORED COMPUTED FIELD.** The first version of
+the "a finished transfer is left alone" test forced `state = 'done'` with raw
+SQL; the next recompute put it back, so the test proved nothing while
+appearing to fail. It validates the transfer for real now.
+
+**The 19.0.2.2.0 migration** re-schedules every OPEN transfer that has a
+slot, because W/O #268 and its fellows are already on his floor carrying the
+date they were ordered.
+
 **THE DISPATCH COLUMN IS NOT `optional`.** That was the whole of what he could
 not see: an `optional="show"` column is shown only to somebody who has never
 touched that list's column chooser, and anybody who has keeps the set they
