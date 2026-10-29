@@ -1440,9 +1440,45 @@ and a part may have been renamed since. The number is already unambiguous. A
 test asserts it - the first draft of that test assumed the opposite and
 failed.
 
-**THE 98 BLANK ROWS WERE NOT SHIPPED**, only the 157 with a minimum, so the
-screen can say "not in the file" but cannot say "in the file and left blank".
-If that distinction is ever wanted, ship all 255.
+### HE SENT THE FILE AND HIS PRODUCT LIST, AND IT WAS 36 MINIMUMS SHORT
+
+**HIS FILE HOLDS 193 MINIMUMS. ONLY 157 WERE SHIPPED.** The 36 missing are
+EXACTLY the rows with no part number, because the step that turned his
+workbook into `minmax_levels.csv` required a Code and dropped anything
+without one. All four flag angles, eighteen RAW track lengths, Cut Down Hinge
+#6-#9, Hinge #8-#9, the hollow shaft and a drum. He found it by looking;
+nothing in the code could have, because the rows never reached the
+repository.
+
+**84 OF HIS 112 PRODUCTS HAVE NO PART NUMBER**, and **161 of the 193
+minimums can only be placed by name**. Name matching is the MAIN PATH here,
+not a corner - which is the opposite of what the first build assumed.
+
+**THREE ATTEMPTS AT MATCHING BY NAME, and his catalogue killed the first
+two:**
+
+1. `name ilike "<the whole row>"` - can never match a VARIANT, whose `name`
+   is its template's (`Flag Angle`) while the row says
+   `Flag Angle (Black, 5.9")`.
+2. Cut the row at its first bracket to recover the template name - and
+   `Bottom Bracket ( Pair )` and `End Bearing Plate ( Pair )` are template
+   names WITH A BRACKET IN THEM, so the cut lands mid-name. Eight rows.
+3. **Parse nothing.** Index every product's own `display_name` - exactly what
+   Odoo prints - once, and look the row up in it. `name` is indexed too, for
+   single-variant parts. Exact only, never "contains": without a part number
+   narrowing the field to a handful of variants, a loose match is picking one
+   product out of the whole catalogue.
+
+**REHEARSED AGAINST HIS REAL CATALOGUE before shipping**, by rebuilding his
+112 templates (and their variants, inferred from the bracketed suffixes in
+his own rows) into 476 products and running the real loader: **193 of 193
+placed, none unmatched.** That is the check worth repeating whenever this
+file changes - an export of his products plus the workbook is enough to know
+the answer before he merges.
+
+A single-value attribute is left out of a variant's name by Odoo, so the
+rehearsal skips any dimension with one value; a family that is genuinely
+one-colour would need care.
 
 ### A NEW MODULE IS NOT INSTALLED BY MERGING (owner, 2026-10-29)
 

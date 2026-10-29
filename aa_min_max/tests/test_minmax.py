@@ -103,7 +103,7 @@ class MinMaxCase(TransactionCase):
         show the max so we can just worry about the minimum for now."*"""
         rows = read_levels()
 
-        self.assertEqual(len(rows), 157, LEVELS_FILE)
+        self.assertEqual(len(rows), 193, LEVELS_FILE)
         self.assertTrue(all(r["min_qty"] > 0 for r in rows),
                         "a row with no minimum should not have been shipped")
         self.assertFalse([r for r in rows if r["max_qty"]],
@@ -111,6 +111,25 @@ class MinMaxCase(TransactionCase):
         # The shapes that make matching hard have to actually be in there.
         shared = [r for r in rows if r["code"] == "CH1108"]
         self.assertEqual(len(shared), 8, "the eight jamb brackets")
+
+    def test_the_rows_with_no_part_number_are_shipped(self):
+        """THIRTY-SIX OF HIS MINIMUMS HAVE NO PART NUMBER, and the extraction
+        that built the first file REQUIRED one and dropped every one of them -
+        which is why he kept finding parts with no minimum. Owner,
+        2026-10-29: *"there are still some products missing, for example the
+        flag angles."*"""
+        rows = read_levels()
+        codeless = [r for r in rows if not r["code"]]
+
+        self.assertEqual(len(codeless), 36)
+
+        flags = [r for r in rows if r["name"].startswith("Flag Angle")]
+
+        self.assertEqual(len(flags), 4, "all four flag angles")
+        self.assertTrue(all(not r["code"] for r in flags))
+        self.assertAlmostEqual(
+            [r for r in flags if "Black, 5.9" in r["name"]][0]["min_qty"],
+            225, 2)
 
     def test_every_shipped_row_names_a_part(self):
         """The name is the only thing that tells a merged family apart, so a
@@ -576,6 +595,24 @@ class MinMaxCase(TransactionCase):
         self.assertEqual(self.env["aa.minmax.level"].search_count([]), 1)
 
     # --- a part with no part number at all ------------------------------------
+
+    def test_a_template_name_with_a_bracket_in_it_still_matches(self):
+        """`Bottom Bracket ( Pair )` and `End Bearing Plate ( Pair )` are
+        TEMPLATE names with a bracket in them, so recovering the template
+        name by cutting the row at its first bracket lands in the middle of
+        the name. Nothing is parsed now - the printed name is looked up."""
+        template = self.a_family("End Bearing Plate ( Pair )", "",
+                                 ["Black", "White"], ['3 3/8"', '6"'])
+        template.product_variant_ids.write({"default_code": False})
+
+        load_levels(self.env, rows=[
+            self.row("", 'End Bearing Plate ( Pair ) (Black, 3 3/8")', 113)])
+
+        wanted = template.product_variant_ids.filtered(
+            lambda v: 'Black, 3 3/8"' in v.display_name)
+
+        self.assertEqual(len(wanted), 1)
+        self.assertAlmostEqual(self.level(wanted).product_min_qty, 113, 2)
 
     def test_a_row_with_no_part_number_is_matched_by_name(self):
         """THE FLAG ANGLE CASE. `spring_engineering` looks them up by

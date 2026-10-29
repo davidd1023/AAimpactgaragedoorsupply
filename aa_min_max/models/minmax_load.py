@@ -188,40 +188,64 @@ def read_levels():
     return rows
 
 
-def _match_by_name(env, row):
+def _name_index(env):
+    """{flattened name: [products]} for every active part, printed and plain.
+
+    LOOKED UP, NEVER GUESSED AT. The first attempt searched
+    `name ilike "<the whole row>"`, which can never match a variant: a
+    variant's `name` is its TEMPLATE's - "Flag Angle" - while the row says
+    "Flag Angle (Black, 5.9\")". The second idea was to cut the row at its
+    first bracket to recover the template name, and HIS CATALOGUE KILLS THAT
+    TOO: `Bottom Bracket ( Pair )` and `End Bearing Plate ( Pair )` are
+    template names with a bracket in them, so the cut lands in the middle of
+    the name.
+
+    So nothing is parsed. Every part's own `display_name` - exactly what Odoo
+    prints, brackets and all - is indexed once, and the row is looked up in
+    it. `name` is indexed too, for the single-variant parts whose printed
+    name is just their name.
+
+    EIGHTY-FOUR OF HIS 112 PRODUCTS HAVE NO PART NUMBER, and 161 of his 193
+    minimums can only be placed this way, so this is the main path and not a
+    corner.
+    """
+    index = {"display": {}, "name": {}}
+
+    for product in env["product.product"].sudo().search([]):
+        index["display"].setdefault(flatten(product.display_name), []).append(product)
+        index["name"].setdefault(flatten(product.name), []).append(product)
+
+    return index
+
+
+def _match_by_name(row, by_name):
     """A part identified by its NAME, for a row with no part number.
 
-    STRICTEST FIRST, as with the code: the whole name, then ends-with. Never
-    "contains" - without a part number narrowing the field to a handful of
-    variants, a loose match is being asked to pick one product out of the
-    entire catalogue, and "Flag Angle Black" would happily find
-    "Flag Angle Black 6-3/8". Several matches is a refusal, as always.
+    Exact only, on the printed name first and the plain name second. Never
+    anything looser: without a part number narrowing the field to a handful
+    of variants, a loose match is being asked to pick one product out of the
+    whole catalogue. Several matches is a refusal, as always.
     """
     wanted = flatten(row["name"])
 
     if not wanted:
         return None, _("the row names no part and gives no part number")
 
-    products = env["product.product"].sudo().search(
-        [("name", "ilike", row["name"])], limit=50)
-    tiers = (
-        [p for p in products if flatten(p.name) == wanted],
-        [p for p in products if flatten(p.display_name).endswith(wanted)],
-    )
+    for key in ("display", "name"):
+        found = by_name[key].get(wanted) or []
 
-    for named in tiers:
-        if len(named) == 1:
-            return named[0], None
+        if len(found) == 1:
+            return found[0], None
 
-        if len(named) > 1:
+        if len(found) > 1:
             return None, _("%(count)s parts are named %(name)r and the row "
                            "gives no part number to tell them apart",
-                           count=len(named), name=row["name"])
+                           count=len(found), name=row["name"])
 
     return None, _("no part is named %r", row["name"])
 
 
-def _match(env, row, by_code):
+def _match(env, row, by_code, by_name):
     """(product, why it could not be matched)."""
     if not row["code"]:
         # NO PART NUMBER AT ALL, which is not a broken row: plenty of his
@@ -230,7 +254,7 @@ def _match(env, row, by_code):
         # and never by a code, because they have not got one. A loader keyed
         # only on part numbers could never have placed them, and the row was
         # dropped before it even reached the file.
-        return _match_by_name(env, row)
+        return _match_by_name(row, by_name)
 
     candidates = by_code.get(row["code"])
 
@@ -301,13 +325,18 @@ def load_levels(env, set_vendors=True, rows=None, only_missing=False):
     for product in products:
         by_code.setdefault(product.default_code, []).append(product)
 
+    # Built once, and only when a row actually needs it - 84 of his 112
+    # products carry no part number, so in practice it is always needed.
+    by_name = _name_index(env) if any(not r["code"] for r in rows) else {
+        "display": {}, "name": {}}
+
     written, unchanged, refused = 0, 0, []
     Level = env["aa.minmax.level"].sudo()
     Level.search([]).unlink()
     recorded = []
 
     for row in rows:
-        product, why = _match(env, row, by_code)
+        product, why = _match(env, row, by_code, by_name)
         recorded.append({
             "code": row["code"], "name": row["name"],
             "min_qty": row["min_qty"], "max_qty": row["max_qty"],
