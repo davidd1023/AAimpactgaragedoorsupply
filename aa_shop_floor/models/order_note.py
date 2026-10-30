@@ -36,10 +36,8 @@ and real markup still renders as markup. Both kinds come out right, and
 neither is rewritten.
 """
 
-from markupsafe import Markup
-
 from odoo import api, fields, models
-from odoo.tools.mail import is_html_empty
+from odoo.addons.work_order_sheet.models.order_note import readable_note
 
 
 class MrpProduction(models.Model):
@@ -55,16 +53,11 @@ class MrpProduction(models.Model):
     def _compute_aa_order_note(self):
         for production in self:
             order = production._aa_note_order()
-            note = order.note if order else False
-
-            if not note or is_html_empty(note):
-                production.aa_order_note = False
-                continue
-
-            # PRE-WRAP, so a textarea's newlines are line breaks and the
-            # editor's markup is still markup. Nothing is rewritten.
-            production.aa_order_note = Markup(
-                '<div style="white-space: pre-wrap;">%s</div>') % Markup(note)
+            # ONE COPY OF THE RULE, in `work_order_sheet`, which this module
+            # depends on - the transfer shows the same note and the two must
+            # not drift.
+            production.aa_order_note = readable_note(
+                order.note if order else False)
 
     def _aa_note_order(self):
         """The order behind this job, by line or by Source Document."""

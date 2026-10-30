@@ -1499,3 +1499,127 @@ class TestWorkOrderPoNumber(TransactionCase):
         for view in ("work_order_sheet.view_picking_form_work_stations",
                      "work_order_sheet.view_picking_internal_search_work_stations"):
             self.assertIn('name="aa_po_number"', self.env.ref(view).arch, view)
+
+
+@tagged("post_install", "-at_install")
+class TestOrderNoteOnTheTransfer(TransactionCase):
+    """THE DEALER'S NOTE, WHERE THE SHOP ACTUALLY LOOKS.
+
+    Owner, 2026-10-30, with a screenshot of W/O #299: *"i dont see the note,
+    could you put it on this tab and on the work order sheet as well."*
+
+    **I PUT IT ON THE WRONG MODEL.** He had asked for "the manufacturing page
+    for that order" and the first build answered `mrp.production`. The
+    screenshot settles it - Check Availability, Validate, Source and
+    Destination Location, PO Number - that is a `stock.picking` shown under
+    Manufacturing > Work Orders. The note was on a record he never opens.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.partner = self.env["res.partner"].create({"name": "A Dealer"})
+        self.product = self.env["product.product"].create({
+            "name": "A door part", "type": "consu", "is_storable": True})
+        self.picking_type = self.env["stock.picking.type"].search(
+            [("code", "=", "internal")], limit=1)
+
+    def _order(self, note):
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "note": note,
+            "order_line": [(0, 0, {"product_id": self.product.id,
+                                   "product_uom_qty": 2})]})
+        order.action_confirm()
+
+        return order
+
+    def _loose(self, origin):
+        """A transfer carrying only a Source Document, as a route-made one."""
+        return self.env["stock.picking"].create({
+            "picking_type_id": self.picking_type.id,
+            "partner_id": self.partner.id,
+            "origin": origin,
+            "location_id": self.env.ref("stock.stock_location_stock").id,
+            "location_dest_id": self.env.ref("stock.stock_location_output").id,
+        })
+
+    def _sheet(self, picking):
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "work_order_sheet.report_work_order_sheet", picking.ids)
+
+        return visible_text(rendered)
+
+    # --- the tab he pointed at ------------------------------------------------
+
+    def test_the_note_is_on_the_transfer(self):
+        """THE ONE THAT SETTLES IT - on the model he is actually looking at."""
+        order = self._order("Cut the tracks two inches short")
+
+        picking = order.picking_ids[:1]
+
+        self.assertTrue(picking)
+        self.assertIn("Cut the tracks two inches short", picking.aa_order_note)
+
+    def test_a_transfer_with_only_a_source_document_finds_it(self):
+        order = self._order("Black track, not white")
+
+        self.assertIn("Black track, not white",
+                      self._loose(order.name).aa_order_note)
+
+    def test_an_order_with_no_note_shows_nothing(self):
+        order = self._order(False)
+
+        self.assertFalse(order.picking_ids[:1].aa_order_note)
+
+    def test_a_transfer_with_no_order_does_not_fall_over(self):
+        self.assertFalse(self._loose("NOT-AN-ORDER").aa_order_note)
+
+    def test_it_is_above_odoos_own_note_and_does_not_replace_it(self):
+        """The transfer's own note stays the shop's to write in; copying the
+        order's words into it would leave two of them, one going stale."""
+        order = self._order("From the dealer")
+        picking = order.picking_ids[:1]
+
+        picking.note = "Packed by Michel"
+
+        self.assertIn("Packed by Michel", picking.note)
+        self.assertNotIn("From the dealer", picking.note)
+        self.assertIn("From the dealer", picking.aa_order_note)
+
+    def test_correcting_the_order_corrects_the_transfer(self):
+        order = self._order("First thought")
+        picking = order.picking_ids[:1]
+
+        order.note = "Second thought"
+        picking.invalidate_recordset()
+
+        self.assertIn("Second thought", picking.aa_order_note)
+
+    def test_the_note_tab_shows_it(self):
+        arch = self.env.ref(
+            "work_order_sheet.view_picking_form_work_stations").arch
+
+        self.assertIn("aa_order_note", arch)
+        self.assertIn("page[@name='note']", arch)
+
+    # --- and on the printed sheet ---------------------------------------------
+
+    def test_the_printed_sheet_carries_it(self):
+        order = self._order("Cut the tracks two inches short")
+
+        sheet = self._sheet(order.picking_ids[:1])
+
+        self.assertIn("NOTE FROM THE ORDER", sheet)
+        self.assertIn("Cut the tracks two inches short", sheet)
+
+    def test_a_sheet_with_no_note_prints_no_heading(self):
+        order = self._order(False)
+
+        self.assertNotIn("NOTE FROM THE ORDER",
+                         self._sheet(order.picking_ids[:1]))
+
+    def test_the_note_keeps_its_line_breaks(self):
+        """A two-line instruction must not become one wrong one."""
+        order = self._order("Cut 2 inches short\nBlack track")
+
+        self.assertIn("pre-wrap", order.picking_ids[:1].aa_order_note)

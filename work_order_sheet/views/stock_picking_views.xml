@@ -19,6 +19,24 @@
     <field name="inherit_id" ref="stock.view_picking_form"/>
     <field name="arch" type="xml">
 
+      <!-- THE DEALER'S NOTE, ON THE TAB HE POINTED AT (owner, 2026-10-30,
+           with a screenshot of W/O #299: "i dont see the note, could you put
+           it on this tab").
+
+           ABOVE Odoo's own note and READ-ONLY. Writing the order's note into
+           `stock.picking.note` would have put the words on this tab too, and
+           then there would be two of them: a copy going stale the moment the
+           office corrects the order, and no way to tell whose words were
+           whose once somebody typed their own remark underneath. The
+           transfer's note stays the shop's to write in. -->
+      <xpath expr="//page[@name='note']/field[@name='note']" position="before">
+        <div class="alert alert-info" role="status"
+             invisible="not aa_order_note">
+          <strong>From the dealer's order</strong>
+          <field name="aa_order_note" nolabel="1" readonly="1"/>
+        </div>
+      </xpath>
+
       <!-- THE DEALER'S PO, BESIDE OUR OWN REFERENCE (owner, 2026-10-29:
            "can you make the po visible on the work order page"). Next to the
            Source Document on purpose: they are the same fact told twice, his

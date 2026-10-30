@@ -145,6 +145,7 @@
                          buried in one of them is in scope for the others by
                          luck rather than by rule. -->
                     <t t-set="po" t-value="o._work_order_po_number()"/>
+                    <t t-set="order_note" t-value="o.aa_order_note"/>
 
                     <!-- PLAIN ASCII THROUGHOUT. wkhtmltopdf renders these pages
                          as Latin-1 whatever the charset says, so a non-breaking
@@ -176,6 +177,17 @@
                             PO <t t-esc="po"/>
                         </div>
                         <div t-if="not po and o.origin" style="margin:0 0 18px;"/>
+
+                        <!-- WHAT THE DEALER ASKED FOR IN HIS OWN WORDS
+                             (owner, 2026-10-30: "and on the work order sheet
+                             as well"). Boxed and above the parts, because
+                             "cut the tracks two inches short" has to be read
+                             BEFORE anything is cut, not found afterwards. -->
+                        <div t-if="order_note"
+                             style="border:2px solid #C0272D;padding:8px 12px;margin:0 0 18px;font-size:14px;">
+                          <div style="font-weight:800;font-size:12px;color:#C0272D;letter-spacing:.06em;margin-bottom:4px;">NOTE FROM THE ORDER</div>
+                          <t t-out="order_note"/>
+                        </div>
 
                         <table style="border-collapse:collapse;width:100%;font-size:14px;margin-bottom:20px;">
                             <tr>
@@ -272,6 +284,17 @@
                                  order it belongs to in the dealer's words as
                                  well as ours. -->
                             <t t-if="po"> | <strong style="color:#C0272D;">PO <t t-esc="po"/></strong></t>
+                        </div>
+
+                        <!-- AND ON EVERY STATION PAGE. The sheet is split up
+                             and handed out, so the man cutting tracks gets
+                             this page and nothing else - the one page that
+                             must carry the instruction is the one in his
+                             hand. -->
+                        <div t-if="order_note"
+                             style="border:2px solid #C0272D;padding:6px 10px;margin:0 0 12px;font-size:13px;">
+                          <strong style="color:#C0272D;">NOTE:</strong>
+                          <t t-out="order_note"/>
                             <t t-if="o.partner_id"> | <t t-esc="o.partner_id.display_name"/></t>
                             <t t-if="o.date_deadline"> | Due <span t-field="o.date_deadline" t-options="{'widget': 'date'}"/></t>
                             <t t-if="door.get('width') and door.get('height')">
