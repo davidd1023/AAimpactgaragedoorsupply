@@ -289,6 +289,37 @@ back through a string, so changing the reference on such an order does not
 follow until the transfer is touched. Every dealer order has a real
 `sale_id`; this is the route-made case only.
 
+#### AND TYPING IT IN THE SEARCH BOX FOUND NOTHING (owner, 2026-10-30)
+
+*"when i try to seach a number by po number, it doesnt show the order in the
+results of the search"* - with 1003 plainly in the PO Number column of one
+screenshot and "No transfer found" in the next.
+
+**PUTTING THE FIELD IN THE SEARCH VIEW WAS NOT ENOUGH, and that is the
+lesson.** The box searches whatever its FIRST `<field>` is when you press
+Enter, which here is Odoo's `name`, labelled *Transfer* - and `position=
+"inside"` had put the PO LAST, below every filter. So "1003" went in as
+`Transfer 1003`, matched nothing, and the option that would have worked sat
+at the bottom of a dropdown nobody opens. **A field being searchABLE is not
+the same as it being searchED.**
+
+**SO THE PO JOINS THAT SAME FACET**, which is not a special case but the rule
+Odoo already follows: that field searches `name` OR `origin`, because a
+transfer is looked up by our number or by the order it came from. His PO is
+the third name for the same thing - his name for it, and the one a dealer
+says on the telephone. The label reads **Transfer / PO** so the facet
+explains itself.
+
+It is ALSO still its own field, now SECOND in the dropdown beside the W/O
+number instead of last, for a PO that is just a number and could collide
+with somebody else's Source Document.
+
+**THE TESTS READ THE DOMAIN OUT OF THE RENDERED VIEW AND RUN IT**, rather
+than asserting the field can be searched - which it always could, while the
+box did nothing. One of them asserts `name` is still the first field, so the
+day Odoo reorders its own search view this breaks loudly instead of quietly
+going back to finding nothing.
+
 ### DISPATCHED FOR THE RECORD, WITHOUT USING ANY STOCK (owner, 2026-10-29)
 
 He asked first whether it was possible - *"is there a way to mark an order as
