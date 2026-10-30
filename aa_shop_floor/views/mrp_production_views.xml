@@ -5,6 +5,27 @@
         <field name="model">mrp.production</field>
         <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
         <field name="arch" type="xml">
+            <!-- THE DEALER'S NOTE, WHERE IT CANNOT BE MISSED (owner,
+                 2026-10-30: "i cant see the notes on the manufacturing page
+                 for that order").
+
+                 ABOVE THE NOTEBOOK, not inside the Shop Floor page: that
+                 page is hidden unless the job has a shop spec, and a note
+                 saying "cut the tracks two inches short" matters on every
+                 job there is. A note filed behind a tab nobody opens is the
+                 fault this is fixing.
+
+                 `role="status"` rather than `alert`: Odoo's view checker
+                 reserves the alert roles for things that stop what you are
+                 doing, and this is something to read, not an emergency. -->
+            <xpath expr="//notebook" position="before">
+                <div class="alert alert-info" role="status"
+                     invisible="not aa_order_note">
+                    <strong>Note from the order</strong>
+                    <field name="aa_order_note" nolabel="1" readonly="1"/>
+                </div>
+            </xpath>
+
             <xpath expr="//notebook" position="inside">
                 <page string="Shop Floor" name="aa_shop_floor" invisible="not aa_shop_spec">
                     <group>
