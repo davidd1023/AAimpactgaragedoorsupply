@@ -1826,6 +1826,42 @@ So nothing is sniffed and nothing is rewritten: the note is wrapped in
 `white-space: pre-wrap`, under which a literal newline is a line break and
 real markup is still markup. Both kinds come out right.
 
+### AND IT WAS ON THE WRONG SCREEN (owner, 2026-10-30)
+
+*"i dont see the note, could you put it on this tab and on the work order
+sheet as well"* - with a screenshot of **W/O #299**, open on its **Note** tab.
+
+**HE SAID "THE MANUFACTURING PAGE" AND I DECIDED WHICH MODEL THAT WAS.** The
+first build answered `mrp.production`, which is a defensible reading of the
+words and the wrong one: the screenshot shows Check Availability, Validate,
+Source and Destination Location, PO Number and Source Document - that is a
+**`stock.picking`**, shown under Manufacturing > Work Orders, which is the
+screen the shop actually works off. The note went on a record he never
+opens, and every test passed. **The same mistake as the sticker's host: the
+picture settles what the words cannot.**
+
+So `aa_order_note` is on `stock.picking` too, and the rule is in ONE place -
+`readable_note()` in `work_order_sheet/models/order_note.py`, which
+`aa_shop_floor` imports (it already depends on this module). Two copies of
+"how a dealer's note is made readable" is how one of them comes to lose its
+line breaks again.
+
+**ON THE NOTE TAB HE POINTED AT, ABOVE ODOO'S OWN `note`, AND NOT INTO IT.**
+The transfer's own note stays the shop's to write in - *"Packed by Michel"* -
+and copying the order's words into it would leave two of them, the one on the
+transfer going stale the moment the office corrects the order. NOT STORED, for
+the same reason as the job's.
+
+**AND ON THE PRINTED SHEET**, which is the half he had to ask for twice: the
+cover in the shop's own red under the PO, and a compact NOTE box on EVERY
+station page, for the same reason the door's size and the PO are repeated -
+the sheet is split up and handed out, and "cut the tracks two inches short"
+is for whoever is cutting the tracks. `t-set` at ARTICLE scope beside `po`,
+`sections` and `door`, never inside the cover: the station pages are its
+siblings.
+
+An order with no note prints no heading rather than an empty box.
+
 ### Spring boxes (owner, 2026-10-19)
 
 Springs come in big supplier boxes and stay boxed until the floor has room; box
