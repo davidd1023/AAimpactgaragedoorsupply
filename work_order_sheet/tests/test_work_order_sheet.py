@@ -1,5 +1,8 @@
 import html
 import re
+from ast import literal_eval
+
+from lxml import etree
 
 from odoo.tests.common import TransactionCase, tagged
 
@@ -1623,3 +1626,137 @@ class TestOrderNoteOnTheTransfer(TransactionCase):
         order = self._order("Cut 2 inches short\nBlack track")
 
         self.assertIn("pre-wrap", order.picking_ids[:1].aa_order_note)
+
+
+@tagged("post_install", "-at_install")
+class TestSearchingByPoNumber(TransactionCase):
+    """TYPING THE PO AND PRESSING ENTER MUST FIND THE ORDER.
+
+    Owner, 2026-10-30: *"when i try to seach a number by po number, it doesnt
+    show the order in the results of the search"* - with 1003 plainly in the
+    PO Number column of one screenshot and an empty result in the next.
+
+    **HAVING THE FIELD IN THE SEARCH VIEW WAS NOT ENOUGH**, which is what
+    these tests exist to hold down. Odoo's FIRST `<field>` is what Enter
+    takes, and the PO was last in the list. So the tests read the domain out
+    of the RENDERED view and run it, rather than asserting that the field is
+    searchable - which it always was.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.partner = self.env["res.partner"].create({"name": "A Dealer"})
+        self.product = self.env["product.product"].create({
+            "name": "A door part", "type": "consu", "is_storable": True})
+
+    def _order(self, po):
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "client_order_ref": po,
+            "order_line": [(0, 0, {"product_id": self.product.id,
+                                   "product_uom_qty": 1})]})
+        order.action_confirm()
+
+        return order
+
+    def _search_field(self, name):
+        """The <field> as the browser gets it, inherits applied."""
+        view = self.env["stock.picking"].get_view(
+            self.env.ref("stock.view_picking_internal_search").id, "search")
+
+        return etree.fromstring(view["arch"]).xpath(
+            "//field[@name='%s']" % name)
+
+    def _type_into(self, field, typed):
+        """What pressing Enter on that facet actually searches."""
+        domain = field.get("filter_domain")
+
+        if not domain:
+            return [(field.get("name"), "ilike", typed)]
+
+        return literal_eval(domain.replace("self", repr(typed)))
+
+    # --- the facet Enter lands on -------------------------------------------
+
+    def test_typing_the_po_and_pressing_enter_finds_it(self):
+        """THE ONE HE SENT THE SCREENSHOTS OF."""
+        order = self._order("1003")
+        picking = order.picking_ids[:1]
+
+        self.assertTrue(picking)
+
+        first = self._search_field("name")[0]
+        found = self.env["stock.picking"].search(
+            self._type_into(first, "1003"))
+
+        self.assertIn(picking, found)
+
+    def test_the_facet_the_default_lands_on_is_still_the_first_one(self):
+        """If Odoo ever reorders its own search view this breaks loudly,
+        rather than the box quietly going back to finding nothing."""
+        view = self.env["stock.picking"].get_view(
+            self.env.ref("stock.view_picking_internal_search").id, "search")
+
+        names = [f.get("name")
+                 for f in etree.fromstring(view["arch"]).xpath("//search/field")]
+
+        # `name` is what Enter takes, so it is the one the PO had to join.
+        self.assertEqual(names[0], "name")
+
+        # And the PO is at the TOP of the dropdown, beside the W/O number -
+        # not at the bottom, which is where it was and why he never saw it.
+        self.assertIn("aa_po_number", names[:3], names)
+
+    def test_it_still_finds_a_transfer_by_its_own_name(self):
+        """The PO joins that facet; it does not take it over."""
+        order = self._order("1003")
+        picking = order.picking_ids[:1]
+
+        first = self._search_field("name")[0]
+
+        self.assertIn(picking, self.env["stock.picking"].search(
+            self._type_into(first, picking.name)))
+
+    def test_it_still_finds_one_by_its_source_document(self):
+        order = self._order("1003")
+        picking = order.picking_ids[:1]
+
+        first = self._search_field("name")[0]
+
+        self.assertIn(picking, self.env["stock.picking"].search(
+            self._type_into(first, order.name)))
+
+    def test_the_label_says_the_po_is_in_there(self):
+        self.assertEqual(self._search_field("name")[0].get("string"),
+                         "Transfer / PO")
+
+    # --- and the PO on its own ------------------------------------------------
+
+    def test_the_po_field_on_its_own_finds_it(self):
+        order = self._order("1003")
+
+        found = self.env["stock.picking"].search(
+            self._type_into(self._search_field("aa_po_number")[0], "1003"))
+
+        self.assertIn(order.picking_ids[:1], found)
+
+    def test_the_po_field_on_its_own_does_not_match_a_source_document(self):
+        """Which is the whole reason it is there beside the wider facet: a
+        bare number could be somebody else's Source Document."""
+        order = self._order("1003")
+
+        found = self.env["stock.picking"].search(
+            self._type_into(self._search_field("aa_po_number")[0], order.name))
+
+        self.assertNotIn(order.picking_ids[:1], found)
+
+    def test_an_order_with_no_po_is_not_dragged_in(self):
+        with_po = self._order("1003")
+        without = self._order(False)
+
+        first = self._search_field("name")[0]
+        found = self.env["stock.picking"].search(
+            self._type_into(first, "1003"))
+
+        self.assertIn(with_po.picking_ids[:1], found)
+        self.assertNotIn(without.picking_ids[:1], found)
