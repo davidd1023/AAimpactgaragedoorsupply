@@ -1784,6 +1784,48 @@ an LH one. `action_apply` does read `line.hand` (spring_adjust.py:189), so it
 is not simply that; it was not run down because it is nothing to do with the
 run-out figure. Worth fixing - it corrupts the very stock this reports on.
 
+## THE DEALER'S NOTE REACHES THE JOB (`aa_shop_floor`, owner 2026-10-30)
+
+*"when notes are made on the dealer quick order, i cant see the notes on the
+manufacturing page for that order, could you fix that."*
+
+**IT WAS NOWHERE DOWNSTREAM.** The Quick Order has always stored it, into
+Odoo's own `sale.order.note` (`aa_dealer_orders/controllers.py`, trimmed to
+2000 characters) - but **`mrp.production` has no note field of its own** and
+nothing here ever reached back for it. The note sat on the order where only
+the office looks. It is still not on the printed Work Order Sheet or the
+bench card; he was told.
+
+`aa_order_note` on `mrp.production`, **NOT STORED** - it is a paragraph a man
+reads before he builds, with nothing to search or sort on, and an office that
+corrects a note wants the correction on the bench's screen at once.
+
+**THE JOB FINDS ITS ORDER TWO WAYS**, as everything here must:
+`aa_sale_line_id`, then the Source Document by name - a prepared track job
+from Odoo's own route carries nothing else.
+
+**ABOVE THE NOTEBOOK, NOT IN THE SHOP FLOOR TAB.** That page is hidden unless
+the job has a shop spec, and "cut the tracks two inches short" matters on
+every job there is. A note behind a tab nobody opens is the fault being
+fixed. `role="status"`, not `alert`: Odoo's view checker reserves the alert
+roles for things that stop what you are doing.
+
+**ITS LINE BREAKS WOULD HAVE BEEN LOST, SILENTLY - and the first fix for
+that did not work.** `sale.order.note` is an HTML field, but what the Quick
+Order writes into it is the raw contents of a textarea, and in HTML a newline
+is whitespace: "cut 2 inches short\nblack track" renders as ONE RUN-ON LINE,
+which is how a two-line instruction becomes one wrong one.
+
+The obvious answer - run it through `plaintext2html` when it has no markup -
+**fails, and a test found that rather than reasoning**: Odoo's Html field has
+ALREADY wrapped the textarea's contents in `<p>...</p>` by the time anything
+reads it, newlines and all. So "does this look like HTML" answers yes for
+both kinds and tells you nothing.
+
+So nothing is sniffed and nothing is rewritten: the note is wrapped in
+`white-space: pre-wrap`, under which a literal newline is a line break and
+real markup is still markup. Both kinds come out right.
+
 ### Spring boxes (owner, 2026-10-19)
 
 Springs come in big supplier boxes and stay boxed until the floor has room; box

@@ -1,6 +1,6 @@
 {
     'name': 'AA Shop Floor',
-    'version': '19.0.1.38.0',
+    'version': '19.0.1.39.0',
     'summary': 'Each Shop Floor station shows exactly what to make for the order',
     'description': """
 The Shop Floor card tells the worker what to make, without opening anything else.
