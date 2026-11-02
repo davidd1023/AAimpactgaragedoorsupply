@@ -35,6 +35,33 @@ function readView() {
     }
 }
 
+// SORT BY W/O (owner, 2026-11-02: "que pueda organizar de mayor a menor en
+// los # de w/o de nosotros y de AA impact"). Clicking W/O # or AA Impact W/O
+// sorts highest first, a second click lowest first, a third goes back to the
+// order the orders came in - which stays the default, because that is the
+// order the shop works them in.
+const SORT_KEY = "aa_shop_floor.overview_sort";
+const SORT_COLUMNS = { order: "order", aa_impact: "aaImpactWo" };
+
+function readSort() {
+    try {
+        const saved = JSON.parse(window.localStorage.getItem(SORT_KEY) || "null");
+        if (saved && SORT_COLUMNS[saved.column] && ["desc", "asc"].includes(saved.dir)) {
+            return saved;
+        }
+    } catch {
+        // Nothing kept: arrival order.
+    }
+    return { column: "", dir: "" };
+}
+
+// "W/O #269" -> 269, "1026" -> 1026. A PO that is not a number, or no W/O at
+// all, gives null and sorts after every numbered order either way.
+function woNumber(text) {
+    const match = String(text || "").match(/\d+/);
+    return match ? parseInt(match[0], 10) : null;
+}
+
 function parse(text) {
     try {
         return JSON.parse(text || "{}");
@@ -52,6 +79,7 @@ patch(MrpDisplay.prototype, {
             station: "",
             query: "",
             open: {},
+            sort: readSort(),
         });
     },
 
@@ -198,7 +226,7 @@ patch(MrpDisplay.prototype, {
     aaFilterRows(rows) {
         const query = this.aaOverview.query.trim().toLowerCase();
         const station = this.aaOverview.station;
-        return rows.filter((row) => {
+        const kept = rows.filter((row) => {
             if (!this.aaInTab(row, this.aaOverview.tab)) {
                 return false;
             }
@@ -212,6 +240,52 @@ patch(MrpDisplay.prototype, {
             }
             return true;
         });
+        return this.aaSortRows(kept);
+    },
+
+    // --- sorting by W/O ------------------------------------------------------
+
+    aaSortRows(rows) {
+        const { column, dir } = this.aaOverview.sort;
+        const field = SORT_COLUMNS[column];
+        if (!field || !dir) {
+            return rows; // arrival order
+        }
+        const sign = dir === "desc" ? -1 : 1;
+        // Array.sort is stable, so equal numbers keep their arrival order.
+        return [...rows].sort((a, b) => {
+            const x = woNumber(a[field]);
+            const y = woNumber(b[field]);
+            if (x === null || y === null) {
+                return x === y ? 0 : x === null ? 1 : -1;
+            }
+            return sign * (x - y);
+        });
+    },
+
+    // desc -> asc -> arrival order -> desc ...
+    aaToggleSort(column) {
+        const sort = this.aaOverview.sort;
+        if (sort.column !== column) {
+            this.aaOverview.sort = { column, dir: "desc" };
+        } else if (sort.dir === "desc") {
+            this.aaOverview.sort = { column, dir: "asc" };
+        } else {
+            this.aaOverview.sort = { column: "", dir: "" };
+        }
+        try {
+            window.localStorage.setItem(SORT_KEY, JSON.stringify(this.aaOverview.sort));
+        } catch {
+            // A tablet that keeps nothing opens in arrival order.
+        }
+    },
+
+    aaSortIcon(column) {
+        const sort = this.aaOverview.sort;
+        if (sort.column !== column) {
+            return "fa-sort text-muted";
+        }
+        return sort.dir === "desc" ? "fa-sort-numeric-desc" : "fa-sort-numeric-asc";
     },
 
     // --- how a row looks ---------------------------------------------------
