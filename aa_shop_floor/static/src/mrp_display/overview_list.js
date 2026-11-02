@@ -139,6 +139,7 @@ patch(MrpDisplay.prototype, {
             key: order || record.id,
             order: order || "",
             customer: board.customer || "",
+            aaImpactWo: board.aa_impact_wo || "",
             received: received || "",
             ageHours,
             canAssign: Boolean(canAssign),
