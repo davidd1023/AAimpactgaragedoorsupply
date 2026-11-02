@@ -69,6 +69,49 @@ Three more that were checked and had **not** changed in 20:
 Series before 19 are untested. `is_storable` does not exist before 18, and
 `type="jsonrpc"` was `type="json"` before 19.
 
+## If you are Claude Code on the Odoo 20 project — read this first
+
+You can do what the agent on the origin repository cannot: **read the Odoo 20
+source directly and actually test against Owl 3.** That agent works on an
+Odoo 19 container and had to fetch Odoo 20 files off GitHub to get even this
+far.
+
+**Three of the four Owl 3 breaks are already done** (in the generator, so they
+survive a re-sync):
+
+- `t-esc` → `t-out` — all 41. Valid in Owl 2 as well; Odoo 19's own templates
+  use `t-out` 98 times.
+- `useState` → a runtime feature test near the top of
+  `static/src/js/spring_calculator.js`: `OWL2 ? owl.useState : owl.proxy`.
+- `useEffect` → same test drops the second argument on Owl 3.
+
+**What is left is `t-model`, nine bindings**, which in Owl 3 takes a signal:
+
+    state.assembly  state.springId  state.wireSize  state.liftType
+    state.liftin    state.pitchAmount  state.drum   state.weight
+    state.cycles
+
+Seven are on `<select>` and two on `<input type="number">` (`liftin`,
+`weight`). The inputs are easy — `t-att-value` plus a `t-on-input` handler.
+**The selects are the open question**: `t-att-value` on a `<select>` sets an
+attribute and does not select an option, and the state is written
+programmatically as well as by the user (the engine recommends a wire size),
+so the selection has to follow state rather than only drive it.
+
+Also unverified on Owl 3, because they were never reachable from Odoo 19:
+`onWillStart`, and whether `proxy` is a true drop-in for `useState`.
+
+### ⚠️ Send changes back, or they are lost
+
+**This module is GENERATED** from `spring_engineering` in the origin
+repository by `tools/build_spring_calculator.py`. Editing these files here
+works until somebody re-syncs, and then it is silently undone — which is the
+exact failure the generator exists to prevent.
+
+So when you have it working: **produce a diff of what you changed and send it
+back**, so it can be folded into the generator as transforms. Do not treat a
+fix made only in this repository as finished.
+
 ## Putting it on the second project
 
 ### The recommended way: a git submodule

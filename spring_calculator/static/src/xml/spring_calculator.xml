@@ -24,7 +24,7 @@
 
                     <!-- Sizes the wrapper to the value on show, so the
                          select below covers that text and nothing more. -->
-                    <span class="se-select-sizer" t-esc="assemblyLabel"/>
+                    <span class="se-select-sizer" t-out="assemblyLabel"/>
 
                 <select
                     t-model="state.assembly"
@@ -101,7 +101,7 @@
 
                     <!-- Sizes the wrapper to the value on show, so the
                          select below covers that text and nothing more. -->
-                    <span class="se-select-sizer" t-esc="state.springId"/>
+                    <span class="se-select-sizer" t-out="state.springId"/>
 
                 <select
                     t-model="state.springId"
@@ -187,7 +187,7 @@
 
                     <!-- Sizes the wrapper to the value on show, so the
                          select below covers that text and nothing more. -->
-                    <span class="se-select-sizer" t-esc="state.cycles"/>
+                    <span class="se-select-sizer" t-out="state.cycles"/>
 
                 <select
                     t-model="state.cycles"
@@ -226,7 +226,7 @@
 
                     <!-- Sizes the wrapper to the value on show, so the
                          select below covers that text and nothing more. -->
-                    <span class="se-select-sizer" t-esc="liftTypeLabel"/>
+                    <span class="se-select-sizer" t-out="liftTypeLabel"/>
 
                 <select
                     t-model="state.liftType"
@@ -340,7 +340,7 @@
 
                     <!-- Sizes the wrapper to the value on show, so the
                          select below covers that text and nothing more. -->
-                    <span class="se-select-sizer" t-esc="drumLabel"/>
+                    <span class="se-select-sizer" t-out="drumLabel"/>
 
                 <select
                     t-model="state.drum"
@@ -1184,7 +1184,7 @@
 
                     <!-- Sizes the wrapper to the value on show, so the
                          select below covers that text and nothing more. -->
-                    <span class="se-select-sizer" t-esc="state.pitchAmount"/>
+                    <span class="se-select-sizer" t-out="state.pitchAmount"/>
 
                 <select
                     t-model="state.pitchAmount"
@@ -1273,7 +1273,7 @@
 
                     <!-- Sizes the wrapper to the value on show, so the
                          select below covers that text and nothing more. -->
-                    <span class="se-select-sizer" t-esc="state.wireSize"/>
+                    <span class="se-select-sizer" t-out="state.wireSize"/>
 
                 <select
                     t-model="state.wireSize"
@@ -1387,11 +1387,11 @@
             <div class="se-wire-stock-warning">
                 <div class="se-wire-stock-head">
                     <t t-if="unstockedWires.length === 1">
-                        We don't currently stock <t t-esc="unstockedWires[0]"/> wire.
+                        We don't currently stock <t t-out="unstockedWires[0]"/> wire.
                     </t>
                     <t t-else="">
                         We don't currently stock
-                        <t t-esc="unstockedWires.join(' or ')"/> wire.
+                        <t t-out="unstockedWires.join(' or ')"/> wire.
                     </t>
                 </div>
                 <div class="se-wire-stock-body">
@@ -1408,7 +1408,7 @@
                 <div class="se-wire-stock-sizes">
                     <span t-foreach="stockedWireLabels" t-as="size"
                           t-key="size" class="se-wire-stock-size"
-                          t-esc="size"/>
+                          t-out="size"/>
                 </div>
             </div>
 
@@ -1428,66 +1428,66 @@
 
             <div class="se-rowR">
                     <span>Wire Size</span>
-                    <span t-att-class="valueClass" t-esc="duplexOuterWire"/>
+                    <span t-att-class="valueClass" t-out="duplexOuterWire"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring ID</span>
-                    <span t-att-class="valueClass" t-esc="duplexOuterId"/>
+                    <span t-att-class="valueClass" t-out="duplexOuterId"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring Length</span>
-                    <span t-att-class="valueClass" t-esc="duplexOuterLength.toFixed(2) + '&quot;'"/>
+                    <span t-att-class="valueClass" t-out="duplexOuterLength.toFixed(2) + '&quot;'"/>
             </div>
 
             <div class="se-rowR">
                     <span>Weight</span>
-                    <span t-att-class="valueClass" t-esc="duplexOuterWeight.toFixed(2) + ' lb'"/>
+                    <span t-att-class="valueClass" t-out="duplexOuterWeight.toFixed(2) + ' lb'"/>
             </div>
 
             <div class="se-rowR-header">Inner</div>
 
             <div class="se-rowR">
                     <span>Wire Size</span>
-                    <span t-att-class="valueClass" t-esc="duplexInnerWire"/>
+                    <span t-att-class="valueClass" t-out="duplexInnerWire"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring ID</span>
-                    <span t-att-class="valueClass" t-esc="duplexInnerId"/>
+                    <span t-att-class="valueClass" t-out="duplexInnerId"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring Length</span>
-                    <span t-att-class="valueClass" t-esc="duplexInnerLength.toFixed(2) + '&quot;'"/>
+                    <span t-att-class="valueClass" t-out="duplexInnerLength.toFixed(2) + '&quot;'"/>
             </div>
 
             <div class="se-rowR">
                     <span>Weight</span>
-                    <span t-att-class="valueClass" t-esc="duplexInnerWeight.toFixed(2) + ' lb'"/>
+                    <span t-att-class="valueClass" t-out="duplexInnerWeight.toFixed(2) + ' lb'"/>
             </div>
 
             <div class="se-rowR-header">Other</div>
 
             <div class="se-rowR">
                     <span>Cycles</span>
-                    <span t-att-class="valueClass" t-esc="duplexCycles"/>
+                    <span t-att-class="valueClass" t-out="duplexCycles"/>
             </div>
 
             <div class="se-rowR">
                     <span>Multiplier</span>
-                    <span t-att-class="valueClass" t-esc="multiplier"/>
+                    <span t-att-class="valueClass" t-out="multiplier"/>
             </div>
 
             <div class="se-rowR-split">
                 <div class="se-rowR">
                     <span>Turns</span>
-                    <span t-att-class="valueClass" t-esc="turns"/>
+                    <span t-att-class="valueClass" t-out="turns"/>
                 </div>
                 <div class="se-rowR">
                     <span>TIPPT</span>
-                    <span t-att-class="valueClass" t-esc="tippt"/>
+                    <span t-att-class="valueClass" t-out="tippt"/>
                 </div>
             </div>
 
@@ -1501,49 +1501,49 @@
 
             <div class="se-rowR">
                     <span>Spring ID</span>
-                    <span t-att-class="valueClass" t-esc="state.springId"/>
+                    <span t-att-class="valueClass" t-out="state.springId"/>
             </div>
 
             <!-- Results SpringLength -->
 
             <div class="se-rowR">
                     <span>Spring Length</span>
-                    <span t-att-class="valueClass" t-esc="springLength + '&quot;'"/>
+                    <span t-att-class="valueClass" t-out="springLength + '&quot;'"/>
             </div>
 
             <!-- Results Spring Weight -->
 
             <div class="se-rowR">
                     <span>Spring Weight</span>
-                    <span t-att-class="valueClass" t-esc="springWeight + ' lb'"/>
+                    <span t-att-class="valueClass" t-out="springWeight + ' lb'"/>
             </div>
 
             <!-- Results Cycles -->
 
             <div class="se-rowR">
                     <span>Cycles</span>
-                    <span t-att-class="valueClass" t-esc="cycleLife"/>
+                    <span t-att-class="valueClass" t-out="cycleLife"/>
             </div>
 
             <!-- Results Multiplier -->
 
             <div class="se-rowR">
                     <span>Multiplier</span>
-                    <span t-att-class="valueClass" t-esc="multiplier"/>
+                    <span t-att-class="valueClass" t-out="multiplier"/>
             </div>
 
             <!-- Results Turns -->
 
             <div class="se-rowR">
                     <span>Turns</span>
-                    <span t-att-class="valueClass" t-esc="turns"/>
+                    <span t-att-class="valueClass" t-out="turns"/>
             </div>
 
             <!-- Results TIPPT -->
 
             <div class="se-rowR">
                 <span>TIPPT</span>
-                <span t-att-class="valueClass" t-esc="tippt"/>
+                <span t-att-class="valueClass" t-out="tippt"/>
             </div>
 
             </t>
@@ -1561,26 +1561,26 @@
 
             <div class="se-rowR">
                     <span>Cones</span>
-                    <span t-att-class="valueClass" t-esc="money(priceCones)"/>
+                    <span t-att-class="valueClass" t-out="money(priceCones)"/>
             </div>
 
             <div class="se-rowR">
                     <span>Spring Steel</span>
-                    <span t-att-class="valueClass" t-esc="money(priceSteel)"/>
+                    <span t-att-class="valueClass" t-out="money(priceSteel)"/>
             </div>
 
             <!-- Only the 5 1/4" spring takes a filler, so the row appears only
                  when there is one to charge for. It shows the footage because
                  that is what is bought - it is cut to the spring's length. -->
             <div class="se-rowR" t-if="priceFiller > 0">
-                    <span>Plastic Filler<t t-esc="' (' + priceFillerFeet + ' ft)'"/></span>
-                    <span t-att-class="valueClass" t-esc="money(priceFiller)"/>
+                    <span>Plastic Filler<t t-out="' (' + priceFillerFeet + ' ft)'"/></span>
+                    <span t-att-class="valueClass" t-out="money(priceFiller)"/>
             </div>
 
             <div class="se-rowR se-rowR-total">
                     <span>Total</span>
                     <span t-att-class="valueClass"
-                          t-esc="priceAvailable ? money(priceTotal) : 'call us'"/>
+                          t-out="priceAvailable ? money(priceTotal) : 'call us'"/>
             </div>
 
             </t>
@@ -1595,19 +1595,19 @@
 
                     <div class="se-warn-box" t-on-click.stop="">
 
-                        <div class="se-warn-box-title" t-esc="drumInfoTitle"/>
+                        <div class="se-warn-box-title" t-out="drumInfoTitle"/>
 
                         <!-- Specifications when there are any, otherwise a
                              line saying why there are none. -->
                         <div class="se-info-rows" t-if="drumInfo">
                             <div class="se-info-row"
                                  t-foreach="drumInfo" t-as="spec" t-key="spec[0]">
-                                <span t-esc="spec[0]"/>
-                                <span class="se-info-value" t-esc="spec[1]"/>
+                                <span t-out="spec[0]"/>
+                                <span class="se-info-value" t-out="spec[1]"/>
                             </div>
                         </div>
 
-                        <div class="se-info-empty" t-if="!drumInfo" t-esc="drumInfoMessage"/>
+                        <div class="se-info-empty" t-if="!drumInfo" t-out="drumInfoMessage"/>
 
                     </div>
 
@@ -1632,13 +1632,13 @@
                             <div class="se-warn-item"
                                  t-foreach="warnings" t-as="warning" t-key="warning.id">
                                 <span t-att-class="'se-warn-dot se-warn-' + warning.severity">!</span>
-                                <span t-esc="warning.message"/>
+                                <span t-out="warning.message"/>
                             </div>
 
                             <!-- The caution note is its own message, not a
                                  tail repeated on every warning above. -->
                             <div class="se-warn-item se-warn-note">
-                                <span t-esc="warningSuffix"/>
+                                <span t-out="warningSuffix"/>
                             </div>
 
                         </div>
@@ -1687,7 +1687,7 @@
             </div>
 
             <!-- Whatever the server would not build, in its own words. -->
-            <div class="se-cart-error" t-if="state.cartError" t-esc="state.cartError"/>
+            <div class="se-cart-error" t-if="state.cartError" t-out="state.cartError"/>
 
             </t>
 

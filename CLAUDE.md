@@ -2131,3 +2131,53 @@ not a migration.
 manifest version and `compat.py` both stay, because both are harmless on 19
 and both are blockers already cleared if Odoo 20 is ever revisited. What is
 NOT cleared, and is written down above so nobody re-derives it, is Owl 3.
+
+#### THE VERSION BELONGS TO THE BRANCH, NOT THE CODE (owner, 2026-11-02)
+
+*"i cant change the odoo version on staging or release, wont that cause
+problems when trying to merge into those branches?"* - and he is right, which
+makes "put project 2 on Odoo 19" the wrong answer.
+
+**Odoo.sh's "Odoo Version" is a DEVELOPMENT-BRANCH-ONLY setting** - its own
+documentation: it "can be changed for each build, **but not for production**",
+and exists to test upgraded code while production is still on the old series.
+**"Merging a staging branch into production merges only the source code."**
+So the version does not travel with a merge: put 19-targeted files into a 20
+staging branch and staging rebuilds on **Odoo 20**, failing exactly as before.
+A dev branch at 19 is a sandbox, not a route to production.
+
+**PROJECT 2 IS AN ODOO 20 PROJECT AND CANNOT BE WALKED BACKWARDS.**
+
+**AND THE MIGRATION WAS NOT AS BAD AS I SAID.** `t-model` is a convenience,
+not a necessity: the same inputs bind explicitly with `t-att-value` and an
+event handler, which is plain Owl and works in BOTH versions. That turns a
+blind fork into four changes that can each be proved on Owl 2 here. Three are
+now done, in the GENERATOR so they survive a re-sync:
+
+- `t-esc` -> `t-out`, all 41. **Owl 2's compiler implements both** and Odoo
+  19's own templates use `t-out` 98 times - checked, not assumed.
+- `useState` -> `OWL2 ? owl.useState : owl.proxy`, a runtime feature test.
+- `useEffect` -> the same test drops the second argument on Owl 3.
+
+**THE NINE `t-model` BINDINGS ARE STILL OPEN**, and seven are on `<select>`,
+where `t-att-value` sets an attribute and does NOT select an option - and the
+state is written programmatically too (the engine recommends a wire), so the
+selection must follow state rather than only drive it. That answer cannot be
+checked from a container that has only Owl 2.
+
+**CHROME IS TOO UNRELIABLE HERE TO VERIFY ANY OF IT.** At load 25-30 the
+server itself fails with `RuntimeError: can't start new thread` in
+`server.py`, the page returns `net::ERR_EMPTY_RESPONSE`, and the browser test
+reports "the calculator never mounted" - which is INDISTINGUISHABLE from a
+real failure. What was verified instead: the module installs, 24 tests pass,
+and the SERVED bundle carries the feature test, the `proxy` fallback, the
+component registration and the compiled `t-out` template.
+
+**SO THE WORK BELONGS ON PROJECT 2'S OWN CONTAINER** - owner's idea, and a
+better one than mine: *"if i use claude on the other project would it be able
+to fix it there?"* An agent there has the **Odoo 20 source on disk and a real
+Odoo 20 database**, so it can read and TEST what this build can only fetch
+off GitHub. `spring_calculator/README.md` now carries the brief, including
+the one rule that matters: **the module is GENERATED, so a fix made only in
+project 2's repository is undone by the next re-sync** - it has to come back
+as a diff and be folded into the generator.

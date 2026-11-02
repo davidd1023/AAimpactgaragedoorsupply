@@ -1,10 +1,18 @@
 // GENERATED FROM spring_engineering BY tools/build_spring_calculator.py. DO NOT EDIT BY HAND - change the original and re-run the script.
 /** @odoo-module **/
 
-import { Component, onWillStart, useEffect, useState } from "@odoo/owl";
+import * as owl from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
+
+// OWL 2 OR OWL 3 - see tools/build_spring_calculator.py. Odoo 19 has
+// Owl 2 and `useState`; Odoo 20 has Owl 3, where it is `proxy` and
+// `useEffect` takes no dependencies argument.
+const { Component, onWillStart } = owl;
+const OWL2 = typeof owl.useState === "function";
+const useState = OWL2 ? owl.useState : owl.proxy;
+const useEffect = OWL2 ? owl.useEffect : (effect) => owl.useEffect(effect);
 
 // --- Spring length constants ---------------------------------------------
 // Verified exactly (to the cent) against 11 reference results from the

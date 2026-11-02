@@ -103,6 +103,40 @@ RENAMES = [
     ('request.env["ir.config_parameter"].sudo().get_param(key)',
      "config_rate(request.env, key)"),
 
+    # ---- OWL 2 **OR** OWL 3, FROM ONE FILE SET -----------------------------
+    #
+    # Odoo 20 ships OWL 3, which is a breaking rewrite: `useState` is gone in
+    # favour of `proxy`, `t-esc` is gone in favour of `t-out`, and `useEffect`
+    # no longer takes a dependencies argument. Odoo 19 ships Owl 2, which is
+    # where this repository's tests run - so neither version may be abandoned.
+    #
+    # BOTH OF THESE WORK ON OWL 2 TOO, which is the whole point: they can be
+    # proved here not to break anything, rather than written blind. `t-out`
+    # has existed since Owl 2 and escapes plain strings exactly as `t-esc`
+    # did; the hooks are chosen at runtime off a feature test.
+    #
+    # STILL OUTSTANDING: the nine `t-model` bindings, which in Owl 3 take a
+    # SIGNAL. Seven of them are on `<select>`, where the obvious replacement
+    # (`t-att-value`) does not select an option, and the right answer cannot
+    # be checked from a container that only has Owl 2. See the README.
+    ("t-esc=\"", "t-out=\""),
+    ('import { Component, onWillStart, useEffect, useState } from "@odoo/owl";',
+     'import * as owl from "@odoo/owl";'),
+    # The hooks are resolved AFTER the imports rather than in place of them:
+    # `import` is hoisted so either is legal, but a const block sitting above
+    # the remaining imports reads like a mistake and invites somebody to
+    # "fix" it.
+    ('import { _t } from "@web/core/l10n/translation";',
+     'import { _t } from "@web/core/l10n/translation";\n'
+     '\n'
+     '// OWL 2 OR OWL 3 - see tools/build_spring_calculator.py. Odoo 19 has\n'
+     '// Owl 2 and `useState`; Odoo 20 has Owl 3, where it is `proxy` and\n'
+     '// `useEffect` takes no dependencies argument.\n'
+     'const { Component, onWillStart } = owl;\n'
+     'const OWL2 = typeof owl.useState === "function";\n'
+     'const useState = OWL2 ? owl.useState : owl.proxy;\n'
+     'const useEffect = OWL2 ? owl.useEffect : (effect) => owl.useEffect(effect);'),
+
     # The backend app: its menu and action ids, and the words on the menu.
     ("action_spring_engineering", "action_spring_calculator"),
     ("menu_spring_engineering", "menu_spring_calculator"),

@@ -19,7 +19,7 @@
                                 <label class="form-label" for="aa_cts_id">Inside diameter (I.D.)</label>
                                 <select class="form-select" id="aa_cts_id">
                                     <t t-foreach="combos" t-as="inner">
-                                        <option t-att-value="inner" t-esc="id_labels[inner]"/>
+                                        <option t-att-value="inner" t-out="id_labels[inner]"/>
                                     </t>
                                 </select>
                             </div>
