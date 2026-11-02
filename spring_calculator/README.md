@@ -34,14 +34,23 @@ screen. A three-part version is prefixed with whatever series is running
 (`1.0.0` becomes `19.0.1.0.0` on 19, `20.0.1.0.0` on 20), so the module is at
 least offered.
 
-**That is not the same as saying it WORKS on every series.** The code was
-written for Odoo 19. Install it on a development branch first and read what
-happens. Things most likely to need attention on a later series:
+**It is known to install on Odoo 19 and Odoo 20.** It was written for 19 and
+checked against the Odoo 20 source when the second project turned out to be
+on 20.
 
-- `type="jsonrpc"` on four routes — new in 19, was `type="json"` before
-- `website._get_and_cache_current_cart()` and `._create_cart()` — new in 19,
-  replacing `website.sale_get_order(force_create=True)`
-- `is_storable` on the two products — 18 and later only
+The one real difference found: **Odoo 20 removed `ir.config_parameter`'s
+`get_param` and `set_param`**, replacing them with typed accessors
+(`get_str`, `get_float`, `get_int`, `get_bool` and setters). `compat.py`
+bridges that, so one file set runs on both — which matters, because the
+tests that prove this carve correct can only run next to the original, on 19.
+
+Three things that were checked and did **not** change, so nobody has to look
+again: `type="jsonrpc"` is still a valid route type in 20;
+`website._get_and_cache_current_cart()` and `._create_cart()` still exist;
+and `is_storable` is still a field on `product.template`.
+
+Earlier series are untested. `is_storable` does not exist before 18, and
+`type="jsonrpc"` was `type="json"` before 19.
 
 ## Putting it on the second project
 

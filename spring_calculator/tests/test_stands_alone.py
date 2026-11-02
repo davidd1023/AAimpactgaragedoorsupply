@@ -12,6 +12,7 @@ original to compare against.
 from types import SimpleNamespace
 from unittest.mock import patch
 
+from odoo.addons.spring_calculator.compat import config_rate, set_config_rate
 from odoo.addons.spring_calculator.controllers import main
 from odoo.tests.common import TransactionCase, tagged
 
@@ -89,10 +90,33 @@ class TestStandsAlone(TransactionCase):
         """A fresh database must be able to quote at all. The original ships
         these through a <function> call rather than records, and so does
         this - the reason is written down in the generated settings file."""
-        params = self.env["ir.config_parameter"].sudo()
+        # Read through the shim, which is the only way to ask this question
+        # on both series: Odoo 20 dropped `get_param` entirely.
+        self.assertTrue(
+            config_rate(self.env, "spring_engineering.steel_per_lb"))
+        self.assertTrue(
+            config_rate(self.env, "spring_engineering.steel_cost_per_lb"))
 
-        self.assertTrue(params.get_param("spring_engineering.steel_per_lb"))
-        self.assertTrue(params.get_param("spring_engineering.steel_cost_per_lb"))
+    def test_the_rates_can_be_written_and_read_back(self):
+        """THE ROUND TRIP, which is where Odoo 20 would bite if the shim read
+        a value back differently from the way it wrote it - a float row read
+        as a string comes back as the default, which looks exactly like a
+        deleted parameter and turns every quote into "call us"."""
+        set_config_rate(self.env, "spring_engineering.steel_per_lb", 1.46)
+
+        self.assertEqual(
+            float(config_rate(self.env, "spring_engineering.steel_per_lb")),
+            1.46)
+
+    def test_a_rate_of_zero_is_not_a_missing_rate(self):
+        """The original's hard-won bug: on Odoo 19 `set_param` DELETES the
+        row for a falsy value, so a deliberate zero read back as absent."""
+        set_config_rate(self.env, "spring_engineering.steel_per_lb", 0.0)
+
+        stored = config_rate(self.env, "spring_engineering.steel_per_lb")
+
+        self.assertNotIn(stored, (None, False, ""))
+        self.assertEqual(float(stored), 0.0)
 
     # --- it books a cart line ------------------------------------------------
 

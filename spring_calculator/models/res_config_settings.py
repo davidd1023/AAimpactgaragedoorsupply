@@ -1,6 +1,8 @@
 # GENERATED FROM spring_engineering BY tools/build_spring_calculator.py. DO NOT EDIT BY HAND - change the original and re-run the script.
 from odoo import fields, models
 
+from ..compat import set_config_rate
+
 
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
@@ -17,14 +19,10 @@ class ResConfigSettings(models.TransientModel):
         """
         super().set_values()
 
-        params = self.env["ir.config_parameter"].sudo()
-        params.set_param(
-            "spring_engineering.steel_per_lb", str(self.spring_steel_per_lb or 0.0)
-        )
-        params.set_param(
-            "spring_engineering.steel_cost_per_lb",
-            str(self.spring_steel_cost_per_lb or 0.0),
-        )
+        set_config_rate(self.env, "spring_engineering.steel_per_lb",
+                        self.spring_steel_per_lb or 0.0)
+        set_config_rate(self.env, "spring_engineering.steel_cost_per_lb",
+                        self.spring_steel_cost_per_lb or 0.0)
 
     # THE SELL RATE: cost + winding labour + margin, per pound. It is NOT
     # marked up again - see pricing.py.

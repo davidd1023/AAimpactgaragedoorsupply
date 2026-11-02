@@ -2051,3 +2051,45 @@ source" arrangement did not anticipate. For now the generated module is one
 file set that installs on both; the day 19 and 20 genuinely need different
 code, the generator grows a `--series` option rather than the folder being
 forked by hand.
+
+#### ODOO 20 REMOVED `get_param`, AND THAT IS THE ONLY BREAK (owner, 2026-11-02)
+
+Installing on his Odoo 20 project died in the `<function>` call that seeds
+the rates:
+
+```
+AttributeError: 'ir.config_parameter' object has no attribute 'get_param'
+```
+
+**Odoo 20 replaced the generic `get_param`/`set_param` with TYPED accessors** -
+`get_str`, `get_float`, `get_int`, `get_bool` and matching setters. Read off
+the Odoo 20 source on GitHub, not guessed: there is no Odoo 20 in this
+container and the model's training predates its release, so **the way to
+answer a question about a series you cannot run is to fetch its source.**
+
+**THREE OTHER THINGS WERE CHECKED THE SAME WAY AND HAD NOT CHANGED**, which
+is worth recording so nobody looks again: `type="jsonrpc"` is still a valid
+route type in 20 (`JsonRPCDispatcher`), `website._get_and_cache_current_cart()`
+and `._create_cart()` still exist, and `is_storable` is still on
+`product.template`. Two of those were my own predictions in the previous
+entry, and both were wrong - predicting what a version changed is not the
+same as reading it.
+
+**A SHIM, NOT A MIGRATION TO THE NEW API**, and the reason is testability:
+the equivalence tests that prove the carve correct can only run beside the
+original, which is Odoo 19. A module that installs only on 20 is a module
+whose maths nothing checks. `spring_calculator/compat.py` is `config_rate()`
+and `set_config_rate()`, keyed on `hasattr`.
+
+**READ IT THE WAY IT IS WRITTEN.** Both parameters back **Float** fields, and
+Odoo 20's own settings page writes them with `set_float`; reading a float row
+back with `get_str` returns `INVALID_VALUE`, which becomes the default and is
+INDISTINGUISHABLE FROM A DELETED PARAMETER - which the engine deliberately
+turns into "call us". So the shim uses the float accessors on 20. A test
+asserts the round trip, and another that a rate of ZERO still reads back as
+zero rather than as absent.
+
+**ODOO 20 ALSO FIXED THE ZERO BUG** the original works around: `set_float`
+converts only `None` and `False` to None, and `0.0 is False` is False, so a
+deliberate zero is stored. The workaround is kept for 19 and is harmless on
+20.

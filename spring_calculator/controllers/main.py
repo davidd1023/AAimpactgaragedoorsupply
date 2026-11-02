@@ -14,6 +14,7 @@ import re
 
 from odoo import http
 
+from ..compat import config_rate
 from ..pricing import (
     CONE_PRICES, FILLER_PRICE_PER_FOOT, FILLER_SPRING_ID, STEEL_PRICE_PER_LB,
 )
@@ -231,7 +232,7 @@ def _pricing_param(key):
     of the subtle part below, which is the kind of duplication that has already
     cost this project real bugs twice.
     """
-    raw = request.env["ir.config_parameter"].sudo().get_param(key)
+    raw = config_rate(request.env, key)
 
     # MISSING IS CHECKED BEFORE float(), not by letting float() complain.
     # get_param returns False when there is no row, and float(False) is 0.0 -

@@ -87,6 +87,22 @@ RENAMES = [
     ("spring_engineering.calculator_page", "spring_calculator.calculator_page"),
     ("spring_engineering.Calculator", "spring_calculator.Calculator"),
     ("spring_engineering.calculator", "spring_calculator.calculator"),
+    # ODOO 20 DROPPED `get_param`. It replaced ir.config_parameter's generic
+    # get_param/set_param with TYPED accessors - get_str, get_float, get_int,
+    # get_bool and their setters - and the module died on install with
+    # `'ir.config_parameter' object has no attribute 'get_param'` (owner,
+    # 2026-11-02, on his Odoo 20 project).
+    #
+    # `compat.py` below keeps ONE file set working on 19 and 20 alike, which
+    # matters because the equivalence tests that prove this carve correct can
+    # only run here, on 19. Two anchors, both verified unique to main.py:
+    # the relative import (custom_spring.py's pricing import has no bracket)
+    # and the one call itself.
+    ("from ..pricing import (",
+     "from ..compat import config_rate\nfrom ..pricing import ("),
+    ('request.env["ir.config_parameter"].sudo().get_param(key)',
+     "config_rate(request.env, key)"),
+
     # The backend app: its menu and action ids, and the words on the menu.
     ("action_spring_engineering", "action_spring_calculator"),
     ("menu_spring_engineering", "menu_spring_calculator"),
@@ -283,9 +299,66 @@ def handwritten():
         "from . import res_config_settings\nfrom . import sale_order_line\n"
     )
 
+    files["compat.py"] = f'''# {BANNER}
+"""ONE FILE SET, TWO ODOO SERIES.
+
+**Odoo 20 removed `ir.config_parameter.get_param` and `set_param`** and put
+typed accessors in their place - `get_str`, `get_float`, `get_int`,
+`get_bool` and matching setters. The module died on install with
+
+    AttributeError: 'ir.config_parameter' object has no attribute 'get_param'
+
+WHY A SHIM RATHER THAN JUST MOVING TO THE NEW API: the tests that prove this
+carve correct - the ones that run eight specifications through BOTH engines
+and compare the quotes - can only run where `spring_engineering` is, which is
+Odoo 19. A module that only installs on 20 is a module whose maths nothing
+checks.
+
+**READ IT THE WAY IT IS WRITTEN.** Both parameters back `Float` fields on
+res.config.settings, and on Odoo 20 Odoo's own settings page writes them with
+`set_float`. Reading a float row back with `get_str` returns INVALID_VALUE,
+which `get_str` turns into the default - indistinguishable from a deleted
+parameter, which the engine turns into "call us". So these use the FLOAT
+accessors on 20, matching what the settings page does.
+"""
+
+
+def config_rate(env, key):
+    """The stored rate, or None/False when there is no row.
+
+    The caller tells a missing parameter from a zero and refuses to quote on
+    the first - which is the whole point of it, so neither series may answer
+    "0.0" for "absent".
+    """
+    params = env["ir.config_parameter"].sudo()
+
+    if hasattr(params, "get_float"):        # Odoo 20 and later
+        return params.get_float(key, None)
+
+    return params.get_param(key)            # Odoo 19 and earlier
+
+
+def set_config_rate(env, key, value):
+    """Store a rate so that ZERO survives.
+
+    On Odoo 19 `set_param` DELETES the row when handed a falsy value, so the
+    figure goes in as a string - a deliberate 0 would otherwise read back as
+    a deleted parameter and turn every quote into "call us". Odoo 20 does not
+    have that fault (`0.0 is False` is False, so the float is stored), and
+    takes the float.
+    """
+    params = env["ir.config_parameter"].sudo()
+
+    if hasattr(params, "set_float"):        # Odoo 20 and later
+        params.set_float(key, float(value))
+    else:
+        params.set_param(key, str(value))   # Odoo 19 and earlier
+'''
+
     files["models/ir_config_parameter.py"] = f'''# {BANNER}
 from odoo import api, models
 
+from ..compat import config_rate, set_config_rate
 from ..pricing import STEEL_COST_PER_LB, STEEL_PRICE_PER_LB
 
 # THE KEYS KEEP THE `spring_engineering.` PREFIX ON PURPOSE - see the note in
@@ -297,8 +370,8 @@ from ..pricing import STEEL_COST_PER_LB, STEEL_PRICE_PER_LB
 # 2026-10-16 ("cones and filler at cost, markup setting removed"), so the row
 # would be a default for a figure nothing reads.
 DEFAULTS = {{
-    "spring_engineering.steel_per_lb": str(STEEL_PRICE_PER_LB),
-    "spring_engineering.steel_cost_per_lb": str(STEEL_COST_PER_LB),
+    "spring_engineering.steel_per_lb": STEEL_PRICE_PER_LB,
+    "spring_engineering.steel_cost_per_lb": STEEL_COST_PER_LB,
 }}
 
 
@@ -318,15 +391,15 @@ class IrConfigParameter(models.Model):
         A STORED "0" IS A VALUE and is left alone; only a missing or blank
         parameter is filled in.
         """
-        params = self.sudo()
-
         for key, default in DEFAULTS.items():
-            if not (params.get_param(key) or "").strip():
-                params.set_param(key, default)
+            if config_rate(self.env, key) in (None, False, ""):
+                set_config_rate(self.env, key, default)
 '''
 
     files["models/res_config_settings.py"] = f'''# {BANNER}
 from odoo import fields, models
+
+from ..compat import set_config_rate
 
 
 class ResConfigSettings(models.TransientModel):
@@ -344,14 +417,10 @@ class ResConfigSettings(models.TransientModel):
         """
         super().set_values()
 
-        params = self.env["ir.config_parameter"].sudo()
-        params.set_param(
-            "spring_engineering.steel_per_lb", str(self.spring_steel_per_lb or 0.0)
-        )
-        params.set_param(
-            "spring_engineering.steel_cost_per_lb",
-            str(self.spring_steel_cost_per_lb or 0.0),
-        )
+        set_config_rate(self.env, "spring_engineering.steel_per_lb",
+                        self.spring_steel_per_lb or 0.0)
+        set_config_rate(self.env, "spring_engineering.steel_cost_per_lb",
+                        self.spring_steel_cost_per_lb or 0.0)
 
     # THE SELL RATE: cost + winding labour + margin, per pound. It is NOT
     # marked up again - see pricing.py.

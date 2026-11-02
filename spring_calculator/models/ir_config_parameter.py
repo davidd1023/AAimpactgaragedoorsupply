@@ -1,6 +1,7 @@
 # GENERATED FROM spring_engineering BY tools/build_spring_calculator.py. DO NOT EDIT BY HAND - change the original and re-run the script.
 from odoo import api, models
 
+from ..compat import config_rate, set_config_rate
 from ..pricing import STEEL_COST_PER_LB, STEEL_PRICE_PER_LB
 
 # THE KEYS KEEP THE `spring_engineering.` PREFIX ON PURPOSE - see the note in
@@ -12,8 +13,8 @@ from ..pricing import STEEL_COST_PER_LB, STEEL_PRICE_PER_LB
 # 2026-10-16 ("cones and filler at cost, markup setting removed"), so the row
 # would be a default for a figure nothing reads.
 DEFAULTS = {
-    "spring_engineering.steel_per_lb": str(STEEL_PRICE_PER_LB),
-    "spring_engineering.steel_cost_per_lb": str(STEEL_COST_PER_LB),
+    "spring_engineering.steel_per_lb": STEEL_PRICE_PER_LB,
+    "spring_engineering.steel_cost_per_lb": STEEL_COST_PER_LB,
 }
 
 
@@ -33,8 +34,6 @@ class IrConfigParameter(models.Model):
         A STORED "0" IS A VALUE and is left alone; only a missing or blank
         parameter is filled in.
         """
-        params = self.sudo()
-
         for key, default in DEFAULTS.items():
-            if not (params.get_param(key) or "").strip():
-                params.set_param(key, default)
+            if config_rate(self.env, key) in (None, False, ""):
+                set_config_rate(self.env, key, default)
