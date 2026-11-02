@@ -90,3 +90,18 @@ class TrackMergeCase(TransactionCase):
         (first | second).with_user(self.env.ref("base.user_admin")).aa_mark_done_jobs()
 
         self.assertEqual((first | second).mapped("state"), ["done", "done"])
+
+    def test_a_vertical_with_three_steps_is_listed_once(self):
+        horizontal = self._job(self.horizontal, self.tracks)
+        vertical = self._job(self.vertical, self.tracks)
+        for step in ("Mount flag angle", "Mount jamb brackets"):
+            self.env["mrp.workorder"].with_context(aa_keep_workcenter=True).create({
+                "name": step, "production_id": vertical.id,
+                "product_uom_id": vertical.product_uom_id.id,
+                "workcenter_id": self.tracks.id})
+
+        partners = self._merge(horizontal)["partners"]
+        self.assertEqual([p["production_id"] for p in partners], [vertical.id])
+        for wo in vertical.workorder_ids:
+            wo.invalidate_recordset(["aa_track_merge"])
+            self.assertTrue(json.loads(wo.aa_track_merge)["hidden"])

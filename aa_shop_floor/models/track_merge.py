@@ -62,8 +62,16 @@ class MrpWorkorder(models.Model):
             carrier = group[0]
             partners = []
             if wo == carrier:
+                # ONE ENTRY PER TRACK, not per step: a vertical is three work
+                # orders (cut, flag angle, jamb brackets) of one production,
+                # and its cut list is the production's. The carrier's own
+                # production is already drawn by the card itself.
+                seen = carrier.production_id
                 for other in group[1:]:
                     production = other.production_id
+                    if production in seen:
+                        continue
+                    seen |= production
                     partners.append({
                         "id": other.id,
                         "production_id": production.id,
