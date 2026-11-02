@@ -276,12 +276,28 @@ class MrpProduction(models.Model):
                 # when an order has none (one confirmed before W/O existed).
                 "order": production.aa_wo_number or production.origin,
                 "customer": order.partner_id.display_name or "",
+                "aa_impact_wo": self._aa_impact_wo(order),
                 "received": received,
                 "can_assign": can_assign,
                 "send_ids": [j["id"] for j in jobs if j["can_send"]],
                 "remove_ids": [j["id"] for j in jobs if j["can_remove"]],
                 "jobs": groups,
             })
+
+    # ---- AA Impact's own W/O (owner, 2026-11-02) ----
+    # "si es una orden de AA Impact ... que me salga el w/o de referencia de
+    # aa impact al lado del de nosotros, entre nuestro W/O # y From" - and on
+    # the Shop Floor, after Received and before Customer.
+    # AA Impact Garage Door types ITS OWN work order number into the Quick
+    # Order's PO field (client_order_ref), so for them the PO *is* their W/O.
+    # Any other customer's PO is not a W/O and is not shown here.
+    AA_IMPACT_CUSTOMER = "AA Impact Garage Door"
+
+    @api.model
+    def _aa_impact_wo(self, order):
+        if not order or order.partner_id.commercial_partner_id.name != self.AA_IMPACT_CUSTOMER:
+            return ""
+        return (order.client_order_ref or "").strip()
 
     # ---- Station timer (owner, 2026-10-15) ----
     # The worker starts the job at the station (Odoo's own work order clock) and

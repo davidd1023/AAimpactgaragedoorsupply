@@ -59,3 +59,25 @@ class OverviewListCase(TransactionCase):
     def test_the_shop_floor_loads_every_order_on_one_page(self):
         """Odoo's 40 split an order's jobs across pages."""
         self.assertGreaterEqual(int(self.env["mrp.workorder"].get_shopfloor_limit()), 500)
+
+
+@tagged("post_install", "-at_install")
+class OverviewAAImpactWoCase(OverviewListCase):
+    """AA IMPACT'S OWN W/O (owner, 2026-11-02): AA Impact Garage Door types its
+    own work order number into the Quick Order's PO, so on the Overview it is
+    shown in its own column after Received. Nobody else's PO is."""
+
+    def test_aa_impact_order_shows_its_wo(self):
+        company = self.env["res.partner"].create(
+            {"name": "AA Impact Garage Door", "is_company": True})
+        contact = self.env["res.partner"].create(
+            {"name": "Administrator", "parent_id": company.id})
+        order = self.env["sale.order"].create(
+            {"partner_id": contact.id, "client_order_ref": " 1026 "})
+        board = self._board(self._job(order.name))
+        self.assertEqual(board["aa_impact_wo"], "1026")
+
+    def test_another_dealers_po_is_not_shown(self):
+        self.order.client_order_ref = "PO-44821"
+        board = self._board(self._job(self.order.name))
+        self.assertEqual(board["aa_impact_wo"], "")
