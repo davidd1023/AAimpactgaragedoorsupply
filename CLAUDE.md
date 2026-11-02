@@ -2093,3 +2093,41 @@ zero rather than as absent.
 converts only `None` and `False` to None, and `0.0 is False` is False, so a
 deliberate zero is stored. The workaround is kept for 19 and is harmless on
 20.
+
+#### AND THEN OWL 3, WHICH IS WHY PROJECT 2 IS ON ODOO 19 (owner, 2026-11-02)
+
+With the module finally installed on his Odoo 20 build, the backend action
+threw `TypeError: useState is not a function`.
+
+**ODOO 20 SHIPS OWL 3**, a breaking rewrite of the UI framework. The Odoo 20
+DOCUMENTATION still shows `useState` and is lagging; the SOURCE does not use
+it - `addons/web/static/src/core/dropdown/dropdown.js` imports `signal`,
+`useProps`, `immediateEffect` and `@web/owl2/utils`, and that last is Owl 3
+utilities rather than an Owl 2 shim (it exports `render`, `onWillRender`,
+`useLayoutEffect`, `useEnv`, `useSubEnv` and nothing like `useState`). **Read
+the source, not the docs, when a version is new.**
+
+Measured against the calculator rather than guessed at:
+
+- `useState` x4 - removed, replaced by `proxy`
+- `t-esc` x41 - removed, replaced by `t-out` (which also works in Owl 2)
+- `useEffect` x1 - signature changed, no second argument
+- **`t-model` x9 - now takes a SIGNAL**, not reactive state
+
+**THE LAST ONE IS WHY IT IS A MIGRATION AND NOT A PATCH.** Those nine
+bindings are the calculator's whole input surface - weight, drum, lift, wire,
+spring I.D., cycles, pitch - and moving off `useState` changes how state is
+read in every one of 4,449 lines. Owl 3 signals do not run on Owl 2, so doing
+it would FORK the calculator permanently by series, and **this container can
+only ever test the 19 half**: it would be a blind rewrite of the engine that
+prices his springs, with him finding out what broke.
+
+So he was given the choice and took the cheap one: **project 2 moves to Odoo
+19**, which project 1 runs anyway. Odoo.sh puts it under the branch's
+**Settings > Odoo version**. A brand-new project with no data is a rebuild,
+not a migration.
+
+**NOTHING OF THE ODOO 20 WORK IS WASTED OR REVERTED**: the series-less
+manifest version and `compat.py` both stay, because both are harmless on 19
+and both are blockers already cleared if Odoo 20 is ever revisited. What is
+NOT cleared, and is written down above so nobody re-derives it, is Owl 3.

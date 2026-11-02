@@ -34,22 +34,39 @@ screen. A three-part version is prefixed with whatever series is running
 (`1.0.0` becomes `19.0.1.0.0` on 19, `20.0.1.0.0` on 20), so the module is at
 least offered.
 
-**It is known to install on Odoo 19 and Odoo 20.** It was written for 19 and
-checked against the Odoo 20 source when the second project turned out to be
-on 20.
+## ⚠️ Odoo 19 only. It installs on Odoo 20 and does not run.
 
-The one real difference found: **Odoo 20 removed `ir.config_parameter`'s
-`get_param` and `set_param`**, replacing them with typed accessors
-(`get_str`, `get_float`, `get_int`, `get_bool` and setters). `compat.py`
-bridges that, so one file set runs on both — which matters, because the
-tests that prove this carve correct can only run next to the original, on 19.
+**Odoo 20 ships Owl 3**, which is a breaking rewrite of the UI framework, and
+the calculator is a 4,449-line Owl 2 component. Checked against the Odoo 20
+source on 2026-11-02 — the Odoo 20 *documentation* still shows `useState` and
+is lagging; the source does not use it:
 
-Three things that were checked and did **not** change, so nobody has to look
-again: `type="jsonrpc"` is still a valid route type in 20;
+- `useState` (×4) — **removed in Owl 3**, replaced by `proxy`
+- `t-esc` (×41) — **removed**, replaced by `t-out` (which also works in Owl 2)
+- `useEffect` (×1) — signature changed, no second argument
+- **`t-model` (×9) — now takes a SIGNAL**, not reactive state
+
+That last one is why this is a migration and not a patch: those nine bindings
+are the calculator's whole input surface, and moving off `useState` changes
+how state is read in every one of those 4,449 lines. Owl 3 signals do not run
+on Owl 2, so doing it would FORK the calculator permanently into a 19 version
+and a 20 version — and this repository can only ever test the 19 one.
+
+**So the second project was put on Odoo 19** (owner's call, 2026-11-02),
+which is also what project 1 runs. Odoo.sh: the branch's **Settings → Odoo
+version**.
+
+Two things about Odoo 20 that were run down and **are** solved, should it ever
+be revisited: the manifest version (see above), and `ir.config_parameter`
+losing `get_param`/`set_param` in favour of typed accessors — `compat.py`
+already bridges that one and is harmless on 19.
+
+Three more that were checked and had **not** changed in 20:
+`type="jsonrpc"` is still a valid route type;
 `website._get_and_cache_current_cart()` and `._create_cart()` still exist;
-and `is_storable` is still a field on `product.template`.
+`is_storable` is still a field on `product.template`.
 
-Earlier series are untested. `is_storable` does not exist before 18, and
+Series before 19 are untested. `is_storable` does not exist before 18, and
 `type="jsonrpc"` was `type="json"` before 19.
 
 ## Putting it on the second project
