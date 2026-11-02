@@ -30,6 +30,7 @@ spring without a second copy of the model, which CLAUDE.md forbids.
 import re
 
 from odoo import Command, _, api, fields, models
+from odoo.exceptions import UserError
 
 ADD_PARTS = ('box', 'tracks', 'springs')
 
@@ -68,16 +69,22 @@ class SaleOrder(models.Model):
 
     def _aa_kit_lines(self):
         return self.order_line.filtered(
-            lambda l: l.product_id and l.product_template_id.aa_dealer_quick_order)
+            lambda l: l.product_id and l.product_uom_qty > 0 and l.product_template_id.aa_dealer_quick_order)
 
     def _aa_spring_lines(self):
         spring = self.env.ref('spring_engineering.product_custom_spring', raise_if_not_found=False)
-        return self.order_line.filtered(lambda l: spring and l.product_template_id == spring)
+        return self.order_line.filtered(
+            lambda l: spring and l.product_template_id == spring and l.product_uom_qty > 0)
+
+    def _aa_filler_lines(self):
+        filler = self.env.ref('spring_engineering.product_custom_filler', raise_if_not_found=False)
+        return self.order_line.filtered(
+            lambda l: filler and l.product_template_id == filler and l.product_uom_qty > 0)
 
     def _aa_track_lines(self):
         custom = self.env.ref('aa_dealer_orders.product_custom_track', raise_if_not_found=False)
         return self.order_line.filtered(
-            lambda l: l.product_id and (
+            lambda l: l.product_id and l.product_uom_qty > 0 and (
                 (custom and l.product_template_id == custom)
                 or l.product_id._aa_track_facts()))
 
@@ -143,11 +150,11 @@ class SaleOrder(models.Model):
 
     # ── the buttons ─────────────────────────────────────────────────────────
 
-    def _aa_open_add_page(self, part):
+    def _aa_open_add_page(self, part, back=''):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_url',
-            'url': f'/dealer/order/add/{self.id}?part={part}',
+            'url': f'/dealer/order/add/{self.id}?part={part}' + (f'&back={back}' if back else ''),
             'target': 'self',
         }
 
@@ -206,3 +213,114 @@ class SaleOrder(models.Model):
                      "invoice the new lines by hand.", why=fallback_reason, err=str(e))
         return _("A new invoice %(inv)s was made for the new lines (%(why)s).",
                  inv=', '.join(moves.mapped('name')), why=fallback_reason)
+
+    # ── REMOVE A PART (owner, 2026-11-02, on the Shop Floor) ──────────────────
+    # "agregar hw box, muelles o tracks aqui en shopfloor si no lo tiene la
+    # orden, que por error no se puso o algo, y ademas removerlo de la orden".
+
+    def _aa_part_lines(self, part):
+        if part == 'box':
+            return self._aa_kit_lines()
+        if part == 'tracks':
+            return self._aa_track_lines()
+        if part == 'springs':
+            return self._aa_spring_lines() | self._aa_filler_lines()
+        return self.env['sale.order.line']
+
+    def _aa_part_jobs(self, lines):
+        """The Shop Floor work behind these lines, whatever its state.
+
+        By the sale line (springs, kits - _aa_create_station_productions writes
+        it) and, for a prepared track, by the order's name and the product -
+        Odoo's own route raises those and links them by origin only.
+        """
+        Production = self.env['mrp.production'].sudo()
+        jobs = Production.search([('aa_sale_line_id', 'in', lines.ids)]) \
+            if 'aa_sale_line_id' in Production._fields else Production.browse()
+        tracks = lines.filtered(lambda l: l.product_id._aa_track_facts())
+        if tracks and self.name:
+            jobs |= Production.search([
+                ('origin', '=', self.name),
+                ('product_id', 'in', tracks.product_id.ids),
+            ])
+        return jobs.filtered(lambda p: p.state != 'cancel')
+
+    def aa_remove_part(self, part):
+        """Take a hardware box, the tracks or the springs off a placed order.
+
+        Refused once anything has been made or handed over - a job done or
+        being worked on, or a delivery already out - because that is not a
+        mistake on the order any more, it is a return. Otherwise the jobs are
+        cancelled, the lines go to quantity 0 (Odoo keeps a confirmed line, it
+        will not delete it) and the unpaid invoice is redone without them.
+        """
+        self.ensure_one()
+        if part not in ADD_PARTS or not self._aa_can_add_parts():
+            raise UserError(_("Only an administrator can change a dealer order on account."))
+        label = {'box': _('Hardware Box'), 'tracks': _('Tracks'), 'springs': _('Springs')}[part]
+        lines = self._aa_part_lines(part)
+        if not lines:
+            raise UserError(_("%s: there is nothing of that on this order.", label))
+        jobs = self._aa_part_jobs(lines)
+        started = jobs.filtered(lambda p: p.state == 'done' or p.workorder_ids.filtered(
+            lambda w: w.state in ('progress', 'done')))
+        if started:
+            raise UserError(_("%(label)s cannot be removed: %(jobs)s already started or finished at the station.",
+                              label=label, jobs=", ".join(started.mapped('name'))))
+        if any(l.qty_delivered for l in lines):
+            raise UserError(_("%s cannot be removed: some of it has already been delivered.", label))
+
+        summary = ", ".join(f"{l.product_id.display_name} x{l.product_uom_qty:g} ({l.price_subtotal:.2f})"
+                            for l in lines)
+        for job in jobs:
+            job.action_cancel()
+        lines.write({'product_uom_qty': 0})
+        invoice_note = self._aa_uninvoice(lines)
+        # A kit taken off leaves its boxed lift cables without a job: they get
+        # one of their own, exactly as cables bought without a kit do.
+        if part == 'box' and hasattr(self, '_aa_create_station_productions'):
+            self._aa_create_station_productions()
+        if hasattr(jobs, '_aa_tell_the_shop_floor') and jobs:
+            jobs._aa_tell_the_shop_floor()
+        self.message_post(body=_("%(label)s removed by %(user)s: %(lines)s. %(inv)s",
+                                 label=label, user=self.env.user.name, lines=summary, inv=invoice_note))
+        return _("%(label)s removed from %(order)s. %(inv)s", label=label,
+                 order=self.aa_wo_number or self.name, inv=invoice_note)
+
+    def _aa_uninvoice(self, lines):
+        """Take removed lines off the unpaid invoice they were billed on."""
+        moves = lines.invoice_lines.move_id.filtered(lambda m: m.move_type == 'out_invoice' and m.state != 'cancel')
+        notes = []
+        for move in moves:
+            if move.state == 'posted' and move.payment_state != 'not_paid':
+                notes.append(_("Invoice %s already has a payment on it - issue a credit note for the removed lines.",
+                               move.name))
+                continue
+            try:
+                with self.env.cr.savepoint():
+                    was_posted = move.state == 'posted'
+                    if was_posted:
+                        move.button_draft()
+                    move.invoice_line_ids.filtered(lambda il: il.sale_line_ids & lines).unlink()
+                    if was_posted and move.invoice_line_ids:
+                        move.action_post()
+                notes.append(_("Invoice %s was redone without them.", move.name))
+            except Exception as e:
+                notes.append(_("Invoice %(inv)s could not be redone (%(err)s) - fix it by hand.",
+                               inv=move.name, err=str(e)))
+        return " ".join(notes)
+
+    # ── what the Shop Floor shows an admin ──────────────────────────────────
+
+    def _aa_parts_board(self):
+        """For the Shop Floor row: which parts this order has, or None when not allowed."""
+        self.ensure_one()
+        if not self._aa_can_add_parts():
+            return None
+        return {
+            'order_id': self.id,
+            'parts': [
+                {'part': part, 'label': label, 'has': bool(self._aa_part_lines(part))}
+                for part, label in (('box', 'Hardware Box'), ('tracks', 'Tracks'), ('springs', 'Springs'))
+            ],
+        }

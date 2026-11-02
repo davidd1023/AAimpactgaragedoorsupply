@@ -332,7 +332,7 @@ class AADealerOrder(AAOptionPricing, http.Controller):
     # ── pages ────────────────────────────────────────────────────────────────
 
     @http.route('/dealer/order/add/<int:order_id>', type='http', auth='user', website=True, sitemap=False)
-    def dealer_order_add_page(self, order_id, part='tracks', **kw):
+    def dealer_order_add_page(self, order_id, part='tracks', back='', **kw):
         """The Quick Order page, filled in with an order's doors, adding ONE part to it.
 
         Admin only (owner, 2026-11-02); see add_parts.py for the why.
@@ -351,6 +351,7 @@ class AADealerOrder(AAOptionPricing, http.Controller):
             'add_part': part,
             'add_label': ADD_LABELS[part],
             'add_doors_json': json.dumps(order._aa_door_rows()),
+            'add_back': self._aa_back_url(order, back),
         })
 
     @http.route('/dealer/order', type='http', auth='user', website=True, sitemap=False)
@@ -373,6 +374,7 @@ class AADealerOrder(AAOptionPricing, http.Controller):
             'add_part': False,
             'add_label': '',
             'add_doors_json': False,
+            'add_back': False,
         })
 
     @http.route('/dealer/order/price', type='jsonrpc', auth='user', website=True)
@@ -575,8 +577,15 @@ class AADealerOrder(AAOptionPricing, http.Controller):
             'notes': notes,
         }
 
+    @staticmethod
+    def _aa_back_url(order, back):
+        """Where the admin goes afterwards: back to the Shop Floor if he came from it."""
+        if back == 'shop-floor':
+            return '/odoo/shop-floor'
+        return f'/odoo/action-sale.action_orders/{order.id}'
+
     @http.route('/dealer/order/add/<int:order_id>/submit', type='jsonrpc', auth='user', website=True)
-    def dealer_order_add_submit(self, order_id, lines, part='', **kw):
+    def dealer_order_add_submit(self, order_id, lines, part='', back='', **kw):
         order = self._aa_add_order(order_id)
         if not order or part not in ADD_PARTS:
             return {'error': _("Only an administrator can add to a dealer order on account.")}
@@ -647,13 +656,18 @@ class AADealerOrder(AAOptionPricing, http.Controller):
                         'name': f"{extra['product'].display_name}\n{extra['label']} for {door}",
                     })
         added = order.order_line - before
+        # The Shop Floor jobs: a spring and a kit get theirs here (the same
+        # call confirmation makes, which skips a line that already has one);
+        # a prepared track's comes from Odoo's own route as the line is made.
+        if hasattr(order, '_aa_create_station_productions'):
+            order._aa_create_station_productions()
         invoice_note = order._aa_reinvoice(added)
         order.message_post(body=_(
             "%(what)s added by %(user)s: %(lines)s. %(inv)s",
             what=ADD_LABELS[part], user=request.env.user.name,
             lines=", ".join(f"{l.product_id.display_name} x{l.product_uom_qty:g} ({l.price_subtotal:.2f})" for l in added),
             inv=invoice_note))
-        return {'redirect': f'/odoo/action-sale.action_orders/{order.id}'}
+        return {'redirect': self._aa_back_url(order, back)}
 
     def _check_series(self, template, line, idx):
         """The kit comes from the door width (AA Calculator): <=144" 1200, <=194" 1600, <=220" 1800."""

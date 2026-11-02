@@ -1974,3 +1974,30 @@ His three answers:
   date), and the new lines go on an invoice of their own instead. Quantity is
   forced to the ordered quantity because a delivery-policy product would
   otherwise invoice 0. An order never invoiced is left alone.
+
+### AND ON THE SHOP FLOOR, WITH REMOVE (owner, 2026-11-02, an hour later)
+
+*"we were talking about adding hw box, springs or tracks here in shop floor
+if the order doesn't have it - put in by mistake or whatever - and also
+removing it from the order."* The buttons belong where he runs the floor: the
+Overview list, inside an opened row, **"Order parts (admin)"** - Add for what
+the order lacks, Remove for what it has. The sale order header keeps its Add
+buttons too.
+
+The board carries `parts` from `sale.order._aa_parts_board()`, asked through
+`hasattr` so `aa_shop_floor` takes no dependency on `aa_dealer_orders`; None
+for anybody but an admin and for any order that was a purchase. **Add** goes to
+the same pre-filled page with `back=shop-floor` and comes back to the floor.
+After adding, `_aa_create_station_productions()` is called - it is what
+confirmation calls, it skips lines that already have a job - so an added
+spring or box gets its Shop Floor job; a prepared track's comes from Odoo's
+route as the line is made.
+
+**Remove** (`aa_remove_part`): refused once a job for that part is done or
+being worked on, or anything is delivered - that is a return, not a mistake on
+the order. Otherwise the jobs are cancelled, the lines go to quantity 0 (Odoo
+will not delete a confirmed line) and the unpaid invoice is redone without
+them; a paid one is left alone with a note to issue a credit note. Springs
+take their plastic filler with them. A box taken off re-runs
+`_aa_create_station_productions` so its boxed lift cables get a job of their
+own.

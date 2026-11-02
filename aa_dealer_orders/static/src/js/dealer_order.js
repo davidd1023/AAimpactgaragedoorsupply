@@ -531,7 +531,7 @@
             submitBtn.disabled = true;
             submitBtn.textContent = addOrder ? "Adding..." : "Placing order...";
             const request = addOrder
-                ? rpc("/dealer/order/add/" + addOrder + "/submit", { part: addPart, lines: lines.map((l) => l.payload()) })
+                ? rpc("/dealer/order/add/" + addOrder + "/submit", { part: addPart, back: root.dataset.back || "", lines: lines.map((l) => l.payload()) })
                 : rpc("/dealer/order/submit", {
                     po_number: po,
                     pickup_date: root.querySelector("#aa_pickup").value || null,

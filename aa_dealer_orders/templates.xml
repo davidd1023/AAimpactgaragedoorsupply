@@ -85,7 +85,8 @@
                  t-att-data-currency-symbol="currency.symbol"
                  t-att-data-add-order="add_order and add_order.id"
                  t-att-data-add-part="add_part"
-                 t-att-data-doors="add_doors_json">
+                 t-att-data-doors="add_doors_json"
+                 t-att-data-back="add_back and request.params.get('back')">
 
                 <!-- ADMIN: ADD ONE PART TO AN ORDER ALREADY PLACED (owner, 2026-11-02). -->
                 <div t-if="add_order" class="d-flex flex-wrap justify-content-between align-items-end mb-3 gap-2">
@@ -97,7 +98,7 @@
                             <t t-esc="add_label.lower()"/> are added, and the order's invoice is redone.
                         </div>
                     </div>
-                    <a t-attf-href="/odoo/action-sale.action_orders/#{add_order.id}" class="btn btn-outline-secondary btn-sm">Back to the order</a>
+                    <a t-att-href="add_back" class="btn btn-outline-secondary btn-sm">Back</a>
                 </div>
 
                 <div t-if="not add_order" class="d-flex flex-wrap justify-content-between align-items-end mb-3 gap-2">

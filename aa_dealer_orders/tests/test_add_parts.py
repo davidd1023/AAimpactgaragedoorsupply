@@ -162,3 +162,36 @@ class AddPartsCase(HttpCase):
             "order_id": order.id, "product_id": self.widget.id, "price_unit": 50.0})
         self.assertEqual(order._aa_reinvoice(line), "")
         self.assertFalse(order.invoice_ids)
+
+    # --- removing a part (owner, 2026-11-02, on the Shop Floor) -------------------
+
+    def test_remove_tracks_zeroes_the_line_and_redoes_the_invoice(self):
+        custom = self.env.ref("aa_dealer_orders.product_custom_track").product_variant_id
+        order = self._order(lines=[
+            Command.create({"product_id": self.widget.id}),
+            Command.create({"product_id": custom.id, "price_unit": 211.54})])
+        invoice = order._create_invoices()
+        invoice.action_post()
+        number = invoice.name
+        self.assertFalse(order.aa_needs_tracks)
+        message = order.aa_remove_part("tracks")
+        self.assertIn("Tracks removed", message)
+        track_line = order.order_line.filtered(lambda l: l.product_id == custom)
+        self.assertEqual(track_line.product_uom_qty, 0)
+        self.assertTrue(order.aa_needs_tracks, "the Add button comes back")
+        self.assertEqual(invoice.state, "posted")
+        self.assertEqual(invoice.name, number)
+        self.assertAlmostEqual(invoice.amount_untaxed, 100.0)
+
+    def test_remove_something_not_there_is_refused(self):
+        from odoo.exceptions import UserError
+        order = self._order()
+        with self.assertRaises(UserError):
+            order.aa_remove_part("springs")
+
+    def test_parts_board_lists_what_the_order_has(self):
+        order = self._order(lines=[Command.create({"product_id": self.kit.product_variant_id.id})])
+        board = order._aa_parts_board()
+        has = {p["part"]: p["has"] for p in board["parts"]}
+        self.assertEqual(has, {"box": True, "tracks": False, "springs": False})
+        self.assertIsNone(self._order(self.walk_in)._aa_parts_board())

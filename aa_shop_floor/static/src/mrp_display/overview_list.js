@@ -1,5 +1,7 @@
 import { useState } from "@odoo/owl";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { patch } from "@web/core/utils/patch";
+import { useService } from "@web/core/utils/hooks";
 import { MrpDisplay } from "@mrp_workorder/mrp_display/mrp_display";
 
 // THE OVERVIEW AS A LIST (owner, 2026-10-21: "more than 60 orders" on the
@@ -81,6 +83,8 @@ patch(MrpDisplay.prototype, {
             open: {},
             sort: readSort(),
         });
+        this.aaPartsDialog = useService("dialog");
+        this.aaPartsNotify = useService("notification");
     },
 
     // --- which view ------------------------------------------------------
@@ -176,6 +180,7 @@ patch(MrpDisplay.prototype, {
             jobs,
             byStation,
             status,
+            parts: board.parts || null,
         };
     },
 
@@ -333,6 +338,32 @@ patch(MrpDisplay.prototype, {
     },
 
     // --- the buttons -------------------------------------------------------
+
+    // ADD / REMOVE A BOX, TRACKS OR SPRINGS (owner, 2026-11-02, admins only).
+    // Add opens the Quick Order page filled with the order's doors - the spring
+    // calculator runs there and nowhere else - and comes back here afterwards.
+    aaAddPart(parts, part) {
+        window.location.href = `/dealer/order/add/${parts.order_id}?part=${part}&back=shop-floor`;
+    },
+
+    aaRemovePart(parts, item, order) {
+        this.aaPartsDialog.add(ConfirmationDialog, {
+            title: `Remove ${item.label}`,
+            body: `Take the ${item.label.toLowerCase()} off ${order}? Their Shop Floor work is cancelled, ` +
+                "the lines go to 0 and the unpaid invoice is redone.",
+            confirmLabel: "Remove",
+            confirm: async () => {
+                try {
+                    const message = await this.model.orm.call("sale.order", "aa_remove_part", [[parts.order_id], item.part]);
+                    this.aaPartsNotify.add(message, { type: "success" });
+                } catch (error) {
+                    this.aaPartsNotify.add(error.data?.message || error.message || String(error), { type: "danger" });
+                }
+                await this.onClickRefresh();
+            },
+            cancel: () => {},
+        });
+    },
 
     async aaListAction(method, ids) {
         if (!ids || !ids.length) {
