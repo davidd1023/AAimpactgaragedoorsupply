@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED FROM spring_engineering BY tools/build_spring_calculator.py. DO NOT EDIT BY HAND - change the original and re-run the script. -->
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.spring.calculator</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- The rates live in Website's settings because the calculator
+                 is a website page, anchored after the Website app's own
+                 General block - the same anchor the original uses, and it
+                 has to be a real one: an xpath that matches nothing fails
+                 the whole install, which is how the first build of this
+                 module died. -->
+            <xpath expr="//block[@id='website_info_settings']" position="after">
+                <block title="Spring Calculator" id="spring_calculator_settings">
+                    <setting string="Spring sell price per pound"
+                             help="What a pound of wound spring steel SELLS for: your cost, the winding labour and your margin. It is not marked up again.">
+                        <div class="content-group">
+                            <div class="row">
+                                <field name="spring_steel_per_lb" class="oe_inline"/>
+                                <span class="ms-2">per lb</span>
+                            </div>
+                        </div>
+                    </setting>
+                    <setting string="Spring steel cost per pound"
+                             help="What the steel COSTS you. Nothing a customer sees is priced from this - it is used for staff-only cost figures.">
+                        <div class="content-group">
+                            <div class="row">
+                                <field name="spring_steel_cost_per_lb" class="oe_inline"/>
+                                <span class="ms-2">per lb</span>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

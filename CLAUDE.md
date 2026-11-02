@@ -129,6 +129,71 @@ All three agree with the reference exactly on the case checked.
 
 Stated by the owner: *"6\" is the same as 5 1/4\""* for cone pricing.
 
+### THE CALCULATOR ON A SECOND PROJECT (`spring_calculator`, owner 2026-11-02)
+
+*"i want to put the spring engineering custom module on another project"* -
+another Odoo.sh project of his own, the CALCULATOR ONLY - and then the line
+that decided the whole design: *"you can do what is neccesary, as long as it
+doesnt affect the original spring engineering calculator in any way."*
+
+**SO NOTHING WAS CARVED IN PLACE.** The obvious build - split the calculator
+out of `spring_engineering` and have the old module depend on the new one -
+would have moved `product_custom_spring`'s XML ID, which his live orders
+point at and which `main.py` and `cart_cost.py` look up by name. That is a
+migration on the page the business runs on, to no benefit for THIS project.
+`tools/build_spring_calculator.py` READS the original and WRITES a second,
+lighter module beside it. **`git status spring_engineering/` is empty**, which
+is a promise a test can check rather than one somebody has to remember.
+
+**IT IS GENERATED, NOT COPIED, AND THE REASON IS A COUNT**: 151 of the 288
+commits to `spring_engineering` in the 90 days to 2026-11-02 touched the
+engine (`spring_engineering.js`, `controllers/main.py`, `pricing.py`), the
+most recent five days before. This is not finished code to fork and forget -
+a hand copy is wrong within the fortnight and wrong SILENTLY. Same
+arrangement as `tools/build_embed.py` and the door preview block, for the
+same reason written down there.
+
+**THE MODULE IS EIGHT FEATURES WEARING ONE NAME**, and only the first is the
+calculator: catalogue merge (89 of HIS products, by name), track prep (nearly
+all of `sale_order.py`), the wishlist heart, signup validation, reorder,
+minimum order and quantity limits, the cart cost line, the grid price fix.
+That is why the carved module can drop `website_sale_wishlist` and
+`auth_signup` - neither was ever any part of the calculator.
+
+**THEY MUST NEVER SHARE A DATABASE, AND THAT WAS MEASURED.** Both claim
+`/spring-calculator` and `/custom-torsion-spring`, and with both installed on
+this build the NEW one won - the page came back mounting
+`spring_calculator.calculator`. So it was uninstalled again and the original
+checked back (`spring_engineering.calculator`, HTTP 200, its products intact).
+**It is deliberately left uninstalled here**; this repository is the SOURCE
+for the second project, not a host for it. Everything else that would have
+collided is renamed - Owl template, public component, client action, product
+XML IDs - so the clash is one obvious thing rather than four subtle ones.
+
+**THE CONFIG KEYS KEEP THE `spring_engineering.` PREFIX ON PURPOSE.** They
+are internal identifiers nobody reads - the owner sees "Spring sell price per
+pound" in Settings - and leaving them alone is what lets `pricing.py` and the
+price-reading half of `main.py` copy across completely untouched. It also
+means that if the two ever did share a database they would agree on the steel
+rate instead of quietly quoting from two different ones.
+
+**THE DRIFT ALARM IS `--check`, AND IT NEEDS NO DATABASE.**
+`python3 tools/build_spring_calculator.py --check` exits 1 when the generated
+module is stale; run it before pushing. The deeper proof is
+`spring_calculator/tests/test_matches_the_original.py`, which runs eight
+specifications through BOTH engines and compares the quotes - price,
+description, turns, filler, and the refusals - and compares the 4,449-line
+browser engine as TEXT after undoing the renames, because none of the Python
+tests touch the JS where the sizing actually lives. Those tests SKIP where
+`spring_engineering` is absent, which is the second project.
+
+**A MODULE IS NOT INSTALLED BY MERGING** - the `aa_min_max` lesson applies
+again and is in that module's README: Apps > Update Apps List > Install, once.
+
+**THE PRE-EXISTING FAILURE IS THE PROOF THE ORIGINAL IS UNHARMED**:
+`spring_engineering` runs **5 failed, 2 errors of 348**, all in
+`test_bracket_fasteners`, exactly the count recorded above for a clean tree.
+
 ## Pricing
 
 ### A 5 1/4" spring takes a plastic filler
