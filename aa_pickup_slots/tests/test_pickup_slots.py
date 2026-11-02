@@ -13,11 +13,16 @@ day their order is not made yet.
 """
 
 import json
-from datetime import date
+from datetime import date, datetime
 
 from odoo.addons.http_routing.tests.common import MockRequest
 from odoo.exceptions import ValidationError
 from odoo.tests.common import HttpCase, TransactionCase, tagged
+
+from odoo.addons.aa_pickup_slots.models.pickup_time import (
+    TZ_SETTING,
+    slot_in_utc,
+)
 
 
 @tagged("post_install", "-at_install")
@@ -510,3 +515,151 @@ class PickupRouteCase(HttpCase):
         payload = self._call(date="", time="half past ten")
 
         self.assertNotIn("error", payload)
+
+
+@tagged("post_install", "-at_install")
+class PickupIsTheScheduledDateCase(PickupSlotCase):
+    """THE SLOT IS WHEN THE WORK IS DUE.
+
+    Owner, 2026-10-29, with a screenshot of W/O #268: *"when the customer
+    selects their order date it should be the scheduled date in the work
+    order, but currently the schedule date is the same as the time it was
+    ordered and the actual scheduled date is next to it."*
+
+    He is right that they were two things side by side: Odoo set
+    `scheduled_date` to the moment the order was CONFIRMED, and this module
+    printed the real answer in the field beside it, so the shop had to read
+    the second and ignore the first.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.env["ir.config_parameter"].sudo().set_param(
+            TZ_SETTING, "America/Toronto")
+
+    def _collected(self, day, hour=13.5):
+        self.order.carrier_id = self.pickup
+        self.order.write({"aa_pickup_date": day, "aa_pickup_time": hour})
+        self.order.action_confirm()
+
+        return self.order.picking_ids
+
+    # --- the sentence he wrote ------------------------------------------------
+
+    def test_the_scheduled_date_is_the_slot_the_customer_chose(self):
+        """THE ONE THAT SETTLES IT. 1:30 PM on 9 November, in a shop on
+        Eastern time, is 18:30 UTC - which is what Odoo stores."""
+        pickings = self._collected(date(2026, 11, 9), 13.5)
+
+        self.assertTrue(pickings)
+        for picking in pickings:
+            self.assertEqual(picking.scheduled_date,
+                             datetime(2026, 11, 9, 18, 30))
+
+    def test_summer_and_winter_are_an_hour_apart(self):
+        """DST IS THE WHOLE REASON THIS IS NOT ARITHMETIC. The shop says 1:30
+        PM both times; UTC does not agree with itself."""
+        winter = slot_in_utc(self.env, date(2026, 11, 9), 13.5)
+        summer = slot_in_utc(self.env, date(2026, 7, 15), 13.5)
+
+        self.assertEqual(winter.hour, 18, "EST is UTC-5")
+        self.assertEqual(summer.hour, 17, "EDT is UTC-4")
+
+    def test_moving_the_slot_moves_the_scheduled_date(self):
+        """A customer telephones and changes the day. Dispatch reading one
+        date while the order says another is the fault this replaces."""
+        pickings = self._collected(date(2026, 11, 9), 13.5)
+
+        self.order.write({"aa_pickup_date": date(2026, 11, 10),
+                          "aa_pickup_time": 7.0})
+
+        for picking in pickings.filtered(
+                lambda p: p.state not in ("done", "cancel")):
+            self.assertEqual(picking.scheduled_date,
+                             datetime(2026, 11, 10, 12, 0))
+
+    def test_a_backorder_is_due_when_the_customer_comes_back(self):
+        """A backorder is made by COPYING, and these fields are `copy=False`;
+        it is the half of the order he actually returns for."""
+        self._collected(date(2026, 11, 9), 13.5)
+        backorder = self.env["stock.picking"].create({
+            "picking_type_id": self.order.picking_ids[0].picking_type_id.id,
+            "partner_id": self.customer.id,
+            "sale_id": self.order.id,
+            "location_id": self.order.picking_ids[0].location_id.id,
+            "location_dest_id": self.order.picking_ids[0].location_dest_id.id,
+        })
+
+        self.assertEqual(backorder.scheduled_date, datetime(2026, 11, 9, 18, 30))
+
+    # --- what it must not touch ----------------------------------------------
+
+    def test_a_finished_transfer_keeps_the_date_it_went_out_on(self):
+        """What was on the paperwork is a record - the rule everywhere else
+        in this module."""
+        pickings = self._collected(date(2026, 11, 9), 13.5)
+        picking = pickings[0]
+        # VALIDATED FOR REAL. `state` is a STORED COMPUTED field on
+        # stock.picking, so forcing it with raw SQL is undone by the next
+        # recompute - the first version of this test did exactly that and
+        # proved nothing while appearing to fail.
+        for move in picking.move_ids:
+            move.quantity = move.product_uom_qty
+
+        picking.button_validate()
+        picking.invalidate_recordset()
+
+        self.assertEqual(picking.state, "done", "the fixture is not done")
+
+        was = picking.scheduled_date
+
+        self.order.write({"aa_pickup_date": date(2026, 12, 25)})
+
+        picking.invalidate_recordset()
+        self.assertEqual(picking.scheduled_date, was,
+                         "a finished transfer was re-scheduled")
+
+    def test_a_transfer_with_no_slot_is_left_as_odoo_scheduled_it(self):
+        """A delivery is never asked for a slot, so nothing here may touch
+        its planning."""
+        self.order.carrier_id = self.courier
+        self.order.action_confirm()
+
+        for picking in self.order.picking_ids:
+            self.assertFalse(picking.aa_pickup_date)
+            self.assertTrue(picking.scheduled_date)
+
+    def test_a_date_set_by_hand_is_not_overwritten_by_an_ordinary_save(self):
+        """This is not a rule that reaches in and rewrites planning every
+        time somebody saves the transfer - only when the SLOT moves."""
+        picking = self._collected(date(2026, 11, 9), 13.5)[0]
+        picking.write({"scheduled_date": datetime(2026, 11, 9, 12, 0)})
+
+        picking.write({"note": "packed early"})
+
+        self.assertEqual(picking.scheduled_date, datetime(2026, 11, 9, 12, 0))
+
+    # --- the timezone ---------------------------------------------------------
+
+    def test_the_timezone_is_a_setting(self):
+        self.env["ir.config_parameter"].sudo().set_param(
+            TZ_SETTING, "Europe/Brussels")
+
+        self.assertEqual(slot_in_utc(self.env, date(2026, 11, 9), 13.5),
+                         datetime(2026, 11, 9, 12, 30), "CET is UTC+1")
+
+    def test_a_mistyped_timezone_falls_back_rather_than_raising(self):
+        """A transfer that cannot be saved over a fat-fingered setting is
+        worse than one scheduled an hour out - the same call as the closed
+        days."""
+        self.env["ir.config_parameter"].sudo().set_param(
+            TZ_SETTING, "Mars/Olympus_Mons")
+
+        self.assertEqual(slot_in_utc(self.env, date(2026, 11, 9), 13.5),
+                         datetime(2026, 11, 9, 18, 30))
+
+    def test_a_day_with_no_time_is_taken_as_the_counter_opening(self):
+        """A customer cannot pay without choosing a time, so this is a back
+        office order - and opening is the earliest they could be there."""
+        self.assertEqual(slot_in_utc(self.env, date(2026, 11, 9), 0.0),
+                         datetime(2026, 11, 9, 12, 0), "7:00 EST")

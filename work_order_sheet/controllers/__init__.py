@@ -5,3 +5,4 @@
 #
 #   from . import station
 from . import delivery
+from . import dispatch_scan

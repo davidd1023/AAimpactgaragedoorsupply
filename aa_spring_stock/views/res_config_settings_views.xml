@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- IN INVENTORY > CONFIGURATION > SETTINGS, beside the rest of the stock
+       setup, because that is where somebody looking after coil stock already
+       is. Not in Technical: the owner could not find the Technical menu at
+       all (2026-10-28), and a setting nobody can reach is a setting nobody
+       changes. -->
+  <record id="res_config_settings_view_form_aa_spring_runout" model="ir.ui.view">
+    <field name="name">res.config.settings.view.form.aa.spring.runout</field>
+    <field name="model">res.config.settings</field>
+    <field name="priority" eval="40"/>
+    <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//block[@name='warehouse_setting_container']" position="after">
+        <block title="Spring Coil Stock" name="aa_spring_stock_container">
+          <setting id="aa_spring_runout"
+                   string="Run-out warning"
+                   help="Inventory > Springs > Spring Inventory says how many days of each wire and I.D. is left at the pace of recent orders. These two numbers decide that figure and when it turns red.">
+            <div class="content-group mt-2">
+              <div class="row">
+                <label for="aa_spring_runout_warn_days"
+                       string="Warn under (days left)"
+                       class="col-lg-5 o_light_label"/>
+                <field name="aa_spring_runout_warn_days"/>
+              </div>
+              <div class="row">
+                <label for="aa_spring_pace_days"
+                       string="Measure the pace over (days)"
+                       class="col-lg-5 o_light_label"/>
+                <field name="aa_spring_pace_days"/>
+              </div>
+            </div>
+            <div class="text-muted small mt-2">
+              Set the first to about how long a steel order takes to arrive.
+              A size nobody has ordered in the second period shows no figure
+              at all, rather than a warning.
+            </div>
+          </setting>
+        </block>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

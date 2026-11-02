@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE PAGE A PHONE OPENS AT THE COUNTER.
+
+       Owner, 2026-10-28: "Odoo opens that order, checks every station is done
+       and the invoice is paid, and marks it Dispatched in one tap."
+
+       BUILT FOR A PHONE HELD IN ONE HAND while the other holds a box: big
+       type, one button, and the two answers above it in words a person reads
+       at arm's length rather than a table to study. -->
+  <template id="dispatch_scan_page" name="Dispatch this order">
+    <t t-call="web.frontend_layout">
+      <t t-set="no_header" t-value="True"/>
+      <t t-set="no_footer" t-value="True"/>
+
+      <div class="container" style="max-width: 540px; padding: 1.5rem 1rem 3rem;">
+
+        <div t-if="notice" class="alert alert-success" role="status">
+          <b t-out="notice"/>
+        </div>
+        <div t-if="problem" class="alert alert-danger" role="alert">
+          <b t-out="problem"/>
+        </div>
+
+        <h1 class="h3 mb-0" t-out="picking.name"/>
+        <div t-if="picking.aa_wo_number" class="text-muted"
+             t-out="picking.aa_wo_number"/>
+        <div class="h5 mt-2 mb-1" t-out="picking.partner_id.name"/>
+        <div t-if="order" class="text-muted small" t-out="order.name"/>
+        <div t-if="picking.aa_pickup_label" class="small mt-1">
+          Pickup: <b t-out="picking.aa_pickup_label"/>
+        </div>
+
+        <!-- THE TWO CHECKS, each in one line. -->
+        <div class="mt-4">
+          <div t-attf-class="alert #{'alert-success' if paid else 'alert-danger'} py-2 px-3 mb-2">
+            <b>Payment:</b> <t t-out="payment"/>
+          </div>
+
+          <div t-attf-class="alert #{'alert-success' if finished else 'alert-warning'} py-2 px-3 mb-2">
+            <t t-if="finished"><b>Stations:</b> all finished</t>
+            <t t-else="">
+              <b>Stations: still open</b>
+              <ul class="mb-0 mt-1 small">
+                <li t-foreach="open_jobs" t-as="job" t-key="job" t-out="job"/>
+              </ul>
+            </t>
+          </div>
+        </div>
+
+        <!-- WHAT IS IN IT, so whoever scans can look in the box. -->
+        <div class="mt-3">
+          <div class="text-uppercase text-muted small mb-1">In this order</div>
+          <ul class="list-unstyled mb-0">
+            <li t-foreach="picking.move_ids" t-as="move" t-key="move.id"
+                class="small border-bottom py-1">
+              <span t-out="int(move.product_uom_qty)"/> ×
+              <span t-out="move.product_id.display_name"/>
+            </li>
+          </ul>
+        </div>
+
+        <!-- THE ONE TAP. Unpaid kills it outright; an open station only asks
+             (owner, 2026-10-28). -->
+        <div class="mt-4">
+          <t t-if="already">
+            <div class="alert alert-secondary mb-0">
+              Dispatched by <b t-out="picking.aa_dispatched_by.name"/>
+              on <b t-out="picking.aa_dispatched_on"/>.
+            </div>
+          </t>
+
+          <t t-elif="not paid">
+            <button class="btn btn-lg btn-secondary w-100" disabled="disabled">
+              Cannot dispatch - not paid
+            </button>
+            <div class="small text-muted mt-2">
+              Take the payment, or raise and settle the invoice, then scan
+              again.
+            </div>
+          </t>
+
+          <t t-elif="not ready">
+            <button class="btn btn-lg btn-secondary w-100" disabled="disabled">
+              Not ready to go out
+            </button>
+            <div class="small text-muted mt-2">
+              This transfer is <b t-out="picking.state"/>.
+            </div>
+          </t>
+
+          <t t-else="">
+            <form method="post"
+                  t-attf-action="/dispatch/#{picking.id}/#{token}/go">
+              <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+              <button type="submit" class="btn btn-lg btn-success w-100"
+                      t-att-onclick="'return confirm(&quot;A station is still open. Dispatch anyway?&quot;);' if needs_confirm else None">
+                Mark Dispatched
+              </button>
+            </form>
+          </t>
+        </div>
+
+      </div>
+    </t>
+  </template>
+
+  <template id="dispatch_scan_refused" name="Dispatch scan - not for you">
+    <t t-call="web.frontend_layout">
+      <t t-set="no_header" t-value="True"/>
+      <t t-set="no_footer" t-value="True"/>
+      <div class="container" style="max-width: 540px; padding: 3rem 1rem;">
+        <div class="alert alert-warning">
+          <b>This is for the dispatch desk.</b>
+          Sign in with an account that can dispatch orders and scan again.
+        </div>
+      </div>
+    </t>
+  </template>
+
+</odoo>

@@ -90,10 +90,14 @@ SHOWN_SETTING = "aa_shop_addons.shown"
 #: something missing. Owner, 2026-10-27, asked whether to drop them: "show
 #: them but make it obvious that the cones are included so customers dont make
 #: the mistake of buying when they dont need one".
-CONES_INCLUDED = (
-    "Already included with your spring. You only need these if you are"
-    " replacing the cones on a spring you already have."
-)
+#:
+#: HIS WORDING, 2026-10-28: *"for the warning on the recomendations on the
+#: spring pages change it to: 'Cones are already included with your spring'"*.
+#: It used to carry a second sentence of mine - when a customer WOULD need a
+#: set - and he took it off. WORD FOR WORD, because the sentence a customer
+#: reads is his to write; the tests compare against this constant rather than
+#: quoting it, so changing it again is one line.
+CONES_INCLUDED = "Cones are already included with your spring"
 
 
 class ProductTemplate(models.Model):

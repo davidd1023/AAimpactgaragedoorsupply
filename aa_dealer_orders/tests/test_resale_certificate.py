@@ -428,3 +428,90 @@ class ResaleCertificateCase(HttpCase):
 
         self.assertNotIn("RS-12345", page)
         self.assertNotIn("resale.pdf", page)
+
+
+@tagged("post_install", "-at_install")
+class EditModeBannerCase(ResaleCertificateCase):
+    """THE X AT THE TOP OF THE PAGE THREW A JAVASCRIPT ERROR.
+
+    Owner, 2026-10-28: *"when trying to click the x on the top of the tax
+    exempt dealer status page i got this error ... Cannot read properties of
+    null (reading 'defaultPrevented')"*.
+
+    `portal.portal_back_in_edit_mode` is not a banner, it is the CONTENTS of
+    one: a line of text and a bare `btn-close` carrying
+    `data-bs-dismiss="alert"`. Called on its own, that button has no `.alert`
+    above it, so Bootstrap's `Alert.close()` looks for the element it is
+    meant to dismiss, finds null, and reads `defaultPrevented` off it.
+
+    Odoo's own callers set it as `o_portal_fullwidth_alert`, which the portal
+    layout wraps in `alert alert-info alert-dismissible`. This one did not.
+    """
+
+    def _page(self, login):
+        self.authenticate(login, self.PASSWORD)
+        answer = self.url_open("/my/resale-certificate")
+        self.assertEqual(answer.status_code, 200)
+
+        return answer.text
+
+    def _staff(self):
+        return self.env["res.users"].create({
+            "name": "Somebody at the counter",
+            "login": "aa_counter_staff",
+            "email": "counter@example.com",
+            "password": self.PASSWORD,
+            "group_ids": [(6, 0, [self.env.ref("base.group_user").id])],
+        })
+
+    def test_every_dismiss_button_has_an_alert_to_dismiss(self):
+        """THE ONE THAT SETTLES IT, and it is asserted as the browser sees
+        it: a `data-bs-dismiss="alert"` with no `.alert` ancestor is the
+        exact shape that throws."""
+        from lxml import html as lxml_html
+
+        self._staff()
+        page = lxml_html.fromstring(self._page("aa_counter_staff"))
+        buttons = page.xpath('//*[@data-bs-dismiss="alert"]')
+
+        self.assertTrue(buttons, "the edit-mode banner is not on the page")
+
+        for button in buttons:
+            alerts = [a for a in button.iterancestors()
+                      if "alert" in (a.get("class") or "").split()]
+            self.assertTrue(
+                alerts,
+                "a dismiss button with nothing to dismiss - this is the"
+                " TypeError he saw")
+
+    def test_a_dealer_is_not_told_they_are_previewing_the_portal(self):
+        """It was shown to EVERYBODY. A dealer reading their own certificate
+        page was told they were looking at a "preview of the customer portal"
+        and offered a way into a back office they cannot open."""
+        page = self._page("aa_dealer_applicant")
+
+        self.assertIn("Tax-exempt dealer status", page)
+        self.assertNotIn("Back to edit mode", page)
+        self.assertNotIn("preview of the customer portal", page)
+
+    def test_staff_still_get_the_way_back(self):
+        self._staff()
+        page = self._page("aa_counter_staff")
+
+        self.assertIn("Back to edit mode", page)
+
+    def test_it_points_at_the_contact_and_not_at_settings(self):
+        """It went to General Settings, which has nothing to do with this
+        page. The certificate is approved or rejected on the CONTACT.
+
+        WHOSE contact: the page is `/my/...`, so it is always the signed-in
+        user's own - a member of staff opening it sees their own certificate
+        page, not a dealer's. The link therefore goes to the record the page
+        is actually about, which is the right answer for a "back to edit
+        mode" button even if it is a quiet one."""
+        staff = self._staff()
+        page = self._page("aa_counter_staff")
+
+        self.assertIn(
+            "action-base.action_partner_form/%s" % staff.partner_id.id, page)
+        self.assertNotIn("action_general_configuration", page)

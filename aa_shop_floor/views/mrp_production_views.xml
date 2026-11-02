@@ -5,11 +5,53 @@
         <field name="model">mrp.production</field>
         <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
         <field name="arch" type="xml">
+            <!-- THE DEALER'S NOTE, WHERE IT CANNOT BE MISSED (owner,
+                 2026-10-30: "i cant see the notes on the manufacturing page
+                 for that order").
+
+                 ABOVE THE NOTEBOOK, not inside the Shop Floor page: that
+                 page is hidden unless the job has a shop spec, and a note
+                 saying "cut the tracks two inches short" matters on every
+                 job there is. A note filed behind a tab nobody opens is the
+                 fault this is fixing.
+
+                 `role="status"` rather than `alert`: Odoo's view checker
+                 reserves the alert roles for things that stop what you are
+                 doing, and this is something to read, not an emergency. -->
+            <xpath expr="//notebook" position="before">
+                <div class="alert alert-info" role="status"
+                     invisible="not aa_order_note">
+                    <strong>Note from the order</strong>
+                    <field name="aa_order_note" nolabel="1" readonly="1"/>
+                </div>
+            </xpath>
+
             <xpath expr="//notebook" position="inside">
                 <page string="Shop Floor" name="aa_shop_floor" invisible="not aa_shop_spec">
                     <group>
                         <field name="aa_sale_line_id" readonly="1"/>
                         <field name="aa_shop_spec" readonly="1"/>
+                        <!-- THE STICKER'S LINK, WHERE SOMEBODY CAN SEE IT.
+                             Owner, 2026-10-28: "i still get the not found
+                             page when scanning the sticker on my phone" -
+                             and there was no way to read the link except by
+                             pointing a camera at it, so nobody could tell a
+                             bad token from a bad host from a bad camera.
+                             Clicking it here opens exactly what the QR code
+                             holds, from a browser already signed in. -->
+                        <field name="aa_box_url" widget="url" readonly="1"
+                               invisible="aa_station_kind != 'kit'"
+                               string="Box sticker link"/>
+
+                        <!-- AND WHICH HOST IT POINTS AT, because that was the
+                             fault: his Prod printed every sticker pointing at
+                             the apex domain, which is not Odoo and does not
+                             redirect to the www that is (owner, 2026-10-28,
+                             with the scanned link at last). A QR code cannot
+                             be proof-read, so the host has to be legible
+                             somewhere a person can look. -->
+                        <field name="aa_box_url_warning" readonly="1"
+                               invisible="aa_station_kind != 'kit'"/>
                     </group>
                 </page>
             </xpath>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- THE QR, ON BOTH FORMS PRINTED AT DISPATCH.
+
+       Owner, 2026-10-28: *"the qr should be on one of the form that is
+       printed out at dispatch"* - and asked which, he said BOTH. Whichever
+       sheet is in somebody's hand at the counter is the one they scan, and a
+       code that is only on the other one is a code nobody uses.
+
+       Added by INHERIT rather than by editing the two reports, so the sheets
+       keep reading as they did and this can be lifted out in one piece.
+
+       The image URL is built in PYTHON (`_aa_dispatch_qr_src`), the way the
+       box sticker's is: a template has no business quoting a URL, and
+       `quote(..., safe="")` is the whole reason a link survives being a
+       query parameter. -->
+
+  <template id="dispatch_qr_block" name="Dispatch QR block">
+    <div style="text-align:center;page-break-inside:avoid;">
+      <img t-att-src="o._aa_dispatch_qr_src()"
+           style="width:92px;height:92px;"
+           alt="Scan to dispatch"/>
+      <div style="font-size:9px;color:#666;margin-top:2px;letter-spacing:.04em;">
+        SCAN TO DISPATCH
+      </div>
+    </div>
+  </template>
+
+  <!-- The shop floor's own copy, the one that travels with the goods. -->
+  <template id="report_work_order_sheet_dispatch_qr"
+            inherit_id="work_order_sheet.report_work_order_sheet">
+    <xpath expr="//div[hasclass('article')]" position="inside">
+      <div style="margin-top:14px;">
+        <t t-call="work_order_sheet.dispatch_qr_block"/>
+      </div>
+    </xpath>
+  </template>
+
+  <!-- And the sheet at the door, the one the customer signs. -->
+  <template id="report_delivery_confirmation_dispatch_qr"
+            inherit_id="work_order_sheet.report_delivery_confirmation">
+    <xpath expr="//div[hasclass('article')]" position="inside">
+      <div style="margin-top:14px;">
+        <t t-call="work_order_sheet.dispatch_qr_block"/>
+      </div>
+    </xpath>
+  </template>
+
+</odoo>

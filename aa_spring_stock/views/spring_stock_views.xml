@@ -6,8 +6,14 @@
         <field name="name">aa.spring.stock.summary.list</field>
         <field name="model">aa.spring.stock.summary</field>
         <field name="arch" type="xml">
+            <!-- RED FOR EITHER REASON. The pairs alert answers "is there a
+                 coil behind this one"; the run-out answers "how long will it
+                 last". They disagree often and usefully: a size with three
+                 pairs on the floor and a dealer ordering it weekly is fine by
+                 one and nearly gone by the other. -->
             <list string="Spring Inventory" create="0" edit="0" delete="0"
-                  decoration-danger="alert == 'order'" decoration-warning="alert == 'open_box'">
+                  decoration-danger="alert == 'order' or runout == 'now'"
+                  decoration-warning="alert == 'open_box' or runout == 'soon'">
                 <field name="inside_diameter"/>
                 <field name="wire"/>
                 <field name="floor_pairs"/>
@@ -26,6 +32,26 @@
                 <field name="alert" widget="badge"
                        decoration-danger="alert == 'order'" decoration-warning="alert == 'open_box'"
                        decoration-success="alert == 'ok'"/>
+
+                <!-- HOW LONG IT WILL LAST (owner, 2026-10-28). Shown, not
+                     optional: a column behind the toggle at the right-hand
+                     end is a column he will never see, which is the whole of
+                     what went wrong with the Dispatch pickup column. -->
+                <field name="days_left" string="Days Left" sum="Days Left"
+                       decoration-danger="runout == 'now'"
+                       decoration-warning="runout == 'soon'"/>
+                <!-- THE RATE IT WORKED FROM, beside the answer. A days-left
+                     figure nobody can check is a figure nobody acts on - and
+                     with two cuts behind it, it should not be acted on. -->
+                <field name="used_per_day_in" string="Used/Day"/>
+                <field name="cuts_counted" string="Cuts" optional="show"/>
+                <field name="free_l_in" optional="hide"/>
+                <field name="free_r_in" optional="hide"/>
+                <field name="runout" widget="badge"
+                       decoration-danger="runout == 'now'"
+                       decoration-warning="runout == 'soon'"
+                       decoration-success="runout == 'ok'"
+                       decoration-muted="runout == 'none'"/>
             </list>
         </field>
     </record>
@@ -40,12 +66,21 @@
                 <filter name="needs_attention" string="Needs Attention" domain="[('alert', '!=', 'ok')]"/>
                 <filter name="to_order" string="Order from Supplier" domain="[('alert', '=', 'order')]"/>
                 <separator/>
+                <!-- "What am I about to run out of" as one click. `runout` is
+                     in the database, not computed in Python, which is the
+                     reason it can be filtered and sorted on at all. -->
+                <filter name="running_out" string="Running Out"
+                        domain="[('runout', 'in', ('soon', 'now'))]"/>
+                <filter name="out_of_material" string="Out of Material"
+                        domain="[('runout', '=', 'now')]"/>
+                <separator/>
                 <filter name="id_2625" string='2 5/8"' domain="[('inside_diameter_num', '=', 2.625)]"/>
                 <filter name="id_375" string='3 3/4"' domain="[('inside_diameter_num', '=', 3.75)]"/>
                 <filter name="id_525" string='5 1/4"' domain="[('inside_diameter_num', '=', 5.25)]"/>
                 <group>
                     <filter name="group_id" string="I.D." context="{'group_by': 'inside_diameter'}"/>
                     <filter name="group_alert" string="Alert" context="{'group_by': 'alert'}"/>
+                    <filter name="group_runout" string="Run-out" context="{'group_by': 'runout'}"/>
                 </group>
             </search>
         </field>

@@ -76,6 +76,49 @@ only way to make one.
 has 5 failures and 2 errors on a clean tree** (checked by stashing). Nothing
 to do with duplex; it is about prepared-track brackets and fasteners.
 
+### THE SHOP CARD AND THE PRODUCT PAGE SHOWED DIFFERENT PRICES (owner, 2026-10-28)
+
+*"kit prices aren't matching, for example the aa-1200 hardware kit says 254.39
+when you first see it on the shop page, but when you enter its product page it
+says 293.97 on its default values."*
+
+**ODOO'S OWN DOING, and two methods that were never asked the same question.**
+The SHOP GRID calls `_get_sales_prices`, which prices the TEMPLATE -
+`pricelist._compute_price_rule(template, 1)` - with NO COMBINATION, so not one
+attribute extra is in it. The PRODUCT PAGE calls `_get_combination_info`,
+which with no combination picks `_get_first_possible_combination()` and prices
+THAT VARIANT. 293.97 - 254.39 = **39.58**, which is what his AA-1200's default
+values add.
+
+**IT IS NOT ONE KIT.** Since the merge of 2026-10-21 nearly every family here
+is priced as "the product's price plus an extra per size", so the grid has
+been under-stating hinges, shafts, brackets and the rest too. A kit only made
+it visible by putting forty dollars between the two screens.
+
+`spring_engineering/models/shop_grid_price.py` overrides `_get_sales_prices`
+to ask `_get_combination_info` for the very answer the page will give.
+**NOT BY ARITHMETIC**: the number Odoo worked out has already been through the
+pricelist, the fiscal position and the tax display setting, and an extra is
+none of those - on a tax-inclusive shop, adding it would land outside the tax.
+It only runs where `_aa_has_priced_attributes()` is true, which is a field
+read, so the rest of the catalogue pays nothing.
+
+**THE PAGE IS THE ONE THAT IS RIGHT.** The card could have said "from $254.39"
+instead, which is Odoo's reading of that number - but the first price the shop
+shows should not be one the customer can never pay.
+
+**`_get_sales_prices` CANNOT BE CALLED UNDER `MockRequest` either** - it reads
+`request.pricelist` and immediately subscripts it, and the mock is not
+subscriptable. Same trap as `_get_combination_info`. The tests FETCH both
+pages, which is also where he read the two numbers.
+
+**AND THE DEV DATABASE HAS A DEMO PRICELIST taking 10% off everything**, so no
+absolute figure asserted there means anything. The fault is a DIFFERENCE
+between two screens and that survives any pricelist, so the tests compare the
+two rather than measuring either. Fixtures also need UNIQUE NAMES: the shop is
+searched by name to get a grid of one card, and two fixtures called the same
+thing put two cards there, the first answering for both.
+
 ### Only the three visible Single spring IDs are used
 
 Stated earlier by the owner: *"we are not using all of the single spring id's only
@@ -187,6 +230,138 @@ this the website". A dealer's on-account transaction sits at `pending` for
 ever, and a back office order typed by hand has no transaction, so both keep
 their confirmation. `super()` is still called, on a narrowed recordset, so
 nothing else that hooks the method is lost.
+
+### THE DEALER'S PO NUMBER IS ON THE WORK ORDER (owner, 2026-10-29)
+
+*"in dealer quick order there is a po number that users can input, however
+this number doesnt show up at all in the work order, can you fix that?"*
+
+**NOTHING HAD TO BE CAPTURED.** The Quick Order already stores it in Odoo's
+own `client_order_ref` on the sale order (`aa_dealer_orders/controllers.py`),
+where it is **REQUIRED** - a dealer cannot submit without one. It was simply
+never printed.
+
+**THE SHEET IS A TRANSFER, NOT AN ORDER**, which is the whole reason it never
+appeared: every field on the Work Order Sheet comes off `stock.picking`, and
+the PO is two records away. `_work_order_po_number()` crosses that with
+`_work_order_sale_order()`, which also finds the order of a transfer carrying
+nothing but a Source Document - a route-made one has no `sale_id`.
+
+It prints in THREE places: the cover, in the shop's own red because on a
+counter full of paper it is the one number somebody is hunting for; **every
+station page**, for the same reason the door's size is repeated, since the
+sheet gets split up and handed out; and the **delivery confirmation**, which
+is the form that goes back with the dealer and what he reconciles against.
+One line each to remove.
+
+An order with NO reference - a website order, or one typed in the back
+office - prints nothing rather than an empty label, which would read as a
+number somebody forgot to write down.
+
+**`t-set` AT ARTICLE SCOPE, NOT INSIDE THE COVER.** The station pages are
+SIBLINGS of the cover, so a `t-set` buried in one of them is in scope for the
+others by luck rather than by rule; `po` is set beside `sections`, `door` and
+`lines` where the template already sets the sheet-wide values.
+
+**AND THEN ON THE SCREEN** - owner, an hour later: *"can you make the po
+visible on the work order page"*.
+
+`aa_po_number` on `stock.picking`, **STORED**, which is the whole point: a
+method can SHOW a number but not FIND one, and finding is what this is for -
+a dealer telephones about PO-44821 and nobody here knows which of ours that
+is. It is on the FORM beside the Source Document (they are the same fact told
+twice, his name for the order and ours), as a COLUMN on the Work Orders list,
+and in the SEARCH box.
+
+**THE COLUMN IS NOT `optional`**, the same call as the Dispatch pickup
+column: `optional="show"` is shown only to somebody who has never touched
+that list's column chooser, and he has touched this one - it already carries
+Dispatched and the station badges.
+
+**NO MIGRATION.** Odoo backfills a stored computed column when it adds it,
+and that was PROVED rather than assumed: blank the column by hand, call
+`env.add_to_compute(field, all_records)` - which is Odoo's own mechanism -
+and the value comes back.
+
+**ONE GAP, WRITTEN DOWN RATHER THAN PAPERED OVER**: a transfer carrying only
+a Source Document is matched to its order BY NAME, and no `depends` can reach
+back through a string, so changing the reference on such an order does not
+follow until the transfer is touched. Every dealer order has a real
+`sale_id`; this is the route-made case only.
+
+#### AND TYPING IT IN THE SEARCH BOX FOUND NOTHING (owner, 2026-10-30)
+
+*"when i try to seach a number by po number, it doesnt show the order in the
+results of the search"* - with 1003 plainly in the PO Number column of one
+screenshot and "No transfer found" in the next.
+
+**PUTTING THE FIELD IN THE SEARCH VIEW WAS NOT ENOUGH, and that is the
+lesson.** The box searches whatever its FIRST `<field>` is when you press
+Enter, which here is Odoo's `name`, labelled *Transfer* - and `position=
+"inside"` had put the PO LAST, below every filter. So "1003" went in as
+`Transfer 1003`, matched nothing, and the option that would have worked sat
+at the bottom of a dropdown nobody opens. **A field being searchABLE is not
+the same as it being searchED.**
+
+**SO THE PO JOINS THAT SAME FACET**, which is not a special case but the rule
+Odoo already follows: that field searches `name` OR `origin`, because a
+transfer is looked up by our number or by the order it came from. His PO is
+the third name for the same thing - his name for it, and the one a dealer
+says on the telephone. The label reads **Transfer / PO** so the facet
+explains itself.
+
+It is ALSO still its own field, now SECOND in the dropdown beside the W/O
+number instead of last, for a PO that is just a number and could collide
+with somebody else's Source Document.
+
+**THE TESTS READ THE DOMAIN OUT OF THE RENDERED VIEW AND RUN IT**, rather
+than asserting the field can be searched - which it always could, while the
+box did nothing. One of them asserts `name` is still the first field, so the
+day Odoo reorders its own search view this breaks loudly instead of quietly
+going back to finding nothing.
+
+### DISPATCHED FOR THE RECORD, WITHOUT USING ANY STOCK (owner, 2026-10-29)
+
+He asked first whether it was possible - *"is there a way to mark an order as
+sent without using up inventory?"* - and then for it, in the **Actions menu**
+of the Dispatch list with thirty transfers ticked, carrying his own warning:
+*"this is only for orders that used no actual inventory and is only to be
+used for records or testing, not for real orders."*
+
+**ODOO WILL NOT LET A TRANSFER BE DONE WHILE MOVING NOTHING**, and both
+obvious ways round it were MEASURED before anything was written:
+
+- **All quantities at nought** (with `skip_sanity_check`, which is a
+  supported context key): `_action_done` CANCELS a zero-quantity move, so the
+  transfer ends up **Cancelled**, not dispatched. Stock untouched, but it is
+  not "sent".
+- **Dispatching with an empty rack**: Odoo does not block at all - it takes
+  the quant **negative** (-5 in the rehearsal). That is the opposite of what
+  he asked for.
+
+**SO EVERY LINE IS DELIVERED TO WHERE IT CAME FROM.** `line.location_dest_id
+= line.location_id`, at the full quantity, through Odoo's own
+`button_validate` - so the transfer is genuinely Done and the order genuinely
+reads as delivered - and because the source and destination are the same
+quant, the decrement and the increment are the same number. Measured: 45 on
+hand before, 45 after, 50 in the building either way.
+
+**THE CHATTER SAYS WHAT HAPPENED.** A transfer reading Done while the shelf
+never moved is a lie unless somebody wrote it down, and whoever opens that
+order in six months needs to know why its stock never went anywhere.
+
+**STOCK MANAGERS ONLY** (`group_ids` on the server action). On a real order
+this silently breaks the count of everything on it, which is what his own
+warning says; the group makes the warning true.
+
+**ONE AWKWARD TRANSFER DOES NOT ABANDON THE OTHER TWENTY-NINE** - he had
+thirty selected. Each is tried on its own and the refusals are named back.
+
+Two Odoo 19 details that each cost a load: **`ir.actions.server` has
+`group_ids`, not `groups_id`** (the module would not install), and **a
+`alert-heading` class inside an alert trips the view checker's accessibility
+rule** - every `alert-*` class wants an alert role, which a heading cannot
+carry.
 
 ### ONE CANCELLATION EMAIL PER ORDER, WHOEVER CANCELS IT
 
@@ -342,6 +517,11 @@ them but make it obvious that the cones are included so customers dont make
 the mistake of buying when they dont need one."* So the spring carries the
 note and a kit does not, where it would be a lie.
 
+**THE WORDING IS HIS, WORD FOR WORD** (2026-10-28): *"Cones are already
+included with your spring."* It is `CONES_INCLUDED` in
+`models/product_template.py`; the tests compare against the constant rather
+than quoting it, so changing the sentence again is one line and no test edit.
+
 Templates are shown, not variants - a track is one product with twenty
 combinations behind it since the merge, and twenty near-identical cards under
 a kit is not a recommendation.
@@ -492,6 +672,256 @@ held that an empty kit still put its own line in the cart. That was never a
 decision - only what the code happened to do, because the parts were added
 after the line and an empty list added none. Rewritten, not deleted.
 
+### THE X ON THE TAX-EXEMPT PAGE THREW A JAVASCRIPT ERROR (owner, 2026-10-28)
+
+*"when trying to click the x on the top of the tax exempt dealer status page
+i got this error ... Cannot read properties of null (reading
+'defaultPrevented')"*
+
+**`portal.portal_back_in_edit_mode` IS NOT A BANNER, IT IS THE CONTENTS OF
+ONE** - a line of text plus a bare `btn-close` carrying
+`data-bs-dismiss="alert"`. Called on its own, as `resale_templates.xml` did,
+that button has no `.alert` above it: Bootstrap's `Alert.close()` looks for
+the element it is meant to dismiss, finds null, and reads `defaultPrevented`
+off it. **Every caller in Odoo's own code sets it as
+`o_portal_fullwidth_alert`**, which the portal layout wraps in `alert
+alert-info alert-dismissible` - that is the alert the X is for.
+
+**AND IT WAS SHOWN TO EVERY PORTAL USER**, because ours carried no `groups`
+while all of Odoo's do. A dealer reading their own certificate page was told
+they were looking at a "preview of the customer portal" and offered a way
+back into a back office they cannot open. It is `base.group_user` now.
+
+The link went to GENERAL SETTINGS, which has nothing to do with the page; it
+goes to the contact record, where the certificate is actually approved or
+rejected. `/my/...` means the SIGNED-IN USER'S own partner - a member of
+staff opening that page sees their own certificate page, not a dealer's.
+
+A test asserts the shape the browser trips over: **any
+`data-bs-dismiss="alert"` with no `.alert` ancestor**, read out of the
+rendered page with lxml.
+
+### SCAN THE QR TO DISPATCH (owner, 2026-10-28)
+
+*"At pickup, the team scans the box sticker with a phone or tablet. Odoo opens
+that order, checks every station is done and the invoice is paid, and marks it
+Dispatched in one tap. the qr should be on one of the form that is printed out
+at dispatch."*
+
+**THE ACTION ALREADY EXISTED.** `action_aa_dispatched` has been the one button
+since 2026-10-19. What is new is a way to reach it from a phone and two checks
+worth making while somebody is holding the box.
+
+Three things he decided when asked, each of which changed the build:
+
+- **UNPAID BLOCKS, with no override** - the button is dead and says why.
+  Checked again in the route, not only on the page that drew the button: a
+  page can be open since this morning and a form can be posted to directly.
+- **AN OPEN STATION ONLY WARNS** and can be gone past with a second tap,
+  because a foreman can see the box is packed and the system is sometimes
+  behind the shop.
+- **A DEALER ON ACCOUNT PASSES THE PAYMENT CHECK**, saying ON ACCOUNT rather
+  than UNPAID. A Quick Order raises no invoice at the time, so the rule would
+  otherwise have blocked every dealer collection there is. Read through
+  `_fields` because `aa_order_on_account` belongs to `aa_dealer_orders`.
+- **THE QR GOES ON THE STICKER** - owner, 2026-10-28, correcting the form
+  answer he gave an hour earlier: *"actually the qr code is supposed to be on
+  the sticker."* The box sticker ALREADY had a QR and it already opened the
+  "what is in this box" page, so **nothing new is printed on a 1 1/4 inch
+  label**: that same page now also draws a Dispatch panel. ONE CODE, TWO
+  AUDIENCES - a second QR would be two codes a phone has to choose between,
+  and every sticker already on a shelf would be the wrong one.
+  **THE PANEL IS NOT PUBLIC even though the page is**: it is drawn only for
+  `stock.group_stock_user`, and `/box/<id>/<token>/dispatch` checks again
+  rather than trusting that a button was ever shown. A fitter on a ladder
+  scanning the same code still sees only the door's figures.
+  A box belongs to a JOB and the button belongs to a TRANSFER, so
+  `_aa_dispatch_picking()` joins them through the sale order and takes the
+  OUTGOING one still to go out - a part-delivered order has a done transfer
+  and a backorder, and the backorder is what somebody is standing there for.
+- **THE QR IS ALSO ON BOTH PRINTED FORMS**, kept deliberately: a sticker only
+  exists for a HARDWARE KIT job, so a spring-only order has no sticker at all
+  and the Work Order Sheet is the only thing to scan. One line to remove from
+  `report/dispatch_qr.xml` if he ever wants the forms bare.
+
+**DOES IT DO WHAT HE ASKED? Checked clause by clause, 2026-10-28**, when he
+asked exactly that - and two gaps came out of the asking, both the same
+mistake as the 404:
+
+- *"the team scans ... with a phone or tablet"* - A SHARED TABLET signs in
+  once and keeps the panel; A PHONE OUT OF A POCKET never has, and drew the
+  door's figures with NO SIGN THAT DISPATCH EXISTED. Nobody signs in for a
+  button they have never seen. One discreet line now - "Staff: sign in to
+  dispatch this order" - returning to that same sticker, shown to the PUBLIC
+  only, because a dealer or fitter already signed in would not get the panel
+  by signing in again.
+- *"marks it Dispatched"* - A PACKED BOX WITH NO DELIVERY RAISED YET drew no
+  Dispatch section at all, which looks identical to not being allowed one.
+  **On `pick_ship` the outgoing delivery does not exist until the internal
+  pick is validated**, so this is the likeliest thing to happen at the
+  counter, not a corner. It now says so.
+- *"Odoo opens that order"* - IT OPENS THE BOX, not the sale order form: the
+  W/O number, the door, the kit and its figures, with Payment / Stations /
+  Delivery under them. Deliberate - a phone at a counter wants the box, and
+  the sale order form on a phone is unusable - but it is not literally what
+  he wrote, and he has been told.
+- *"checks every station is done"* - it checks every job on the order, and
+  WARNS rather than blocks, which is his own earlier decision. Two taps then,
+  not one.
+- *"the invoice is paid"* - blocks, no override, re-checked in the route.
+
+**IT IS NOT A PUBLIC LINK, unlike the box sticker.** `/box/...` only reads a
+door's figures out loud; this one MARKS AN ORDER COLLECTED, and a public
+version would let anybody who photographed a form empty the dispatch list. It
+asks for a login and `stock.group_stock_user`. The token stays as well - a URL
+that is only an id is a URL somebody edits.
+
+**THE CHECKS READ WITH SUDO; THE DISPATCH DOES NOT.** A dispatch clerk has
+stock rights and nothing else, so the first build answered **403** the instant
+the page asked whether an invoice was paid. Being told "paid" is not the same
+as being allowed to open the ledger. The dispatch itself is still done as the
+person standing there, so `aa_dispatched_by` means something.
+
+**HIS WAREHOUSE DELIVERS IN TWO STEPS (`pick_ship`)** - a fact worth keeping.
+Confirming an order makes an INTERNAL pick and nothing else; the outgoing
+delivery, which is the only kind `action_aa_dispatched` will touch, appears
+once that pick is validated. Any fixture that wants a dispatchable transfer
+has to validate the pick first.
+
+**A STICKER THAT WILL NOT OPEN NOW SAYS WHY** - owner, 2026-10-28: *"when i
+try scanning the qr code on the sticker it leads to a not found page."*
+
+`/box/...` refuses for FOUR different reasons and said "Not Found" to all of
+them, which at a counter is no help. It now carries the reason back and shows
+it **to a signed-in member of staff only**.
+
+**A PHONE AT THE COUNTER IS A STRANGER**, which is why that first fix changed
+nothing for him: nobody is signed into Odoo on their own phone, so all four
+reasons collapsed straight back into the bare 404 the reason page was written
+to replace. A stranger now gets a page offering a **sign-in that returns to
+the same link** - one tap to the reason instead of a dead end. It still names
+none of the four: the page is IDENTICAL whichever it was, so it cannot be
+used as an oracle for which box ids exist, and a test strips the one thing
+that must differ (the echoed path) and asserts the rest is the same. All it
+admits is that `/box/` is a route, which werkzeug's own 207 bytes already
+admitted.
+
+Two old tests asserted `404` on a public refusal and were REWRITTEN, not
+patched around: the status code was never the decision - "the box does not
+open" is.
+
+**IT WAS THE HOST, AND IT WAS A MISSING `www`** - settled 2026-10-28 when he
+sent the scanned link: `https://aaimpactgaragedoorsupply.com/box/131/571e5b68...`
+
+That APEX DOMAIN IS NOT ODOO. It answers ten bytes of `text/plain` "Not
+Found" to everything, `/web/login` included, and it does **not** redirect.
+**His Odoo is at `www.aaimpactgaragedoorsupply.com`**, where that very link
+returns the box page for W/O #234. So `web.base.url` on Prod is the apex and
+every sticker ever printed points at a host that cannot serve it.
+
+**NOTHING IN THE CODE WAS WRONG.** The job, the token, the route and the
+sticker were all correct, and every test passed throughout - which is the
+lesson: every test BUILT the link from `_aa_box_token()` and not one READ IT
+OFF THE PRINTED STICKER. A test that constructs the URL it then fetches can
+never notice that the label points somewhere else. `StickerHostCase` now
+renders the report, digs the URL out of the QR's own `/report/barcode/`
+query, and fetches it.
+
+**HE PRINTED A SECOND STICKER AND IT WAS THE SAME** - owner, 2026-10-28:
+*"im still getting not found on my phone, heres the link:
+https://aaimpactgaragedoorsupply.com/box/132/bc5f7388a4bf525d6680b92e"*. Job
+132, W/O #235, apex again: 404 there, 200 on `www`. Nothing had changed
+because THE FAULT IS NOT IN THE CODE and the setting had not been touched -
+and nothing of ours was on Prod either, main being unmerged. Worth
+remembering that a code fix cannot answer a configuration fault, however many
+times it is pushed.
+
+**SO THE FIX IS A BUTTON NOW**: Manufacturing > Settings > Hardware Station >
+"Sticker QR links" shows the host the stickers carry, warns when it is not
+the address being read or is not frozen, and **"Use this site for sticker
+links"** sets it from the ADDRESS BAR and freezes it in one click. Read,
+never typed: the host somebody is looking at Odoo through is right by
+definition, and a hostname anybody has to type is another week of this. It
+refuses outside a browser rather than writing an empty host.
+
+**AND IN THE END IT IS NO LONGER A SETTING AT ALL** - owner, 2026-10-28:
+*"i dont see any technical option in the settings."* System Parameters sits
+behind Settings > **Technical**, which does not appear unless developer mode
+is on, so the fix I kept giving him was behind a door he could not open.
+
+**A STICKER PRINTED FROM A BROWSER NOW CARRIES THAT BROWSER'S ADDRESS**
+(`_aa_sticker_base_url`). Right by construction: somebody is looking at Odoo
+through that host, so it serves Odoo, so the sticker opens. No setting to
+find, nothing to type, nothing to get wrong - and it fixes itself on every
+site, Prod, staging and dev alike.
+
+**UNLESS THE BASE URL IS FROZEN, which is the line it does not cross.**
+`web.base.url.freeze` is an administrator SAYING which host is right, and
+being overruled by whoever last pressed Print would be worse than the fault.
+Unfrozen, Odoo is already rewriting that parameter to whichever host an admin
+last signed in from - so reading the request is the SAME POLICY applied per
+label instead of per login, and strictly more accurate. A label printed in
+the BACKGROUND has no request and still falls back to the parameter, which is
+why it is still shown in Settings.
+
+**WHAT THE APEX ACTUALLY DOES** - run down before any of this was written,
+and not what "not a domain of his" first suggested: Odoo.sh redirects it to
+`www` **for `/` only, dropping the path**. So `https://aaimpact...com/` 301s
+to the www root and the domain looks perfectly healthy typed into a browser,
+while `/web/login`, `/box/132/...` and every other deep path 404 - which is
+all a sticker QR is. That is why nothing looked wrong with the domain.
+
+**IT WAS NOT ONLY THE STICKERS.** Every page of the shop was declaring
+`<link rel="canonical" href="https://aaimpactgaragedoorsupply.com/shop">`,
+which 404s - Google being told the one true URL of each page is a dead one.
+Same single cause. The canonical comes from the Website record's **Website
+Domain** field (falling back to `web.base.url`), which is in Website >
+Configuration > Settings and needs no developer mode.
+
+**THE FIX BY HAND, if it is ever wanted**: set `web.base.url` to
+`https://www.aaimpactgaragedoorsupply.com` AND `web.base.url.freeze` to
+`True`, both in Settings > Technical > System Parameters.
+
+**HOW TO TELL WHICH COMMIT PROD IS RUNNING, with no access to it**: probe a
+behaviour only one version has. `/box/<id>/<bad token>` returning the
+sign-in page with a `%2F`-quoted redirect is `343854e` and nothing earlier -
+which is how it was established that he HAD merged, twenty minutes before
+the commit he was looking for. Without the freeze
+Odoo rewrites that host to whichever one an administrator last signed in
+from, which is how it became the apex and how it will become something else
+again - silently, because a QR code cannot be proof-read. The job form now
+names the host beside the link and warns when it is not frozen. Stickers
+already on boxes stay wrong until reprinted, unless the apex is made to
+redirect to `www` at the DNS/registrar end, which fixes them all at once.
+
+**HOW TO TELL ODOO FROM NOT-ODOO at a host you cannot log into**: fetch
+`/web/login`. Odoo serves it; his apex 404s it.
+
+**AND THE LINK IS NOW ON THE JOB** (Manufacturing > the kit job > Shop Floor
+tab > "Box sticker link"). `aa_box_url` existed as a computed field and was
+shown NOWHERE, so the only way to read what a sticker held was to point a
+camera at it - which cannot tell a bad token from a bad host from a bad
+camera. Clicking it opens exactly what the QR holds, from a browser already
+signed in.
+
+**WHAT THE ROUND TRIP IS NOT**: checked when the 404 persisted - the sticker
+report, the token and the controller are `mrp.production` end to end
+(`report/hardware_sticker.xml` has `model=mrp.production`, the token lives on
+`MrpProduction`, and the route browses `mrp.production`). There is no
+production/work-order id mix-up, and the 63 commits merged from Prod touch
+nothing named `box_url`, `box_token`, `barcode_type` or `get_base_url`.
+
+**HOW TO TELL A LIVE ROUTE FROM A MISSING ONE** without any access: fetch a
+URL that route would refuse. The controller's own `request.not_found()` is a
+BARE 207-byte werkzeug page; a path with no route at all gets Odoo's THEMED
+website 404 of 32 KB. That is how the box route was proved to be live on his
+Prod before anything was changed.
+
+**`url_open(url, data={})` SENDS A GET.** An empty dict is falsy, so Odoo's
+helper does not post - which reads as a 405 and looks like a routing fault for
+half an hour. Post a real session csrf token instead; it belongs to the
+session rather than to one form, so it can be taken off any page that has one.
+
 ## Pickup slots (`aa_pickup_slots`)
 
 Owner, 2026-10-27: *"At checkout, the customer picks a pickup day and time
@@ -561,6 +991,59 @@ backorder is made by COPYING and these fields are `copy=False` - which is right
 for a duplicated order and wrong for the half the customer comes back for.
 Transfers already DONE or CANCELLED are never rewritten: what was on the
 paperwork is a record. The 19.0.2.1.0 migration fills in the open ones.
+
+### THE SLOT IS NOW THE SCHEDULED DATE (owner, 2026-10-29)
+
+*"when the customer selects their order date it should be the scheduled date
+in the work order, but currently the schedule date is the same as the time it
+was ordered and the actual scheduled date is next to it"* - with a screenshot
+of W/O #268 showing **Scheduled Date: Oct 29, 12:01 PM** and, in the field
+beside it, **Mon 9 Nov, 1:30 PM**.
+
+He is right that they were two things side by side. Odoo sets
+`scheduled_date` when the order is CONFIRMED - the moment it was ordered -
+and this module printed the real answer next to it in `aa_pickup_label`, so
+the shop had to read the second and ignore the first. Now the slot IS the
+scheduled date and the two agree.
+
+**ONE PLACE, ON `stock.picking.write`.** The slot reaches a transfer by three
+roads - confirmation, a slot moved afterwards, a backorder copying its order
+- and keeping a stored copy in step across three of them is exactly what went
+wrong with the Pickup column itself. All three end in a write of those two
+fields, so the rule lives there and a fourth road cannot forget it. `create`
+covers a transfer born with the slot already in its values.
+
+**DONE AND CANCELLED ARE LEFT ALONE**, and it only moves when the SLOT moves -
+somebody who sets a scheduled date by hand keeps it.
+
+### THE MODULE HAD NO TIMEZONE, AND NOW IT NEEDS ONE
+
+Every hour in `aa_pickup_slots` - the 7:00 to 4:00 he chose, the label, the
+times offered at checkout - is SHOP LOCAL TIME, and nothing ever converted
+because nothing ever left that world. `scheduled_date` is a naive **UTC**
+datetime, so "1:30 PM" suddenly has to say which 1:30 PM it is.
+
+**GUESSING WAS NOT GOOD ENOUGH, and the database was asked before deciding.**
+Its candidates are a company calendar saying `UTC` (Odoo's default, not a
+statement about the shop), a blank partner timezone, and the timezone of
+whoever presses the button - which for a website customer could be anywhere.
+So it is a SETTING, `aa_pickup_slots.timezone`, beside the opening hours it
+belongs with, defaulting to **America/Toronto** - the fact already written
+down here, that the shop works 7:00-4:00 Eastern. A mistyped zone falls back
+rather than raising, the same call as the closed days.
+
+**DST IS WHY THIS IS NOT ARITHMETIC**: 1:30 PM in July is 17:30 UTC and 1:30
+PM in November is 18:30, and the shop says 1:30 PM both times. A test asserts
+both.
+
+**`stock.picking.state` IS A STORED COMPUTED FIELD.** The first version of
+the "a finished transfer is left alone" test forced `state = 'done'` with raw
+SQL; the next recompute put it back, so the test proved nothing while
+appearing to fail. It validates the transfer for real now.
+
+**The 19.0.2.2.0 migration** re-schedules every OPEN transfer that has a
+slot, because W/O #268 and its fellows are already on his floor carrying the
+date they were ordered.
 
 **THE DISPATCH COLUMN IS NOT `optional`.** That was the whole of what he could
 not see: an `optional="show"` column is shown only to somebody who has never
@@ -1011,6 +1494,259 @@ uncommitted one, because it reaches Prod the next time main is merged.
 The push lands on this build's branch (`main`). Prod is still the owner's own
 merge - never commit to or push the `Prod` branch directly.
 
+## A minimum per part (`aa_min_max`)
+
+Owner, 2026-10-29: *"make minimum and maximum of each item, same thing we did
+for the spring in which we need to make a warning when an item is below its
+minimum so that we can make a reorder of that product. I want you to show this
+all in a new menu youll make in inventory, in the reporting tab, so that way we
+can easily see the max and min of each item. the list doesn't currently show
+the max so we can just worry about the minimum for now"* - with the filled-in
+spreadsheet attached.
+
+**HE FILLED IN 157 MINIMUMS AND LEFT 98 BLANK.** The blanks are his own rule,
+written on the workbook's "How to fill" tab: *"Leave Min and Max blank for
+parts you don't want to track."* They load as nothing at all and read as
+**Untracked**, never as below - a blank taken for nought would put every nut
+and bolt in the shop on the warning list. **Every maximum came back blank.**
+
+**THE LEVELS LIVE IN ODOO'S OWN REORDERING RULES** (`stock.warehouse.orderpoint`),
+not in two fields of ours. That is the design decision: a minimum stock level
+is not a new idea, and putting his numbers there means the reorder he is
+heading towards is **Odoo's Replenishment screen**, which counts incoming
+purchase orders and applies the supplier's lead time. A field of our own would
+have been a second truth to keep in step and would have had to be migrated
+into reordering rules the day he wanted the purchase order.
+
+**ODOO REFUSES A MAXIMUM BELOW THE MINIMUM** - "The minimum quantity must be
+less than or equal to the maximum quantity" - so "minimum only" is not
+directly storable. A blank maximum is written AS THE MINIMUM, which in Odoo's
+terms means "order just enough to get back to the minimum". **The screen then
+blanks a maximum equal to the minimum** (`NULLIF`), so the column stays empty
+exactly where he left it empty instead of showing 157 rows of a figure he
+never chose.
+
+**THE RULES ARE WRITTEN `manual`, NEVER `auto`.** An `auto` rule is picked up
+by Odoo's scheduler, which raises purchase orders by itself - and 97 of the
+157 parts are ALREADY below their minimum, so installing this with `auto`
+would have sent a wall of orders to four suppliers the same night.
+
+### A PART NUMBER NO LONGER IDENTIFIES A PART
+
+**THIRTY-TWO of the codes in his file are shared**, because of the catalogue
+merge of 2026-10-21: `CH1108` is all EIGHT jamb brackets, `CH1119D` all four
+spring anchor brackets, `CH1411-1` three colours of one hinge. Matching on the
+code alone would have put one bracket's minimum on eight **and looked like it
+worked**.
+
+So the match is code first, then the variant's own name as Odoo prints it
+(`Jamb Bracket (Black, #10)`) - the Product column of his file was generated
+FROM his Odoo, so the names agree by construction. **THREE TIERS, STRICTEST
+FIRST**: the full name, then ends-with, then contains. A loose match alone is
+how `#1` swallows `#10` - `hingeblack1` is a substring of `hingeblack10`. His
+hinges stop at #9 and his jamb brackets start at #10 so nothing collides
+today; a test holds it for the day one does.
+
+**NOTHING IS GUESSED.** A row matching no product, or still several after the
+name, is REPORTED BY NAME and not loaded - "12 rows skipped" is not something
+anybody can act on. A minimum silently on the wrong variant is worse than one
+never loaded: the screen would call a part fine while the rack is empty.
+
+**ODOO LEAVES A SINGLE-VALUE ATTRIBUTE OUT OF THE VARIANT NAME**, so a
+one-colour fixture is named `Hinge (#1)` and tests nothing about
+`(Black, #1)`. That cost a test run.
+
+### ODOO DELETED THE MINIMUMS OF EVERY WELL-STOCKED PART (owner, 2026-10-29)
+
+*"some items dont have a minimum set even though you had the information, for
+example cut down hinges says no minimum set when on the excel it says the
+minimum is 288 for some of them."*
+
+**MY BUG, AND A NASTY ONE.** `stock.warehouse.orderpoint._unlink_processed_orderpoints`
+is an `@api.autovacuum` whose entire test is:
+
+```
+create_uid == SUPERUSER_ID  AND  trigger == 'manual'  AND  qty_to_order <= 0
+```
+
+The loader wrote its rules with `sudo()` from the install hook - **superuser** -
+and `manual` by deliberate choice, so Odoo's scheduler would not order
+anything by itself. That is Odoo's own description of a throwaway rule, so the
+moment a part was AT OR ABOVE its minimum and `qty_to_order` fell to nought,
+Odoo binned it.
+
+**THE HEALTHY PARTS LOST THEIR MINIMUMS AND THE SHORT ONES KEPT THEIRS**,
+which is the worst possible half to lose: nobody looks at a part that is
+fine, so it would have gone unnoticed until something ran out with no warning
+at all. Cut Down Hinge is well stocked, which is exactly why it was one of
+them.
+
+**IT IS NOT ONLY THE NIGHTLY VACUUM**: `_get_orderpoint_action()` runs the
+same cleanup, so merely OPENING Inventory > Operations > Replenishment does
+it - which is the screen he was told to use.
+
+**THE FIX IS ONE OF THE THREE CONDITIONS, and only one can be given up.**
+`qty_to_order` is arithmetic; `trigger` must stay `manual` or 97 parts below
+their minimum would send a wall of purchase orders out overnight. So the
+rules are created BY A REAL USER (`levels_user()` - the current user if it is
+not the superuser, then `base.user_admin`, then any active internal user).
+Proved both ways on this build: superuser-owned rules vanish, admin-owned
+ones survive.
+
+**THE REPAIR IS A MIGRATION (19.0.1.1.0) IN TWO STEPS, AND THE ORDER
+MATTERS.** First `repair_doomed_rules()` rebuilds the surviving rules under a
+real user **keeping the numbers they hold**, because one may carry a minimum
+he has changed by hand and the fault was who owned the rule, not what it
+said. Then `load_levels(only_missing=True)` brings back the rules Odoo has
+already deleted, **without writing over anything still standing**.
+
+**THE REPAIR IS CONFINED TO THE PART NUMBERS IN HIS FILE.** Odoo makes
+superuser-owned `manual` orderpoints of its own as scratch rows whenever
+Replenishment is opened on a product whose forecast is negative, and deletes
+them on purpose; repairing every rule of that shape would ADOPT them and fill
+the screen with rules nobody asked for.
+
+**A `str.replace(..., 1)` HIT THE WRONG FUNCTION.** The `with_user(owner)`
+edit landed on the first `Orderpoint = ...` in the file, which was inside the
+repair helper inserted moments earlier, and the module would not load
+(`UnboundLocalError`). When a file has two identical lines, edit by line
+number or by a unique anchor.
+
+### "WHY HAS THIS ONE NO MINIMUM" IS NOW ON THE SCREEN (owner, 2026-10-29)
+
+*"there are still some products missing, for example the flag angles."*
+
+**THEY WERE NEVER IN THE FILE** - and the screen said "No Minimum Set", the
+very same words it used for the ones Odoo had deleted an hour earlier. Two
+completely different problems, one sentence, and no way for him to tell them
+apart. Both times the only way to answer was for me to go and read the file.
+That is the signal to build the screen, exactly as with Add-ons Check.
+
+So every line of the file is now a record (`aa.minmax.level`, rewritten on
+each load) with what became of it, and the report carries a **Why No
+Minimum** column saying which of three things is true:
+
+- *No figure was given for this part in the file* - nothing to fix but to
+  type one;
+- the row's own reason, in words, when it was given and could not be placed;
+- *A minimum was loaded and has gone since* - which is what the superuser
+  bug looked like.
+
+**AND A PART NEED NOT HAVE A PART NUMBER.** The flag angles are why:
+`spring_engineering` finds them with `name =ilike "Flag Angle %s"` and never
+by a code, because they have not got one. The loader was keyed entirely on
+part numbers, and worse, **the extraction that built the shipped file
+REQUIRED a Code and dropped any row without one** - so a minimum he typed
+against a flag angle never even reached the repository. A row with no number
+is now matched by NAME: whole name, then ends-with, and never "contains" -
+without a number narrowing the field to a handful of variants, a loose match
+is being asked to pick one product out of the whole catalogue, and
+"Flag Angle Black" would happily find "Flag Angle Black 6-3/8". Several
+matches is a refusal, as always.
+
+**WHERE A NUMBER NAMES EXACTLY ONE PRODUCT THE NAME IS IGNORED**, which is
+deliberate and worth keeping: his file's names came out of a STAGING database
+and a part may have been renamed since. The number is already unambiguous. A
+test asserts it - the first draft of that test assumed the opposite and
+failed.
+
+### HE SENT THE FILE AND HIS PRODUCT LIST, AND IT WAS 36 MINIMUMS SHORT
+
+**HIS FILE HOLDS 193 MINIMUMS. ONLY 157 WERE SHIPPED.** The 36 missing are
+EXACTLY the rows with no part number, because the step that turned his
+workbook into `minmax_levels.csv` required a Code and dropped anything
+without one. All four flag angles, eighteen RAW track lengths, Cut Down Hinge
+#6-#9, Hinge #8-#9, the hollow shaft and a drum. He found it by looking;
+nothing in the code could have, because the rows never reached the
+repository.
+
+**84 OF HIS 112 PRODUCTS HAVE NO PART NUMBER**, and **161 of the 193
+minimums can only be placed by name**. Name matching is the MAIN PATH here,
+not a corner - which is the opposite of what the first build assumed.
+
+**THREE ATTEMPTS AT MATCHING BY NAME, and his catalogue killed the first
+two:**
+
+1. `name ilike "<the whole row>"` - can never match a VARIANT, whose `name`
+   is its template's (`Flag Angle`) while the row says
+   `Flag Angle (Black, 5.9")`.
+2. Cut the row at its first bracket to recover the template name - and
+   `Bottom Bracket ( Pair )` and `End Bearing Plate ( Pair )` are template
+   names WITH A BRACKET IN THEM, so the cut lands mid-name. Eight rows.
+3. **Parse nothing.** Index every product's own `display_name` - exactly what
+   Odoo prints - once, and look the row up in it. `name` is indexed too, for
+   single-variant parts. Exact only, never "contains": without a part number
+   narrowing the field to a handful of variants, a loose match is picking one
+   product out of the whole catalogue.
+
+**REHEARSED AGAINST HIS REAL CATALOGUE before shipping**, by rebuilding his
+112 templates (and their variants, inferred from the bracketed suffixes in
+his own rows) into 476 products and running the real loader: **193 of 193
+placed, none unmatched.** That is the check worth repeating whenever this
+file changes - an export of his products plus the workbook is enough to know
+the answer before he merges.
+
+A single-value attribute is left out of a variant's name by Odoo, so the
+rehearsal skips any dimension with one value; a family that is genuinely
+one-colour would need care.
+
+### A NEW MODULE IS NOT INSTALLED BY MERGING (owner, 2026-10-29)
+
+*"im not seeing it in reporting"* - with a screenshot of his Prod showing
+Stock, Locations, Moves History and Moves Analysis, and no Min / Max Levels.
+
+**MERGING A BRANCH ONLY UPDATES MODULES THAT ARE ALREADY INSTALLED.** A module
+that did not exist before sits in Apps waiting for somebody to install it, and
+nothing about a deploy says so. Every new module in this repository has needed
+that step; this is the first time it was noticed, because every earlier one was
+installed on a dev build first.
+
+**`auto_install: True` DOES NOT FIX IT ON A LIVE DATABASE.** Proved here by
+uninstalling the module and running both `-u aa_spring_stock` and `-u base`:
+neither brought it back. The auto-install decision is the SQL in
+`odoo/modules/db.py::initialize()`, and `load_modules` calls `initialize()`
+only when the database **is not yet initialised** - so it fires on a fresh
+build and never retro-installs. It is kept for new builds; it is not the
+answer.
+
+**SO THE MODULE IS AN APPLICATION**, which is: Odoo's Apps screen filters to
+applications by default, so `application: False` makes a module invisible
+there unless somebody knows to clear a filter. The one person who would have
+to is the one who asked for the screen.
+
+**A MANIFEST KEY WRITTEN TWICE IS SILENT.** The scaffold already carried
+`'application': False` and the fix added `'application': True` above it; a
+Python dict literal takes the LAST one, so the module installed and reported
+`application=False` with both lines plainly visible in the file. Read what
+Odoo loaded (`get_manifest`), not what the file appears to say.
+
+To install on Prod: **Apps > Update Apps List**, search *Min / Max*, Install.
+Once only - after that it updates with every other module.
+
+### The screen
+
+**Inventory > Reporting > Min / Max Levels**, where he asked for it. It opens
+on **Below Minimum**, because "what needs ordering" is the question it exists
+to answer; every part is one click away on the Status filters.
+
+**"SHORT BY" IS THE COLUMN THAT MAKES IT USABLE.** Ninety-seven parts are
+below their minimum on day one, since the minimums cover 180 doors. A screen
+of 97 red rows in no particular order is 97 rows of undifferentiated alarm;
+sorted by how far below, the top of it is what to ring the supplier about this
+morning.
+
+A report is a DATABASE VIEW and cannot be typed into, so each row has a button
+opening its own reordering rule - the minimum he disagrees with is the one he
+wants to change there and then. Loading is re-runnable from
+`action_load_levels`; the first install does it from `post_init_hook` and sets
+`aa_min_max.levels_loaded` so a later update never undoes his edits.
+
+**HIS VENDOR COLUMN IS LOADED TOO** (Iowa Spring, CHI Hardware, Arrow
+Tru-Line, Action Industries) onto any part that names NO vendor - Odoo cannot
+raise a purchase order without one, and leaving it on the floor means asking
+him for the same thing again. **It never overwrites**: a part that already
+names a vendor is purchasing's own data, with prices and lead times behind it.
+
 ## Spring coil stock (`aa_spring_stock`)
 
 Coils are COIL-<wire>-<I.D.>-<L/R>, in inches, one lot per piece, under
@@ -1021,6 +1757,166 @@ that is long enough, then the Floor, then the Boxes - the shortest piece that
 fits in each. A coil taken from a Box is moved to the Floor once cut. A piece
 left shorter than 16" is scrapped; 16" or more stays where it is. A spring
 with no matching coil never blocks the order: it is logged as a problem cut.
+
+### HOW LONG THE COIL WILL LAST (owner, 2026-10-28)
+
+*"Spring Engineering already knows the inches every order cuts. I want it to
+track the spring wire size and id inventory and send a warning somewhere that
+at the current pace of orders being made we will likely run out of material in
+x amount of days."*
+
+**NOTHING NEW IS MEASURED.** Both halves were already recorded:
+`aa.spring.cut` has logged every spring ever cut - dated, with its wire, its
+I.D. and its inches - and the quants hold what is left. The feature is one
+division, and all the work was in deciding what the two numbers mean. It is
+three columns on `aa.spring.stock.summary` (Inventory > Springs > Spring
+Inventory): **Days Left**, **Used / Day** and **Cuts** counted.
+
+Asked where to put the warning he chose **the stock screens and NO EMAIL**
+("lets not do emails for now"), and **14 days** as the line.
+
+- **ON SPRING INVENTORY, NOT ON FLOOR / RACK / BOXES.** Days-left is a figure
+  per wire and I.D. across every place; on a *Floor* row it would silently
+  include Box stock and be a number that does not belong to the row it is on.
+- **THE WORSE HAND DECIDES.** A spring takes a LH piece AND a RH piece, so a
+  size with a mountain of LH and no RH has run out - the same reasoning as the
+  pairs alert. `days_left` is the smaller of the two hands, and **Postgres
+  `LEAST` returns the smallest NON-NULL**, which is what makes a hand nobody
+  orders drop out of the comparison instead of dragging it to zero.
+- **FREE INCHES, NOT INCHES**: `quantity - reserved_quantity`. A confirmed
+  order has already reserved the piece each spring is cut from, and counting
+  those inches would promise material that is spoken for. The reservation IS
+  the planned cut, so this needs no join to the cut log.
+- **NO PACE MEANS NO ANSWER.** A size nobody has cut in the window shows
+  BLANK - not a warning, not "forever". He asked what happens at the CURRENT
+  pace; a warning on a size that never moves is the noise that costs the real
+  ones their credibility.
+- **A CUT NOBODY COULD MAKE IS STILL DEMAND.** The pace counts `done` AND
+  `short` - `short` being an order that wanted that size and found no piece
+  long enough. Leaving those out understates the pace exactly when stock is
+  tightest. They cannot double-count: a replan unlinks a cut that is not done
+  before writing the new one. `planned` is excluded, because its inches are
+  already off the free figure through the reservation.
+- **JOINED BY PRODUCT, NEVER BY THE LABELS.** `aa.spring.cut` stores
+  `inside_diameter` as the pretty label (`2 5/8"`) and `wire` as the code
+  (`262`), while the summary groups by `2.625`. Matching those Char columns
+  would line up nothing at all; the coil's `default_code` is the one spelling
+  both sides already agree on.
+- **UTC EXPLICITLY** in the window: `aa_spring_cut.date` is a naive timestamp
+  holding UTC, and bare `now()` is a timestamptz that Postgres would cast
+  using the SESSION's timezone, sliding the window by however many hours that
+  is.
+
+Both numbers are SETTINGS under **Inventory > Configuration > Settings** -
+"Warn under (days left)" (`aa_spring_stock.runout_warn_days`, 14) and
+"Measure the pace over (days)" (`aa_spring_stock.pace_days`, 30) - read LIVE
+by the SQL view, so changing one changes the screen with no module update. A
+mistyped value falls back to the default rather than taking the inventory
+screen down, the same call as the pickup holidays. The xpath anchor is
+`warehouse_setting_container`; **there is no `traceability_setting_container`
+block** in Odoo 19's stock settings, which is one install failure.
+
+`runout` lives in the DATABASE rather than in a Python compute, which is the
+only reason "Running Out" can be a search filter and the column can be
+sorted on.
+
+**IT FOUND A BUG: EVERY SPRING ORDER WAS RESERVING ITS COIL TWICE.** Raising
+`move.product_uom_qty` on a confirmed move makes Odoo assign it immediately,
+off whichever quant it likes, and `_aa_plan_coil_cuts` then added its own
+deliberate line ON TOP - 120" reserved against a 60" demand. **It never lost
+material**: the right inches come off at `done`, which the consumption tests
+prove. What it did was HIDE GOOD COIL - `_aa_coil_pieces` offers
+`quantity - reserved_quantity`, so a piece with plenty left looked too short,
+pushing the next order onto the Floor, then the Boxes, and eventually logging
+"No piece is long enough" with a full coil on the rack. Odoo's guess at the
+lot is now REPLACED rather than added to, since this code has already chosen
+the piece by his order of preference.
+
+**A PRE-EXISTING FAILURE, NOT THIS:** `test_adjust_changes_removes_and_adds_pieces`
+fails on a clean tree (checked by stashing) - `(2, 0) != (1, 1)`. Adding a
+piece of the OTHER HAND from the Adjust dialog appears to create it on the
+hand of the row the dialog was opened from, so an RH coil added there becomes
+an LH one. `action_apply` does read `line.hand` (spring_adjust.py:189), so it
+is not simply that; it was not run down because it is nothing to do with the
+run-out figure. Worth fixing - it corrupts the very stock this reports on.
+
+## THE DEALER'S NOTE REACHES THE JOB (`aa_shop_floor`, owner 2026-10-30)
+
+*"when notes are made on the dealer quick order, i cant see the notes on the
+manufacturing page for that order, could you fix that."*
+
+**IT WAS NOWHERE DOWNSTREAM.** The Quick Order has always stored it, into
+Odoo's own `sale.order.note` (`aa_dealer_orders/controllers.py`, trimmed to
+2000 characters) - but **`mrp.production` has no note field of its own** and
+nothing here ever reached back for it. The note sat on the order where only
+the office looks. It is still not on the printed Work Order Sheet or the
+bench card; he was told.
+
+`aa_order_note` on `mrp.production`, **NOT STORED** - it is a paragraph a man
+reads before he builds, with nothing to search or sort on, and an office that
+corrects a note wants the correction on the bench's screen at once.
+
+**THE JOB FINDS ITS ORDER TWO WAYS**, as everything here must:
+`aa_sale_line_id`, then the Source Document by name - a prepared track job
+from Odoo's own route carries nothing else.
+
+**ABOVE THE NOTEBOOK, NOT IN THE SHOP FLOOR TAB.** That page is hidden unless
+the job has a shop spec, and "cut the tracks two inches short" matters on
+every job there is. A note behind a tab nobody opens is the fault being
+fixed. `role="status"`, not `alert`: Odoo's view checker reserves the alert
+roles for things that stop what you are doing.
+
+**ITS LINE BREAKS WOULD HAVE BEEN LOST, SILENTLY - and the first fix for
+that did not work.** `sale.order.note` is an HTML field, but what the Quick
+Order writes into it is the raw contents of a textarea, and in HTML a newline
+is whitespace: "cut 2 inches short\nblack track" renders as ONE RUN-ON LINE,
+which is how a two-line instruction becomes one wrong one.
+
+The obvious answer - run it through `plaintext2html` when it has no markup -
+**fails, and a test found that rather than reasoning**: Odoo's Html field has
+ALREADY wrapped the textarea's contents in `<p>...</p>` by the time anything
+reads it, newlines and all. So "does this look like HTML" answers yes for
+both kinds and tells you nothing.
+
+So nothing is sniffed and nothing is rewritten: the note is wrapped in
+`white-space: pre-wrap`, under which a literal newline is a line break and
+real markup is still markup. Both kinds come out right.
+
+### AND IT WAS ON THE WRONG SCREEN (owner, 2026-10-30)
+
+*"i dont see the note, could you put it on this tab and on the work order
+sheet as well"* - with a screenshot of **W/O #299**, open on its **Note** tab.
+
+**HE SAID "THE MANUFACTURING PAGE" AND I DECIDED WHICH MODEL THAT WAS.** The
+first build answered `mrp.production`, which is a defensible reading of the
+words and the wrong one: the screenshot shows Check Availability, Validate,
+Source and Destination Location, PO Number and Source Document - that is a
+**`stock.picking`**, shown under Manufacturing > Work Orders, which is the
+screen the shop actually works off. The note went on a record he never
+opens, and every test passed. **The same mistake as the sticker's host: the
+picture settles what the words cannot.**
+
+So `aa_order_note` is on `stock.picking` too, and the rule is in ONE place -
+`readable_note()` in `work_order_sheet/models/order_note.py`, which
+`aa_shop_floor` imports (it already depends on this module). Two copies of
+"how a dealer's note is made readable" is how one of them comes to lose its
+line breaks again.
+
+**ON THE NOTE TAB HE POINTED AT, ABOVE ODOO'S OWN `note`, AND NOT INTO IT.**
+The transfer's own note stays the shop's to write in - *"Packed by Michel"* -
+and copying the order's words into it would leave two of them, the one on the
+transfer going stale the moment the office corrects the order. NOT STORED, for
+the same reason as the job's.
+
+**AND ON THE PRINTED SHEET**, which is the half he had to ask for twice: the
+cover in the shop's own red under the PO, and a compact NOTE box on EVERY
+station page, for the same reason the door's size and the PO are repeated -
+the sheet is split up and handed out, and "cut the tracks two inches short"
+is for whoever is cutting the tracks. `t-set` at ARTICLE scope beside `po`,
+`sections` and `door`, never inside the cover: the station pages are its
+siblings.
+
+An order with no note prints no heading rather than an empty box.
 
 ### Spring boxes (owner, 2026-10-19)
 

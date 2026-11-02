@@ -5,6 +5,7 @@ from . import res_users
 from . import website
 from . import res_config_settings
 from . import product_template
+from . import shop_grid_price
 from . import product_wishlist
 from . import sale_order_line
 from . import sale_order

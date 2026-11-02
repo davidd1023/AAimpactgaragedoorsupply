@@ -40,6 +40,23 @@
       td { padding: 12px 14px 12px 0; font-size: 19px; font-weight: bold;
            vertical-align: top; }
       tr + tr th, tr + tr td { border-top: 1px solid #e6e9ed; }
+      .aa_green { color: #156c2e; }
+      .aa_red { color: #a4262c; }
+      .aa_ok { background: #e8f5ec; border: 1px solid #9bd3ad; color: #10401f;
+               border-radius: 10px; padding: 12px 14px; margin: 10px 0;
+               font-weight: bold; }
+      .aa_bad { background: #fdeaea; border: 1px solid #e5a3a5; color: #7a1d20;
+                border-radius: 10px; padding: 12px 14px; margin: 10px 0;
+                font-weight: bold; }
+      .aa_btn { display: block; width: 100%; margin-top: 14px; padding: 16px;
+                font-size: 20px; font-weight: bold; color: #fff;
+                background: #156c2e; border: 0; border-radius: 10px; }
+      .aa_signin_wrap { margin-top: 22px; text-align: center; }
+      .aa_signin { display: inline-block; padding: 10px 16px; font-size: 14px;
+                   color: #714B67; text-decoration: none;
+                   border: 1px solid #d6dbe1; border-radius: 8px;
+                   background: #fff; }
+      .aa_btn_dead { background: #9aa4ae; }
       .section { margin: 22px 0 8px; font-size: 14px; color: #5a6b7c;
                  text-transform: uppercase; letter-spacing: .04em; }
       footer { color: #5a6b7c; font-size: 14px; padding: 18px;
@@ -84,11 +101,143 @@
           </t>
         </table>
       </t>
+      <!-- THE DISPATCH PANEL (owner, 2026-10-28: "actually the qr code is
+           supposed to be on the sticker"). Drawn only for somebody signed in
+           on the dispatch desk - a fitter on a ladder, a driver or the
+           customer scanning the same code sees the door's figures above and
+           nothing of this. -->
+      <t t-if="dispatch">
+        <div class="section">Dispatch</div>
+
+        <div t-if="notice" class="aa_ok"><t t-esc="notice"/></div>
+        <div t-if="problem" class="aa_bad"><t t-esc="problem"/></div>
+
+        <table>
+          <tr>
+            <th>Payment</th>
+            <td t-attf-class="#{'aa_green' if dispatch['paid'] else 'aa_red'}">
+              <t t-esc="dispatch['payment']"/>
+            </td>
+          </tr>
+          <tr>
+            <th>Stations</th>
+            <td t-attf-class="#{'aa_green' if dispatch['finished'] else 'aa_red'}">
+              <t t-if="dispatch['finished']">All finished</t>
+              <t t-else="">
+                Still open:
+                <t t-esc="', '.join(dispatch['open_jobs'])"/>
+              </t>
+            </td>
+          </tr>
+          <tr>
+            <th>Delivery</th>
+            <td><t t-esc="dispatch['picking'].name"/></td>
+          </tr>
+        </table>
+
+        <t t-if="dispatch['already']">
+          <div class="aa_ok">
+            Dispatched by <t t-esc="dispatch['picking'].aa_dispatched_by.name"/>.
+          </div>
+        </t>
+        <t t-elif="not dispatch['paid']">
+          <button class="aa_btn aa_btn_dead" disabled="disabled">
+            Cannot dispatch - not paid
+          </button>
+        </t>
+        <t t-elif="not dispatch['ready']">
+          <button class="aa_btn aa_btn_dead" disabled="disabled">
+            Not ready to go out
+          </button>
+        </t>
+        <t t-else="">
+          <form method="post"
+                t-attf-action="/box/#{production.id}/#{token}/dispatch">
+            <input type="hidden" name="csrf_token"
+                   t-att-value="request.csrf_token()"/>
+            <button type="submit" class="aa_btn"
+                    t-att-onclick="'return confirm(&quot;A station is still open. Dispatch anyway?&quot;);' if dispatch['needs_confirm'] else None">
+              Mark Dispatched
+            </button>
+          </form>
+        </t>
+      </t>
+
+      <!-- THE DESK, WITH NOTHING TO DISPATCH. Drawing nothing at all was
+           the fault: on a two-step warehouse the outgoing delivery does not
+           exist until the internal pick is validated, so a packed box
+           scanned by the right person showed no Dispatch section and no
+           reason for it. -->
+      <t t-if="dispatch_none">
+        <div class="section">Dispatch</div>
+        <div class="aa_bad"><t t-esc="dispatch_none"/></div>
+      </t>
+
+      <!-- AND FOR A PHONE THAT IS NOT SIGNED IN. The team scans with
+           "a phone or tablet" (owner, 2026-10-28): a shared tablet signs in
+           once and keeps the Dispatch panel above, but a phone out of
+           somebody's pocket never has, and drew the figures with no sign
+           that dispatch existed at all. One line, and signing in comes back
+           to this sticker.
+
+           Shown to the PUBLIC only - a dealer or a fitter already signed in
+           would not get the panel by signing in again. -->
+      <div t-if="dispatch_sign_in" class="aa_signin_wrap">
+        <a class="aa_signin" t-att-href="dispatch_sign_in">
+          Staff: sign in to dispatch this order
+        </a>
+      </div>
     </main>
 
     <footer>
       <t t-esc="company.name"/>
     </footer>
+  </body>
+</html>
+  </template>
+
+
+  <!-- WHY A STICKER WOULD NOT OPEN, for somebody who works here.
+       Owner, 2026-10-28: "when i try scanning the qr code on the sticker it
+       leads to a not found page" - and the page would not say which of four
+       reasons it was. A stranger still gets the bare 404. -->
+  <template id="hardware_box_refused" name="Hardware box - cannot open">&lt;!DOCTYPE html&gt;
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Sticker will not open</title>
+    <style>
+      body { margin: 0; font-family: Arial, Helvetica, sans-serif;
+             background: #f4f5f7; color: #111; font-size: 17px; }
+      main { padding: 24px 16px; max-width: 620px; margin: 0 auto; }
+      h1 { font-size: 22px; margin: 0 0 14px; }
+      .why { background: #fff; border: 1px solid #d6dbe1; border-radius: 10px;
+             padding: 16px; line-height: 1.5; }
+      a.signin { display: block; margin-top: 18px; padding: 14px 16px;
+                 background: #714B67; color: #fff; text-decoration: none;
+                 border-radius: 10px; text-align: center; font-weight: bold; }
+      p.note { color: #555; font-size: 15px; line-height: 1.5; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>This sticker will not open</h1>
+
+      <!-- STAFF GET THE REASON, which is one of four and names the fault. -->
+      <div t-if="why" class="why"><t t-esc="why"/></div>
+
+      <!-- A PHONE AT THE COUNTER IS NOT SIGNED IN, so this is what the man
+           holding the box actually sees. It says nothing about why - the page
+           is identical for all four reasons - but it is one tap to finding
+           out, which a bare 404 never was. -->
+      <t t-if="sign_in">
+        <p class="note">
+          If you work here, sign in and this page will say why.
+        </p>
+        <a class="signin" t-att-href="sign_in">Sign in and try again</a>
+      </t>
+    </main>
   </body>
 </html>
   </template>

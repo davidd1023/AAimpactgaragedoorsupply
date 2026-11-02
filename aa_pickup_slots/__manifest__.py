@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "AA Pickup Slots",
-    "version": "19.0.2.1.0",
+    "version": "19.0.2.2.0",
     "summary": "A pickup day and time window chosen at checkout, carried to the floor",
     "description": """
 WHEN THE CUSTOMER IS COMING TO COLLECT.

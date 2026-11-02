@@ -361,3 +361,51 @@ class MrpWorkorder(models.Model):
 
     aa_shop_spec = fields.Text(related="production_id.aa_shop_spec", string="Shop Floor Instructions")
     aa_packed = fields.Text(related="production_id.aa_packed", string="Packed Rows")
+
+
+class MrpProductionDispatch(models.Model):
+    """THE DELIVERY BEHIND A BOX, so the sticker can dispatch it.
+
+    Owner, 2026-10-28: *"actually the qr code is supposed to be on the
+    sticker."* The sticker already carries a QR and it already opens a page -
+    the one that reads a door's figures out loud on a ladder. So nothing new
+    is printed: that same page now also offers the Dispatch panel, but only
+    to somebody signed in on the dispatch desk.
+
+    ONE CODE, TWO AUDIENCES. A second QR on a 1 1/4 inch label would be two
+    codes a phone has to choose between, and every sticker already out there
+    would be the wrong one.
+    """
+
+    _inherit = "mrp.production"
+
+    def _aa_dispatch_picking(self):
+        """The outgoing delivery for this box's order, or an empty set.
+
+        A box belongs to a JOB and the Dispatched button belongs to a
+        TRANSFER, so the two are joined through the sale order. His warehouse
+        delivers in two steps, which is why this asks for the OUTGOING one
+        and not simply the first picking it finds.
+        """
+        self.ensure_one()
+        order = self.env["sale.order"].sudo().browse()
+
+        if self.aa_sale_line_id:
+            order = self.aa_sale_line_id.order_id
+        elif self.origin:
+            order = self.env["sale.order"].sudo().search(
+                [("name", "=", self.origin)], limit=1)
+
+        if not order:
+            return self.env["stock.picking"].sudo().browse()
+
+        out = order.sudo().picking_ids.filtered(
+            lambda p: p.picking_type_code == "outgoing"
+            and p.state != "cancel")
+
+        # The one still to go out, if there is one - a part-delivered order
+        # has a done transfer and a backorder, and the backorder is the one
+        # somebody is standing at the counter for.
+        waiting = out.filtered(lambda p: p.state != "done")
+
+        return (waiting or out)[:1]

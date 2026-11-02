@@ -10,3 +10,6 @@ from . import order_confirmation_email
 from . import order_cancelled_email
 from . import dispatched
 from . import auto_dispatch
+from . import dispatch_scan
+from . import dispatch_no_stock
+from . import order_note

@@ -1,6 +1,6 @@
 {
     'name': 'AA Spring Stock',
-    'version': '19.0.1.3.0',
+    'version': '19.0.1.4.0',
     'summary': 'Spring orders consume coil inches; a plain view of the spring inventory',
     'description': """
 Spring coils (COIL-<wire>-<I.D.>-<L/R>, kept in inches, one lot per piece) are
@@ -18,6 +18,11 @@ consumed by the Springs manufacturing order of each custom spring.
   a Box is moved to the Floor, since it has been opened.
 * Inventory > Springs: a summary per wire and I.D. (L and R side by side, with
   reorder alerts), the leftover pieces on the Rack, and the cut history.
+* HOW LONG IT WILL LAST: free inches on hand divided by the inches a day the
+  cut history says are being used, per wire and I.D., whichever hand runs out
+  first. Flagged Running Out under the number of days set in Inventory >
+  Configuration > Settings. A size nobody has cut lately shows no figure
+  rather than a warning.
 * Floor / Rack / Boxes: one page, a fold-out group per place, per wire and I.D.
 * Floor / Rack / Boxes is where the stock is worked (owner, 2026-10-20): Move
   to Floor on a box line, Adjust on any line (change, remove or add pieces when
@@ -33,6 +38,7 @@ consumed by the Springs manufacturing order of each custom spring.
     'depends': ['stock', 'mrp', 'aa_shop_floor', 'work_order_sheet'],
     'data': [
         'security/ir.model.access.csv',
+        'views/res_config_settings_views.xml',
         'views/spring_stock_views.xml',
         'views/spring_box_views.xml',
         'data/spring_box_data.xml',

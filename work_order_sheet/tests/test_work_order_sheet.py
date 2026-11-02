@@ -1,5 +1,8 @@
 import html
 import re
+from ast import literal_eval
+
+from lxml import etree
 
 from odoo.tests.common import TransactionCase, tagged
 
@@ -1319,3 +1322,441 @@ class TestWorkOrderSheetServiceLines(TestWorkOrderSheet):
 
         self.assertIn("Custom Torsion Spring Assembly", names)
         self.assertNotIn("Pickup - Medley Warehouse", names)
+
+
+@tagged("post_install", "-at_install")
+class TestWorkOrderPoNumber(TransactionCase):
+    """THE DEALER'S PO NUMBER, ON THE SHEET.
+
+    Owner, 2026-10-29: *"in dealer quick order there is a po number that users
+    can input, however this number doesnt show up at all in the work order,
+    can you fix that?"*
+
+    Nothing had to be captured: the Quick Order already stores it in Odoo's
+    own `client_order_ref`, where it is REQUIRED - a dealer cannot submit
+    without one. It simply was never printed, because **the sheet is a
+    TRANSFER and the PO is two records away**.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.partner = self.env["res.partner"].create({"name": "A Dealer"})
+        self.product = self.env["product.product"].create({
+            "name": "A door part", "type": "consu", "is_storable": True})
+        self.picking_type = self.env["stock.picking.type"].search(
+            [("code", "=", "internal")], limit=1)
+
+    def _order(self, po):
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "client_order_ref": po,
+            "order_line": [(0, 0, {"product_id": self.product.id,
+                                   "product_uom_qty": 2})],
+        })
+        order.action_confirm()
+
+        return order
+
+    def _picking_for(self, order):
+        picking = order.picking_ids[:1]
+
+        self.assertTrue(picking, "the order made no transfer")
+
+        return picking
+
+    def _loose_picking(self, origin):
+        """A transfer that carries only a Source Document, as a route-made one
+        does - no `sale_id` to follow."""
+        return self.env["stock.picking"].create({
+            "picking_type_id": self.picking_type.id,
+            "partner_id": self.partner.id,
+            "origin": origin,
+            "location_id": self.env.ref("stock.stock_location_stock").id,
+            "location_dest_id": self.env.ref("stock.stock_location_output").id,
+        })
+
+    def _sheet(self, picking):
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "work_order_sheet.report_work_order_sheet", picking.ids)
+
+        return visible_text(rendered)
+
+    def _note(self, picking):
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "work_order_sheet.report_delivery_confirmation", picking.ids)
+
+        return visible_text(rendered)
+
+    # --- the sentence he wrote ------------------------------------------------
+
+    def test_the_po_number_is_printed_on_the_work_order(self):
+        """THE ONE THAT SETTLES IT."""
+        order = self._order("PO-44821")
+
+        sheet = self._sheet(self._picking_for(order))
+
+        self.assertIn("PO-44821", sheet)
+
+    def test_the_picking_can_find_the_po_through_the_order(self):
+        order = self._order("PO-44821")
+
+        self.assertEqual(
+            self._picking_for(order)._work_order_po_number(), "PO-44821")
+
+    def test_a_transfer_with_only_a_source_document_still_finds_it(self):
+        """A transfer made by a route carries no `sale_id` - only the plain
+        text of the order name in its Source Document."""
+        order = self._order("PO-99001")
+        loose = self._loose_picking(order.name)
+
+        self.assertEqual(loose._work_order_po_number(), "PO-99001")
+
+    def test_an_order_with_no_reference_prints_no_label(self):
+        """A website order has none, and an empty "PO" on a sheet is worse
+        than a gap - it reads as a number somebody forgot to write down."""
+        order = self._order("")
+
+        sheet = self._sheet(self._picking_for(order))
+
+        self.assertNotIn(" PO ", sheet)
+
+    def test_a_transfer_with_no_order_at_all_does_not_fall_over(self):
+        """A transfer typed in the back office has no order behind it."""
+        loose = self._loose_picking("NOT-AN-ORDER")
+
+        self.assertEqual(loose._work_order_po_number(), "")
+        self.assertNotIn(" PO ", self._sheet(loose))
+
+    def test_whitespace_round_a_po_is_not_printed(self):
+        order = self._order("   PO-7  ")
+
+        self.assertEqual(
+            self._picking_for(order)._work_order_po_number(), "PO-7")
+
+    # --- where else it has to appear -----------------------------------------
+
+    def test_it_is_on_the_sheet_the_dealer_signs(self):
+        """He asked for the work order; this is the form that goes back with
+        him, and a PO is what a dealer reconciles a delivery against."""
+        order = self._order("PO-31337")
+
+        self.assertIn("PO-31337", self._note(self._picking_for(order)))
+
+    def test_it_is_on_every_station_page_not_only_the_cover(self):
+        """The sheet gets split up and handed out, so a page on its own has to
+        say which order it belongs to in the dealer's words as well as ours -
+        the same reason the door's size is repeated."""
+        order = self._order("PO-5150")
+        sheet = self._sheet(self._picking_for(order))
+
+        self.assertGreaterEqual(
+            sheet.count("PO-5150"), 2,
+            "the PO appeared once, so it is on the cover only")
+
+    # --- on the screen, not only on the paper --------------------------------
+
+    def test_the_po_is_stored_on_the_transfer(self):
+        """Owner, 2026-10-29: *"can you make the po visible on the work order
+        page"*. Stored rather than computed on the fly, because a method can
+        SHOW it but not FIND it."""
+        order = self._order("PO-44821")
+
+        self.assertEqual(self._picking_for(order).aa_po_number, "PO-44821")
+
+    def test_a_work_order_can_be_found_by_the_dealers_own_number(self):
+        """THE REASON IT IS STORED. A dealer telephones about PO-44821 and
+        nobody here knows which of ours that is."""
+        wanted = self._order("PO-44821")
+        self._order("PO-00000")
+
+        found = self.env["stock.picking"].search(
+            [("aa_po_number", "=", "PO-44821")])
+
+        self.assertEqual(found, self._picking_for(wanted))
+
+    def test_changing_the_reference_updates_the_transfer(self):
+        order = self._order("PO-OLD")
+        picking = self._picking_for(order)
+
+        order.client_order_ref = "PO-NEW"
+
+        self.assertEqual(picking.aa_po_number, "PO-NEW")
+
+    def test_a_transfer_with_no_order_stores_nothing(self):
+        loose = self._loose_picking("NOT-AN-ORDER")
+
+        self.assertFalse(loose.aa_po_number)
+
+    def test_the_column_is_not_optional_so_it_is_actually_there(self):
+        """An `optional="show"` column is shown only to somebody who has never
+        touched that list's column chooser, and he has touched this one - it
+        carries Dispatched and the station badges. The pickup column cost a
+        round of exactly this."""
+        arch = self.env.ref(
+            "work_order_sheet.vpicktree_work_stations").arch
+
+        self.assertIn('name="aa_po_number"', arch)
+        self.assertNotIn('name="aa_po_number" optional', arch)
+
+    def test_it_is_on_the_transfer_form_and_in_the_search(self):
+        for view in ("work_order_sheet.view_picking_form_work_stations",
+                     "work_order_sheet.view_picking_internal_search_work_stations"):
+            self.assertIn('name="aa_po_number"', self.env.ref(view).arch, view)
+
+
+@tagged("post_install", "-at_install")
+class TestOrderNoteOnTheTransfer(TransactionCase):
+    """THE DEALER'S NOTE, WHERE THE SHOP ACTUALLY LOOKS.
+
+    Owner, 2026-10-30, with a screenshot of W/O #299: *"i dont see the note,
+    could you put it on this tab and on the work order sheet as well."*
+
+    **I PUT IT ON THE WRONG MODEL.** He had asked for "the manufacturing page
+    for that order" and the first build answered `mrp.production`. The
+    screenshot settles it - Check Availability, Validate, Source and
+    Destination Location, PO Number - that is a `stock.picking` shown under
+    Manufacturing > Work Orders. The note was on a record he never opens.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.partner = self.env["res.partner"].create({"name": "A Dealer"})
+        self.product = self.env["product.product"].create({
+            "name": "A door part", "type": "consu", "is_storable": True})
+        self.picking_type = self.env["stock.picking.type"].search(
+            [("code", "=", "internal")], limit=1)
+
+    def _order(self, note):
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "note": note,
+            "order_line": [(0, 0, {"product_id": self.product.id,
+                                   "product_uom_qty": 2})]})
+        order.action_confirm()
+
+        return order
+
+    def _loose(self, origin):
+        """A transfer carrying only a Source Document, as a route-made one."""
+        return self.env["stock.picking"].create({
+            "picking_type_id": self.picking_type.id,
+            "partner_id": self.partner.id,
+            "origin": origin,
+            "location_id": self.env.ref("stock.stock_location_stock").id,
+            "location_dest_id": self.env.ref("stock.stock_location_output").id,
+        })
+
+    def _sheet(self, picking):
+        rendered, _kind = self.env["ir.actions.report"]._render_qweb_html(
+            "work_order_sheet.report_work_order_sheet", picking.ids)
+
+        return visible_text(rendered)
+
+    # --- the tab he pointed at ------------------------------------------------
+
+    def test_the_note_is_on_the_transfer(self):
+        """THE ONE THAT SETTLES IT - on the model he is actually looking at."""
+        order = self._order("Cut the tracks two inches short")
+
+        picking = order.picking_ids[:1]
+
+        self.assertTrue(picking)
+        self.assertIn("Cut the tracks two inches short", picking.aa_order_note)
+
+    def test_a_transfer_with_only_a_source_document_finds_it(self):
+        order = self._order("Black track, not white")
+
+        self.assertIn("Black track, not white",
+                      self._loose(order.name).aa_order_note)
+
+    def test_an_order_with_no_note_shows_nothing(self):
+        order = self._order(False)
+
+        self.assertFalse(order.picking_ids[:1].aa_order_note)
+
+    def test_a_transfer_with_no_order_does_not_fall_over(self):
+        self.assertFalse(self._loose("NOT-AN-ORDER").aa_order_note)
+
+    def test_it_is_above_odoos_own_note_and_does_not_replace_it(self):
+        """The transfer's own note stays the shop's to write in; copying the
+        order's words into it would leave two of them, one going stale."""
+        order = self._order("From the dealer")
+        picking = order.picking_ids[:1]
+
+        picking.note = "Packed by Michel"
+
+        self.assertIn("Packed by Michel", picking.note)
+        self.assertNotIn("From the dealer", picking.note)
+        self.assertIn("From the dealer", picking.aa_order_note)
+
+    def test_correcting_the_order_corrects_the_transfer(self):
+        order = self._order("First thought")
+        picking = order.picking_ids[:1]
+
+        order.note = "Second thought"
+        picking.invalidate_recordset()
+
+        self.assertIn("Second thought", picking.aa_order_note)
+
+    def test_the_note_tab_shows_it(self):
+        arch = self.env.ref(
+            "work_order_sheet.view_picking_form_work_stations").arch
+
+        self.assertIn("aa_order_note", arch)
+        self.assertIn("page[@name='note']", arch)
+
+    # --- and on the printed sheet ---------------------------------------------
+
+    def test_the_printed_sheet_carries_it(self):
+        order = self._order("Cut the tracks two inches short")
+
+        sheet = self._sheet(order.picking_ids[:1])
+
+        self.assertIn("NOTE FROM THE ORDER", sheet)
+        self.assertIn("Cut the tracks two inches short", sheet)
+
+    def test_a_sheet_with_no_note_prints_no_heading(self):
+        order = self._order(False)
+
+        self.assertNotIn("NOTE FROM THE ORDER",
+                         self._sheet(order.picking_ids[:1]))
+
+    def test_the_note_keeps_its_line_breaks(self):
+        """A two-line instruction must not become one wrong one."""
+        order = self._order("Cut 2 inches short\nBlack track")
+
+        self.assertIn("pre-wrap", order.picking_ids[:1].aa_order_note)
+
+
+@tagged("post_install", "-at_install")
+class TestSearchingByPoNumber(TransactionCase):
+    """TYPING THE PO AND PRESSING ENTER MUST FIND THE ORDER.
+
+    Owner, 2026-10-30: *"when i try to seach a number by po number, it doesnt
+    show the order in the results of the search"* - with 1003 plainly in the
+    PO Number column of one screenshot and an empty result in the next.
+
+    **HAVING THE FIELD IN THE SEARCH VIEW WAS NOT ENOUGH**, which is what
+    these tests exist to hold down. Odoo's FIRST `<field>` is what Enter
+    takes, and the PO was last in the list. So the tests read the domain out
+    of the RENDERED view and run it, rather than asserting that the field is
+    searchable - which it always was.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.partner = self.env["res.partner"].create({"name": "A Dealer"})
+        self.product = self.env["product.product"].create({
+            "name": "A door part", "type": "consu", "is_storable": True})
+
+    def _order(self, po):
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "client_order_ref": po,
+            "order_line": [(0, 0, {"product_id": self.product.id,
+                                   "product_uom_qty": 1})]})
+        order.action_confirm()
+
+        return order
+
+    def _search_field(self, name):
+        """The <field> as the browser gets it, inherits applied."""
+        view = self.env["stock.picking"].get_view(
+            self.env.ref("stock.view_picking_internal_search").id, "search")
+
+        return etree.fromstring(view["arch"]).xpath(
+            "//field[@name='%s']" % name)
+
+    def _type_into(self, field, typed):
+        """What pressing Enter on that facet actually searches."""
+        domain = field.get("filter_domain")
+
+        if not domain:
+            return [(field.get("name"), "ilike", typed)]
+
+        return literal_eval(domain.replace("self", repr(typed)))
+
+    # --- the facet Enter lands on -------------------------------------------
+
+    def test_typing_the_po_and_pressing_enter_finds_it(self):
+        """THE ONE HE SENT THE SCREENSHOTS OF."""
+        order = self._order("1003")
+        picking = order.picking_ids[:1]
+
+        self.assertTrue(picking)
+
+        first = self._search_field("name")[0]
+        found = self.env["stock.picking"].search(
+            self._type_into(first, "1003"))
+
+        self.assertIn(picking, found)
+
+    def test_the_facet_the_default_lands_on_is_still_the_first_one(self):
+        """If Odoo ever reorders its own search view this breaks loudly,
+        rather than the box quietly going back to finding nothing."""
+        view = self.env["stock.picking"].get_view(
+            self.env.ref("stock.view_picking_internal_search").id, "search")
+
+        names = [f.get("name")
+                 for f in etree.fromstring(view["arch"]).xpath("//search/field")]
+
+        # `name` is what Enter takes, so it is the one the PO had to join.
+        self.assertEqual(names[0], "name")
+
+        # And the PO is at the TOP of the dropdown, beside the W/O number -
+        # not at the bottom, which is where it was and why he never saw it.
+        self.assertIn("aa_po_number", names[:3], names)
+
+    def test_it_still_finds_a_transfer_by_its_own_name(self):
+        """The PO joins that facet; it does not take it over."""
+        order = self._order("1003")
+        picking = order.picking_ids[:1]
+
+        first = self._search_field("name")[0]
+
+        self.assertIn(picking, self.env["stock.picking"].search(
+            self._type_into(first, picking.name)))
+
+    def test_it_still_finds_one_by_its_source_document(self):
+        order = self._order("1003")
+        picking = order.picking_ids[:1]
+
+        first = self._search_field("name")[0]
+
+        self.assertIn(picking, self.env["stock.picking"].search(
+            self._type_into(first, order.name)))
+
+    def test_the_label_says_the_po_is_in_there(self):
+        self.assertEqual(self._search_field("name")[0].get("string"),
+                         "Transfer / PO")
+
+    # --- and the PO on its own ------------------------------------------------
+
+    def test_the_po_field_on_its_own_finds_it(self):
+        order = self._order("1003")
+
+        found = self.env["stock.picking"].search(
+            self._type_into(self._search_field("aa_po_number")[0], "1003"))
+
+        self.assertIn(order.picking_ids[:1], found)
+
+    def test_the_po_field_on_its_own_does_not_match_a_source_document(self):
+        """Which is the whole reason it is there beside the wider facet: a
+        bare number could be somebody else's Source Document."""
+        order = self._order("1003")
+
+        found = self.env["stock.picking"].search(
+            self._type_into(self._search_field("aa_po_number")[0], order.name))
+
+        self.assertNotIn(order.picking_ids[:1], found)
+
+    def test_an_order_with_no_po_is_not_dragged_in(self):
+        with_po = self._order("1003")
+        without = self._order(False)
+
+        first = self._search_field("name")[0]
+        found = self.env["stock.picking"].search(
+            self._type_into(first, "1003"))
+
+        self.assertIn(with_po.picking_ids[:1], found)
+        self.assertNotIn(without.picking_ids[:1], found)

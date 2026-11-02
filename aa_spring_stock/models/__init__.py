@@ -1,4 +1,5 @@
 from . import coil
+from . import res_config_settings
 from . import spring_cut
 from . import spring_box
 from . import spring_stock_summary
