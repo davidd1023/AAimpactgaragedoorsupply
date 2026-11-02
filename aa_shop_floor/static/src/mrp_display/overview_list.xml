@@ -58,9 +58,19 @@
                 <table class="table table-sm table-hover align-middle bg-view border o_aa_overview_table mb-0">
                     <thead>
                         <tr>
-                            <th>W/O #</th>
+                            <!-- Click to sort high-low, low-high, then back to
+                                 arrival order (owner, 2026-11-02). -->
+                            <th class="o_aa_sortable text-nowrap" role="button"
+                                title="Sort by W/O # (highest first, lowest first, arrival order)"
+                                t-on-click="() => this.aaToggleSort('order')">
+                                W/O # <i class="fa ms-1" t-att-class="aaSortIcon('order')"/>
+                            </th>
                             <th>Received</th>
-                            <th class="text-nowrap">AA Impact W/O</th>
+                            <th class="o_aa_sortable text-nowrap" role="button"
+                                title="Sort by AA Impact W/O (highest first, lowest first, arrival order)"
+                                t-on-click="() => this.aaToggleSort('aa_impact')">
+                                AA Impact W/O <i class="fa ms-1" t-att-class="aaSortIcon('aa_impact')"/>
+                            </th>
                             <th>Customer</th>
                             <t t-foreach="aaCols" t-as="aaCol" t-key="aaCol">
                                 <th t-esc="aaCol"/>
