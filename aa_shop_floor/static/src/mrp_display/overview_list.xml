@@ -60,6 +60,7 @@
                         <tr>
                             <th>W/O #</th>
                             <th>Received</th>
+                            <th class="text-nowrap">AA Impact W/O</th>
                             <th>Customer</th>
                             <t t-foreach="aaCols" t-as="aaCol" t-key="aaCol">
                                 <th t-esc="aaCol"/>
@@ -78,6 +79,7 @@
                                     <t t-esc="aaRow.order"/>
                                 </td>
                                 <td class="text-nowrap" t-esc="aaRow.received"/>
+                                <td class="text-nowrap" t-esc="aaRow.aaImpactWo"/>
                                 <td class="o_aa_overview_customer" t-att-title="aaRow.customer" t-esc="aaRow.customer"/>
                                 <t t-foreach="aaCols" t-as="aaCol" t-key="aaCol">
                                     <td>
@@ -104,7 +106,7 @@
                                 </td>
                             </tr>
                             <tr t-if="aaOverview.open[aaRow.key]" class="o_aa_overview_detail">
-                                <td t-att-colspan="5 + aaCols.length" class="bg-100 p-3">
+                                <td t-att-colspan="6 + aaCols.length" class="bg-100 p-3">
                                     <div t-if="aaRow.canAssign and (aaRow.sendIds.length or aaRow.removeIds.length)"
                                          class="d-flex flex-wrap gap-2 mb-2">
                                         <button t-if="aaRow.sendIds.length" type="button" class="btn btn-primary"
@@ -157,7 +159,7 @@
                             </tr>
                         </t>
                         <tr t-if="!aaRows.length">
-                            <td t-att-colspan="5 + aaCols.length" class="text-center text-muted py-4">
+                            <td t-att-colspan="6 + aaCols.length" class="text-center text-muted py-4">
                                 No orders here.
                             </td>
                         </tr>
