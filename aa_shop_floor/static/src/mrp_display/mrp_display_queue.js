@@ -33,6 +33,17 @@ patch(MrpDisplay.prototype, {
                 const order = orderOf(rec);
                 return !order || carrier[order] === rec.resId;
             });
+        } else {
+            // ONE TRACK TASK PER ORDER AT THE STATION (owner, 2026-11-02): the
+            // vertical and horizontal track jobs of an order are drawn on one
+            // card; the server says which job carries it (track_merge.py).
+            records = records.filter((rec) => {
+                try {
+                    return !JSON.parse(rec.data.aa_track_merge || "{}").hidden;
+                } catch {
+                    return true;
+                }
+            });
         }
         const moId = (rec) => (showMOs ? rec.resId : rec.data.production_id?.id || 0);
         const sorted = [...records].sort((a, b) => {

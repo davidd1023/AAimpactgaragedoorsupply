@@ -10,7 +10,9 @@ patch(MrpDisplayAction.prototype, {
             // What the box is for, and the link its sticker opens.
             "aa_hardware_card", "aa_box_url", "aa_wo_number");
         structure["mrp.workorder"].push(
-            "aa_shop_spec", "aa_packed", "aa_hardware_card", "aa_box_url", "aa_wo_number");
+            "aa_shop_spec", "aa_packed", "aa_hardware_card", "aa_box_url", "aa_wo_number",
+            // One Track Prep card per order (owner, 2026-11-02).
+            "aa_track_merge");
         return structure;
     },
 });
