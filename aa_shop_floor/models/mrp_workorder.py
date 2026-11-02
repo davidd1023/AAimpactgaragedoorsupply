@@ -344,6 +344,10 @@ class MrpProduction(models.Model):
             if not production.qty_producing:
                 production._set_quantities()
         for production in todo:
+            # Closing a Track Prep job closes the order's other track job with
+            # it (track_merge.py), so it may be done already by now.
+            if production.state in ("done", "cancel"):
+                continue
             result = production.with_context(
                 skip_consumption=True, skip_backorder=True, mo_ids_to_backorder=[],
             ).button_mark_done()
