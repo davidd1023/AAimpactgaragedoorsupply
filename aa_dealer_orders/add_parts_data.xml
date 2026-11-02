@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- A TRACK LONGER THAN ANY PREPARED ONE (owner, 2026-11-02). It has no
+       product of its own length to sell, so the charge goes on this line,
+       priced per inch off the longest prepared track of that size and colour.
+       A SERVICE, deliberately: putting the longest prepared product on the
+       line instead would raise a Track Prep job for the WRONG length (132"
+       for a 144" door). The bench keeps cutting these from the kit line's
+       "AA prepares it" note, as it always has.
+
+       Its name must never say "Horizontal Track" or "Vertical Track":
+       _aa_track_facts reads those words to recognise a prepared track. -->
+  <data noupdate="1">
+    <record id="product_custom_track" model="product.template">
+      <field name="name">Custom Length Track (AA prepares)</field>
+      <field name="default_code">AA-TRACK-CUSTOM</field>
+      <field name="type">service</field>
+      <field name="sale_ok" eval="True"/>
+      <field name="purchase_ok" eval="False"/>
+      <field name="list_price">0.0</field>
+      <field name="invoice_policy">order</field>
+      <field name="is_published" eval="False"/>
+    </record>
+  </data>
+</odoo>

@@ -86,6 +86,11 @@
         const errorEl = root.querySelector("#aa_error");
         const submitBtn = root.querySelector("#aa_submit");
         const lines = [];
+        // ADMIN ADD MODE (owner, 2026-11-02): the page is filled with an order's
+        // doors and adds ONE part to that order - "box", "tracks" or "springs".
+        const addOrder = Number(root.dataset.addOrder) || 0;
+        const addPart = root.dataset.addPart || "";
+        const addDoors = addOrder ? JSON.parse(root.dataset.doors || "[]") : [];
         const money = (v) => symbol + Number(v || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
         if (!products.length) {
@@ -103,7 +108,7 @@
             lines.forEach((l, i) => (l.numEl.textContent = "Door " + (i + 1)));
         }
 
-        function addLine(copyFrom) {
+        function addLine(copyFrom, prefill) {
             const line = { subtotal: null, selects: {}, checks: {} };
             const kitSel = el("select", { class: "form-select" },
                 products.map((p) => el("option", { value: p.id, text: p.name })));
@@ -252,7 +257,8 @@
                         el("label", { class: "form-label small mb-1", text: "Drum" }), drumSel, drumHint,
                     ]));
                 }
-                optsBox.parentElement.classList.toggle("d-none", !hasMulti);
+                optsBox.parentElement.classList.toggle("d-none", !hasMulti || !!addOrder);
+                if (addOrder) tickPartOn(line);
             }
 
             function pickByPrefix(attrName, prefixes) {
@@ -386,7 +392,10 @@
                 line.subtotal = null;
                 if (!line.kitOk) { priceEl.textContent = "-"; refreshTotal(); return; }
                 priceEl.textContent = "...";
-                rpc("/dealer/order/price", { template_id: product().id, ptav_ids: ptavIds(), qty: Number(qty.value) || 1, line: line.payload() })
+                rpc("/dealer/order/price", {
+                    template_id: product().id, ptav_ids: ptavIds(), qty: Number(qty.value) || 1, line: line.payload(),
+                    add_order: addOrder || null, add_part: addPart || null,
+                })
                     .then((r) => {
                         if (my !== seq) return;
                         breakdown.innerHTML = "";
@@ -395,7 +404,7 @@
                             line.subtotal = r.subtotal;
                             priceEl.textContent = money(r.subtotal);
                             if ((r.extras || []).length || (r.notes || []).length) {
-                                breakdown.appendChild(el("div", { text: "Kit: " + money(r.kit_price) + " each" }));
+                                if (!addOrder || addPart === "box") breakdown.appendChild(el("div", { text: "Kit: " + money(r.kit_price) + " each" }));
                                 (r.extras || []).forEach((x) => breakdown.appendChild(
                                     el("div", { text: aaLabel(x.label) + ": " + x.name + (x.qty > 1 ? " x" + x.qty : "") + " - " + money(x.unit_price) })));
                                 (r.notes || []).forEach((n) => breakdown.appendChild(el("div", { class: "text-warning-emphasis", text: n })));
@@ -439,6 +448,7 @@
                 other.price();
             };
             line.kitSel = kitSel;
+            function tickPart() { if (addOrder) tickPartOn(line); }
 
             line.autoKit = autoKit;
             line.buildAttrs = buildAttrs;
@@ -465,30 +475,70 @@
             lines.push(line);
             renumber();
             if (copyFrom) copyFrom.copyInto(line);
+            else if (prefill) fillFrom(prefill);
             else { buildAttrs(); refreshDrum(); price(); }
+
+            // Fill this line from a door already on the order, then tick only the
+            // part being added. The add-on boxes are hidden: the part is the point.
+            function fillFrom(d) {
+                const set = (input, v) => { if (v !== undefined && v !== null && v !== "" && v !== 0) input.value = v; };
+                const w = Number(d.width_in) || 0, h = Number(d.height_in) || 0;
+                if (w) { wFt.value = Math.floor(w / 12); wIn.value = +(w % 12).toFixed(3); }
+                if (h) { hFt.value = Math.floor(h / 12); hIn.value = +(h % 12).toFixed(3); }
+                set(weight, d.weight);
+                set(qty, d.qty);
+                set(tag, d.tag);
+                if (d.track_type) trackSel.value = d.track_type;
+                if (d.lift_type) liftSel.value = d.lift_type;
+                set(hlInput, d.high_lift);
+                autoKit();
+                buildAttrs();
+                syncRoller();
+                autoPanels();
+                syncLift();
+                fillDrums(false);
+                if (d.drum && drumChoices().includes(d.drum)) drumSel.value = d.drum;
+                else autoDrum();
+                syncKitDrum();
+                if (d.color) pickByPrefix("Finish Color", [d.color]);
+                tickPart();
+                price();
+            }
+        }
+
+        // Only the part being added is ticked; nothing else rides along.
+        function tickPartOn(line) {
+            Object.values(line.checks).forEach((c) => {
+                c.cb.checked = (addPart === "tracks" && c.name === "Tracks") || (addPart === "springs" && c.name === "Springs");
+            });
         }
 
         root.querySelector("#aa_add_line").addEventListener("click", () => addLine());
-        addLine();
+        if (addDoors.length) addDoors.forEach((d) => addLine(null, d));
+        else addLine();
 
         submitBtn.addEventListener("click", () => {
             errorEl.textContent = "";
             const po = root.querySelector("#aa_po").value.trim();
-            if (!po) { errorEl.textContent = "Please enter your PO number."; root.querySelector("#aa_po").focus(); return; }
+            if (!po && !addOrder) { errorEl.textContent = "Please enter your PO number."; root.querySelector("#aa_po").focus(); return; }
             const noKit = lines.findIndex((l) => !l.kitOk);
             if (noKit >= 0) { errorEl.textContent = "Door " + (noKit + 1) + ": enter a door width up to 18' 4\"."; return; }
             const missing = lines.findIndex((l) => !l.payload().track_type);
             if (missing >= 0) { errorEl.textContent = "Door " + (missing + 1) + ": choose the track type."; return; }
             const noHl = lines.findIndex((l) => l.payload().lift_type === "highlift" && !(Number(l.payload().high_lift) > 0));
             if (noHl >= 0) { errorEl.textContent = "Door " + (noHl + 1) + ": enter the high lift in inches."; return; }
+            const label = submitBtn.textContent;
             submitBtn.disabled = true;
-            submitBtn.textContent = "Placing order...";
-            rpc("/dealer/order/submit", {
-                po_number: po,
-                pickup_date: root.querySelector("#aa_pickup").value || null,
-                notes: root.querySelector("#aa_notes").value,
-                lines: lines.map((l) => l.payload()),
-            })
+            submitBtn.textContent = addOrder ? "Adding..." : "Placing order...";
+            const request = addOrder
+                ? rpc("/dealer/order/add/" + addOrder + "/submit", { part: addPart, lines: lines.map((l) => l.payload()) })
+                : rpc("/dealer/order/submit", {
+                    po_number: po,
+                    pickup_date: root.querySelector("#aa_pickup").value || null,
+                    notes: root.querySelector("#aa_notes").value,
+                    lines: lines.map((l) => l.payload()),
+                });
+            request
                 .then((r) => {
                     if (r.error) throw new Error(r.error);
                     window.location.href = r.redirect;
@@ -496,7 +546,7 @@
                 .catch((e) => {
                     errorEl.textContent = e.message;
                     submitBtn.disabled = false;
-                    submitBtn.textContent = "Place order — charge to account";
+                    submitBtn.textContent = label;
                 });
         });
     }

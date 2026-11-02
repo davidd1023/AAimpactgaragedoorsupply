@@ -1929,3 +1929,48 @@ time, and a box is removed only once it is empty. Floor, Rack and Boxes are
 shown on ONE page, a fold-out group per place (owner, 2026-10-19: not separate
 menus) - `aa.spring.place.summary`, menu "Floor / Rack / Boxes". Anything that asks "is this a
 box coil" must use `place_of()`, never `location.name == "Boxes"`.
+
+## ADMIN: ADD BOX / TRACKS / SPRINGS TO A PLACED ORDER (`aa_dealer_orders`, owner 2026-11-02)
+
+*"the original AA Impact order, our 332, does carry tracks - give me an
+admin-only button that says Add Tracks, or if it has no springs Add Springs,
+and it must show in the order's cost. Only for AA Impact, the only preferred
+dealer, charged to account - on a purchase it must not appear"* - then *"or
+box"*: the hardware box, from the door's measurements, by its series.
+
+**W/O #332 HAD ASKED FOR TRACKS AND PAID NOTHING FOR THEM.** Its 18x11 door
+needs a 144" horizontal and a 124" vertical 3" track; the longest prepared
+ones are 132" and 112", so the Quick Order wrote "AA prepares it" and charged
+$0. That is the case the buttons exist for.
+
+Buttons on the sale order header - **Add Hardware Box / Add Tracks / Add
+Springs** - each shown only when the order has none of that part. Locked
+three ways: `groups="base.group_system"`, the compute
+(`_aa_can_add_parts`: admin, confirmed, on-account partner, NO done/authorized
+transaction - a card payment means it was a purchase) and the routes, which
+ask `_aa_can_add_parts` again.
+
+**THEY OPEN THE QUICK ORDER PAGE, NOT A WIZARD** (`/dealer/order/add/<id>?part=`),
+filled from the order's kit lines (track/lift/drum stored; size and weight
+parsed out of the line note, which is the only place the Quick Order ever
+kept them) or, with no kit, the spring lines' `aa_door_*`. Because **the spring
+calculator runs only in the browser** (`spring_bridge.js`); a back-office form
+could not size a spring without a second copy of the model.
+
+His three answers:
+
+- **A TRACK LONGER THAN ANY PREPARED ONE IS PRICED PER INCH** off the longest
+  prepared track of that size and colour. It goes on `product_custom_track`,
+  a SERVICE - the longest prepared product on the line would raise a Track
+  Prep job for the WRONG LENGTH. The bench still cuts it from the kit line's
+  note. Its name must never contain "Horizontal Track"/"Vertical Track"
+  (`_aa_track_facts` reads those words). Normal Quick Orders still say "AA
+  prepares it" at $0 - this pricing is only in the add flow.
+- **THE BOX** is the kit picked from the width, as the Quick Order does,
+  added with no add-ons ticked.
+- **THE ORIGINAL INVOICE IS REDONE** (`_aa_reinvoice`): reset to draft, new
+  lines appended, posted again under the same number - only while
+  `payment_state == 'not_paid'`. Anything paid on it, or a reset refused (lock
+  date), and the new lines go on an invoice of their own instead. Quantity is
+  forced to the ordered quantity because a delivery-policy product would
+  otherwise invoice 0. An order never invoiced is left alone.
