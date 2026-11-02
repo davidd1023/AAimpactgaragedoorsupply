@@ -1,7 +1,27 @@
 # GENERATED FROM spring_engineering BY tools/build_spring_calculator.py. DO NOT EDIT BY HAND - change the original and re-run the script.
 {
     "name": "Spring Calculator",
-    "version": "19.0.1.0.0",
+    # NO SERIES IN THE VERSION, ON PURPOSE (owner, 2026-11-02: his second
+    # project turned out to run Odoo 20, and the module showed up in Apps as
+    # "Uninstallable" with no reason given).
+    #
+    # Odoo's loader does this, in odoo/modules/module.py:
+    #
+    #     if manifest['installable'] and not check_version(version, ...):
+    #         manifest['installable'] = False
+    #
+    # and `check_version` passes only when the version STARTS WITH the
+    # running series. A five-part "19.0.1.0.0" is returned unchanged by
+    # `adapt_version`, so it fails on 20.0 - silently, as a greyed-out
+    # button. A THREE-part version is PREFIXED with whatever series is
+    # running ("1.0.0" -> "20.0.1.0.0"), so the module is offered on any of
+    # them.
+    #
+    # THE TRADE, WRITTEN DOWN: Odoo will no longer refuse this module on a
+    # series it was not written for. That refusal was worth something - but
+    # not much, since it names no reason - and it is worth less than being
+    # able to install the thing and read a real traceback.
+    "version": "1.0.0",
     "category": "Engineering",
     "summary": "Torsion spring calculator, quote and cart",
     "author": "AA Impact Garage Door Supply",

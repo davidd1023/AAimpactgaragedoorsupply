@@ -2007,3 +2007,47 @@ time, and a box is removed only once it is empty. Floor, Rack and Boxes are
 shown on ONE page, a fold-out group per place (owner, 2026-10-19: not separate
 menus) - `aa.spring.place.summary`, menu "Floor / Rack / Boxes". Anything that asks "is this a
 box coil" must use `place_of()`, never `location.name == "Boxes"`.
+
+### "UNINSTALLABLE" IS A VERSION REFUSAL, AND IT NAMES NO REASON (owner, 2026-11-02)
+
+*"i see the module in the app page but its not letting me install it ...
+Status? Uninstallable"* - with the three dependencies showing *Not Installed*,
+which is a red herring: that is simply what an uninstalled dependency says,
+and Odoo would have pulled them in.
+
+**THE SECOND PROJECT RUNS ODOO 20.** The carved module shipped with
+`"version": "19.0.1.0.0"`, and `odoo/modules/module.py` does:
+
+```
+if manifest['installable'] and not check_version(version, should_raise=False):
+    manifest['installable'] = False
+```
+
+`check_version` passes only when the version STARTS WITH the running series,
+and `adapt_version` returns a FIVE-part version unchanged - so `19.0.1.0.0`
+fails on `20.0` and the module is greyed out. **A THREE-part version is
+PREFIXED with the running series** (`1.0.0` becomes `20.0.1.0.0`), which is
+why `spring_calculator` now ships as `1.0.0`. Proved here: Odoo 19 recorded
+it as `19.0.1.0.0` and installed it.
+
+**THE TRADE IS WRITTEN DOWN IN THE README**: Odoo will no longer refuse the
+module on a series it was not written for. That refusal was worth little -
+it names no reason anywhere on the screen, which is exactly why this took a
+round trip - and it is worth less than being able to install and read a real
+traceback.
+
+**WHAT IS NOT KNOWN, AND MUST NOT BE GUESSED AT: Odoo 20.** This container
+holds the Odoo 19 source and nothing later, and the model's training predates
+20's release. The module is Odoo 19 code. The three things most likely to
+need attention are named in the README - `type="jsonrpc"` (new in 19),
+`website._get_and_cache_current_cart()` / `._create_cart()` (new in 19,
+replacing `sale_get_order`), and `is_storable` (18+). **Install on a
+DEVELOPMENT branch and let the errors say what else.** Do not write
+speculative Odoo 20 changes from this build; there is nothing here to check
+them against.
+
+**AND IT MEANS THE TWO PROJECTS ARE ON DIFFERENT SERIES**, which the "one
+source" arrangement did not anticipate. For now the generated module is one
+file set that installs on both; the day 19 and 20 genuinely need different
+code, the generator grows a `--series` option rather than the folder being
+forked by hand.

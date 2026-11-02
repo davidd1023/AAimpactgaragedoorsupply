@@ -24,6 +24,25 @@ installed. This module lives here as the **source** for the second project
 and is deliberately left uninstalled.
 
 
+## Which Odoo versions it installs on
+
+The manifest version is **`1.0.0`** — three parts, no series — and that is
+deliberate. Odoo's loader refuses a module whose version does not start with
+the running series, and it does so by greying out the Install button and
+calling the module **"Uninstallable"** with no reason given anywhere on the
+screen. A three-part version is prefixed with whatever series is running
+(`1.0.0` becomes `19.0.1.0.0` on 19, `20.0.1.0.0` on 20), so the module is at
+least offered.
+
+**That is not the same as saying it WORKS on every series.** The code was
+written for Odoo 19. Install it on a development branch first and read what
+happens. Things most likely to need attention on a later series:
+
+- `type="jsonrpc"` on four routes — new in 19, was `type="json"` before
+- `website._get_and_cache_current_cart()` and `._create_cart()` — new in 19,
+  replacing `website.sale_get_order(force_create=True)`
+- `is_storable` on the two products — 18 and later only
+
 ## Putting it on the second project
 
 ### The recommended way: a git submodule
