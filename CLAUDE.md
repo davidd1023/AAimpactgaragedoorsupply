@@ -194,6 +194,44 @@ again and is in that module's README: Apps > Update Apps List > Install, once.
 `spring_engineering` runs **5 failed, 2 errors of 348**, all in
 `test_bracket_fasteners`, exactly the count recorded above for a clean tree.
 
+#### WHAT IS PROVED, AND THE ONE THING THAT IS NOT
+
+He asked straight out: *"so are you one hundred percent sure it will work on
+the other project?"* - and the answer was no, so this is the list.
+
+PROVED: the carved engine returns the IDENTICAL quote to the original over
+eight specifications (both wire sizes, all three I.D.s, the 5 1/4" that adds
+a filler, hi-lift, both cycle ratings, and the refusals); the 4,449-line
+browser engine is byte-identical after undoing the renames; the module
+installs clean; the four-name mount chain agrees and is present in the
+**bundle the server actually serves**, not merely on disk; its two products
+are self-contained, with no category, UoM or attribute to dangle; every
+external reference in it resolves to `website.*`; all three dependencies are
+stock Odoo. **AND IT MOUNTED IN A REAL BROWSER**, observed once before Chrome
+stopped starting.
+
+**NOT PROVED: AN INSTALL ON A DATABASE WITHOUT `spring_engineering`.** Every
+test ran where the original was already installed, and this container is tied
+to ONE database - a second cannot be created to try it on. The static sweep
+above is what stands in for it, and it is strong, but it is not the same
+thing. **The first install on the second project is the real test.**
+
+**CHROME IS UNRELIABLE ON THIS HOST** - `RuntimeError: can't start new
+thread` at load 21. `test_the_calculator_mounts_and_computes` SKIPS with that
+reason rather than failing red, and it is worth running on the second project
+where it will actually go: it drives the form (a weight and a drum, which is
+what `resultsVisible` wants) and then asserts a figure appears.
+
+**A BROWSER TEST THAT ASSERTED THE WRONG INITIAL STATE** is how that was
+learnt: the first version waited for `.se-rowR-total` on page load, and the
+calculator deliberately shows nothing until it has a drum and a weight,
+because every result would otherwise read 0 or NaN. The test was wrong, not
+the module - but it took a real browser to tell the difference.
+
+**ODOO PARSES THE MODULE README THROUGH DOCUTILS** for the Apps description,
+and a markdown table's `|---|---|` logs `Undefined substitution referenced:
+"---"` on every single install. No tables in a module README.
+
 ## Pricing
 
 ### A 5 1/4" spring takes a plastic filler

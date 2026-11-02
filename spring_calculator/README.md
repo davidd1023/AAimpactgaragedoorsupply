@@ -7,7 +7,6 @@ It is **generated** from `spring_engineering` by
 `tools/build_spring_calculator.py`. Nothing in here is written by hand except
 this file and `tests/`.
 
----
 
 ## ⚠️ Never install this and `spring_engineering` in the same database
 
@@ -24,7 +23,6 @@ On this repository's own project, `spring_engineering` is the one that is
 installed. This module lives here as the **source** for the second project
 and is deliberately left uninstalled.
 
----
 
 ## Putting it on the second project
 
@@ -50,7 +48,6 @@ says so.
 Copy `spring_calculator/` into the second project's repo. Fine for a demo.
 Not fine for two live sites — see *Keeping it in step* below for why.
 
----
 
 ## Keeping it in step
 
@@ -85,18 +82,22 @@ refusals — and compares the 4,449-line browser engine as text after undoing
 the renames. It skips itself where `spring_engineering` is absent, which is
 the second project.
 
----
 
 ## What is in it
 
-| | |
-|---|---|
-| `controllers/main.py` | the engine: constants, `quote_assembly`, `add_assembly_lines`, the routes |
-| `controllers/custom_spring.py` | the `/custom-torsion-spring` page |
-| `pricing.py` | steel rates, cone prices, the filler rate |
-| `static/src/js/spring_calculator.js` | the sizing maths, 4,449 lines, calibration baked in |
-| `models/sale_order_line.py` | `spring_spec_json`, `aa_spec_note`, the door figures |
-| `views/` | both pages, the two products, the backend app, the settings |
+*(No markdown tables in this file: Odoo runs the README through docutils for
+the Apps description, and a `|---|---|` separator logs an "Undefined
+substitution" error on every install.)*
+
+- `controllers/main.py` — the engine: constants, `quote_assembly`,
+  `add_assembly_lines`, the routes
+- `controllers/custom_spring.py` — the `/custom-torsion-spring` page
+- `pricing.py` — steel rates, cone prices, the filler rate
+- `static/src/js/spring_calculator.js` — the sizing maths, 4,449 lines,
+  calibration baked in
+- `models/sale_order_line.py` — `spring_spec_json`, `aa_spec_note`, the door
+  figures
+- `views/` — both pages, the two products, the backend app, the settings
 
 ## What is *not*
 
