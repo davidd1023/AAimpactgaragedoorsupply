@@ -195,3 +195,31 @@ class AddPartsCase(HttpCase):
         has = {p["part"]: p["has"] for p in board["parts"]}
         self.assertEqual(has, {"box": True, "tracks": False, "springs": False})
         self.assertIsNone(self._order(self.walk_in)._aa_parts_board())
+
+    def test_a_second_submit_adds_nothing(self):
+        """Never charged twice: the part is already there, so the route refuses."""
+        custom = self.env.ref("aa_dealer_orders.product_custom_track").product_variant_id
+        order = self._order(lines=[Command.create({"product_id": custom.id, "price_unit": 211.54})])
+        before = order.amount_untaxed
+        self.authenticate("admin", "admin")
+        res = self.url_open(
+            f"/dealer/order/add/{order.id}/submit",
+            data=json.dumps({"jsonrpc": "2.0", "method": "call",
+                             "params": {"part": "tracks", "lines": [{"template_id": 1}]}}),
+            headers={"Content-Type": "application/json"}).json()
+        self.assertIn("already on this order", res["result"]["error"])
+        order.invalidate_recordset()
+        self.assertEqual(order.amount_untaxed, before)
+        self.assertFalse(order.transaction_ids, "adding never creates a payment")
+
+    def test_adding_after_invoicing_does_not_rebill_the_old_lines(self):
+        """The redone invoice carries each line once: old ones are not billed again."""
+        order = self._order()
+        invoice = order._create_invoices()
+        invoice.action_post()
+        line = self.env["sale.order.line"].create({
+            "order_id": order.id, "product_id": self.widget.id, "price_unit": 50.0})
+        order._aa_reinvoice(line)
+        self.assertEqual(len(order.invoice_ids), 1)
+        self.assertAlmostEqual(invoice.amount_untaxed, order.amount_untaxed)
+        self.assertEqual(sorted(invoice.invoice_line_ids.mapped("quantity")), [1.0, 1.0])

@@ -591,6 +591,13 @@ class AADealerOrder(AAOptionPricing, http.Controller):
             return {'error': _("Only an administrator can add to a dealer order on account.")}
         if not lines or len(lines) > MAX_LINES:
             return {'error': _("Add at least one door.")}
+        # NEVER TWICE (owner, 2026-11-03: "check it isn't charging every time
+        # something is added"). The button is hidden once the part is on the
+        # order, but a page left open, the Back button or a second tab can
+        # still post - so the server asks again, and the second submit is
+        # refused instead of charging the part a second time.
+        if order._aa_part_lines(part):
+            return {'error': _("%s are already on this order - nothing was added again.", ADD_LABELS[part])}
         partner = order.partner_id
         products = self._quick_order_products()
         catalog = Catalog(request.env)
