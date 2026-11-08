@@ -277,6 +277,11 @@ class MrpProduction(models.Model):
                 "order": production.aa_wo_number or production.origin,
                 "customer": order.partner_id.display_name or "",
                 "aa_impact_wo": self._aa_impact_wo(order),
+                # ADD / REMOVE A BOX, TRACKS OR SPRINGS (owner, 2026-11-02),
+                # admins only - aa_dealer_orders decides, and says None to
+                # everybody else and to any order that was a purchase. Asked
+                # through hasattr so this module does not depend on it.
+                "parts": order._aa_parts_board() if order and hasattr(order, "_aa_parts_board") else None,
                 "received": received,
                 "can_assign": can_assign,
                 "send_ids": [j["id"] for j in jobs if j["can_send"]],

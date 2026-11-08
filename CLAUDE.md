@@ -1117,6 +1117,31 @@ Two things about Odoo 19 that cost a build each:
 - **A search view's group-by `<group>` takes neither `expand` nor `string`**
   in 19. Both are rejected by the RELAX NG schema and the view will not load.
 
+## Operator PINs on the Shop Floor (`aa_shop_floor`, owner, 2026-10-28)
+
+*"as admin I should have the option to change Jorge's and Michel's work-station
+PIN, and if I have the admin account I don't need to type the PIN to get into
+their users, and I should be able to do on their work stations the same as
+they do."*
+
+**AN ADMIN (`base.group_system`) SIGNS IN AS ANY OPERATOR WITHOUT THE PIN.**
+`hr.employee.login` / `logout` are overridden in `models/operator_pin.py` to
+hand in the employee's own PIN for an admin, so Odoo carries on exactly as if
+it had been typed: the operator is signed in, his timers run under his name,
+and the admin can do everything at that station that he can.
+**`pin_validation` is deliberately NOT overridden** - the Attendance kiosk and
+anything else that asks for a PIN keeps asking.
+
+**THIS ONLY WORKS IF THE WORKERS' DEVICES ARE NOT ON AN ADMIN LOGIN.** Owner,
+same day: "admin will have his own device and michel and jorge another one
+each". In staging the only internal logins were Administrator and Supply
+Admin, BOTH admins - a worker tablet on either would skip every PIN for
+whoever stands at it. The worker devices need a non-admin login.
+
+**CHANGE PIN is in the Shop Floor's menu, beside History**, admins only
+(hidden by `user.isSystem`, refused on the server too). Digits only, at least
+4. The list never carries a PIN back to the browser, only whether one is set.
+
 ## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
 
 *"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one
@@ -1904,3 +1929,75 @@ time, and a box is removed only once it is empty. Floor, Rack and Boxes are
 shown on ONE page, a fold-out group per place (owner, 2026-10-19: not separate
 menus) - `aa.spring.place.summary`, menu "Floor / Rack / Boxes". Anything that asks "is this a
 box coil" must use `place_of()`, never `location.name == "Boxes"`.
+
+## ADMIN: ADD BOX / TRACKS / SPRINGS TO A PLACED ORDER (`aa_dealer_orders`, owner 2026-11-02)
+
+*"the original AA Impact order, our 332, does carry tracks - give me an
+admin-only button that says Add Tracks, or if it has no springs Add Springs,
+and it must show in the order's cost. Only for AA Impact, the only preferred
+dealer, charged to account - on a purchase it must not appear"* - then *"or
+box"*: the hardware box, from the door's measurements, by its series.
+
+**W/O #332 HAD ASKED FOR TRACKS AND PAID NOTHING FOR THEM.** Its 18x11 door
+needs a 144" horizontal and a 124" vertical 3" track; the longest prepared
+ones are 132" and 112", so the Quick Order wrote "AA prepares it" and charged
+$0. That is the case the buttons exist for.
+
+Buttons on the sale order header - **Add Hardware Box / Add Tracks / Add
+Springs** - each shown only when the order has none of that part. Locked
+three ways: `groups="base.group_system"`, the compute
+(`_aa_can_add_parts`: admin, confirmed, on-account partner, NO done/authorized
+transaction - a card payment means it was a purchase) and the routes, which
+ask `_aa_can_add_parts` again.
+
+**THEY OPEN THE QUICK ORDER PAGE, NOT A WIZARD** (`/dealer/order/add/<id>?part=`),
+filled from the order's kit lines (track/lift/drum stored; size and weight
+parsed out of the line note, which is the only place the Quick Order ever
+kept them) or, with no kit, the spring lines' `aa_door_*`. Because **the spring
+calculator runs only in the browser** (`spring_bridge.js`); a back-office form
+could not size a spring without a second copy of the model.
+
+His three answers:
+
+- **A TRACK LONGER THAN ANY PREPARED ONE IS PRICED PER INCH** off the longest
+  prepared track of that size and colour. It goes on `product_custom_track`,
+  a SERVICE - the longest prepared product on the line would raise a Track
+  Prep job for the WRONG LENGTH. The bench still cuts it from the kit line's
+  note. Its name must never contain "Horizontal Track"/"Vertical Track"
+  (`_aa_track_facts` reads those words). Normal Quick Orders still say "AA
+  prepares it" at $0 - this pricing is only in the add flow.
+- **THE BOX** is the kit picked from the width, as the Quick Order does,
+  added with no add-ons ticked.
+- **THE ORIGINAL INVOICE IS REDONE** (`_aa_reinvoice`): reset to draft, new
+  lines appended, posted again under the same number - only while
+  `payment_state == 'not_paid'`. Anything paid on it, or a reset refused (lock
+  date), and the new lines go on an invoice of their own instead. Quantity is
+  forced to the ordered quantity because a delivery-policy product would
+  otherwise invoice 0. An order never invoiced is left alone.
+
+### AND ON THE SHOP FLOOR, WITH REMOVE (owner, 2026-11-02, an hour later)
+
+*"we were talking about adding hw box, springs or tracks here in shop floor
+if the order doesn't have it - put in by mistake or whatever - and also
+removing it from the order."* The buttons belong where he runs the floor: the
+Overview list, inside an opened row, **"Order parts (admin)"** - Add for what
+the order lacks, Remove for what it has. The sale order header keeps its Add
+buttons too.
+
+The board carries `parts` from `sale.order._aa_parts_board()`, asked through
+`hasattr` so `aa_shop_floor` takes no dependency on `aa_dealer_orders`; None
+for anybody but an admin and for any order that was a purchase. **Add** goes to
+the same pre-filled page with `back=shop-floor` and comes back to the floor.
+After adding, `_aa_create_station_productions()` is called - it is what
+confirmation calls, it skips lines that already have a job - so an added
+spring or box gets its Shop Floor job; a prepared track's comes from Odoo's
+route as the line is made.
+
+**Remove** (`aa_remove_part`): refused once a job for that part is done or
+being worked on, or anything is delivered - that is a return, not a mistake on
+the order. Otherwise the jobs are cancelled, the lines go to quantity 0 (Odoo
+will not delete a confirmed line) and the unpaid invoice is redone without
+them; a paid one is left alone with a note to issue a credit note. Springs
+take their plastic filler with them. A box taken off re-runs
+`_aa_create_station_productions` so its boxed lift cables get a job of their
+own.
