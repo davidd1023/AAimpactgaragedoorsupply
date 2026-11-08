@@ -33,10 +33,13 @@ it. His own warning says as much; the group makes it true.
 """
 
 from odoo import _, api, fields, models
+from odoo.tools.translate import _lt
 from odoo.exceptions import UserError
 
-#: His words, near enough verbatim (2026-10-29).
-WARNING = _(
+#: His words, near enough verbatim (2026-10-29). Lazy (_lt): translated when
+#: the wizard opens, not when the module loads - an eager _() here logged a
+#: "no translation language detected" warning on every server start.
+WARNING = _lt(
     "Warning: this is only for orders that used no actual inventory and is "
     "only to be used for records or testing, not for real orders."
 )
@@ -116,7 +119,7 @@ class AaDispatchNoStock(models.TransientModel):
 
     picking_ids = fields.Many2many(
         "stock.picking", string="Transfers", required=True)
-    warning = fields.Char(default=lambda self: WARNING, readonly=True)
+    warning = fields.Char(default=lambda self: str(WARNING), readonly=True)
     settled_count = fields.Integer(
         string="Already Settled", compute="_compute_counts")
     to_do_count = fields.Integer(string="To Dispatch", compute="_compute_counts")
