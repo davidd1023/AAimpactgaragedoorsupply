@@ -28,6 +28,7 @@ import { writeFileSync, readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { stateFromReading, isClean, isModelledDuplex } from "./ref-state.mjs";
+import { makeRnd } from "./rnd.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const [out, seedArg, budgetArg, samplesArg] = process.argv.slice(2);
@@ -107,11 +108,20 @@ const CYCLES = ["10,000", "15,000", "25,000", "50,000", "75,000", "100,000",
     "150,000", "200,000", "250,000", "300,000"];
 const RADII = ["LHR", "12", "15"];
 
-let seed = Number(seedArg) || 1;
-const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
-const pick = (a) => a[Math.floor(rnd() * a.length)];
-const between = (lo, hi) => lo + Math.floor(rnd() * (hi - lo + 1));
+const { rnd, pick, between } = makeRnd(seedArg);
 const buckets = new Map();
+
+// A GEOMETRY THIS DRAW HAS ALREADY TAKEN, which is separate from `held` and is
+// the lesson of batch V13: `held` answers "do we own this reading", and nothing
+// answered "have I already put this one in the basket". The generator was
+// collapsing onto a few hundred geometries (see dev/rnd.mjs) and every repeat
+// passed the `held` check honestly, so 400 requests bought 21 distinct doors
+// and the importer reported the other 379 as though the corpus had grown.
+//
+// The generator is fixed. This stands anyway: a sampler that can emit the same
+// case twice is a sampler that can spend the owner's account on nothing, and
+// the cost of being sure is a Set.
+const drawn = new Set();
 
 for (let k = 0; k < SAMPLES; k++) {
     const hi = rnd() < 0.35;
@@ -128,7 +138,11 @@ for (let k = 0; k < SAMPLES; k++) {
         doorHeightFeet: Math.floor(heightIn / 12), doorHeightInches: heightIn % 12,
     };
 
-    if (held.has(geomKey(st))) continue;
+    const key = geomKey(st);
+
+    if (held.has(key) || drawn.has(key)) continue;
+
+    drawn.add(key);
 
     let c, s;
 
@@ -188,8 +202,29 @@ for (const r of need) {
     r.took = take;
 }
 
+// THE LAST GATE BEFORE THE OWNER'S ACCOUNT IS SPENT.
+//
+// Every request in this file costs a second of somebody else's server and a
+// slice of his login. Batch V13 wrote 400 cases holding 21 distinct doors and
+// nothing objected until the importer had already paid for them - so the file
+// is now checked against what it claims to be, here, where it is still free.
+//
+// It asserts the sweep, not the generator: it would have caught V13 whatever
+// the cause was, and it will catch the next cause too.
+const distinct = new Set(cases.map((c) => [c.drum, c.springs, c.radius,
+    c.lift, c.hiLift ?? "", c.cycles, c.weight, c.heightInches].join("|")));
+
+if (distinct.size !== cases.length) {
+    console.error(`REFUSING TO WRITE ${out}: ${cases.length} cases but only `
+        + `${distinct.size} distinct geometries - ${cases.length - distinct.size}`
+        + ` of these requests would ask the reference a question already asked`
+        + ` in this same file. See dev/rnd.mjs; this is what spoiled batch V13.`);
+    process.exit(1);
+}
+
 writeFileSync(out, JSON.stringify(cases, null, 1));
-console.log(`\nwrote ${cases.length} targeted cases to ${out} (seed ${seedArg}, target ${TARGET})\n`);
+console.log(`\nwrote ${cases.length} targeted cases to ${out} (seed ${seedArg}, target ${TARGET})`);
+console.log(`${distinct.size} distinct geometries, ${drawn.size} sampled\n`);
 console.log("rung            have   need  traffic   pool   taken");
 
 for (const r of need) {

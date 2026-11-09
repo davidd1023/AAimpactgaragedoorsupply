@@ -72,7 +72,20 @@ const inputKey = (state) => [
     state.doorHeightFeet, state.doorHeightInches ?? 0,
 ].join("|");
 
-const have = new Set(corpus.readings.map((r) => inputKey(r.state)));
+// TWO SETS, NOT ONE, AND THE REASON IS A WASTED CAMPAIGN.
+//
+// This was one `have` seeded from the corpus and added to as rows were taken,
+// so a row duplicated WITHIN THE PULL was reported as "already in corpus (same
+// inputs)" - which is a sentence about the corpus being saturated. Batch V13
+// was 379 of those and every one of them was a repeat of another row in the
+// same file (the sampler's generator had collapsed; see dev/rnd.mjs). The
+// wording sent the diagnosis at the corpus and the deriver for an afternoon.
+//
+// They are different faults with different fixes: one means stop pulling, the
+// other means the sampler is broken and the requests were wasted. So they are
+// counted apart and named apart.
+const inCorpus = new Set(corpus.readings.map((r) => inputKey(r.state)));
+const inThisPull = new Set();
 const usedIds = new Set(corpus.readings.map((r) => r.id));
 const skipped = {};
 const skip = (why) => { skipped[why] = (skipped[why] ?? 0) + 1; };
@@ -150,12 +163,17 @@ for (const r of JSON.parse(readFileSync(pullFile, "utf8"))) {
 
     const key = inputKey(state);
 
-    if (have.has(key)) {
-        skip("already in corpus (same inputs)");
+    if (inCorpus.has(key)) {
+        skip("already in corpus (same inputs) - the corpus already holds this door");
         continue;
     }
 
-    have.add(key);
+    if (inThisPull.has(key)) {
+        skip("DUPLICATED WITHIN THIS PULL - a wasted request, not a full corpus");
+        continue;
+    }
+
+    inThisPull.add(key);
 
     // Ids must still be unique even though they no longer define identity.
     let tag = base;
