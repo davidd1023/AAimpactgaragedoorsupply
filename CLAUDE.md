@@ -2181,3 +2181,52 @@ off GitHub. `spring_calculator/README.md` now carries the brief, including
 the one rule that matters: **the module is GENERATED, so a fix made only in
 project 2's repository is undone by the next re-sync** - it has to come back
 as a diff and be folded into the generator.
+
+### DUPLEX ACCURACY: THE TABLE IS DERIVED, NOT WRITTEN (owner, 2026-11-09)
+
+*"we need to improve the accuracy of duplex springs even if they give
+warnings that wouldnt make them purchasable"* - with a screenshot of a door
+we got wrong: 12' x 14', 1067 lb, 2 springs, D525-216, r15, 10,000 cycles.
+Reference 32.25" / 33.25"; we said 31.00" / 32.00", **1.25" short on both**.
+
+**THE CALIBRATION TABLE IS COMPUTED FROM THE READINGS, NOT MAINTAINED BY
+HAND.** `dev/derive.mjs` fits it from `dev/corpus.json` plus any
+`dev/pulled*.json`; `sh dev/apply.sh` derives and installs it. Its own
+header says so: *"a new pull improves the table by re-running this rather
+than by editing JavaScript."* **Never hand-edit the rungs.**
+
+**THE FIRST THING TO CHECK IS WHETHER THE INSTALLED TABLE IS STALE**, and on
+2026-11-09 it was not: `apply.sh` changed **zero lines**. So 10,776/11,049
+(97.53%) was the model's ceiling on the data then held, not neglect.
+
+**SO THE FIX WAS DATA, NOT CODE.** His reading went into the corpus, the
+table was re-derived, and his door now returns 33.25"/32.25" exactly. Score
+10,777/11,050 - the same 273 failures, one more reading covered. One
+reference reading fixes one door and does not move the percentage.
+
+**A PLAUSIBLE RULE THE DATA KILLED, and the reason to always check.** 203 of
+the 273 failures are LENGTH with the wire already right, and five of the
+two-spring ones landed on a whole inch where the reference wanted a quarter.
+`duplexSnapToGrid` already lifts whole inches to the quarter above - but only
+at 3+ springs - so extending it to 2 looked obvious. **The corpus refutes
+it**: at 2 springs the reference uses 4,816 whole inches AND 2,296 quarters.
+At 3 and 4 it is 6 and 2 whole inches against 4,262 and 3,090. The rule is
+real at 3+ and false at 2; shipping it would have broken thousands of
+readings to fix five.
+
+**WHERE THE REMAINING ERROR LIVES.** The bonus is keyed on (spring count,
+floor of active length, frac). On the worst rung, `0.2625/0.2253`, there are
+**11 readings where the same (count, floor, frac) carries a different
+reference answer** - so no refit in those three variables can ever reach
+100%. `derive.mjs` names the weak groups itself: `0.2625/0.2253` is
+non-monotonic in frac at 2 and 4 springs, and `0.3625/0.295 at 2 springs` -
+the owner's rung - cross-validates at only **90.6%** over 32 readings, which
+is why roughly one door in ten there is wrong.
+
+**WHAT WOULD ACTUALLY MOVE THE NUMBER**: more reference readings on those
+rungs, which only the owner can pull. `derive.mjs` prints the groups and even
+says where to sweep ("in steps of 6 lb or less").
+
+**THE DRIFT ALARM WORKED.** Changing the engine made
+`tools/build_spring_calculator.py --check` fail at once, naming the stale
+file. Regenerating is part of any engine change.

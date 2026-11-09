@@ -363743,6 +363743,42 @@
     "duplexOuterWeight": 0.02
    },
    "referenceCycles": 212000
+  },
+  {
+   "id": "owner-D525216-3625-295-1067lb-14ft-2spr-r15-t10000",
+   "status": "verified",
+   "source": "Reference calculator screenshot supplied by the owner 2026-11-09. Our app returned 31.00/32.00 for the same door - 1.25\" short on both springs - which is what prompted the reading.",
+   "state": {
+    "assembly": "Duplex",
+    "drum": "CANIMEX/TF D525-216",
+    "springId": "3 3/4\" inside 6\"",
+    "radius": "15",
+    "liftType": "Standard",
+    "springs": 2,
+    "cycles": "10,000",
+    "weight": "1067",
+    "doorHeightFeet": 14,
+    "doorHeightInches": 0,
+    "doorWidthFeet": 12,
+    "doorWidthInches": 0
+   },
+   "expect": {
+    "duplexInnerWire": "0.295\"",
+    "duplexOuterWire": "0.3625\"",
+    "duplexInnerLength": 32.25,
+    "duplexOuterLength": 33.25,
+    "duplexInnerWeight": 26.93,
+    "duplexOuterWeight": 53.66
+   },
+   "tolerance": {
+    "duplexInnerWeight": 0.02,
+    "duplexOuterWeight": 0.02
+   },
+   "referenceCycles": 9000,
+   "note": [
+    "Rung 0.3625/0.295 at 2 springs - the group derive.mjs reports at",
+    "90.6% out of sample over 32 readings, its weakest cross-validation."
+   ]
   }
  ]
 }
