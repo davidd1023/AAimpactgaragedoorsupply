@@ -2230,3 +2230,41 @@ says where to sweep ("in steps of 6 lb or less").
 **THE DRIFT ALARM WORKED.** Changing the engine made
 `tools/build_spring_calculator.py --check` fail at once, naming the stale
 file. Regenerating is part of any engine change.
+
+#### PULLING FROM SERVICE SPRING, AND WHAT A CAMPAIGN NOW YIELDS (2026-11-09)
+
+Owner: *"why dont you just use my ssc account to obtain the data yourself"* -
+and the tooling for it was already written. `dev/pull.mjs` reads credentials
+from **`~/.ssc-credentials` only** (never the command line, the environment or
+the repo), goes one request a second, caps at 400, and prints neither value.
+`dev/rung-target-sample.mjs` aims a draw at the starved rungs and
+`dev/rung-campaign.sh` runs generate/pull/import batch by batch under a lock.
+
+**THE CONTAINER IS EPHEMERAL, SO THE CREDENTIALS AND `dev/sweeps*.json` ARE
+GONE AFTER EVERY REBUILD** - both are gitignored, which is right. The
+`garageDoorLineId` the API requires (`5a06c4b3-c798-459e-bba2-a6c857eebb0b`)
+went with them, and was recovered from `dev/biased-soft-weightonly.json`,
+which is a committed pull output and carries its own `input`. Look there
+first rather than crawling the site - the SPA does not expose it.
+
+**THE PIPELINE WAS PROVED ON ONE REQUEST BEFORE ANY VOLUME**: the owner's own
+1067 lb door, which came back 0.295"/32.25" and 0.3625"/33.25" - exactly his
+screenshot, confirming the credentials, the endpoint, the parsing and my
+reading of his screenshot in one go.
+
+**BATCH V13: 400 REQUESTS, 21 NEW READINGS, ACCURACY UNCHANGED.** 379 were
+rejected by the importer as *"already in corpus (same inputs)"*. Score went
+10,776/11,049 to 10,797/11,071 - **97.53% both times**. Twelve batches have
+saturated the draw space the sampler explores.
+
+**THE SAMPLER AND THE IMPORTER DISAGREE ABOUT WHAT IS ALREADY HELD**, and
+that is the bug to fix before spending more of his account.
+`rung-target-sample.mjs` builds a `held` set and skips it (line 131); the
+importer's `inputKey` is character-for-character the same fields. Yet the
+sampler emitted 400 it believed new and the importer rejected 379. **Not run
+down in this session** - and note that a check I wrote to find it was itself
+broken (`stateFromReading` returned `NaN`/`undefined`, so my "0 duplicates"
+was meaningless; the importer's count is the one to trust).
+
+**UNTIL THAT IS FIXED, A CAMPAIGN COSTS 400 REQUESTS ON SOMEONE ELSE'S SERVER
+FOR ABOUT 20 READINGS.** Fix the dedupe first; the yield is the whole point.
