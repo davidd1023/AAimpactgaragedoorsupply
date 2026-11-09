@@ -46,6 +46,21 @@ if (existsSync(out) && !process.env.OVERWRITE) {
 const BUDGET = Number(budgetArg);
 const SAMPLES = Number(samplesArg) || 30000;
 const TARGET = Number(process.env.TARGET) || 320;
+
+// RUNGS=0.3625/0.295[,...] SPENDS THE WHOLE BUDGET ON NAMED RUNGS, AND THE
+// REASON IS THE OWNER'S OWN DOOR.
+//
+// The default allocation ranks by traffic/need - how often a real door lands
+// on a rung over how short it is - which is the right rule for the catalogue
+// as a whole and CANNOT EVER REACH A RARE RUNG. His 1067 lb door sits on
+// 0.3625/0.295, which carries traffic 4 of 31 in the validation sets: needing
+// 200 readings it scores 0.02, sorts dead last, and waits for every common
+// rung to fill first. Batch V14 fed seven rungs and gave his none.
+//
+// A rung nobody visits is still somebody's door. This is the override for
+// "fix the door in front of me" as against "raise the average", and the two
+// are different jobs.
+const ONLY = (process.env.RUNGS || "").split(",").map((s) => s.trim()).filter(Boolean);
 const mod = await load();
 
 let lineId = null;
@@ -167,13 +182,34 @@ for (let k = 0; k < SAMPLES; k++) {
 }
 
 // --- allocate the budget: most points per request first ----------------------
-const need = [...traffic].map(([rung, n]) => ({
+// With RUNGS set the candidates are the NAMED rungs, not the ones the
+// validation sets happen to visit - a rare rung may have no traffic at all and
+// would otherwise never even be a candidate. Ordered by how starved it is,
+// since traffic is deliberately not the question any more.
+const candidates = ONLY.length
+    ? ONLY.map((rung) => [rung, traffic.get(rung) ?? 0])
+    : [...traffic];
+
+const need = candidates.map(([rung, n]) => ({
     rung, traffic: n,
     have: have.get(rung) ?? 0,
     need: Math.max(0, TARGET - (have.get(rung) ?? 0)),
     pool: (buckets.get(rung) || []).length,
 })).filter((r) => r.need > 0 && r.pool > 0)
-    .sort((a, b) => (b.traffic / b.need) - (a.traffic / a.need));
+    .sort((a, b) => (ONLY.length
+        ? b.need - a.need
+        : (b.traffic / b.need) - (a.traffic / a.need)));
+
+if (ONLY.length && !need.length) {
+    console.error(`nothing to draw for ${ONLY.join(", ")}: either already at`
+        + ` the target of ${TARGET}, or the sampler produced no geometry`
+        + ` landing on it in ${SAMPLES} samples. Rung counts it does hold:`);
+    for (const r of ONLY) {
+        console.error(`  ${r}: have ${have.get(r) ?? 0},`
+            + ` pool ${(buckets.get(r) || []).length}`);
+    }
+    process.exit(1);
+}
 
 const cases = [];
 
