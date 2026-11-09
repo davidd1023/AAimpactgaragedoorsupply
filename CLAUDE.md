@@ -2355,6 +2355,64 @@ merely measured.
 Same cost, pointed at the door he actually sent a screenshot of. The
 allocator needs an override; traffic weighting cannot get there.
 
+##### BATCH V15 AIMED AT HIS OWN RUNG, AND IT GRADUATED (2026-11-09)
+
+`RUNGS=0.3625/0.295` is the override written for this: candidates come from
+the NAMED rungs rather than the ones the validation sets visit, ordered by how
+starved each is. The default traffic ranking is untouched - it is right for
+raising the average and cannot ever fix one man's door.
+
+It cost **200 requests, not 400** (exactly what the rung needed to reach the
+same target of 320), 200 of 200 accepted, zero warnings, and **the wire was
+right on all 200** - the error here was only ever length.
+
+    rung 0.3625/0.295:  n 120 -> 316,  two-spring fit 32 -> 97 readings
+
+**IT IS GONE FROM EVERY WEAK LIST.** `derive.mjs` named it before at 90.6%
+cross-validation over 32 readings; it now appears **zero** times in those
+diagnostics. His door still returns the reference exactly (0.295"/32.25",
+0.3625"/33.25") through a full refit, which is the point - the earlier match
+was one reading propping up one door.
+
+Global 11,199/11,471 -> 11,393/11,671 (97.63% -> 97.62%) with **old failures
+unchanged at 272**: nothing regressed, and the dip is 200 deliberately hard
+doors joining the denominator. **This batch bought coverage, not a headline.**
+
+##### THE HEAVY HALF OF THE TABLE IS UNFITTED, AND THE SAMPLER CAUSED IT
+
+Measured over the 278 remaining failures rather than guessed: **268 are
+LENGTH with the wire already right**, and **209 sit on wire >= 0.4687 across
+49 groups, nearly all failing 100%** - every `0.625/*` group fails every
+reading it has, on 2 to 27 readings each.
+
+**THE CAUSE IS STRUCTURAL AND IT IS THE OWNER'S OWN SENTENCE.** A door heavy
+enough to need 0.4615" wire ALWAYS trips *"wire size exceeds 0.4375 maximum
+for the outer spring inside diameter, Service Spring will not make it"* - so
+`rung-target-sample.mjs` discarded every one, its filter being *any* non-info
+warning. That is a note about what the shop can SELL. He asked for accuracy
+*"even if they give warnings that wouldnt make them purchasable"*.
+
+Doubly unreachable, in fact: the hi-lift drums carry **no DRUM_LIMITS entry**,
+so the `?? 750` fallback capped them below where heavy wire even begins. And
+their traffic is **0**, so the default allocator could not have chosen them
+either.
+
+**`SOFT=1` KEEPS NON-PURCHASABLE DOORS AND STILL EXCLUDES TWO THINGS**, each
+for its own reason: **red** (here "assembly too long for the door", which is
+a different door rather than a different spring), and **the drum-weight
+warning**, because the engine CLAMPS weight to the drum's rating - so the
+request would ask the reference about a heavier door than we computed. That
+is a corrupt reading, not an unsellable one. Soft mode samples to a generous
+ceiling and lets that warning set the real limit, so no number is invented.
+
+**EXPECT A LOWER YIELD AND DO NOT BE SURPRISED BY IT**: 57% of heavy corpus
+readings are answered cleanly by the reference against 90% for ordinary
+doors, and a flagged reading teaches the wire but not the length. 57% of
+something beats 100% of nothing, which is what these rungs get today.
+
+**PROVED REACHABLE, NOT YET PULLED**: a dry run wrote 337 distinct cases
+across those seven rungs. The pull is the next step.
+
 **TWO THINGS ABOUT RUNNING ANYTHING LONG HERE.** The scratchpad was cleared
 mid-session and took a test log with it - the same way this repository once
 lost a campaign runner - so **a log for anything long belongs in

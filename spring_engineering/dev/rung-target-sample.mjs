@@ -61,6 +61,10 @@ const TARGET = Number(process.env.TARGET) || 320;
 // "fix the door in front of me" as against "raise the average", and the two
 // are different jobs.
 const ONLY = (process.env.RUNGS || "").split(",").map((s) => s.trim()).filter(Boolean);
+
+// SOFT=1 keeps doors that carry a non-purchasable warning. See the filter
+// below for what it does and does not let through, and whose instruction it is.
+const SOFT = !!process.env.SOFT;
 const mod = await load();
 
 let lineId = null;
@@ -148,7 +152,15 @@ for (let k = 0; k < SAMPLES; k++) {
         springs: between(1, 4), radius: hi ? "15" : pick(RADII),
         liftType: hi ? "Hi-Lift" : "Standard",
         liftin: hi ? String(between(12, Math.min(120, lim.maxHiLift ?? 120))) : "",
-        cycles: pick(CYCLES), weight: String(between(150, lim.maxWeight ?? 750)),
+        cycles: pick(CYCLES),
+        // IN SOFT MODE THE CEILING IS NOT A NUMBER ANYBODY TYPED. The three
+        // standard drums carry a real rating in DRUM_LIMITS; the hi-lift drums
+        // carry none, so the old `?? 750` fallback was a guess that happened
+        // to sit below every heavy rung - which is half of why they starved.
+        // Soft mode samples up to a generous ceiling and lets the engine's own
+        // "heavier than this drum will allow" warning throw the rest out, so
+        // the limit is the drum's rating as the engine knows it.
+        weight: String(between(150, lim.maxWeight ?? (SOFT ? 3000 : 750))),
         doorWidthFeet: 18, doorWidthInches: 0,
         doorHeightFeet: Math.floor(heightIn / 12), doorHeightInches: heightIn % 12,
     };
@@ -168,7 +180,44 @@ for (let k = 0; k < SAMPLES; k++) {
     // Our own warnings as the buildability filter. A reading the reference
     // flags keeps its wire and loses its length, so a flagged one buys nothing
     // for the quantity this campaign is after.
-    if ((c.warnings || []).some((w) => w && w.severity !== "info")) continue;
+    //
+    // SOFT=1 IS THE OWNER'S OWN INSTRUCTION, 2026-11-09: *"we need to improve
+    // the accuracy of duplex springs EVEN IF THEY GIVE WARNINGS THAT WOULDNT
+    // MAKE THEM PURCHASABLE"* - and that filter is what stood in the way.
+    //
+    // THE HEAVY HALF OF THE TABLE CANNOT BE REACHED WITHOUT IT. Measured:
+    // every `0.625/*` group fails 100% of its length readings, 209 of the
+    // failing readings sit on wire >= 0.4687, and those rungs hold 2 to 27
+    // readings each. The reason is structural - a door heavy enough to need
+    // 0.4615" wire ALWAYS trips "wire size exceeds 0.4375 maximum for the
+    // outer spring inside diameter, Service Spring will not make it", so the
+    // sampler discarded every one of them. It is a note about what the shop
+    // can sell, not about whether the figures are right, and the owner asked
+    // for the figures.
+    //
+    // WHAT STAYS EXCLUDED, AND WHY EACH:
+    //
+    //   - RED. Here that is "assembly will be too long for the door", which
+    //     is a different door rather than a different spring.
+    //   - THE DRUM-WEIGHT WARNING, which is not about buildability at all:
+    //     the engine CLAMPS the weight to the drum's rating (it is a passing
+    //     invariant that the weight used never exceeds it), so the request
+    //     would ask the reference about a heavier door than we computed and
+    //     the two answers would not be comparable. That is a corrupt
+    //     reading, not an unsellable one.
+    //
+    // Soft readings are worth roughly 57% for LENGTH - that is the measured
+    // share of heavy corpus readings the reference answers cleanly - against
+    // 90% for ordinary doors. A flagged one still teaches the wire pairing.
+    // 57% of something beats 100% of nothing, which is what these rungs get
+    // today.
+    const warned = (c.warnings || []).filter((w) => w && w.severity !== "info");
+    const clamped = warned.some((w) =>
+        /heavier than this drum will allow/i.test(w.text || w.message || ""));
+
+    if (clamped) continue;
+
+    if (SOFT ? warned.some((w) => w.severity === "red") : warned.length) continue;
 
     const L = c.duplexInnerLength;
 
