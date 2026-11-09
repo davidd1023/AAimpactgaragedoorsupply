@@ -2254,17 +2254,111 @@ reading of his screenshot in one go.
 
 **BATCH V13: 400 REQUESTS, 21 NEW READINGS, ACCURACY UNCHANGED.** 379 were
 rejected by the importer as *"already in corpus (same inputs)"*. Score went
-10,776/11,049 to 10,797/11,071 - **97.53% both times**. Twelve batches have
-saturated the draw space the sampler explores.
+10,776/11,049 to 10,797/11,071 - **97.53% both times**.
 
-**THE SAMPLER AND THE IMPORTER DISAGREE ABOUT WHAT IS ALREADY HELD**, and
-that is the bug to fix before spending more of his account.
-`rung-target-sample.mjs` builds a `held` set and skips it (line 131); the
-importer's `inputKey` is character-for-character the same fields. Yet the
-sampler emitted 400 it believed new and the importer rejected 379. **Not run
-down in this session** - and note that a check I wrote to find it was itself
-broken (`stateFromReading` returned `NaN`/`undefined`, so my "0 duplicates"
-was meaningless; the importer's count is the one to trust).
+**I CONCLUDED FROM THAT THAT THE CORPUS WAS SATURATED. IT WAS NOT, AND IT WAS
+NOT THE DEDUPE EITHER.** Both readings were wrong and the real cause is
+below. The lesson is in the shape of the mistake: two sets that look like
+they disagree, where one of them is a *message* rather than a measurement.
 
-**UNTIL THAT IS FIXED, A CAMPAIGN COSTS 400 REQUESTS ON SOMEONE ELSE'S SERVER
-FOR ABOUT 20 READINGS.** Fix the dedupe first; the yield is the whole point.
+##### THE SAMPLER'S RANDOM GENERATOR HAD COLLAPSED (2026-11-09)
+
+Five tools carried this line by copy-paste:
+
+```
+seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+```
+
+**IT IS NOT AN LCG.** `seed * 1103515245` reaches 2.4e18 and a double is
+exact only to 9.0e15, so the low bits are discarded on **every step** - the
+state itself is up to 2^31, so this is not about a large starting seed. The
+sequence falls into whatever short cycle the rounding lands in, and the
+cycle length depends on the seed unpredictably. Distinct values in 30,000
+draws, over the 28 seeds this repository has used:
+
+```
+seed 20261009      17,690      seed 61006         10,547
+seed 202610081006  13,039      seed 202610081014  10,936
+seed 202610081013     *318*
+```
+
+`rung-campaign.sh` builds its seed as `2026100810$I`. **V13 drew the one
+seed in the set that collapses**, so 30,000 sampled geometries became a few
+hundred and its 400 cases held **21 distinct doors**. The other 379 were
+repeats of other rows *in the same file*. Had the batch been numbered 12 or
+14 this would still be undiagnosed.
+
+**AND THE IMPORTER'S WORDING IS WHAT MISLED THE DIAGNOSIS.** It kept ONE
+`have` set, seeded from the corpus and added to as rows were taken, so a row
+duplicated *within the pull* was reported as *"already in corpus"* - a
+sentence about the corpus being full. It now counts and names the two apart,
+because they are different faults with different fixes: one means stop
+pulling, the other means the sampler is broken and the requests were wasted.
+
+**THE YARDSTICKS ARE UNHARMED, CHECKED AND NOT ASSUMED**: the
+`eval-validation` draws are 380/380, 380/380 and 400/400 distinct. They are
+saved DATA and never re-generated, so every accuracy figure ever quoted off
+them stands. V13 is the only spoiled batch.
+
+**THE FIX IS `Math.imul`** (exact int32, wrapping - the arithmetic these
+constants were chosen for), in **ONE** copy at `dev/rnd.mjs`, imported by all
+five samplers. The same 28 seeds then give 30,000 distinct out of 30,000,
+worst case. **The ref-state.mjs lesson a second time**: a thing five tools
+each keep their own copy of is wrong in all five at once, where no single
+tool's tests can see it.
+
+**THE DIVISOR IS `2**31`, NOT `2**31 - 1`.** Dividing by `0x7fffffff` returns
+exactly 1.0 at the top of the range, so `pick()` read one past the end of its
+array and returned `undefined` - a case with no drum in it. One chance in
+2^31 per call: a bug waiting for a campaign big enough to find it.
+
+**THREE GUARDS SO IT CANNOT RECUR QUIETLY.** The sampler keeps a `drawn` set
+*separate from* `held` (`held` answers "do we own this reading"; nothing
+answered "have I already put this one in the basket"); it **REFUSES TO WRITE
+a sweep whose cases are not distinct**, before a single request is paid for,
+asserting the sweep rather than the generator so it would have caught V13
+whatever the cause; and the importer names the two duplicate kinds apart.
+
+##### BATCH V14: 400 REQUESTS, 400 READINGS (2026-11-09)
+
+The first campaign after the fix, and what V13 should have been:
+
+```
+V13 (collapsed)   400 requests ->  21 readings -> 97.53%
+V14 (fixed)       400 requests -> 400 readings -> 97.63%
+```
+
+Nothing rejected. **The refit predicted all 400 new doors correctly AND
+fixed two old ones** - failures went 274 to 272 while the corpus grew by 400,
+so coverage was not bought with old accuracy. Score 10,797/11,071 to
+**11,199/11,471**. Golden unmoved (725 byte-identical), 18 invariants pass.
+
+Seven starved rungs fed: `0.4062/0.331` 172 -> 277 with its two-spring split
+rebuilt (`from` 26 -> 59), `0.3437/0.283` 231 -> 320, `0.331/0.273` 251 ->
+319, `0.3938/0.3125` 276 -> 319, `0.295/0.2437` 266 -> 320, `0.295/0.2343`
+299 -> 320.
+
+**AND IT GAVE THE OWNER'S OWN RUNG NOTHING, WHICH IS THE FINDING.** His
+1067 lb door is on `0.3625/0.295`, which still holds **120 readings**. The
+allocator ranks by traffic/need - how often a real door lands on a rung over
+how short it is - and his rung has **traffic 4 of 31**, second lowest in the
+validation sets. Needing 200 readings it scores 0.02, sorts dead last, and is
+reached only once every common rung is full. **It never will be.**
+
+That rule is right on its own terms: it is why `0.2625/0.2253` holds 1,199
+readings on traffic 122, and why the rung beside his (`0.3625/0.283`) holds
+322. His is the hole in the table - and it is exactly the 90.6%
+cross-validation over 32 readings recorded above, explained rather than
+merely measured.
+
+**SO THE NEXT BATCH AIMS ALL 400 AT `0.3625/0.295` AND IGNORES TRAFFIC.**
+Same cost, pointed at the door he actually sent a screenshot of. The
+allocator needs an override; traffic weighting cannot get there.
+
+**TWO THINGS ABOUT RUNNING ANYTHING LONG HERE.** The scratchpad was cleared
+mid-session and took a test log with it - the same way this repository once
+lost a campaign runner - so **a log for anything long belongs in
+`/home/odoo/logs`**, not the scratchpad. And the background dev server
+**died under host load 28** (the documented failure from load 21 up); it does
+not come back by itself, so `odoo-bin --dev=reload` has to be restarted or
+the build URL stays dead.
