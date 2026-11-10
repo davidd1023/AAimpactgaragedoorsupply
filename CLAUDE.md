@@ -2469,6 +2469,112 @@ is doors the reference refuses to answer, plus `0.2625/0.2253` where it gives
 different answers for identical inputs - both already documented as
 unfixable with more data.
 
+##### HOW ACCURATE IS THE SPRING HE ACTUALLY SELLS? (owner asked, 2026-11-10)
+
+*"are standard springs 100% accurate? how accurate are duplex springs?"*
+
+**THE 725-CASE GOLDEN SNAPSHOT DOES NOT ANSWER THAT, AND IT HAD BEEN QUOTED AS
+IF IT DID.** It proves nothing MOVED; it says nothing about being RIGHT.
+`dev/single-external.mjs` says so in its own header. Measured against the
+reference instead, on CLEAN readings only:
+
+```
+                            n    wire    length   weight
+the three IDs SOLD        216   99.5%    100.0%   100.0%
+all clean Single          275   99.6%    100.0%   100.0%
+```
+
+**LENGTH AND WEIGHT ARE PERFECT. ONE reading of 275 takes the wrong wire** -
+and over all 557 Single readings it reads 98.6%, which is the same envelope
+distortion as duplex: the flagged ones drag it.
+
+**THE ONE MISS IS A CORNER OF THE DRUM**: 5 1/4", D400-144, 3 springs, r15,
+**750 lb at 144"** - which is EXACTLY that drum's maximum weight AND exactly
+its maximum height, both at once. Reference 0.3065", ours 0.295" - one step
+**LIGHTER**, which is the under-sprung direction. **Not acted on**: one
+reading is what the duplex snap-to-grid lesson above was about.
+
+**DUPLEX, IN THE ENVELOPE: 10,172 readings, 178 failing = 98.25%**, of which
+55 are wire and 123 length-only.
+
+**AND THE THING HE SELLS IS THE LESS MEASURED OF THE TWO** - 275 clean Single
+readings against 10,172 duplex. That is the imbalance worth fixing, not the
+percentages.
+
+###### A FINDER THAT INVENTED ITS OWN FIELD NAMES
+
+My first attempt to locate that miss reported **0 clean readings** where
+`single-breakdown.mjs` reported 275. It used `i.springId` and
+`c.singleWireSize`, neither of which exists - the real names are
+**`i.innerDiameter`** (through `ID_TEXT`) and **`c.recommendedWire`**, and the
+reference's spring is `d.outerSpring || d.innerSpring`. Copying the working
+tool's extraction made the two agree. **The ref-state.mjs rule again: a tool
+that measures what another tool already reports must be checked against it
+before its findings are believed.**
+
+###### THE SINGLE GAP BATCH: 249 REQUESTS, 67 CLEAN, 100% ON ALL OF THEM
+
+`dev/single-gap-sample.mjs` aims at the slices nobody had measured and stamps
+every case `eval: true`, so **derive.mjs can never fit them** - a yardstick,
+not training data. `dev/eval-single-gap-seed20261110.json`.
+
+**67 clean readings, and the model is 100% on wire, length AND weight across
+every slice of them** - all three sold IDs, all five drums including
+`525-54HL` and `D800-120` which had **never been drawn for Single at all**,
+hi-lift to 119", doors to 20 ft, one to four springs, every cycle target.
+That is an independent confirmation on data the fitter has never seen, and it
+takes Single's clean evidence base from 275 to 342.
+
+**ONLY 67 OF 249 CAME BACK CLEAN, AND THE REASON IS THE SAME ENVELOPE**:
+
+```
+147x  "Torsion assembly will be too long for a 216 " wide door!"
+ 82x  "Only spring lengths between 0 and 120" are supported"
+ 42x  "Only spring lengths between 0 and 96" are recommended"
+```
+
+216" is ALREADY the widest door the box allows, chosen in that sampler for
+exactly this reason - and tall heavy multi-spring doors still overrun it. **So
+the Single "gaps" are thin because the reference cannot answer them, not
+because nobody asked.** The same conclusion as the heavy duplex rungs, reached
+independently. Expect roughly a quarter of any future tall/hi-lift Single draw
+to be usable.
+
+**NOTE `pull.mjs` PRINTS `error` FOR ANY NON-SUCCESS STATUS**, which looked
+like 148 transport failures mid-run and was nothing of the kind: all 249 got
+real answers and the output carried **zero** `error` fields. Read the output
+file, not the progress line.
+
+##### MORE BONUS LEVELS STILL DO NOT PAY, RE-MEASURED ON 4x THE DATA
+
+`LINE_LEVELS` defaults to 2 and the comment above it records the experiment
+being rejected twice - but **last measured 2026-10-05 on 3,181 readings**,
+where the corpus now holds 12,008. Extra capacity overfits less as data grows,
+so that conclusion was stale rather than wrong, and it costs only CPU to
+re-ask. On the never-tuned validation sets:
+
+```
+LINE_LEVELS=2  (installed)   520/531 = 97.93%
+LINE_LEVELS=3                507/531 = 95.48%
+```
+
+**Worse by 2.45 points** - a bigger loss than when first rejected. Table
+reverted. The question is now settled on four times the data; do not re-ask it
+without a new reason.
+
+**AND THE BIGGEST REMAINING DUPLEX CLUSTER IS NOT A DATA PROBLEM.** 32 of the
+178 in-envelope failures sit on `0.295/0.2437 at 2 springs`.
+`dev/group-shape.mjs` on it shows why:
+
+```
+levels: -1:2   0:84   0.25:2   1:26   1.25:62
+```
+
+**FIVE bonus levels where the fitter allows at most three**, and at floor 12,
+frac 0.96 the reference gives bonus **-1 AND +1 for the same inputs**. Model
+capacity plus reference noise - which is why V14's 54 readings on that rung
+changed nothing, and why no further pull should be aimed there.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
