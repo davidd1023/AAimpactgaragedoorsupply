@@ -2410,8 +2410,87 @@ readings are answered cleanly by the reference against 90% for ordinary
 doors, and a flagged reading teaches the wire but not the length. 57% of
 something beats 100% of nothing, which is what these rungs get today.
 
-**PROVED REACHABLE, NOT YET PULLED**: a dry run wrote 337 distinct cases
-across those seven rungs. The pull is the next step.
+##### BATCH V16 PULLED THEM, AND THE ANSWER WAS NOT WHAT EITHER OF US EXPECTED
+
+337 requests on the seven heavy rungs, SOFT mode. **ZERO came back clean** -
+not 57%, zero. I had estimated 57% from the heavy readings already in the
+corpus, which arrived through differently-built sweeps and were the wrong
+population to generalise from. **Ten requests would have said the same thing
+as 337. Probe before spending.**
+
+**THE REFERENCE DISCLAIMS ITS OWN ANSWER ON THESE DOORS**, in its own words:
+
+```
+897x  "Only spring lengths between 0 and 96" are recommended"
+337x  "Wire size exceeds 0.4375 maximum for the outer spring inner diameter"
+312x  "Wire size exceeds 0.4062 maximum for the inner spring inner diameter"
+166x  "Only spring lengths between 0 and 120" are supported"
+```
+
+229 of the 337 complaints mention LENGTH. Most of these doors want two
+springs each over 96". So **the "209 heavy failures at 100%" were never a
+data shortage** - we were scoring the model against numbers Service Spring
+will not stand behind. There is no data to buy there, and no further heavy
+pull should be run for LENGTH.
+
+**BUT I WAS WRONG THAT THE BATCH BOUGHT NOTHING, AND THE MEASUREMENT SAID SO.**
+Failures went **278 to 262** and the score 97.62% to **97.82%** - the largest
+single-batch gain of the session. All 337 new readings reproduce AND **16 OLD
+failures were fixed**, because a flagged reading's WIRE and CYCLE figures are
+sound even where its length is not, which is exactly what `import.mjs` says
+in its own comment and what I talked myself out of. Golden unmoved (725
+byte-identical), 20 invariants pass.
+
+**THE REAL PRIZE IS A HONEST WAY TO STATE THE ACCURACY**, because "97.8%"
+averages in doors nobody can get a trustworthy answer for:
+
+```
+group                                 readings   exact   wire-right
+CLEAN (reference stands behind it)      10172    98.3%       99.5%
+flagged, under 96"                       1218    94.7%       97.5%
+flagged, 96-120"                          384    91.4%       98.4%
+flagged, over 120"                        234    43.2%       97.9%
+```
+
+**INSIDE THE SUPPORTED ENVELOPE THE CALCULATOR IS 98.3% EXACT AND PICKS THE
+RIGHT WIRE 99.5% OF THE TIME.** Nearly the whole shortfall is the 234 readings
+past 120", where the reference has already given up. **Quote the clean
+figure**, and note that the WIRE is right 97.9-99.5% everywhere, in the
+envelope and out of it - only LENGTH degrades, and only where the reference
+disclaims it. `/home/odoo/logs/envelope.mjs` in this session computed that
+split; it is worth rebuilding as a committed tool if the question returns.
+
+Of what remains, 311 are "wire right, length wrong" and 97 are "wire wrong"
+(a stricter count than replay's 262 - it asserts both lengths on every
+reading, including those past 120" that replay leaves alone).
+
+**SO THE DUPLEX ACCURACY WORK IS DONE UNTIL SOMETHING CHANGES.** What is left
+is doors the reference refuses to answer, plus `0.2625/0.2253` where it gives
+different answers for identical inputs - both already documented as
+unfixable with more data.
+
+##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
+
+A replay launched from inside a background task sat for **TWO HOURS using 0.2
+seconds of CPU**. When the task was reaped its stdout pipe lost its reader and
+node blocked on the first write - a process that looks busy and is doing
+nothing. It was reported as "still scoring" three times before anybody
+checked.
+
+**THE TELL IS CPU TIME, NOT ELAPSED TIME**: `ps -o time=` or
+`/proc/<pid>/stat` fields 14+15. A stuck job and a slow one are
+indistinguishable by any other means on a host that genuinely runs at load 20.
+
+The launch that works puts the redirect INSIDE the inner shell:
+
+```
+nohup sh -c 'node dev/replay.mjs > /home/odoo/logs/x.log 2>&1; echo DONE >> /home/odoo/logs/x.log' > /dev/null 2>&1 &
+```
+
+A bare `setsid nohup ... > log &` from a tool call did NOT survive here. And
+`pgrep -f replay.mjs` MATCHES THE SHELL RUNNING THE PGREP, so it reports
+"running" when nothing is - check `ps -eo cmd | grep "node dev/replay"`
+instead.
 
 **TWO THINGS ABOUT RUNNING ANYTHING LONG HERE.** The scratchpad was cleared
 mid-session and took a test log with it - the same way this repository once
