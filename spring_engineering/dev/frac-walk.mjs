@@ -30,6 +30,7 @@ import { load, make } from "./harness.mjs";
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { makeRnd } from "./rnd.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const [out, seedArg, budgetArg, ...groups] = process.argv.slice(2);
@@ -74,9 +75,7 @@ const DRUMS = [
 const RADII = ["LHR", "12", "15"];
 const CYCLES = ["10,000", "15,000", "25,000", "50,000", "100,000"];
 
-let seed = Number(seedArg) || 1;
-const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
-const pick = (a) => a[Math.floor(rnd() * a.length)];
+const { rnd, pick } = makeRnd(seedArg);
 
 const mod = await load();
 const counts = [...new Set([...TARGETS].map((g) => Number(g.split("|")[1])))];

@@ -27,6 +27,7 @@
 import { writeFileSync, readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { makeRnd } from "./rnd.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const [out, seedArg, countArg, hiShareArg] = process.argv.slice(2);
@@ -107,10 +108,7 @@ const IDS = [
 const RADII = [10, 12, 15];
 const CYCLES = [10000, 15000, 25000, 50000, 75000, 100000, 150000, 200000, 250000, 300000];
 
-let seed = Number(seedArg) || 1;
-const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
-const pick = (a) => a[Math.floor(rnd() * a.length)];
-const between = (lo, hi) => lo + Math.floor(rnd() * (hi - lo + 1));
+const { rnd, pick, between } = makeRnd(seedArg);
 
 // 60/40 between the two gaps. Hi-lift is the thinner slice - 6 clean readings
 // against 33 - and it is the one with a known history of hiding a wrong
@@ -126,6 +124,7 @@ if (!(HI_SHARE >= 0 && HI_SHARE <= 1)) {
     process.exit(1);
 }
 const cases = [];
+const drawn = new Set();
 
 for (let k = 0; k < COUNT; k++) {
     const wantHi = k < Math.round(COUNT * HI_SHARE);
@@ -169,7 +168,33 @@ for (let k = 0; k < COUNT; k++) {
         row.hiLift = between(12, maxHi);
     }
 
+    // NOT TWICE, which rung-target-sample.mjs learnt the expensive way: a
+    // sampler that can emit the same case twice spends the owner's account on
+    // a question the reference has already answered. The generator is sound
+    // now (dev/rnd.mjs), and this still stands - a draw of 250 produced one
+    // repeat by ordinary chance, which is one wasted request.
+    const key = [row.drum, row.springs, row.radius, row.lift, row.hiLift ?? "",
+        row.cycles, row.weight, row.heightInches, row.innerDiameter].join("|");
+
+    if (drawn.has(key)) {
+        continue;
+    }
+
+    drawn.add(key);
     cases.push(row);
+}
+
+// THE LAST GATE BEFORE THE ACCOUNT IS SPENT, the same one the duplex sampler
+// carries and for the same reason. It asserts the SWEEP, so it catches a
+// repeat whatever caused it.
+const distinct = new Set(cases.map((c) => [c.drum, c.springs, c.radius, c.lift,
+    c.hiLift ?? "", c.cycles, c.weight, c.heightInches, c.innerDiameter].join("|")));
+
+if (distinct.size !== cases.length) {
+    console.error(`REFUSING TO WRITE ${out}: ${cases.length} cases but only `
+        + `${distinct.size} distinct - ${cases.length - distinct.size} would ask `
+        + `the reference a question already asked in this same file.`);
+    process.exit(1);
 }
 
 writeFileSync(out, JSON.stringify(cases, null, 1));
