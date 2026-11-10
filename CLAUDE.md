@@ -2752,6 +2752,61 @@ is the THIRD invented-field-name mistake of the session - after `i.springId`
 and `c.singleWireSize`. **Read the getter, do not guess the shape of what it
 returns.**
 
+##### WHAT THE WEB SAID ABOUT THE LENGTH RULE (2026-11-10)
+
+Asked to look outside the repository for a lead on the 105 winnable length
+failures. It found no new lever, but it CLOSED two hypotheses by measurement
+and confirmed two decisions, which is worth writing down so nobody re-derives
+them.
+
+**THE COIL-ROUNDING HYPOTHESIS IS DEAD.** The industry formula is
+`IPPT = (E x d^4) / (10.8 x D x N)` with `N = length / wire`, because torsion
+coils are wound CLOSED and touching. That suggests the reference might solve
+for the coil count and ROUND IT - which would put length on a grid spaced by
+the WIRE DIAMETER, different per rung, and would neatly explain a per-rung
+bonus that a fixed quarter-inch grid can never quite fit. **Measured over
+20,344 in-envelope lengths: only 8% sit near a whole coil and
+`frac(length/wire)` is spread almost uniformly.** The reference is not
+rounding coils.
+
+**AND THE LENGTH GRID IS ALREADY RIGHT, WHICH IS WHY THAT WAS WORTH ASKING:**
+
+```
+frac(reference length)   .00  59.7%   .25  40.3%   .50  0.0%   .75  0.0% (6)
+```
+
+The reference returns ONLY whole inches and quarter inches - never a half,
+never three quarters, in 20,344 readings. **Our model never emits one either**
+(checked: zero violations), so there is no free correction there.
+
+**THE VENDOR'S OWN SELL SHEET CONFIRMS THE ONE DESIGN DECISION THIS ALL RESTS
+ON.** `resources.sscorp.com` is Service Spring Corp - the reference itself -
+and its Toledo commercial sheet lists *"Cones available for these standard
+sizes: Duplex: 6" outer spring x 3 3/4" inner spring"*. That is the ONLY
+duplex pair they stock, and it is exactly the pair the owner said to use and
+the only one the model is calibrated for. Independent confirmation of the
+dropdown holding one option.
+
+**A MODEST SIGNAL, NOT A LEVER**: the same sheet says commercial spring wire
+runs **.295 to .625**, and several weak rungs sit below it - including
+`0.2625/0.2253`, the contradictory one. Failure rates split:
+
+```
+outer wire BELOW .295    2,391 readings   62 failing   2.59%
+outer wire within range  7,781 readings  116 failing   1.49%
+```
+
+1.7x worse below the range they say they make, which fits the idea that those
+answers are the calculator extrapolating rather than describing a product. But
+**116 of the 178 failures are inside the range**, so this explains a lean, not
+the problem.
+
+**ONE DISCREPANCY WORTH THE OWNER'S EYE**: the sell sheet says *"the spring
+filler is cut one inch shorter than the specified spring length"*, where he
+said a 4 foot spring takes 4 feet of filler. At $3.24 a foot that is about
+27 cents a spring, and HIS rule governs - but the vendor's sheet disagrees
+with it and he may not know.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
