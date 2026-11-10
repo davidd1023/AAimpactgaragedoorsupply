@@ -2600,6 +2600,65 @@ frac 0.96 the reference gives bonus **-1 AND +1 for the same inputs**. Model
 capacity plus reference noise - which is why V14's 54 readings on that rung
 changed nothing, and why no further pull should be aimed there.
 
+##### "ARE YOU SURE YOU CANNOT IMPROVE ACCURACY ANYMORE?" - NO (owner, 2026-11-10)
+
+He pushed back on being told the duplex work was finished, and he was right
+to. **I had over-claimed twice**, and the measurement that settles it is this
+split of the 177 in-envelope failures:
+
+```
+wire wrong                             54
+length wrong, key CONTRADICTS itself   18   <- genuinely unfixable
+length wrong, key is UNAMBIGUOUS      105   <- WINNABLE
+```
+
+**ONLY 18 ARE REFERENCE NOISE.** The entry above implies most of the
+remainder is - it is not. For **105** readings the reference gives ONE answer
+for those exact inputs and the model still gets it wrong, which is the FITTER
+leaving them, not the data. `/home/odoo/logs/winnable.mjs` computed it; worth
+rebuilding as a committed tool.
+
+**THE CONTRADICTIONS WERE COUNTED RATHER THAN ASSUMED**: of 9,188 distinct
+(rung, springs, floor, frac) keys, **16** carry more than one reference
+answer, over 35 readings. And no single input explains them - inside those 16
+groups the height varies in 15, the weight in 14, cycles in 13, drum and
+radius in 11 - so there is no obvious missing fourth variable, which is the
+thing the previous entry said was needed and never went looking for.
+
+Where the 105 sit: **28 on `0.295/0.2437 2spr`**, 11 + 4 + 4 on
+`0.2625/0.2253`, 9 on `0.289/0.2343 2spr`, 6 on `0.3625/0.295 2spr`, and 39
+spread over groups of one or two.
+
+###### AND THE CAPACITY EXPERIMENT, ASKED PROPERLY THIS TIME
+
+The `LINE_LEVELS` verdict above was reached by raising capacity for EVERY
+group, which most groups do not want - they take two levels and extra freedom
+only lets them chase noise. The groups carrying the error are the opposite
+case, and **"raise it everywhere" and "raise it only where the fitter has
+given up" are different experiments.** Only the first had ever been run.
+
+So `LINE_LEVELS_MAX` tries 2 first - any group that fits today is fitted byte
+for byte as before - and reaches higher only where 2 returns nothing. The
+ordering search's hard cap of 3 was lifted with it, since above 3 a group fell
+to `fitLineAnyLevels`, which insists on BONUS order, and the five-level group
+runs 0 -> 1.25 -> 1 in frac: it failed on both paths and memorised bands.
+
+```
+baseline (2 levels)        520/531 = 97.93%
+per-group fallback to 5    509/531 = 95.86%
+```
+
+**IT LOSES BY 2.07 POINTS**, moving 18 rung lines. So the original verdict
+stands and the reasoning behind it is now sound. A perfect fit is an
+IN-SAMPLE criterion; with four or five free levels one is easy to find and
+generalises worse than the bands it replaces, and on a group that size the
+cross-validation gate has little left to validate against.
+
+**THE 105 REMAIN WINNABLE, BUT NOT BY MORE LEVELS.** That would take a
+different functional form rather than more freedom in this one. The flag is
+kept off by default so the measurement is one word to reproduce. **Do not
+re-run either capacity experiment without a new idea about the form.**
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
