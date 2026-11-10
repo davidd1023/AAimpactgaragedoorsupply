@@ -72,9 +72,10 @@ still on the floor, so the Hardware card's outer/inner rows are still tested -
 against an order built with the ban lifted by `patch.object`, which is now the
 only way to make one.
 
-**A PRE-EXISTING FAILURE, NOT THIS: `spring_engineering` test_bracket_fasteners
-has 5 failures and 2 errors on a clean tree** (checked by stashing). Nothing
-to do with duplex; it is about prepared-track brackets and fasteners.
+**`test_bracket_fasteners` USED TO FAIL HERE AND NO LONGER DOES** - 5 failures
+and 2 errors on a clean tree, for weeks, and it was never a fault in prepared
+tracks at all. See *THE WHOLE REPOSITORY IS GREEN* below. `spring_engineering`
+now runs **0 failed, 0 errors of 348**, so a red test in it means something.
 
 ### THE SHOP CARD AND THE PRODUCT PAGE SHOWED DIFFERENT PRICES (owner, 2026-10-28)
 
@@ -190,9 +191,10 @@ tests touch the JS where the sizing actually lives. Those tests SKIP where
 **A MODULE IS NOT INSTALLED BY MERGING** - the `aa_min_max` lesson applies
 again and is in that module's README: Apps > Update Apps List > Install, once.
 
-**THE PRE-EXISTING FAILURE IS THE PROOF THE ORIGINAL IS UNHARMED**:
-`spring_engineering` runs **5 failed, 2 errors of 348**, all in
-`test_bracket_fasteners`, exactly the count recorded above for a clean tree.
+**THE BASELINE IS NOW ZERO**: `spring_engineering` runs **0 failed, 0 errors
+of 348**. It was 5 failed and 2 errors when the carve was done, which is what
+earlier entries quote as the proof the original is unharmed; that count is
+history now and any failure is real.
 
 #### WHAT IS PROVED, AND THE ONE THING THAT IS NOT
 
@@ -2838,6 +2840,56 @@ nothing else, and the removed track is off it - which survives any pricelist.
 **A test that only fails on development builds is worse than no test**: it
 grows the "known failing" baseline until nobody can tell real breakage from
 noise.
+
+## THE WHOLE REPOSITORY IS GREEN, AND NEITHER "KNOWN FAILURE" WAS REAL (2026-11-10)
+
+```
+aa_spring_stock      1 failed  of  30   ->   0 failed, 0 errors of  30
+spring_engineering   5 failed + 2 err of 348 -> 0 failed, 0 errors of 348
+aa_shop_floor        0 of 218      aa_dealer_orders  0 of 129
+work_order_sheet     0 of 259
+```
+
+Both failures had stood for weeks, both were written into this file as facts
+about the business, and **neither was a defect in any code that ships.**
+
+**ONE SAID THE STOCK WAS CORRUPT. IT WAS NOT.** The entry under
+`aa_spring_stock` read *"an RH coil added there becomes an LH one ... worth
+fixing, it corrupts the very stock this reports on"* - an inference from a red
+test. The quants were always right; the test re-read a SQL-view row whose
+fields the ORM still had cached from before the adjustment. `flush_all()`
+pushes writes OUT and does not invalidate what was cached IN, and a view row's
+ID is derived from what it groups, so the SAME id comes back from the second
+search. One `invalidate_all()` beside the flush.
+
+**THE OTHER SAID PREPARED-TRACK BRACKETS WERE BROKEN. THEY ARE NOT.** A
+prepared track refuses as a WHOLE when one part is missing - deliberate, and
+`_cart_add` says so in a warning no test read: *"We are missing a part needed
+to prepare this track (Flag Angle 5.9" Black), so it was not added."* No flag
+angle, no brackets, no fasteners, every count 0 - which reads exactly like a
+broken bracket feature. **The part is missing only on a development
+database**: the lookup wants `Flag Angle 5.9" Black` and the demo data here is
+`(demo) Flag Angle 5.9" Black`. Prod has the real products. The fixtures now
+MAKE the four flag angles through one `make_flag_angles()` helper, as they
+already make the stud, the nut and the lag screw.
+
+**WHAT THE BASELINE COST**: every run for weeks answered "5 failed, 2 errors -
+that is the baseline", and a real regression in prepared tracks or spring
+stock would have hidden inside that sentence perfectly. **A known-failing test
+is not a neutral cost; it is a blind spot with a number on it.**
+
+**AND READING THE CODE FOUND NOTHING, THREE TIMES, BECAUSE THE CODE WAS
+RIGHT.** `action_apply`, `_coil_product`, `_fastener_product` and the
+flag-angle lookup were all examined and all correct. One print of the quants
+and one print of what `_cart_add` RETURNS had each answer immediately.
+**Instrument before believing a failure's account of itself** - and a
+temporary test file is the way to do it, since tests roll back and the
+database is never touched.
+
+A wrong theory on the way, discarded before it reached a commit: that the dev
+catalogue held a competing stud of the same name, so the code found that one
+while the test asserted on its own fixture. `psql` said the count was zero.
+**Check the cheap fact before writing the story.**
 
 ## ADMIN: ADD BOX / TRACKS / SPRINGS TO A PLACED ORDER (`aa_dealer_orders`, owner 2026-11-02)
 
