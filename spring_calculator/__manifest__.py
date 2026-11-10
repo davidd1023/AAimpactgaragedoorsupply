@@ -56,4 +56,8 @@
     },
     "installable": True,
     "application": True,
+    # IT WILL NOT INSTALL BESIDE THE ORIGINAL, AND THAT IS THE WHOLE POINT
+    # (owner, 2026-11-10: *"can you make it so that the spring calculator
+    # thing cant be added to apps"*). See `_refuse_beside_the_original`.
+    "pre_init_hook": "_refuse_beside_the_original",
 }

@@ -181,7 +181,26 @@ class AddPartsCase(HttpCase):
         self.assertTrue(order.aa_needs_tracks, "the Add button comes back")
         self.assertEqual(invoice.state, "posted")
         self.assertEqual(invoice.name, number)
-        self.assertAlmostEqual(invoice.amount_untaxed, 100.0)
+        # NOT AN ABSOLUTE FIGURE. This asserted 100.0 - the widget's list
+        # price - and arrived as 90.0 on every development build, because
+        # THE DEV DATABASE CARRIES A DEMO PRICELIST TAKING 10% OFF
+        # EVERYTHING (CLAUDE.md records the same trap costing a day on the
+        # shop-grid price work). It passes on staging and Prod, which are
+        # copies of production and have no such pricelist, so the feature
+        # was never broken - only the test was environment-dependent, and
+        # it would have failed for whoever next merged.
+        #
+        # The sibling tests here escape it by setting `price_unit` on their
+        # lines by hand; this one lets the product's list price flow through
+        # the order, which is where a pricelist applies.
+        #
+        # What the test MEANS is that the track is off the redone invoice and
+        # the widget alone is left, and that survives any pricelist.
+        self.assertEqual(
+            invoice.invoice_line_ids.product_id, self.widget,
+            "the redone invoice should carry the widget and nothing else")
+        self.assertNotIn(custom, invoice.invoice_line_ids.product_id,
+                         "the removed track must be off the invoice")
 
     def test_remove_something_not_there_is_refused(self):
         from odoo.exceptions import UserError

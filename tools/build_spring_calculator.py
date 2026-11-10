@@ -321,10 +321,70 @@ def handwritten():
     }},
     "installable": True,
     "application": True,
+    # IT WILL NOT INSTALL BESIDE THE ORIGINAL, AND THAT IS THE WHOLE POINT
+    # (owner, 2026-11-10: *"can you make it so that the spring calculator
+    # thing cant be added to apps"*). See `_refuse_beside_the_original`.
+    "pre_init_hook": "_refuse_beside_the_original",
 }}
 '''
 
-    files["__init__.py"] = f"# {BANNER}\nfrom . import controllers\nfrom . import models\n"
+    # WHY A HOOK AND NOT `installable: False`.
+    #
+    # The danger is ONE DATABASE WITH BOTH MODULES: they claim the same two
+    # routes and this one WINS them, which was measured rather than assumed -
+    # with both installed here, /spring-calculator came back mounting
+    # `spring_calculator.calculator` instead of the original. On his live site
+    # that is the calculator page replaced by a copy carrying none of his
+    # products.
+    #
+    # `installable: False` would stop that and ALSO stop the second project,
+    # which is the only reason this module exists - and the second project
+    # copies this folder, so the flag travels with it. A blanket ban is the
+    # wrong shape for a rule that is really about sharing a database.
+    #
+    # So the refusal is exactly the collision: `spring_engineering` present in
+    # THIS database. On the second project that module does not exist and the
+    # install proceeds untouched.
+    #
+    # `pre_init_hook` RUNS ONLY ON INSTALL (odoo/modules/loading.py checks
+    # `update_operation == 'install'`) and before the models load, so an
+    # existing install still updates normally and nothing half-installs.
+    # Read off the Odoo 19 source, not guessed: it is called as `hook(env)`.
+    #
+    # It is a refusal with a REASON ON THE SCREEN, which is worth more than a
+    # module missing from the list - the last time something was hidden from
+    # Apps (`aa_min_max`, `application: False`) the one person who needed it
+    # could not find it, and nothing said why.
+    files["__init__.py"] = f'''# {BANNER}
+from odoo.exceptions import UserError
+
+from . import controllers
+from . import models
+
+
+def _refuse_beside_the_original(env):
+    """Refuse to install where `spring_engineering` already lives.
+
+    Both modules claim /spring-calculator and /custom-torsion-spring, and
+    this one wins them - so installing it on the database that runs the shop
+    would silently replace the live calculator with a copy that has none of
+    the shop's products behind it.
+    """
+    original = env["ir.module.module"].sudo().search(
+        [("name", "=", "spring_engineering"),
+         ("state", "in", ("installed", "to upgrade", "to install"))], limit=1)
+
+    if original:
+        raise UserError(
+            "Spring Calculator cannot be installed on this database.\\n\\n"
+            "The Spring Engineering module is already installed here, and the"
+            " two claim the same pages (/spring-calculator and"
+            " /custom-torsion-spring). This one would take them over, so the"
+            " calculator would stop showing the shop's own products.\\n\\n"
+            "This module is the copy kept for the separate calculator-only"
+            " project. Nothing needs to be installed here."
+        )
+'''
     files["controllers/__init__.py"] = (
         f"# {BANNER}\nfrom . import main\nfrom . import custom_spring\n"
     )

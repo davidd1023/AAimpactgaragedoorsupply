@@ -2631,6 +2631,64 @@ lost a campaign runner - so **a log for anything long belongs in
 not come back by itself, so `odoo-bin --dev=reload` has to be restarted or
 the build URL stays dead.
 
+### IT WILL NOT INSTALL BESIDE THE ORIGINAL (owner, 2026-11-10)
+
+*"can you make it so that the spring calculator thing cant be added to
+apps"* - after being told that a merge puts `spring_calculator` in the Apps
+list of his LIVE database, where installing it would take `/spring-calculator`
+and `/custom-torsion-spring` off the real calculator. That was measured, not
+feared: with both installed here the page came back mounting
+`spring_calculator.calculator`.
+
+**`installable: False` WOULD HAVE BEEN THE WRONG LOCK.** It also stops the
+second project, which is the only reason the module exists - and that project
+COPIES this folder, so the flag travels with it. The danger is not the module;
+it is ONE DATABASE WITH BOTH.
+
+So the refusal is exactly the collision: a **`pre_init_hook`**,
+`_refuse_beside_the_original`, raising a UserError when `spring_engineering`
+is installed in the same database. On the second project that module does not
+exist and the install proceeds untouched. Read off the Odoo 19 source rather
+than guessed: `pre_init_hook` is called as `hook(env)` and **only on install**
+(`odoo/modules/loading.py` checks `update_operation == 'install'`), so an
+existing install still updates and nothing half-installs.
+
+**A REFUSAL WITH THE REASON ON SCREEN, not a module missing from the list** -
+the `aa_min_max` lesson in reverse: hiding something from Apps meant the one
+person who needed it could not find it and nothing said why.
+
+**Proved both ways here**: `odoo-bin -i spring_calculator` raises the
+UserError and leaves it `uninstalled`, `spring_engineering` still `installed`,
+and `/spring-calculator` still answers 200 mounting
+`spring_engineering.calculator`.
+
+**IT IS IN THE GENERATOR** (`tools/build_spring_calculator.py`), so a re-sync
+keeps it. **AND IT COSTS SOMETHING, WRITTEN DOWN**: the equivalence tests in
+`spring_calculator/tests/` can only run beside the original, and the original
+is now exactly what blocks the install - so **those tests can no longer be run
+on this build**. `--check` and the text comparison of the browser engine still
+guard the carve without a database. If the equivalence tests are ever needed
+again, the hook is the one line to bypass deliberately.
+
+### A TEST THAT ASSERTED MONEY ON A DEV BUILD (2026-11-10)
+
+Merging Prod into main left ONE unexpected failure of 129:
+`AddPartsCase.test_remove_tracks_zeroes_the_line_and_redoes_the_invoice`,
+`90.0 != 100.0`.
+
+**NOT THE MERGE AND NOT THE FEATURE.** It asserted the widget's list price of
+100.0 and **the dev database carries a demo pricelist taking 10% off
+everything** - the same trap already recorded against the shop-grid price
+work. It passes on staging and Prod, which are copies of production. Its
+sibling tests escape it by setting `price_unit` by hand; this one let the list
+price flow through the order, which is where a pricelist applies.
+
+It now asserts what it MEANS - the redone invoice carries the widget and
+nothing else, and the removed track is off it - which survives any pricelist.
+**A test that only fails on development builds is worse than no test**: it
+grows the "known failing" baseline until nobody can tell real breakage from
+noise.
+
 ## ADMIN: ADD BOX / TRACKS / SPRINGS TO A PLACED ORDER (`aa_dealer_orders`, owner 2026-11-02)
 
 *"the original AA Impact order, our 332, does carry tracks - give me an
