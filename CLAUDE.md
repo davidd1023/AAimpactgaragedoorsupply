@@ -1935,13 +1935,45 @@ pushing the next order onto the Floor, then the Boxes, and eventually logging
 lot is now REPLACED rather than added to, since this code has already chosen
 the piece by his order of preference.
 
-**A PRE-EXISTING FAILURE, NOT THIS:** `test_adjust_changes_removes_and_adds_pieces`
-fails on a clean tree (checked by stashing) - `(2, 0) != (1, 1)`. Adding a
-piece of the OTHER HAND from the Adjust dialog appears to create it on the
-hand of the row the dialog was opened from, so an RH coil added there becomes
-an LH one. `action_apply` does read `line.hand` (spring_adjust.py:189), so it
-is not simply that; it was not run down because it is nothing to do with the
-run-out figure. Worth fixing - it corrupts the very stock this reports on.
+### THAT "ADJUST PUTS THE COIL ON THE WRONG HAND" BUG DOES NOT EXIST (2026-11-10)
+
+`test_adjust_changes_removes_and_adds_pieces` failed on a clean tree for
+weeks - `(2, 0) != (1, 1)` - and this file recorded it as *"an RH coil added
+there becomes an LH one ... worth fixing, it corrupts the very stock this
+reports on."* **THAT WAS AN INFERENCE FROM A RED TEST AND IT WAS WRONG.**
+Nothing was ever corrupted.
+
+Instrumented rather than reasoned about, the quants after the adjustment are
+exactly right:
+
+```
+COIL-262-2.625-L  lot=TEST-A-L   qty=25.0
+COIL-262-2.625-L  lot=TEST-B-L   qty=0.0
+COIL-262-2.625-R  lot=262-2.625-1-R  qty=84.0   <- the RH piece, correct
+```
+
+while the summary row read back `l_pcs=2 r_pcs=0 l_in=100.0` - which is
+60 + 40, **the state BEFORE the adjustment**. `action_apply` and
+`_coil_product` were right all along.
+
+**THE FAULT IS THE TEST HELPER, AND `flush_all()` IS NOT ENOUGH.**
+`aa.spring.place.summary` is a SQL view, so flushing is needed to get pending
+writes where the view's query can see them - that was already there and is
+right. But **a view row's ID is derived from what it groups**, so a second
+search returns the SAME id and the ORM hands back the field values it read the
+FIRST time. The test reads the row to open the dialog, adjusts, reads again,
+and gets the stale figures. **Flushing writes OUT does not invalidate what was
+cached IN.**
+
+`self.env.invalidate_all()` beside the flush in `row()` fixes every test in
+the file: `aa_spring_stock` now runs **0 failed, 0 errors of 30**.
+
+**THE LESSON IS BIGGER THAN THE TEST.** A red test was read as a description
+of a bug and written down here as fact, where it sat as a known hazard about
+stock integrity that was never real. **Instrument before believing a failure's
+story about itself** - the quants were one print statement away the whole
+time. And anywhere a SQL-view row is read twice across a write, invalidate as
+well as flush.
 
 ## THE DEALER'S NOTE REACHES THE JOB (`aa_shop_floor`, owner 2026-10-30)
 
