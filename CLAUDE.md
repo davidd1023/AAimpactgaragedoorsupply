@@ -72,9 +72,10 @@ still on the floor, so the Hardware card's outer/inner rows are still tested -
 against an order built with the ban lifted by `patch.object`, which is now the
 only way to make one.
 
-**A PRE-EXISTING FAILURE, NOT THIS: `spring_engineering` test_bracket_fasteners
-has 5 failures and 2 errors on a clean tree** (checked by stashing). Nothing
-to do with duplex; it is about prepared-track brackets and fasteners.
+**`test_bracket_fasteners` USED TO FAIL HERE AND NO LONGER DOES** - 5 failures
+and 2 errors on a clean tree, for weeks, and it was never a fault in prepared
+tracks at all. See *THE WHOLE REPOSITORY IS GREEN* below. `spring_engineering`
+now runs **0 failed, 0 errors of 348**, so a red test in it means something.
 
 ### THE SHOP CARD AND THE PRODUCT PAGE SHOWED DIFFERENT PRICES (owner, 2026-10-28)
 
@@ -190,9 +191,10 @@ tests touch the JS where the sizing actually lives. Those tests SKIP where
 **A MODULE IS NOT INSTALLED BY MERGING** - the `aa_min_max` lesson applies
 again and is in that module's README: Apps > Update Apps List > Install, once.
 
-**THE PRE-EXISTING FAILURE IS THE PROOF THE ORIGINAL IS UNHARMED**:
-`spring_engineering` runs **5 failed, 2 errors of 348**, all in
-`test_bracket_fasteners`, exactly the count recorded above for a clean tree.
+**THE BASELINE IS NOW ZERO**: `spring_engineering` runs **0 failed, 0 errors
+of 348**. It was 5 failed and 2 errors when the carve was done, which is what
+earlier entries quote as the proof the original is unharmed; that count is
+history now and any failure is real.
 
 #### WHAT IS PROVED, AND THE ONE THING THAT IS NOT
 
@@ -1935,13 +1937,45 @@ pushing the next order onto the Floor, then the Boxes, and eventually logging
 lot is now REPLACED rather than added to, since this code has already chosen
 the piece by his order of preference.
 
-**A PRE-EXISTING FAILURE, NOT THIS:** `test_adjust_changes_removes_and_adds_pieces`
-fails on a clean tree (checked by stashing) - `(2, 0) != (1, 1)`. Adding a
-piece of the OTHER HAND from the Adjust dialog appears to create it on the
-hand of the row the dialog was opened from, so an RH coil added there becomes
-an LH one. `action_apply` does read `line.hand` (spring_adjust.py:189), so it
-is not simply that; it was not run down because it is nothing to do with the
-run-out figure. Worth fixing - it corrupts the very stock this reports on.
+### THAT "ADJUST PUTS THE COIL ON THE WRONG HAND" BUG DOES NOT EXIST (2026-11-10)
+
+`test_adjust_changes_removes_and_adds_pieces` failed on a clean tree for
+weeks - `(2, 0) != (1, 1)` - and this file recorded it as *"an RH coil added
+there becomes an LH one ... worth fixing, it corrupts the very stock this
+reports on."* **THAT WAS AN INFERENCE FROM A RED TEST AND IT WAS WRONG.**
+Nothing was ever corrupted.
+
+Instrumented rather than reasoned about, the quants after the adjustment are
+exactly right:
+
+```
+COIL-262-2.625-L  lot=TEST-A-L   qty=25.0
+COIL-262-2.625-L  lot=TEST-B-L   qty=0.0
+COIL-262-2.625-R  lot=262-2.625-1-R  qty=84.0   <- the RH piece, correct
+```
+
+while the summary row read back `l_pcs=2 r_pcs=0 l_in=100.0` - which is
+60 + 40, **the state BEFORE the adjustment**. `action_apply` and
+`_coil_product` were right all along.
+
+**THE FAULT IS THE TEST HELPER, AND `flush_all()` IS NOT ENOUGH.**
+`aa.spring.place.summary` is a SQL view, so flushing is needed to get pending
+writes where the view's query can see them - that was already there and is
+right. But **a view row's ID is derived from what it groups**, so a second
+search returns the SAME id and the ORM hands back the field values it read the
+FIRST time. The test reads the row to open the dialog, adjusts, reads again,
+and gets the stale figures. **Flushing writes OUT does not invalidate what was
+cached IN.**
+
+`self.env.invalidate_all()` beside the flush in `row()` fixes every test in
+the file: `aa_spring_stock` now runs **0 failed, 0 errors of 30**.
+
+**THE LESSON IS BIGGER THAN THE TEST.** A red test was read as a description
+of a bug and written down here as fact, where it sat as a known hazard about
+stock integrity that was never real. **Instrument before believing a failure's
+story about itself** - the quants were one print statement away the whole
+time. And anywhere a SQL-view row is read twice across a write, invalidate as
+well as flush.
 
 ## THE DEALER'S NOTE REACHES THE JOB (`aa_shop_floor`, owner 2026-10-30)
 
@@ -2600,6 +2634,124 @@ frac 0.96 the reference gives bonus **-1 AND +1 for the same inputs**. Model
 capacity plus reference noise - which is why V14's 54 readings on that rung
 changed nothing, and why no further pull should be aimed there.
 
+##### "ARE YOU SURE YOU CANNOT IMPROVE ACCURACY ANYMORE?" - NO (owner, 2026-11-10)
+
+He pushed back on being told the duplex work was finished, and he was right
+to. **I had over-claimed twice**, and the measurement that settles it is this
+split of the 177 in-envelope failures:
+
+```
+wire wrong                             54
+length wrong, key CONTRADICTS itself   18   <- genuinely unfixable
+length wrong, key is UNAMBIGUOUS      105   <- WINNABLE
+```
+
+**ONLY 18 ARE REFERENCE NOISE.** The entry above implies most of the
+remainder is - it is not. For **105** readings the reference gives ONE answer
+for those exact inputs and the model still gets it wrong, which is the FITTER
+leaving them, not the data. `/home/odoo/logs/winnable.mjs` computed it; worth
+rebuilding as a committed tool.
+
+**THE CONTRADICTIONS WERE COUNTED RATHER THAN ASSUMED**: of 9,188 distinct
+(rung, springs, floor, frac) keys, **16** carry more than one reference
+answer, over 35 readings. And no single input explains them - inside those 16
+groups the height varies in 15, the weight in 14, cycles in 13, drum and
+radius in 11 - so there is no obvious missing fourth variable, which is the
+thing the previous entry said was needed and never went looking for.
+
+Where the 105 sit: **28 on `0.295/0.2437 2spr`**, 11 + 4 + 4 on
+`0.2625/0.2253`, 9 on `0.289/0.2343 2spr`, 6 on `0.3625/0.295 2spr`, and 39
+spread over groups of one or two.
+
+###### AND THE CAPACITY EXPERIMENT, ASKED PROPERLY THIS TIME
+
+The `LINE_LEVELS` verdict above was reached by raising capacity for EVERY
+group, which most groups do not want - they take two levels and extra freedom
+only lets them chase noise. The groups carrying the error are the opposite
+case, and **"raise it everywhere" and "raise it only where the fitter has
+given up" are different experiments.** Only the first had ever been run.
+
+So `LINE_LEVELS_MAX` tries 2 first - any group that fits today is fitted byte
+for byte as before - and reaches higher only where 2 returns nothing. The
+ordering search's hard cap of 3 was lifted with it, since above 3 a group fell
+to `fitLineAnyLevels`, which insists on BONUS order, and the five-level group
+runs 0 -> 1.25 -> 1 in frac: it failed on both paths and memorised bands.
+
+```
+baseline (2 levels)        520/531 = 97.93%
+per-group fallback to 5    509/531 = 95.86%
+```
+
+**IT LOSES BY 2.07 POINTS**, moving 18 rung lines. So the original verdict
+stands and the reasoning behind it is now sound. A perfect fit is an
+IN-SAMPLE criterion; with four or five free levels one is easy to find and
+generalises worse than the bands it replaces, and on a group that size the
+cross-validation gate has little left to validate against.
+
+**THE 105 REMAIN WINNABLE, BUT NOT BY MORE LEVELS.** That would take a
+different functional form rather than more freedom in this one. The flag is
+kept off by default so the measurement is one word to reproduce. **Do not
+re-run either capacity experiment without a new idea about the form.**
+
+##### THE 54 WIRE MISSES ARE A THRESHOLD, NOT A MODEL (2026-11-10)
+
+Every accuracy session so far has been about LENGTH. The 54 in-envelope WIRE
+misses had never been looked at, and they turn out to have a single clean
+mechanism.
+
+**THEY ARE ALL EXACTLY ONE STEP ON THE LADDER, AND SYMMETRICALLY SO**: 27
+softer than the reference, 27 stiffer. A symmetric error is not a rule facing
+the wrong way - it is a boundary being crossed in both directions, so no shift
+of the threshold can win. Shifting it trades 27 for 27.
+
+**THE PHYSICS IS SOUND, AND THIS IS THE MEASUREMENT THAT SHOWS IT.** On a wire
+miss our cycle figure describes OUR pair and the reference's describes ITS
+pair, so comparing them compares two different springs - 21.65% median, which
+is an EFFECT of the miss and was nearly reported as its cause. The
+non-circular test is to run OUR cycle model on THE REFERENCE'S OWN pair:
+
+```
+                                 median abs err   within 1%   within 5%
+where we picked the same pair          1.85%         28.0%       85.5%
+where we picked a DIFFERENT pair       1.02%         50.0%      100.0%
+```
+
+**OUR CYCLE MODEL IS MORE ACCURATE ON THE MISSES THAN ON THE HITS**, and the
+reference's pair is a candidate we considered in **all 54** cases. So nothing
+is wrong with the cycle maths or the ladder - only with which candidate the
+rule selects.
+
+**AND THE MISSES ARE THE MARGINAL DOORS**, which is the mechanism:
+
+```
+                     |margin| from the target        within 2%
+                   p10      median      p90         of threshold
+wire correct       1.7%      12.7%     61.8%           11.2%
+wire MISSED        0.0%       6.4%     47.9%           50.0%
+```
+
+Selection takes the softest candidate whose life reaches the target. **Half
+the misses sit within 2% of that threshold against 11% of the hits**, and our
+estimate of that quantity carries about 1% error - which is enough to flip a
+candidate sitting on the line, in whichever direction the error happens to
+fall.
+
+**SO THESE 54 ARE IRREDUCIBLE WITHOUT A MORE ACCURATE CYCLE MODEL.** Not a
+rule to fix and not data to buy: a threshold decision taken on a quantity
+known to 1% will always mis-sort the doors within 1% of it. 0.5% of
+in-envelope readings, half of them one step SOFTER - and that is the
+under-sprung direction, so it is the half worth knowing about.
+
+`/home/odoo/logs/` held `wiremiss.mjs`, `cyclefair.mjs` and `margin.mjs` for
+this; all three are worth rebuilding as committed tools if the question
+returns.
+
+**AND `duplexCycles` RETURNS A FORMATTED STRING** (`"48,000"`), so `dc > 0` is
+silently false and a diagnostic reading it numerically reports ZERO rows. That
+is the THIRD invented-field-name mistake of the session - after `i.springId`
+and `c.singleWireSize`. **Read the getter, do not guess the shape of what it
+returns.**
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
@@ -2688,6 +2840,56 @@ nothing else, and the removed track is off it - which survives any pricelist.
 **A test that only fails on development builds is worse than no test**: it
 grows the "known failing" baseline until nobody can tell real breakage from
 noise.
+
+## THE WHOLE REPOSITORY IS GREEN, AND NEITHER "KNOWN FAILURE" WAS REAL (2026-11-10)
+
+```
+aa_spring_stock      1 failed  of  30   ->   0 failed, 0 errors of  30
+spring_engineering   5 failed + 2 err of 348 -> 0 failed, 0 errors of 348
+aa_shop_floor        0 of 218      aa_dealer_orders  0 of 129
+work_order_sheet     0 of 259
+```
+
+Both failures had stood for weeks, both were written into this file as facts
+about the business, and **neither was a defect in any code that ships.**
+
+**ONE SAID THE STOCK WAS CORRUPT. IT WAS NOT.** The entry under
+`aa_spring_stock` read *"an RH coil added there becomes an LH one ... worth
+fixing, it corrupts the very stock this reports on"* - an inference from a red
+test. The quants were always right; the test re-read a SQL-view row whose
+fields the ORM still had cached from before the adjustment. `flush_all()`
+pushes writes OUT and does not invalidate what was cached IN, and a view row's
+ID is derived from what it groups, so the SAME id comes back from the second
+search. One `invalidate_all()` beside the flush.
+
+**THE OTHER SAID PREPARED-TRACK BRACKETS WERE BROKEN. THEY ARE NOT.** A
+prepared track refuses as a WHOLE when one part is missing - deliberate, and
+`_cart_add` says so in a warning no test read: *"We are missing a part needed
+to prepare this track (Flag Angle 5.9" Black), so it was not added."* No flag
+angle, no brackets, no fasteners, every count 0 - which reads exactly like a
+broken bracket feature. **The part is missing only on a development
+database**: the lookup wants `Flag Angle 5.9" Black` and the demo data here is
+`(demo) Flag Angle 5.9" Black`. Prod has the real products. The fixtures now
+MAKE the four flag angles through one `make_flag_angles()` helper, as they
+already make the stud, the nut and the lag screw.
+
+**WHAT THE BASELINE COST**: every run for weeks answered "5 failed, 2 errors -
+that is the baseline", and a real regression in prepared tracks or spring
+stock would have hidden inside that sentence perfectly. **A known-failing test
+is not a neutral cost; it is a blind spot with a number on it.**
+
+**AND READING THE CODE FOUND NOTHING, THREE TIMES, BECAUSE THE CODE WAS
+RIGHT.** `action_apply`, `_coil_product`, `_fastener_product` and the
+flag-angle lookup were all examined and all correct. One print of the quants
+and one print of what `_cart_add` RETURNS had each answer immediately.
+**Instrument before believing a failure's account of itself** - and a
+temporary test file is the way to do it, since tests roll back and the
+database is never touched.
+
+A wrong theory on the way, discarded before it reached a commit: that the dev
+catalogue held a competing stud of the same name, so the code found that one
+while the test asserted on its own fixture. `psql` said the count was zero.
+**Check the cheap fact before writing the story.**
 
 ## ADMIN: ADD BOX / TRACKS / SPRINGS TO A PLACED ORDER (`aa_dealer_orders`, owner 2026-11-02)
 

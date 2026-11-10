@@ -4,6 +4,33 @@ import re
 from odoo.tests.common import HttpCase, TransactionCase, tagged
 
 
+def make_flag_angles(env):
+    """The four flag angles a prepared track can ask for.
+
+    WHY EVERY FIXTURE IN THIS FILE NEEDS THEM, and why the file was red
+    without them: a prepared track refuses as a WHOLE when any one of its
+    parts is missing - correct behaviour - and `_cart_add` says so in a
+    warning no test reads: "We are missing a part needed to prepare this
+    track (Flag Angle 5.9" Black), so it was not added." No flag angle means
+    no brackets, no brackets means no fasteners, and every count in the file
+    came back 0. It read as a bracket-and-fastener bug and was written down
+    as one.
+
+    The part is missing only on a DEVELOPMENT database: the lookup wants
+    `Flag Angle 5.9" Black` exactly, and the demo data here is named
+    `(demo) Flag Angle 5.9" Black`. Prod carries the real products, so a test
+    leaning on the catalogue passes there and fails here - which is how this
+    survived for weeks looking like a defect in the shop.
+
+    ONE COPY, deliberately: the stud/nut/lag block is already pasted five
+    times in this file, and that is exactly how five fixtures come to differ.
+    """
+    return env["product.product"].create([{
+        "name": "Flag Angle %s %s" % (size, colour), "type": "consu",
+        "list_price": 7.5, "sale_ok": True, "is_published": True,
+    } for size in ('5.9"', '6-3/8"') for colour in ("Black", "White")])
+
+
 @tagged("post_install", "-at_install")
 class TestBracketFasteners(TransactionCase):
     """A jamb bracket never ships without its stud and its flange nut.
@@ -25,6 +52,7 @@ class TestBracketFasteners(TransactionCase):
         self.lag = self.env["product.product"].create({
             "name": "Lag Screws", "type": "consu",
             "list_price": 0.4, "sale_ok": True, "is_published": True})
+        make_flag_angles(self.env)
         self.bracket = self.env["product.product"].search(
             [("default_code", "=", "ATL-610J10JBBR")], limit=1)
         self.assertTrue(self.bracket, "the catalogue bracket is missing")
@@ -283,6 +311,7 @@ class TestTheHeaderCount(HttpCase):
         self.lag = self.env["product.product"].create({
             "name": "Lag Screws", "type": "consu",
             "list_price": 0.4, "sale_ok": True, "is_published": True})
+        make_flag_angles(self.env)
         self.bracket = self.env["product.product"].search(
             [("default_code", "=", "ATL-610J10JBBR")], limit=1)
         self.bracket.product_tmpl_id.write({"is_published": True})
@@ -370,6 +399,7 @@ class TestFastenersStackUnderTheBracket(HttpCase):
         self.lag = self.env["product.product"].create({
             "name": "Lag Screws", "type": "consu",
             "list_price": 0.4, "sale_ok": True, "is_published": True})
+        make_flag_angles(self.env)
         self.bracket = self.env["product.product"].search(
             [("default_code", "=", "ATL-610J10JBBR")], limit=1)
         self.bracket.product_tmpl_id.write({"is_published": True})
@@ -503,6 +533,7 @@ class TestBuyingABracketBesideAPreparedTrack(TransactionCase):
         self.lag = self.env["product.product"].create({
             "name": "Lag Screws", "type": "consu",
             "list_price": 0.4, "sale_ok": True, "is_published": True})
+        make_flag_angles(self.env)
         self.attr = self.env.ref("spring_engineering.attribute_track_preparation")
         self.prepared = self.env.ref(
             "spring_engineering.attribute_value_track_prepared")
