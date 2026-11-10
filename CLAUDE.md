@@ -2659,6 +2659,65 @@ different functional form rather than more freedom in this one. The flag is
 kept off by default so the measurement is one word to reproduce. **Do not
 re-run either capacity experiment without a new idea about the form.**
 
+##### THE 54 WIRE MISSES ARE A THRESHOLD, NOT A MODEL (2026-11-10)
+
+Every accuracy session so far has been about LENGTH. The 54 in-envelope WIRE
+misses had never been looked at, and they turn out to have a single clean
+mechanism.
+
+**THEY ARE ALL EXACTLY ONE STEP ON THE LADDER, AND SYMMETRICALLY SO**: 27
+softer than the reference, 27 stiffer. A symmetric error is not a rule facing
+the wrong way - it is a boundary being crossed in both directions, so no shift
+of the threshold can win. Shifting it trades 27 for 27.
+
+**THE PHYSICS IS SOUND, AND THIS IS THE MEASUREMENT THAT SHOWS IT.** On a wire
+miss our cycle figure describes OUR pair and the reference's describes ITS
+pair, so comparing them compares two different springs - 21.65% median, which
+is an EFFECT of the miss and was nearly reported as its cause. The
+non-circular test is to run OUR cycle model on THE REFERENCE'S OWN pair:
+
+```
+                                 median abs err   within 1%   within 5%
+where we picked the same pair          1.85%         28.0%       85.5%
+where we picked a DIFFERENT pair       1.02%         50.0%      100.0%
+```
+
+**OUR CYCLE MODEL IS MORE ACCURATE ON THE MISSES THAN ON THE HITS**, and the
+reference's pair is a candidate we considered in **all 54** cases. So nothing
+is wrong with the cycle maths or the ladder - only with which candidate the
+rule selects.
+
+**AND THE MISSES ARE THE MARGINAL DOORS**, which is the mechanism:
+
+```
+                     |margin| from the target        within 2%
+                   p10      median      p90         of threshold
+wire correct       1.7%      12.7%     61.8%           11.2%
+wire MISSED        0.0%       6.4%     47.9%           50.0%
+```
+
+Selection takes the softest candidate whose life reaches the target. **Half
+the misses sit within 2% of that threshold against 11% of the hits**, and our
+estimate of that quantity carries about 1% error - which is enough to flip a
+candidate sitting on the line, in whichever direction the error happens to
+fall.
+
+**SO THESE 54 ARE IRREDUCIBLE WITHOUT A MORE ACCURATE CYCLE MODEL.** Not a
+rule to fix and not data to buy: a threshold decision taken on a quantity
+known to 1% will always mis-sort the doors within 1% of it. 0.5% of
+in-envelope readings, half of them one step SOFTER - and that is the
+under-sprung direction, so it is the half worth knowing about.
+
+`/home/odoo/logs/` held `wiremiss.mjs`, `cyclefair.mjs` and `margin.mjs` for
+this; all three are worth rebuilding as committed tools if the question
+returns.
+
+**AND `duplexCycles` RETURNS A FORMATTED STRING** (`"48,000"`), so `dc > 0` is
+silently false and a diagnostic reading it numerically reports ZERO rows. That
+is the THIRD invented-field-name mistake of the session - after `i.springId`
+and `c.singleWireSize`. **Read the getter, do not guess the shape of what it
+returns.**
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
