@@ -2,7 +2,7 @@ import base64
 import json
 import logging
 
-from odoo import _, fields, http
+from odoo import Command, _, fields, http
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request, route
 
@@ -11,13 +11,15 @@ from odoo.addons.website_sale.controllers.cart import Cart
 
 from odoo.addons.spring_engineering.controllers.main import add_assembly_lines, quote_assembly
 
-from .door_options import TRIM_ATTRIBUTES, TRIM_COLOURS, Catalog
+from .add_parts import ADD_PARTS
+from .door_options import TRIM_ATTRIBUTES, TRIM_COLOURS, Catalog, track_lengths
 from .models import AA_DRUMS, AA_HL_DRUMS, AA_LIFT_TYPES, AA_STD_DRUMS, AA_TRACK_TYPES
 
 _logger = logging.getLogger(__name__)
 
 MAX_LINES = 50
 MAX_QTY = 500
+ADD_LABELS = {'box': 'Hardware Box', 'tracks': 'Tracks', 'springs': 'Springs'}
 
 
 class AADealerPortal(CustomerPortal):
@@ -329,6 +331,29 @@ class AADealerOrder(AAOptionPricing, http.Controller):
 
     # ── pages ────────────────────────────────────────────────────────────────
 
+    @http.route('/dealer/order/add/<int:order_id>', type='http', auth='user', website=True, sitemap=False)
+    def dealer_order_add_page(self, order_id, part='tracks', back='', **kw):
+        """The Quick Order page, filled in with an order's doors, adding ONE part to it.
+
+        Admin only (owner, 2026-11-02); see add_parts.py for the why.
+        """
+        order = self._aa_add_order(order_id)
+        if not order or part not in ADD_PARTS:
+            return request.render('aa_dealer_orders.dealer_order_denied', {})
+        products = self._quick_order_products()
+        return request.render('aa_dealer_orders.dealer_order_page', {
+            'partner': order.partner_id,
+            'dealer': order.partner_id.commercial_partner_id,
+            'products_json': json.dumps([self._product_payload(p) for p in products]),
+            'recent_orders': False,
+            'currency': request.website.currency_id,
+            'add_order': order,
+            'add_part': part,
+            'add_label': ADD_LABELS[part],
+            'add_doors_json': json.dumps(order._aa_door_rows()),
+            'add_back': self._aa_back_url(order, back),
+        })
+
     @http.route('/dealer/order', type='http', auth='user', website=True, sitemap=False)
     def dealer_order_page(self, **kw):
         partner = self._dealer_partner()
@@ -345,10 +370,17 @@ class AADealerOrder(AAOptionPricing, http.Controller):
             'products_json': json.dumps([self._product_payload(p) for p in products]),
             'recent_orders': recent,
             'currency': request.website.currency_id,
+            'add_order': False,
+            'add_part': False,
+            'add_label': '',
+            'add_doors_json': False,
+            'add_back': False,
         })
 
     @http.route('/dealer/order/price', type='jsonrpc', auth='user', website=True)
-    def dealer_order_price(self, template_id, ptav_ids, qty=1, line=None, **kw):
+    def dealer_order_price(self, template_id, ptav_ids, qty=1, line=None, add_order=None, add_part=None, **kw):
+        if add_order:
+            return self._aa_add_price(add_order, add_part, template_id, ptav_ids, qty, line)
         partner = self._dealer_partner()
         if not partner:
             return {'error': _("Not available.")}
@@ -459,6 +491,190 @@ class AADealerOrder(AAOptionPricing, http.Controller):
         order.message_post(body=_("Placed from the dealer Quick Order page by %s (charged to account).",
                                   request.env.user.name))
         return {'redirect': order.get_portal_url()}
+
+    # ── ADD A PART TO AN ORDER ALREADY PLACED (admin, owner 2026-11-02) ────────
+
+    def _aa_add_order(self, order_id):
+        """The order to add to, or None: confirmed, on account, not paid at checkout, asked by an admin."""
+        try:
+            order = request.env['sale.order'].browse(int(order_id)).exists()
+        except (TypeError, ValueError):
+            return None
+        if not order or not order._aa_can_add_parts():
+            return None
+        return order
+
+    def _aa_custom_tracks(self, partner, catalog, door, qty):
+        """A track longer than every prepared one, priced PER INCH off the longest (owner's choice).
+
+        Returns (extras, notes_it_answers): the notes are the "AA prepares it"
+        lines door_items wrote for the same tracks, to be taken off the page.
+        """
+        extras, answered = [], []
+        height = door['height']
+        track = door['track_type'] or ''
+        if not door.get('tracks') or not height or 'LHR' in track:
+            return extras, answered
+        size = track[:1]
+        color = door.get('color') or 'White'
+        vert, horiz = track_lengths(height, door['lift'], door.get('high_lift') or 0.0)
+        empty = request.env['product.template.attribute.value']
+        for kind, items, need in (('horizontal', catalog.horizontal, horiz), ('vertical', catalog.vertical, vert)):
+            if catalog._shortest(items, size, color, need):
+                continue
+            fits = sorted((length, p.id, p) for s, length, c, p in items if s == size and c == color)
+            if not fits:
+                continue
+            length, _pid, longest = fits[-1]
+            unit = self._unit_price(partner, longest, empty, qty)
+            if unit <= 0 or not length:
+                continue
+            extras.append({
+                'label': 'Tracks', 'custom': True, 'qty': 1,
+                'unit_price': round(unit / length * need, 2),
+                'name': (f'{size}" {kind}, {need:g}" long ({color}) - custom length, AA prepares it '
+                         f'(priced per inch from the {length}" track)'),
+            })
+            answered.append(f'no prepared {size}" {kind} for {need:g}"')
+        return extras, answered
+
+    def _aa_add_items(self, partner, variant, no_variant, line, qty, part, catalog):
+        """What adding `part` for this door puts on the order: (kit_unit or None, extras, notes)."""
+        if part == 'box':
+            return self._unit_price(partner, variant, no_variant, qty), [], []
+        label = 'Tracks' if part == 'tracks' else 'Springs'
+        extras, notes = self._priced_options(partner, variant, no_variant, line, qty, catalog)
+        extras = [e for e in extras if e['label'] == label]
+        if part == 'tracks':
+            custom, answered = self._aa_custom_tracks(
+                partner, catalog, self._door_data(variant, no_variant, line), qty)
+            extras += custom
+            notes = [n for n in notes if not any(a in n for a in answered)]
+        notes = [n for n in notes if n.startswith(label)]
+        return None, extras, notes
+
+    def _aa_add_price(self, add_order, add_part, template_id, ptav_ids, qty, line):
+        order = self._aa_add_order(add_order)
+        if not order or add_part not in ADD_PARTS:
+            return {'error': _("Not available.")}
+        template = self._quick_order_products().filtered(lambda t: t.id == int(template_id))
+        if not template:
+            return {'error': _("Product not available.")}
+        try:
+            variant, no_variant = self._resolve_combination(template, ptav_ids)
+        except ValidationError as e:
+            return {'error': str(e.args[0])}
+        qty = max(1, min(int(qty or 1), MAX_QTY))
+        kit_unit, extras, notes = self._aa_add_items(
+            order.partner_id, variant, no_variant, line or {}, qty, add_part, Catalog(request.env))
+        door_unit = (kit_unit or 0.0) + sum(e['unit_price'] * e['qty'] for e in extras)
+        return {
+            'unit_price': door_unit,
+            'subtotal': door_unit * qty,
+            'kit_price': kit_unit or 0.0,
+            'extras': [{'label': e['label'], 'name': e.get('name') or e['product'].display_name,
+                        'qty': e['qty'], 'unit_price': e['unit_price']} for e in extras],
+            'notes': notes,
+        }
+
+    @staticmethod
+    def _aa_back_url(order, back):
+        """Where the admin goes afterwards: back to the Shop Floor if he came from it."""
+        if back == 'shop-floor':
+            return '/odoo/shop-floor'
+        return f'/odoo/action-sale.action_orders/{order.id}'
+
+    @http.route('/dealer/order/add/<int:order_id>/submit', type='jsonrpc', auth='user', website=True)
+    def dealer_order_add_submit(self, order_id, lines, part='', back='', **kw):
+        order = self._aa_add_order(order_id)
+        if not order or part not in ADD_PARTS:
+            return {'error': _("Only an administrator can add to a dealer order on account.")}
+        if not lines or len(lines) > MAX_LINES:
+            return {'error': _("Add at least one door.")}
+        # NEVER TWICE (owner, 2026-11-03: "check it isn't charging every time
+        # something is added"). The button is hidden once the part is on the
+        # order, but a page left open, the Back button or a second tab can
+        # still post - so the server asks again, and the second submit is
+        # refused instead of charging the part a second time.
+        if order._aa_part_lines(part):
+            return {'error': _("%s are already on this order - nothing was added again.", ADD_LABELS[part])}
+        partner = order.partner_id
+        products = self._quick_order_products()
+        catalog = Catalog(request.env)
+        door_count = len(order._aa_kit_lines())
+        planned = []
+        try:
+            for idx, line in enumerate(lines, start=1):
+                template = products.filtered(lambda t: t.id == int(line.get('template_id') or 0))
+                if not template:
+                    raise ValidationError(_("Door %s: enter the door width.", idx))
+                qty = int(line.get('qty') or 0)
+                if qty < 1 or qty > MAX_QTY:
+                    raise ValidationError(_("Door %s: quantity must be between 1 and %s.", idx, MAX_QTY))
+                self._check_series(template, line, idx)
+                variant, no_variant = self._resolve_combination(template, line.get('ptav_ids'))
+                track_vals = self._track_values(line, idx, variant)
+                kit_unit, extras, notes = self._aa_add_items(partner, variant, no_variant, line, qty, part, catalog)
+                if part == 'box' and kit_unit <= 0:
+                    raise ValidationError(_("Door %s: no price is set for this kit yet.", idx))
+                if part != 'box' and not extras:
+                    raise ValidationError(_("Door %(idx)s: nothing could be priced to add. %(why)s",
+                                            idx=idx, why=" ".join(notes)))
+                planned.append((idx, line, qty, variant, no_variant, track_vals, extras, notes))
+        except (ValidationError, ValueError, TypeError) as e:
+            return {'error': str(e.args[0]) if e.args else _("Invalid request.")}
+
+        SOL = request.env['sale.order.line']
+        custom_track = request.env.ref('aa_dealer_orders.product_custom_track').product_variant_id
+        before = order.order_line
+        for idx, line, qty, variant, no_variant, track_vals, extras, notes in planned:
+            tag = (line.get('tag') or '').strip()[:80]
+            door = f"Door {door_count + idx if part == 'box' else idx}" + (f" ({tag})" if tag else "")
+            if part == 'box':
+                sol = SOL.create({
+                    **track_vals,
+                    'order_id': order.id,
+                    'product_id': variant.id,
+                    'product_no_variant_attribute_value_ids': [Command.set(no_variant.ids)],
+                    'product_uom_qty': qty,
+                })
+                note = self._line_note(line)
+                if note:
+                    sol.name = f"{sol.name}\n{note}"
+                continue
+            for extra in extras:
+                if extra.get('quote'):
+                    booked = add_assembly_lines(order, extra['quote'], qty=qty, note=f"Springs for {door}")
+                    if booked.get('error'):
+                        return {'error': _("Springs for %(door)s: %(err)s", door=door, err=booked['error'])}
+                elif extra.get('custom'):
+                    sol = SOL.create({
+                        'order_id': order.id,
+                        'product_id': custom_track.id,
+                        'product_uom_qty': extra['qty'] * qty,
+                        'name': f"{extra['name']}\nTracks for {door}",
+                    })
+                    sol.price_unit = extra['unit_price']
+                else:
+                    SOL.create({
+                        'order_id': order.id,
+                        'product_id': extra['product'].id,
+                        'product_uom_qty': extra['qty'] * qty,
+                        'name': f"{extra['product'].display_name}\n{extra['label']} for {door}",
+                    })
+        added = order.order_line - before
+        # The Shop Floor jobs: a spring and a kit get theirs here (the same
+        # call confirmation makes, which skips a line that already has one);
+        # a prepared track's comes from Odoo's own route as the line is made.
+        if hasattr(order, '_aa_create_station_productions'):
+            order._aa_create_station_productions()
+        invoice_note = order._aa_reinvoice(added)
+        order.message_post(body=_(
+            "%(what)s added by %(user)s: %(lines)s. %(inv)s",
+            what=ADD_LABELS[part], user=request.env.user.name,
+            lines=", ".join(f"{l.product_id.display_name} x{l.product_uom_qty:g} ({l.price_subtotal:.2f})" for l in added),
+            inv=invoice_note))
+        return {'redirect': self._aa_back_url(order, back)}
 
     def _check_series(self, template, line, idx):
         """The kit comes from the door width (AA Calculator): <=144" 1200, <=194" 1600, <=220" 1800."""

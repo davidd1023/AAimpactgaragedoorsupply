@@ -116,6 +116,32 @@
                     <span t-esc="aaPackedCount(aaRows)"/>
                 </div>
             </div>
+            <!-- ONE TRACK TASK PER ORDER (owner, 2026-11-02): the order's other
+                 track job (vertical / horizontal) on this same card. Done with
+                 this card, it is done too (track_merge.py). -->
+            <t t-foreach="aaMergePartners()" t-as="aaPartner" t-key="aaPartner.id">
+                <div class="o_aa_shop_spec o_aa_merged_job border rounded p-2 bg-100 mt-2">
+                    <div class="fw-bold" t-esc="aaPartner.product"/>
+                    <t t-foreach="aaPartner.spec ? aaPartner.spec.split('\n') : []" t-as="aaRow" t-key="aaRow_index">
+                        <t t-set="aaParts" t-value="aaRow.split('|')"/>
+                        <div t-if="!aaParts[1]" class="o_aa_shop_spec_section d-flex justify-content-between fw-bold text-uppercase border-top mt-2 pt-1">
+                            <span t-esc="aaParts[0]"/>
+                        </div>
+                        <div t-elif="aaParts[2] === 'c'"
+                             class="o_aa_check d-flex align-items-center gap-2 cursor-pointer"
+                             t-att-class="{'o_aa_packed': aaPartnerIsPacked(aaPartner, aaRow_index)}"
+                             t-on-click.stop="() => this.aaTogglePartnerPacked(aaPartner, aaRow_index)">
+                            <i class="fa fa-fw" t-att-class="aaPartnerIsPacked(aaPartner, aaRow_index) ? 'fa-check-square text-success' : 'fa-square-o text-muted'"/>
+                            <span class="o_aa_label flex-grow-1" t-esc="aaParts[0]"/>
+                            <span class="fw-bold text-end" t-esc="aaParts[1]"/>
+                        </div>
+                        <div t-else="" class="d-flex justify-content-between gap-3">
+                            <span class="text-muted" t-esc="aaParts[0]"/>
+                            <span class="fw-bold text-end" t-esc="aaParts[1]"/>
+                        </div>
+                    </t>
+                </div>
+            </t>
             <t t-if="record.aa_station_board and !aaOrderData.grouped">
                 <t t-set="aaBoardData" t-value="aaBoard()"/>
                 <div t-if="aaBoardData.received" class="o_aa_received text-muted small mt-1">

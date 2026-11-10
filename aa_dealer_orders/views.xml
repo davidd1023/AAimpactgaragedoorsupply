@@ -48,6 +48,25 @@
                 <widget name="web_ribbon" title="Dealer Quick Order" bg_color="text-bg-info"
                         invisible="not aa_dealer_quick_order"/>
             </xpath>
+            <!-- ADMIN ONLY, and only what the order is missing (owner,
+                 2026-11-02). groups= hides them; the compute and the route
+                 refuse anyone else too, and anything not on account or paid
+                 at checkout - a purchase - never shows them. -->
+            <xpath expr="//header" position="inside">
+                <field name="aa_add_parts_allowed" invisible="1"/>
+                <field name="aa_needs_box" invisible="1"/>
+                <field name="aa_needs_tracks" invisible="1"/>
+                <field name="aa_needs_springs" invisible="1"/>
+                <button name="action_aa_add_box" type="object" string="Add Hardware Box"
+                        class="btn-secondary" groups="base.group_system"
+                        invisible="not aa_needs_box"/>
+                <button name="action_aa_add_tracks" type="object" string="Add Tracks"
+                        class="btn-secondary" groups="base.group_system"
+                        invisible="not aa_needs_tracks"/>
+                <button name="action_aa_add_springs" type="object" string="Add Springs"
+                        class="btn-secondary" groups="base.group_system"
+                        invisible="not aa_needs_springs"/>
+            </xpath>
         </field>
     </record>
 

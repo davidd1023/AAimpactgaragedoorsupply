@@ -31,6 +31,33 @@ patch(MrpDisplayRecord.prototype, {
         return total ? done + " / " + total : "";
     },
 
+    // ONE TRACK TASK PER ORDER (owner, 2026-11-02): the other track jobs of
+    // this order at this station, drawn inside this card (track_merge.py).
+    aaMergePartners() {
+        const record = this.props.record;
+        if (record.resModel !== "mrp.workorder") {
+            return [];
+        }
+        try {
+            return JSON.parse(record.data.aa_track_merge || "{}").partners || [];
+        } catch {
+            return [];
+        }
+    },
+
+    aaPartnerIsPacked(partner, index) {
+        try {
+            return JSON.parse(partner.packed || "[]").includes(String(index));
+        } catch {
+            return false;
+        }
+    },
+
+    async aaTogglePartnerPacked(partner, index) {
+        await this.model.orm.call("mrp.production", "aa_toggle_packed", [[partner.production_id], String(index)]);
+        await this.env.reload(this.props.record);
+    },
+
     async aaTogglePacked(index) {
         const record = this.props.record;
         const productionId =

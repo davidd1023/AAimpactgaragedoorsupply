@@ -9,4 +9,6 @@ from . import portal_progress
 from . import res_config_settings
 from . import shop_floor_live
 from . import orphan_jobs
+from . import operator_pin
 from . import order_note
+from . import track_merge

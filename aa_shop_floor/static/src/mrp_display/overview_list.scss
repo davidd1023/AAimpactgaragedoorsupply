@@ -14,8 +14,10 @@
             white-space: nowrap;
         }
 
-        .o_aa_overview_row {
+        .o_aa_overview_row,
+        .o_aa_sortable {
             cursor: pointer;
+            user-select: none;
         }
 
         // Narrow (owner, 2026-10-21): the full name shows on hover.

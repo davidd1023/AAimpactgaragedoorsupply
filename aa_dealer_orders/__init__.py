@@ -1,5 +1,6 @@
 from . import controllers
 from . import models
+from . import add_parts
 from . import resale
 from . import custom_kit
 from . import custom_kit_zero_price

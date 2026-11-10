@@ -276,12 +276,33 @@ class MrpProduction(models.Model):
                 # when an order has none (one confirmed before W/O existed).
                 "order": production.aa_wo_number or production.origin,
                 "customer": order.partner_id.display_name or "",
+                "aa_impact_wo": self._aa_impact_wo(order),
+                # ADD / REMOVE A BOX, TRACKS OR SPRINGS (owner, 2026-11-02),
+                # admins only - aa_dealer_orders decides, and says None to
+                # everybody else and to any order that was a purchase. Asked
+                # through hasattr so this module does not depend on it.
+                "parts": order._aa_parts_board() if order and hasattr(order, "_aa_parts_board") else None,
                 "received": received,
                 "can_assign": can_assign,
                 "send_ids": [j["id"] for j in jobs if j["can_send"]],
                 "remove_ids": [j["id"] for j in jobs if j["can_remove"]],
                 "jobs": groups,
             })
+
+    # ---- AA Impact's own W/O (owner, 2026-11-02) ----
+    # "si es una orden de AA Impact ... que me salga el w/o de referencia de
+    # aa impact al lado del de nosotros, entre nuestro W/O # y From" - and on
+    # the Shop Floor, after Received and before Customer.
+    # AA Impact Garage Door types ITS OWN work order number into the Quick
+    # Order's PO field (client_order_ref), so for them the PO *is* their W/O.
+    # Any other customer's PO is not a W/O and is not shown here.
+    AA_IMPACT_CUSTOMER = "AA Impact Garage Door"
+
+    @api.model
+    def _aa_impact_wo(self, order):
+        if not order or order.partner_id.commercial_partner_id.name != self.AA_IMPACT_CUSTOMER:
+            return ""
+        return (order.client_order_ref or "").strip()
 
     # ---- Station timer (owner, 2026-10-15) ----
     # The worker starts the job at the station (Odoo's own work order clock) and
@@ -328,6 +349,10 @@ class MrpProduction(models.Model):
             if not production.qty_producing:
                 production._set_quantities()
         for production in todo:
+            # Closing a Track Prep job closes the order's other track job with
+            # it (track_merge.py), so it may be done already by now.
+            if production.state in ("done", "cancel"):
+                continue
             result = production.with_context(
                 skip_consumption=True, skip_backorder=True, mo_ids_to_backorder=[],
             ).button_mark_done()

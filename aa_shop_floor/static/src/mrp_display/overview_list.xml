@@ -58,8 +58,19 @@
                 <table class="table table-sm table-hover align-middle bg-view border o_aa_overview_table mb-0">
                     <thead>
                         <tr>
-                            <th>W/O #</th>
+                            <!-- Click to sort high-low, low-high, then back to
+                                 arrival order (owner, 2026-11-02). -->
+                            <th class="o_aa_sortable text-nowrap" role="button"
+                                title="Sort by W/O # (highest first, lowest first, arrival order)"
+                                t-on-click="() => this.aaToggleSort('order')">
+                                W/O # <i class="fa ms-1" t-att-class="aaSortIcon('order')"/>
+                            </th>
                             <th>Received</th>
+                            <th class="o_aa_sortable text-nowrap" role="button"
+                                title="Sort by AA Impact W/O (highest first, lowest first, arrival order)"
+                                t-on-click="() => this.aaToggleSort('aa_impact')">
+                                AA Impact W/O <i class="fa ms-1" t-att-class="aaSortIcon('aa_impact')"/>
+                            </th>
                             <th>Customer</th>
                             <t t-foreach="aaCols" t-as="aaCol" t-key="aaCol">
                                 <th t-esc="aaCol"/>
@@ -78,6 +89,7 @@
                                     <t t-esc="aaRow.order"/>
                                 </td>
                                 <td class="text-nowrap" t-esc="aaRow.received"/>
+                                <td class="text-nowrap" t-esc="aaRow.aaImpactWo"/>
                                 <td class="o_aa_overview_customer" t-att-title="aaRow.customer" t-esc="aaRow.customer"/>
                                 <t t-foreach="aaCols" t-as="aaCol" t-key="aaCol">
                                     <td>
@@ -104,7 +116,7 @@
                                 </td>
                             </tr>
                             <tr t-if="aaOverview.open[aaRow.key]" class="o_aa_overview_detail">
-                                <td t-att-colspan="5 + aaCols.length" class="bg-100 p-3">
+                                <td t-att-colspan="6 + aaCols.length" class="bg-100 p-3">
                                     <div t-if="aaRow.canAssign and (aaRow.sendIds.length or aaRow.removeIds.length)"
                                          class="d-flex flex-wrap gap-2 mb-2">
                                         <button t-if="aaRow.sendIds.length" type="button" class="btn btn-primary"
@@ -115,6 +127,21 @@
                                                 t-on-click.stop="() => this.aaListAction('aa_remove_from_station', aaRow.removeIds)">
                                             <i class="fa fa-undo me-1"/>Remove all
                                         </button>
+                                    </div>
+                                    <!-- Admin: add what the order is missing, or take a part off it
+                                         (owner, 2026-11-02). Only drawn when the server says so. -->
+                                    <div t-if="aaRow.parts" class="d-flex flex-wrap align-items-center gap-2 mb-2 o_aa_parts">
+                                        <span class="small text-muted me-1">Order parts (admin):</span>
+                                        <t t-foreach="aaRow.parts.parts" t-as="aaPart" t-key="aaPart.part">
+                                            <button t-if="!aaPart.has" type="button" class="btn btn-sm btn-outline-primary"
+                                                    t-on-click.stop="() => this.aaAddPart(aaRow.parts, aaPart.part)">
+                                                <i class="fa fa-plus me-1"/>Add <t t-esc="aaPart.label"/>
+                                            </button>
+                                            <button t-else="" type="button" class="btn btn-sm btn-outline-danger"
+                                                    t-on-click.stop="() => this.aaRemovePart(aaRow.parts, aaPart, aaRow.order)">
+                                                <i class="fa fa-times me-1"/>Remove <t t-esc="aaPart.label"/>
+                                            </button>
+                                        </t>
                                     </div>
                                     <div class="o_aa_overview_jobs">
                                         <t t-foreach="aaRow.jobs" t-as="aaJob" t-key="aaJob.id">
@@ -157,7 +184,7 @@
                             </tr>
                         </t>
                         <tr t-if="!aaRows.length">
-                            <td t-att-colspan="5 + aaCols.length" class="text-center text-muted py-4">
+                            <td t-att-colspan="6 + aaCols.length" class="text-center text-muted py-4">
                                 No orders here.
                             </td>
                         </tr>
