@@ -2890,11 +2890,44 @@ wire     readings   within 1/8"   by chance   verdict
    ...most rungs: cannot tell
 ```
 
-**INCONCLUSIVE, AND THE TEST IS ITSELF CONFOUNDED**: for a wire that divides
-evenly into quarters (0.5, 0.25) the multiples of `d` land on the same grid
-the reference rounds to, so agreement is an artefact rather than evidence.
-**So the rule is neither confirmed nor refuted** - which is a different and
-more honest position than the entry above claimed.
+**THAT TEST WAS INCONCLUSIVE AND ITSELF CONFOUNDED** - for a wire dividing
+evenly into quarters the multiples of `d` land on the same grid the reference
+rounds to - so a better one was built, and it SETTLES IT.
+
+###### AND THEN THE RULE WAS TESTED PROPERLY, AND IT LOSES (2026-11-11)
+
+The vendor's rule makes a sharp prediction. If `duplexActiveLength` is active
+coils x wire, then `length = activeLength + (dead coils x wire)`, and the
+fitted "bonus" is really a small INTEGER number of dead coils - which would
+explain at a stroke why the bonus differs per rung. Tested over the 10,338
+clean, wire-correct readings, snapping to the `{n, n+0.25}` set the reference
+actually uses:
+
+```
+snap(activeLength + k x wire)     k=0  40.25%   k=1  32.13%   k=2  21.82%
+                                  best k chosen PER RUNG      40.88%
+the bonus table as it stands                                  98.81%
+```
+
+**A TEST THAT COULD HAVE CONFIRMED IT, AND DID NOT.** Had the rule held, some
+`k` would score near 99%; the best is 41%. And the residual settles it beyond
+argument - `(reference length - active length) / wire`, fractional part:
+
+```
+bins of 0.1:  10  11   9  10  10  10  10  11  10  10
+within 0.1 of a whole coil: 19.6%   (20.0% if purely flat)
+```
+
+**PERFECTLY FLAT.** The gap between the reference's length and the active
+length is not coil-quantised in any degree. So *"count total coils and
+multiply by wire size"* is how SSC tell you to MEASURE a spring you are
+holding - it is not how their calculator CHOOSES one. Those are different
+questions and the sentence answers only the first.
+
+**SO THE COIL IDEA IS NOW GENUINELY CLOSED**, by a test with the power to
+confirm it, rather than by the earlier one which had no power at all. The
+bonus table stays. No code was changed to find this out - the experiment was
+three diagnostics and the installed table was never touched.
 
 **WHAT IT WOULD TAKE TO SETTLE IT**: implement the form - solve for the coil
 count from the required IPPT, multiply by the wire, round to a quarter - and
