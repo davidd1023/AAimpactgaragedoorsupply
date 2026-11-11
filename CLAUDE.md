@@ -2944,6 +2944,44 @@ software, with Conversions, Engineering, Spring IPPT, Springs by IPPT and a
 Weight Calculator - the same engine behind the web calculator, should anyone
 want a second way to probe it.
 
+##### THE CALCULATOR'S OWN JAVASCRIPT HOLDS NO MATHS (checked, 2026-11-11)
+
+*"are you sure that none of the scripts that are publically viewable on the
+ssc website arent helpful"* - and I was not sure, because I had ASSUMED the
+sizing was server-side from the fact that we POST to an endpoint, without ever
+looking. Now looked at.
+
+The shop is a Vite build and `build/manifest.json` is public (63 entries). The
+calculator lives in the shared chunk `common-components-*.js`, 685 KB, which
+does carry the vocabulary - `wireSize` 73 times, `springLength` 36, `duplex`
+23, plus drum and cycle. **But it holds no arithmetic:**
+
+```
+"/spring-engineering/engineer-torsion-spring"   <- the endpoint we already use
+physics constants (28,500,000 / 10.8 / 0.0796)  <- NONE
+every springLength occurrence                   <- form state, request payload,
+                                                   or reading a stock part
+```
+
+**IT IS A FORM THAT POSTS TO THE SERVER.** There is nothing in the public
+JavaScript to learn the length rule from, and no further reason to look there.
+
+**BUT IT NAMED FOUR ENDPOINTS, AND ONE ANSWERS A DIFFERENT OPEN QUESTION:**
+
+```
+/spring-engineering/engineer-torsion-spring   (the one dev/pull.mjs uses)
+/spring-engineering/drum-recommendation       <- HOW THE DRUM IS PICKED
+/spring-engineering/drum-list
+/spring-engineering/drum
+```
+
+`drum-recommendation` is a **GET** taking `doorHeight`, `doorWeightPounds` and
+`hiLift`, returning `{drumName}` - and *"how the drum is picked"* is a
+standing unanswered question that blocks the second project's quoting
+automation. It has never been asked; `dev/pull.mjs` only ever calls the
+engineering endpoint. **One request would answer what nobody here can derive**,
+and a small sweep would give the whole rule.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
