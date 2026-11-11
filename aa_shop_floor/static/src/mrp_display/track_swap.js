@@ -7,6 +7,7 @@
 // offcut is thrown away, for now. A merged card carries several jobs (the
 // vertical and the horizontal), so the dialog lists each of them.
 
+import { _t } from "@web/core/l10n/translation";
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { patch } from "@web/core/utils/patch";
@@ -77,7 +78,7 @@ export class AaTrackSwapDialog extends Component {
         } finally {
             this.state.busy = false;
             if (done.length) {
-                this.notification.add(`Cut from ${done.join(", ")}`, { type: "success" });
+                this.notification.add(_t("Cut from %s", done.join(", ")), { type: "success" });
                 await this.props.onDone();
             }
         }

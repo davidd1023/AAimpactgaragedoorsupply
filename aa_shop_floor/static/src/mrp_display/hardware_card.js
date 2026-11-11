@@ -10,6 +10,7 @@
 // says none of those things, so "don't display anything" needs no condition of
 // its own here: the card either has rows or does not exist.
 
+import { _t } from "@web/core/l10n/translation";
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { patch } from "@web/core/utils/patch";
@@ -39,6 +40,14 @@ export class AaHardwareCardDialog extends Component {
                 await this.orm.call("mrp.production", "aa_sticker_sizes", [])
             );
         });
+    }
+
+    // THE CARD'S OWN WORDS IN THE USER'S LANGUAGE (owner, 2026-11-11). The
+    // rows are stored in English ("Cut to|160\" (LH + RH)"), so the label -
+    // and a value that is a fixed phrase - is looked up in i18n/es.po here;
+    // anything not listed there (a size, a count) comes back unchanged.
+    aaT(text) {
+        return text ? String(_t(text)) : text;
     }
 
     get title() {

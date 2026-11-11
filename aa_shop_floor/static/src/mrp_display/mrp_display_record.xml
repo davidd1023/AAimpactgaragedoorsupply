@@ -57,8 +57,8 @@
                                 <div class="fw-bold" t-esc="aaItem.product"/>
                                 <t t-foreach="aaItem.summary" t-as="aaSum" t-key="aaSum_index">
                                     <div class="d-flex justify-content-between gap-3">
-                                        <span class="text-muted" t-esc="aaSum[0]"/>
-                                        <span class="fw-bold text-end" t-esc="aaSum[1]"/>
+                                        <span class="text-muted" t-esc="aaT(aaSum[0])"/>
+                                        <span class="fw-bold text-end" t-esc="aaT(aaSum[1])"/>
                                     </div>
                                 </t>
                                 <div t-if="aaItem.more" class="text-muted small" t-esc="aaItem.more"/>
@@ -92,10 +92,10 @@
                          t-att-class="{'o_aa_packed': aaIsPacked(aaRow_index)}"
                          t-on-click.stop="() => this.aaTogglePacked(aaRow_index)">
                         <i class="fa fa-fw" t-att-class="aaIsPacked(aaRow_index) ? 'fa-check-square text-success' : 'fa-square-o text-muted'"/>
-                        <span class="o_aa_label flex-grow-1" t-esc="aaParts[0]"/>
+                        <span class="o_aa_label flex-grow-1" t-esc="aaT(aaParts[0])"/>
                     </div>
                     <div t-elif="!aaParts[1]" class="o_aa_shop_spec_section d-flex justify-content-between fw-bold text-uppercase border-top mt-2 pt-1">
-                        <span t-esc="aaParts[0]"/>
+                        <span t-esc="aaT(aaParts[0])"/>
                         <span t-if="aaParts[0] === 'Box contents' or aaParts[0] === 'Parts'" class="text-muted" t-esc="aaPackedCount(aaRows)"/>
                     </div>
                     <div t-elif="aaParts[2] === 'c'"
@@ -103,12 +103,12 @@
                          t-att-class="{'o_aa_packed': aaIsPacked(aaRow_index)}"
                          t-on-click.stop="() => this.aaTogglePacked(aaRow_index)">
                         <i class="fa fa-fw" t-att-class="aaIsPacked(aaRow_index) ? 'fa-check-square text-success' : 'fa-square-o text-muted'"/>
-                        <span class="o_aa_label flex-grow-1" t-esc="aaParts[0]"/>
-                        <span class="fw-bold text-end" t-esc="aaParts[1]"/>
+                        <span class="o_aa_label flex-grow-1" t-esc="aaT(aaParts[0])"/>
+                        <span class="fw-bold text-end" t-esc="aaT(aaParts[1])"/>
                     </div>
                     <div t-else="" class="d-flex justify-content-between gap-3">
-                        <span class="text-muted" t-esc="aaParts[0]"/>
-                        <span class="fw-bold text-end" t-esc="aaParts[1]"/>
+                        <span class="text-muted" t-esc="aaT(aaParts[0])"/>
+                        <span class="fw-bold text-end" t-esc="aaT(aaParts[1])"/>
                     </div>
                 </t>
                 <div t-if="aaLimit &lt; aaRows.length" class="o_aa_spec_more d-flex justify-content-between text-muted border-top mt-2 pt-1">
@@ -125,19 +125,19 @@
                     <t t-foreach="aaPartner.spec ? aaPartner.spec.split('\n') : []" t-as="aaRow" t-key="aaRow_index">
                         <t t-set="aaParts" t-value="aaRow.split('|')"/>
                         <div t-if="!aaParts[1]" class="o_aa_shop_spec_section d-flex justify-content-between fw-bold text-uppercase border-top mt-2 pt-1">
-                            <span t-esc="aaParts[0]"/>
+                            <span t-esc="aaT(aaParts[0])"/>
                         </div>
                         <div t-elif="aaParts[2] === 'c'"
                              class="o_aa_check d-flex align-items-center gap-2 cursor-pointer"
                              t-att-class="{'o_aa_packed': aaPartnerIsPacked(aaPartner, aaRow_index)}"
                              t-on-click.stop="() => this.aaTogglePartnerPacked(aaPartner, aaRow_index)">
                             <i class="fa fa-fw" t-att-class="aaPartnerIsPacked(aaPartner, aaRow_index) ? 'fa-check-square text-success' : 'fa-square-o text-muted'"/>
-                            <span class="o_aa_label flex-grow-1" t-esc="aaParts[0]"/>
-                            <span class="fw-bold text-end" t-esc="aaParts[1]"/>
+                            <span class="o_aa_label flex-grow-1" t-esc="aaT(aaParts[0])"/>
+                            <span class="fw-bold text-end" t-esc="aaT(aaParts[1])"/>
                         </div>
                         <div t-else="" class="d-flex justify-content-between gap-3">
-                            <span class="text-muted" t-esc="aaParts[0]"/>
-                            <span class="fw-bold text-end" t-esc="aaParts[1]"/>
+                            <span class="text-muted" t-esc="aaT(aaParts[0])"/>
+                            <span class="fw-bold text-end" t-esc="aaT(aaParts[1])"/>
                         </div>
                     </t>
                 </div>
