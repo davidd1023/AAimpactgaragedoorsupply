@@ -3077,6 +3077,58 @@ real modelling exercise and it is not done.
 thousand readings were pulled, at a second apiece, while three of the fields
 each one returned went in the bin.
 
+###### THE IPPT INVERSION WAS TESTABLE AFTER ALL, AND IT LOSES (2026-11-11)
+
+The entry above records this as blocked: *"closing it needs the REQUIRED
+IPPT, not the reference's reported total, which is an output of its own
+choice and makes any test circular."* **That was right about the reference's
+figure and WRONG that we have no other.** The engine computes
+`duplexTipptExact` from weight x rEff / turns - all DOOR inputs, nothing the
+reference said. It is a required IPPT, and it was there the whole time.
+
+**AND IT AGREES WITH THE REFERENCE TO 0.014%**, which is the find worth
+keeping out of all this:
+
+```
+our REQUIRED ippt vs their REPORTED ippt   2,587 clean readings
+    median error 0.014%      within 1%: 100.0%      within 5%: 100.0%
+    turns:       0.301%      within 1%: 100.0%
+```
+
+**THAT IS AN INDEPENDENT CONFIRMATION OF THE TORQUE MODEL** - rEff, the
+multiplier surface, the turns - against the reference's own arithmetic rather
+than its outputs, on a quantity the whole engine rests on. Nothing else here
+has ever checked it that way.
+
+**BUT INVERTING IT FOR THE LENGTH SCORES 19.26% WHERE THE TABLE SCORES
+98.81%:**
+
+```
+L = (E d^5) / (10.8 D x ippt), snapped to {n, n+0.25}, 2,575 readings
+    EXACT 19.26%    within 1/4" 47.11%    within 1" 84.16%    median 0.75"
+```
+
+**AND IT CANNOT BE RESCUED BY FITTING E BETTER, which is the decisive part.**
+E is not a constant across the rungs - it runs **31.54M to 34.09M psi**, 8%,
+rising steadily as the wire gets thinner (0.3938 lowest, 0.2625 highest). So
+a per-rung E would be the bonus table wearing different clothes. Worse, the
+scatter WITHIN a single rung is p90/p10 **1.6% to 4.7%**, while a quarter inch
+on a 30" spring is **0.83%**. **The formula's own noise is two to six times
+the grid it has to land on**, so no fit of E - global, per rung, or per
+anything - can resolve a length to the quarter inch. The relation is real
+(it reproduced E to a few per cent) and it is simply too coarse to be the
+selection rule.
+
+`dev/ippt-length.mjs` is the test, committed. It needs no requests and no
+database.
+
+**SO FOUR LEVERS HAVE NOW BEEN TRIED AND LOST**, not three: more data, more
+capacity (globally and per group), coil-count quantisation, and the IPPT
+inversion. The last was the only idea that came from outside this repository.
+**Duplex length is closed unless a genuinely new form appears** - and the
+three remaining open items are not about accuracy at all, but are listed
+below.
+
 ##### D800-120 RUNS 1/4" CABLE, AND THE REST OF THE ENDPOINTS SURVEYED (2026-11-11)
 
 **`GET /spring-engineering/drum?drumName=CANIMEX/TF D800-120`** - one request,
@@ -3167,6 +3219,26 @@ first), and a 40-case rehearsal that previously could not pass 750 lb drew
 the `rnd.mjs` lesson a second time, and the `ref-state.mjs` lesson a third.
 Neither sampler's own output looked wrong; the ceiling simply never appeared
 in a draw, because a ceiling that is too low produces no error at all.
+
+###### WHAT IS ACTUALLY LEFT, AND NONE OF IT IS ACCURACY (2026-11-11)
+
+Asked *"so is there nothing left?"*. On duplex length, no - see above. But
+the week's digging turned up three things that are NOT done and are worth
+more than another decimal:
+
+- **THE DRUM RULE IS KNOWN AND NOT IMPLEMENTED.** "How is the drum picked"
+  was recorded for over a week as blocking the second project's quoting
+  automation, and it is now two comparisons against `DRUM_LIMITS` (above).
+  Nothing in this repository uses it yet.
+- **THE VENDOR DISAGREES WITH HIM ABOUT THE FILLER.** SSC's own sell sheet:
+  *"the spring filler is cut one inch shorter than the specified spring
+  length"*, where he said a 4 foot spring takes 4 feet. **His rule governs** -
+  it is his shop - but he may not know the vendor says otherwise, and at
+  $3.24 a foot it is about 27 cents a spring. He has not been asked.
+- **SINGLE IS THE THING HE SELLS AND THE LESS MEASURED OF THE TWO**: 342
+  clean reference readings against 10,172 for duplex. The percentages are
+  perfect so far (100% on length and weight) - on a twenty-ninth of the
+  evidence. That imbalance is the real gap, not the 98.25%.
 
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
