@@ -365,6 +365,27 @@ patch(MrpDisplay.prototype, {
         });
     },
 
+    // SEND BACK (owner, 2026-11-11, admins): a job marked done by mistake goes
+    // back to its station, and the stock it moved is put back.
+    aaSendBack(job, order) {
+        this.aaPartsDialog.add(ConfirmationDialog, {
+            title: `Send back ${job.station}`,
+            body: `${job.station} on ${order} was marked done. Send it back to the station as not done? ` +
+                "The stock it moved is put back and the station gets the job again.",
+            confirmLabel: "Send back",
+            confirm: async () => {
+                try {
+                    await this.model.orm.call("mrp.production", "aa_send_back", [job.send_back_ids]);
+                    this.aaPartsNotify.add(`${job.station} on ${order} is back at the station.`, { type: "success" });
+                } catch (error) {
+                    this.aaPartsNotify.add(error.data?.message || error.message || String(error), { type: "danger" });
+                }
+                await this.onClickRefresh();
+            },
+            cancel: () => {},
+        });
+    },
+
     async aaListAction(method, ids) {
         if (!ids || !ids.length) {
             return;

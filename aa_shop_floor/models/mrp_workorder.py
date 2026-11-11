@@ -149,7 +149,9 @@ class MrpProduction(models.Model):
             return self.browse()
         if not self.env["sale.order"].sudo().search_count([("name", "=", self.origin)]):
             return self.browse()
-        return self.sudo().search([("origin", "=", self.origin), ("state", "!=", "cancel")], order="id")
+        # A job sent back to its station is replaced by its copy (send_back.py).
+        return self.sudo().search([("origin", "=", self.origin), ("state", "!=", "cancel"),
+                                   ("aa_sent_back", "=", False)], order="id")
 
     @staticmethod
     def _aa_spec_summary(spec):
@@ -172,6 +174,7 @@ class MrpProduction(models.Model):
     def _compute_aa_order_board(self):
         pending = self.env["mrp.workcenter"].sudo()._aa_pending()
         can_assign = self.env.user.has_group(MANAGER_GROUP)
+        is_admin = self.env.user.has_group("base.group_system")
         for production in self:
             siblings = production._aa_order_siblings() if production.id else production.browse()
             # A ONE-JOB ORDER GETS ITS BOARD TOO (owner, 2026-10-21: the
@@ -218,6 +221,9 @@ class MrpProduction(models.Model):
                     "can_remove": bool((open_wos - waiting).filtered(
                         lambda w: w.state not in LOCKED_STATES)),
                     "can_done": mo.state not in ("done", "cancel"),
+                    # SEND BACK (owner, 2026-11-11): admins, finished jobs only.
+                    "can_send_back": is_admin and mo.state == "done"
+                                     and not mo._aa_send_back_refusal(),
                     **timing,
                 })
             # One section per station (owner, 2026-10-14): vertical and horizontal
@@ -227,7 +233,8 @@ class MrpProduction(models.Model):
                 group = next((g for g in groups if g["station"] == job["station"]), None)
                 if not group:
                     group = {"id": job["id"], "station": job["station"], "items": [],
-                             "send_ids": [], "remove_ids": [], "done_ids": [], "statuses": [],
+                             "send_ids": [], "remove_ids": [], "done_ids": [], "send_back_ids": [],
+                             "statuses": [],
                              "minutes": 0.0, "running_since": False,
                              "started_utc": False, "finished_utc": False}
                     groups.append(group)
@@ -245,6 +252,8 @@ class MrpProduction(models.Model):
                     group["remove_ids"].append(job["id"])
                 if job["can_done"]:
                     group["done_ids"].append(job["id"])
+                if job["can_send_back"]:
+                    group["send_back_ids"].append(job["id"])
             for group in groups:
                 statuses = set(group.pop("statuses"))
                 if statuses == {"done"}:

@@ -162,7 +162,7 @@
                                                         <div t-if="aaItem.more" class="text-muted small" t-esc="aaItem.more"/>
                                                     </div>
                                                 </t>
-                                                <div t-if="aaRow.canAssign and (aaJob.send_ids.length or aaJob.remove_ids.length or aaJob.done_ids.length)"
+                                                <div t-if="(aaRow.canAssign and (aaJob.send_ids.length or aaJob.remove_ids.length or aaJob.done_ids.length)) or (aaJob.send_back_ids and aaJob.send_back_ids.length)"
                                                      class="d-flex flex-wrap gap-2 mt-2">
                                                     <button t-if="aaJob.send_ids.length" type="button" class="btn btn-sm btn-primary"
                                                             t-on-click.stop="() => this.aaListAction('aa_send_to_station', aaJob.send_ids)">
@@ -175,6 +175,12 @@
                                                     <button t-if="aaJob.done_ids.length" type="button" class="btn btn-sm btn-success ms-auto"
                                                             t-on-click.stop="() => this.aaListAction('aa_mark_done_jobs', aaJob.done_ids)">
                                                         <i class="fa fa-check me-1"/>Mark as Done
+                                                    </button>
+                                                    <!-- Admin: marked done by mistake (owner, 2026-11-11). -->
+                                                    <button t-if="aaJob.send_back_ids and aaJob.send_back_ids.length" type="button"
+                                                            class="btn btn-sm btn-outline-danger ms-auto"
+                                                            t-on-click.stop="() => this.aaSendBack(aaJob, aaRow.order)">
+                                                        <i class="fa fa-reply me-1"/>Send back
                                                     </button>
                                                 </div>
                                             </div>
