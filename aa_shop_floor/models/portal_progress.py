@@ -57,7 +57,8 @@ class MrpProduction(models.Model):
             return []
 
         productions = self.sudo().search(
-            [("origin", "=", origin), ("state", "!=", "cancel")], order="id")
+            [("origin", "=", origin), ("state", "!=", "cancel"),
+             ("aa_sent_back", "=", False)], order="id")
         pending = self.env["mrp.workcenter"].sudo()._aa_pending()
         groups = {}
 

@@ -243,7 +243,9 @@ class SaleOrder(models.Model):
                 ('origin', '=', self.name),
                 ('product_id', 'in', tracks.product_id.ids),
             ])
-        return jobs.filtered(lambda p: p.state != 'cancel')
+        # A job sent back to its station (aa_shop_floor) is not the job any more.
+        return jobs.filtered(lambda p: p.state != 'cancel'
+                             and not ('aa_sent_back' in p._fields and p.aa_sent_back))
 
     def aa_remove_part(self, part):
         """Take a hardware box, the tracks or the springs off a placed order.

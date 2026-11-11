@@ -166,7 +166,9 @@ class MrpWorkorder(models.Model):
         A job still waiting at a station is not history - it is the board.
         """
         return [("state", "in", ("progress", "done")),
-                ("aa_sale_order", "!=", False)]
+                ("aa_sale_order", "!=", False),
+                # Marked done by mistake and sent back: its copy is the job.
+                ("production_id.aa_sent_back", "=", False)]
 
     @api.model
     def aa_shop_floor_history(self, order=None, limit=RECENT_ORDERS):
@@ -265,6 +267,7 @@ class MrpWorkorder(models.Model):
         since = fields.Datetime.now() - timedelta(days=DAYS_BACK + 1)
         workorders = self.search(
             [("state", "=", "done"), ("aa_sale_order", "!=", False),
+             ("production_id.aa_sent_back", "=", False),
              ("date_finished", ">=", since)],
             order="date_finished desc, id desc", limit=DAY_JOBS_SCANNED)
 
