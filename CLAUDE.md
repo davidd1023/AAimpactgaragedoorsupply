@@ -2807,6 +2807,57 @@ said a 4 foot spring takes 4 feet of filler. At $3.24 a foot that is about
 27 cents a spring, and HIS rule governs - but the vendor's sheet disagrees
 with it and he may not know.
 
+##### BATCH S2 SETTLES IT: VOLUME IS NOT THE LEVER, EVEN ON A STARVED RUNG
+
+*"are you sure more runs wont help on accuracy even if its only by a
+decimal"* - a fair question, because the session's own numbers argued against
+me: V14 gave +0.10, V16 gave +0.20, and **V16 was the batch I had predicted
+would buy nothing.** So the claim was tested rather than repeated.
+
+**THE TARGETING WAS SOUND AND THE RESULT WAS NOTHING.** 223 requests at the
+two mid-range rungs carrying the most failures while still short of the 320
+that fixed the owner's rung. 223 of 223 accepted, **215 of 216 clean** on the
+way (these sit inside the reference's envelope, unlike the heavy batch):
+
+```
+0.3938/0.3195   124 -> 320 readings    failures 6 -> 6
+0.3125/0.2625    18 ->  44 readings    failures 5 -> 5
+in-envelope failures          178 -> 179
+never-tuned yardstick       97.93% -> 97.93%
+global           11,746/12,008 -> 11,968/12,231
+```
+
+**FILLING A RUNG 2.6x CHANGED ITS FAILURE COUNT BY ZERO.** `0.3938/0.3195`
+got exactly the treatment that made `0.3625/0.295` graduate - 124 to 320,
+the same target - and not one of its six failures moved. 222 of the 223 new
+readings are reproduced, so the batch was absorbed cleanly; it simply fixed
+nothing.
+
+**SO THE "SHORT OF 320" HEURISTIC DOES NOT PREDICT WHETHER DATA HELPS**, and
+that is the finding. The split this session drew between *"rungs still short -
+data may help"* and *"at target - fit-bound"* is not a real distinction: a
+short rung can be fit-bound too. What V15 bought on the owner's rung was
+ROBUSTNESS - it left every weak list and its cross-validation came right -
+rather than a lower failure count, and that was visible at the time (it still
+carries 6 failures at 316 readings).
+
+**A SECOND LIMIT WORTH KNOWING: SOME RUNGS CANNOT BE FILLED AT ALL.**
+`0.3125/0.2625` needs 302 readings and 60,000 sampled geometries contained
+only **27** that land on it. It went 18 -> 44 and the sampler cannot reach
+further. A rare rung is rare in the door space, not merely unvisited.
+
+**WHAT IS LEFT IS FIT-BOUND, AND NOW THAT IS MEASURED RATHER THAN ASSERTED.**
+Three levers have each been tried and lost: more data (this batch), more
+model capacity globally and per-group (both lose 2+ points on never-tuned
+data), and a different functional form from the published engineering formula
+(the coil-rounding hypothesis, refuted on 20,344 lengths). **Do not spend
+further requests on duplex length without a new idea about the FORM of the
+rule.**
+
+The readings are kept - they are 223 more genuine reference answers and they
+cost nothing to hold - and the table is refitted around them. Golden unmoved
+(725 byte-identical), 20 invariants pass.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
