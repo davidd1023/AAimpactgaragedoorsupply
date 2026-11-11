@@ -23,11 +23,11 @@ const VIEW_KEY = "aa_shop_floor.overview_view";
 const STATION_ORDER = ["Track Prep", "Hardware", "Springs"];
 
 const CHIPS = {
-    pending: { cls: "text-bg-warning", text: "Pending" },
-    station: { cls: "text-bg-info", text: "Assigned" },
-    progress: { cls: "text-bg-primary", text: "In progress" },
-    done: { cls: "text-bg-success", text: "Done" },
-    none: { cls: "text-bg-secondary", text: "No work orders" },
+    pending: { cls: "text-bg-warning", text: _t("Pending") },
+    station: { cls: "text-bg-info", text: _t("Assigned") },
+    progress: { cls: "text-bg-primary", text: _t("In progress") },
+    done: { cls: "text-bg-success", text: _t("Done") },
+    none: { cls: "text-bg-secondary", text: _t("No work orders") },
 };
 
 function readView() {
@@ -208,10 +208,10 @@ patch(MrpDisplay.prototype, {
     aaTabs(rows) {
         const count = (test) => rows.filter(test).length;
         return [
-            { key: "all", label: "All", count: rows.length },
-            { key: "assign", label: "To assign", count: count((r) => this.aaInTab(r, "assign")) },
-            { key: "stations", label: "At stations", count: count((r) => this.aaInTab(r, "stations")) },
-            { key: "progress", label: "In progress", count: count((r) => this.aaInTab(r, "progress")) },
+            { key: "all", label: _t("All"), count: rows.length },
+            { key: "assign", label: _t("To assign"), count: count((r) => this.aaInTab(r, "assign")) },
+            { key: "stations", label: _t("At stations"), count: count((r) => this.aaInTab(r, "stations")) },
+            { key: "progress", label: _t("In progress"), count: count((r) => this.aaInTab(r, "progress")) },
         ];
     },
 
@@ -302,13 +302,13 @@ patch(MrpDisplay.prototype, {
 
     aaAgeLabel(hours) {
         if (hours < 1) {
-            return "New";
+            return _t("New");
         }
         if (hours < 24) {
             return `${Math.floor(hours)} h`;
         }
         const days = Math.floor(hours / 24);
-        return `${days} ${days === 1 ? "day" : "days"}`;
+        return days === 1 ? _t("1 day") : _t("%s days", days);
     },
 
     // Green under a day, yellow up to two, red after that.

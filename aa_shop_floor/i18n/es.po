@@ -1,5 +1,5 @@
 # Spanish for the Shop Floor (owner, 2026-11-11).
-# Generated from the templates so every msgid is exactly what Owl looks up.
+# Generated from the templates and the _t() calls so every msgid is exactly what is looked up.
 msgid ""
 msgstr ""
 "Project-Id-Version: aa_shop_floor\n"
@@ -11,682 +11,886 @@ msgstr ""
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/hardware_card.xml:0
 msgid "hardware"
 msgstr "hardware"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/hardware_card.xml:0
 msgid "Also on this order"
 msgstr "También en esta orden"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/hardware_card.xml:0
 msgid "Print sticker"
 msgstr "Imprimir etiqueta"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/hardware_card.xml:0
 msgid "Sticker size"
 msgstr "Tamaño de etiqueta"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/hardware_card.xml:0
 msgid "Close"
 msgstr "Cerrar"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "History"
 msgstr "Historial"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "By day"
 msgstr "Por día"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Recent orders"
 msgstr "Órdenes recientes"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Times"
 msgstr "Tiempos"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Worker & task"
 msgstr "Trabajador y tarea"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Worker"
 msgstr "Trabajador"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Task"
 msgstr "Tarea"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Day"
 msgstr "Día"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "days"
 msgstr "días"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Nobody has clocked any time yet."
 msgstr "Nadie ha registrado tiempo todavía."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Work timed at a station shows here."
 msgstr "El trabajo cronometrado en una estación aparece aquí."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Average"
 msgstr "Promedio"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Jobs"
 msgstr "Trabajos"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Total"
 msgstr "Total"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid ""
 "One job is one worker on one piece of work, however many\n"
 "                    times they started and stopped it. Time still running and\n"
 "                    anything logged as blocked are left out."
-msgstr "Un trabajo es un trabajador en una pieza de trabajo, sin importar cuántas veces lo inició y lo paró. No se cuenta el tiempo que sigue corriendo ni lo registrado como bloqueado."
+msgstr ""
+"Un trabajo es un trabajador en una pieza de trabajo, sin importar cuántas "
+"veces lo inició y lo paró. No se cuenta el tiempo que sigue corriendo ni lo "
+"registrado como bloqueado."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Nothing finished in the last 60 days."
 msgstr "Nada terminado en los últimos 60 días."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "finished"
 msgstr "terminado"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "worked"
 msgstr "trabajado"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Show older days"
 msgstr "Ver días anteriores"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Nothing has been started yet."
 msgstr "Todavía no se ha iniciado nada."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "A job shows here as soon as somebody taps Start on it."
 msgstr "Un trabajo aparece aquí en cuanto alguien toca Iniciar."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "of"
 msgstr "de"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "worked in total"
 msgstr "trabajado en total"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "so far"
 msgstr "hasta ahora"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "start to finish"
 msgstr "de inicio a fin"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Running"
 msgstr "Corriendo"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Paused"
 msgstr "En pausa"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "· still running"
 msgstr "· todavía corriendo"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "· not finished"
 msgstr "· sin terminar"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/history.xml:0
 msgid "Finished"
 msgstr "Terminado"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_footer.xml:0
 msgid "Mark as Done"
 msgstr "Marcar como hecho"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_footer.xml:0
 msgid "What for"
 msgstr "Para qué"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_footer.xml:0
 msgid "Print"
 msgstr "Imprimir"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_footer.xml:0
 msgid "Change track"
 msgstr "Cambiar track"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_footer.xml:0
 msgid "Start"
 msgstr "Iniciar"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.xml:0
 msgid "Received"
 msgstr "Recibido"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.xml:0
 msgid "Send all"
 msgstr "Enviar todo"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.xml:0
 msgid "Remove all"
 msgstr "Quitar todo"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.xml:0
 msgid "Send to"
 msgstr "Enviar a"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.xml:0
 msgid "Remove from"
 msgstr "Quitar de"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.xml:0
 msgid "Pending"
 msgstr "Pendiente"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/operator_pin.xml:0
 msgid "Change PIN"
 msgstr "Cambiar PIN"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/operator_pin.xml:0
 msgid "Operator PINs"
 msgstr "PIN de operadores"
 
 #. module: aa_shop_floor
 #. odoo-javascript
-msgid "Type a new PIN (at least 4 digits) and press Save. The old PIN stops working at once."
-msgstr "Escribe un PIN nuevo (al menos 4 dígitos) y presiona Guardar. El PIN anterior deja de funcionar enseguida."
+#: code:addons/aa_shop_floor/static/src/mrp_display/operator_pin.xml:0
+msgid ""
+"Type a new PIN (at least 4 digits) and press Save. The old PIN stops working"
+" at once."
+msgstr ""
+"Escribe un PIN nuevo (al menos 4 dígitos) y presiona Guardar. El PIN "
+"anterior deja de funcionar enseguida."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/operator_pin.xml:0
 msgid "PIN set"
 msgstr "PIN puesto"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/operator_pin.xml:0
 msgid "No PIN"
 msgstr "Sin PIN"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/operator_pin.xml:0
 msgid "New PIN"
 msgstr "PIN nuevo"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/operator_pin.xml:0
 msgid "Save"
 msgstr "Guardar"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "List"
 msgstr "Lista"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "Cards"
 msgstr "Tarjetas"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "All stations"
 msgstr "Todas las estaciones"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "W/O # or customer"
 msgstr "W/O # o cliente"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "orders"
 msgstr "órdenes"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "W/O #"
 msgstr "W/O #"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "Sort by W/O # (highest first, lowest first, arrival order)"
 msgstr "Ordenar por W/O # (mayor primero, menor primero, orden de llegada)"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "AA Impact W/O"
 msgstr "W/O AA Impact"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "Sort by AA Impact W/O (highest first, lowest first, arrival order)"
-msgstr "Ordenar por W/O AA Impact (mayor primero, menor primero, orden de llegada)"
+msgstr ""
+"Ordenar por W/O AA Impact (mayor primero, menor primero, orden de llegada)"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "Customer"
 msgstr "Cliente"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "Age"
 msgstr "Edad"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "Order parts (admin):"
 msgstr "Partes de la orden (admin):"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "Add"
 msgstr "Agregar"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "Remove"
 msgstr "Quitar"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "Send back"
 msgstr "Devolver"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.xml:0
 msgid "No orders here."
 msgstr "No hay órdenes aquí."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "Use a longer track"
 msgstr "Usar un track más largo"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid ""
 "Pick a longer RAW track that is on the rack. It comes off\n"
 "                inventory instead, and the leftover is thrown away."
-msgstr "Elige un track RAW más largo que esté en el rack. Se descuenta ese del inventario y el sobrante se bota."
+msgstr ""
+"Elige un track RAW más largo que esté en el rack. Se descuenta ese del "
+"inventario y el sobrante se bota."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "Nothing on this card can be changed."
 msgstr "No hay nada en esta tarjeta que se pueda cambiar."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "Now cut from:"
 msgstr "Ahora se corta de:"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "No RAW track chosen yet"
 msgstr "Todavía no se eligió track RAW"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "Needs"
 msgstr "Necesita"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "piece(s)"
 msgstr "pieza(s)"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "on hand)"
 msgstr "en inventario)"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "Not enough: needs"
 msgstr "No alcanza: necesita"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "Use the track picked"
 msgstr "Usar el track elegido"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "Use the"
 msgstr "Usar los"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "tracks picked"
 msgstr "tracks elegidos"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "Pick a track"
 msgstr "Elige un track"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.xml:0
 msgid "Cancel"
 msgstr "Cancelar"
 
 #. module: aa_shop_floor
 #. odoo-javascript
-msgid "One job is one worker on one piece of work, however many times they started and stopped it. Time still running and anything logged as blocked are left out."
-msgstr "Un trabajo es un trabajador en una pieza de trabajo, sin importar cuántas veces lo inició y lo paró. No se cuenta el tiempo que sigue corriendo ni lo registrado como bloqueado."
-
-#. module: aa_shop_floor
-#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/operator_pin.js:0
 msgid "The PIN must be at least 4 digits."
 msgstr "El PIN debe tener al menos 4 dígitos."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/operator_pin.js:0
 #, python-format
 msgid "%s's PIN is changed."
 msgstr "Se cambió el PIN de %s."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
+msgid "Assigned"
+msgstr "Asignado"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
+msgid "In progress"
+msgstr "En progreso"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
+msgid "Done"
+msgstr "Hecho"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
+msgid "No work orders"
+msgstr "Sin órdenes de trabajo"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
+msgid "All"
+msgstr "Todas"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
+msgid "To assign"
+msgstr "Por asignar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
+msgid "At stations"
+msgstr "En estaciones"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
+msgid "New"
+msgstr "Nuevo"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
+msgid "1 day"
+msgstr "1 día"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
+#, python-format
+msgid "%s days"
+msgstr "%s días"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
 #, python-format
 msgid "Remove %s"
 msgstr "Quitar %s"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
 #, python-format
-msgid "Take the %(part)s off %(order)s? Their Shop Floor work is cancelled, the lines go to 0 and the unpaid invoice is redone."
-msgstr "¿Quitar %(part)s de %(order)s? Su trabajo en Shop Floor se cancela, las líneas quedan en 0 y la factura sin pagar se rehace."
+msgid ""
+"Take the %(part)s off %(order)s? Their Shop Floor work is cancelled, the "
+"lines go to 0 and the unpaid invoice is redone."
+msgstr ""
+"¿Quitar %(part)s de %(order)s? Su trabajo en Shop Floor se cancela, las "
+"líneas quedan en 0 y la factura sin pagar se rehace."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
 #, python-format
 msgid "Send back %s"
 msgstr "Devolver %s"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
 #, python-format
-msgid "%(station)s on %(order)s was marked done. Send it back to the station as not done? The stock it moved is put back and the station gets the job again."
-msgstr "%(station)s en %(order)s se marcó como hecho. ¿Devolverlo a la estación como no hecho? El inventario que movió se repone y la estación recibe el trabajo otra vez."
+msgid ""
+"%(station)s on %(order)s was marked done. Send it back to the station as not"
+" done? The stock it moved is put back and the station gets the job again."
+msgstr ""
+"%(station)s en %(order)s se marcó como hecho. ¿Devolverlo a la estación como"
+" no hecho? El inventario que movió se repone y la estación recibe el trabajo"
+" otra vez."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/overview_list.js:0
 #, python-format
 msgid "%(station)s on %(order)s is back at the station."
 msgstr "%(station)s en %(order)s está de vuelta en la estación."
 
 #. module: aa_shop_floor
 #. odoo-javascript
-msgid "Hardware Box"
-msgstr "Caja de hardware"
-
-#. module: aa_shop_floor
-#. odoo-javascript
-msgid "Tracks"
-msgstr "Tracks"
-
-#. module: aa_shop_floor
-#. odoo-javascript
-msgid "Springs"
-msgstr "Resortes"
-
-#. module: aa_shop_floor
-#. odoo-javascript
-msgid "Pick a longer RAW track that is on the rack. It comes off inventory instead, and the leftover is thrown away."
-msgstr "Elige un track RAW más largo que esté en el rack. Se descuenta ese del inventario y el sobrante se bota."
-
-#. module: aa_shop_floor
-#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/track_swap.js:0
 #, python-format
 msgid "Cut from %s"
 msgstr "Cortado de %s"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
+msgid "Hardware Box"
+msgstr "Caja de hardware"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
+msgid "Tracks"
+msgstr "Tracks"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
+msgid "Springs"
+msgstr "Resortes"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Assembly"
 msgstr "Ensamble"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Spring"
 msgstr "Resorte"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Outer"
 msgstr "Exterior"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Inner"
 msgstr "Interior"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Spring (outer)"
 msgstr "Resorte (exterior)"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Spring (inner)"
 msgstr "Resorte (interior)"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Wire"
 msgstr "Alambre"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "I.D."
 msgstr "I.D."
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Length"
 msgstr "Largo"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "LH"
 msgstr "LH"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "RH"
 msgstr "RH"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Note"
 msgstr "Nota"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Filler"
 msgstr "Relleno"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Door"
 msgstr "Puerta"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Track"
 msgstr "Track"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Pairs"
 msgstr "Pares"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Cut to"
 msgstr "Cortar a"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Custom"
 msgstr "Especial"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "For"
 msgstr "Para"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Door height"
 msgstr "Alto de puerta"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Parts"
 msgstr "Partes"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Extras"
 msgstr "Extras"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Weight"
 msgstr "Peso"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Kit"
 msgstr "Kit"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Box contents"
 msgstr "Contenido de la caja"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Lift cable"
 msgstr "Cable de levante"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Cable"
 msgstr "Cable"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Cut"
 msgstr "Cortar"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Each cable"
 msgstr "Cada cable"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Drum"
 msgstr "Tambor"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Hardware Color"
 msgstr "Color de hardware"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Track Lift"
 msgstr "Levante del track"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Turns"
 msgstr "Vueltas"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Wind"
 msgstr "Enrollado"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Longer than any prepared track"
 msgstr "Más largo que cualquier track preparado"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Each LH / RH is a full set (outer + inner), both the same hand"
-msgstr "Cada LH / RH es un juego completo (exterior + interior), los dos de la misma mano"
+msgstr ""
+"Cada LH / RH es un juego completo (exterior + interior), los dos de la misma"
+" mano"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "1 oval sleeve, 1 thimble, 1 aluminum stop"
 msgstr "1 manga ovalada, 1 guardacabo, 1 tope de aluminio"
 
 #. module: aa_shop_floor
 #. odoo-javascript
+#: code:addons/aa_shop_floor/static/src/mrp_display/mrp_display_record.js:0
 msgid "Custom length (see the order)"
 msgstr "Largo especial (ver la orden)"
