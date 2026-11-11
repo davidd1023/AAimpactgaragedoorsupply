@@ -32,6 +32,14 @@
                     t-on-click.stop="() => this.aaPrintSticker()">
                 <i class="fa fa-print me-1"/>Print
             </button>
+            <!-- A LONGER TRACK (owner, 2026-11-11): when the RAW piece the job
+                 asks for is not on the rack, Jorge cuts it from a longer one
+                 and inventory follows. -->
+            <button t-if="aaTrackSwappable()"
+                    type="button" class="btn btn-outline-secondary o_aa_track_swap_btn"
+                    t-on-click.stop="() => this.aaOpenTrackSwap()">
+                <i class="fa fa-exchange me-1"/>Change track
+            </button>
             <button t-if="!active and !disabled and !['done', 'cancel'].includes(props.record.data.state)"
                     type="button" class="btn btn-success o_aa_start_btn"
                     t-on-click.stop="onClickHeader">
