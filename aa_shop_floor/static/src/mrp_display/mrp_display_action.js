@@ -12,7 +12,9 @@ patch(MrpDisplayAction.prototype, {
         structure["mrp.workorder"].push(
             "aa_shop_spec", "aa_packed", "aa_hardware_card", "aa_box_url", "aa_wo_number",
             // One Track Prep card per order (owner, 2026-11-02).
-            "aa_track_merge");
+            "aa_track_merge",
+            // A longer RAW track (owner, 2026-11-11).
+            "aa_track_swappable");
         return structure;
     },
 });
