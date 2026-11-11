@@ -1,7 +1,8 @@
 // ASK THE REFERENCE HOW IT PICKS A DRUM.
 //
 //   node dev/drum-probe.mjs            one request, to prove the endpoint
-//   node dev/drum-probe.mjs list       the WHOLE drum table, one request
+//   node dev/drum-probe.mjs list       every drum NAME, one request
+//   node dev/drum-probe.mjs detail "CANIMEX/TF D800-120"   one full record
 //   node dev/drum-probe.mjs sweep      map the recommendation rule over a grid
 //
 // WHY THIS EXISTS. "How is the drum picked" has been an open question for
@@ -129,6 +130,29 @@ login();
 // records and which had to be measured), its moment arms, its circumference,
 // and `maximumDiameter` - the MAXIMUM CABLE DIAMETER, which is the standing
 // "does D800-120 run 1/4\" or 3/16\" cable" question answered outright.
+// ONE DRUM'S FULL RECORD BY NAME. `maximumDiameter` is the maximum CABLE
+// diameter, which is what settles "does D800-120 run 1/4\" or 3/16\" cable".
+if (process.argv[2] === "detail") {
+    const name = process.argv[3];
+
+    if (!name) {
+        console.error('usage: node dev/drum-probe.mjs detail "CANIMEX/TF D800-120"');
+        process.exit(1);
+    }
+
+    const raw = xhr(["-L", `${BASE}/spring-engineering/drum?drumName=${encodeURIComponent(name)}`]);
+    let j;
+
+    try { j = JSON.parse(raw); } catch { console.log(raw.slice(0, 300)); process.exit(1); }
+
+    const d = j.Drum ?? j;
+    console.log(`${d.drumName ?? name}\n`);
+    for (const [k, v] of Object.entries(d)) {
+        console.log(`  ${k.padEnd(24)} ${Array.isArray(v) ? v.join(", ") : v}`);
+    }
+    process.exit(0);
+}
+
 if (process.argv[2] === "list") {
     // `liftType` is required here too, and it is how the STANDARD and
     // HI-LIFT sets are separated - this module keeps them in two tables

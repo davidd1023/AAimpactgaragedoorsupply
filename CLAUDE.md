@@ -3077,6 +3077,68 @@ real modelling exercise and it is not done.
 thousand readings were pulled, at a second apiece, while three of the fields
 each one returned went in the bin.
 
+##### D800-120 RUNS 1/4" CABLE, AND THE REST OF THE ENDPOINTS SURVEYED (2026-11-11)
+
+**`GET /spring-engineering/drum?drumName=CANIMEX/TF D800-120`** - one request,
+and a standing question is closed:
+
+```
+maximumDiameter      0.25        <- the MAXIMUM CABLE DIAMETER: 1/4", not 3/16"
+maximumHeight        384         maximumWeight         2200
+maximumHighLift      120         flatMomentArm         4.125
+circumference        25.92       rateOfRise            0.313
+cableLength          137         maximumCapacityFlat   264
+isHighLift true      isStandard false      compatible null
+```
+
+None of that was held anywhere in this repository. `DRUM_LIMITS` carries no
+entry for the hi-lift drums at all, which is what made
+`rung-target-sample.mjs` fall back to `?? 750` and put the heavy rungs out of
+reach - **those figures can now be filled in from the source** rather than
+guessed or left out.
+
+**AND THE REST OF THE API SURFACE, SURVEYED SO NOBODY LOOKS AGAIN.** Every
+quoted route in the shop bundle:
+
+```
+ENGINEERING   /spring-engineering/engineer-torsion-spring   (pull.mjs uses it)
+              /spring-engineering/drum-recommendation       (the drum rule)
+              /spring-engineering/drum-list                 (names only)
+              /spring-engineering/drum                      (one full record)
+
+COMMERCE      /custom/duplex  /custom/torsion  /custom/torsion-preview
+              /custom/door    /custom/extension   /cart/*  /product/*
+```
+
+**THE `/custom/*` ROUTES ARE COMMERCE, NOT ENGINEERING.** `torsion-preview`
+returns `{springParts, canConvert, totalPrice}` - it takes a spring you have
+ALREADY specified and prices it, or converts it to stock parts. Useful if
+pricing or stock-conversion is ever wanted; it says nothing about how a length
+is chosen.
+
+**AND THERE IS NO "SPRINGS BY IPPT" ON THE WEB.** That module exists in their
+mobile and desktop app but has no web route - `ippt` appears in the entire
+bundle twice, both as a variable name. So the web cannot be asked to invert
+IPPT into a spring, which was the one remaining cheap route to the length
+rule. **The four engineering endpoints above are the whole surface.**
+
+###### THE DESKTOP APP: FOUND, DELIBERATELY NOT OPENED
+
+`resources.sscorp.com/springengineering/SSCSpringEngineering.msi` (75.7 MB)
+and `.dmg` (81.2 MB) download without a login, and a 2020 Windows build of a
+calculation tool would very likely decompile to readable source.
+
+**NOT DONE, AND THE FIRST REASON IS TECHNICAL**: both were last modified
+**September 2020**, while the mobile app is at v2.1.5 (January 2026) and the
+web calculator is live. Every figure this repository holds is calibrated
+against the LIVE service, so a 2020 rule could not be told apart from a stale
+one - a discovery there might make the model quietly worse.
+
+The second reason is that decompiling a supplier's software to replicate a
+tool they give the trade free is the owner's exposure, not the agent's, and
+105 readings of duplex accuracy on a product he does not sell is not worth
+putting on the table. **He agreed; it stays undownloaded.**
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
