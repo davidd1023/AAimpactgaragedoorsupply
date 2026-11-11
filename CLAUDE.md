@@ -2982,6 +2982,52 @@ automation. It has never been asked; `dev/pull.mjs` only ever calls the
 engineering endpoint. **One request would answer what nobody here can derive**,
 and a small sweep would give the whole rule.
 
+##### HOW THE DRUM IS PICKED - ANSWERED (2026-11-11)
+
+A standing unanswered question, recorded for over a week as blocking the
+second project's quoting automation and as something only the owner could
+settle. **The reference answers it, and reading their public bundle is what
+found the door.**
+
+```
+GET /spring-engineering/drum-recommendation
+    ?liftType=Standard&doorHeightInches=168&doorWeightPounds=1067
+```
+
+**THE RULE, SWEPT OVER 8 HEIGHTS x 9 WEIGHTS AND REPRODUCED EXACTLY:**
+
+> Take the FIRST drum, in the order `D400-96` -> `D400-144` -> `D525-216`,
+> whose **maxHeight >= door height** AND **maxWeight >= door weight**.
+
+All 72 cells of the sweep are reproduced by that rule using the
+`DRUM_LIMITS` this module already holds - 96/530, 144/750, 231/1500. **The
+table was already right; only the selection rule was missing**, and it is two
+comparisons.
+
+**THREE THINGS THAT COST A REQUEST EACH TO LEARN, so nobody pays twice:**
+
+- **`X-Requested-With: XMLHttpRequest` IS NOT OPTIONAL.** Without it the route
+  redirects to `/account` and answers **200 with HTML** - which is exactly
+  what an expired session looks like, and is why the first attempt read as a
+  login failure. `dev/pull.mjs`'s own endpoint does not need it, so this is
+  per-route.
+- **THE FIELD NAMES COME FROM THE SERVER, NOT THE BUNDLE.** The minified
+  JavaScript shows `doorHeight`; the server wants `doorHeightInches`. With
+  the XHR header a bad request answers **422 naming every field it wants** -
+  far better than reading minified code.
+- **`drum-list` RETURNS NAMES ONLY** - `{"Drums":["AMBASSADOR D-101", ...]}`,
+  about sixty across many brands - not records. The full record comes back
+  from the RECOMMENDATION, and it is rich: `maximumHeight`, `maximumWeight`,
+  **`maximumDiameter` (the maximum CABLE diameter)**, `highMomentArm`,
+  `flatMomentArm`, `circumference`, `cableLength` and a `compatible` list.
+  D525-216 returns `maximumHeight 231` and `maximumWeight 1500`, confirming
+  both figures this repository had to derive by hand.
+
+**SO `maximumDiameter` ALSO ANSWERS "DOES D800-120 RUN 1/4\" OR 3/16\" CABLE"**
+- another standing question - for one request against a hi-lift door.
+`dev/drum-probe.mjs` is the tool; it defaults to a SINGLE request and the
+sweep is opt-in, which is the V16 lesson built in.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
