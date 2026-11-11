@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- WHAT A CUSTOM-LENGTH TRACK JOB MAKES (owner, 2026-11-11).
+
+         A track longer than every prepared one is sold on the dealer order as
+         a SERVICE line (aa_dealer_orders.product_custom_track), priced per inch.
+         It stays a service - that is what stops Odoo's own route raising a
+         prepared-track job for the WRONG length. But a manufacturing order
+         cannot make a service, so the Track Prep job for it makes this product
+         instead: a goods item that is never stocked, never sold and never
+         bought. Its job carries the sale line (aa_sale_line_id), and the card
+         reads the size, direction, colour and length off that line.
+
+         Its name must never say "Horizontal Track" or "Vertical Track":
+         _aa_track_facts reads those words to recognise a prepared track. -->
+    <data noupdate="1">
+        <record id="product_custom_track_job" model="product.template">
+            <field name="name">Custom Length Track (Track Prep job)</field>
+            <field name="default_code">AA-TRACK-PREP</field>
+            <field name="type">consu</field>
+            <field name="is_storable" eval="False"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0.0</field>
+        </record>
+    </data>
+</odoo>
