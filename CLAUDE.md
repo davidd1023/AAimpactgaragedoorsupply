@@ -3028,6 +3028,55 @@ comparisons.
 `dev/drum-probe.mjs` is the tool; it defaults to a SINGLE request and the
 sweep is opt-in, which is the V16 lesson built in.
 
+##### THE REFERENCE VOLUNTEERS THREE FIGURES WE THREW AWAY (2026-11-11)
+
+Asked whether there were other ways to get at what the length rule needs. The
+first one cost nothing, because the answer was already on disk: **every
+response carries more than the importer keeps.**
+
+```
+data: turnsOnSprings, totalInchPoundPerTurn, multiplier, cycles,
+      innerSpring{wireSize, innerDiameter, springLength, springWeight},
+      outerSpring{...}
+```
+
+`import.mjs` kept `cycles` and the two springs. **`totalInchPoundPerTurn`,
+`turnsOnSprings` and `multiplier` were discarded on every pull ever made** -
+they survive only in the committed `dev/pulled-*.json`, never in the corpus.
+It keeps all three now.
+
+**IPPT IS THE QUANTITY THE SPRING DERIVES FROM**, so it allows a check against
+the reference's own ARITHMETIC rather than its outputs. Solving
+
+```
+IPPT = (E d^5) / (10.8 D L)      per spring, summed over the nested pair,
+                                 times the door's spring count
+```
+
+over 1,212 clean readings gives **E = 32.63 million psi, p90/p10 spread
+1.0396x, 99.3% within 5%**. The relation HOLDS. That is the first independent
+confirmation of this engine's physics that does not come from fitting lengths
+- and it is the textbook formula from the earlier web search, now checked
+against the reference itself rather than against a calculator website.
+
+**DEAD COILS DO NOT EXPLAIN THE RESIDUAL 4%**: refitting with `L - k d` for k
+from 0 to 5 in half-coil steps moves the spread by 0.002x and never below
+1.0374x. The residual is most likely the length quantisation itself - the grid
+the reference snaps to, `{n, n+0.25}`, leaves gaps of up to 0.75", which on a
+30" spring is well over a per cent.
+
+**WHAT THAT OPENS, AND WHY IT IS NOT FINISHED.** If the continuous length is
+`L = (E d^5) / (10.8 D x IPPT_per_spring)` and the reported one is that
+snapped, then the bonus table is reproducing a SNAP rather than a physical
+quantity - one constant `E` in place of fifty fitted rungs. Closing it needs
+the REQUIRED IPPT (what the door demands), not the reference's reported total,
+which is an output of its own choice and makes any test circular. That is a
+real modelling exercise and it is not done.
+
+**THE LESSON IS CHEAPER THAN THE PHYSICS: READ THE WHOLE RESPONSE.** Twelve
+thousand readings were pulled, at a second apiece, while three of the fields
+each one returned went in the bin.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
