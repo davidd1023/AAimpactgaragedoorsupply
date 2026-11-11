@@ -3444,6 +3444,118 @@ bit**, because that bit was only added to `import.mjs` partway through and
 earlier batches carry none - a split on it would silently call thousands of
 old readings clean.
 
+##### "MAKE SINGLE 100%, AND IMPROVE DUPLEX PAST 120"" (owner, 2026-11-11)
+
+Two questions, and they got different answers. **Duplex past 120" is now
+better and shipped; Single cannot be made 100% today and the reason is
+measured rather than asserted.**
+
+###### DUPLEX PAST 120": DONE. 43.28% -> 61.57%
+
+```
+band                          n     exact BEFORE    exact AFTER
+inside 96"  (recommended)   11564      98.06%         98.06%   <- untouched
+96-120"     (supported)       399      91.73%         91.98%
+over 120"   (DISCLAIMED)      268      43.28%         61.57%
+ALL DUPLEX                  12231      96.66%         97.06%
+```
+
+Golden **725 byte-identical**, **20 invariants pass**, `spring_engineering`
+**0 failed 0 errors of 348**, `spring_calculator` regenerated.
+
+**THE ERROR THERE IS ONE-SIDED AND GROWS**, which is what made it worth
+chasing where nothing else was: 143 readings long against 4 short, 78.7%
+exact just over the line falling to **0.0%** more than 100" past it. Three
+tests were named in advance as what would count - a systematic bias,
+clamping, or drift with distance - and it is the first and third.
+
+**THE OVERSHOOT IS NOT IN THE BONUS, WHICH IS THE WHOLE DESIGN ARGUMENT.**
+Every rung's bonus is clamped to two levels (`lo`/`hi`), at most about an
+inch, so it cannot make a 2" drift. It is in `duplexActiveLength` - the
+stiffness model - and **correcting that would move all 11,564 in-envelope
+readings that are right today.** A correction gated above 120" cannot touch
+one of them. Here the ugly local fix is the SAFE one and the principled one
+is not; that is the reverse of the usual rule and worth remembering.
+
+**THE SIMPLER FORM WON, AGAIN.** Split-half, fit on one half and score on
+the other, both ways round:
+
+```
+baseline (no correction)        116 / 264   43.9%
+per-rung LINEAR    (~64 params) 137 / 264   52.1%
+per-rung CONSTANT  (~32 params) 150 / 264   56.8%   <- shipped
+A GLOBAL linear drift            +0          nothing
+```
+
+Twice the freedom, worse out of sample - the third time this project has
+measured that (`LINE_LEVELS`, the per-group capacity experiment, now this).
+
+**NINE OF THE TEN OFFSETS ARE EXACTLY ONE INCH AND ALL TEN ARE ON HEAVY WIRE
+(0.4531 and up).** That is why it reads as structure rather than a curve
+fitted to 264 points. A rung with under two readings carries no entry; the
+guard itself was chosen by split-half rather than picked.
+
+**DERIVED, NEVER HAND-EDITED**, like the rung table: `node
+dev/derive-over120.mjs` refits it and rewrites `dev/over120-offsets.json`.
+`dev/over120.mjs` and `dev/over120-fit.mjs` are the diagnostics.
+
+**QUOTE 56.8%, NOT 61.57%** - the first is out of sample, the second is the
+shipped table scored on data it was fitted to.
+
+**AND `replay.mjs` BARELY SEES THIS**, which is worth knowing: it does not
+assert length past 120" (269 readings "not asserted - only the wire"), so it
+moved 11,968 -> 11,969. `dev/envelope.mjs` is the tool that measures this
+band. A guard that does not look at what you changed cannot approve it.
+
+###### SINGLE: NO, AND IT IS 2 WRONG IN 1,246
+
+`dev/single-misses.mjs` names them rather than printing a percentage, because
+"is it 100%" cannot be answered by one. **Both are 5 1/4" on D400-144:**
+
+```
+3spr r15  10,000cyc  18x12  750lb   wire 0.295 vs 0.3065   (length, weight ok)
+2spr r12 100,000cyc  18x10  474lb   length 63.25 vs 63     (wire ok)
+```
+
+The second is a quarter inch - the grid's own granularity, one reading.
+
+**THE FIRST IS A REAL FINDING AND IS NOT CLOSED.** It sits at EXACTLY the
+D400-144's 750 lb rating, and an 8-request probe shows the reference stepping
+up a wire between 735 and 750 lb **at two different heights**, so it is the
+WEIGHT, not the height. Its own reported cycle counts say why:
+
+```
+144in  735lb  0.295  -> 11,000 cycles     (target 10,000)
+144in  750lb  0.3065 -> 16,000
+```
+
+At 735 the reference has ~10% margin left on 0.295, so 2% more load takes it
+under the target and it steps up. **Our model gives 0.295 at 750 lb 16,459
+cycles** - no margin problem at all, so we stay soft.
+
+**BUT THE CYCLE MODEL IS NOT BROKEN**, measured on 1,245 clean readings where
+the wire agrees (`dev/single-cycles.mjs`):
+
+```
+OUR cycle life / THEIRS    median 1.000   p10 0.979   p90 1.023   100% within 10%
+```
+
+So a ~2% model against a decision taken on margins this thin: **18.2% of
+readings leave the reference under 10% margin over the target**, and that is
+the population a 2% error can flip. Same mechanism as the 54 duplex wire
+misses - a threshold decision on a quantity known to a few per cent.
+
+**WHAT IS NOT YET EXPLAINED, AND IS TOMORROW'S THREAD**: if our model tracks
+theirs to 2% everywhere, our 16,459 at 750 lb cannot sit beside their 11,000
+at 735 lb on the same wire - that is a ~50% gap at one corner, against ±2%
+globally. Either this corner is genuinely anomalous or the comparison is
+mis-set. **The next step is one command**: run `dev/single-cycles.mjs` on the
+probe output, which holds the 735 lb reading where the wire DOES agree, and
+read the ratio there. Do not theorise before running it.
+
+**5 1/4" IS BOTH MISSES AND IT IS THE FILLER I.D.** - worth a glance when
+this is picked up.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2

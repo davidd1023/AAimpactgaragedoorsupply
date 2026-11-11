@@ -1162,6 +1162,58 @@ const DUPLEX_PAIRS = {
 //
 // DO NOT RE-OFFER A PAIR BY DELETING THIS COMMENT. Calibrating one took thousands
 // of reference readings.
+// PAST 120" THE MODEL OVERSHOOTS, AND THIS IS THE ONLY PLACE A LOCAL
+// CORRECTION IS ALLOWED TO EXIST.
+//
+// The reference disclaims this band in its own words - "only spring lengths
+// between 0 and 120" are supported" - and measured over the corpus the error
+// there is one-sided and grows: 143 readings long against 4 short, 78.7%
+// exact just over the line falling to 0.0% more than 100" past it.
+//
+// THE OVERSHOOT IS NOT IN THE BONUS. Every rung's bonus is clamped to two
+// levels (`lo`/`hi` in lineByCount), at most about an inch, so it cannot
+// produce a 2" drift. It is in duplexActiveLength - the stiffness model -
+// and correcting THAT would move all 11,564 in-envelope readings that are
+// right today. A correction gated above 120" cannot touch one of them, which
+// is the whole reason it is done this way round: here the ugly local fix is
+// the safe one and the principled one is not.
+//
+// DERIVED, NEVER HAND-EDITED, exactly like the rung table itself:
+// `node dev/derive-over120.mjs` refits it and rewrites its source of truth
+// at dev/over120-offsets.json. Proved by SPLIT-HALF before being shipped -
+// fitted on one half of the band, scored on the other, both ways round:
+//
+//     baseline (no correction)        116 / 264   43.9 per cent
+//     per-rung LINEAR    (~64 params) 137 / 264   52.1
+//     per-rung CONSTANT  (~32 params) 150 / 264   56.8   <- shipped
+//
+// The simpler form winning on data it was not fitted to is the same lesson
+// as LINE_LEVELS and the per-group capacity experiment: freedom that is not
+// paid for in generalisation is freedom that chases noise.
+//
+// NINE OF THE TEN OFFSETS ARE EXACTLY ONE INCH AND EVERY ONE IS ON HEAVY
+// WIRE (0.4531 and up), which is why this reads as structure rather than as
+// a curve fitted to 264 points. A rung with fewer than two readings in the
+// band carries no entry and is left alone - a constant fitted to one reading
+// is a constant fitted to noise.
+const DUPLEX_LONG_OFFSET = {
+    "0.4531/0.375": 1,
+    "0.4687/0.375": 1,
+    "0.49/0.3938": 1,
+    "0.5/0.3938": 1,
+    "0.5/0.4062": 1,
+    "0.5312/0.4062": 1,
+    "0.5625/0.4375": 1,
+    "0.625/0.4615": 1,
+    "0.625/0.4687": 2,
+    "0.625/0.49": 1,
+};
+
+// Outer is always inner + 1, so the pair runs past 120" when the inner does
+// past 119. The gate reads OUR OWN length because at prediction time the
+// reference's answer is exactly what is not known.
+const DUPLEX_LONG_FROM = 119;
+
 const DUPLEX_ALIASES = {
     '3 1/2" inside 5 1/2" (Raynor)': '2 5/8" inside 5 1/4"',
     '3 3/8" inside 5 7/8" (Overhead)': '2 5/8" inside 5 1/4"',
@@ -3366,7 +3418,8 @@ get duplexCalibrated() {
 }
 
 get duplexInnerLength() {
-    return duplexSnapToGrid(
+    const step = this.duplexStep;
+    const raw = duplexSnapToGrid(
         duplexLength(
             this.duplexActiveLength,
             this.duplexStep,
@@ -3374,6 +3427,19 @@ get duplexInnerLength() {
         ),
         this.duplexSpringCount
     );
+
+    // See DUPLEX_LONG_OFFSET. Nothing at or below the gate is touched, so
+    // every reading inside the length the reference stands behind returns
+    // exactly what it returned before this existed.
+    if (!step || !(raw > DUPLEX_LONG_FROM)) {
+        return raw;
+    }
+
+    const off = DUPLEX_LONG_OFFSET[`${step.outerWire}/${step.innerWire}`];
+
+    return off
+        ? duplexSnapToGrid(raw - off, this.duplexSpringCount)
+        : raw;
 }
 
 // Active coil length of the pair, before rounding. Exposed because the
