@@ -2759,7 +2759,9 @@ failures. It found no new lever, but it CLOSED two hypotheses by measurement
 and confirmed two decisions, which is worth writing down so nobody re-derives
 them.
 
-**THE COIL-ROUNDING HYPOTHESIS IS DEAD.** The industry formula is
+**THE COIL-ROUNDING HYPOTHESIS IS NOT DEAD - THE TEST BELOW COULD NOT SEE
+IT** (corrected 2026-11-11, see *THE VENDOR STATES THE LENGTH RULE* further
+down). The industry formula is
 `IPPT = (E x d^4) / (10.8 x D x N)` with `N = length / wire`, because torsion
 coils are wound CLOSED and touching. That suggests the reference might solve
 for the coil count and ROUND IT - which would put length on a grid spaced by
@@ -2857,6 +2859,57 @@ rule.**
 The readings are kept - they are 223 more genuine reference answers and they
 cost nothing to hold - and the table is refitted around them. Golden unmoved
 (725 byte-identical), 20 invariants pass.
+
+##### THE VENDOR STATES THE LENGTH RULE, AND MY REFUTATION WAS INVALID (2026-11-11)
+
+Asked to search further rather than accept "nothing more can be done", and
+this came back from **Service Spring's own ordering guide** - the reference's
+own words:
+
+> *"for a distorted or broken spring, count total coils and multiply by wire
+> size - e.g., 120 coils x .250 wire = 30\""*
+
+**LENGTH = TOTAL COILS x WIRE SIZE.** Which is the coil hypothesis the entry
+above records as refuted - and **that refutation was invalid.** The test was
+"is `length / wire` near an integer", measured over 20,344 readings, and it
+found a near-uniform spread. But the reference reports length rounded to a
+QUARTER INCH, and a quarter inch is **0.95 of a coil on 0.2625 wire**. The
+rounding destroys integrality by construction, so the test could not have
+detected the rule even if it were exactly true. **A test that cannot fail the
+hypothesis cannot refute it either.**
+
+**THE TEST ONLY DISCRIMINATES ON THICK WIRE**, where a quarter inch is a small
+fraction of a coil. On clean readings:
+
+```
+wire     readings   within 1/8"   by chance   verdict
+0.5           153       86.3%        50.0%    supports
+0.625          10       60.0%        40.0%    supports (n too small)
+0.4615        118       39.0%        54.2%    AGAINST
+0.5625         13       23.1%        44.4%    AGAINST (n too small)
+   ...most rungs: cannot tell
+```
+
+**INCONCLUSIVE, AND THE TEST IS ITSELF CONFOUNDED**: for a wire that divides
+evenly into quarters (0.5, 0.25) the multiples of `d` land on the same grid
+the reference rounds to, so agreement is an artefact rather than evidence.
+**So the rule is neither confirmed nor refuted** - which is a different and
+more honest position than the entry above claimed.
+
+**WHAT IT WOULD TAKE TO SETTLE IT**: implement the form - solve for the coil
+count from the required IPPT, multiply by the wire, round to a quarter - and
+score it against the never-tuned sets. That is a REWRITE of the length model
+rather than a tweak, and it risks the 98.25% that works today. It is the first
+genuinely new idea about the FORM since this work began, and it comes from the
+vendor rather than from guessing.
+
+**ALSO WORTH KNOWING, from the same search**: commercial 3 3/4" springs are
+sold at lengths like **45.5"** (American Garage Door Supply publish IPPT per
+SKU), so the reference is NOT picking from a stock list - it never returns a
+half inch. And SSC's **Spring Engineering app** is their rate book as
+software, with Conversions, Engineering, Spring IPPT, Springs by IPPT and a
+Weight Calculator - the same engine behind the web calculator, should anyone
+want a second way to probe it.
 
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
