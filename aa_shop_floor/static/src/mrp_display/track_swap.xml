@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="aa_shop_floor.TrackSwapDialog">
-        <Dialog title="'Use a longer track'" size="'md'">
+        <Dialog title.translate="Use a longer track" size="'md'">
             <p class="text-muted mb-3">
                 Pick a longer RAW track that is on the rack. It comes off
                 inventory instead, and the leftover is thrown away.
