@@ -12,3 +12,5 @@ from . import orphan_jobs
 from . import operator_pin
 from . import order_note
 from . import track_merge
+from . import ir_ui_menu
+from . import track_swap

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="aa_shop_floor.TrackSwapDialog">
+        <Dialog title="'Use a longer track'" size="'md'">
+            <p class="text-muted mb-3">
+                Pick a longer RAW track that is on the rack. It comes off
+                inventory instead, and the leftover is thrown away.
+            </p>
+            <div t-if="!state.board.length" class="alert alert-info mb-0">
+                Nothing on this card can be changed.
+            </div>
+            <div t-foreach="state.board" t-as="job" t-key="job.production_id" class="mb-3 border-top pt-2">
+                <div class="fs-5 fw-bold" t-esc="job.track"/>
+                <div class="small text-muted mb-2">
+                    <t t-esc="job.job"/>
+                    <t t-if="job.current"><br/>Now cut from: <span class="fw-bold" t-esc="job.current"/></t>
+                    <t t-else=""><br/>No RAW track chosen yet</t>
+                    <br/>Needs <span class="fw-bold" t-esc="job.needs"/> piece(s)
+                </div>
+                <div t-if="!job.options.length" class="text-danger" t-esc="job.reason"/>
+                <div class="d-flex flex-wrap gap-2">
+                    <button t-foreach="job.options" t-as="option" t-key="option.id"
+                            type="button"
+                            t-att-class="'btn btn-lg ' + (isPicked(job, option) ? 'btn-primary' : 'btn-outline-primary')"
+                            t-on-click="() => this.pick(job, option)">
+                        <span class="fw-bold" t-esc="option.length"/>
+                        <span class="small ms-1">(<t t-esc="option.on_hand"/> on hand)</span>
+                        <div t-if="isShort(job, option)" class="small fw-bold text-danger">
+                            Not enough: needs <t t-esc="job.needs"/>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary btn-lg" t-att-disabled="!pickedCount or state.busy"
+                        t-on-click="confirm">
+                    <t t-if="pickedCount === 1">Use the track picked</t>
+                    <t t-elif="pickedCount">Use the <t t-esc="pickedCount"/> tracks picked</t>
+                    <t t-else="">Pick a track</t>
+                </button>
+                <button class="btn btn-secondary btn-lg" t-on-click="props.close">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>
