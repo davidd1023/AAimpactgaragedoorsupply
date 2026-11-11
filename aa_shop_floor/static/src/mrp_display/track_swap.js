@@ -25,7 +25,9 @@ export class AaTrackSwapDialog extends Component {
     setup() {
         this.orm = useService("orm");
         this.notification = useService("notification");
-        this.state = useState({ board: [], busy: false, picked: null });
+        // ONE PICK PER JOB, keyed by production: a merged card carries the
+        // horizontal and the vertical, and both may need a longer piece.
+        this.state = useState({ board: [], busy: false, picked: {} });
         onWillStart(() => this.load());
     }
 
@@ -34,32 +36,52 @@ export class AaTrackSwapDialog extends Component {
             "mrp.production", "aa_track_swap_board", [this.props.productionIds]);
     }
 
-    // TWO TAPS, NOT ONE: the first picks, the second confirms. It takes a
-    // real piece off the count, and a tablet gets brushed.
+    // A tap picks, a second tap on the same piece unpicks; nothing changes
+    // until the button at the bottom. It takes real pieces off the count, and
+    // a tablet gets brushed.
     pick(job, option) {
-        this.state.picked = { productionId: job.production_id, option };
+        const picked = this.state.picked;
+        if (picked[job.production_id] && picked[job.production_id].id === option.id) {
+            delete picked[job.production_id];
+        } else {
+            picked[job.production_id] = option;
+        }
     }
 
     isPicked(job, option) {
-        const picked = this.state.picked;
-        return picked && picked.productionId === job.production_id && picked.option.id === option.id;
+        const chosen = this.state.picked[job.production_id];
+        return Boolean(chosen) && chosen.id === option.id;
+    }
+
+    isShort(job, option) {
+        return option.on_hand < job.needs;
+    }
+
+    get pickedCount() {
+        return Object.keys(this.state.picked).length;
     }
 
     async confirm() {
-        const picked = this.state.picked;
-        if (!picked || this.state.busy) {
+        const entries = Object.entries(this.state.picked);
+        if (!entries.length || this.state.busy) {
             return;
         }
         this.state.busy = true;
+        const done = [];
         try {
-            const result = await this.orm.call(
-                "mrp.production", "aa_track_swap", [[picked.productionId], picked.option.id]);
-            this.notification.add(`Cut from ${result.track}`, { type: "success" });
-            await this.props.onDone();
-            this.props.close();
+            for (const [productionId, option] of entries) {
+                const result = await this.orm.call(
+                    "mrp.production", "aa_track_swap", [[Number(productionId)], option.id]);
+                done.push(result.track);
+            }
         } finally {
             this.state.busy = false;
+            if (done.length) {
+                this.notification.add(`Cut from ${done.join(", ")}`, { type: "success" });
+                await this.props.onDone();
+            }
         }
+        this.props.close();
     }
 }
 

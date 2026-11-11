@@ -107,6 +107,13 @@ class MrpProduction(models.Model):
                 }
         return None
 
+    def _aa_track_pieces(self):
+        """How many RAW pieces the job consumes: a stock job keeps its count;
+        a custom job cuts LH + RH for every pair."""
+        self.ensure_one()
+        move = self._aa_raw_track_move()
+        return move.product_uom_qty if move else 2.0 * (self.product_qty or 1.0)
+
     def aa_track_swap_allowed(self):
         """Whether the card shows the button: an open track job with something to swap."""
         self.ensure_one()
@@ -141,6 +148,7 @@ class MrpProduction(models.Model):
         options.sort(key=lambda o: o["inches"])
         current = need["current"]
         return {
+            "needs": self._aa_track_pieces(),
             "current": current.with_context(display_default_code=False).display_name if current else False,
             "track": '%s" %s · %s' % (need["size"], need["kind"].title(), need["colour"]),
             "options": options,
@@ -163,8 +171,7 @@ class MrpProduction(models.Model):
                 or facts["colour"] != need["colour"] or facts["inches"] < need["min_inches"]:
             raise UserError(_("That RAW track does not fit this job."))
         old_move = self._aa_raw_track_move()
-        # A STOCK JOB KEEPS ITS COUNT; a custom job cuts LH + RH for every pair.
-        qty = old_move.product_uom_qty if old_move else 2.0 * (self.product_qty or 1.0)
+        qty = self._aa_track_pieces()
         if old_move:
             old_name = old_move.product_id.with_context(display_default_code=False).display_name
             old_move._do_unreserve()

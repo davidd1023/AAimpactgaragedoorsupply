@@ -52,6 +52,7 @@ class TrackSwapCase(TransactionCase):
         options = self._job().aa_track_swap_options()
         self.assertEqual([o["id"] for o in options["options"]], [self.longer.id, self.longest.id])
         self.assertEqual(options["options"][0]["length"], "9'6\"")
+        self.assertEqual(options["needs"], 1.0)
 
     def test_the_swap_takes_the_longer_piece_off_the_count(self):
         job = self._job()
@@ -108,8 +109,21 @@ class TrackSwapCase(TransactionCase):
         self.assertTrue(job.aa_track_swappable)
         board = job.aa_track_swap_board()
         self.assertFalse(board[0]["current"])
+        self.assertEqual(board[0]["needs"], 2.0, "LH + RH for the one pair")
         # 100" or more: the 9'6" (114") and the 12', not the 8' (96").
         self.assertEqual([o["id"] for o in board[0]["options"]], [self.longer.id, self.longest.id])
         job.aa_track_swap(self.longer.id)
         move = job.move_raw_ids.filtered(lambda m: m.product_id == self.longer)
         self.assertEqual(move.product_uom_qty, 2.0, "LH + RH for the one pair")
+
+    def test_both_jobs_on_one_card_can_be_changed(self):
+        vertical = self._job()
+        horizontal_wanted = self._raw("3\" Horizontal Track RAW - 9'6\" Black", 0)
+        horizontal = self._job(horizontal_wanted)
+        board = (vertical | horizontal).aa_track_swap_board()
+        self.assertEqual(len(board), 2)
+        vertical.aa_track_swap(self.longer.id)
+        horizontal.aa_track_swap(self.horizontal.id)
+        self.assertEqual(vertical.move_raw_ids.filtered(lambda m: m.state != "cancel").product_id, self.longer)
+        self.assertEqual(horizontal.move_raw_ids.filtered(lambda m: m.state != "cancel").product_id,
+                         self.horizontal)
