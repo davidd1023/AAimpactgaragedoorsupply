@@ -3355,6 +3355,61 @@ Committed as `dev/eval-trade-single-seed20261111.json` with
 eval set. The cases are not committed: the sampler plus the seed reproduces
 them exactly, and a seed is a better record than a file.
 
+##### WHERE ACCURACY STANDS, 2026-11-11 (two committed tools, no requests)
+
+Asked *"so whats accuracy at right now?"*. Measured fresh rather than quoted
+from the entries above, which were taken at different points and under
+different definitions. **Both tools are committed and need no database and no
+pulls**, so this is one command each from now on:
+
+```
+node dev/single-breakdown.mjs dev/eval-single*.json dev/eval-trade-single*.json
+node dev/envelope.mjs
+```
+
+**SINGLE - what the business actually sells:**
+
+```
+                       n     wire    length   weight
+the three sold IDs   1187   99.9%    99.9%    99.9%
+all clean Single     1246   99.9%    99.9%    99.9%
+  2 5/8"              422  100.0%   100.0%   100.0%
+  3 3/4"              422  100.0%   100.0%   100.0%
+  5 1/4"              343   99.7%    99.7%    99.7%
+```
+
+**ONE MISS IN 1,187, and it is on 5 1/4"** - every 2 5/8" and 3 3/4" reading
+ever taken is exact on wire, length and weight. The evidence base is 1,246
+clean readings against 275 a day earlier.
+
+**DUPLEX - calculated but not sold**, split by whether the reference stands
+behind its own answer:
+
+```
+band                          n     exact    wire right
+inside 96"  (recommended)   11564   98.06%     99.25%
+96-120"     (supported)       399   91.73%     98.50%
+over 120"   (DISCLAIMED)      268   43.28%     98.13%
+ALL DUPLEX                  12231   96.66%     99.20%
+```
+
+**QUOTE 98.06%, NOT 96.66%.** The pooled figure averages in 268 doors whose
+own author says *"only spring lengths between 0 and 120" are supported"*.
+
+**THE WIRE IS 98-99% EVERYWHERE, IN THE ENVELOPE AND OUT OF IT.** Only LENGTH
+degrades, and only where the reference has given up: of 311 duplex failures
+with the wire already right, **147 are past 120"**.
+
+**THIS IS THE STRICT COUNT.** `envelope.mjs` asserts BOTH lengths of the pair
+on every reading including those past 120", where `replay.mjs` leaves some
+alone - so it reads a little below figures quoted elsewhere in this file.
+Prefer it: it is the pessimistic one and it is reproducible.
+
+**CLASSIFIED BY THE REFERENCE'S OWN RETURNED LENGTH, not by the `flagged`
+bit**, because that bit was only added to `import.mjs` partway through and
+earlier batches carry none - a split on it would silently call thousands of
+old readings clean.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
