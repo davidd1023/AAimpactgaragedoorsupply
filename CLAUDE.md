@@ -3240,6 +3240,121 @@ more than another decimal:
   perfect so far (100% on length and weight) - on a twenty-ninth of the
   evidence. That imbalance is the real gap, not the 98.25%.
 
+###### A MILLION PULLS: THE ARITHMETIC, AND WHAT DATA CONVERGES TO (owner, 2026-11-11)
+
+*"lets do one million pulls. this should give us all of the info we could
+ever need about the calculations."*
+
+**IT DOES NOT FIT, AND THAT IS BEFORE ANY ARGUMENT ABOUT WHETHER IT WOULD
+HELP:**
+
+```
+corpus.json at 1,155 bytes a reading   1.08 GB
+the raw pull files at 818 bytes          0.76 GB
+                                       --------
+                                         1.84 GB   on a 1.0 GB partition
+time at the one-request-a-second rate   11.6 DAYS continuous
+```
+
+The container is ephemeral and the dev server has already died under host
+load 28. Eleven days of uninterrupted anything is not available here, and
+the disk limit is a hard constraint in this environment.
+
+**BUT THE IDEA INSIDE IT WAS NEW AND WORTH MEASURING.** Batch S2 proved more
+data does not help THE FITTER. "A million readings" is a different and better
+thought: with enough coverage you do not NEED a fitter - you look the answer
+up. That is a genuinely new FORM, which is exactly what every previous entry
+says is required. So it was measured rather than dismissed.
+
+`dev/data-ceiling.mjs` builds the learning curve of a pure lookup - key on
+(rung, springs, floor of active length), take the bonus of the nearest frac
+seen in training, test on a fifth held out and never trained on:
+
+```
+ train      n    key seen   exact (all)   exact (where seen)
+    2%     194      7.6%        3.87%            50.81%
+   10%     970     28.3%       17.15%            60.64%
+   35%    3397     56.0%       38.99%            69.66%
+   70%    6794     73.3%       54.66%            74.54%
+  100%    9707     80.0%       62.12%            77.68%
+
+ THE INSTALLED TABLE on the same held-out readings:        97.40%
+```
+
+**MORE DATA CONVERGES TO SOMETHING WORSE.** Read the last column - that is
+the lookup's ceiling where coverage is not the limit, and it is **77.68%**,
+climbing about a point per doubling. A lookup is what infinite data converges
+to, so no quantity of readings reaches the 97.40% the fitted table already
+gives. **The model is doing work that data cannot replace**: it generalises
+ACROSS keys, and the lookup cannot.
+
+**AND THE KEY SPACE IS NOWHERE NEAR DENSE**: 4,494 distinct keys from 12,133
+readings, **47.3% seen exactly once**. By Good-Turing that puts roughly 17%
+of the next reading's probability on a key never seen - which matches the 80%
+coverage measured. Filling it would take well over 100,000 readings, to reach
+an answer worse than today's.
+
+**20 KEYS CONTRADICT THEMSELVES at the same frac**, so even a perfect lookup
+has a ceiling below 100%.
+
+**SO: NO FURTHER DUPLEX PULLING, AND NOW FOR A FIFTH REASON** - the fit beats
+the limit of what data alone can do.
+
+###### WHAT THE SAME BUDGET BOUGHT INSTEAD: THE TRADE SINGLE BATCH
+
+The imbalance named in the previous entry is the real gap, so the campaign
+was pointed there instead. **`dev/single-trade-sample.mjs` draws the Single
+doors the shop actually SELLS** - 8x7 residential to 18x12 light commercial -
+where `single-gap-sample.mjs` deliberately aims at hi-lift and 12 ft and up
+and yields 27% clean.
+
+**FOUR THINGS KEEP THE YIELD UP, each from a documented failure**: the drum
+is picked by **the reference's own rule learned this session**, weight comes
+from the door's AREA at a real lb/sqft rather than a flat range, the width is
+a real door width the assembly has to fit across, and only the three SOLD
+I.D.s are drawn.
+
+**PROBED WITH 40 BEFORE SPENDING** - the V16 lesson, applied:
+
+```
+CLEAN 35/40 = 88%        (the gap sampler gets 27%)
+and the model on those 35:  wire 100%  length 100%  weight 100%
+```
+
+**`pull.mjs` REFUSED THE FIRST OUTPUT NAME AND WAS RIGHT**: cases stamped
+`eval: true` may only be written to a file whose name contains *eval*, so the
+fitter can never be handed its own yardstick. That guard fired on this batch.
+
+**THE FULL CAMPAIGN: 1,200 REQUESTS, 869 CLEAN, AND THE WIRE IS RIGHT ON
+EVERY ONE.**
+
+```
+1,200 answered, ZERO transport errors, 869 clean (75%)
+
+                        n     wire    length   weight
+every slice pooled     869   100.0%   99.9%    99.9%
+2 5/8"  (sold)         302   100.0%  100.0%   100.0%
+3 3/4"  (sold)         315   100.0%  100.0%   100.0%
+5 1/4"  (sold)         252   100.0%   99.6%    99.6%
+1 / 2 / 4 springs    206/587/76  100%  100/99.8/100%
+10k..50k cycles                 100%   100.0%
+100,000 cycles          75   100.0%   98.7%    98.7%
+```
+
+**SINGLE'S CLEAN EVIDENCE BASE GOES 342 -> 1,211**, three and a half times,
+on exactly the doors the business sells - and the model picks **the right
+wire 869 times out of 869**, which is the figure that matters, because wire
+is the only thing Single has ever got wrong (1 of 275 before this).
+
+**THE ONE LENGTH MISS is a 5 1/4" at 100,000 cycles**, the rarest corner
+drawn: 100k is 75 readings of 869 and 5 1/4" is the ID that adds a filler.
+Not acted on - one reading is what the snap-to-grid lesson was about.
+
+Committed as `dev/eval-trade-single-seed20261111.json` with
+`garageDoorLineId` **stripped**, which `.gitignore` requires of any committed
+eval set. The cases are not committed: the sampler plus the seed reproduces
+them exactly, and a seed is a better record than a file.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
