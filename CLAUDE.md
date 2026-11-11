@@ -3191,6 +3191,40 @@ tool they give the trade free is the owner's exposure, not the agent's, and
 105 readings of duplex accuracy on a product he does not sell is not worth
 putting on the table. **He agreed; it stays undownloaded.**
 
+###### THE MOBILE APPS: ASKED AGAIN, DECLINED AGAIN (owner, 2026-11-11)
+
+*"could you download and access the code from this app"* - the iOS and
+Android **SSC Spring Engineering** apps, after the desktop one was declined.
+
+**ONE OF THE TWO REASONS FOR DECLINING THE DESKTOP APP IS GONE, AND THAT WAS
+SAID PLAINLY.** That build was September 2020 and a stale rule could not be
+told from a correct one. The mobile apps are **v2.1.5, January 2026** -
+current. The technical objection does not apply here.
+
+**WHAT REMAINS IS HIS EXPOSURE, NOT THE AGENT'S.** Service Spring is his
+SUPPLIER, in a live commercial relationship. The iOS route also crosses a
+harder line than the desktop one did: App Store binaries are FairPlay
+encrypted, so reaching the code means stripping DRM - circumvention rather
+than reverse engineering - and the Android route needs an unauthorised copy
+from a mirror.
+
+**AND IT ALMOST CERTAINLY HOLDS NO MATHS.** The web bundle was checked and
+carries no physics constants at all - it is a form that posts to the server.
+The app is the same product on the same backend, so the likeliest outcome is
+the four endpoints already surveyed above.
+
+**THE DECIDING POINT IS WHAT IT WOULD BUY: DUPLEX, WHICH HE DOES NOT SELL.**
+Single measures 99.9% on wire, length and weight over 1,187 readings; duplex
+is 98.06% inside the reference's own envelope. Risking a supplier
+relationship for a decimal on a product withdrawn from sale on 2026-10-28 is
+the wrong trade, and saying so is the job.
+
+**THE LEGITIMATE ROUTE IS BETTER AND FREE: ASK THEM.** He is a customer.
+"How does your calculator choose the spring length" is a question a rep
+answers in one call, on the record, with no exposure - and it would settle
+in five minutes what four measured experiments could not. Offered to draft
+the email.
+
 ###### THE ENGINE'S DRUM TABLES ARE EXACTLY RIGHT. THE DEV TOOLING'S WERE NOT
 
 `node dev/drum-probe.mjs ours` fetched all six drums this module offers and
