@@ -135,11 +135,11 @@
                                         <t t-foreach="aaRow.parts.parts" t-as="aaPart" t-key="aaPart.part">
                                             <button t-if="!aaPart.has" type="button" class="btn btn-sm btn-outline-primary"
                                                     t-on-click.stop="() => this.aaAddPart(aaRow.parts, aaPart.part)">
-                                                <i class="fa fa-plus me-1"/>Add <t t-esc="aaPart.label"/>
+                                                <i class="fa fa-plus me-1"/>Add <t t-esc="aaT(aaPart.label)"/>
                                             </button>
                                             <button t-else="" type="button" class="btn btn-sm btn-outline-danger"
                                                     t-on-click.stop="() => this.aaRemovePart(aaRow.parts, aaPart, aaRow.order)">
-                                                <i class="fa fa-times me-1"/>Remove <t t-esc="aaPart.label"/>
+                                                <i class="fa fa-times me-1"/>Remove <t t-esc="aaT(aaPart.label)"/>
                                             </button>
                                         </t>
                                     </div>
@@ -155,8 +155,8 @@
                                                         <div class="fw-bold" t-esc="aaItem.product"/>
                                                         <t t-foreach="aaItem.summary" t-as="aaSum" t-key="aaSum_index">
                                                             <div class="d-flex justify-content-between gap-3 small">
-                                                                <span class="text-muted" t-esc="aaSum[0]"/>
-                                                                <span class="fw-bold text-end" t-esc="aaSum[1]"/>
+                                                                <span class="text-muted" t-esc="aaT(aaSum[0])"/>
+                                                                <span class="fw-bold text-end" t-esc="aaT(aaSum[1])"/>
                                                             </div>
                                                         </t>
                                                         <div t-if="aaItem.more" class="text-muted small" t-esc="aaItem.more"/>

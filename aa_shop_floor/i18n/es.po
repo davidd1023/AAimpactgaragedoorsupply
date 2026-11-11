@@ -1,0 +1,692 @@
+# Spanish for the Shop Floor (owner, 2026-11-11).
+# Generated from the templates so every msgid is exactly what Owl looks up.
+msgid ""
+msgstr ""
+"Project-Id-Version: aa_shop_floor\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "hardware"
+msgstr "hardware"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Also on this order"
+msgstr "También en esta orden"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Print sticker"
+msgstr "Imprimir etiqueta"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Sticker size"
+msgstr "Tamaño de etiqueta"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Close"
+msgstr "Cerrar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "History"
+msgstr "Historial"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "By day"
+msgstr "Por día"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Recent orders"
+msgstr "Órdenes recientes"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Times"
+msgstr "Tiempos"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Worker & task"
+msgstr "Trabajador y tarea"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Worker"
+msgstr "Trabajador"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Task"
+msgstr "Tarea"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Day"
+msgstr "Día"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "days"
+msgstr "días"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Nobody has clocked any time yet."
+msgstr "Nadie ha registrado tiempo todavía."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Work timed at a station shows here."
+msgstr "El trabajo cronometrado en una estación aparece aquí."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Average"
+msgstr "Promedio"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Jobs"
+msgstr "Trabajos"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Total"
+msgstr "Total"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid ""
+"One job is one worker on one piece of work, however many\n"
+"                    times they started and stopped it. Time still running and\n"
+"                    anything logged as blocked are left out."
+msgstr "Un trabajo es un trabajador en una pieza de trabajo, sin importar cuántas veces lo inició y lo paró. No se cuenta el tiempo que sigue corriendo ni lo registrado como bloqueado."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Nothing finished in the last 60 days."
+msgstr "Nada terminado en los últimos 60 días."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "finished"
+msgstr "terminado"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "worked"
+msgstr "trabajado"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Show older days"
+msgstr "Ver días anteriores"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Nothing has been started yet."
+msgstr "Todavía no se ha iniciado nada."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "A job shows here as soon as somebody taps Start on it."
+msgstr "Un trabajo aparece aquí en cuanto alguien toca Iniciar."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "of"
+msgstr "de"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "worked in total"
+msgstr "trabajado en total"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "so far"
+msgstr "hasta ahora"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "start to finish"
+msgstr "de inicio a fin"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Running"
+msgstr "Corriendo"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Paused"
+msgstr "En pausa"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "· still running"
+msgstr "· todavía corriendo"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "· not finished"
+msgstr "· sin terminar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Finished"
+msgstr "Terminado"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Mark as Done"
+msgstr "Marcar como hecho"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "What for"
+msgstr "Para qué"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Print"
+msgstr "Imprimir"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Change track"
+msgstr "Cambiar track"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Start"
+msgstr "Iniciar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Received"
+msgstr "Recibido"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Send all"
+msgstr "Enviar todo"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Remove all"
+msgstr "Quitar todo"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Send to"
+msgstr "Enviar a"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Remove from"
+msgstr "Quitar de"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Pending"
+msgstr "Pendiente"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Change PIN"
+msgstr "Cambiar PIN"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Operator PINs"
+msgstr "PIN de operadores"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Type a new PIN (at least 4 digits) and press Save. The old PIN stops working at once."
+msgstr "Escribe un PIN nuevo (al menos 4 dígitos) y presiona Guardar. El PIN anterior deja de funcionar enseguida."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "PIN set"
+msgstr "PIN puesto"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "No PIN"
+msgstr "Sin PIN"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "New PIN"
+msgstr "PIN nuevo"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Save"
+msgstr "Guardar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "List"
+msgstr "Lista"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Cards"
+msgstr "Tarjetas"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "All stations"
+msgstr "Todas las estaciones"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "W/O # or customer"
+msgstr "W/O # o cliente"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "orders"
+msgstr "órdenes"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "W/O #"
+msgstr "W/O #"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Sort by W/O # (highest first, lowest first, arrival order)"
+msgstr "Ordenar por W/O # (mayor primero, menor primero, orden de llegada)"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "AA Impact W/O"
+msgstr "W/O AA Impact"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Sort by AA Impact W/O (highest first, lowest first, arrival order)"
+msgstr "Ordenar por W/O AA Impact (mayor primero, menor primero, orden de llegada)"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Customer"
+msgstr "Cliente"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Age"
+msgstr "Edad"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Order parts (admin):"
+msgstr "Partes de la orden (admin):"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Add"
+msgstr "Agregar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Remove"
+msgstr "Quitar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Send back"
+msgstr "Devolver"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "No orders here."
+msgstr "No hay órdenes aquí."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Use a longer track"
+msgstr "Usar un track más largo"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid ""
+"Pick a longer RAW track that is on the rack. It comes off\n"
+"                inventory instead, and the leftover is thrown away."
+msgstr "Elige un track RAW más largo que esté en el rack. Se descuenta ese del inventario y el sobrante se bota."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Nothing on this card can be changed."
+msgstr "No hay nada en esta tarjeta que se pueda cambiar."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Now cut from:"
+msgstr "Ahora se corta de:"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "No RAW track chosen yet"
+msgstr "Todavía no se eligió track RAW"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Needs"
+msgstr "Necesita"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "piece(s)"
+msgstr "pieza(s)"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "on hand)"
+msgstr "en inventario)"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Not enough: needs"
+msgstr "No alcanza: necesita"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Use the track picked"
+msgstr "Usar el track elegido"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Use the"
+msgstr "Usar los"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "tracks picked"
+msgstr "tracks elegidos"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Pick a track"
+msgstr "Elige un track"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "One job is one worker on one piece of work, however many times they started and stopped it. Time still running and anything logged as blocked are left out."
+msgstr "Un trabajo es un trabajador en una pieza de trabajo, sin importar cuántas veces lo inició y lo paró. No se cuenta el tiempo que sigue corriendo ni lo registrado como bloqueado."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "The PIN must be at least 4 digits."
+msgstr "El PIN debe tener al menos 4 dígitos."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#, python-format
+msgid "%s's PIN is changed."
+msgstr "Se cambió el PIN de %s."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#, python-format
+msgid "Remove %s"
+msgstr "Quitar %s"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#, python-format
+msgid "Take the %(part)s off %(order)s? Their Shop Floor work is cancelled, the lines go to 0 and the unpaid invoice is redone."
+msgstr "¿Quitar %(part)s de %(order)s? Su trabajo en Shop Floor se cancela, las líneas quedan en 0 y la factura sin pagar se rehace."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#, python-format
+msgid "Send back %s"
+msgstr "Devolver %s"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#, python-format
+msgid "%(station)s on %(order)s was marked done. Send it back to the station as not done? The stock it moved is put back and the station gets the job again."
+msgstr "%(station)s en %(order)s se marcó como hecho. ¿Devolverlo a la estación como no hecho? El inventario que movió se repone y la estación recibe el trabajo otra vez."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#, python-format
+msgid "%(station)s on %(order)s is back at the station."
+msgstr "%(station)s en %(order)s está de vuelta en la estación."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Hardware Box"
+msgstr "Caja de hardware"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Tracks"
+msgstr "Tracks"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Springs"
+msgstr "Resortes"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Pick a longer RAW track that is on the rack. It comes off inventory instead, and the leftover is thrown away."
+msgstr "Elige un track RAW más largo que esté en el rack. Se descuenta ese del inventario y el sobrante se bota."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+#, python-format
+msgid "Cut from %s"
+msgstr "Cortado de %s"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Assembly"
+msgstr "Ensamble"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Spring"
+msgstr "Resorte"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Outer"
+msgstr "Exterior"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Inner"
+msgstr "Interior"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Spring (outer)"
+msgstr "Resorte (exterior)"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Spring (inner)"
+msgstr "Resorte (interior)"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Wire"
+msgstr "Alambre"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "I.D."
+msgstr "I.D."
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Length"
+msgstr "Largo"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "LH"
+msgstr "LH"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "RH"
+msgstr "RH"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Note"
+msgstr "Nota"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Filler"
+msgstr "Relleno"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Door"
+msgstr "Puerta"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Track"
+msgstr "Track"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Pairs"
+msgstr "Pares"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Cut to"
+msgstr "Cortar a"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Custom"
+msgstr "Especial"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "For"
+msgstr "Para"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Door height"
+msgstr "Alto de puerta"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Parts"
+msgstr "Partes"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Extras"
+msgstr "Extras"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Weight"
+msgstr "Peso"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Kit"
+msgstr "Kit"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Box contents"
+msgstr "Contenido de la caja"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Lift cable"
+msgstr "Cable de levante"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Cable"
+msgstr "Cable"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Cut"
+msgstr "Cortar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Each cable"
+msgstr "Cada cable"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Drum"
+msgstr "Tambor"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Hardware Color"
+msgstr "Color de hardware"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Track Lift"
+msgstr "Levante del track"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Turns"
+msgstr "Vueltas"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Wind"
+msgstr "Enrollado"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Longer than any prepared track"
+msgstr "Más largo que cualquier track preparado"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Each LH / RH is a full set (outer + inner), both the same hand"
+msgstr "Cada LH / RH es un juego completo (exterior + interior), los dos de la misma mano"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "1 oval sleeve, 1 thimble, 1 aluminum stop"
+msgstr "1 manga ovalada, 1 guardacabo, 1 tope de aluminio"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Custom length (see the order)"
+msgstr "Largo especial (ver la orden)"
