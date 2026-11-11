@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- A WORKER WHO SEES ONLY THE SHOP FLOOR (owner, 2026-11-11).
+
+         "a jorge y a michel cuando entren con sus usuarios quiero que solo
+         vean shopfloor". Their login needs Manufacturing and Inventory RIGHTS
+         for the Shop Floor to work at all, and Odoo shows an app to anybody
+         with the rights behind it - so rights cannot hide the other apps.
+         This group hides them instead (ir_ui_menu.py), and changes no right:
+         a member can do exactly what he could before, he is only shown the
+         one app. An administrator is never restricted, even if put in it. -->
+    <record id="group_shop_floor_only" model="res.groups">
+        <field name="name">Shop Floor only (hide every other app)</field>
+        <field name="comment">Members see only the Shop Floor app in the menu. Their access rights are unchanged. Administrators are never restricted.</field>
+    </record>
+</odoo>
