@@ -28,6 +28,7 @@ import { writeFileSync, readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeRnd } from "./rnd.mjs";
+import { load } from "./harness.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const [out, seedArg, countArg, hiShareArg] = process.argv.slice(2);
@@ -49,6 +50,8 @@ if (existsSync(out) && !process.env.OVERWRITE) {
 }
 
 const COUNT = Number(countArg) || 200;
+// the engine's own drum tables, rather than a hand-typed fourth copy
+const mod = await load();
 
 let lineId = null;
 
@@ -64,13 +67,15 @@ if (!lineId) {
 }
 
 // [name, max height, max weight, max hi-lift (0 = standard only)]
+//
+// TAKEN FROM THE ENGINE, NOT TYPED OUT. This was a hand-written copy and it
+// had `575-120` at 192 inches where the drum goes to **264** - so a quarter of
+// that drum's range was never drawn. The engine's own tables are right on all
+// six (checked against the reference's drum records, 2026-11-11); a fourth
+// copy of a fact is a fourth chance to be wrong in one place only.
 const DRUMS = [
-    ["CANIMEX/TF D400-96", 96, 530, 0],
-    ["CANIMEX/TF D400-144", 144, 750, 0],
-    ["CANIMEX/TF D525-216", 231, 1500, 0],
-    ["CANIMEX/TF 575-120", 192, 1000, 120],
-    ["CANIMEX/TF 525-54HL", 234, 1000, 54],
-    ["CANIMEX/TF D800-120", 384, 2200, 120],
+    ...Object.entries(mod.DRUM_LIMITS).map(([n, v]) => [n, v.maxHeight, v.maxWeight, 0]),
+    ...Object.entries(mod.HILIFT_DRUMS).map(([n, v]) => [n, v.maxHeight, v.maxWeight, v.maxHiLift]),
 ];
 const HI_DRUMS = DRUMS.filter((d) => d[3] > 0);
 // A HI-LIFT DRUM ANSWERS ONLY UNDER HI-LIFT.

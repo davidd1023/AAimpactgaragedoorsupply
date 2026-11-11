@@ -122,7 +122,16 @@ console.log(`already hold ${held.size} distinct geometries`);
 
 // --- sample geometries and bucket them by the rung we predict ----------------
 const STD = Object.keys(mod.DRUMS), HI = Object.keys(mod.HILIFT_DRUMS);
-const LIM = mod.DRUM_LIMITS;
+// ONE LOOKUP FOR EITHER KIND OF DRUM.
+//
+// This read DRUM_LIMITS alone, which holds the three STANDARD drums - so
+// every hi-lift drum missed and fell to a `?? 750` fallback that nobody
+// chose. The engine has carried the real figures in HILIFT_DRUMS all along
+// (384/2200/120, 264/1000/120, 234/1000/54, confirmed against the
+// reference's own drum records on 2026-11-11); the sampler was reading the
+// wrong table, which is the fourth time in this repository that a fact kept
+// in two places has been wrong in one of them.
+const limitsFor = (drum) => mod.HILIFT_DRUMS[drum] || mod.DRUM_LIMITS[drum] || null;
 const CYCLES = ["10,000", "15,000", "25,000", "50,000", "75,000", "100,000",
     "150,000", "200,000", "250,000", "300,000"];
 const RADII = ["LHR", "12", "15"];
@@ -145,7 +154,7 @@ const drawn = new Set();
 for (let k = 0; k < SAMPLES; k++) {
     const hi = rnd() < 0.35;
     const drum = pick(hi ? HI : STD);
-    const lim = LIM[drum] || { maxHeight: 144, maxWeight: 750 };
+    const lim = limitsFor(drum) || { maxHeight: 144, maxWeight: 750 };
     const heightIn = between(84, Math.min(lim.maxHeight ?? 144, 240));
     const st = {
         assembly: "Duplex", springId: '3 3/4" inside 6"', drum,
@@ -153,13 +162,10 @@ for (let k = 0; k < SAMPLES; k++) {
         liftType: hi ? "Hi-Lift" : "Standard",
         liftin: hi ? String(between(12, Math.min(120, lim.maxHiLift ?? 120))) : "",
         cycles: pick(CYCLES),
-        // IN SOFT MODE THE CEILING IS NOT A NUMBER ANYBODY TYPED. The three
-        // standard drums carry a real rating in DRUM_LIMITS; the hi-lift drums
-        // carry none, so the old `?? 750` fallback was a guess that happened
-        // to sit below every heavy rung - which is half of why they starved.
-        // Soft mode samples up to a generous ceiling and lets the engine's own
-        // "heavier than this drum will allow" warning throw the rest out, so
-        // the limit is the drum's rating as the engine knows it.
+        // EVERY DRUM NOW CARRIES A REAL RATING, hi-lift included, so this is
+        // the drum's own ceiling rather than a guess. Soft mode still reaches
+        // past it to a generous bound and lets the engine's own "heavier than
+        // this drum will allow" warning throw the rest out.
         weight: String(between(150, lim.maxWeight ?? (SOFT ? 3000 : 750))),
         doorWidthFeet: 18, doorWidthInches: 0,
         doorHeightFeet: Math.floor(heightIn / 12), doorHeightInches: heightIn % 12,

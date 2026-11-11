@@ -3,6 +3,7 @@
 //   node dev/drum-probe.mjs            one request, to prove the endpoint
 //   node dev/drum-probe.mjs list       every drum NAME, one request
 //   node dev/drum-probe.mjs detail "CANIMEX/TF D800-120"   one full record
+//   node dev/drum-probe.mjs ours      every drum this module offers
 //   node dev/drum-probe.mjs sweep      map the recommendation rule over a grid
 //
 // WHY THIS EXISTS. "How is the drum picked" has been an open question for
@@ -132,6 +133,39 @@ login();
 // "does D800-120 run 1/4\" or 3/16\" cable" question answered outright.
 // ONE DRUM'S FULL RECORD BY NAME. `maximumDiameter` is the maximum CABLE
 // diameter, which is what settles "does D800-120 run 1/4\" or 3/16\" cable".
+// THE SIX THIS MODULE OFFERS, so DRUM_LIMITS can hold real figures rather
+// than a guess. The hi-lift drums have NO DRUM_LIMITS entry at all, which is
+// why dev/rung-target-sample.mjs fell back to `?? 750` and could never reach
+// the heavy rungs - a ceiling nobody chose, standing in for a number the
+// reference will simply hand over.
+if (process.argv[2] === "ours") {
+    const mod = await (await import("./harness.mjs")).load();
+    const names = [...Object.keys(mod.DRUMS), ...Object.keys(mod.HILIFT_DRUMS)];
+    console.log("drum                       maxH  maxWt   cable  maxHiLift   flatArm    circ");
+
+    for (const n of names) {
+        const raw = xhr(["-L", `${BASE}/spring-engineering/drum?drumName=${encodeURIComponent(n)}`]);
+        let d;
+
+        try { d = (JSON.parse(raw).Drum) ?? null; } catch { d = null; }
+
+        if (!d) {
+            console.log(`${n.padEnd(26)}  (no record - name may differ from theirs)`);
+            sleep(1000);
+            continue;
+        }
+
+        console.log(`${n.padEnd(26)}${String(d.maximumHeight).padStart(5)}`
+            + `${String(d.maximumWeight).padStart(7)}`
+            + `${String(d.maximumDiameter).padStart(8)}`
+            + `${String(d.maximumHighLift).padStart(11)}`
+            + `${String(d.flatMomentArm).padStart(10)}`
+            + `${String(d.circumference).padStart(8)}`);
+        sleep(1000);
+    }
+    process.exit(0);
+}
+
 if (process.argv[2] === "detail") {
     const name = process.argv[3];
 

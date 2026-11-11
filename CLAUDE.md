@@ -3139,6 +3139,35 @@ tool they give the trade free is the owner's exposure, not the agent's, and
 105 readings of duplex accuracy on a product he does not sell is not worth
 putting on the table. **He agreed; it stays undownloaded.**
 
+###### THE ENGINE'S DRUM TABLES ARE EXACTLY RIGHT. THE DEV TOOLING'S WERE NOT
+
+`node dev/drum-probe.mjs ours` fetched all six drums this module offers and
+compared them against `DRUM_LIMITS` and `HILIFT_DRUMS`:
+
+```
+D400-144  144/750    D400-96  96/530     D525-216  231/1500
+D800-120  384/2200   575-120  264/1000   525-54HL  234/1000
+```
+
+**ALL SIX MATCH THE REFERENCE'S OWN RECORDS.** Nothing that ships was wrong,
+which is worth writing down because the drum figures were measured rather
+than sourced and had never been checked against the vendor.
+
+**THE WRONG COPIES WERE BOTH IN `dev/`, AND THEY WERE WRONG BECAUSE THEY WERE
+COPIES.** `rung-target-sample.mjs` read `DRUM_LIMITS` alone - which holds the
+standard drums only - so every hi-lift drum missed and fell to a `?? 750`
+fallback nobody chose; `single-gap-sample.mjs` hand-typed the table and had
+`575-120` at **192"** where the drum reaches **264"**. Between them, a third
+of `525-54HL`'s range and a quarter of `575-120`'s were unreachable by any
+draw. Both now read the engine's tables (`limitsFor()` tries `HILIFT_DRUMS`
+first), and a 40-case rehearsal that previously could not pass 750 lb drew
+`525-54HL` at 998 lb / 205" and `D800-120` at 1229 lb.
+
+**A FOURTH COPY OF A FACT IS A FOURTH CHANCE TO BE WRONG IN ONE PLACE ONLY** -
+the `rnd.mjs` lesson a second time, and the `ref-state.mjs` lesson a third.
+Neither sampler's own output looked wrong; the ceiling simply never appeared
+in a draw, because a ceiling that is too low produces no error at all.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
