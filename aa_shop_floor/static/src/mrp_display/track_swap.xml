@@ -16,6 +16,7 @@
                     <t t-esc="job.job"/>
                     <t t-if="job.current"><br/>Now cut from: <span class="fw-bold" t-esc="job.current"/></t>
                     <t t-else=""><br/>No RAW track chosen yet</t>
+                    <br/>Needs <span class="fw-bold" t-esc="job.needs"/> piece(s)
                 </div>
                 <div t-if="!job.options.length" class="text-danger" t-esc="job.reason"/>
                 <div class="d-flex flex-wrap gap-2">
@@ -25,13 +26,17 @@
                             t-on-click="() => this.pick(job, option)">
                         <span class="fw-bold" t-esc="option.length"/>
                         <span class="small ms-1">(<t t-esc="option.on_hand"/> on hand)</span>
+                        <div t-if="isShort(job, option)" class="small fw-bold text-danger">
+                            Not enough: needs <t t-esc="job.needs"/>
+                        </div>
                     </button>
                 </div>
             </div>
             <t t-set-slot="footer">
-                <button class="btn btn-primary btn-lg" t-att-disabled="!state.picked or state.busy"
+                <button class="btn btn-primary btn-lg" t-att-disabled="!pickedCount or state.busy"
                         t-on-click="confirm">
-                    <t t-if="state.picked">Use <t t-esc="state.picked.option.length"/></t>
+                    <t t-if="pickedCount === 1">Use the track picked</t>
+                    <t t-elif="pickedCount">Use the <t t-esc="pickedCount"/> tracks picked</t>
                     <t t-else="">Pick a track</t>
                 </button>
                 <button class="btn btn-secondary btn-lg" t-on-click="props.close">Cancel</button>
