@@ -5,6 +5,11 @@ HARDWARE_WORKCENTER = "Hardware"
 SPRING_OPERATION = "Cut coil, install cones, mark LH/RH"
 KIT_OPERATION = "Pack hardware kit"
 CABLE_OPERATION = "Cut lift cables, sleeve, thimble, stop"
+# A track longer than every prepared one (owner, 2026-11-11). Same work center
+# as the prepared tracks, so it sits on Jorge's station and merges into the
+# order's one Track Prep card (track_merge.py reads the work center's name).
+TRACK_WORKCENTER = "Track Prep"
+CUSTOM_TRACK_OPERATION = "Cut custom-length track (LH + RH)"
 
 
 class MrpBom(models.Model):

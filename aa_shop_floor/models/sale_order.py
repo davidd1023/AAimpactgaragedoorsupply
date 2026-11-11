@@ -2,7 +2,9 @@ import logging
 
 from odoo import _, models
 
-from .mrp_bom import CABLE_OPERATION, HARDWARE_WORKCENTER, KIT_OPERATION
+from .mrp_bom import (
+    CABLE_OPERATION, CUSTOM_TRACK_OPERATION, HARDWARE_WORKCENTER, KIT_OPERATION, TRACK_WORKCENTER,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -152,12 +154,24 @@ class SaleOrder(models.Model):
 
         jobs._aa_tell_the_shop_floor()
 
-    def _aa_station_kind(self, line, spring_tmpl):
+    def _aa_custom_track_tmpl(self):
+        """The dealer order's custom-length track, or an empty record.
+
+        It belongs to aa_dealer_orders, which this module does not depend on,
+        so it is looked up rather than referenced: without that module there
+        are simply no custom tracks.
+        """
+        return self.env.ref("aa_dealer_orders.product_custom_track", raise_if_not_found=False) \
+            or self.env["product.template"]
+
+    def _aa_station_kind(self, line, spring_tmpl, custom_track_tmpl=None):
         """Which Shop Floor station a line goes to, or None."""
         if line.display_type or line.product_uom_qty <= 0 or not line.product_id:
             return None
         if spring_tmpl and line.product_id.product_tmpl_id == spring_tmpl and line.spring_spec_json:
             return "spring"
+        if custom_track_tmpl and line.product_id.product_tmpl_id == custom_track_tmpl:
+            return "track"
         if is_hardware_kit(line.product_id):
             return "kit"
         if is_prepared_cable(line.product_id):
@@ -185,37 +199,57 @@ class SaleOrder(models.Model):
                 result.setdefault(current, []).append(line)
         return result
 
-    def _aa_create_station_productions(self):
+    def _aa_create_station_productions(self, only=None):
         """One manufacturing order per line that a station has to prepare.
 
         Springs: custom springs from Spring Engineering.
         Hardware: hardware kits (pack the box) and prepared lift cable pairs (cut).
+        Track Prep: tracks longer than any prepared one (owner, 2026-11-11) -
+        the stock lengths get theirs from Odoo's own route, these never did,
+        so the order showed no Track Prep at all while Jorge had tracks to cut.
 
         ONE PER LINE, created here rather than by a Manufacture route, because
         every custom spring is the same product with a different spec: a route
         would merge two orders' springs into one MO and lose a spec. Skips a
         line that already has its MO, so confirming twice makes nothing twice.
+
+        `only` limits it to some kinds ("track", ...) - the migration that gives
+        orders already on the floor their custom-track jobs passes it, so it
+        cannot raise a spring or kit job somebody chose not to have.
         """
         spring_tmpl = self.env.ref("spring_engineering.product_custom_spring", raise_if_not_found=False)
+        custom_track_tmpl = self._aa_custom_track_tmpl()
+        track_job_product = self.env.ref(
+            "aa_shop_floor.product_custom_track_job", raise_if_not_found=False)
         Production = self.env["mrp.production"].sudo()
         Bom = self.env["mrp.bom"].sudo()
         for order in self:
-            kinds = {line: self._aa_station_kind(line, spring_tmpl) for line in order.order_line}
+            kinds = {line: self._aa_station_kind(line, spring_tmpl, custom_track_tmpl)
+                     for line in order.order_line}
             cables_by_kit = self._aa_cables_by_kit(kinds)
             boxed = set().union(*cables_by_kit.values()) if cables_by_kit else set()
             for line in order.order_line:
                 kind = kinds[line]
-                if not kind or line in boxed \
+                if not kind or (only and kind not in only) or line in boxed \
                         or Production.search_count([("aa_sale_line_id", "=", line.id)]):
                     continue
+                product = line.product_id
                 if kind == "spring":
                     bom = Bom._aa_custom_spring_bom()
                 elif kind == "kit":
                     bom = Bom._aa_station_bom(line.product_id.product_tmpl_id, HARDWARE_WORKCENTER, KIT_OPERATION)
+                elif kind == "track":
+                    # THE LINE IS A SERVICE AND A JOB CANNOT MAKE ONE, so the
+                    # job makes the never-stocked Track Prep product and keeps
+                    # the line, which is where the length is written.
+                    if not track_job_product:
+                        continue
+                    product = track_job_product.product_variant_id
+                    bom = Bom._aa_station_bom(track_job_product, TRACK_WORKCENTER, CUSTOM_TRACK_OPERATION)
                 else:
                     bom = Bom._aa_station_bom(line.product_id.product_tmpl_id, HARDWARE_WORKCENTER, CABLE_OPERATION)
                 values = {
-                    "product_id": line.product_id.id,
+                    "product_id": product.id,
                     "product_qty": line.product_uom_qty,
                     "bom_id": bom.id,
                     "origin": order.name,

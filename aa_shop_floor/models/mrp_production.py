@@ -20,6 +20,13 @@ RAW_LENGTH = re.compile(r"RAW\s*-\s*(\d+)'\s*(?:(\d+)\")?")
 
 STOCK_SPRING_CODE = re.compile(r"^SPR-(\d{3,4})-(\d+(?:\.\d+)?)-([LR])$")
 
+# A custom-length track as the dealer order writes it on its line, e.g.
+#   3" horizontal, 156" long (Black) - custom length, AA prepares it (...)
+#   Tracks for Door 1 (Smith - 12x12)
+CUSTOM_TRACK = re.compile(
+    r'(\d)"\s*(horizontal|vertical)\s*,\s*(\d+(?:\.\d+)?)"\s*long\s*\(([^)]+)\)', re.I)
+CUSTOM_TRACK_DOOR = re.compile(r"^Tracks for (.+)$", re.I | re.M)
+
 
 def wire_label(wire):
     """0.2625 -> '.2625', 0.25 -> '.250', the way the shop writes wire."""
@@ -60,7 +67,8 @@ class MrpProduction(models.Model):
         "sale.order.line", string="Sale Order Line", copy=False, index=True, readonly=True)
     aa_spring_spec_json = fields.Text(string="Spring Spec (data)", copy=False, readonly=True)
     aa_station_kind = fields.Selection(
-        [("spring", "Spring"), ("kit", "Hardware Kit"), ("cable", "Lift Cables")],
+        [("spring", "Spring"), ("kit", "Hardware Kit"), ("cable", "Lift Cables"),
+         ("track", "Custom-Length Track")],
         string="Station Job", copy=False, readonly=True)
     # Lift cable lines packed in this kit's box (shown on the kit card instead of
     # a card of their own).
@@ -82,6 +90,8 @@ class MrpProduction(models.Model):
                 rows = production._aa_kit_rows()
             elif production.aa_station_kind == "cable":
                 rows = production._aa_cable_rows()
+            elif production.aa_station_kind == "track":
+                rows = production._aa_custom_track_rows()
             else:
                 rows = production._aa_track_rows() or production._aa_spring_rows()
             production.aa_shop_spec = "\n".join("|".join(str(x) for x in row) for row in rows) or False
@@ -167,6 +177,34 @@ class MrpProduction(models.Model):
     # Prepared tracks come from Odoo's own Manufacture route with the owner's
     # BoMs (RAW track x2, and for verticals the flag angles, jamb brackets and
     # lag screws). Each MO unit is one LH + RH pair.
+
+    def _aa_custom_track_rows(self):
+        """A track longer than any prepared one (owner, 2026-11-11).
+
+        Everything the bench needs is on the sale line the dealer order wrote,
+        so it is read from there - the job's own product is only a placeholder
+        that lets a service be made. The rows have the same labels as a
+        prepared track's card, so the two read alike at the station.
+        """
+        self.ensure_one()
+        text = self.aa_sale_line_id.name or ""
+        hit = CUSTOM_TRACK.search(text)
+        pairs = self.product_qty or 1.0
+        if not hit:
+            # Never a blank card: show the line as written.
+            first = text.split("\n")[0].strip()
+            return [("Track", first or "Custom length (see the order)"), ("Pairs", qty_label(pairs))]
+        size, kind, length, colour = hit.group(1), hit.group(2).title(), float(hit.group(3)), hit.group(4).strip()
+        rows = [
+            ("Track", '%s" %s · %s' % (size, kind, colour)),
+            ("Cut to", "%s (LH + RH)" % inches_label(length)),
+            ("Custom", "Longer than any prepared track"),
+            ("Pairs", qty_label(pairs)),
+        ]
+        door = CUSTOM_TRACK_DOOR.search(text)
+        if door:
+            rows.append(("For", door.group(1).strip()))
+        return rows
 
     def _aa_track_rows(self):
         # READ OFF THE VARIANT, NOT OFF THE NAME. The size, length and finish
