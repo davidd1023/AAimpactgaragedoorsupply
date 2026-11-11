@@ -506,7 +506,10 @@ class HardwareCardCase(HttpCase):
                 type(job), "_aa_hardware_card",
                 side_effect=ValueError("something on this order is odd")):
             job.invalidate_recordset()
-            job._compute_aa_hardware_card()
+            # The ERROR it logs is the point, and is caught here so Odoo.sh
+            # does not read it as a failed build.
+            with self.assertLogs("odoo.addons.aa_shop_floor.models.hardware_card", level="ERROR"):
+                job._compute_aa_hardware_card()
 
         self.assertFalse(job.aa_hardware_card, "it should be empty, not fatal")
 
