@@ -3816,6 +3816,127 @@ sample against +42. More data per rung lets the fit afford to be choosier.
   owner's standing rule is that the duplex message REPLACES the wire warning
   rather than stacking** - so where a third note goes is his call, not mine.
 
+##### MAX DOOR HEIGHT IS 220", AND THAT RE-CUTS THE WHOLE BAND (owner, 2026-11-12)
+
+*"our max height for doors is 220" so it is a possibility that we will need
+to make springs for doors of that height, so keep looking for answers in any
+way that you can"*
+
+**I HAD DISMISSED THE BAND AS ABSURD DOORS AND THAT WAS WRONG.** The entry
+above reads "springs over 220 inches - over eighteen feet - where the
+reference's own answer is nearly twice the length it says it supports", and
+calls it "not a number anybody can act on". Every earlier cut of this band was
+by SPRING length, which is a derived quantity nobody orders.
+`dev/by-door-height.mjs` cuts it by the thing a customer actually asks for:
+
+```
+by DOOR height                   n    exact   wire right
+0-96" tall                    5129   97.06%    99.45%
+96-144" tall                  5295   96.22%    99.11%
+144-180" tall                 1446   95.16%    98.89%
+180-220" tall                  813   93.48%    99.38%
+220"+ tall (outside envelope)  254   86.61%    99.21%
+
+DOORS HE CAN BUILD (<=220")  12683   96.26%    99.24%
+```
+
+**SO THE ANSWER TO HIS BUSINESS QUESTION IS 96.26%, AND 93.48% AT THE 220"
+LIMIT** - not 56%. And the WIRE at 180-220" is **99.38%**, better than the
+overall, which is the figure that decides whether a door is sprung safely.
+
+**AND THE PAST-120" FAILURES ARE HEAVY DOORS, NOT TALL ONES:**
+
+```
+past-120" band, by door height    n    exact
+0-144" tall                     348   49.43%   <- the WORST, and they are SHORT
+144-180" tall                    85   62.35%
+180-220" tall                   113   67.26%
+220"+ tall                       62   66.13%
+```
+
+Only **62 of 608** are doors taller than 220". The rest are ordinary heights
+needing long springs because they are heavy, and every one is orderable. The
+"absurd doors" framing was exactly backwards.
+
+###### THE REFERENCE IS PERFECTLY DETERMINISTIC PAST 120"
+
+All 12,937 readings assume it is and nobody had checked. Fifty doors re-asked
+- **30 we FAIL and 20 we PASS as a control**, so the result could not be read
+as "hard doors are noisy":
+
+```
+SAME answer as before: 50      DIFFERENT: 0
+```
+
+**SO THE 55% IS OUR ERROR AND THE TARGET IS CLEAN.** That also kills a
+reading I had written down an hour earlier: the flat mechanism search below
+looked like "noise in the target", and it is not. The band is winnable in
+principle.
+
+###### NO MECHANISM, IN ANY VARIABLE (`dev/over120-mechanism.mjs`)
+
+Flat everywhere, which is why the search is recorded rather than repeated:
+
+```
+weight against the drum's rating   54.5 / 55.3 / 61.3 / 51.4%   (0 clamp cases)
+spring count 1/2/3/4               61.4 / 55.5 / 54.5 / 50.0%
+lb per spring (5 bands)            70.8 / 49.6 / 48.0 / 66.2 / 57.9%   non-monotone
+cycle target (5 bands)             flat 48-58%
+the four crossed cells             50-63%
+```
+
+###### TEN CORRECTION SHAPES, AND THE CONSTANT STILL WINS
+
+```
+no correction                                   46.4%
+per-rung CONSTANT                               54.8%   <- shipped
+two levels per rung + ONE global frac cut       55.3%   best of 26 configs = noise
+per-rung LINEAR (2 params)                      52.1%
+keyed on (rung, spring count)                   51.5%
+frac-banded per rung (3 params)                 51.1%
+per-rung SCALE (raw * k)                        49.3%
+per-rung EXCESS scale                           48.0%
+a global second term on top          no gain even IN-sample
+one global frac rule on top                     +0
+```
+
+**AND NOW THERE IS A REASON THE CONSTANT IS RIGHT RATHER THAN LUCKY.** Each
+rung's bonus is a line in floor(active length) CLAMPED to two levels, so past
+120" the line saturates at `hi`. A per-rung constant is exactly the saturated
+level the clamp cannot reach - **it is not a bolt-on, it is the long-regime
+bonus the existing form cannot express.** What it cannot do is supply TWO
+levels, which is what the residual pile at -1" and +1" is asking for, and
+every attempt to supply two has lost or tied.
+
+**THE +3 READINGS AT cut 0.55 ARE NOT A FINDING.** Thirteen cuts by two
+minimums is 26 configurations, the best of them beat the baseline by three
+readings of 606, and the cut was chosen by looking at the holdout. That is a
+selection on the test set, not an out-of-sample gain.
+
+###### SO WHERE THE ERROR ACTUALLY IS, AND WHAT IT WOULD COST
+
+A clean deterministic target, ten output transforms exhausted, seven
+explanatory variables flat. **The information is already lost by the time the
+output exists** - which puts the error inside `duplexActiveLength`, the
+stiffness model, in the long regime.
+
+Fixing that means a long-regime term INSIDE `derive.mjs` - refitting sMult/K
+or letting the bonus line fit a separate band for floor > 119 - rather than
+correcting its output. **That is the first thing all session that could move
+this number, and it is also the one thing that risks the 98.20% in-envelope.**
+Not attempted; it needs its own session with the never-tuned sets, the golden
+snapshot and `envelope.mjs` all watched, and a revert ready.
+
+###### BATCH L1 AND THE TOOLS
+
+`dev/over120-target-sample.mjs` fed the band directly for the first time -
+360 requests, 340 usable, **zero clean**, which does not matter because
+`derive-over120.mjs` fits against whatever length the reference returned where
+`derive.mjs` drops flagged lengths. Corpus 12,596 -> 12,937.
+
+The refit chose a **stricter** guard (min 8 rather than 3), kept 10 rungs
+rather than 12, and came out better: +46 out of sample against +42.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
