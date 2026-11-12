@@ -30,6 +30,23 @@
 // the freedom and does worse on data it was not fitted to, which is the same
 // lesson as LINE_LEVELS and the per-group capacity experiment.
 //
+// EMPTY THE INSTALLED TABLE BEFORE FITTING. THIS IS NOT OPTIONAL.
+//
+// The gate below reads `c.duplexInnerLength`, which is the engine's output
+// AFTER DUPLEX_LONG_OFFSET has already been applied. Fit against that and you
+// are fitting a correction on top of itself: on 2026-11-12 this script was run
+// with the offsets still installed and reported "0 rungs carry an offset,
+// baseline 61.5%" - which read as "the correction is no longer needed". It was
+// needed. Emptying the table and measuring put the band straight back to
+// 43.28%, and refitting properly returned twelve rungs worth +42 readings.
+//
+// So the order is: EMPTY the block in spring_engineering.js, run this, then
+// install what it writes. `sh dev/apply-over120.sh` does all three.
+//
+// The same family as reading a getter after changing its inputs underneath
+// it - a correct measurement of the wrong thing. A derived correction must be
+// fitted against output that does not already contain it.
+//
 // THE GATE IS OUR OWN LENGTH, NOT THE REFERENCE'S. At prediction time the
 // reference's answer is precisely what is unknown, so banding on it would be
 // a tool that cannot be shipped. Outer is always inner + 1, so "the pair goes

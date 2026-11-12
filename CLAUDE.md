@@ -3600,6 +3600,106 @@ diagnostic as a fact about the world - the first being the `aa_spring_stock`
 away and the write-up came first. **The tool is fixed so it cannot say this
 again**, which is the only durable part of the fix.
 
+##### CONCENTRATED PULLS: WHERE DATA STILL PAYS, MEASURED (owner, 2026-11-12)
+
+*"could you do any more things to improve the accuracy, like more runs
+concentrated at the problematic areas"* - asked a fourth time, and the
+previous answers had tested the WRONG UNIT.
+
+**THE FITTER'S UNIT IS (rung, spring count), NOT THE RUNG.** `lineByCount`
+holds a separate line per spring count, so a rung can hold 320 readings while
+the 2-spring group inside it holds 9. `rung-target-sample.mjs` fills RUNGS, so
+"the rung is at target" never meant "the group that is failing has any data".
+Batch S2 and every earlier answer tested rungs.
+
+**`dev/group-density.mjs` SETTLES IT - THE CURVE HAS AN ELBOW AT 25:**
+
+```
+group size    groups   readings   failures   failure rate
+1-9              46        187         28    14.97%
+10-24            20        332          9     2.71%
+25-49            31       1159         19     1.64%
+50-99            30       2160         42     1.94%
+100-249          44       6249        121     1.94%
+250+              4       1876         37     1.97%
+```
+
+**FLAT FROM 25 UPWARD** over 11,444 readings and four bands. So **S2 bought
+nothing because 124 readings was already deep inside the flat zone** - that
+is now explained rather than merely observed. And "concentrate on the worst
+groups" cannot work: `0.295/0.2437 2spr` fails at 17% on 176 readings, which
+is a hard group, not a thin one.
+
+**BELOW 10 READINGS DATA PAYS 8x**, and 22 thin groups carried 28 failures.
+`dev/group-target-sample.mjs` aims at those, targeting **25** rather than 320.
+Reachability was checked first: 15 of 22 take >=20 draws in 60,000; one got
+zero in 120,000. A rare group is rare in the door space.
+
+###### AND I SHOULD HAVE PREDICTED THE YIELD FROM MY OWN NOTES
+
+**28 CLEAN OF 376 = 7.4%.** The thin groups are thin BECAUSE they are heavy
+wire - 0.4531 to 0.625 - and this file already records that every door needing
+outer wire past 0.4375 trips *"wire size exceeds 0.4375 maximum"*, and that
+the V16 heavy batch came back **zero** clean. The density curve cannot see
+which rungs it is pointing at. **Check what a target IS, not only how thin.**
+
+**BUT IT HELPED ANYWAY, AND FOR THE V16 REASON**: a flagged reading's WIRE and
+cycle figures are sound even where its length is not. On the never-tuned
+validation sets, CLEAN readings:
+
+```
+seed 61006       wire 99.4% -> 100.0%    length 97.7% -> 98.9%
+seed 20261007    wire 98.9% -> 98.9%     length 96.6% -> 96.6%
+seed 20261009    wire 99.5% -> 99.5%     length 97.3% -> 97.3%
+   all three FLAGGED bands improved: 84.5->86.6, 87.0->89.2, 88.0->89.6
+```
+
+```
+band                          n     before    after
+inside 96"  (recommended)   11839    98.06%   98.20%
+96-120"     (supported)       489    91.98%   93.66%
+over 120"   (DISCLAIMED)      268    61.57%   61.57%
+ALL DUPLEX                  12596    97.06%   97.25%
+```
+
+Golden **725 byte-identical**, **20 invariants pass**, **0 failed 0 errors of
+348**, `spring_calculator` regenerated. ORDERABLE - what a customer can
+actually buy - unchanged at 99.6% wire / 97.8% length.
+
+###### THE NEAR-MISS: A DERIVED CORRECTION FITTED ON TOP OF ITSELF
+
+After the refit I re-ran `derive-over120.mjs` and it reported **"0 rungs carry
+an offset, baseline 61.5%"** - which reads as *the correction is no longer
+needed, the real data has fixed it properly*. I wrote that conclusion down and
+installed an empty table.
+
+**`envelope.mjs` CAUGHT IT.** With the table empty the band fell straight back
+to **43.28%** - the offsets had been working all along. The deriver gates on
+`c.duplexInnerLength`, which is the engine's output **after the offsets are
+applied**, so it was fitting a correction on top of itself and correctly
+finding nothing more to add.
+
+**THE SAME FAMILY AS THE `cycleLife` MISS THE DAY BEFORE** - a correct
+measurement of the wrong thing. Fifth of that family. **A derived correction
+must be fitted against output that does not already contain it.**
+
+Refitted properly (table emptied first) it returns **12 rungs worth +42
+readings out of sample**, better than the 10 rungs and +34 of 2026-11-11 -
+because the new heavy-rung readings sharpened it.
+
+**`sh dev/apply-over120.sh` NOW DOES EMPTY -> DERIVE -> INSTALL** so the order
+cannot be got wrong, and the deriver's header says why in full.
+
+###### SO: IS THERE MORE TO BUY?
+
+- **Duplex, thin groups: spent.** 21 of 22 fed; the yield is 7% and what it
+  buys is wire, not length. A second pass would cost 400 requests for
+  perhaps another 0.1 point.
+- **Duplex, groups over 25 readings: provably nothing.** The curve is flat.
+- **Single: nothing.** Both remaining misses are irreducible corners - a
+  threshold tie at margin 1.000 and a quarter inch on one reading.
+- **What is left is the FORM**, as it has been since 2026-11-10.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
