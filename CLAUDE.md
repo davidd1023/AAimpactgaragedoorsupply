@@ -3700,6 +3700,122 @@ cannot be got wrong, and the deriver's header says why in full.
   threshold tie at margin 1.000 and a quarter inch on one reading.
 - **What is left is the FORM**, as it has been since 2026-11-10.
 
+##### PAST 120": FIVE MORE FORMS TRIED, AND THE HEADLINE GOT WORSE ON PURPOSE (owner, 2026-11-12)
+
+*"we really need to fix those duplex springs that are over 120", what can we
+do for those?"*
+
+**READ THE NUMBER CHANGE FIRST, BECAUSE IT LOOKS LIKE A REGRESSION AND IS
+NOT:**
+
+```
+band                        before            after
+over 120"       268 readings  61.57%    608 readings  56.25%
+exact COUNT              165               ->   342
+```
+
+The percentage fell because **340 of the hardest doors that exist joined the
+denominator**. Nothing regressed: the three never-tuned validation sets read
+*identically* before and after, golden is 725 byte-identical, inside-96" is
+unchanged at 98.20%, and 96-120" improved to 94.08%. Same shape as batch V15 -
+coverage, not a headline.
+
+**AND THE NEW FIGURE IS THE HONEST ONE.** Out of sample on 603 readings the
+correction is worth **+7.6 points (46.6% -> 54.2%)**, where the same split-half
+on 266 readings read **+13.9**. The old number was flattering because the band
+was small and easy. Quote 54.2%.
+
+###### THE RESIDUAL AFTER THE CORRECTION - NOBODY HAD LOOKED
+
+Every earlier measurement of this band was taken BEFORE any correction
+existed. `dev/over120-residual.mjs` looks after it, and it must MEASURE
+corrected output where `derive-over120.mjs` must FIT uncorrected output -
+same engine, opposite requirement, which is why that near-miss happened.
+
+**THE BIAS IS GONE**: 44 short against 53 long, median 0.00, where before the
+correction it was 143 long against 4 short. So no further constant can win -
+that is settled rather than assumed.
+
+**AND THE FAILURE IS NOT EVENLY SPREAD, WHICH IS THE USEFUL PART:**
+
+```
+past 120"     n    exact     short  long
+0-10"        47   76.6%        9      2
+10-25"       54   59.3%       17      5
+25-50"       60   73.3%       10      6
+50-100"      48   66.7%        7      9
+100-+"       53   39.6%        1     31     <- springs over 220"
+```
+
+**Just over the line we are at 76.6%.** The catastrophic bucket is springs
+past **220 inches** - over eighteen feet - where the reference's own answer is
+nearly twice the length it says it supports. That is where the 56% comes
+from, and it is not a number anybody can act on.
+
+###### FIVE FORMS, ALL MEASURED, ALL LOST
+
+```
+form                                       out of sample
+no correction                                     43.6%
+per-rung CONSTANT (shipped)                       57.5%
+a global second term (per-inch or flat)      no gain even IN-sample
+keyed on (rung, SPRING COUNT)                     51.5%
+frac-banded per rung                              51.1%
+one global frac rule on top of the constant       +0
+```
+
+**THE SPRING-COUNT KEY LOSING IS WORTH KEEPING.** The main bonus table keys
+per spring count via `lineByCount`, so copying that here looked obviously
+right - and it costs six points, because it halves the readings per key. The
+density curve again: freedom that is not paid for in generalisation is
+freedom that chases noise.
+
+**AND FRAC CARRIES REAL SIGNAL THAT CANNOT BE USED**, which is the subtlest
+result of the day:
+
+```
+residual -1"   median frac 0.547
+residual  0    median frac 0.440
+residual +1"   median frac 0.200
+```
+
+Monotone, and in the direction you would predict. But the distributions
+overlap (p10-p90 of 0.16-0.91 against 0.01-0.72), so a per-rung cut on five
+readings cannot find the threshold, and **one global rule fitted freely chose
++0 on BOTH sides in BOTH halves**. A signal being real is not the same as its
+being exploitable.
+
+###### BATCH L1: THE BAND HAD NEVER BEEN FED DIRECTLY
+
+`dev/group-target-sample.mjs` EXCLUDED it by construction - its filter was
+`duplexOuterLength <= 120` because it was chasing in-envelope groups - and
+V16 only reached it by accident. So the offsets were fitted on about **eight
+readings a rung**, squarely inside the regime where `group-density.mjs` says
+data pays eight times over.
+
+`dev/over120-target-sample.mjs` aims there. **360 requests, 340 usable, ZERO
+clean** - and the zero does not matter here, which is the distinction worth
+recording: `derive.mjs` drops a flagged reading's LENGTH from the rung fit,
+but `derive-over120.mjs` fits the length error directly against whatever the
+reference returned, so **flagged readings feed this table and not that one**.
+
+The refit then chose a **stricter** guard - min 8 readings a rung rather than
+min 3 - kept 10 rungs rather than 12, and came out **better**: +46 out of
+sample against +42. More data per rung lets the fit afford to be choosier.
+
+###### SO WHAT IS LEFT FOR THIS BAND
+
+- **The form is spent.** Seven variants now, counting the per-rung line and
+  global drift from 2026-11-11. The per-rung constant is the ceiling.
+- **Data still pays a little**, but it buys a better-founded table rather than
+  a better percentage, and each batch makes the headline look worse because
+  the doors it adds are harder than the ones already held.
+- **The honest product answer has not been built**: a duplex pair past 120" is
+  an extrapolation past what Service Spring supports, and the page prints the
+  figure without saying so. One getter and one line. **NOT DONE, because the
+  owner's standing rule is that the duplex message REPLACES the wire warning
+  rather than stacking** - so where a third note goes is his call, not mine.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
