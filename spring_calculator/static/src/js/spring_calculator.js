@@ -1192,30 +1192,59 @@ const DUPLEX_PAIRS = {
 // at dev/over120-offsets.json. Proved by SPLIT-HALF before being shipped -
 // fitted on one half of the band, scored on the other, both ways round:
 //
-//     baseline (no correction)        116 / 264   43.9 per cent
-//     per-rung LINEAR    (~64 params) 137 / 264   52.1
-//     per-rung CONSTANT  (~32 params) 150 / 264   56.8   <- shipped
+//     baseline (no correction)                  46.4 per cent
+//     per-rung LINEAR            (~64 params)   52.1
+//     per-rung CONSTANT          (~32 params)   53.2
+//     per-rung TWO LEVELS on floor (~75 params) 59.3   <- shipped
 //
-// The simpler form winning on data it was not fitted to is the same lesson
-// as LINE_LEVELS and the per-group capacity experiment: freedom that is not
-// paid for in generalisation is freedom that chases noise.
+// TWELVE FORMS WERE TRIED FOR THIS BAND AND ELEVEN LOST TO THE CONSTANT. The
+// twelfth is the only one that came from a MEASUREMENT rather than from
+// invention, which is why it is also the only one that won.
 //
-// NINE OF THE TEN OFFSETS ARE EXACTLY ONE INCH AND EVERY ONE IS ON HEAVY
-// WIRE (0.4531 and up), which is why this reads as structure rather than as
-// a curve fitted to 264 points. A rung with fewer than two readings in the
-// band carries no entry and is left alone - a constant fitted to one reading
-// is a constant fitted to noise.
+// `dev/group-shape.mjs` run past the gate shows every rung's implied bonus
+// taking exactly TWO LEVELS, ONE INCH APART - `-1`/`0` on the heavy rungs,
+// `0.25`/`1.25` on `0.2625/0.2253 4spr` - never a spread. A single constant
+// per rung can only ever pick the majority level and lose the other, which is
+// precisely the 53 per cent it scored.
+//
+// AND THE SEPARATOR IS THE FLOOR OF THE ACTIVE LENGTH, not the frac, not the
+// door height, weight or cycle count - all five were tried and floor is the
+// only one that generalises. That is the same variable `splitByCount` splits
+// on in-envelope, where the fitter has never produced a split above floor 59;
+// out here the bonus line is clamped to two levels and SATURATES, so the
+// second level it wants is unreachable and has to be supplied by this table.
+//
+// FIVE SHUFFLES, FIVE WINS, +6.14 points pooled over 3,030 out-of-sample
+// scorings - not one lucky split. A rung with fewer than six readings in the
+// band carries no entry and is left alone.
+//
+// Each entry is `{ t, lo, hi }`: `lo` applies below floor `t` and `hi` at or
+// above it. `t: null` means the rung wanted no split and `lo` is its constant.
 const DUPLEX_LONG_OFFSET = {
-    "0.4531/0.3625": 1,
-    "0.4615/0.375": 0.75,
-    "0.49/0.3938": 1,
-    "0.5/0.3938": 1,
-    "0.5/0.4062": 1,
-    "0.5312/0.4305": 1,
-    "0.625/0.4531": 1,
-    "0.625/0.4615": 1,
-    "0.625/0.4687": 2,
-    "0.625/0.49": 1,
+    "0.3625/0.283": { t: 257, lo: 0, hi: 1 },
+    "0.3938/0.3065": { t: 251, lo: 0, hi: 1 },
+    "0.3938/0.3125": { t: 442, lo: 0, hi: 1.75 },
+    "0.4062/0.331": { t: 146, lo: 0, hi: 0.75 },
+    "0.4218/0.331": { t: 190, lo: 0, hi: 1 },
+    "0.4218/0.3437": { t: 164, lo: 0, hi: 0.75 },
+    "0.4305/0.3437": { t: 210, lo: 0, hi: 2 },
+    "0.4375/0.3625": { t: 147, lo: 0, hi: 1 },
+    "0.4531/0.3625": { t: 125, lo: 0, hi: 1 },
+    "0.4615/0.375": { t: 126, lo: 1, hi: 0.75 },
+    "0.4687/0.375": { t: 200, lo: 0, hi: 1 },
+    "0.49/0.3938": { t: 202, lo: 1, hi: 2 },
+    "0.5/0.3938": { t: 160, lo: 1, hi: 2 },
+    "0.5/0.4062": { t: 166, lo: 1, hi: 1.75 },
+    "0.5312/0.4062": { t: 137, lo: 0, hi: 1 },
+    "0.5312/0.4218": { t: 200, lo: 0, hi: 1 },
+    "0.5312/0.4305": { t: 140, lo: 0, hi: 1 },
+    "0.5625/0.4305": { t: 173, lo: 0, hi: 1 },
+    "0.5625/0.4375": { t: 174, lo: 0, hi: 1 },
+    "0.5625/0.4531": { t: 168, lo: 0, hi: 1 },
+    "0.625/0.4531": { t: 168, lo: 0, hi: 1 },
+    "0.625/0.4615": { t: 161, lo: 0, hi: 1 },
+    "0.625/0.4687": { t: 196, lo: 1, hi: 2 },
+    "0.625/0.49": { t: 186, lo: 0, hi: 1 },
 };
 
 // Outer is always inner + 1, so the pair runs past 120" when the inner does
@@ -3444,7 +3473,17 @@ get duplexInnerLength() {
         return raw;
     }
 
-    const off = DUPLEX_LONG_OFFSET[`${step.outerWire}/${step.innerWire}`];
+    const e = DUPLEX_LONG_OFFSET[`${step.outerWire}/${step.innerWire}`];
+
+    if (!e) {
+        return raw;
+    }
+
+    // TWO LEVELS, chosen by the floor of the active length - see the table.
+    // A rung that wanted no split carries `t: null` and uses `lo` throughout.
+    const off = e.t === null || Math.floor(this.duplexActiveLength) < e.t
+        ? e.lo
+        : e.hi;
 
     return off
         ? duplexSnapToGrid(raw - off, this.duplexSpringCount)

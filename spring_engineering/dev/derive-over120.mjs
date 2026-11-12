@@ -22,13 +22,29 @@
 // MEASURED, NOT ASSUMED, by split-half - fit on one half, score on the other,
 // both ways round:
 //
-//     baseline (no correction)        116 / 263   44.1%
-//     per-rung LINEAR    (~64 params) 137 / 263   52.1%
-//     per-rung CONSTANT  (~32 params) 148 / 263   56.3%   <- simpler AND better
+//     baseline (no correction)                   46.4%
+//     per-rung LINEAR            (~64 params)    52.1%
+//     per-rung CONSTANT          (~32 params)    53.2%
+//     per-rung TWO LEVELS on floor (~75 params)  59.3%   <- shipped
 //
-// The simpler form winning is the useful result: a line per rung has twice
-// the freedom and does worse on data it was not fitted to, which is the same
-// lesson as LINE_LEVELS and the per-group capacity experiment.
+// TWELVE FORMS, ELEVEN OF WHICH LOST TO THE CONSTANT. The twelfth is the only
+// one that came out of a measurement rather than out of invention: past the
+// gate every rung's implied bonus takes exactly TWO LEVELS ONE INCH APART
+// (`-1`/`0` on the heavy rungs, `0.25`/`1.25` on `0.2625/0.2253 4spr`), never
+// a spread, so a single constant can only pick the majority level - which is
+// exactly the 53% it scored.
+//
+// THE SEPARATOR IS THE FLOOR OF THE ACTIVE LENGTH. Frac, door height, weight
+// and cycle count were all tried; floor is the only one that generalises, and
+// it is the same variable `splitByCount` splits on in-envelope. Out here the
+// bonus line is clamped to two levels and SATURATES, so the second level it
+// wants cannot be reached and has to be supplied by this table.
+//
+// FIVE SHUFFLES, FIVE WINS, +6.14 points pooled over 3,030 out-of-sample
+// scorings. Simpler is usually better in this project - LINE_LEVELS, the
+// per-group capacity experiment, the per-rung line above - and this is the
+// one place where it was not, because the extra freedom was measured to be
+// needed rather than hoped to be.
 //
 // EMPTY THE INSTALLED TABLE BEFORE FITTING. THIS IS NOT OPTIONAL.
 //
@@ -86,6 +102,7 @@ for (const r of corpus.readings) {
 
     rows.push({
         ourIn, ourOut: c.duplexOuterLength,
+        floor: Math.floor(c.duplexActiveLength),
         refIn: r.expect.duplexInnerLength, refOut: r.expect.duplexOuterLength,
         rung: `${s.outerWire}/${s.innerWire}`,
     });
@@ -102,15 +119,32 @@ const snap = (x) => {
 const hit = (x, off) => snap(x.ourIn - off) === x.refIn
     && snap(x.ourOut - off) === x.refOut;
 const score = (set, offs) => set.filter((x) =>
-    hit(x, offs.get(x.rung) ?? 0)).length;
+    hit(x, offFor(offs.get(x.rung), x))).length;
 
 const OFFSETS = [];
 
 for (let a = -1; a <= 4.001; a += 0.25) OFFSETS.push(Math.round(a * 100) / 100);
 
+const bestOffset = (g) => {
+    let best = 0, bestHit = g.filter((x) => hit(x, 0)).length;
+
+    for (const off of OFFSETS) {
+        const h = g.filter((x) => hit(x, off)).length;
+
+        if (h > bestHit) { bestHit = h; best = off; }
+    }
+
+    return [best, bestHit];
+};
+
 // A rung with too few readings is a constant fitted to noise, so the guard is
 // a MINIMUM COUNT below which the rung is left alone. Which minimum is itself
 // measured rather than picked.
+//
+// TWO LEVELS, SPLIT ON THE FLOOR OF THE ACTIVE LENGTH. The one-constant form
+// is always tried first and a split has to beat it outright, so a rung that
+// genuinely wants one level gets one - which is what `t: null` records. Each
+// side needs two readings, or the "split" is a level fitted to a single door.
 const fitOffsets = (train, min) => {
     const out = new Map();
 
@@ -119,19 +153,29 @@ const fitOffsets = (train, min) => {
 
         if (g.length < min) continue;
 
-        let best = 0, bestHit = g.filter((x) => hit(x, 0)).length;
+        const [c, ch] = bestOffset(g);
+        let best = { hit: ch, t: null, lo: c, hi: c };
 
-        for (const off of OFFSETS) {
-            const h = g.filter((x) => hit(x, off)).length;
+        for (const t of [...new Set(g.map((x) => x.floor))].sort((a, b) => a - b)) {
+            const below = g.filter((x) => x.floor < t);
+            const above = g.filter((x) => x.floor >= t);
 
-            if (h > bestHit) { bestHit = h; best = off; }
+            if (below.length < 2 || above.length < 2) continue;
+
+            const [lo, lh] = bestOffset(below);
+            const [hi, hh] = bestOffset(above);
+
+            if (lh + hh > best.hit) best = { hit: lh + hh, t, lo, hi };
         }
 
-        if (best !== 0) out.set(rg, best);
+        if (best.lo !== 0 || best.hi !== 0) out.set(rg, best);
     }
 
     return out;
 };
+
+const offFor = (e, x) => (!e ? 0
+    : (e.t === null || x.floor < e.t ? e.lo : e.hi));
 
 console.log(`${rows.length} past-120" readings with the wire right, `
     + `${new Set(rows.map((x) => x.rung)).size} rungs\n`);
@@ -153,7 +197,7 @@ console.log("  min   rungs kept   exact out of sample");
 
 let bestMin = 1, bestTotal = -1;
 
-for (const min of [1, 2, 3, 4, 5, 6, 8, 10]) {
+for (const min of [2, 4, 6, 8, 10, 12]) {
     let tot = 0, kept = 0;
 
     for (const [train, test] of [[A, B], [B, A]]) {
@@ -187,11 +231,12 @@ console.log(`SHIPPED TABLE: ${final.size} rungs carry an offset `
     + `(the rest are left alone)\n`);
 
 const js = "{ " + [...final].sort()
-    .map(([k, v]) => `"${k}": ${v}`).join(", ") + " }";
+    .map(([k, v]) => `"${k}": {t:${v.t}, lo:${v.lo}, hi:${v.hi}}`).join(", ") + " }";
 
 console.log(js);
 writeFileSync(join(HERE, "over120-offsets.json"),
-    JSON.stringify(Object.fromEntries(final), null, 1) + "\n");
+    JSON.stringify(Object.fromEntries([...final]
+        .map(([k, v]) => [k, { t: v.t, lo: v.lo, hi: v.hi }])), null, 1) + "\n");
 console.log(`\nwritten to dev/over120-offsets.json`);
 console.log(`in-sample with this table: `
     + `${(score(rows, final) / rows.length * 100).toFixed(1)}% `

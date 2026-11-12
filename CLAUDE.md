@@ -3700,6 +3700,106 @@ cannot be got wrong, and the deriver's header says why in full.
   threshold tie at margin 1.000 and a quarter inch on one reading.
 - **What is left is the FORM**, as it has been since 2026-11-10.
 
+##### THE TWELFTH FORM WON, AND IT WAS THE FIRST ONE MEASURED RATHER THAN INVENTED (2026-11-12)
+
+*"alright, so is there no avenues left to explore to find how to increase
+duplex accuracy"* - asked after being told the work was finished. **It was not
+finished, and the answer was a form, which is what every entry above said was
+required.**
+
+```
+band                          n     exact BEFORE    exact AFTER
+inside 96"  (recommended)   11839      98.20%         98.20%   <- UNCHANGED
+96-120"     (supported)       490      93.66%         94.08%
+over 120"   (DISCLAIMED)      608      61.57%         67.93%
+```
+
+Golden **725 byte-identical**, **20 invariants pass**, `spring_engineering`
+**0 failed 0 errors of 348**, `spring_calculator` regenerated.
+
+**THE MEASUREMENT CAME FIRST, AND THAT IS THE WHOLE DIFFERENCE.** Eleven forms
+had been tried for this band and eleven lost to the per-rung constant, every
+one of them a shape somebody thought of. The twelfth came from looking at what
+the band's implied bonus actually LOOKS like past the gate:
+
+```
+0.5312/0.4218 1spr   n=20   levels: -1:3   0:17
+0.5625/0.4531 1spr   n=17   levels: -1:3   0:14
+0.625/0.49    1spr   n=24   levels: -2:3   -1:10   0:10
+0.2625/0.2253 4spr   n=21   levels: 0.25:14   1.25:7
+```
+
+**EXACTLY TWO LEVELS, ONE INCH APART, IN EVERY SINGLE GROUP** - never a
+spread. A constant per rung can only pick the majority level and must lose the
+other, which is precisely the 53% it was scoring. **The residual had been
+telling us its own shape all along**; the earlier entry even names "a pile at
++1 and +2" as the thing to look for and then reasons past it.
+
+**AND THE SEPARATOR IS THE FLOOR OF THE ACTIVE LENGTH.** Frac, door height,
+weight and cycle count were all tried; floor is the only one that generalises,
+and frac actively loses. That is the SAME variable `splitByCount` splits on
+in-envelope - where the fitter has never produced a split above floor 59.
+
+**WHY THE FORM IS RIGHT RATHER THAN LUCKY, STRUCTURALLY.** In-envelope the
+bonus is a line in floor CLAMPED to two levels (`lo`/`hi`). Past 120" that
+line saturates, so the second level it wants is unreachable by construction -
+and this table is exactly the mechanism that supplies it. The constant was the
+saturated level; the two-level entry is both of them.
+
+**FIVE SHUFFLES, FIVE WINS**, because 606 readings against ~75 parameters is
+enough freedom for one lucky split:
+
+```
+seed        none    const (shipped)   two levels on floor
+20261112   46.4%        54.3%              59.6%   WINS
+61006      46.4%        51.7%              60.1%   WINS
+20261007   46.4%        53.5%              57.6%   WINS
+20261009   46.4%        53.3%              60.4%   WINS
+777001     46.4%        53.3%              59.1%   WINS
+POOLED     46.37%       53.20%             59.34%   +6.14 points
+```
+
+**QUOTE 59.3%, NOT 67.93%** - the first is out of sample over 3,030 scorings,
+the second is the shipped table measured on data it was fitted to. The
+deriver's own guard ladder settles on **min 8 readings per rung** and reads
+62.4% against a 46.6% baseline.
+
+**NEARLY EVERY ENTRY IS `lo: 0, hi: 1`**, which is what makes it readable
+rather than a curve: below a per-rung threshold on the active length no
+correction is needed at all, and above it exactly one inch. **The overshoot
+has a point where it STARTS**, and the table now says where, per rung.
+
+**SIMPLER IS USUALLY BETTER IN THIS PROJECT AND THIS IS THE ONE PLACE IT WAS
+NOT.** `LINE_LEVELS`, the per-group capacity experiment and the per-rung line
+all lost to the simpler option. Here three parameters per rung beat one - and
+the reason is that the extra freedom was MEASURED to be needed (two levels are
+visibly there) rather than hoped to be.
+
+###### AND THE CIRCULARITY TRAP BIT A SECOND TIME, IN THE DIAGNOSTIC
+
+The first split-half run of this reported **baseline 57.6%, shipped constant
+52.3%** - no correction beating the correction, which is impossible and read
+as "the table is now harmful".
+
+**`DUPLEX_LONG_OFFSET` IS NOT EXPORTED OFF THE HARNESS**, so
+`mod.DUPLEX_LONG_OFFSET?.[rung] ?? 0` silently resolved to zero and the
+un-correction did nothing. "No correction at all" was therefore the SHIPPED
+TABLE's own score, and every candidate form was being fitted on top of it.
+Reading the table from `dev/over120-offsets.json` instead put the baseline
+back to 46.4% and the real answer appeared.
+
+**SIXTH OF THE FAMILY** - after `i.springId`, `c.singleWireSize`,
+`duplexCycles` returning `"48,000"`, `cycleLife` read after its inputs
+changed, and the deriver fitting on corrected output. Five of the six are the
+same mistake in two flavours: **an invented or absent field read as a default,
+and a correct measurement of the wrong thing.** The tell both times was a
+number that could not be true - a baseline beating a fit, a correction
+reporting itself unnecessary.
+
+**AN OPTIONAL CHAIN IS NOT A SAFE WAY TO READ A TABLE THAT MUST BE THERE.**
+`?? 0` turned a missing export into a plausible zero. Where the value is
+required, read it from its source of truth and let it throw.
+
 ##### PAST 120": FIVE MORE FORMS TRIED, AND THE HEADLINE GOT WORSE ON PURPOSE (owner, 2026-11-12)
 
 *"we really need to fix those duplex springs that are over 120", what can we
