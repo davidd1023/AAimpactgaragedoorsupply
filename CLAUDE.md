@@ -3545,16 +3545,60 @@ readings leave the reference under 10% margin over the target**, and that is
 the population a 2% error can flip. Same mechanism as the 54 duplex wire
 misses - a threshold decision on a quantity known to a few per cent.
 
-**WHAT IS NOT YET EXPLAINED, AND IS TOMORROW'S THREAD**: if our model tracks
-theirs to 2% everywhere, our 16,459 at 750 lb cannot sit beside their 11,000
-at 735 lb on the same wire - that is a ~50% gap at one corner, against ±2%
-globally. Either this corner is genuinely anomalous or the comparison is
-mis-set. **The next step is one command**: run `dev/single-cycles.mjs` on the
-probe output, which holds the 735 lb reading where the wire DOES agree, and
-read the ratio there. Do not theorise before running it.
+####### RESOLVED, AND THE "ANOMALY" WAS MY OWN DIAGNOSTIC (2026-11-12)
 
-**5 1/4" IS BOTH MISSES AND IT IS THE FILLER I.D.** - worth a glance when
-this is picked up.
+The entry above recorded a *"~50% gap at one corner"* as an open thread and
+named the one command that would settle it. Run, it settled it immediately:
+at that very corner our cycle model agrees with the reference to **median
+0.999** over the six probe readings where the wire matches. There was no gap.
+
+**THE 16,459 WAS OUR LIFE FOR 0.3065, NOT FOR 0.295.**
+`dev/single-misses.mjs` read `c.cycleLife` AFTER setting
+`c.state.wireSize` to the REFERENCE's wire - so the getter reported the
+right figure for the wrong spring, and I compared it against the
+reference's 0.295 figure at a different weight. Our 16,459 against their
+16,000 for 0.3065 is 3%, entirely consistent.
+
+**THE REAL NUMBERS, computed per candidate and printing both:**
+
+```
+weight    our 0.295   our 0.3065   reference
+   700       13,802       22,716
+   720       12,100       19,915
+   735       10,989       18,087   0.295  -> 11,000    agreement to 0.1%
+   750       10,000       16,459   0.3065 -> 16,000
+```
+
+**OUR MODEL AGREES TO 0.1% AT 735 lb, AND AT 750 lb IT LANDS EXACTLY ON THE
+10,000 TARGET.** `dev/single-misses.mjs` now prints the margin and it reads
+**1.000**. The rule takes the softest candidate whose life REACHES the
+target, `10,000 >= 10,000` admits it, and the reference's own figure falls a
+hair under and steps up.
+
+**SO IT IS A TIE AT THE THRESHOLD, AND IT IS IRREDUCIBLE.** Two models that
+agree to a tenth of a per cent straddling a line by a hundredth of one
+cannot be sorted by any rule. Requiring strictly-greater-than would match
+this reading by luck and be wrong in the other direction for the next door
+that lands at 10,000.4 where the reference says 10,001. **Not acted on.**
+
+**SO SINGLE IS 99.84%, AND BOTH REMAINING MISSES ARE CORNERS WITH NO FIX:**
+
+```
+5 1/4" D400-144 3spr 750lb   wire one step soft   MARGIN 1.000
+5 1/4" D400-144 2spr 474lb   length 63.25 vs 63   quarter inch, one reading
+```
+
+**THE LESSON IS THE FOURTH OF ITS FAMILY AND THE WORST.** After
+`i.springId`, `c.singleWireSize` and `duplexCycles` returning `"48,000"`,
+this one was a getter read AFTER ITS OWN INPUTS WERE CHANGED UNDERNEATH IT -
+no invented name, no wrong type, just a correct number about a different
+question. **Capture before mutating, and name the input you asked about.**
+
+And it is the second time this file has carried an inference from a
+diagnostic as a fact about the world - the first being the `aa_spring_stock`
+"corrupt coil" that never existed. Both times the measurement was one command
+away and the write-up came first. **The tool is fixed so it cannot say this
+again**, which is the only durable part of the fix.
 
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 

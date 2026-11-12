@@ -74,6 +74,26 @@ for (const file of files) {
         const ourWire = c.recommendedWire;
         const wireOk = ourWire !== null && Math.abs(ourWire - sp.wireSize) < 1e-9;
 
+        // BOTH CANDIDATES' CYCLE LIVES, TAKEN BEFORE ANYTHING IS MUTATED, and
+        // through `cyclesForWire` rather than `cycleLife`.
+        //
+        // THIS LINE USED TO READ `c.cycleLife` AFTER the overwrite below, and
+        // it cost a whole session. `cycleLife` reads `state.wireSize`, so once
+        // that holds the REFERENCE's wire the getter reports the right figure
+        // for the wrong spring - 16,459 for 0.3065 where the question was
+        // about 0.295. I compared it against the reference's 11,000 for 0.295
+        // at the neighbouring weight, called it a 50% discrepancy, and wrote
+        // an "unexplained anomaly" into CLAUDE.md as a thread to pick up.
+        // There was nothing there.
+        //
+        // The fourth mistake of this family: `i.springId`, `c.singleWireSize`,
+        // `duplexCycles` returning "48,000", and now a getter read after its
+        // own inputs were changed underneath it. **Capture before mutating,
+        // and name the wire you asked about.**
+        const target = Number(i.cycles);
+        const cycOurs = ourWire ? c.cyclesForWire(ourWire) : null;
+        const cycTheirs = c.cyclesForWire(sp.wireSize);
+
         // The reference's own wire goes back in before length and weight are
         // compared, or a wire miss is counted three times over.
         c.state.wireSize = `${sp.wireSize}"`;
@@ -96,8 +116,14 @@ for (const file of files) {
             // HOW CLOSE THE DECISION WAS. A wire miss on a door sitting on the
             // cycle-life threshold is a rounding fight, not a rule fault - the
             // duplex wire work established that and it is the first thing to
-            // ask of any new one.
-            cyc: c.cycleLife ?? null,
+            // ask of any new one. The MARGIN is the number that answers it:
+            // our chosen wire's life over the target, where 1.000 means the
+            // door sat exactly on the line and no model could be asked to
+            // sort it.
+            target,
+            cycOurs: cycOurs ? Math.round(cycOurs) : null,
+            cycTheirs: cycTheirs ? Math.round(cycTheirs) : null,
+            margin: cycOurs && target ? cycOurs / target : null,
         });
     }
 }
@@ -108,8 +134,11 @@ for (const m of misses) {
     console.log(`${m.sold ? "SOLD " : "     "}${m.id.padEnd(8)} ${m.drum.padEnd(9)}`
         + ` ${m.springs}spr r${String(m.radius).padEnd(3)} ${String(m.cycles).padStart(7)}cyc`
         + ` ${m.lift.padEnd(12)} door ${m.door.padEnd(10)} ${String(m.w).padStart(5)}lb`);
-    console.log(`      wire ${m.wire}   length ${m.len}   weight ${m.wt}`
-        + (m.cyc ? `   our cycle life ${m.cyc}` : ""));
+    console.log(`      wire ${m.wire}   length ${m.len}   weight ${m.wt}`);
+    console.log(`      target ${m.target.toLocaleString("en-US")} cycles; `
+        + `our life on OUR wire ${m.cycOurs?.toLocaleString("en-US")}`
+        + ` (margin ${m.margin?.toFixed(3)}), on THEIRS `
+        + `${m.cycTheirs?.toLocaleString("en-US")}`);
     console.log(`      (${m.file})`);
 }
 
