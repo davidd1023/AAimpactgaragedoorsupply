@@ -4037,6 +4037,78 @@ snapshot and `envelope.mjs` all watched, and a revert ready.
 The refit chose a **stricter** guard (min 8 rather than 3), kept 10 rungs
 rather than 12, and came out better: +46 out of sample against +42.
 
+##### PAUSED MID-EXPERIMENT: THE FITTER'S OWN GATES (2026-11-12, resume here)
+
+*"is there anythng left that can be done t improve the accuracy"* - and yes,
+there was a gap nobody had looked at. **Paused at the owner's request with the
+answer INCONCLUSIVE. Nothing was shipped and nothing was changed.**
+
+**ONLY `LINE_LEVELS` HAD EVER BEEN SWEPT.** Three knobs gate the fit itself
+and were left at whatever they were first set to:
+
+```
+SPLIT_MIN_SIDE  readings needed either side of a floor split   (8)
+LEVEL_SUPPORT   share of a group a bonus level must carry      (0.06)
+LINE_SLACK      misses a line fit may tolerate                 (0.18)
+```
+
+**WHY IT WAS WORTH ASKING - the twelfth-form method pointed in-envelope.**
+`dev/inenv-shape.mjs` shows the two biggest failing groups are TWO-level with
+500+ readings each:
+
+```
+0.2625/0.2253 4spr   558 readings  13 fails   levels 0.25:405  1.25:153
+0.2625/0.2253 3spr   473 readings   7 fails   levels 0.25:347  1.25:126
+```
+
+The form ALLOWS two levels, so those failures are neither capacity nor data -
+they are the fit's gates. **53 of the 128 in-envelope failures sit in groups
+of that shape**; 46 sit in 4+-level groups, which is the capacity experiment
+already run twice and lost.
+
+**FOLD 0, 2,587 held-out readings, out of sample:**
+
+```
+baseline (installed)   2413      SPLIT_MIN_SIDE=4    2413   <- NO EFFECT
+LEVEL_SUPPORT=0.03     2417      SPLIT_MIN_SIDE=16   2413   <- none either way
+LEVEL_SUPPORT=0.12     2405      LINE_SLACK=0.10     2423   <- best, +10
+                                 LINE_SLACK=0.26     2414
+```
+
+**`SPLIT_MIN_SIDE` NOT MOVING AT ALL IS A CLEAN NEGATIVE**, and it kills a
+lead recorded the same day: the floor-split gate is NOT what stops
+`splitByCount` reaching the long regime. Do not chase that again.
+
+**AND THEN FOLD 1 SAID MINUS ONE** (baseline 2409, `0.10` 2408). Fold 0 is the
+fold the winner was CHOSEN on, over six configs, so it cannot support the
+claim - exactly the mistake recorded against the "+3 readings at cut 0.55"
+result past 120". **Folds 2-4 are unrun.** Fold 2's baseline is 2395/2594.
+
+**TO RESUME, ONE COMMAND** (about 60 minutes at host load 18):
+
+```
+sh dev/knob-sweep.sh confirm 0.10
+```
+
+`0.10` must win on MOST of folds 1-4. **On the evidence so far it is 1 win on a
+used fold against 1 loss on a clean one, which is leaning negative** - and the
+honest expectation is a fourth documented negative rather than a gain. If it
+does win, the magnitude is about +0.3 points in-envelope: one default in
+`derive.mjs`, then `sh dev/apply.sh` AND `sh dev/apply-over120.sh` (the rung
+table feeds `duplexInnerLength`, so the past-120 offsets must be refitted
+after it), then the full guard set.
+
+**EVERY FOLD INSTALLS A THROWAWAY TABLE INTO THE ENGINE FILE.** The script's
+trap restores it, but **never commit while a holdout run is going** - that
+would ship a one-fifth-of-the-corpus table as the product. `git checkout
+static/src/js/spring_engineering.js` and check `grep -c "lo:"` before any
+commit that follows this work.
+
+**`pkill -f confirm.sh` KILLED MY OWN SHELL** (exit 144) before the heredoc
+had written the script, so the relaunch failed with "cannot open" and the
+engine file was left holding a fold's table. Kill background jobs BY PID from
+`ps`, never by a pattern a tool call's own shell matches.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
