@@ -72,9 +72,10 @@ still on the floor, so the Hardware card's outer/inner rows are still tested -
 against an order built with the ban lifted by `patch.object`, which is now the
 only way to make one.
 
-**A PRE-EXISTING FAILURE, NOT THIS: `spring_engineering` test_bracket_fasteners
-has 5 failures and 2 errors on a clean tree** (checked by stashing). Nothing
-to do with duplex; it is about prepared-track brackets and fasteners.
+**`test_bracket_fasteners` USED TO FAIL HERE AND NO LONGER DOES** - 5 failures
+and 2 errors on a clean tree, for weeks, and it was never a fault in prepared
+tracks at all. See *THE WHOLE REPOSITORY IS GREEN* below. `spring_engineering`
+now runs **0 failed, 0 errors of 348**, so a red test in it means something.
 
 ### THE SHOP CARD AND THE PRODUCT PAGE SHOWED DIFFERENT PRICES (owner, 2026-10-28)
 
@@ -128,6 +129,110 @@ All three agree with the reference exactly on the case checked.
 ### 6" is priced as 5 1/4"
 
 Stated by the owner: *"6\" is the same as 5 1/4\""* for cone pricing.
+
+### THE CALCULATOR ON A SECOND PROJECT (`spring_calculator`, owner 2026-11-02)
+
+*"i want to put the spring engineering custom module on another project"* -
+another Odoo.sh project of his own, the CALCULATOR ONLY - and then the line
+that decided the whole design: *"you can do what is neccesary, as long as it
+doesnt affect the original spring engineering calculator in any way."*
+
+**SO NOTHING WAS CARVED IN PLACE.** The obvious build - split the calculator
+out of `spring_engineering` and have the old module depend on the new one -
+would have moved `product_custom_spring`'s XML ID, which his live orders
+point at and which `main.py` and `cart_cost.py` look up by name. That is a
+migration on the page the business runs on, to no benefit for THIS project.
+`tools/build_spring_calculator.py` READS the original and WRITES a second,
+lighter module beside it. **`git status spring_engineering/` is empty**, which
+is a promise a test can check rather than one somebody has to remember.
+
+**IT IS GENERATED, NOT COPIED, AND THE REASON IS A COUNT**: 151 of the 288
+commits to `spring_engineering` in the 90 days to 2026-11-02 touched the
+engine (`spring_engineering.js`, `controllers/main.py`, `pricing.py`), the
+most recent five days before. This is not finished code to fork and forget -
+a hand copy is wrong within the fortnight and wrong SILENTLY. Same
+arrangement as `tools/build_embed.py` and the door preview block, for the
+same reason written down there.
+
+**THE MODULE IS EIGHT FEATURES WEARING ONE NAME**, and only the first is the
+calculator: catalogue merge (89 of HIS products, by name), track prep (nearly
+all of `sale_order.py`), the wishlist heart, signup validation, reorder,
+minimum order and quantity limits, the cart cost line, the grid price fix.
+That is why the carved module can drop `website_sale_wishlist` and
+`auth_signup` - neither was ever any part of the calculator.
+
+**THEY MUST NEVER SHARE A DATABASE, AND THAT WAS MEASURED.** Both claim
+`/spring-calculator` and `/custom-torsion-spring`, and with both installed on
+this build the NEW one won - the page came back mounting
+`spring_calculator.calculator`. So it was uninstalled again and the original
+checked back (`spring_engineering.calculator`, HTTP 200, its products intact).
+**It is deliberately left uninstalled here**; this repository is the SOURCE
+for the second project, not a host for it. Everything else that would have
+collided is renamed - Owl template, public component, client action, product
+XML IDs - so the clash is one obvious thing rather than four subtle ones.
+
+**THE CONFIG KEYS KEEP THE `spring_engineering.` PREFIX ON PURPOSE.** They
+are internal identifiers nobody reads - the owner sees "Spring sell price per
+pound" in Settings - and leaving them alone is what lets `pricing.py` and the
+price-reading half of `main.py` copy across completely untouched. It also
+means that if the two ever did share a database they would agree on the steel
+rate instead of quietly quoting from two different ones.
+
+**THE DRIFT ALARM IS `--check`, AND IT NEEDS NO DATABASE.**
+`python3 tools/build_spring_calculator.py --check` exits 1 when the generated
+module is stale; run it before pushing. The deeper proof is
+`spring_calculator/tests/test_matches_the_original.py`, which runs eight
+specifications through BOTH engines and compares the quotes - price,
+description, turns, filler, and the refusals - and compares the 4,449-line
+browser engine as TEXT after undoing the renames, because none of the Python
+tests touch the JS where the sizing actually lives. Those tests SKIP where
+`spring_engineering` is absent, which is the second project.
+
+**A MODULE IS NOT INSTALLED BY MERGING** - the `aa_min_max` lesson applies
+again and is in that module's README: Apps > Update Apps List > Install, once.
+
+**THE BASELINE IS NOW ZERO**: `spring_engineering` runs **0 failed, 0 errors
+of 348**. It was 5 failed and 2 errors when the carve was done, which is what
+earlier entries quote as the proof the original is unharmed; that count is
+history now and any failure is real.
+
+#### WHAT IS PROVED, AND THE ONE THING THAT IS NOT
+
+He asked straight out: *"so are you one hundred percent sure it will work on
+the other project?"* - and the answer was no, so this is the list.
+
+PROVED: the carved engine returns the IDENTICAL quote to the original over
+eight specifications (both wire sizes, all three I.D.s, the 5 1/4" that adds
+a filler, hi-lift, both cycle ratings, and the refusals); the 4,449-line
+browser engine is byte-identical after undoing the renames; the module
+installs clean; the four-name mount chain agrees and is present in the
+**bundle the server actually serves**, not merely on disk; its two products
+are self-contained, with no category, UoM or attribute to dangle; every
+external reference in it resolves to `website.*`; all three dependencies are
+stock Odoo. **AND IT MOUNTED IN A REAL BROWSER**, observed once before Chrome
+stopped starting.
+
+**NOT PROVED: AN INSTALL ON A DATABASE WITHOUT `spring_engineering`.** Every
+test ran where the original was already installed, and this container is tied
+to ONE database - a second cannot be created to try it on. The static sweep
+above is what stands in for it, and it is strong, but it is not the same
+thing. **The first install on the second project is the real test.**
+
+**CHROME IS UNRELIABLE ON THIS HOST** - `RuntimeError: can't start new
+thread` at load 21. `test_the_calculator_mounts_and_computes` SKIPS with that
+reason rather than failing red, and it is worth running on the second project
+where it will actually go: it drives the form (a weight and a drum, which is
+what `resultsVisible` wants) and then asserts a figure appears.
+
+**A BROWSER TEST THAT ASSERTED THE WRONG INITIAL STATE** is how that was
+learnt: the first version waited for `.se-rowR-total` on page load, and the
+calculator deliberately shows nothing until it has a drum and a weight,
+because every result would otherwise read 0 or NaN. The test was wrong, not
+the module - but it took a real browser to tell the difference.
+
+**ODOO PARSES THE MODULE README THROUGH DOCUTILS** for the Apps description,
+and a markdown table's `|---|---|` logs `Undefined substitution referenced:
+"---"` on every single install. No tables in a module README.
 
 ## Pricing
 
@@ -1832,13 +1937,45 @@ pushing the next order onto the Floor, then the Boxes, and eventually logging
 lot is now REPLACED rather than added to, since this code has already chosen
 the piece by his order of preference.
 
-**A PRE-EXISTING FAILURE, NOT THIS:** `test_adjust_changes_removes_and_adds_pieces`
-fails on a clean tree (checked by stashing) - `(2, 0) != (1, 1)`. Adding a
-piece of the OTHER HAND from the Adjust dialog appears to create it on the
-hand of the row the dialog was opened from, so an RH coil added there becomes
-an LH one. `action_apply` does read `line.hand` (spring_adjust.py:189), so it
-is not simply that; it was not run down because it is nothing to do with the
-run-out figure. Worth fixing - it corrupts the very stock this reports on.
+### THAT "ADJUST PUTS THE COIL ON THE WRONG HAND" BUG DOES NOT EXIST (2026-11-10)
+
+`test_adjust_changes_removes_and_adds_pieces` failed on a clean tree for
+weeks - `(2, 0) != (1, 1)` - and this file recorded it as *"an RH coil added
+there becomes an LH one ... worth fixing, it corrupts the very stock this
+reports on."* **THAT WAS AN INFERENCE FROM A RED TEST AND IT WAS WRONG.**
+Nothing was ever corrupted.
+
+Instrumented rather than reasoned about, the quants after the adjustment are
+exactly right:
+
+```
+COIL-262-2.625-L  lot=TEST-A-L   qty=25.0
+COIL-262-2.625-L  lot=TEST-B-L   qty=0.0
+COIL-262-2.625-R  lot=262-2.625-1-R  qty=84.0   <- the RH piece, correct
+```
+
+while the summary row read back `l_pcs=2 r_pcs=0 l_in=100.0` - which is
+60 + 40, **the state BEFORE the adjustment**. `action_apply` and
+`_coil_product` were right all along.
+
+**THE FAULT IS THE TEST HELPER, AND `flush_all()` IS NOT ENOUGH.**
+`aa.spring.place.summary` is a SQL view, so flushing is needed to get pending
+writes where the view's query can see them - that was already there and is
+right. But **a view row's ID is derived from what it groups**, so a second
+search returns the SAME id and the ORM hands back the field values it read the
+FIRST time. The test reads the row to open the dialog, adjusts, reads again,
+and gets the stale figures. **Flushing writes OUT does not invalidate what was
+cached IN.**
+
+`self.env.invalidate_all()` beside the flush in `row()` fixes every test in
+the file: `aa_spring_stock` now runs **0 failed, 0 errors of 30**.
+
+**THE LESSON IS BIGGER THAN THE TEST.** A red test was read as a description
+of a bug and written down here as fact, where it sat as a known hazard about
+stock integrity that was never real. **Instrument before believing a failure's
+story about itself** - the quants were one print statement away the whole
+time. And anywhere a SQL-view row is read twice across a write, invalidate as
+well as flush.
 
 ## THE DEALER'S NOTE REACHES THE JOB (`aa_shop_floor`, owner 2026-10-30)
 
@@ -1929,6 +2066,1778 @@ time, and a box is removed only once it is empty. Floor, Rack and Boxes are
 shown on ONE page, a fold-out group per place (owner, 2026-10-19: not separate
 menus) - `aa.spring.place.summary`, menu "Floor / Rack / Boxes". Anything that asks "is this a
 box coil" must use `place_of()`, never `location.name == "Boxes"`.
+
+### "UNINSTALLABLE" IS A VERSION REFUSAL, AND IT NAMES NO REASON (owner, 2026-11-02)
+
+*"i see the module in the app page but its not letting me install it ...
+Status? Uninstallable"* - with the three dependencies showing *Not Installed*,
+which is a red herring: that is simply what an uninstalled dependency says,
+and Odoo would have pulled them in.
+
+**THE SECOND PROJECT RUNS ODOO 20.** The carved module shipped with
+`"version": "19.0.1.0.0"`, and `odoo/modules/module.py` does:
+
+```
+if manifest['installable'] and not check_version(version, should_raise=False):
+    manifest['installable'] = False
+```
+
+`check_version` passes only when the version STARTS WITH the running series,
+and `adapt_version` returns a FIVE-part version unchanged - so `19.0.1.0.0`
+fails on `20.0` and the module is greyed out. **A THREE-part version is
+PREFIXED with the running series** (`1.0.0` becomes `20.0.1.0.0`), which is
+why `spring_calculator` now ships as `1.0.0`. Proved here: Odoo 19 recorded
+it as `19.0.1.0.0` and installed it.
+
+**THE TRADE IS WRITTEN DOWN IN THE README**: Odoo will no longer refuse the
+module on a series it was not written for. That refusal was worth little -
+it names no reason anywhere on the screen, which is exactly why this took a
+round trip - and it is worth less than being able to install and read a real
+traceback.
+
+**WHAT IS NOT KNOWN, AND MUST NOT BE GUESSED AT: Odoo 20.** This container
+holds the Odoo 19 source and nothing later, and the model's training predates
+20's release. The module is Odoo 19 code. The three things most likely to
+need attention are named in the README - `type="jsonrpc"` (new in 19),
+`website._get_and_cache_current_cart()` / `._create_cart()` (new in 19,
+replacing `sale_get_order`), and `is_storable` (18+). **Install on a
+DEVELOPMENT branch and let the errors say what else.** Do not write
+speculative Odoo 20 changes from this build; there is nothing here to check
+them against.
+
+**AND IT MEANS THE TWO PROJECTS ARE ON DIFFERENT SERIES**, which the "one
+source" arrangement did not anticipate. For now the generated module is one
+file set that installs on both; the day 19 and 20 genuinely need different
+code, the generator grows a `--series` option rather than the folder being
+forked by hand.
+
+#### ODOO 20 REMOVED `get_param`, AND THAT IS THE ONLY BREAK (owner, 2026-11-02)
+
+Installing on his Odoo 20 project died in the `<function>` call that seeds
+the rates:
+
+```
+AttributeError: 'ir.config_parameter' object has no attribute 'get_param'
+```
+
+**Odoo 20 replaced the generic `get_param`/`set_param` with TYPED accessors** -
+`get_str`, `get_float`, `get_int`, `get_bool` and matching setters. Read off
+the Odoo 20 source on GitHub, not guessed: there is no Odoo 20 in this
+container and the model's training predates its release, so **the way to
+answer a question about a series you cannot run is to fetch its source.**
+
+**THREE OTHER THINGS WERE CHECKED THE SAME WAY AND HAD NOT CHANGED**, which
+is worth recording so nobody looks again: `type="jsonrpc"` is still a valid
+route type in 20 (`JsonRPCDispatcher`), `website._get_and_cache_current_cart()`
+and `._create_cart()` still exist, and `is_storable` is still on
+`product.template`. Two of those were my own predictions in the previous
+entry, and both were wrong - predicting what a version changed is not the
+same as reading it.
+
+**A SHIM, NOT A MIGRATION TO THE NEW API**, and the reason is testability:
+the equivalence tests that prove the carve correct can only run beside the
+original, which is Odoo 19. A module that installs only on 20 is a module
+whose maths nothing checks. `spring_calculator/compat.py` is `config_rate()`
+and `set_config_rate()`, keyed on `hasattr`.
+
+**READ IT THE WAY IT IS WRITTEN.** Both parameters back **Float** fields, and
+Odoo 20's own settings page writes them with `set_float`; reading a float row
+back with `get_str` returns `INVALID_VALUE`, which becomes the default and is
+INDISTINGUISHABLE FROM A DELETED PARAMETER - which the engine deliberately
+turns into "call us". So the shim uses the float accessors on 20. A test
+asserts the round trip, and another that a rate of ZERO still reads back as
+zero rather than as absent.
+
+**ODOO 20 ALSO FIXED THE ZERO BUG** the original works around: `set_float`
+converts only `None` and `False` to None, and `0.0 is False` is False, so a
+deliberate zero is stored. The workaround is kept for 19 and is harmless on
+20.
+
+#### AND THEN OWL 3, WHICH IS WHY PROJECT 2 IS ON ODOO 19 (owner, 2026-11-02)
+
+With the module finally installed on his Odoo 20 build, the backend action
+threw `TypeError: useState is not a function`.
+
+**ODOO 20 SHIPS OWL 3**, a breaking rewrite of the UI framework. The Odoo 20
+DOCUMENTATION still shows `useState` and is lagging; the SOURCE does not use
+it - `addons/web/static/src/core/dropdown/dropdown.js` imports `signal`,
+`useProps`, `immediateEffect` and `@web/owl2/utils`, and that last is Owl 3
+utilities rather than an Owl 2 shim (it exports `render`, `onWillRender`,
+`useLayoutEffect`, `useEnv`, `useSubEnv` and nothing like `useState`). **Read
+the source, not the docs, when a version is new.**
+
+Measured against the calculator rather than guessed at:
+
+- `useState` x4 - removed, replaced by `proxy`
+- `t-esc` x41 - removed, replaced by `t-out` (which also works in Owl 2)
+- `useEffect` x1 - signature changed, no second argument
+- **`t-model` x9 - now takes a SIGNAL**, not reactive state
+
+**THE LAST ONE IS WHY IT IS A MIGRATION AND NOT A PATCH.** Those nine
+bindings are the calculator's whole input surface - weight, drum, lift, wire,
+spring I.D., cycles, pitch - and moving off `useState` changes how state is
+read in every one of 4,449 lines. Owl 3 signals do not run on Owl 2, so doing
+it would FORK the calculator permanently by series, and **this container can
+only ever test the 19 half**: it would be a blind rewrite of the engine that
+prices his springs, with him finding out what broke.
+
+So he was given the choice and took the cheap one: **project 2 moves to Odoo
+19**, which project 1 runs anyway. Odoo.sh puts it under the branch's
+**Settings > Odoo version**. A brand-new project with no data is a rebuild,
+not a migration.
+
+**NOTHING OF THE ODOO 20 WORK IS WASTED OR REVERTED**: the series-less
+manifest version and `compat.py` both stay, because both are harmless on 19
+and both are blockers already cleared if Odoo 20 is ever revisited. What is
+NOT cleared, and is written down above so nobody re-derives it, is Owl 3.
+
+#### THE VERSION BELONGS TO THE BRANCH, NOT THE CODE (owner, 2026-11-02)
+
+*"i cant change the odoo version on staging or release, wont that cause
+problems when trying to merge into those branches?"* - and he is right, which
+makes "put project 2 on Odoo 19" the wrong answer.
+
+**Odoo.sh's "Odoo Version" is a DEVELOPMENT-BRANCH-ONLY setting** - its own
+documentation: it "can be changed for each build, **but not for production**",
+and exists to test upgraded code while production is still on the old series.
+**"Merging a staging branch into production merges only the source code."**
+So the version does not travel with a merge: put 19-targeted files into a 20
+staging branch and staging rebuilds on **Odoo 20**, failing exactly as before.
+A dev branch at 19 is a sandbox, not a route to production.
+
+**PROJECT 2 IS AN ODOO 20 PROJECT AND CANNOT BE WALKED BACKWARDS.**
+
+**AND THE MIGRATION WAS NOT AS BAD AS I SAID.** `t-model` is a convenience,
+not a necessity: the same inputs bind explicitly with `t-att-value` and an
+event handler, which is plain Owl and works in BOTH versions. That turns a
+blind fork into four changes that can each be proved on Owl 2 here. Three are
+now done, in the GENERATOR so they survive a re-sync:
+
+- `t-esc` -> `t-out`, all 41. **Owl 2's compiler implements both** and Odoo
+  19's own templates use `t-out` 98 times - checked, not assumed.
+- `useState` -> `OWL2 ? owl.useState : owl.proxy`, a runtime feature test.
+- `useEffect` -> the same test drops the second argument on Owl 3.
+
+**THE NINE `t-model` BINDINGS ARE STILL OPEN**, and seven are on `<select>`,
+where `t-att-value` sets an attribute and does NOT select an option - and the
+state is written programmatically too (the engine recommends a wire), so the
+selection must follow state rather than only drive it. That answer cannot be
+checked from a container that has only Owl 2.
+
+**CHROME IS TOO UNRELIABLE HERE TO VERIFY ANY OF IT.** At load 25-30 the
+server itself fails with `RuntimeError: can't start new thread` in
+`server.py`, the page returns `net::ERR_EMPTY_RESPONSE`, and the browser test
+reports "the calculator never mounted" - which is INDISTINGUISHABLE from a
+real failure. What was verified instead: the module installs, 24 tests pass,
+and the SERVED bundle carries the feature test, the `proxy` fallback, the
+component registration and the compiled `t-out` template.
+
+**SO THE WORK BELONGS ON PROJECT 2'S OWN CONTAINER** - owner's idea, and a
+better one than mine: *"if i use claude on the other project would it be able
+to fix it there?"* An agent there has the **Odoo 20 source on disk and a real
+Odoo 20 database**, so it can read and TEST what this build can only fetch
+off GitHub. `spring_calculator/README.md` now carries the brief, including
+the one rule that matters: **the module is GENERATED, so a fix made only in
+project 2's repository is undone by the next re-sync** - it has to come back
+as a diff and be folded into the generator.
+
+### DUPLEX ACCURACY: THE TABLE IS DERIVED, NOT WRITTEN (owner, 2026-11-09)
+
+*"we need to improve the accuracy of duplex springs even if they give
+warnings that wouldnt make them purchasable"* - with a screenshot of a door
+we got wrong: 12' x 14', 1067 lb, 2 springs, D525-216, r15, 10,000 cycles.
+Reference 32.25" / 33.25"; we said 31.00" / 32.00", **1.25" short on both**.
+
+**THE CALIBRATION TABLE IS COMPUTED FROM THE READINGS, NOT MAINTAINED BY
+HAND.** `dev/derive.mjs` fits it from `dev/corpus.json` plus any
+`dev/pulled*.json`; `sh dev/apply.sh` derives and installs it. Its own
+header says so: *"a new pull improves the table by re-running this rather
+than by editing JavaScript."* **Never hand-edit the rungs.**
+
+**THE FIRST THING TO CHECK IS WHETHER THE INSTALLED TABLE IS STALE**, and on
+2026-11-09 it was not: `apply.sh` changed **zero lines**. So 10,776/11,049
+(97.53%) was the model's ceiling on the data then held, not neglect.
+
+**SO THE FIX WAS DATA, NOT CODE.** His reading went into the corpus, the
+table was re-derived, and his door now returns 33.25"/32.25" exactly. Score
+10,777/11,050 - the same 273 failures, one more reading covered. One
+reference reading fixes one door and does not move the percentage.
+
+**A PLAUSIBLE RULE THE DATA KILLED, and the reason to always check.** 203 of
+the 273 failures are LENGTH with the wire already right, and five of the
+two-spring ones landed on a whole inch where the reference wanted a quarter.
+`duplexSnapToGrid` already lifts whole inches to the quarter above - but only
+at 3+ springs - so extending it to 2 looked obvious. **The corpus refutes
+it**: at 2 springs the reference uses 4,816 whole inches AND 2,296 quarters.
+At 3 and 4 it is 6 and 2 whole inches against 4,262 and 3,090. The rule is
+real at 3+ and false at 2; shipping it would have broken thousands of
+readings to fix five.
+
+**WHERE THE REMAINING ERROR LIVES.** The bonus is keyed on (spring count,
+floor of active length, frac). On the worst rung, `0.2625/0.2253`, there are
+**11 readings where the same (count, floor, frac) carries a different
+reference answer** - so no refit in those three variables can ever reach
+100%. `derive.mjs` names the weak groups itself: `0.2625/0.2253` is
+non-monotonic in frac at 2 and 4 springs, and `0.3625/0.295 at 2 springs` -
+the owner's rung - cross-validates at only **90.6%** over 32 readings, which
+is why roughly one door in ten there is wrong.
+
+**WHAT WOULD ACTUALLY MOVE THE NUMBER**: more reference readings on those
+rungs, which only the owner can pull. `derive.mjs` prints the groups and even
+says where to sweep ("in steps of 6 lb or less").
+
+**THE DRIFT ALARM WORKED.** Changing the engine made
+`tools/build_spring_calculator.py --check` fail at once, naming the stale
+file. Regenerating is part of any engine change.
+
+#### PULLING FROM SERVICE SPRING, AND WHAT A CAMPAIGN NOW YIELDS (2026-11-09)
+
+Owner: *"why dont you just use my ssc account to obtain the data yourself"* -
+and the tooling for it was already written. `dev/pull.mjs` reads credentials
+from **`~/.ssc-credentials` only** (never the command line, the environment or
+the repo), goes one request a second, caps at 400, and prints neither value.
+`dev/rung-target-sample.mjs` aims a draw at the starved rungs and
+`dev/rung-campaign.sh` runs generate/pull/import batch by batch under a lock.
+
+**THE CONTAINER IS EPHEMERAL, SO THE CREDENTIALS AND `dev/sweeps*.json` ARE
+GONE AFTER EVERY REBUILD** - both are gitignored, which is right. The
+`garageDoorLineId` the API requires (`5a06c4b3-c798-459e-bba2-a6c857eebb0b`)
+went with them, and was recovered from `dev/biased-soft-weightonly.json`,
+which is a committed pull output and carries its own `input`. Look there
+first rather than crawling the site - the SPA does not expose it.
+
+**THE PIPELINE WAS PROVED ON ONE REQUEST BEFORE ANY VOLUME**: the owner's own
+1067 lb door, which came back 0.295"/32.25" and 0.3625"/33.25" - exactly his
+screenshot, confirming the credentials, the endpoint, the parsing and my
+reading of his screenshot in one go.
+
+**BATCH V13: 400 REQUESTS, 21 NEW READINGS, ACCURACY UNCHANGED.** 379 were
+rejected by the importer as *"already in corpus (same inputs)"*. Score went
+10,776/11,049 to 10,797/11,071 - **97.53% both times**.
+
+**I CONCLUDED FROM THAT THAT THE CORPUS WAS SATURATED. IT WAS NOT, AND IT WAS
+NOT THE DEDUPE EITHER.** Both readings were wrong and the real cause is
+below. The lesson is in the shape of the mistake: two sets that look like
+they disagree, where one of them is a *message* rather than a measurement.
+
+##### THE SAMPLER'S RANDOM GENERATOR HAD COLLAPSED (2026-11-09)
+
+Five tools carried this line by copy-paste:
+
+```
+seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+```
+
+**IT IS NOT AN LCG.** `seed * 1103515245` reaches 2.4e18 and a double is
+exact only to 9.0e15, so the low bits are discarded on **every step** - the
+state itself is up to 2^31, so this is not about a large starting seed. The
+sequence falls into whatever short cycle the rounding lands in, and the
+cycle length depends on the seed unpredictably. Distinct values in 30,000
+draws, over the 28 seeds this repository has used:
+
+```
+seed 20261009      17,690      seed 61006         10,547
+seed 202610081006  13,039      seed 202610081014  10,936
+seed 202610081013     *318*
+```
+
+`rung-campaign.sh` builds its seed as `2026100810$I`. **V13 drew the one
+seed in the set that collapses**, so 30,000 sampled geometries became a few
+hundred and its 400 cases held **21 distinct doors**. The other 379 were
+repeats of other rows *in the same file*. Had the batch been numbered 12 or
+14 this would still be undiagnosed.
+
+**AND THE IMPORTER'S WORDING IS WHAT MISLED THE DIAGNOSIS.** It kept ONE
+`have` set, seeded from the corpus and added to as rows were taken, so a row
+duplicated *within the pull* was reported as *"already in corpus"* - a
+sentence about the corpus being full. It now counts and names the two apart,
+because they are different faults with different fixes: one means stop
+pulling, the other means the sampler is broken and the requests were wasted.
+
+**THE YARDSTICKS ARE UNHARMED, CHECKED AND NOT ASSUMED**: the
+`eval-validation` draws are 380/380, 380/380 and 400/400 distinct. They are
+saved DATA and never re-generated, so every accuracy figure ever quoted off
+them stands. V13 is the only spoiled batch.
+
+**THE FIX IS `Math.imul`** (exact int32, wrapping - the arithmetic these
+constants were chosen for), in **ONE** copy at `dev/rnd.mjs`, imported by all
+five samplers. The same 28 seeds then give 30,000 distinct out of 30,000,
+worst case. **The ref-state.mjs lesson a second time**: a thing five tools
+each keep their own copy of is wrong in all five at once, where no single
+tool's tests can see it.
+
+**THE DIVISOR IS `2**31`, NOT `2**31 - 1`.** Dividing by `0x7fffffff` returns
+exactly 1.0 at the top of the range, so `pick()` read one past the end of its
+array and returned `undefined` - a case with no drum in it. One chance in
+2^31 per call: a bug waiting for a campaign big enough to find it.
+
+**THREE GUARDS SO IT CANNOT RECUR QUIETLY.** The sampler keeps a `drawn` set
+*separate from* `held` (`held` answers "do we own this reading"; nothing
+answered "have I already put this one in the basket"); it **REFUSES TO WRITE
+a sweep whose cases are not distinct**, before a single request is paid for,
+asserting the sweep rather than the generator so it would have caught V13
+whatever the cause; and the importer names the two duplicate kinds apart.
+
+##### BATCH V14: 400 REQUESTS, 400 READINGS (2026-11-09)
+
+The first campaign after the fix, and what V13 should have been:
+
+```
+V13 (collapsed)   400 requests ->  21 readings -> 97.53%
+V14 (fixed)       400 requests -> 400 readings -> 97.63%
+```
+
+Nothing rejected. **The refit predicted all 400 new doors correctly AND
+fixed two old ones** - failures went 274 to 272 while the corpus grew by 400,
+so coverage was not bought with old accuracy. Score 10,797/11,071 to
+**11,199/11,471**. Golden unmoved (725 byte-identical), 18 invariants pass.
+
+Seven starved rungs fed: `0.4062/0.331` 172 -> 277 with its two-spring split
+rebuilt (`from` 26 -> 59), `0.3437/0.283` 231 -> 320, `0.331/0.273` 251 ->
+319, `0.3938/0.3125` 276 -> 319, `0.295/0.2437` 266 -> 320, `0.295/0.2343`
+299 -> 320.
+
+**AND IT GAVE THE OWNER'S OWN RUNG NOTHING, WHICH IS THE FINDING.** His
+1067 lb door is on `0.3625/0.295`, which still holds **120 readings**. The
+allocator ranks by traffic/need - how often a real door lands on a rung over
+how short it is - and his rung has **traffic 4 of 31**, second lowest in the
+validation sets. Needing 200 readings it scores 0.02, sorts dead last, and is
+reached only once every common rung is full. **It never will be.**
+
+That rule is right on its own terms: it is why `0.2625/0.2253` holds 1,199
+readings on traffic 122, and why the rung beside his (`0.3625/0.283`) holds
+322. His is the hole in the table - and it is exactly the 90.6%
+cross-validation over 32 readings recorded above, explained rather than
+merely measured.
+
+**SO THE NEXT BATCH AIMS ALL 400 AT `0.3625/0.295` AND IGNORES TRAFFIC.**
+Same cost, pointed at the door he actually sent a screenshot of. The
+allocator needs an override; traffic weighting cannot get there.
+
+##### BATCH V15 AIMED AT HIS OWN RUNG, AND IT GRADUATED (2026-11-09)
+
+`RUNGS=0.3625/0.295` is the override written for this: candidates come from
+the NAMED rungs rather than the ones the validation sets visit, ordered by how
+starved each is. The default traffic ranking is untouched - it is right for
+raising the average and cannot ever fix one man's door.
+
+It cost **200 requests, not 400** (exactly what the rung needed to reach the
+same target of 320), 200 of 200 accepted, zero warnings, and **the wire was
+right on all 200** - the error here was only ever length.
+
+    rung 0.3625/0.295:  n 120 -> 316,  two-spring fit 32 -> 97 readings
+
+**IT IS GONE FROM EVERY WEAK LIST.** `derive.mjs` named it before at 90.6%
+cross-validation over 32 readings; it now appears **zero** times in those
+diagnostics. His door still returns the reference exactly (0.295"/32.25",
+0.3625"/33.25") through a full refit, which is the point - the earlier match
+was one reading propping up one door.
+
+Global 11,199/11,471 -> 11,393/11,671 (97.63% -> 97.62%) with **old failures
+unchanged at 272**: nothing regressed, and the dip is 200 deliberately hard
+doors joining the denominator. **This batch bought coverage, not a headline.**
+
+##### THE HEAVY HALF OF THE TABLE IS UNFITTED, AND THE SAMPLER CAUSED IT
+
+Measured over the 278 remaining failures rather than guessed: **268 are
+LENGTH with the wire already right**, and **209 sit on wire >= 0.4687 across
+49 groups, nearly all failing 100%** - every `0.625/*` group fails every
+reading it has, on 2 to 27 readings each.
+
+**THE CAUSE IS STRUCTURAL AND IT IS THE OWNER'S OWN SENTENCE.** A door heavy
+enough to need 0.4615" wire ALWAYS trips *"wire size exceeds 0.4375 maximum
+for the outer spring inside diameter, Service Spring will not make it"* - so
+`rung-target-sample.mjs` discarded every one, its filter being *any* non-info
+warning. That is a note about what the shop can SELL. He asked for accuracy
+*"even if they give warnings that wouldnt make them purchasable"*.
+
+Doubly unreachable, in fact: the hi-lift drums carry **no DRUM_LIMITS entry**,
+so the `?? 750` fallback capped them below where heavy wire even begins. And
+their traffic is **0**, so the default allocator could not have chosen them
+either.
+
+**`SOFT=1` KEEPS NON-PURCHASABLE DOORS AND STILL EXCLUDES TWO THINGS**, each
+for its own reason: **red** (here "assembly too long for the door", which is
+a different door rather than a different spring), and **the drum-weight
+warning**, because the engine CLAMPS weight to the drum's rating - so the
+request would ask the reference about a heavier door than we computed. That
+is a corrupt reading, not an unsellable one. Soft mode samples to a generous
+ceiling and lets that warning set the real limit, so no number is invented.
+
+**EXPECT A LOWER YIELD AND DO NOT BE SURPRISED BY IT**: 57% of heavy corpus
+readings are answered cleanly by the reference against 90% for ordinary
+doors, and a flagged reading teaches the wire but not the length. 57% of
+something beats 100% of nothing, which is what these rungs get today.
+
+##### BATCH V16 PULLED THEM, AND THE ANSWER WAS NOT WHAT EITHER OF US EXPECTED
+
+337 requests on the seven heavy rungs, SOFT mode. **ZERO came back clean** -
+not 57%, zero. I had estimated 57% from the heavy readings already in the
+corpus, which arrived through differently-built sweeps and were the wrong
+population to generalise from. **Ten requests would have said the same thing
+as 337. Probe before spending.**
+
+**THE REFERENCE DISCLAIMS ITS OWN ANSWER ON THESE DOORS**, in its own words:
+
+```
+897x  "Only spring lengths between 0 and 96" are recommended"
+337x  "Wire size exceeds 0.4375 maximum for the outer spring inner diameter"
+312x  "Wire size exceeds 0.4062 maximum for the inner spring inner diameter"
+166x  "Only spring lengths between 0 and 120" are supported"
+```
+
+229 of the 337 complaints mention LENGTH. Most of these doors want two
+springs each over 96". So **the "209 heavy failures at 100%" were never a
+data shortage** - we were scoring the model against numbers Service Spring
+will not stand behind. There is no data to buy there, and no further heavy
+pull should be run for LENGTH.
+
+**BUT I WAS WRONG THAT THE BATCH BOUGHT NOTHING, AND THE MEASUREMENT SAID SO.**
+Failures went **278 to 262** and the score 97.62% to **97.82%** - the largest
+single-batch gain of the session. All 337 new readings reproduce AND **16 OLD
+failures were fixed**, because a flagged reading's WIRE and CYCLE figures are
+sound even where its length is not, which is exactly what `import.mjs` says
+in its own comment and what I talked myself out of. Golden unmoved (725
+byte-identical), 20 invariants pass.
+
+**THE REAL PRIZE IS A HONEST WAY TO STATE THE ACCURACY**, because "97.8%"
+averages in doors nobody can get a trustworthy answer for:
+
+```
+group                                 readings   exact   wire-right
+CLEAN (reference stands behind it)      10172    98.3%       99.5%
+flagged, under 96"                       1218    94.7%       97.5%
+flagged, 96-120"                          384    91.4%       98.4%
+flagged, over 120"                        234    43.2%       97.9%
+```
+
+**INSIDE THE SUPPORTED ENVELOPE THE CALCULATOR IS 98.3% EXACT AND PICKS THE
+RIGHT WIRE 99.5% OF THE TIME.** Nearly the whole shortfall is the 234 readings
+past 120", where the reference has already given up. **Quote the clean
+figure**, and note that the WIRE is right 97.9-99.5% everywhere, in the
+envelope and out of it - only LENGTH degrades, and only where the reference
+disclaims it. `/home/odoo/logs/envelope.mjs` in this session computed that
+split; it is worth rebuilding as a committed tool if the question returns.
+
+Of what remains, 311 are "wire right, length wrong" and 97 are "wire wrong"
+(a stricter count than replay's 262 - it asserts both lengths on every
+reading, including those past 120" that replay leaves alone).
+
+**SO THE DUPLEX ACCURACY WORK IS DONE UNTIL SOMETHING CHANGES.** What is left
+is doors the reference refuses to answer, plus `0.2625/0.2253` where it gives
+different answers for identical inputs - both already documented as
+unfixable with more data.
+
+##### HOW ACCURATE IS THE SPRING HE ACTUALLY SELLS? (owner asked, 2026-11-10)
+
+*"are standard springs 100% accurate? how accurate are duplex springs?"*
+
+**THE 725-CASE GOLDEN SNAPSHOT DOES NOT ANSWER THAT, AND IT HAD BEEN QUOTED AS
+IF IT DID.** It proves nothing MOVED; it says nothing about being RIGHT.
+`dev/single-external.mjs` says so in its own header. Measured against the
+reference instead, on CLEAN readings only:
+
+```
+                            n    wire    length   weight
+the three IDs SOLD        216   99.5%    100.0%   100.0%
+all clean Single          275   99.6%    100.0%   100.0%
+```
+
+**LENGTH AND WEIGHT ARE PERFECT. ONE reading of 275 takes the wrong wire** -
+and over all 557 Single readings it reads 98.6%, which is the same envelope
+distortion as duplex: the flagged ones drag it.
+
+**THE ONE MISS IS A CORNER OF THE DRUM**: 5 1/4", D400-144, 3 springs, r15,
+**750 lb at 144"** - which is EXACTLY that drum's maximum weight AND exactly
+its maximum height, both at once. Reference 0.3065", ours 0.295" - one step
+**LIGHTER**, which is the under-sprung direction. **Not acted on**: one
+reading is what the duplex snap-to-grid lesson above was about.
+
+**DUPLEX, IN THE ENVELOPE: 10,172 readings, 178 failing = 98.25%**, of which
+55 are wire and 123 length-only.
+
+**AND THE THING HE SELLS IS THE LESS MEASURED OF THE TWO** - 275 clean Single
+readings against 10,172 duplex. That is the imbalance worth fixing, not the
+percentages.
+
+###### A FINDER THAT INVENTED ITS OWN FIELD NAMES
+
+My first attempt to locate that miss reported **0 clean readings** where
+`single-breakdown.mjs` reported 275. It used `i.springId` and
+`c.singleWireSize`, neither of which exists - the real names are
+**`i.innerDiameter`** (through `ID_TEXT`) and **`c.recommendedWire`**, and the
+reference's spring is `d.outerSpring || d.innerSpring`. Copying the working
+tool's extraction made the two agree. **The ref-state.mjs rule again: a tool
+that measures what another tool already reports must be checked against it
+before its findings are believed.**
+
+###### THE SINGLE GAP BATCH: 249 REQUESTS, 67 CLEAN, 100% ON ALL OF THEM
+
+`dev/single-gap-sample.mjs` aims at the slices nobody had measured and stamps
+every case `eval: true`, so **derive.mjs can never fit them** - a yardstick,
+not training data. `dev/eval-single-gap-seed20261110.json`.
+
+**67 clean readings, and the model is 100% on wire, length AND weight across
+every slice of them** - all three sold IDs, all five drums including
+`525-54HL` and `D800-120` which had **never been drawn for Single at all**,
+hi-lift to 119", doors to 20 ft, one to four springs, every cycle target.
+That is an independent confirmation on data the fitter has never seen, and it
+takes Single's clean evidence base from 275 to 342.
+
+**ONLY 67 OF 249 CAME BACK CLEAN, AND THE REASON IS THE SAME ENVELOPE**:
+
+```
+147x  "Torsion assembly will be too long for a 216 " wide door!"
+ 82x  "Only spring lengths between 0 and 120" are supported"
+ 42x  "Only spring lengths between 0 and 96" are recommended"
+```
+
+216" is ALREADY the widest door the box allows, chosen in that sampler for
+exactly this reason - and tall heavy multi-spring doors still overrun it. **So
+the Single "gaps" are thin because the reference cannot answer them, not
+because nobody asked.** The same conclusion as the heavy duplex rungs, reached
+independently. Expect roughly a quarter of any future tall/hi-lift Single draw
+to be usable.
+
+**NOTE `pull.mjs` PRINTS `error` FOR ANY NON-SUCCESS STATUS**, which looked
+like 148 transport failures mid-run and was nothing of the kind: all 249 got
+real answers and the output carried **zero** `error` fields. Read the output
+file, not the progress line.
+
+##### MORE BONUS LEVELS STILL DO NOT PAY, RE-MEASURED ON 4x THE DATA
+
+`LINE_LEVELS` defaults to 2 and the comment above it records the experiment
+being rejected twice - but **last measured 2026-10-05 on 3,181 readings**,
+where the corpus now holds 12,008. Extra capacity overfits less as data grows,
+so that conclusion was stale rather than wrong, and it costs only CPU to
+re-ask. On the never-tuned validation sets:
+
+```
+LINE_LEVELS=2  (installed)   520/531 = 97.93%
+LINE_LEVELS=3                507/531 = 95.48%
+```
+
+**Worse by 2.45 points** - a bigger loss than when first rejected. Table
+reverted. The question is now settled on four times the data; do not re-ask it
+without a new reason.
+
+**AND THE BIGGEST REMAINING DUPLEX CLUSTER IS NOT A DATA PROBLEM.** 32 of the
+178 in-envelope failures sit on `0.295/0.2437 at 2 springs`.
+`dev/group-shape.mjs` on it shows why:
+
+```
+levels: -1:2   0:84   0.25:2   1:26   1.25:62
+```
+
+**FIVE bonus levels where the fitter allows at most three**, and at floor 12,
+frac 0.96 the reference gives bonus **-1 AND +1 for the same inputs**. Model
+capacity plus reference noise - which is why V14's 54 readings on that rung
+changed nothing, and why no further pull should be aimed there.
+
+##### "ARE YOU SURE YOU CANNOT IMPROVE ACCURACY ANYMORE?" - NO (owner, 2026-11-10)
+
+He pushed back on being told the duplex work was finished, and he was right
+to. **I had over-claimed twice**, and the measurement that settles it is this
+split of the 177 in-envelope failures:
+
+```
+wire wrong                             54
+length wrong, key CONTRADICTS itself   18   <- genuinely unfixable
+length wrong, key is UNAMBIGUOUS      105   <- WINNABLE
+```
+
+**ONLY 18 ARE REFERENCE NOISE.** The entry above implies most of the
+remainder is - it is not. For **105** readings the reference gives ONE answer
+for those exact inputs and the model still gets it wrong, which is the FITTER
+leaving them, not the data. `/home/odoo/logs/winnable.mjs` computed it; worth
+rebuilding as a committed tool.
+
+**THE CONTRADICTIONS WERE COUNTED RATHER THAN ASSUMED**: of 9,188 distinct
+(rung, springs, floor, frac) keys, **16** carry more than one reference
+answer, over 35 readings. And no single input explains them - inside those 16
+groups the height varies in 15, the weight in 14, cycles in 13, drum and
+radius in 11 - so there is no obvious missing fourth variable, which is the
+thing the previous entry said was needed and never went looking for.
+
+Where the 105 sit: **28 on `0.295/0.2437 2spr`**, 11 + 4 + 4 on
+`0.2625/0.2253`, 9 on `0.289/0.2343 2spr`, 6 on `0.3625/0.295 2spr`, and 39
+spread over groups of one or two.
+
+###### AND THE CAPACITY EXPERIMENT, ASKED PROPERLY THIS TIME
+
+The `LINE_LEVELS` verdict above was reached by raising capacity for EVERY
+group, which most groups do not want - they take two levels and extra freedom
+only lets them chase noise. The groups carrying the error are the opposite
+case, and **"raise it everywhere" and "raise it only where the fitter has
+given up" are different experiments.** Only the first had ever been run.
+
+So `LINE_LEVELS_MAX` tries 2 first - any group that fits today is fitted byte
+for byte as before - and reaches higher only where 2 returns nothing. The
+ordering search's hard cap of 3 was lifted with it, since above 3 a group fell
+to `fitLineAnyLevels`, which insists on BONUS order, and the five-level group
+runs 0 -> 1.25 -> 1 in frac: it failed on both paths and memorised bands.
+
+```
+baseline (2 levels)        520/531 = 97.93%
+per-group fallback to 5    509/531 = 95.86%
+```
+
+**IT LOSES BY 2.07 POINTS**, moving 18 rung lines. So the original verdict
+stands and the reasoning behind it is now sound. A perfect fit is an
+IN-SAMPLE criterion; with four or five free levels one is easy to find and
+generalises worse than the bands it replaces, and on a group that size the
+cross-validation gate has little left to validate against.
+
+**THE 105 REMAIN WINNABLE, BUT NOT BY MORE LEVELS.** That would take a
+different functional form rather than more freedom in this one. The flag is
+kept off by default so the measurement is one word to reproduce. **Do not
+re-run either capacity experiment without a new idea about the form.**
+
+##### THE 54 WIRE MISSES ARE A THRESHOLD, NOT A MODEL (2026-11-10)
+
+Every accuracy session so far has been about LENGTH. The 54 in-envelope WIRE
+misses had never been looked at, and they turn out to have a single clean
+mechanism.
+
+**THEY ARE ALL EXACTLY ONE STEP ON THE LADDER, AND SYMMETRICALLY SO**: 27
+softer than the reference, 27 stiffer. A symmetric error is not a rule facing
+the wrong way - it is a boundary being crossed in both directions, so no shift
+of the threshold can win. Shifting it trades 27 for 27.
+
+**THE PHYSICS IS SOUND, AND THIS IS THE MEASUREMENT THAT SHOWS IT.** On a wire
+miss our cycle figure describes OUR pair and the reference's describes ITS
+pair, so comparing them compares two different springs - 21.65% median, which
+is an EFFECT of the miss and was nearly reported as its cause. The
+non-circular test is to run OUR cycle model on THE REFERENCE'S OWN pair:
+
+```
+                                 median abs err   within 1%   within 5%
+where we picked the same pair          1.85%         28.0%       85.5%
+where we picked a DIFFERENT pair       1.02%         50.0%      100.0%
+```
+
+**OUR CYCLE MODEL IS MORE ACCURATE ON THE MISSES THAN ON THE HITS**, and the
+reference's pair is a candidate we considered in **all 54** cases. So nothing
+is wrong with the cycle maths or the ladder - only with which candidate the
+rule selects.
+
+**AND THE MISSES ARE THE MARGINAL DOORS**, which is the mechanism:
+
+```
+                     |margin| from the target        within 2%
+                   p10      median      p90         of threshold
+wire correct       1.7%      12.7%     61.8%           11.2%
+wire MISSED        0.0%       6.4%     47.9%           50.0%
+```
+
+Selection takes the softest candidate whose life reaches the target. **Half
+the misses sit within 2% of that threshold against 11% of the hits**, and our
+estimate of that quantity carries about 1% error - which is enough to flip a
+candidate sitting on the line, in whichever direction the error happens to
+fall.
+
+**SO THESE 54 ARE IRREDUCIBLE WITHOUT A MORE ACCURATE CYCLE MODEL.** Not a
+rule to fix and not data to buy: a threshold decision taken on a quantity
+known to 1% will always mis-sort the doors within 1% of it. 0.5% of
+in-envelope readings, half of them one step SOFTER - and that is the
+under-sprung direction, so it is the half worth knowing about.
+
+`/home/odoo/logs/` held `wiremiss.mjs`, `cyclefair.mjs` and `margin.mjs` for
+this; all three are worth rebuilding as committed tools if the question
+returns.
+
+**AND `duplexCycles` RETURNS A FORMATTED STRING** (`"48,000"`), so `dc > 0` is
+silently false and a diagnostic reading it numerically reports ZERO rows. That
+is the THIRD invented-field-name mistake of the session - after `i.springId`
+and `c.singleWireSize`. **Read the getter, do not guess the shape of what it
+returns.**
+
+##### WHAT THE WEB SAID ABOUT THE LENGTH RULE (2026-11-10)
+
+Asked to look outside the repository for a lead on the 105 winnable length
+failures. It found no new lever, but it CLOSED two hypotheses by measurement
+and confirmed two decisions, which is worth writing down so nobody re-derives
+them.
+
+**THE COIL-ROUNDING HYPOTHESIS IS NOT DEAD - THE TEST BELOW COULD NOT SEE
+IT** (corrected 2026-11-11, see *THE VENDOR STATES THE LENGTH RULE* further
+down). The industry formula is
+`IPPT = (E x d^4) / (10.8 x D x N)` with `N = length / wire`, because torsion
+coils are wound CLOSED and touching. That suggests the reference might solve
+for the coil count and ROUND IT - which would put length on a grid spaced by
+the WIRE DIAMETER, different per rung, and would neatly explain a per-rung
+bonus that a fixed quarter-inch grid can never quite fit. **Measured over
+20,344 in-envelope lengths: only 8% sit near a whole coil and
+`frac(length/wire)` is spread almost uniformly.** The reference is not
+rounding coils.
+
+**AND THE LENGTH GRID IS ALREADY RIGHT, WHICH IS WHY THAT WAS WORTH ASKING:**
+
+```
+frac(reference length)   .00  59.7%   .25  40.3%   .50  0.0%   .75  0.0% (6)
+```
+
+The reference returns ONLY whole inches and quarter inches - never a half,
+never three quarters, in 20,344 readings. **Our model never emits one either**
+(checked: zero violations), so there is no free correction there.
+
+**THE VENDOR'S OWN SELL SHEET CONFIRMS THE ONE DESIGN DECISION THIS ALL RESTS
+ON.** `resources.sscorp.com` is Service Spring Corp - the reference itself -
+and its Toledo commercial sheet lists *"Cones available for these standard
+sizes: Duplex: 6" outer spring x 3 3/4" inner spring"*. That is the ONLY
+duplex pair they stock, and it is exactly the pair the owner said to use and
+the only one the model is calibrated for. Independent confirmation of the
+dropdown holding one option.
+
+**A MODEST SIGNAL, NOT A LEVER**: the same sheet says commercial spring wire
+runs **.295 to .625**, and several weak rungs sit below it - including
+`0.2625/0.2253`, the contradictory one. Failure rates split:
+
+```
+outer wire BELOW .295    2,391 readings   62 failing   2.59%
+outer wire within range  7,781 readings  116 failing   1.49%
+```
+
+1.7x worse below the range they say they make, which fits the idea that those
+answers are the calculator extrapolating rather than describing a product. But
+**116 of the 178 failures are inside the range**, so this explains a lean, not
+the problem.
+
+**ONE DISCREPANCY WORTH THE OWNER'S EYE**: the sell sheet says *"the spring
+filler is cut one inch shorter than the specified spring length"*, where he
+said a 4 foot spring takes 4 feet of filler. At $3.24 a foot that is about
+27 cents a spring, and HIS rule governs - but the vendor's sheet disagrees
+with it and he may not know.
+
+##### BATCH S2 SETTLES IT: VOLUME IS NOT THE LEVER, EVEN ON A STARVED RUNG
+
+*"are you sure more runs wont help on accuracy even if its only by a
+decimal"* - a fair question, because the session's own numbers argued against
+me: V14 gave +0.10, V16 gave +0.20, and **V16 was the batch I had predicted
+would buy nothing.** So the claim was tested rather than repeated.
+
+**THE TARGETING WAS SOUND AND THE RESULT WAS NOTHING.** 223 requests at the
+two mid-range rungs carrying the most failures while still short of the 320
+that fixed the owner's rung. 223 of 223 accepted, **215 of 216 clean** on the
+way (these sit inside the reference's envelope, unlike the heavy batch):
+
+```
+0.3938/0.3195   124 -> 320 readings    failures 6 -> 6
+0.3125/0.2625    18 ->  44 readings    failures 5 -> 5
+in-envelope failures          178 -> 179
+never-tuned yardstick       97.93% -> 97.93%
+global           11,746/12,008 -> 11,968/12,231
+```
+
+**FILLING A RUNG 2.6x CHANGED ITS FAILURE COUNT BY ZERO.** `0.3938/0.3195`
+got exactly the treatment that made `0.3625/0.295` graduate - 124 to 320,
+the same target - and not one of its six failures moved. 222 of the 223 new
+readings are reproduced, so the batch was absorbed cleanly; it simply fixed
+nothing.
+
+**SO THE "SHORT OF 320" HEURISTIC DOES NOT PREDICT WHETHER DATA HELPS**, and
+that is the finding. The split this session drew between *"rungs still short -
+data may help"* and *"at target - fit-bound"* is not a real distinction: a
+short rung can be fit-bound too. What V15 bought on the owner's rung was
+ROBUSTNESS - it left every weak list and its cross-validation came right -
+rather than a lower failure count, and that was visible at the time (it still
+carries 6 failures at 316 readings).
+
+**A SECOND LIMIT WORTH KNOWING: SOME RUNGS CANNOT BE FILLED AT ALL.**
+`0.3125/0.2625` needs 302 readings and 60,000 sampled geometries contained
+only **27** that land on it. It went 18 -> 44 and the sampler cannot reach
+further. A rare rung is rare in the door space, not merely unvisited.
+
+**WHAT IS LEFT IS FIT-BOUND, AND NOW THAT IS MEASURED RATHER THAN ASSERTED.**
+Three levers have each been tried and lost: more data (this batch), more
+model capacity globally and per-group (both lose 2+ points on never-tuned
+data), and a different functional form from the published engineering formula
+(the coil-rounding hypothesis, refuted on 20,344 lengths). **Do not spend
+further requests on duplex length without a new idea about the FORM of the
+rule.**
+
+The readings are kept - they are 223 more genuine reference answers and they
+cost nothing to hold - and the table is refitted around them. Golden unmoved
+(725 byte-identical), 20 invariants pass.
+
+##### THE VENDOR STATES THE LENGTH RULE, AND MY REFUTATION WAS INVALID (2026-11-11)
+
+Asked to search further rather than accept "nothing more can be done", and
+this came back from **Service Spring's own ordering guide** - the reference's
+own words:
+
+> *"for a distorted or broken spring, count total coils and multiply by wire
+> size - e.g., 120 coils x .250 wire = 30\""*
+
+**LENGTH = TOTAL COILS x WIRE SIZE.** Which is the coil hypothesis the entry
+above records as refuted - and **that refutation was invalid.** The test was
+"is `length / wire` near an integer", measured over 20,344 readings, and it
+found a near-uniform spread. But the reference reports length rounded to a
+QUARTER INCH, and a quarter inch is **0.95 of a coil on 0.2625 wire**. The
+rounding destroys integrality by construction, so the test could not have
+detected the rule even if it were exactly true. **A test that cannot fail the
+hypothesis cannot refute it either.**
+
+**THE TEST ONLY DISCRIMINATES ON THICK WIRE**, where a quarter inch is a small
+fraction of a coil. On clean readings:
+
+```
+wire     readings   within 1/8"   by chance   verdict
+0.5           153       86.3%        50.0%    supports
+0.625          10       60.0%        40.0%    supports (n too small)
+0.4615        118       39.0%        54.2%    AGAINST
+0.5625         13       23.1%        44.4%    AGAINST (n too small)
+   ...most rungs: cannot tell
+```
+
+**THAT TEST WAS INCONCLUSIVE AND ITSELF CONFOUNDED** - for a wire dividing
+evenly into quarters the multiples of `d` land on the same grid the reference
+rounds to - so a better one was built, and it SETTLES IT.
+
+###### AND THEN THE RULE WAS TESTED PROPERLY, AND IT LOSES (2026-11-11)
+
+The vendor's rule makes a sharp prediction. If `duplexActiveLength` is active
+coils x wire, then `length = activeLength + (dead coils x wire)`, and the
+fitted "bonus" is really a small INTEGER number of dead coils - which would
+explain at a stroke why the bonus differs per rung. Tested over the 10,338
+clean, wire-correct readings, snapping to the `{n, n+0.25}` set the reference
+actually uses:
+
+```
+snap(activeLength + k x wire)     k=0  40.25%   k=1  32.13%   k=2  21.82%
+                                  best k chosen PER RUNG      40.88%
+the bonus table as it stands                                  98.81%
+```
+
+**A TEST THAT COULD HAVE CONFIRMED IT, AND DID NOT.** Had the rule held, some
+`k` would score near 99%; the best is 41%. And the residual settles it beyond
+argument - `(reference length - active length) / wire`, fractional part:
+
+```
+bins of 0.1:  10  11   9  10  10  10  10  11  10  10
+within 0.1 of a whole coil: 19.6%   (20.0% if purely flat)
+```
+
+**PERFECTLY FLAT.** The gap between the reference's length and the active
+length is not coil-quantised in any degree. So *"count total coils and
+multiply by wire size"* is how SSC tell you to MEASURE a spring you are
+holding - it is not how their calculator CHOOSES one. Those are different
+questions and the sentence answers only the first.
+
+**SO THE COIL IDEA IS NOW GENUINELY CLOSED**, by a test with the power to
+confirm it, rather than by the earlier one which had no power at all. The
+bonus table stays. No code was changed to find this out - the experiment was
+three diagnostics and the installed table was never touched.
+
+**WHAT IT WOULD TAKE TO SETTLE IT**: implement the form - solve for the coil
+count from the required IPPT, multiply by the wire, round to a quarter - and
+score it against the never-tuned sets. That is a REWRITE of the length model
+rather than a tweak, and it risks the 98.25% that works today. It is the first
+genuinely new idea about the FORM since this work began, and it comes from the
+vendor rather than from guessing.
+
+**ALSO WORTH KNOWING, from the same search**: commercial 3 3/4" springs are
+sold at lengths like **45.5"** (American Garage Door Supply publish IPPT per
+SKU), so the reference is NOT picking from a stock list - it never returns a
+half inch. And SSC's **Spring Engineering app** is their rate book as
+software, with Conversions, Engineering, Spring IPPT, Springs by IPPT and a
+Weight Calculator - the same engine behind the web calculator, should anyone
+want a second way to probe it.
+
+##### THE CALCULATOR'S OWN JAVASCRIPT HOLDS NO MATHS (checked, 2026-11-11)
+
+*"are you sure that none of the scripts that are publically viewable on the
+ssc website arent helpful"* - and I was not sure, because I had ASSUMED the
+sizing was server-side from the fact that we POST to an endpoint, without ever
+looking. Now looked at.
+
+The shop is a Vite build and `build/manifest.json` is public (63 entries). The
+calculator lives in the shared chunk `common-components-*.js`, 685 KB, which
+does carry the vocabulary - `wireSize` 73 times, `springLength` 36, `duplex`
+23, plus drum and cycle. **But it holds no arithmetic:**
+
+```
+"/spring-engineering/engineer-torsion-spring"   <- the endpoint we already use
+physics constants (28,500,000 / 10.8 / 0.0796)  <- NONE
+every springLength occurrence                   <- form state, request payload,
+                                                   or reading a stock part
+```
+
+**IT IS A FORM THAT POSTS TO THE SERVER.** There is nothing in the public
+JavaScript to learn the length rule from, and no further reason to look there.
+
+**BUT IT NAMED FOUR ENDPOINTS, AND ONE ANSWERS A DIFFERENT OPEN QUESTION:**
+
+```
+/spring-engineering/engineer-torsion-spring   (the one dev/pull.mjs uses)
+/spring-engineering/drum-recommendation       <- HOW THE DRUM IS PICKED
+/spring-engineering/drum-list
+/spring-engineering/drum
+```
+
+`drum-recommendation` is a **GET** taking `doorHeight`, `doorWeightPounds` and
+`hiLift`, returning `{drumName}` - and *"how the drum is picked"* is a
+standing unanswered question that blocks the second project's quoting
+automation. It has never been asked; `dev/pull.mjs` only ever calls the
+engineering endpoint. **One request would answer what nobody here can derive**,
+and a small sweep would give the whole rule.
+
+##### HOW THE DRUM IS PICKED - ANSWERED (2026-11-11)
+
+A standing unanswered question, recorded for over a week as blocking the
+second project's quoting automation and as something only the owner could
+settle. **The reference answers it, and reading their public bundle is what
+found the door.**
+
+```
+GET /spring-engineering/drum-recommendation
+    ?liftType=Standard&doorHeightInches=168&doorWeightPounds=1067
+```
+
+**THE RULE, SWEPT OVER 8 HEIGHTS x 9 WEIGHTS AND REPRODUCED EXACTLY:**
+
+> Take the FIRST drum, in the order `D400-96` -> `D400-144` -> `D525-216`,
+> whose **maxHeight >= door height** AND **maxWeight >= door weight**.
+
+All 72 cells of the sweep are reproduced by that rule using the
+`DRUM_LIMITS` this module already holds - 96/530, 144/750, 231/1500. **The
+table was already right; only the selection rule was missing**, and it is two
+comparisons.
+
+**THREE THINGS THAT COST A REQUEST EACH TO LEARN, so nobody pays twice:**
+
+- **`X-Requested-With: XMLHttpRequest` IS NOT OPTIONAL.** Without it the route
+  redirects to `/account` and answers **200 with HTML** - which is exactly
+  what an expired session looks like, and is why the first attempt read as a
+  login failure. `dev/pull.mjs`'s own endpoint does not need it, so this is
+  per-route.
+- **THE FIELD NAMES COME FROM THE SERVER, NOT THE BUNDLE.** The minified
+  JavaScript shows `doorHeight`; the server wants `doorHeightInches`. With
+  the XHR header a bad request answers **422 naming every field it wants** -
+  far better than reading minified code.
+- **`drum-list` RETURNS NAMES ONLY** - `{"Drums":["AMBASSADOR D-101", ...]}`,
+  about sixty across many brands - not records. The full record comes back
+  from the RECOMMENDATION, and it is rich: `maximumHeight`, `maximumWeight`,
+  **`maximumDiameter` (the maximum CABLE diameter)**, `highMomentArm`,
+  `flatMomentArm`, `circumference`, `cableLength` and a `compatible` list.
+  D525-216 returns `maximumHeight 231` and `maximumWeight 1500`, confirming
+  both figures this repository had to derive by hand.
+
+**SO `maximumDiameter` ALSO ANSWERS "DOES D800-120 RUN 1/4\" OR 3/16\" CABLE"**
+- another standing question - for one request against a hi-lift door.
+`dev/drum-probe.mjs` is the tool; it defaults to a SINGLE request and the
+sweep is opt-in, which is the V16 lesson built in.
+
+##### THE REFERENCE VOLUNTEERS THREE FIGURES WE THREW AWAY (2026-11-11)
+
+Asked whether there were other ways to get at what the length rule needs. The
+first one cost nothing, because the answer was already on disk: **every
+response carries more than the importer keeps.**
+
+```
+data: turnsOnSprings, totalInchPoundPerTurn, multiplier, cycles,
+      innerSpring{wireSize, innerDiameter, springLength, springWeight},
+      outerSpring{...}
+```
+
+`import.mjs` kept `cycles` and the two springs. **`totalInchPoundPerTurn`,
+`turnsOnSprings` and `multiplier` were discarded on every pull ever made** -
+they survive only in the committed `dev/pulled-*.json`, never in the corpus.
+It keeps all three now.
+
+**IPPT IS THE QUANTITY THE SPRING DERIVES FROM**, so it allows a check against
+the reference's own ARITHMETIC rather than its outputs. Solving
+
+```
+IPPT = (E d^5) / (10.8 D L)      per spring, summed over the nested pair,
+                                 times the door's spring count
+```
+
+over 1,212 clean readings gives **E = 32.63 million psi, p90/p10 spread
+1.0396x, 99.3% within 5%**. The relation HOLDS. That is the first independent
+confirmation of this engine's physics that does not come from fitting lengths
+- and it is the textbook formula from the earlier web search, now checked
+against the reference itself rather than against a calculator website.
+
+**DEAD COILS DO NOT EXPLAIN THE RESIDUAL 4%**: refitting with `L - k d` for k
+from 0 to 5 in half-coil steps moves the spread by 0.002x and never below
+1.0374x. The residual is most likely the length quantisation itself - the grid
+the reference snaps to, `{n, n+0.25}`, leaves gaps of up to 0.75", which on a
+30" spring is well over a per cent.
+
+**WHAT THAT OPENS, AND WHY IT IS NOT FINISHED.** If the continuous length is
+`L = (E d^5) / (10.8 D x IPPT_per_spring)` and the reported one is that
+snapped, then the bonus table is reproducing a SNAP rather than a physical
+quantity - one constant `E` in place of fifty fitted rungs. Closing it needs
+the REQUIRED IPPT (what the door demands), not the reference's reported total,
+which is an output of its own choice and makes any test circular. That is a
+real modelling exercise and it is not done.
+
+**THE LESSON IS CHEAPER THAN THE PHYSICS: READ THE WHOLE RESPONSE.** Twelve
+thousand readings were pulled, at a second apiece, while three of the fields
+each one returned went in the bin.
+
+###### THE IPPT INVERSION WAS TESTABLE AFTER ALL, AND IT LOSES (2026-11-11)
+
+The entry above records this as blocked: *"closing it needs the REQUIRED
+IPPT, not the reference's reported total, which is an output of its own
+choice and makes any test circular."* **That was right about the reference's
+figure and WRONG that we have no other.** The engine computes
+`duplexTipptExact` from weight x rEff / turns - all DOOR inputs, nothing the
+reference said. It is a required IPPT, and it was there the whole time.
+
+**AND IT AGREES WITH THE REFERENCE TO 0.014%**, which is the find worth
+keeping out of all this:
+
+```
+our REQUIRED ippt vs their REPORTED ippt   2,587 clean readings
+    median error 0.014%      within 1%: 100.0%      within 5%: 100.0%
+    turns:       0.301%      within 1%: 100.0%
+```
+
+**THAT IS AN INDEPENDENT CONFIRMATION OF THE TORQUE MODEL** - rEff, the
+multiplier surface, the turns - against the reference's own arithmetic rather
+than its outputs, on a quantity the whole engine rests on. Nothing else here
+has ever checked it that way.
+
+**BUT INVERTING IT FOR THE LENGTH SCORES 19.26% WHERE THE TABLE SCORES
+98.81%:**
+
+```
+L = (E d^5) / (10.8 D x ippt), snapped to {n, n+0.25}, 2,575 readings
+    EXACT 19.26%    within 1/4" 47.11%    within 1" 84.16%    median 0.75"
+```
+
+**AND IT CANNOT BE RESCUED BY FITTING E BETTER, which is the decisive part.**
+E is not a constant across the rungs - it runs **31.54M to 34.09M psi**, 8%,
+rising steadily as the wire gets thinner (0.3938 lowest, 0.2625 highest). So
+a per-rung E would be the bonus table wearing different clothes. Worse, the
+scatter WITHIN a single rung is p90/p10 **1.6% to 4.7%**, while a quarter inch
+on a 30" spring is **0.83%**. **The formula's own noise is two to six times
+the grid it has to land on**, so no fit of E - global, per rung, or per
+anything - can resolve a length to the quarter inch. The relation is real
+(it reproduced E to a few per cent) and it is simply too coarse to be the
+selection rule.
+
+`dev/ippt-length.mjs` is the test, committed. It needs no requests and no
+database.
+
+**SO FOUR LEVERS HAVE NOW BEEN TRIED AND LOST**, not three: more data, more
+capacity (globally and per group), coil-count quantisation, and the IPPT
+inversion. The last was the only idea that came from outside this repository.
+**Duplex length is closed unless a genuinely new form appears** - and the
+three remaining open items are not about accuracy at all, but are listed
+below.
+
+##### D800-120 RUNS 1/4" CABLE, AND THE REST OF THE ENDPOINTS SURVEYED (2026-11-11)
+
+**`GET /spring-engineering/drum?drumName=CANIMEX/TF D800-120`** - one request,
+and a standing question is closed:
+
+```
+maximumDiameter      0.25        <- the MAXIMUM CABLE DIAMETER: 1/4", not 3/16"
+maximumHeight        384         maximumWeight         2200
+maximumHighLift      120         flatMomentArm         4.125
+circumference        25.92       rateOfRise            0.313
+cableLength          137         maximumCapacityFlat   264
+isHighLift true      isStandard false      compatible null
+```
+
+None of that was held anywhere in this repository. `DRUM_LIMITS` carries no
+entry for the hi-lift drums at all, which is what made
+`rung-target-sample.mjs` fall back to `?? 750` and put the heavy rungs out of
+reach - **those figures can now be filled in from the source** rather than
+guessed or left out.
+
+**AND THE REST OF THE API SURFACE, SURVEYED SO NOBODY LOOKS AGAIN.** Every
+quoted route in the shop bundle:
+
+```
+ENGINEERING   /spring-engineering/engineer-torsion-spring   (pull.mjs uses it)
+              /spring-engineering/drum-recommendation       (the drum rule)
+              /spring-engineering/drum-list                 (names only)
+              /spring-engineering/drum                      (one full record)
+
+COMMERCE      /custom/duplex  /custom/torsion  /custom/torsion-preview
+              /custom/door    /custom/extension   /cart/*  /product/*
+```
+
+**THE `/custom/*` ROUTES ARE COMMERCE, NOT ENGINEERING.** `torsion-preview`
+returns `{springParts, canConvert, totalPrice}` - it takes a spring you have
+ALREADY specified and prices it, or converts it to stock parts. Useful if
+pricing or stock-conversion is ever wanted; it says nothing about how a length
+is chosen.
+
+**AND THERE IS NO "SPRINGS BY IPPT" ON THE WEB.** That module exists in their
+mobile and desktop app but has no web route - `ippt` appears in the entire
+bundle twice, both as a variable name. So the web cannot be asked to invert
+IPPT into a spring, which was the one remaining cheap route to the length
+rule. **The four engineering endpoints above are the whole surface.**
+
+###### THE DESKTOP APP: FOUND, DELIBERATELY NOT OPENED
+
+`resources.sscorp.com/springengineering/SSCSpringEngineering.msi` (75.7 MB)
+and `.dmg` (81.2 MB) download without a login, and a 2020 Windows build of a
+calculation tool would very likely decompile to readable source.
+
+**NOT DONE, AND THE FIRST REASON IS TECHNICAL**: both were last modified
+**September 2020**, while the mobile app is at v2.1.5 (January 2026) and the
+web calculator is live. Every figure this repository holds is calibrated
+against the LIVE service, so a 2020 rule could not be told apart from a stale
+one - a discovery there might make the model quietly worse.
+
+The second reason is that decompiling a supplier's software to replicate a
+tool they give the trade free is the owner's exposure, not the agent's, and
+105 readings of duplex accuracy on a product he does not sell is not worth
+putting on the table. **He agreed; it stays undownloaded.**
+
+###### THE MOBILE APPS: ASKED AGAIN, DECLINED AGAIN (owner, 2026-11-11)
+
+*"could you download and access the code from this app"* - the iOS and
+Android **SSC Spring Engineering** apps, after the desktop one was declined.
+
+**ONE OF THE TWO REASONS FOR DECLINING THE DESKTOP APP IS GONE, AND THAT WAS
+SAID PLAINLY.** That build was September 2020 and a stale rule could not be
+told from a correct one. The mobile apps are **v2.1.5, January 2026** -
+current. The technical objection does not apply here.
+
+**WHAT REMAINS IS HIS EXPOSURE, NOT THE AGENT'S.** Service Spring is his
+SUPPLIER, in a live commercial relationship. The iOS route also crosses a
+harder line than the desktop one did: App Store binaries are FairPlay
+encrypted, so reaching the code means stripping DRM - circumvention rather
+than reverse engineering - and the Android route needs an unauthorised copy
+from a mirror.
+
+**AND IT ALMOST CERTAINLY HOLDS NO MATHS.** The web bundle was checked and
+carries no physics constants at all - it is a form that posts to the server.
+The app is the same product on the same backend, so the likeliest outcome is
+the four endpoints already surveyed above.
+
+**THE DECIDING POINT IS WHAT IT WOULD BUY: DUPLEX, WHICH HE DOES NOT SELL.**
+Single measures 99.9% on wire, length and weight over 1,187 readings; duplex
+is 98.06% inside the reference's own envelope. Risking a supplier
+relationship for a decimal on a product withdrawn from sale on 2026-10-28 is
+the wrong trade, and saying so is the job.
+
+**THE LEGITIMATE ROUTE IS BETTER AND FREE: ASK THEM.** He is a customer.
+"How does your calculator choose the spring length" is a question a rep
+answers in one call, on the record, with no exposure - and it would settle
+in five minutes what four measured experiments could not. Offered to draft
+the email.
+
+###### THE ENGINE'S DRUM TABLES ARE EXACTLY RIGHT. THE DEV TOOLING'S WERE NOT
+
+`node dev/drum-probe.mjs ours` fetched all six drums this module offers and
+compared them against `DRUM_LIMITS` and `HILIFT_DRUMS`:
+
+```
+D400-144  144/750    D400-96  96/530     D525-216  231/1500
+D800-120  384/2200   575-120  264/1000   525-54HL  234/1000
+```
+
+**ALL SIX MATCH THE REFERENCE'S OWN RECORDS.** Nothing that ships was wrong,
+which is worth writing down because the drum figures were measured rather
+than sourced and had never been checked against the vendor.
+
+**THE WRONG COPIES WERE BOTH IN `dev/`, AND THEY WERE WRONG BECAUSE THEY WERE
+COPIES.** `rung-target-sample.mjs` read `DRUM_LIMITS` alone - which holds the
+standard drums only - so every hi-lift drum missed and fell to a `?? 750`
+fallback nobody chose; `single-gap-sample.mjs` hand-typed the table and had
+`575-120` at **192"** where the drum reaches **264"**. Between them, a third
+of `525-54HL`'s range and a quarter of `575-120`'s were unreachable by any
+draw. Both now read the engine's tables (`limitsFor()` tries `HILIFT_DRUMS`
+first), and a 40-case rehearsal that previously could not pass 750 lb drew
+`525-54HL` at 998 lb / 205" and `D800-120` at 1229 lb.
+
+**A FOURTH COPY OF A FACT IS A FOURTH CHANCE TO BE WRONG IN ONE PLACE ONLY** -
+the `rnd.mjs` lesson a second time, and the `ref-state.mjs` lesson a third.
+Neither sampler's own output looked wrong; the ceiling simply never appeared
+in a draw, because a ceiling that is too low produces no error at all.
+
+###### WHAT IS ACTUALLY LEFT, AND NONE OF IT IS ACCURACY (2026-11-11)
+
+Asked *"so is there nothing left?"*. On duplex length, no - see above. But
+the week's digging turned up three things that are NOT done and are worth
+more than another decimal:
+
+- **THE DRUM RULE IS KNOWN AND NOT IMPLEMENTED.** "How is the drum picked"
+  was recorded for over a week as blocking the second project's quoting
+  automation, and it is now two comparisons against `DRUM_LIMITS` (above).
+  Nothing in this repository uses it yet.
+- **THE VENDOR DISAGREES WITH HIM ABOUT THE FILLER.** SSC's own sell sheet:
+  *"the spring filler is cut one inch shorter than the specified spring
+  length"*, where he said a 4 foot spring takes 4 feet. **His rule governs** -
+  it is his shop - but he may not know the vendor says otherwise, and at
+  $3.24 a foot it is about 27 cents a spring. He has not been asked.
+- **SINGLE IS THE THING HE SELLS AND THE LESS MEASURED OF THE TWO**: 342
+  clean reference readings against 10,172 for duplex. The percentages are
+  perfect so far (100% on length and weight) - on a twenty-ninth of the
+  evidence. That imbalance is the real gap, not the 98.25%.
+
+###### A MILLION PULLS: THE ARITHMETIC, AND WHAT DATA CONVERGES TO (owner, 2026-11-11)
+
+*"lets do one million pulls. this should give us all of the info we could
+ever need about the calculations."*
+
+**IT DOES NOT FIT, AND THAT IS BEFORE ANY ARGUMENT ABOUT WHETHER IT WOULD
+HELP:**
+
+```
+corpus.json at 1,155 bytes a reading   1.08 GB
+the raw pull files at 818 bytes          0.76 GB
+                                       --------
+                                         1.84 GB   on a 1.0 GB partition
+time at the one-request-a-second rate   11.6 DAYS continuous
+```
+
+The container is ephemeral and the dev server has already died under host
+load 28. Eleven days of uninterrupted anything is not available here, and
+the disk limit is a hard constraint in this environment.
+
+**BUT THE IDEA INSIDE IT WAS NEW AND WORTH MEASURING.** Batch S2 proved more
+data does not help THE FITTER. "A million readings" is a different and better
+thought: with enough coverage you do not NEED a fitter - you look the answer
+up. That is a genuinely new FORM, which is exactly what every previous entry
+says is required. So it was measured rather than dismissed.
+
+`dev/data-ceiling.mjs` builds the learning curve of a pure lookup - key on
+(rung, springs, floor of active length), take the bonus of the nearest frac
+seen in training, test on a fifth held out and never trained on:
+
+```
+ train      n    key seen   exact (all)   exact (where seen)
+    2%     194      7.6%        3.87%            50.81%
+   10%     970     28.3%       17.15%            60.64%
+   35%    3397     56.0%       38.99%            69.66%
+   70%    6794     73.3%       54.66%            74.54%
+  100%    9707     80.0%       62.12%            77.68%
+
+ THE INSTALLED TABLE on the same held-out readings:        97.40%
+```
+
+**MORE DATA CONVERGES TO SOMETHING WORSE.** Read the last column - that is
+the lookup's ceiling where coverage is not the limit, and it is **77.68%**,
+climbing about a point per doubling. A lookup is what infinite data converges
+to, so no quantity of readings reaches the 97.40% the fitted table already
+gives. **The model is doing work that data cannot replace**: it generalises
+ACROSS keys, and the lookup cannot.
+
+**AND THE KEY SPACE IS NOWHERE NEAR DENSE**: 4,494 distinct keys from 12,133
+readings, **47.3% seen exactly once**. By Good-Turing that puts roughly 17%
+of the next reading's probability on a key never seen - which matches the 80%
+coverage measured. Filling it would take well over 100,000 readings, to reach
+an answer worse than today's.
+
+**20 KEYS CONTRADICT THEMSELVES at the same frac**, so even a perfect lookup
+has a ceiling below 100%.
+
+**SO: NO FURTHER DUPLEX PULLING, AND NOW FOR A FIFTH REASON** - the fit beats
+the limit of what data alone can do.
+
+###### WHAT THE SAME BUDGET BOUGHT INSTEAD: THE TRADE SINGLE BATCH
+
+The imbalance named in the previous entry is the real gap, so the campaign
+was pointed there instead. **`dev/single-trade-sample.mjs` draws the Single
+doors the shop actually SELLS** - 8x7 residential to 18x12 light commercial -
+where `single-gap-sample.mjs` deliberately aims at hi-lift and 12 ft and up
+and yields 27% clean.
+
+**FOUR THINGS KEEP THE YIELD UP, each from a documented failure**: the drum
+is picked by **the reference's own rule learned this session**, weight comes
+from the door's AREA at a real lb/sqft rather than a flat range, the width is
+a real door width the assembly has to fit across, and only the three SOLD
+I.D.s are drawn.
+
+**PROBED WITH 40 BEFORE SPENDING** - the V16 lesson, applied:
+
+```
+CLEAN 35/40 = 88%        (the gap sampler gets 27%)
+and the model on those 35:  wire 100%  length 100%  weight 100%
+```
+
+**`pull.mjs` REFUSED THE FIRST OUTPUT NAME AND WAS RIGHT**: cases stamped
+`eval: true` may only be written to a file whose name contains *eval*, so the
+fitter can never be handed its own yardstick. That guard fired on this batch.
+
+**THE FULL CAMPAIGN: 1,200 REQUESTS, 869 CLEAN, AND THE WIRE IS RIGHT ON
+EVERY ONE.**
+
+```
+1,200 answered, ZERO transport errors, 869 clean (75%)
+
+                        n     wire    length   weight
+every slice pooled     869   100.0%   99.9%    99.9%
+2 5/8"  (sold)         302   100.0%  100.0%   100.0%
+3 3/4"  (sold)         315   100.0%  100.0%   100.0%
+5 1/4"  (sold)         252   100.0%   99.6%    99.6%
+1 / 2 / 4 springs    206/587/76  100%  100/99.8/100%
+10k..50k cycles                 100%   100.0%
+100,000 cycles          75   100.0%   98.7%    98.7%
+```
+
+**SINGLE'S CLEAN EVIDENCE BASE GOES 342 -> 1,211**, three and a half times,
+on exactly the doors the business sells - and the model picks **the right
+wire 869 times out of 869**, which is the figure that matters, because wire
+is the only thing Single has ever got wrong (1 of 275 before this).
+
+**THE ONE LENGTH MISS is a 5 1/4" at 100,000 cycles**, the rarest corner
+drawn: 100k is 75 readings of 869 and 5 1/4" is the ID that adds a filler.
+Not acted on - one reading is what the snap-to-grid lesson was about.
+
+Committed as `dev/eval-trade-single-seed20261111.json` with
+`garageDoorLineId` **stripped**, which `.gitignore` requires of any committed
+eval set. The cases are not committed: the sampler plus the seed reproduces
+them exactly, and a seed is a better record than a file.
+
+##### WHERE ACCURACY STANDS, 2026-11-11 (two committed tools, no requests)
+
+Asked *"so whats accuracy at right now?"*. Measured fresh rather than quoted
+from the entries above, which were taken at different points and under
+different definitions. **Both tools are committed and need no database and no
+pulls**, so this is one command each from now on:
+
+```
+node dev/single-breakdown.mjs dev/eval-single*.json dev/eval-trade-single*.json
+node dev/envelope.mjs
+```
+
+**SINGLE - what the business actually sells:**
+
+```
+                       n     wire    length   weight
+the three sold IDs   1187   99.9%    99.9%    99.9%
+all clean Single     1246   99.9%    99.9%    99.9%
+  2 5/8"              422  100.0%   100.0%   100.0%
+  3 3/4"              422  100.0%   100.0%   100.0%
+  5 1/4"              343   99.7%    99.7%    99.7%
+```
+
+**ONE MISS IN 1,187, and it is on 5 1/4"** - every 2 5/8" and 3 3/4" reading
+ever taken is exact on wire, length and weight. The evidence base is 1,246
+clean readings against 275 a day earlier.
+
+**DUPLEX - calculated but not sold**, split by whether the reference stands
+behind its own answer:
+
+```
+band                          n     exact    wire right
+inside 96"  (recommended)   11564   98.06%     99.25%
+96-120"     (supported)       399   91.73%     98.50%
+over 120"   (DISCLAIMED)      268   43.28%     98.13%
+ALL DUPLEX                  12231   96.66%     99.20%
+```
+
+**QUOTE 98.06%, NOT 96.66%.** The pooled figure averages in 268 doors whose
+own author says *"only spring lengths between 0 and 120" are supported"*.
+
+**THE WIRE IS 98-99% EVERYWHERE, IN THE ENVELOPE AND OUT OF IT.** Only LENGTH
+degrades, and only where the reference has given up: of 311 duplex failures
+with the wire already right, **147 are past 120"**.
+
+**THIS IS THE STRICT COUNT.** `envelope.mjs` asserts BOTH lengths of the pair
+on every reading including those past 120", where `replay.mjs` leaves some
+alone - so it reads a little below figures quoted elsewhere in this file.
+Prefer it: it is the pessimistic one and it is reproducible.
+
+**CLASSIFIED BY THE REFERENCE'S OWN RETURNED LENGTH, not by the `flagged`
+bit**, because that bit was only added to `import.mjs` partway through and
+earlier batches carry none - a split on it would silently call thousands of
+old readings clean.
+
+##### "MAKE SINGLE 100%, AND IMPROVE DUPLEX PAST 120"" (owner, 2026-11-11)
+
+Two questions, and they got different answers. **Duplex past 120" is now
+better and shipped; Single cannot be made 100% today and the reason is
+measured rather than asserted.**
+
+###### DUPLEX PAST 120": DONE. 43.28% -> 61.57%
+
+```
+band                          n     exact BEFORE    exact AFTER
+inside 96"  (recommended)   11564      98.06%         98.06%   <- untouched
+96-120"     (supported)       399      91.73%         91.98%
+over 120"   (DISCLAIMED)      268      43.28%         61.57%
+ALL DUPLEX                  12231      96.66%         97.06%
+```
+
+Golden **725 byte-identical**, **20 invariants pass**, `spring_engineering`
+**0 failed 0 errors of 348**, `spring_calculator` regenerated.
+
+**THE ERROR THERE IS ONE-SIDED AND GROWS**, which is what made it worth
+chasing where nothing else was: 143 readings long against 4 short, 78.7%
+exact just over the line falling to **0.0%** more than 100" past it. Three
+tests were named in advance as what would count - a systematic bias,
+clamping, or drift with distance - and it is the first and third.
+
+**THE OVERSHOOT IS NOT IN THE BONUS, WHICH IS THE WHOLE DESIGN ARGUMENT.**
+Every rung's bonus is clamped to two levels (`lo`/`hi`), at most about an
+inch, so it cannot make a 2" drift. It is in `duplexActiveLength` - the
+stiffness model - and **correcting that would move all 11,564 in-envelope
+readings that are right today.** A correction gated above 120" cannot touch
+one of them. Here the ugly local fix is the SAFE one and the principled one
+is not; that is the reverse of the usual rule and worth remembering.
+
+**THE SIMPLER FORM WON, AGAIN.** Split-half, fit on one half and score on
+the other, both ways round:
+
+```
+baseline (no correction)        116 / 264   43.9%
+per-rung LINEAR    (~64 params) 137 / 264   52.1%
+per-rung CONSTANT  (~32 params) 150 / 264   56.8%   <- shipped
+A GLOBAL linear drift            +0          nothing
+```
+
+Twice the freedom, worse out of sample - the third time this project has
+measured that (`LINE_LEVELS`, the per-group capacity experiment, now this).
+
+**NINE OF THE TEN OFFSETS ARE EXACTLY ONE INCH AND ALL TEN ARE ON HEAVY WIRE
+(0.4531 and up).** That is why it reads as structure rather than a curve
+fitted to 264 points. A rung with under two readings carries no entry; the
+guard itself was chosen by split-half rather than picked.
+
+**DERIVED, NEVER HAND-EDITED**, like the rung table: `node
+dev/derive-over120.mjs` refits it and rewrites `dev/over120-offsets.json`.
+`dev/over120.mjs` and `dev/over120-fit.mjs` are the diagnostics.
+
+**QUOTE 56.8%, NOT 61.57%** - the first is out of sample, the second is the
+shipped table scored on data it was fitted to.
+
+**AND `replay.mjs` BARELY SEES THIS**, which is worth knowing: it does not
+assert length past 120" (269 readings "not asserted - only the wire"), so it
+moved 11,968 -> 11,969. `dev/envelope.mjs` is the tool that measures this
+band. A guard that does not look at what you changed cannot approve it.
+
+###### SINGLE: NO, AND IT IS 2 WRONG IN 1,246
+
+`dev/single-misses.mjs` names them rather than printing a percentage, because
+"is it 100%" cannot be answered by one. **Both are 5 1/4" on D400-144:**
+
+```
+3spr r15  10,000cyc  18x12  750lb   wire 0.295 vs 0.3065   (length, weight ok)
+2spr r12 100,000cyc  18x10  474lb   length 63.25 vs 63     (wire ok)
+```
+
+The second is a quarter inch - the grid's own granularity, one reading.
+
+**THE FIRST IS A REAL FINDING AND IS NOT CLOSED.** It sits at EXACTLY the
+D400-144's 750 lb rating, and an 8-request probe shows the reference stepping
+up a wire between 735 and 750 lb **at two different heights**, so it is the
+WEIGHT, not the height. Its own reported cycle counts say why:
+
+```
+144in  735lb  0.295  -> 11,000 cycles     (target 10,000)
+144in  750lb  0.3065 -> 16,000
+```
+
+At 735 the reference has ~10% margin left on 0.295, so 2% more load takes it
+under the target and it steps up. **Our model gives 0.295 at 750 lb 16,459
+cycles** - no margin problem at all, so we stay soft.
+
+**BUT THE CYCLE MODEL IS NOT BROKEN**, measured on 1,245 clean readings where
+the wire agrees (`dev/single-cycles.mjs`):
+
+```
+OUR cycle life / THEIRS    median 1.000   p10 0.979   p90 1.023   100% within 10%
+```
+
+So a ~2% model against a decision taken on margins this thin: **18.2% of
+readings leave the reference under 10% margin over the target**, and that is
+the population a 2% error can flip. Same mechanism as the 54 duplex wire
+misses - a threshold decision on a quantity known to a few per cent.
+
+####### RESOLVED, AND THE "ANOMALY" WAS MY OWN DIAGNOSTIC (2026-11-12)
+
+The entry above recorded a *"~50% gap at one corner"* as an open thread and
+named the one command that would settle it. Run, it settled it immediately:
+at that very corner our cycle model agrees with the reference to **median
+0.999** over the six probe readings where the wire matches. There was no gap.
+
+**THE 16,459 WAS OUR LIFE FOR 0.3065, NOT FOR 0.295.**
+`dev/single-misses.mjs` read `c.cycleLife` AFTER setting
+`c.state.wireSize` to the REFERENCE's wire - so the getter reported the
+right figure for the wrong spring, and I compared it against the
+reference's 0.295 figure at a different weight. Our 16,459 against their
+16,000 for 0.3065 is 3%, entirely consistent.
+
+**THE REAL NUMBERS, computed per candidate and printing both:**
+
+```
+weight    our 0.295   our 0.3065   reference
+   700       13,802       22,716
+   720       12,100       19,915
+   735       10,989       18,087   0.295  -> 11,000    agreement to 0.1%
+   750       10,000       16,459   0.3065 -> 16,000
+```
+
+**OUR MODEL AGREES TO 0.1% AT 735 lb, AND AT 750 lb IT LANDS EXACTLY ON THE
+10,000 TARGET.** `dev/single-misses.mjs` now prints the margin and it reads
+**1.000**. The rule takes the softest candidate whose life REACHES the
+target, `10,000 >= 10,000` admits it, and the reference's own figure falls a
+hair under and steps up.
+
+**SO IT IS A TIE AT THE THRESHOLD, AND IT IS IRREDUCIBLE.** Two models that
+agree to a tenth of a per cent straddling a line by a hundredth of one
+cannot be sorted by any rule. Requiring strictly-greater-than would match
+this reading by luck and be wrong in the other direction for the next door
+that lands at 10,000.4 where the reference says 10,001. **Not acted on.**
+
+**SO SINGLE IS 99.84%, AND BOTH REMAINING MISSES ARE CORNERS WITH NO FIX:**
+
+```
+5 1/4" D400-144 3spr 750lb   wire one step soft   MARGIN 1.000
+5 1/4" D400-144 2spr 474lb   length 63.25 vs 63   quarter inch, one reading
+```
+
+**THE LESSON IS THE FOURTH OF ITS FAMILY AND THE WORST.** After
+`i.springId`, `c.singleWireSize` and `duplexCycles` returning `"48,000"`,
+this one was a getter read AFTER ITS OWN INPUTS WERE CHANGED UNDERNEATH IT -
+no invented name, no wrong type, just a correct number about a different
+question. **Capture before mutating, and name the input you asked about.**
+
+And it is the second time this file has carried an inference from a
+diagnostic as a fact about the world - the first being the `aa_spring_stock`
+"corrupt coil" that never existed. Both times the measurement was one command
+away and the write-up came first. **The tool is fixed so it cannot say this
+again**, which is the only durable part of the fix.
+
+##### CONCENTRATED PULLS: WHERE DATA STILL PAYS, MEASURED (owner, 2026-11-12)
+
+*"could you do any more things to improve the accuracy, like more runs
+concentrated at the problematic areas"* - asked a fourth time, and the
+previous answers had tested the WRONG UNIT.
+
+**THE FITTER'S UNIT IS (rung, spring count), NOT THE RUNG.** `lineByCount`
+holds a separate line per spring count, so a rung can hold 320 readings while
+the 2-spring group inside it holds 9. `rung-target-sample.mjs` fills RUNGS, so
+"the rung is at target" never meant "the group that is failing has any data".
+Batch S2 and every earlier answer tested rungs.
+
+**`dev/group-density.mjs` SETTLES IT - THE CURVE HAS AN ELBOW AT 25:**
+
+```
+group size    groups   readings   failures   failure rate
+1-9              46        187         28    14.97%
+10-24            20        332          9     2.71%
+25-49            31       1159         19     1.64%
+50-99            30       2160         42     1.94%
+100-249          44       6249        121     1.94%
+250+              4       1876         37     1.97%
+```
+
+**FLAT FROM 25 UPWARD** over 11,444 readings and four bands. So **S2 bought
+nothing because 124 readings was already deep inside the flat zone** - that
+is now explained rather than merely observed. And "concentrate on the worst
+groups" cannot work: `0.295/0.2437 2spr` fails at 17% on 176 readings, which
+is a hard group, not a thin one.
+
+**BELOW 10 READINGS DATA PAYS 8x**, and 22 thin groups carried 28 failures.
+`dev/group-target-sample.mjs` aims at those, targeting **25** rather than 320.
+Reachability was checked first: 15 of 22 take >=20 draws in 60,000; one got
+zero in 120,000. A rare group is rare in the door space.
+
+###### AND I SHOULD HAVE PREDICTED THE YIELD FROM MY OWN NOTES
+
+**28 CLEAN OF 376 = 7.4%.** The thin groups are thin BECAUSE they are heavy
+wire - 0.4531 to 0.625 - and this file already records that every door needing
+outer wire past 0.4375 trips *"wire size exceeds 0.4375 maximum"*, and that
+the V16 heavy batch came back **zero** clean. The density curve cannot see
+which rungs it is pointing at. **Check what a target IS, not only how thin.**
+
+**BUT IT HELPED ANYWAY, AND FOR THE V16 REASON**: a flagged reading's WIRE and
+cycle figures are sound even where its length is not. On the never-tuned
+validation sets, CLEAN readings:
+
+```
+seed 61006       wire 99.4% -> 100.0%    length 97.7% -> 98.9%
+seed 20261007    wire 98.9% -> 98.9%     length 96.6% -> 96.6%
+seed 20261009    wire 99.5% -> 99.5%     length 97.3% -> 97.3%
+   all three FLAGGED bands improved: 84.5->86.6, 87.0->89.2, 88.0->89.6
+```
+
+```
+band                          n     before    after
+inside 96"  (recommended)   11839    98.06%   98.20%
+96-120"     (supported)       489    91.98%   93.66%
+over 120"   (DISCLAIMED)      268    61.57%   61.57%
+ALL DUPLEX                  12596    97.06%   97.25%
+```
+
+Golden **725 byte-identical**, **20 invariants pass**, **0 failed 0 errors of
+348**, `spring_calculator` regenerated. ORDERABLE - what a customer can
+actually buy - unchanged at 99.6% wire / 97.8% length.
+
+###### THE NEAR-MISS: A DERIVED CORRECTION FITTED ON TOP OF ITSELF
+
+After the refit I re-ran `derive-over120.mjs` and it reported **"0 rungs carry
+an offset, baseline 61.5%"** - which reads as *the correction is no longer
+needed, the real data has fixed it properly*. I wrote that conclusion down and
+installed an empty table.
+
+**`envelope.mjs` CAUGHT IT.** With the table empty the band fell straight back
+to **43.28%** - the offsets had been working all along. The deriver gates on
+`c.duplexInnerLength`, which is the engine's output **after the offsets are
+applied**, so it was fitting a correction on top of itself and correctly
+finding nothing more to add.
+
+**THE SAME FAMILY AS THE `cycleLife` MISS THE DAY BEFORE** - a correct
+measurement of the wrong thing. Fifth of that family. **A derived correction
+must be fitted against output that does not already contain it.**
+
+Refitted properly (table emptied first) it returns **12 rungs worth +42
+readings out of sample**, better than the 10 rungs and +34 of 2026-11-11 -
+because the new heavy-rung readings sharpened it.
+
+**`sh dev/apply-over120.sh` NOW DOES EMPTY -> DERIVE -> INSTALL** so the order
+cannot be got wrong, and the deriver's header says why in full.
+
+###### SO: IS THERE MORE TO BUY?
+
+- **Duplex, thin groups: spent.** 21 of 22 fed; the yield is 7% and what it
+  buys is wire, not length. A second pass would cost 400 requests for
+  perhaps another 0.1 point.
+- **Duplex, groups over 25 readings: provably nothing.** The curve is flat.
+- **Single: nothing.** Both remaining misses are irreducible corners - a
+  threshold tie at margin 1.000 and a quarter inch on one reading.
+- **What is left is the FORM**, as it has been since 2026-11-10.
+
+##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
+
+A replay launched from inside a background task sat for **TWO HOURS using 0.2
+seconds of CPU**. When the task was reaped its stdout pipe lost its reader and
+node blocked on the first write - a process that looks busy and is doing
+nothing. It was reported as "still scoring" three times before anybody
+checked.
+
+**THE TELL IS CPU TIME, NOT ELAPSED TIME**: `ps -o time=` or
+`/proc/<pid>/stat` fields 14+15. A stuck job and a slow one are
+indistinguishable by any other means on a host that genuinely runs at load 20.
+
+The launch that works puts the redirect INSIDE the inner shell:
+
+```
+nohup sh -c 'node dev/replay.mjs > /home/odoo/logs/x.log 2>&1; echo DONE >> /home/odoo/logs/x.log' > /dev/null 2>&1 &
+```
+
+A bare `setsid nohup ... > log &` from a tool call did NOT survive here. And
+`pgrep -f replay.mjs` MATCHES THE SHELL RUNNING THE PGREP, so it reports
+"running" when nothing is - check `ps -eo cmd | grep "node dev/replay"`
+instead.
+
+**TWO THINGS ABOUT RUNNING ANYTHING LONG HERE.** The scratchpad was cleared
+mid-session and took a test log with it - the same way this repository once
+lost a campaign runner - so **a log for anything long belongs in
+`/home/odoo/logs`**, not the scratchpad. And the background dev server
+**died under host load 28** (the documented failure from load 21 up); it does
+not come back by itself, so `odoo-bin --dev=reload` has to be restarted or
+the build URL stays dead.
+
+### IT WILL NOT INSTALL BESIDE THE ORIGINAL (owner, 2026-11-10)
+
+*"can you make it so that the spring calculator thing cant be added to
+apps"* - after being told that a merge puts `spring_calculator` in the Apps
+list of his LIVE database, where installing it would take `/spring-calculator`
+and `/custom-torsion-spring` off the real calculator. That was measured, not
+feared: with both installed here the page came back mounting
+`spring_calculator.calculator`.
+
+**`installable: False` WOULD HAVE BEEN THE WRONG LOCK.** It also stops the
+second project, which is the only reason the module exists - and that project
+COPIES this folder, so the flag travels with it. The danger is not the module;
+it is ONE DATABASE WITH BOTH.
+
+So the refusal is exactly the collision: a **`pre_init_hook`**,
+`_refuse_beside_the_original`, raising a UserError when `spring_engineering`
+is installed in the same database. On the second project that module does not
+exist and the install proceeds untouched. Read off the Odoo 19 source rather
+than guessed: `pre_init_hook` is called as `hook(env)` and **only on install**
+(`odoo/modules/loading.py` checks `update_operation == 'install'`), so an
+existing install still updates and nothing half-installs.
+
+**A REFUSAL WITH THE REASON ON SCREEN, not a module missing from the list** -
+the `aa_min_max` lesson in reverse: hiding something from Apps meant the one
+person who needed it could not find it and nothing said why.
+
+**Proved both ways here**: `odoo-bin -i spring_calculator` raises the
+UserError and leaves it `uninstalled`, `spring_engineering` still `installed`,
+and `/spring-calculator` still answers 200 mounting
+`spring_engineering.calculator`.
+
+**IT IS IN THE GENERATOR** (`tools/build_spring_calculator.py`), so a re-sync
+keeps it. **AND IT COSTS SOMETHING, WRITTEN DOWN**: the equivalence tests in
+`spring_calculator/tests/` can only run beside the original, and the original
+is now exactly what blocks the install - so **those tests can no longer be run
+on this build**. `--check` and the text comparison of the browser engine still
+guard the carve without a database. If the equivalence tests are ever needed
+again, the hook is the one line to bypass deliberately.
+
+### A TEST THAT ASSERTED MONEY ON A DEV BUILD (2026-11-10)
+
+Merging Prod into main left ONE unexpected failure of 129:
+`AddPartsCase.test_remove_tracks_zeroes_the_line_and_redoes_the_invoice`,
+`90.0 != 100.0`.
+
+**NOT THE MERGE AND NOT THE FEATURE.** It asserted the widget's list price of
+100.0 and **the dev database carries a demo pricelist taking 10% off
+everything** - the same trap already recorded against the shop-grid price
+work. It passes on staging and Prod, which are copies of production. Its
+sibling tests escape it by setting `price_unit` by hand; this one let the list
+price flow through the order, which is where a pricelist applies.
+
+It now asserts what it MEANS - the redone invoice carries the widget and
+nothing else, and the removed track is off it - which survives any pricelist.
+**A test that only fails on development builds is worse than no test**: it
+grows the "known failing" baseline until nobody can tell real breakage from
+noise.
+
+## THE WHOLE REPOSITORY IS GREEN, AND NEITHER "KNOWN FAILURE" WAS REAL (2026-11-10)
+
+```
+aa_spring_stock      1 failed  of  30   ->   0 failed, 0 errors of  30
+spring_engineering   5 failed + 2 err of 348 -> 0 failed, 0 errors of 348
+aa_shop_floor        0 of 218      aa_dealer_orders  0 of 129
+work_order_sheet     0 of 259
+```
+
+Both failures had stood for weeks, both were written into this file as facts
+about the business, and **neither was a defect in any code that ships.**
+
+**ONE SAID THE STOCK WAS CORRUPT. IT WAS NOT.** The entry under
+`aa_spring_stock` read *"an RH coil added there becomes an LH one ... worth
+fixing, it corrupts the very stock this reports on"* - an inference from a red
+test. The quants were always right; the test re-read a SQL-view row whose
+fields the ORM still had cached from before the adjustment. `flush_all()`
+pushes writes OUT and does not invalidate what was cached IN, and a view row's
+ID is derived from what it groups, so the SAME id comes back from the second
+search. One `invalidate_all()` beside the flush.
+
+**THE OTHER SAID PREPARED-TRACK BRACKETS WERE BROKEN. THEY ARE NOT.** A
+prepared track refuses as a WHOLE when one part is missing - deliberate, and
+`_cart_add` says so in a warning no test read: *"We are missing a part needed
+to prepare this track (Flag Angle 5.9" Black), so it was not added."* No flag
+angle, no brackets, no fasteners, every count 0 - which reads exactly like a
+broken bracket feature. **The part is missing only on a development
+database**: the lookup wants `Flag Angle 5.9" Black` and the demo data here is
+`(demo) Flag Angle 5.9" Black`. Prod has the real products. The fixtures now
+MAKE the four flag angles through one `make_flag_angles()` helper, as they
+already make the stud, the nut and the lag screw.
+
+**WHAT THE BASELINE COST**: every run for weeks answered "5 failed, 2 errors -
+that is the baseline", and a real regression in prepared tracks or spring
+stock would have hidden inside that sentence perfectly. **A known-failing test
+is not a neutral cost; it is a blind spot with a number on it.**
+
+**AND READING THE CODE FOUND NOTHING, THREE TIMES, BECAUSE THE CODE WAS
+RIGHT.** `action_apply`, `_coil_product`, `_fastener_product` and the
+flag-angle lookup were all examined and all correct. One print of the quants
+and one print of what `_cart_add` RETURNS had each answer immediately.
+**Instrument before believing a failure's account of itself** - and a
+temporary test file is the way to do it, since tests roll back and the
+database is never touched.
+
+A wrong theory on the way, discarded before it reached a commit: that the dev
+catalogue held a competing stud of the same name, so the code found that one
+while the test asserted on its own fixture. `psql` said the count was zero.
+**Check the cheap fact before writing the story.**
 
 ## ADMIN: ADD BOX / TRACKS / SPRINGS TO A PLACED ORDER (`aa_dealer_orders`, owner 2026-11-02)
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED FROM spring_engineering BY tools/build_spring_calculator.py. DO NOT EDIT BY HAND - change the original and re-run the script. -->
+<odoo>
+
+    <!-- THE RATES, SHIPPED AS A CALL RATHER THAN AS RECORDS. A
+         <record noupdate="1"> loses its xmlid the first time somebody sets
+         the value to zero (set_param deletes the row), and the next module
+         update collides on the key and takes the registry down with it. That
+         is not theoretical - it happened on the original. A function
+         addresses the parameter by key, which is its real identity. -->
+    <function model="ir.config_parameter" name="_spring_calculator_ensure_defaults"/>
+
+</odoo>

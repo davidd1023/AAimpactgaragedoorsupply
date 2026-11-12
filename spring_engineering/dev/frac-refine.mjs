@@ -15,6 +15,7 @@
 // else is the walk's recipe: orderable doors only, one sample per configuration
 // per bucket, configurations drawn independently.
 import { load, make } from "./harness.mjs";
+import { makeRnd } from "./rnd.mjs";
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -82,9 +83,7 @@ const DRUMS = [
 const RADII = ["LHR", "12", "15"];
 const CYCLES = ["10,000", "15,000", "25,000", "50,000", "100,000", "200,000"];
 
-let seed = Number(seedArg) || 1;
-const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
-const pick = (a) => a[Math.floor(rnd() * a.length)];
+const { rnd, pick } = makeRnd(seedArg);
 const counts = [...new Set([...TARGETS].map((g) => Number(g.split("|")[1])))];
 const pool = [];
 let near = 0, far = 0;

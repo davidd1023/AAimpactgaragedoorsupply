@@ -14,7 +14,24 @@ from odoo.addons.aa_spring_stock.tests.test_coil_consumption import CoilStockMix
 class SpringAdjustCase(CoilStockMixin, TransactionCase):
 
     def row(self, place, box=None):
+        # FLUSH IS NOT ENOUGH, AND THAT COST THIS FILE A RED TEST FOR WEEKS.
+        #
+        # `aa.spring.place.summary` is a SQL VIEW, so `flush_all()` is needed to
+        # get the ORM's pending writes into the database where the view's query
+        # can see them - that part was already here and is right.
+        #
+        # But a view row's ID is derived from what it groups, so the SAME id
+        # comes back from a second search - and the ORM still holds the field
+        # values it read the FIRST time. A test that reads the row, adjusts the
+        # stock and reads the row again gets the PRE-ADJUSTMENT figures, because
+        # flushing writes OUT does not invalidate what was cached IN.
+        #
+        # `test_adjust_changes_removes_and_adds_pieces` failed exactly that way:
+        # (2, 0) instead of (1, 1), which looked like an RH coil being created
+        # on the LH hand. It was not - the quants were always right
+        # (COIL-262-2.625-R at 84"); only the figures read back were stale.
         self.env.flush_all()
+        self.env.invalidate_all()
         domain = [("place", "=", place), ("wire", "=", "262"), ("inside_diameter_num", "=", 2.625)]
         if box:
             domain.append(("box_id", "=", box.id))

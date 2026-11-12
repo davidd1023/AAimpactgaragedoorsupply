@@ -20,6 +20,7 @@
 import { writeFileSync, readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { makeRnd } from "./rnd.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const [out, seedArg, countArg] = process.argv.slice(2);
@@ -75,10 +76,7 @@ const DRUMS = [
 const RADII = [10, 12, 15];
 const CYCLES = [10000, 15000, 25000, 50000, 75000, 100000, 150000, 200000, 250000, 300000];
 
-let seed = Number(seedArg) || 1;
-const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
-const pick = (a) => a[Math.floor(rnd() * a.length)];
-const between = (lo, hi) => lo + Math.floor(rnd() * (hi - lo + 1));
+const { rnd, pick, between } = makeRnd(seedArg);
 
 const cases = [];
 

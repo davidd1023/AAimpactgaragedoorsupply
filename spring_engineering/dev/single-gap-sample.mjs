@@ -27,6 +27,8 @@
 import { writeFileSync, readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { makeRnd } from "./rnd.mjs";
+import { load } from "./harness.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const [out, seedArg, countArg, hiShareArg] = process.argv.slice(2);
@@ -48,6 +50,8 @@ if (existsSync(out) && !process.env.OVERWRITE) {
 }
 
 const COUNT = Number(countArg) || 200;
+// the engine's own drum tables, rather than a hand-typed fourth copy
+const mod = await load();
 
 let lineId = null;
 
@@ -63,13 +67,15 @@ if (!lineId) {
 }
 
 // [name, max height, max weight, max hi-lift (0 = standard only)]
+//
+// TAKEN FROM THE ENGINE, NOT TYPED OUT. This was a hand-written copy and it
+// had `575-120` at 192 inches where the drum goes to **264** - so a quarter of
+// that drum's range was never drawn. The engine's own tables are right on all
+// six (checked against the reference's drum records, 2026-11-11); a fourth
+// copy of a fact is a fourth chance to be wrong in one place only.
 const DRUMS = [
-    ["CANIMEX/TF D400-96", 96, 530, 0],
-    ["CANIMEX/TF D400-144", 144, 750, 0],
-    ["CANIMEX/TF D525-216", 231, 1500, 0],
-    ["CANIMEX/TF 575-120", 192, 1000, 120],
-    ["CANIMEX/TF 525-54HL", 234, 1000, 54],
-    ["CANIMEX/TF D800-120", 384, 2200, 120],
+    ...Object.entries(mod.DRUM_LIMITS).map(([n, v]) => [n, v.maxHeight, v.maxWeight, 0]),
+    ...Object.entries(mod.HILIFT_DRUMS).map(([n, v]) => [n, v.maxHeight, v.maxWeight, v.maxHiLift]),
 ];
 const HI_DRUMS = DRUMS.filter((d) => d[3] > 0);
 // A HI-LIFT DRUM ANSWERS ONLY UNDER HI-LIFT.
@@ -107,10 +113,7 @@ const IDS = [
 const RADII = [10, 12, 15];
 const CYCLES = [10000, 15000, 25000, 50000, 75000, 100000, 150000, 200000, 250000, 300000];
 
-let seed = Number(seedArg) || 1;
-const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
-const pick = (a) => a[Math.floor(rnd() * a.length)];
-const between = (lo, hi) => lo + Math.floor(rnd() * (hi - lo + 1));
+const { rnd, pick, between } = makeRnd(seedArg);
 
 // 60/40 between the two gaps. Hi-lift is the thinner slice - 6 clean readings
 // against 33 - and it is the one with a known history of hiding a wrong
@@ -126,6 +129,7 @@ if (!(HI_SHARE >= 0 && HI_SHARE <= 1)) {
     process.exit(1);
 }
 const cases = [];
+const drawn = new Set();
 
 for (let k = 0; k < COUNT; k++) {
     const wantHi = k < Math.round(COUNT * HI_SHARE);
@@ -169,7 +173,33 @@ for (let k = 0; k < COUNT; k++) {
         row.hiLift = between(12, maxHi);
     }
 
+    // NOT TWICE, which rung-target-sample.mjs learnt the expensive way: a
+    // sampler that can emit the same case twice spends the owner's account on
+    // a question the reference has already answered. The generator is sound
+    // now (dev/rnd.mjs), and this still stands - a draw of 250 produced one
+    // repeat by ordinary chance, which is one wasted request.
+    const key = [row.drum, row.springs, row.radius, row.lift, row.hiLift ?? "",
+        row.cycles, row.weight, row.heightInches, row.innerDiameter].join("|");
+
+    if (drawn.has(key)) {
+        continue;
+    }
+
+    drawn.add(key);
     cases.push(row);
+}
+
+// THE LAST GATE BEFORE THE ACCOUNT IS SPENT, the same one the duplex sampler
+// carries and for the same reason. It asserts the SWEEP, so it catches a
+// repeat whatever caused it.
+const distinct = new Set(cases.map((c) => [c.drum, c.springs, c.radius, c.lift,
+    c.hiLift ?? "", c.cycles, c.weight, c.heightInches, c.innerDiameter].join("|")));
+
+if (distinct.size !== cases.length) {
+    console.error(`REFUSING TO WRITE ${out}: ${cases.length} cases but only `
+        + `${distinct.size} distinct - ${cases.length - distinct.size} would ask `
+        + `the reference a question already asked in this same file.`);
+    process.exit(1);
 }
 
 writeFileSync(out, JSON.stringify(cases, null, 1));

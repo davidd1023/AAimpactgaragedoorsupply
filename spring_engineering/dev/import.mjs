@@ -72,7 +72,20 @@ const inputKey = (state) => [
     state.doorHeightFeet, state.doorHeightInches ?? 0,
 ].join("|");
 
-const have = new Set(corpus.readings.map((r) => inputKey(r.state)));
+// TWO SETS, NOT ONE, AND THE REASON IS A WASTED CAMPAIGN.
+//
+// This was one `have` seeded from the corpus and added to as rows were taken,
+// so a row duplicated WITHIN THE PULL was reported as "already in corpus (same
+// inputs)" - which is a sentence about the corpus being saturated. Batch V13
+// was 379 of those and every one of them was a repeat of another row in the
+// same file (the sampler's generator had collapsed; see dev/rnd.mjs). The
+// wording sent the diagnosis at the corpus and the deriver for an afternoon.
+//
+// They are different faults with different fixes: one means stop pulling, the
+// other means the sampler is broken and the requests were wasted. So they are
+// counted apart and named apart.
+const inCorpus = new Set(corpus.readings.map((r) => inputKey(r.state)));
+const inThisPull = new Set();
 const usedIds = new Set(corpus.readings.map((r) => r.id));
 const skipped = {};
 const skip = (why) => { skipped[why] = (skipped[why] ?? 0) + 1; };
@@ -150,12 +163,17 @@ for (const r of JSON.parse(readFileSync(pullFile, "utf8"))) {
 
     const key = inputKey(state);
 
-    if (have.has(key)) {
-        skip("already in corpus (same inputs)");
+    if (inCorpus.has(key)) {
+        skip("already in corpus (same inputs) - the corpus already holds this door");
         continue;
     }
 
-    have.add(key);
+    if (inThisPull.has(key)) {
+        skip("DUPLICATED WITHIN THIS PULL - a wasted request, not a full corpus");
+        continue;
+    }
+
+    inThisPull.add(key);
 
     // Ids must still be unique even though they no longer define identity.
     let tag = base;
@@ -187,6 +205,31 @@ for (const r of JSON.parse(readFileSync(pullFile, "utf8"))) {
         },
         tolerance: { duplexInnerWeight: 0.02, duplexOuterWeight: 0.02 },
         referenceCycles: d.cycles,
+        // THREE FIGURES THE REFERENCE VOLUNTEERS AND THIS IMPORTER THREW AWAY
+        // UNTIL 2026-11-11. Every response carries `turnsOnSprings`,
+        // `totalInchPoundPerTurn` and `multiplier` beside the cycle count, and
+        // only the cycle count was kept - so a year of pulls hold them in
+        // dev/pulled-*.json and the corpus does not.
+        //
+        // IPPT IS THE QUANTITY THE WHOLE SPRING DERIVES FROM. With it the
+        // physics is checkable against the reference's own arithmetic rather
+        // than against its outputs: solving
+        //
+        //     IPPT = (E d^5) / (10.8 D L)
+        //
+        // over 1,212 clean readings gives E = 32.6 million psi with a p90/p10
+        // spread of 1.04x and 99.3% inside 5%. The relation HOLDS - which is
+        // the first independent confirmation of the engine's physics that does
+        // not come from fitting lengths.
+        //
+        // (Dead coils do not explain the residual 4%: refitting with
+        // `L - k d` for k from 0 to 5 moves the spread by 0.002x. The residual
+        // is most likely the length quantisation itself, since the grid the
+        // reference snaps to leaves gaps of up to 0.75" - worth more work, and
+        // it needs these numbers in the corpus to do it.)
+        referenceIppt: d.totalInchPoundPerTurn,
+        referenceTurns: d.turnsOnSprings,
+        referenceMultiplier: d.multiplier,
         // WHETHER THE REFERENCE COMPLAINED. Recorded because a flagged
         // reading's LENGTH is the least trustworthy figure in the file - the
         // complaint is usually about length - while its WIRE choice is as good

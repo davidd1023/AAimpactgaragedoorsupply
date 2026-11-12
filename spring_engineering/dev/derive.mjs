@@ -1326,8 +1326,70 @@ function fitSplit(ls) {
 // bands' worth of tidiness and costs accuracy. Still 2.
 const LINE_LEVELS = Number(process.env.LINE_LEVELS || 2);
 
+// PER-GROUP CAPACITY, WHICH IS NOT THE SAME EXPERIMENT AS RAISING LINE_LEVELS.
+//
+// Raising LINE_LEVELS raises it EVERYWHERE, and that was measured twice and
+// lost both times (97.93% -> 95.48% on the never-tuned sets at 3) - which is
+// what you would expect: most groups genuinely take two levels and the extra
+// freedom only lets the fitter chase noise in them.
+//
+// But the groups that carry the remaining error are not those groups. On
+// `0.295/0.2437 at 2 springs` the reference uses FIVE bonus values
+// (-1, 0, 0.25, 1, 1.25) and 28 of the 105 winnable failures sit there: the
+// fitter cannot express the shape at all, so it falls back to memorised bands
+// and loses every reading the bands do not cover.
+//
+// So this tries 2 FIRST and only reaches for more where 2 found nothing. A
+// group that fits on two levels is fitted exactly as before, byte for byte;
+// only a group the current fitter GIVES UP ON can reach higher.
+//
+// SAFE FOR THE REASON ALREADY WRITTEN ABOVE `fitLineAnyOrder`: a line is
+// returned only on a PERFECT fit, and the caller still cross-validates it
+// against the bands over all the readings and keeps the bands unless the line
+// wins OUT OF SAMPLE. This widens what can be PROPOSED, not what is accepted.
+//
+// MEASURED 2026-11-10, AND IT LOSES TOO - which is why it stays off:
+//
+//     baseline (2 levels)        520/531 = 97.93%
+//     per-group fallback to 5    509/531 = 95.86%
+//
+// Worse by 2.07 points on the never-tuned validation sets, moving 18 rung
+// lines. So the global LINE_LEVELS verdict was RIGHT, though the reasoning
+// behind it was not: "more levels do not pay" had only ever been tested
+// everywhere-at-once, and this is the local version of the question, asked
+// properly and answered the same way.
+//
+// WHY IT STILL LOSES, as far as the numbers say: a perfect fit is an
+// IN-SAMPLE criterion, and with four or five free levels a perfect in-sample
+// fit is easy to find and generalises worse than the memorised bands it
+// replaces. The cross-validation gate downstream does not save it, because on
+// a group of this size there is little left to validate against.
+//
+// SO THE 105 WINNABLE READINGS ARE STILL WINNABLE - the opportunity is real
+// and measured - but NOT BY MORE LEVELS. It would take a different functional
+// form, not more freedom in this one. Do not re-run either capacity
+// experiment without that.
+//
+// Kept, off by default, so the measurement is reproducible in one word rather
+// than rebuilt from scratch by whoever asks next.
+const LINE_LEVELS_MAX = Number(process.env.LINE_LEVELS_MAX || 0);
+
 function fitLine(ls) {
-    return fitLineAnyOrder(ls, LINE_LEVELS);
+    const first = fitLineAnyOrder(ls, LINE_LEVELS);
+
+    if (first || !LINE_LEVELS_MAX) {
+        return first;
+    }
+
+    for (let k = LINE_LEVELS + 1; k <= LINE_LEVELS_MAX; k++) {
+        const more = fitLineAnyOrder(ls, k);
+
+        if (more) {
+            return more;
+        }
+    }
+
+    return null;
 }
 
 // K PARALLEL THRESHOLDS, all sharing one slope.
@@ -1660,10 +1722,21 @@ function orderings(vals) {
     return out;
 }
 
+// THE ORDERING SEARCH WAS CAPPED AT THREE LEVELS, and that cap is why a
+// five-level group could never be fitted at all: above three it fell straight
+// to `fitLineAnyLevels`, which insists on BONUS ORDER - and the group that
+// carries 28 of the winnable failures runs 0 -> 1.25 -> 1 in frac, which is
+// not bonus order. So it failed on both paths and memorised bands instead.
+//
+// Four levels is 24 permutations and five is 120, each a cheap fit, once per
+// group in a run that already takes minutes - but the cap stays at 3 unless
+// LINE_LEVELS_MAX asks for more, so the default run is unchanged.
+const ORDER_CAP = Number(process.env.LINE_LEVELS_MAX || 0) || 3;
+
 function fitLineAnyOrder(ls, maxLevels) {
     const vals = [...new Set(ls.map((l) => l.bonus))].sort((x, y) => x - y);
 
-    if (vals.length < 2 || vals.length > Math.min(maxLevels, 3)) {
+    if (vals.length < 2 || vals.length > Math.min(maxLevels, ORDER_CAP)) {
         return fitLineAnyLevels(ls, maxLevels);
     }
 
