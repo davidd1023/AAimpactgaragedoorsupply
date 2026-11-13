@@ -4303,9 +4303,13 @@ recorded - 54 duplex and the one Single - is a threshold decision on cycle
 life. **The cycle model had never been checked against anything.**
 
 **IT HAS THE ONE THING LENGTH DOES NOT: DIRECT SUPERVISION.** The reference
-REPORTS its cycle figure in every response. The corpus throws it away (its
-`expect` holds only the six wire/length/weight fields) but the raw pull and
-eval files keep it - **6,932 readings carry `data.cycles`**.
+REPORTS its cycle figure in every response. The raw pull and eval files carry it on
+**6,932 readings** - and the CORPUS carries it too, on **12,932 of 12,941**,
+as a top-level `referenceCycles` key. The entry first written here said the
+corpus discarded it; that was wrong, and wrong because I looked only inside
+`expect`. The conclusions below stand - they were drawn on the smaller set and
+the larger one is the same data - but **`referenceCycles` is the better source
+and needs no raw files**.
 
 **AND NOTHING ABSORBS AN ERROR THERE**, which is what made it worth doing.
 In the length model the fitted slope `b` absorbs a scale error, which is why
@@ -4470,6 +4474,78 @@ idea about the FORM**, and the three open items worth more than a decimal are
 unchanged: the drum rule is known and unimplemented, the vendor disagrees
 about filler length, and a past-120" figure is still printed without saying it
 is an extrapolation.
+
+##### TWO MORE LEVERS, PUSHED ON REQUEST, AND BOTH LOSE (owner, 2026-11-13)
+
+*"as long as there is you should keep trying even if the gain is very small"* -
+and he has been right to push before. So two things were found that had never
+been tried. Both are negatives, and both are worth keeping because each had a
+real argument behind it.
+
+###### THE THRESHOLD SEARCH GRID IS NOT THE LIMIT
+
+`b` is scanned over +-0.25 in steps of `1/B_STEPS` = **0.0005**. The threshold
+is `a + b*floor`, so at a typical floor of 30 **one grid step moves it by 0.015
+in frac** - and the median failing margin is **0.0133**. The grid is as coarse
+as the errors it makes, which nobody had noticed.
+
+```
+baseline  B_STEPS=2000  step 0.0005     2413 / 2587
+finer     B_STEPS=8000  step 0.000125   2411 / 2587    -2
+```
+
+Same range, four times finer, **two readings worse** against a noise floor of
+sd 10.5. A finer search necessarily fits the TRAINING data better and
+generalises no better - the extra precision chases noise. Costs four times the
+run for nothing. **Do not re-raise B_STEPS.**
+
+###### THE ALLOCATION HYPOTHESIS IS REFUTED
+
+1,522 readings are held out of the fit by `fit: false`. Re-enabling them
+WHOLESALE was measured at net -3 (p = 0.607) and dropped - but `derive.mjs`'s
+own comment left the door open:
+
+> *"uniform data lands on rungs in proportion to how often a door hits them -
+> so it piles onto the four rungs already at 100% and barely touches the thin
+> ones ... the allocation, not the data, may have been what failed."*
+
+`ENABLE_UNFIT_RUNGS` was built for exactly that and **had never been used**.
+The starved rungs were found by counting: `0.5625/0.4375` has **0 fitted
+length readings and 14 held out**, `0.625/0.4687` 0 and 5, and four more would
+roughly triple.
+
+```
+baseline                     2413 / 2587
+8 starved rungs admitted     2410 / 2587    -3
+```
+
+**The same answer as the wholesale test, to within one reading.** Aiming the
+held-out readings at the thin rungs does no better than admitting them all, so
+the allocation was not what failed - the data simply does not help. That
+hypothesis is now closed rather than open.
+
+###### TEN LEVERS
+
+```
+more data                      flat above 25 readings a group
+more capacity, globally        -2.45 points
+more capacity, per group       -2.07 points
+coil-count quantisation        refuted by a test with power to confirm
+the IPPT inversion             19.26% against the table's 98.81%
+the fitter's own gates         +17 of 10,351, CI -12.5 to +21.0
+the stiffness model            refits to a BYTE-IDENTICAL score
+the cycle model                exact on Single; the one change costs 9 points
+the search grid                -2, and four times the cost
+held-out readings, per rung    -3, same as wholesale
+```
+
+**AND THE REMAINING CEILING IS ABOUT A TENTH OF A POINT**, concentrated in
+~111 two-level straddlers (sliding every boundary in-sample recovers five), 41
+multi-level straddlers of the same kind, and 13 readings in one capacity-bound
+group. Every knob in the fitter has now been swept. **What is wanted is a new
+IDEA about the form, not another parameter** - and the honest thing to say when
+asked again is that the next person to find one should test it, not that none
+exists.
 
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
