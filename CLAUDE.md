@@ -4393,6 +4393,84 @@ them one step soft.
 `expect` still holds only the six**. Cycle supervision lives in the raw files
 and will be lost if they are ever pruned.
 
+##### THE LAST TWO UNMEASURED SLICES, AND THE LEDGER CLOSES (2026-11-13)
+
+Asked again whether anything was left. Two slices had genuinely never been
+looked at, and both are now measured.
+
+###### DUPLEX WEIGHT IS SOUND, AND IT IS THE ONE THAT TOUCHES MONEY
+
+`dev/envelope.mjs` scores a reading EXACT on wire and length. **Weight is a
+third output the reference reports and nothing here had ever scored it for
+duplex** - so a systematic weight error would have been invisible to every
+tool in `dev/`. It matters more than a specification would: weight x the
+per-pound rate IS the price.
+
+```
+11,754 readings with the wire right     p10/median/p90    within 0.5%
+inner spring                            1.0000 all three      99.0%
+outer spring                            1.0000 all three      99.0%
+inner, where the LENGTH is right        1.0000 all three     100.0%
+outer, where the LENGTH is right        1.0000 all three     100.0%
+```
+
+**Weight carries no error of its own.** The 1% shortfall is exactly the length
+misses coming through, which is what the formula says should happen - wire
+cross-section x length x density. Pricing is safe.
+
+###### THE MULTI-LEVEL GROUPS ARE A DIFFERENT SHAPE, AND IT RESOLVES TO ONE GROUP
+
+`dev/miss-margin.mjs` covered only PLAIN TWO-LEVEL groups; every group with
+`cuts` or `mid` was skipped. That was 2,044 in-envelope readings and 54
+failures never examined individually - the largest unexamined slice left.
+
+```
+                                     two-level      multi-level
+failures within 0.01 of a threshold   40.0% (18x)    27.8% (5.5x)
+failures FURTHER than 0.4 from one    12.9%          24.1%
+median failing margin                 0.0133         0.0629
+```
+
+So a quarter of them are **not** straddlers. `/home/odoo/logs/farmiss.mjs`
+named them, and all thirteen are **the same group**:
+
+```
+0.295/0.2437 2spr   x13   we gave 1.25, reference wanted 1
+                          margins 0.408 to 0.493 - all BETWEEN thresholds
+                          13 of 13 wanted a level the group ALREADY HAS
+```
+
+**THAT GROUP IS ALREADY DIAGNOSED ABOVE.** `group-shape.mjs` records it
+carrying FIVE real bonus levels (`-1:2  0:84  0.25:2  1:26  1.25:62`) where
+the fitter allows three. It has level 1; what it cannot do is place the
+1-vs-1.25 boundary while also serving 0. That is capacity, and capacity was
+measured twice - **globally -2.45 points, per group -2.07** - with this very
+group noted as having "failed on both paths and memorised bands".
+
+###### THE LEDGER
+
+```
+more data                      flat above 25 readings a group
+more capacity, globally        -2.45 points
+more capacity, per group       -2.07 points
+coil-count quantisation        refuted by a test with power to confirm
+the IPPT inversion             19.26% against the table's 98.81%
+the fitter's own gates         +17 of 10,351, CI -12.5 to +21.0
+the stiffness model            refits to a BYTE-IDENTICAL score
+the cycle model                exact on Single; the one change costs 9 points
+```
+
+Plus twelve correction forms for the past-120 band, of which one won.
+
+**WHAT IS LEFT IS ABOUT A TENTH OF A POINT**, and every route to it has been
+tried: ~111 two-level straddlers where sliding every boundary in-sample
+recovers five, 41 multi-level straddlers of the same kind, and 13 readings in
+one capacity-bound group. **No further duplex work should start without a new
+idea about the FORM**, and the three open items worth more than a decimal are
+unchanged: the drum rule is known and unimplemented, the vendor disagrees
+about filler length, and a past-120" figure is still printed without saying it
+is an extrapolation.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
