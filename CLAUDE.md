@@ -4547,6 +4547,122 @@ IDEA about the form, not another parameter** - and the honest thing to say when
 asked again is that the next person to find one should test it, not that none
 exists.
 
+##### A COMPLETE CAUSAL CHAIN, AT LAST: THE HI-LIFT POLE (owner, 2026-11-13)
+
+*"okay keep going"*, after ten levers. This one found something real - not a
+lever that moves the headline, but **the first time a length failure has been
+traced all the way to a root cause** rather than described as a straddler.
+
+###### THE CHAIN, EACH STEP MEASURED
+
+```
+length  <- TIPPT, rounded to a tenth          dev/tippt-rounding.mjs
+tippt   <- weight * rEff / TURNS              corr(turns err, ippt err) -0.897
+turns   <- rEff / MULTIPLIER   (hi-lift only) dev/turns-hilift.mjs
+                                              dev/hilift-pole.mjs
+```
+
+**IT STARTED WITH A ROUNDING.** `duplexActiveLength` takes TIPPT as its only
+reading-specific input and rounds it to one decimal, because the reference
+computes from the figure it shows - its own comment says using the exact value
+cost ten points. So the length hangs on WHICH TENTH our tippt lands in:
+
+```
+our tippt rounds to the SAME tenth as theirs   524 readings   11.3% failing
+to a DIFFERENT tenth                           175 readings   35.4% failing
+of those, 2+ tenths out                         42 readings   81.0% failing
+```
+
+**51% of the failures sit on a different tenth, where only 25% of readings
+do.** That is the mechanism, and it is the first one found that points at an
+input rather than at a boundary.
+
+###### AND THE 2+ TENTH GROUP IS ONE CONFIGURATION
+
+Every one of the 42 is **hi-lift**; 39 of 42 are LOW; the relative error
+correlates **-0.937 with turns**. Following that to the turns comparison:
+
+```
+13 of 699 readings have a turns error over 1%, up to 9.18%
+ALL are drum D800-120.  ALL have hiLift / door height > 1.1.
+0 of 418 readings below that ratio are wrong.
+```
+
+**NOT A ROUNDING THIS TIME, AND THAT WAS CHECKED.** The reference reports
+turns to 0.01 and the bulk agree to 0.027 absolute; these differ by 1.7 to
+**85 turns**. Real.
+
+###### IT IS AMPLIFICATION AT A POLE, AND THE ENGINE SAYS SO ITSELF
+
+`turnsExact` on a hi-lift drum is a DIVISION, and its own comment names the
+hazard: *"a hi-lift drum has a smooth MULTIPLIER and the turns fall out of
+that, which is what lets turns go to a pole where the multiplier crosses
+zero."*
+
+The reference reports its own multiplier, so the quantity BEFORE the division
+can be compared. Predicted error `-(mult err)/mult` against the actual:
+
+```
+ |mult|     mult err    predicted   actual turns err
+5.63e-3     -4.74e-4       8.41%          9.18%
+1.07e-2     -5.81e-4       5.43%          5.74%
+8.92e-3     -3.88e-4       4.34%          4.54%
+   ...        ...           ...            ...
+2.87e-2     -3.24e-4       1.13%          1.14%
+```
+
+**Every row matches.** The turns error is entirely the multiplier error
+divided by a near-zero multiplier.
+
+**TWO THINGS CONSPIRE.** The bad readings sit where `|multiplier|` is about
+twenty times smaller than typical (5.6e-3 against a median 3.4e-1) AND where
+the multiplier is about fifty times less accurate (4.3e-4 against 8.8e-6). So
+it is not only a small denominator - the fit itself degrades near its own zero
+crossing, which is what any fitted surface does.
+
+**AND THE `rEff` CANCELS, so going through turns neither causes nor cures it:**
+
+```
+turns = rEff / mult   =>   tippt = weight * rEff / turns = weight * mult
+```
+
+The relative error in tippt simply IS the relative error in the multiplier.
+Computing tippt directly would change nothing - **do not "fix" it that way.**
+
+###### WHAT COULD ACTUALLY BE DONE, AND THE RISK
+
+`hiLiftMultiplier` is a FITTED SURFACE - six basis functions in height,
+quintics in `u`, `drum.multCoeffs` per drum. The only fix is a more accurate
+multiplier near its zero crossing: refit D800-120's coefficients with the 706
+readings carrying `referenceMultiplier`, weighted toward small `|mult|`.
+
+**NOT ATTEMPTED, and the reason is the trade.** That surface feeds turns,
+tippt, cycles and length for EVERY hi-lift door, and the readings that would
+pull the fit are thirteen at the edge of one drum's range. Weighting a fit
+toward its worst-conditioned corner is how the other 632 hi-lift readings get
+worse. It needs its own session with the never-tuned sets watched.
+
+###### THE ENTRY CONDITION, WHICH IS THE USEFUL PART
+
+**`D800-120` with hi-lift more than about 1.1x the door height.** Inside that
+band the figures are hypersensitive: a multiplier right to four decimal places
+still gives turns out by 9%. Outside it - 418 readings - nothing is wrong at
+all.
+
+That is a product fact as much as an accuracy one, and it is the same shape as
+the past-120" extrapolation: a region where the answer should be marked rather
+than quietly printed.
+
+**MEASURED ON DUPLEX, BUT `turnsExact` IS SHARED WITH SINGLE**, so the same
+band is hypersensitive there. Single measures 99.9% over 1,246 clean readings
+including hi-lift to 119" - but those draws were residential doors, mostly
+standard lift, so the band may simply never have been sampled. **A Single draw
+aimed at hiLift > 1.1x height on D800-120 would settle it**, and that is the
+one pull left in this whole line of work that could matter to what he sells.
+
+`dev/tippt-rounding.mjs`, `dev/turns-hilift.mjs` and `dev/hilift-pole.mjs` are
+committed; none needs a database or a request.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
