@@ -4803,6 +4803,104 @@ here: every new `_t()` fails that test until `i18n/es.po` carries it.
 `dev/eval-pole-floor-seed2026111302.json` (line id stripped).
 `DRUM=` and `RATIO=lo:hi` aim the sampler.
 
+##### THE WHOLE INPUT SURFACE, AND THE AUDIT THE POLE SUGGESTED (2026-11-13)
+
+*"is there anything else accuracy related left"* - asked straight after the
+pole shipped. The pole was found by noticing a table that declares a range the
+code never consults, so the obvious next move was to ask **where else that is
+true.** The sweep cost no requests and closed four questions.
+
+###### THE OTHER EDGE OF THE SAME TABLE IS BENIGN, AND STRUCTURALLY SO
+
+`HL800_COLUMNS` has a published CEILING as well as a floor, and the engine
+clamps only at the drum's 384" maxHeight - so at low hi-lift there is up to
+**10 feet of door above the last published row**:
+
+```
+hiLift      0   12   24   36   48   60   72   84   96  108  120
+published  22   23   24   25   26   27   28   29   30   31   32  ft
+engine     32   32   32   32   32   32   32   32   32   32   32  ft
+```
+
+**It does not blow up, and the reason is the basis.** The columns are
+polynomials in `10/H`, so extrapolating to a TALLER door sends `10/H` toward
+zero and the high-order terms vanish; extrapolating toward the floor sends it
+up and they run away. Measured on D800-120 at 12" of hi-lift, the multiplier
+declines smoothly 0.404 -> 0.273 from 21 to 32 ft with turns and length
+climbing smoothly with it. **The floor is dangerous and the ceiling is safe,
+by construction rather than by luck.**
+
+**IT IS STILL UNMEASURED AGAINST THE REFERENCE - zero readings above the
+published ceiling, ever.** The maths says benign and this project has a long
+record of the maths being right and worth checking anyway. About 20 requests
+would close it.
+
+###### THE GUARD'S COVERAGE, CHECKED RATHER THAN ASSUMED
+
+- **525-54HL**: exactly two geometries reach |multiplier| under 0.03, and both
+  are a **48" door** - four feet, not a garage door. Both fire the guard
+  anyway (ratios 1.10 and 1.13). No silent case.
+- **DUPLEX IS COVERED TOO.** The hi-lift block is keyed on the lift type and
+  the drum, never on the assembly, so an 84" duplex door with 96" of hi-lift
+  raises `hilift-past-pole` as well - which is where the original 13 bad
+  duplex readings lived.
+
+###### THE REFERENCE'S COMPLETE REQUEST, FROM ITS OWN CODE
+
+Worth writing down so nobody derives it again. Its `engineerTorsionSpring()`
+sends exactly:
+
+```
+garageDoorLineId  assembly  duplexInnerSpringInnerDiameter
+duplexOuterSpringInnerDiameter  lift  radius  numberOfSprings  innerDiameter
+drumName  cycles  doorWidthInches  doorHeightInches  doorWeightPounds
+pitch  coneType  handSelection  hiLift
+```
+
+`dev/pull.mjs` sends all of them except the last four of that list bar
+hiLift. **`coneType` and `handSelection` are hard-coded `null` in the
+reference's own UI**, so neither can move an answer. **That leaves `pitch` as
+the ONLY input in existence that we do not send** - and the UI sends it as
+`null` whenever track radius is chosen, which is what omitting it amounts to.
+**So every reading in the corpus is an uncontaminated radius reading**, and no
+past measurement needs revisiting.
+
+###### PITCH IS NOT A BUG, BUT IT WOULD COME BACK DEAD
+
+An audit for "fields defined in a data table and read nowhere" turned up
+`state.pitch` and `state.pitchAmount`, set by the UI and consulted by no
+calculation, reaching no order, no work order sheet and no shop floor card.
+That is **not** a defect: `d137f57` put Vertical lift, Pitch and Triplex away
+on the owner's instruction, *"not needed at the moment, wanted back later"*,
+keeping the state and the toggle so they return intact.
+
+**WHAT IS WORTH KNOWING IS WHAT COMES BACK.** In the reference, pitch is an
+ALTERNATIVE TO RADIUS - the control is a two-tab chooser, and picking Pitch
+emits `radius-changed(null)` while picking Track emits `pitch-changed(null)`.
+Radius is already documented here as changing TURNS and nothing else. There is
+no pitch arithmetic anywhere in this engine, so **un-commenting those two
+buttons would restore a control that changes nothing** - precisely the bug
+already recorded against the Radius control ("written to state and read by
+nothing").
+
+Bringing pitch back is therefore a calibration job, not a template edit: a
+draw across the pitch options against a radius baseline would say whether
+pitch maps onto an effective radius (cheap) or is its own surface (a
+campaign). **Nobody should re-enable it without that.**
+
+###### SO WHERE ACCURACY STANDS
+
+Twelve levers measured and spent, twelve correction forms for the past-120
+band of which one won, and today a thirteenth line of work that produced a
+REFUSAL rather than a number. What is left is not an idea anybody is holding
+back: ~111 two-level straddlers, 41 multi-level ones and 13 readings in one
+capacity-bound group, all three of them the same mechanism - a threshold
+decided on a quantity known to about a per cent.
+
+The two genuinely unmeasured things are both small and both the owner's call:
+**the ceiling band** (~20 requests, expected to confirm what the basis
+argument already says) and **pitch** (a feature, not a fix).
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
