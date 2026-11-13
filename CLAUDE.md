@@ -4141,6 +4141,77 @@ INSIDE `derive.mjs`** rather than a correction to its output - the one thing
 that risks the 98.20%, and which needs its own session with the never-tuned
 sets, the golden snapshot and `envelope.mjs` all watched and a revert ready.
 
+##### THE IN-ENVELOPE FAILURES ARE THRESHOLD STRADDLERS (2026-11-13)
+
+*"ok anything else you can try?"* - after six levers had been spent. Yes, one,
+and it was a METHOD rather than a knob: **nobody had ever looked at a single
+in-envelope failure.** Every measurement before this was an aggregate - group
+shapes, knob sweeps, form ladders, fold scores - while the only two things
+that ever worked in this project came from printing one concrete case.
+
+`dev/miss-margin.mjs` computes, for every failure in a plain two-level group,
+its distance from the threshold that decided it:
+
+```
+bonus  = frac > (a + b * floor) ? hi : lo
+margin = frac - (a + b * floor)
+```
+
+**THE FAILURES HUG THE BOUNDARY, 18x OVER:**
+
+```
+|margin|     failures        all readings
+0-0.01       28  40.0%       203   2.2%
+0-0.025      44  62.9%       554   5.9%
+median       0.0133          0.2490          <- 19x closer
+```
+
+**AND THEY STRADDLE IT, WHICH IS WHAT CLOSES THE QUESTION:**
+
+```
+we said HI, reference wanted LO:  30
+we said LO, reference wanted HI:  33
+neither level was right:           7   <- outside the form entirely
+
+sliding every boundary IN-SAMPLE, knowing the answers: recovers 5 of 70
+and ZERO on the two biggest groups (0.2625/0.2253 4spr, 0.289/0.2343 2spr)
+```
+
+**MOVING THE LINE FIXES 30 AND BREAKS 33.** Even granted perfect hindsight
+and a free parameter per group, the best a differently-placed threshold can
+do is five readings - and that is the CEILING, before cross-validation takes
+most of it back. The boundary is not misplaced; the readings are ambiguous at
+the resolution we can compute them to.
+
+**THIS IS THE THIRD INSTANCE OF ONE MECHANISM, AND THAT IS THE FINDING.**
+
+```
+54 duplex WIRE misses      27 softer / 27 stiffer    symmetric
+ 1 Single WIRE miss        margin exactly 1.000      a tie
+63 duplex LENGTH misses    30 one way / 33 the other  straddling
+```
+
+All three are **a threshold decision taken on a quantity known to about a per
+cent**, and all three are irreducible for the same reason: no placement of a
+boundary can sort readings whose true position is uncertain by more than the
+distance they sit from it.
+
+**SO THE 53-IN-TWO-LEVEL-GROUPS OBSERVATION IS NOW EXPLAINED.** The earlier
+entry is right that those failures are neither capacity nor data nor the
+gates - and the reason is that they are not a property of the BONUS TABLE at
+all. They are the precision of `duplexActiveLength` showing through it.
+
+**WHICH NAMES THE TARGET IN A NUMBER FOR THE FIRST TIME: 0.0133.** That is
+the median failing margin, in fractional inches of active length. An active
+length accurate to about one hundredth of an inch better than today's would
+halve these failures, and nothing else will touch them. That is the SAME item
+already standing as the one remaining lever - the stiffness model inside
+`derive.mjs` - except the evidence now covers the whole range rather than
+only past 120", and it comes with a precision target instead of a hope.
+
+**SEVEN READINGS WANTED NEITHER LEVEL**, so even a perfect active length
+leaves those: the two-level form genuinely cannot hold them.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
