@@ -4901,6 +4901,68 @@ The two genuinely unmeasured things are both small and both the owner's call:
 **the ceiling band** (~20 requests, expected to confirm what the basis
 argument already says) and **pitch** (a feature, not a fix).
 
+##### THE DOMINANT CONFIGURATION, AND WHETHER THE TARGET ITSELF HAS MOVED (2026-11-13)
+
+*"so now you are out of ideas"* - asked a third time. Two things had genuinely
+never been measured, and both are now closed. Neither changed any code.
+
+###### STANDARD LIFT HAD BEEN SCORED ON 54 READINGS. IT IS 4,307.
+
+`dev/turns-hilift.mjs` carried standard lift as a CONTROL, on the 54 rows the
+corpus happens to hold `referenceTurns` for. **Standard lift is very nearly
+everything the business sells**, and `turnsOnSprings` and
+`totalInchPoundPerTurn` ride on every raw pull and eval file - so eighty times
+the evidence was already paid for and sitting on disk. `dev/turns-standard.mjs`
+reads it.
+
+```
+                       n        median       p90      worst
+TURNS   all          4307      +0.138%    +0.501%    0.878%
+        radius 10    1218      -0.038%
+        radius 12    1334      +0.103%
+        radius 15    1755      +0.294%     <- the bias TRACKS THE RADIUS
+
+TIPPT   all          4307      +0.0014%   +0.039%    0.187%
+        radius 10/12/15        +0.0015 / +0.0002 / +0.0021%   <- FLAT
+```
+
+**IT IS NOT ROUNDING**, which is the first thing to rule out: the reference
+reports turns to 0.01 and only **14.7%** of ours land within a whole step of
+its figure, the worst out by 0.0512 of a turn.
+
+**BUT IT NEVER REACHES TIPPT, AND TIPPT IS WHAT THE LENGTH IS BUILT FROM.**
+Turns carries a radius-dependent bias; tippt is flat in radius and exact to
+0.0014%. So `rEff` and `turns` are fitted JOINTLY with only their ratio pinned
+by the data, and the error cancels in `weight * rEff / turns`. **Same shape as
+the `b` slope absorbing a stiffness scale error** - a parameter pair where one
+combination is determined and the other is free.
+
+So the only thing carrying it is **the turns figure on screen**, out by under
+0.05 of a turn on a typical 8.6 - well inside the quarter turn an installer
+adjusts by. Correcting it means moving `rEff`, which feeds the tippt
+everything depends on. **Not worth it, and now measured rather than assumed.**
+
+###### THE REFERENCE HAS NOT MOVED IN FIVE WEEKS
+
+Every accuracy figure in this file is scored against data pulled between
+2026-10-06 and now, and **nobody had ever checked that the reference still
+gives those answers.** If SSC had updated their calculator mid-campaign, old
+and new readings would conflict, the fitter would split the difference, and
+the never-tuned yardsticks would be measuring agreement with a dead version.
+
+25 readings from `eval-validation-seed61006.json` - the oldest committed
+yardstick, **2026-10-06** - re-asked and compared on wire, both lengths and
+cycles:
+
+```
+re-asked 25    IDENTICAL 25    DIFFERENT 0
+```
+
+**The target is stable and the corpus is not stale.** That is a risk nobody
+had tested and it quietly underwrites every figure quoted here. Worth
+repeating if a campaign ever spans months rather than weeks; `dev/pull.mjs`
+on a sweep rebuilt from any old eval file is the whole method.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
