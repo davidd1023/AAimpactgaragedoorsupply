@@ -4963,6 +4963,136 @@ had tested and it quietly underwrites every figure quoted here. Worth
 repeating if a campaign ever spans months rather than weeks; `dev/pull.mjs`
 on a sweep rebuilt from any old eval file is the whole method.
 
+##### PARTIAL POOLING: A REAL GAIN, MEASURED, NOT YET SHIPPED (2026-11-13)
+
+*"keep running stuff until you are completely out of ideas ... as long as they
+dont permanently damage the results"*. Four long shots were run. Three closed
+large areas at a stroke; the fourth is **the first genuine accuracy gain in
+weeks**, and it is PAUSED ONE CONFIRMATION SHORT OF SHIPPING.
+
+**NOTHING IS SHIPPED. The engine is byte-identical to `27a9cb4`** - golden 725
+byte-identical, 20/20 invariants, and `SHRINK` defaults to 0, which was proved
+rather than assumed: a default `derive.mjs` run installs a table that `diff`
+says is identical to the committed one.
+
+###### THE TIPPT ORACLE CLOSES EVERYTHING UPSTREAM OF TIPPT, AT ONCE
+
+`duplexActiveLength` takes TIPPT as its ONLY reading-specific input. So hand
+it the reference's own reported TIPPT - a perfect oracle - and whatever that
+recovers is the CEILING on refitting the multiplier surface, the weight model,
+rEff, the turns, or the rounding mode. One measurement, every idea upstream.
+
+```
+                            699 readings, wire already right
+as shipped                  578   82.69%
+with the REFERENCE's tippt  568   81.26%      fixed 5, BROKEN 15
+```
+
+**A PERFECT TIPPT IS WORSE.** The rung table was fitted against OUR tippt
+including its bias, so handing it the truth moves readings off the thresholds
+it learned - the same mechanism as `b` absorbing a stiffness scale error. Even
+in the clean band it is -2.
+
+**SO THE DEFERRED D800-120 `multCoeffs` REFIT IS NOW CLOSED TOO**, along with
+every other upstream idea. `dev/tippt-oracle.mjs`, no requests.
+
+Also closed, both free: **floating point at the floor boundary** - zero of
+12,839 readings have an active length within 1e-6 of a whole inch, so no
+epsilon-snap is needed; and **the slope scan range**, where fitted slopes have
+a median of 0.0055 and a p90 of 0.0195 against a +-0.25 scan, twelve times
+wider than it needs to be. **Max-margin threshold placement was already
+implemented** - `fitLine` maximises the gap and tie-breaks on flatness, with a
+cap, and `if (best && bad > best.bad) continue;` stops a worse fit winning on
+margin. Do not re-propose any of these four.
+
+###### THE ONE THAT WORKED: POOLING THE THRESHOLD ACROSS SPRING COUNTS
+
+Every (rung, spring count) group fits its own line alone, and
+`group-density.mjs` shows thin groups failing eight times as often - classic
+small-sample variance. The structure is visible: `0.2625/0.2253` fits
+a = 0.78222 at three springs and a = 0.78311 at four, independently, same
+slope, same two levels.
+
+`SHRINK=k` pulls each line toward its rung's n-weighted mean by
+`lambda = k / (k + n)`, only across groups sharing a `(lo, hi)` level pair -
+averaging a threshold that separates 0.25 from 1.25 with one that separates 0
+from 1 would be averaging two different questions.
+
+**FIVE-FOLD HOLDOUT OVER THE WHOLE CORPUS, 12,938 READINGS SCORED OUT OF
+SAMPLE, PAIRED:**
+
+```
+k        correct    net    fixed/broken   McNemar p
+0         12018       -         -             -
+10        12033     +15        32/17        0.0444
+25        12041     +23        48/25        0.0095
+60        12054     +36        65/29        0.0003   <- best
+150       12038     +20
+400       12040     +22
+```
+
+**EVERY AMOUNT OF POOLING BEATS NONE**, with an interior peak - exactly the
+shape partial pooling should have. The gain concentrates in groups of 25-49
+readings (net +15), which fits the mechanism: a group needs enough data for a
+LINE to be fitted at all, but not so much that its own estimate is stable.
+
+**THE COMPARISON IS PAIRED, AND THAT IS WHY IT COULD BE SEEN.** Fold totals
+have a standard deviation of 10.5 readings, so comparing them cannot resolve
+anything under about +-21 - the lesson from the LINE_SLACK screen. Pairing the
+same reading across two configurations removes all of that;
+`dev/shrink-report.mjs` runs an exact McNemar on the discordant pairs, and
+`PER_READING=1` on `holdout-score.mjs` emits the rows.
+
+###### WHAT ARGUES AGAINST IT, STATED PLAINLY
+
+- **THE IN-SAMPLE HEADLINE FALLS**: inside 96" goes 98.20% -> 98.10% and the
+  past-120 band 67.93% -> 67.76%. That is the textbook regularisation
+  signature - worse on the training data, better on a new door - and
+  `envelope.mjs` scores the corpus the table was fitted on. It is still the
+  number quoted elsewhere in this file, so **shipping this changes a figure
+  the owner has been told.**
+- **THE NEVER-TUNED SETS CANNOT CONFIRM IT.** Clean arms went 98.9 -> 98.3,
+  96.6 -> 96.6, 97.3 -> 97.3 (net -1 reading); flagged arms 87.7 -> 88.2,
+  89.2 -> 89.2, 88.0 -> 88.5 (net +2). With 535 clean readings a +0.28 point
+  effect is about 1.5 readings - those sets have **no power** here. They do
+  not contradict it either.
+- **THE HOLDOUT FLATTERS REGULARISATION.** Each fold fits on four fifths of
+  the corpus, so groups are thinner there than in production, where
+  shrinkage helps less. `lambda = k/(k+n)` self-adjusts, so the SIGN carries
+  over; the MAGNITUDE at full data will be smaller than +36.
+- **k = 60 WAS CHOSEN BY LOOKING AT THE HOLDOUT.** "Pooling helps" is not a
+  selection artefact - every k tested wins - but "60 is best" is.
+
+###### WHERE IT WAS PAUSED, AND HOW TO FINISH IT
+
+A confirmation under a DIFFERENT fold partition was running and was stopped:
+
+```
+MOD=4 OUT=/home/odoo/logs/m4 sh dev/shrink-sweep.sh 0 60     # ~60 minutes
+node dev/shrink-report.mjs /home/odoo/logs/m4-0.rows /home/odoo/logs/m4-60.rows
+```
+
+If that reproduces a significant positive, the remaining steps are: install
+with `SHRINK=60 node dev/derive.mjs --json | python3 dev/install.py`, then
+golden / invariants / `envelope.mjs` / the 348 tests / regenerate
+`spring_calculator`, and decide whether a +0.28 point out-of-sample gain is
+worth a 0.10 point drop in the in-sample figure that has been quoted. **That
+last one is the owner's call, not the agent's.**
+
+The six holdout runs are committed under `dev/shrink-evidence/` so none of
+this has to be recomputed to be re-read.
+
+###### KILLING A SWEEP LEAVES THE ENGINE HOLDING A FOLD'S TABLE
+
+`shrink-sweep.sh` installs a throwaway table on every fold and restores the
+real one from a trap - but **a trap does not run when the shell is killed.**
+It was killed to pause, and the engine was left holding a four-fifths table
+(50 rung lines different, 70 `lo:` entries against 71). `git checkout` on the
+one file put it back, confirmed by golden 725 byte-identical and 20/20.
+
+**ALWAYS `git status` THE ENGINE AFTER STOPPING A SWEEP**, and never commit
+while one is running.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2

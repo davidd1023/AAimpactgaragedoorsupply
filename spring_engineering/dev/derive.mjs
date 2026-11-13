@@ -946,6 +946,11 @@ const contradictions = [];
 const overfit = [];
 const MAX_BANDS = Number(process.env.MAX_BANDS || 64);
 
+// PARTIAL POOLING OF THE THRESHOLD ACROSS SPRING COUNTS. 0 is off and is the
+// shipped fit, byte for byte. See the block near the end of the rung map for
+// what it does and why; `dev/shrink-sweep.sh` is how it was measured.
+const SHRINK = Number(process.env.SHRINK || 0);
+
 // HOW FINELY THE THRESHOLD SLOPE IS SCANNED. b runs over +-BLO/B_STEPS in steps
 // of 1/B_STEPS, so 2000 is a step of 0.0005 over a range of +-0.25.
 //
@@ -2157,6 +2162,58 @@ const out = [...rungs.values()]
                 contradictions.push(
                     `${g.outer}/${g.inner} at ${sp} spring(s): bonus is not monotonic in frac`
                 );
+            }
+        }
+
+        // SHRINK=<k> POOLS THE THRESHOLD ACROSS SPRING COUNTS. Off by default.
+        //
+        // Each (rung, spring count) group fits its own line alone, and
+        // dev/group-density.mjs shows groups under ten readings failing eight
+        // times as often as the rest - the classic small-sample variance that
+        // partial pooling exists to cut. The structure is plainly there:
+        // 0.2625/0.2253 fits a = 0.78222 at three springs and 0.78311 at
+        // four, independently, with the same slope and the same two levels.
+        //
+        // So each line is pulled toward its RUNG's n-weighted mean by
+        // lambda = k / (k + n): a thin group moves most, a thick one barely
+        // at all, and k = 0 is exactly the shipped fit.
+        //
+        // ONLY PLAIN TWO-LEVEL LINES, AND ONLY WITHIN A MATCHING (lo, hi).
+        // Averaging a threshold that separates 0.25 from 1.25 with one that
+        // separates 0 from 1 would be averaging two different questions.
+        if (SHRINK > 0) {
+            const plain = Object.entries(byCount).filter(([, v]) =>
+                v.line && v.line.a !== undefined
+                && v.line.cuts === undefined && v.line.mid === undefined);
+            const families = new Map();
+
+            for (const [sp, v] of plain) {
+                const key = `${v.line.lo}|${v.line.hi}`;
+
+                if (!families.has(key)) families.set(key, []);
+
+                families.get(key).push([sp, v]);
+            }
+
+            for (const members of families.values()) {
+                if (members.length < 2) continue;
+
+                let wa = 0, wb = 0, wn = 0;
+
+                for (const [, v] of members) {
+                    wa += v.line.a * v.n;
+                    wb += v.line.b * v.n;
+                    wn += v.n;
+                }
+
+                const meanA = wa / wn, meanB = wb / wn;
+
+                for (const [, v] of members) {
+                    const lambda = SHRINK / (SHRINK + v.n);
+
+                    v.line.a = Number((v.line.a + lambda * (meanA - v.line.a)).toFixed(5));
+                    v.line.b = Number((v.line.b + lambda * (meanB - v.line.b)).toFixed(6));
+                }
             }
         }
 
