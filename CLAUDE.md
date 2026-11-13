@@ -4296,6 +4296,103 @@ install throwaway tables; the script's trap restores the engine and `git
 status` was checked clean afterwards, with the 24-rung table and all 48 sMult
 values intact.
 
+##### THE CYCLE MODEL, CHECKED AGAINST DIRECT SUPERVISION FOR THE FIRST TIME (2026-11-13)
+
+Every accuracy session has been about LENGTH, and every WIRE miss ever
+recorded - 54 duplex and the one Single - is a threshold decision on cycle
+life. **The cycle model had never been checked against anything.**
+
+**IT HAS THE ONE THING LENGTH DOES NOT: DIRECT SUPERVISION.** The reference
+REPORTS its cycle figure in every response. The corpus throws it away (its
+`expect` holds only the six wire/length/weight fields) but the raw pull and
+eval files keep it - **6,932 readings carry `data.cycles`**.
+
+**AND NOTHING ABSORBS AN ERROR THERE**, which is what made it worth doing.
+In the length model the fitted slope `b` absorbs a scale error, which is why
+refitting the stiffness model changed nothing. The cycle targets are FIXED
+CONSTANTS - 10,000 / 25,000 / 50,000 / 100,000 - so a one per cent bias moves
+real decisions and nothing undoes it.
+
+`dev/cycle-error.mjs` compares, on the 3,851 clean readings where our wire
+ALREADY matches theirs (anything else compares two different springs).
+
+###### THE EXPONENTS ARE RIGHT, AND THAT IS NOW MEASURED
+
+```
+OUR cycles / THEIRS          p10    median    p90
+by wire 0-.25 ... .4-.47   0.973  0.999..1.007  1.028   <- FLAT, no drift
+by spring count 1/2/3/4           1.004..1.001          <- FLAT
+```
+
+A median that drifted with wire size would mean `CYCLE_WIRE_EXPONENT` is off.
+It does not drift. The three constants - `CYCLE_COEFFICIENT 124205`,
+`CYCLE_WIRE_EXPONENT 2.79`, `CYCLE_EXPONENT 4.67` - are not the problem.
+
+###### THE REFERENCE REPORTS ONLY MULTIPLES OF 1,000
+
+**All 6,923 figures, without exception.** Under 20,000 the distinct values are
+9000, 10000, 11000 ... So at an 11,000-cycle answer its own reporting
+granularity is **+/-4.5%**.
+
+That killed a finding before it was believed. The first cut showed the 10,000
+target reading **1.3% high with only 45.7% within 2%**, against ~1.000 and 81%
+at every other target - which is the commonest target, and high means we think
+a spring lasts longer and pick a SOFTER wire. It is the rounding: a declining
+density of true values inside each 1,000-wide bin biases the ratio upward.
+**Cycle agreement can never be measured to better than +/-500.**
+
+###### SINGLE'S CYCLE MODEL IS EXACT
+
+```
+rounded to the reference's own precision:   Single 1245/1245 = 100.0%
+                                            Duplex  41.9% exact, 93.2% +/-1 step
+```
+
+**Every clean Single reading reproduces the reference's cycle figure exactly.**
+That independently confirms what the Single wire miss was already argued to be:
+a pure threshold tie at margin 1.000, not a model fault.
+
+###### AND THE ROUNDING FLAG IS SETTLED BY MEASUREMENT, NOT BY ITS COMMENT
+
+`duplexCyclesForStep(step, {rounded})` rounds TIPPT and turns to ONE DECIMAL
+because the reference does - **not an output rounding, which is what the flag
+name suggests and what I first assumed**. Measured both ways against the
+reference's reported figure:
+
+```
+Duplex, ROUNDED tippt/turns     41.9% exact   93.2% within one step
+Duplex, UNROUNDED               24.6% exact   60.7% within one step
+```
+
+The rounded figure is far closer - and **the wire DECISION deliberately uses
+the unrounded one**. That looked like a free win. It is not:
+
+```
+wire accuracy, shipped (unrounded)   12839/12937 = 99.242%
+wire accuracy, rounded selection     11689/12937 = 90.353%   <- 1,150 WORSE
+```
+
+**EIGHT AND A HALF POINTS WORSE.** The engine's choice is right and the comment
+at the call site says why: each `K` was BRACKETED against the unrounded
+comparison, so the two are coupled. Agreeing better with the reference's
+*reported* figure does not mean agreeing better with its *decision*.
+
+Reverted; engine byte-identical to the commit, both `rounded: false` call sites
+intact.
+
+###### SO LEVER EIGHT IS SPENT, AND THE WIRE MISSES STAND
+
+The cycle model is exact where it can be checked exactly, its exponents do not
+drift, and the one change that looked available costs nine points. The 54
+duplex wire misses remain what they were measured to be in 2026-11-10: marginal
+doors sorted by a threshold on a quantity known to about a per cent, half of
+them one step soft.
+
+**WORTH KNOWING FOR ANY FUTURE PULL**: `import.mjs` now keeps `cycles`,
+`turnsOnSprings`, `totalInchPoundPerTurn` and `multiplier`, but **the corpus
+`expect` still holds only the six**. Cycle supervision lives in the raw files
+and will be lost if they are ever pruned.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
