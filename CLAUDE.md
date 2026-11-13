@@ -4212,6 +4212,90 @@ only past 120", and it comes with a precision target instead of a hope.
 **SEVEN READINGS WANTED NEITHER LEVEL**, so even a perfect active length
 leaves those: the two-level form genuinely cannot hold them.
 
+##### THE LAST LEVER, MEASURED AND CLOSED (owner, 2026-11-13)
+
+*"as long as you can revert any changes the can cause the accuracy to go down
+you can make any tests you want, they can aslo take as long as you want"* -
+so the one remaining item was finally attempted: the stiffness model inside
+`derive.mjs`, standing since 2026-11-12 as *"the first thing all session that
+could move this number"*.
+
+**IT CANNOT MOVE IT, AND THAT IS NOW PROVED RATHER THAN ARGUED.**
+
+###### THE ARGUMENT: `b` ALREADY ABSORBS A STIFFNESS SCALE ERROR
+
+A two-level group decides by `frac > a + b*floor`, which is the same as
+`active > floor*(1+b) + a`. Scaling `duplexActiveLength` by (1+eps) moves
+frac by about `eps*floor` - **which IS a change in `b`**. The fitted slope has
+been quietly undoing any linear scale error in the active length all along,
+per rung and per spring count.
+
+###### THE PROOF: PERTURB sMult AND REFIT
+
+```
+BASELINE (sMult as shipped)       2413 / 2587
+sMult x 1.003, then REFITTED      2413 / 2587    IDENTICAL
+sMult x 1.010, then REFITTED      2413 / 2587    IDENTICAL
+```
+
+**A ONE PER CENT PERTURBATION OF THE STIFFNESS MODEL - seventy-five times
+the 0.0133 median failing margin - REFITS TO THE SAME SCORE.** The fitter
+re-absorbs it completely. Refitting sMult or K is not a lever; it is a
+reparametrisation of something already fitted.
+
+###### AND NO MISSING INPUT DISAMBIGUATES THE STRADDLERS EITHER
+
+What `b` cannot absorb is error varying with something OTHER than floor. So
+`dev/missing-variable.mjs` asks whether any input the decision does not
+currently see predicts which side the reference chose - door height, weight,
+lb per spring, cycles, radius, hi-lift, active length, turns and the required
+IPPT, with `floor` and `frac` as controls.
+
+```
+AT THE BOUNDARY (|margin| < 0.05, 1067 readings) the two answers differ by:
+  frac +5.8   hiLift -2.0   cycles +1.1   radius -0.9   ...   turns +0.0
+
+PREDICTING THE SIDE, c fitted on one half and scored on the other:
+  noise floor  512.5 of 533, sd 3.39  -> a candidate must beat it by 6.8
+  EVERY variable scored +0.0 or WORSE
+```
+
+**`frac` IS A CONTROL AND ITS +5.8 IS THE EXPECTED ARTEFACT** - `margin` is
+`frac - (a + b*floor)`, so inside a margin band frac tracks the answer by
+construction. Everything real is noise: 33 tests were run and one or two at
+|t| ~ 2 is what chance gives.
+
+###### THE FIRST VERSION OF THAT TEST WAS DOMINATED AND SAID NOTHING
+
+Scoring a GLOBAL `c` over all 9,398 readings returned **exactly** the
+baseline for all eleven candidates - every fold chose c = 0. A correction big
+enough to flip a reading sitting 0.01 from its boundary also moves the 8,850
+sitting nowhere near one, so the easy readings drown the question. **ASK THE
+QUESTION WHERE IT LIVES**: restricted to the boundary band, the test has
+power and still finds nothing.
+
+###### SO IN-ENVELOPE DUPLEX LENGTH IS CLOSED ON SEVEN LEVERS
+
+```
+more data                          measured, flat above 25 readings a group
+more capacity, globally            loses 2.45 points
+more capacity, per group           loses 2.07 points
+coil-count quantisation            refuted by a test with power to confirm
+the IPPT inversion                 19.26% against the table's 98.81%
+the fitter's own gates             +17 of 10,351, CI straddles zero
+the stiffness model                REFITS TO AN IDENTICAL SCORE
+```
+
+**WHAT IS LEFT IS NOT A LEVER BUT A LIMIT.** 63 of 70 failures straddle their
+threshold within a hundredth of an inch; no boundary sorts readings whose
+position is uncertain by more than their distance from it. The same mechanism
+as the 54 duplex wire misses and the Single tie at margin 1.000.
+
+**NOTHING WAS SHIPPED AND NOTHING WAS LEFT MODIFIED.** The perturbation runs
+install throwaway tables; the script's trap restores the engine and `git
+status` was checked clean afterwards, with the 24-rung table and all 48 sMult
+values intact.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
