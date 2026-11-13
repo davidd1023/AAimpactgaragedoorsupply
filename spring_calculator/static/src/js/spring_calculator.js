@@ -235,6 +235,18 @@ function drumTurns(drum, heightFeet) {
 // 7'0"/0" value. Shared by both hi-lift drum families.
 const HILIFT_MIN = 12;
 
+// How far above the DOOR'S OWN HEIGHT the hi-lift may go before the figures
+// stop meaning anything. See the "hilift-past-pole" message for the whole
+// argument; the short of it is that the multiplier surface crosses zero a
+// little above the door height, `turnsExact` divides by it, and both this
+// engine and the reference are extrapolating below the drum catalogue's
+// lowest published height (exactly max(72", hiLift)) by then.
+//
+// 1.1 was measured on duplex (0 of 418 readings below it carry a turns error
+// over 1%, 13 of 13 above it do) and confirmed afterwards on a Single draw it
+// was never fitted to. `dev/hilift-band.mjs` is the tool.
+const HILIFT_POLE_RATIO = 1.1;
+
 // --- CANIMEX/TF 575-120 ---------------------------------------------------
 // Height curves fitted DIRECTLY to the reference calculator, one per measured
 // hi-lift column. The catalog is no longer part of the arithmetic for this
@@ -4017,6 +4029,11 @@ get warnings() {
         const maxHiLift = this.hiLiftDrumData
             ? this.hiLiftDrumData.maxHiLift
             : null;
+        // The EFFECTIVE height, which is what feeds the multiplier surface -
+        // `doorHeightTotalFeet` has already applied the drum's maxHeight cap,
+        // and comparing against the entered height instead would ask about a
+        // door the engine is not computing.
+        const heightInches = this.doorHeightTotalFeet * 12;
 
         if (maxHiLift && hiLift > maxHiLift) {
             found.push({
@@ -4026,6 +4043,64 @@ get warnings() {
                     "The value you entered (%s) is greater than the maximum"
                     + " allowed(%s)",
                     hiLift, maxHiLift),
+            });
+        } else if (maxHiLift
+            && (hiLift > HILIFT_POLE_RATIO * heightInches
+                || this.multiplierExact <= 0)) {
+            // THE POLE. A hi-lift drum's MULTIPLIER is a surface in (height,
+            // hi-lift) and `turnsExact` DIVIDES by it - so where the surface
+            // passes through zero, turns and everything downstream blow up.
+            // Measured on the installed engine, D800-120 at 96" of hi-lift:
+            // a 96" door gives multiplier 0.196 and 26 turns; an 84" door
+            // gives -0.00034 and -15,260 turns.
+            //
+            // IT IS NOT A FITTING ERROR, and that is why this is a refusal
+            // rather than something to fix. The drum's own catalogue stops
+            // publishing at a lowest height per hi-lift column, and
+            // `HL800_COLUMNS` records that floor: it is exactly
+            // max(72", hiLift). Past it both this engine and the reference
+            // are extrapolating off the bottom of every column, and the
+            // reference extrapolates to the same place - it returns negative
+            // turns there too, and of 245 readings ever pulled with the
+            // hi-lift above the door height it stood behind SIX.
+            //
+            // WHY 1.1 AND NOT 1.0. The ratio was measured on duplex first (0
+            // of 418 readings below 1.1 carry a turns error over 1%; 13 of 13
+            // above it do) and a Single draw of 100 confirmed it afterwards
+            // on data it was never fitted to: every reading over 1% sits at
+            // 1.16 or above, and all six readings the reference answered
+            // cleanly past the floor sit at 1.08 or below. Nothing lands in
+            // between. A gate at 1.0 would refuse those six.
+            //
+            // THE SECOND CONDITION IS NOT BELT AND BRACES. The crossing sits
+            // a little ABOVE the door height on these drums but not by a
+            // fixed amount, and one real geometry slips under 1.1: D800-120,
+            // a 72" door with 78" of hi-lift, ratio 1.08, multiplier
+            // -2.8e-3, turns -1757.7. A NON-POSITIVE multiplier is nonsense
+            // by construction whatever the ratio - the spring would have to
+            // unwind to lift the door - and it cannot refuse a good answer:
+            // of every hi-lift Single reading ever pulled, six have one, the
+            // reference agrees on all six, and it called NONE of them clean.
+            //
+            // RED, matching the over-max branch above and for its own reason:
+            // past this the fitted curves leave their measured band entirely.
+            // 62.5% of configurations past the floor return a NEGATIVE spring
+            // length, and before this they were printed without a word.
+            found.push({
+                id: "hilift-past-pole",
+                severity: "red",
+                // THE INCH MARKS RIDE IN THE ARGUMENTS, not in the sentence.
+                // `test_every_string_the_calculator_can_show_is_in_the_file`
+                // joins the JS literals WITHOUT unescaping them and compares
+                // against a .po file it DOES unescape, so a `\"` inside the
+                // message can never match however it is written in the .po.
+                // Keeping the quote out of the msgid sidesteps that entirely
+                // and the customer still reads 115" and 96".
+                message: _t(
+                    "A hi-lift of %s on a %s door is outside the drum's"
+                    + " published range, so these figures cannot be relied on."
+                    + " Please contact us.",
+                    `${hiLift}"`, `${Math.round(heightInches)}"`),
             });
         } else if (hiLift < HILIFT_MIN) {
             found.push({

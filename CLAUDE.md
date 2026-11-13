@@ -4663,6 +4663,146 @@ one pull left in this whole line of work that could matter to what he sells.
 `dev/tippt-rounding.mjs`, `dev/turns-hilift.mjs` and `dev/hilift-pole.mjs` are
 committed; none needs a database or a request.
 
+##### THE POLE IS THE DRUM CATALOGUE'S OWN EDGE, AND IT SHIPPED A GUARD (2026-11-13)
+
+*"run it"* - the one pull named above. It was run, and it changed the finding
+from an accuracy curiosity into **a defect on the assembly the business
+actually sells.** First time in this line of work that anything shipped.
+
+###### THE CHEAPEST HALF COST NOTHING AND SHOULD HAVE BEEN DONE FIRST
+
+Before any request: **only 7 of 2,061 Single readings ever taken sit past
+ratio 1.1, and all 7 are junk** - 300,000-cycle doors with 2,481" springs,
+drawn by `single-gap-sample.mjs` when it was chasing blind spots. So the band
+was never asked a real question. `dev/hilift-band.mjs` cuts hi-lift readings
+**by the RATIO** rather than by hi-lift inches, which is why no earlier tool
+could see this: 105" of hi-lift on a 227" door is ratio 0.46 and safe, the
+same 105" on an 84" door is ratio 1.25 and in the pole. `single-breakdown.mjs`
+slices by the inches and puts them in the same bucket.
+
+###### THE MECHANISM, READ OUT OF THE ENGINE'S OWN TABLE
+
+`HL800_COLUMNS` carries, per hi-lift column, **the catalogue's lowest and
+highest published door height** - and `hl800Base` reads `window[j][a + 3]`,
+so those two fields are **documentation that nothing consults.** Printed out,
+the floor is exactly:
+
+```
+hiLift     0  12  24  36  48  60  72  84  96 108 120
+min height 72  72  72  72  72  72  72  84  96 108 120   = max(72", hiLift)
+```
+
+**SO "HI-LIFT ABOVE THE DOOR'S OWN HEIGHT" IS, BY CONSTRUCTION, BELOW THE
+BOTTOM OF EVERY COLUMN.** The 1.1 ratio measured on duplex is that boundary.
+Below it the surface is interpolated between published rows; above it the
+quintic in `10/H` is extrapolating where `10/H` is largest, so the high-order
+terms run away - and `turnsExact` DIVIDES by the result:
+
+```
+D800-120, 96" of hi-lift     height 96"  ratio 1.00   mult  1.96e-1  turns      26.4
+                             height 84"  ratio 1.14   mult -3.38e-4  turns -15260.8
+                             height 72"  ratio 1.33   mult -3.65e-1  turns     -14.1
+```
+
+**62.5% of configurations past the floor return a NEGATIVE spring length**,
+and before this they were printed to the customer **with no warning at all** -
+a negative length, a negative steel weight, and `cannotBeSold` reading only
+duplex and wire stock, so nothing in the page knew. Nothing was BUYABLE, which
+was checked over 47,328 configurations and is **luck, not design**: the wire
+that falls out of a nonsense turns figure is always one the shop does not
+stock.
+
+###### THE PULL: 100 REQUESTS, AND THE REFERENCE IS IN THE SAME PLACE
+
+A 40-case probe first (the V16 lesson), half of it a CONTROL at ratio 0.5-0.9
+on the same drums and door sizes - without which a poor yield in the band
+reads as "hi-lift doors are awkward" rather than as the pole. Then 60 aimed
+at D800-120 between 0.80 and 1.05, because the strip just BELOW the floor is
+the only part of the band a customer can reach with a sellable door.
+
+```
+D800-120   |turns error| against the reference      575-120
+ ratio      n    median    WORST                     n   WORST
+ 0.00-0.80   6   0.228%    0.27%                      9   0.39%
+ 0.80-0.90  32   0.182%    0.40%                      1   0.19%
+ 0.90-0.95   8   0.181%    0.27%                      1   0.13%
+ 0.95-1.00  13   0.108%    0.21%                      -      -
+ 1.00-1.10  16   0.107%    0.42%                      2   0.19%
+ 1.10-1.25   3   6.154%   37.45%   <- the pole        2   0.16%
+ 1.25-  up   2   1.913%    1.91%                      5   0.52%
+```
+
+**EXACT TO 0.42% ALL THE WAY TO RATIO 1.10 OVER 75 READINGS, THEN 37%.** And
+every clean reading in the probe - 20 of them - is 100% on wire, length AND
+weight. The engine is right up to the catalogue's edge and nowhere past it.
+
+**THE REFERENCE EXTRAPOLATES TO THE SAME PLACE**, which is what makes this a
+refusal rather than something to fit: its own reported turns come back
+NEGATIVE there (-21.4, -25.9, -7.8, -15.0), its own multiplier agrees with
+ours in sign and magnitude on all five bad readings (2.52e-3 against our
+1.83e-3; -2.98e-1 against our -3.10e-1), and **of 245 readings ever pulled
+with the hi-lift above the door height it stood behind SIX.**
+
+###### 1.1 WAS CONFIRMED, NOT FITTED - AND IT NEEDED A SECOND CONDITION
+
+The ratio came from the duplex data on 2026-11-12, before any of this. Today's
+Single draw is independent of it and lands in the same place:
+
+```
+every hi-lift Single reading with a turns error over 1%   ratios 1.16 .. 1.53
+every reading past the floor the reference called CLEAN   ratios 1.01 .. 1.08
+```
+
+Nothing falls between. A gate at 1.0 would refuse those six good answers.
+
+**BUT THE RATIO ALONE IS NOT ENOUGH**, and a 341,088-configuration sweep found
+the hole rather than reasoning finding it: **D800-120, a 72" door with 78" of
+hi-lift, ratio 1.08, multiplier -2.8e-3, turns -1757.7.** The crossing sits a
+little above the door height but not by a fixed amount. So the guard is
+`hiLift > 1.1 x height` **OR a non-positive multiplier**, the second being
+nonsense by construction - the spring would have to unwind to lift the door -
+and provably safe: six hi-lift Single readings have one, the reference agrees
+on all six, and it called **none** of them clean.
+
+**After both conditions: 30,400 negative lengths, 0 still unwarned, and 0
+false fires across 310,688 sane configurations.**
+
+###### WHAT SHIPPED
+
+A red `hilift-past-pole` in the existing hi-lift block, beside
+`hilift-over-max`, which already red-flags the other end for the identical
+reason ("past that the fitted curves leave their measured band entirely").
+`HILIFT_POLE_RATIO` carries the argument.
+
+Golden **725 byte-identical**, **20/20 invariants**, `spring_engineering`
+**0 failed 0 errors of 348**, duplex envelope unmoved (98.20 / 94.08 / 67.93),
+Single unmoved at 99.9%, `spring_calculator` regenerated and `--check` clean.
+
+**NOT DONE, AND IT IS HIS CALL**: `cannotBeSold` still knows nothing about
+this. Nothing in the band is buyable today, but only because the wire happens
+to be unstocked. Making that explicit is one clause.
+
+###### TWO THINGS THAT COST A RUN EACH
+
+**`c.messages` DOES NOT EXIST - THE GETTER IS `c.warnings`**, and it returns
+an empty list unless `resultsVisible`. A diagnostic written as
+`c.messages || c.warnings || []` read the second and I recorded it as the
+first, so the next tool asked for `c.messages` alone and reported the guard
+was not firing when it was. **Seventh of the invented-field-name family**, and
+the first one where an earlier tool's `||` fallback hid which name was real.
+
+**`test_every_string_the_calculator_can_show_is_in_the_file` JOINS THE JS
+LITERALS WITHOUT UNESCAPING THEM** and compares against a `.po` file it DOES
+unescape, so a `\"` inside a message can never match however the `.po` is
+written. The inch marks ride in the ARGUMENTS instead - the msgid carries no
+quote and the customer still reads `115"` and `96"`. Spanish is a tripwire
+here: every new `_t()` fails that test until `i18n/es.po` carries it.
+
+`dev/hilift-band.mjs` and `dev/single-pole-sample.mjs` are committed, with
+`dev/eval-pole-probe-seed20261113.json` and
+`dev/eval-pole-floor-seed2026111302.json` (line id stripped).
+`DRUM=` and `RATIO=lo:hi` aim the sampler.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
