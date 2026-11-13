@@ -20,16 +20,34 @@
 # The form allows two levels, so those failures are neither capacity nor data.
 # 53 of the 128 in-envelope failures sit in groups of that shape.
 #
-# RESULTS SO FAR (2026-11-12), fold 0, 2,587 held-out readings:
+# THE ANSWER IS NO, AND IT IS RECORDED HERE SO NOBODY RE-RUNS IT BLIND.
 #
-#   baseline            2413     SPLIT_MIN_SIDE=4   2413   <- no effect
-#   LEVEL_SUPPORT=0.03  2417     SPLIT_MIN_SIDE=16  2413   <- no effect either way
+# Screen, fold 0, 2,587 held-out readings:
+#
+#   baseline            2413     SPLIT_MIN_SIDE=4   2413   <- IDENTICAL table
+#   LEVEL_SUPPORT=0.03  2417     SPLIT_MIN_SIDE=16  2413   <- IDENTICAL table
 #   LEVEL_SUPPORT=0.12  2405     LINE_SLACK=0.10    2423   <- best, +10
 #                                LINE_SLACK=0.26    2414
 #
-# THEN FOLD 1 SAID -1. Fold 0 is the fold the config was CHOSEN on, so it does
-# not count - the same mistake as the "+3 readings at cut 0.55" result past
-# 120". Folds 2-4 are unrun. INCONCLUSIVE, leaning negative.
+# Confirmation of LINE_SLACK=0.10 on folds 1-4, which the screen never saw:
+#
+#   fold 1  -1      fold 3  +13       TOTAL +17 of 10,351  (+0.16 points)
+#   fold 2 +13      fold 4   -8       t = 0.81 on 3 df, 95% CI -12.5 to +21.0
+#                                     2 wins, 2 losses
+#
+# NOT SHIPPED. The interval straddles zero.
+#
+# AND THE SCREEN COULD NEVER HAVE WORKED, which is the part worth keeping:
+# the per-fold standard deviation is 10.5 readings, so ONE FOLD CANNOT RESOLVE
+# ANYTHING SMALLER THAN ABOUT +/-21. Every figure in that screen - the +10,
+# the +4, the "monotone in both directions" for LEVEL_SUPPORT - sat inside the
+# noise floor. MEASURE THE NOISE FLOOR BEFORE TRUSTING A SCREEN: one baseline
+# run on two different folds costs twelve minutes and shows the spread.
+#
+# ONE NEGATIVE IS SOLID AND FOR A DIFFERENT REASON. SPLIT_MIN_SIDE at 4 and at
+# 16 produced a BYTE-IDENTICAL table - no difference at all rather than a small
+# one - so the noise floor does not apply to it. The floor-split gate is NOT
+# what stops splitByCount reaching the long regime. Do not chase that again.
 #
 # EVERY FOLD INSTALLS A THROWAWAY TABLE into the engine file. The trap restores
 # it, but never commit while this is running.
