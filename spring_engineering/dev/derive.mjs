@@ -1252,12 +1252,24 @@ function fitSplit(ls) {
     // pay for.
     const sideLine = (rows) => {
         let best = null;
+        // A side gets SIDE_SLACK where one is set, LINE_SLACK otherwise. The
+        // restore is in a `finally` because every path out of here must put
+        // the budget back - a leaked override would silently re-slacken every
+        // top-level line fitted afterwards, which is the kind of fault that
+        // produces a plausible table and no error at all.
+        const prev = slackNow;
 
-        for (const cand of [fitLineAnyOrder(rows, 2), fitLineAnyOrder(rows, 3),
-                            fitLineOwnSlopes(rows, 3)]) {
-            if (cand && (!best || cand.bad < best.bad)) {
-                best = cand;
+        slackNow = SIDE_SLACK;
+
+        try {
+            for (const cand of [fitLineAnyOrder(rows, 2), fitLineAnyOrder(rows, 3),
+                                fitLineOwnSlopes(rows, 3)]) {
+                if (cand && (!best || cand.bad < best.bad)) {
+                    best = cand;
+                }
             }
+        } finally {
+            slackNow = prev;
         }
 
         return best;
@@ -1888,7 +1900,29 @@ function fitLineAnyOrder(ls, maxLevels) {
 // settled on a test that had no power to settle them. `LEVEL_SUPPORT` was
 // re-asked the same way at the same time and came back **-170 readings,
 // p < 0.0001** - decisively worse, so that one really is closed.
-const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.10));
+// SIDE_SLACK=<x> GIVES A SPLIT'S SIDE LINES THEIR OWN BUDGET.
+//
+// `sideLine` inside `fitSplit` fits each regime with the same `lineSlack`, so
+// tightening the top-level slack tightens the sides too - and that is how
+// 0.295/0.2437 at two springs fell from a split to a 36-band table when
+// LINE_SLACK moved to 0.10: on a side of about 86 readings the budget went
+// from 15 misses to 8, neither side could be placed, `fitSplit` returned null
+// and the group memorised instead.
+//
+// The two are different questions. The top-level slack decides whether ONE
+// line may stand for a whole group; a side's slack decides whether a REGIME
+// of that group can be described once the split has already been granted.
+// There is no reason they should be the same number, and CLAUDE.md's "ONE
+// SLACK FOR BOTH FITTERS" was about two LINE fitters disagreeing, not about
+// split sides.
+//
+// Unset, this is `null` and nothing changes - `lineSlack` reads LINE_SLACK as
+// before.
+const SIDE_SLACK = process.env.SIDE_SLACK ? Number(process.env.SIDE_SLACK) : null;
+// Set only while a side line is being fitted; see `sideLine`.
+let slackNow = null;
+const lineSlack = (n) =>
+    Math.floor(n * (slackNow ?? Number(process.env.LINE_SLACK || 0.10)));
 
 function fitThreshold(rows, above) {
     let best = null;

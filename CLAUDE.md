@@ -5442,6 +5442,51 @@ number came from 61 readings and the other from 409 - two populations that
 have no reason to be comparable. **A rate computed over whoever happened to
 land in a bucket is not an estimate of what putting somebody there does.**
 
+##### SIDE_SLACK: THE REGRESSION WAS REAL AND COSTS NOTHING (2026-11-16)
+
+The entry above found that shipping `LINE_SLACK=0.10` moved
+`0.295/0.2437 2spr` - 172 readings - from a split to a **36-band table**, and
+named it a regression. The cause is that `sideLine` inside `fitSplit` fits
+each regime with the SAME `lineSlack`, so tightening the top-level budget
+tightened the sides too: on a side of about 86 readings it went from 15
+permitted misses to 8, neither side could be placed, `fitSplit` returned null
+and the group memorised.
+
+`SIDE_SLACK` decouples them, and the two really are different questions - the
+top-level slack decides whether ONE line may stand for a whole group, a side's
+decides whether a REGIME can be described once a split has been granted.
+(CLAUDE.md's "ONE SLACK FOR BOTH FITTERS" was about two LINE fitters
+disagreeing, not about split sides.)
+
+**IT DOES EXACTLY WHAT IT WAS MEANT TO AND GAINS NOTHING:**
+
+```
+LINE_SLACK=0.10 alone   line2 133  line3 8  split 10  bands 10
+  + SIDE_SLACK=0.18     line2 133  line3 8  split 11  bands  9
+
+the only change:  0.295/0.2437 2spr  172 readings  bands -> split
+
+paired holdout, 4 of 5 folds, 10,348 readings scored by both:
+  -5 readings   25 fixed / 30 broken   McNemar p = 0.5901
+```
+
+**A WASH.** So the "regression" was real in form and worth nothing in
+accuracy - which is the `MAX_BANDS` lesson arriving from the other direction:
+a band table on a genuinely hard group is not the disaster its
+population-level rate suggests. Two independent experiments now say the same
+thing about banding, having been designed on the assumption that it was
+terrible.
+
+**KEPT, OFF BY DEFAULT**, because the knob is one line, the reasoning behind
+it is sound, and the next person to notice that group memorising will want the
+measurement rather than the idea. `SIDE_SLACK=0.18` reproduces it.
+
+**THE FOURTH FOLD WAS ENOUGH.** The run was stopped at 4 of 5 to pause, and
+that does not invalidate anything: `dev/shrink-report.mjs` intersects on
+shared reading ids, so a partial run is a smaller paired sample rather than a
+biased one. At -5 with 55 discordant pairs the fifth fold could not have made
+it a win, which is worth knowing the next time a sweep has to be cut short.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
