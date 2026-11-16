@@ -5382,6 +5382,66 @@ the two tools are committed so nobody re-derives it. **Do not re-run the
 factorisation without a more precise active length**; with one, the step is
 already solved and the quarter becomes a plain two-level fit.
 
+##### WHERE LINE_SLACK=0.10's GAIN ACTUALLY CAME FROM, AND A PREDICTION THAT WAS WRONG (2026-11-16)
+
+The commit shipping `LINE_SLACK=0.10` explained it as "a stricter slack pushes
+more groups off the line fitter and into `fitSplit`". **The slowness is real
+and that explanation of the ACCURACY is wrong**, which a two-minute check
+after the fact settled:
+
+```
+                 slack 0.18                 slack 0.10
+  line2 133   line3 9   split 10   bands 9  ->  line2 133  line3 8  split 10  bands 10
+
+  line groups whose fitted a,b MOVED:  0 of 141
+  groups that changed FORM:            2
+```
+
+**Not one line parameter moved, and only two groups changed form at all:**
+
+```
+0.2625/0.2253 2spr   467 readings   line3 (bad=11)  ->  split
+0.295/0.2437  2spr   172 readings   split           ->  bands
+```
+
+So the whole in-sample gain is the biggest group in the corpus - the one this
+file has long recorded as carrying half the remaining error - moving from a
+three-level line to the richer split form, PARTLY OFFSET by a 172-reading
+group falling from a split to a band table. (The holdout gain is larger than
+two groups would suggest because a FOLD fits on four fifths, so more groups
+sit near the slack boundary there than on the full corpus. The comparison was
+still paired within a partition, so it stands.)
+
+###### AND THE OBVIOUS FOLLOW-UP WAS A CONFOUND, NOT A FINDING
+
+That second move looked like a free fix. Scored by form, band tables are
+catastrophic out of sample:
+
+```
+bands     61 readings   42.62%
+none     409 readings   89.98%
+```
+
+so refusing to memorise - `MAX_BANDS=4`, which rejects exactly the two large
+tables (36 bands over 172 readings, 17 over 20) and sends them to plain
+rounding - looked like roughly +90 readings for nothing.
+
+**IT LOSES 32, p = 0.0001** (15 fixed, 47 broken). `MAX_BANDS` stays at 64.
+
+**THE PREDICTION WAS WRONG BECAUSE THOSE TWO PERCENTAGES ARE DIFFERENT
+POPULATIONS, NOT DIFFERENT FORMS.** A group gets a band table precisely
+BECAUSE it is hard - nothing else would fit it - while a group gets no entry
+because plain rounding already works on it. Comparing 42.62% against 89.98%
+compares hard groups with easy ones and says nothing whatever about whether
+banding beats not banding. On the groups that actually get them, a band table
+is better than nothing by 32 readings.
+
+**EIGHTH OF THE FAMILY**, and the same shape as the rest: a correct
+measurement of the wrong thing. The tell available in advance was that one
+number came from 61 readings and the other from 409 - two populations that
+have no reason to be comparable. **A rate computed over whoever happened to
+land in a bucket is not an estimate of what putting somebody there does.**
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
