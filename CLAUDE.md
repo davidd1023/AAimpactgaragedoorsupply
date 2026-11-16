@@ -5187,6 +5187,131 @@ one file put it back, confirmed by golden 725 byte-identical and 20/20.
 **ALWAYS `git status` THE ENGINE AFTER STOPPING A SWEEP**, and never commit
 while one is running.
 
+##### THE GATES, RE-ASKED WITH AN INSTRUMENT THAT COULD SEE (2026-11-16)
+
+Three ideas were chased after the pooling shipped. Two closed in a single
+measurement each; the third found that **a knob rejected on 2026-11-12 was
+positive all along, and the rejection was the right decision on the evidence
+available.**
+
+```
+in sample, inside 96"       failures      ALL DUPLEX
+  this morning   98.20%        140          96.66%
+  + pooling      98.24%        123          96.67%
+  + LINE_SLACK   98.52%         90          96.92%
+
+out of sample (paired, 12,938 readings)   MOD=5    MOD=4
+  no pooling                              12018    11966
+  + pooling (averaged)                    12054    11994
+  + joint target                          12071    12029
+  + LINE_SLACK=0.10                       12098    12085
+                                          -----    -----
+  total for the day                        +80     +119
+```
+
+Golden **725 byte-identical**, **20/20 invariants**, Single unmoved at
+**99.9%**, **0 failed 0 errors of 348**, `spring_calculator` regenerated.
+
+###### THE TWO THAT CLOSED, BOTH FREE
+
+**POOLING CANNOT REACH THE MULTI-LEVEL GROUPS, FOR WANT OF A SIBLING.** Of
+the nine three-level groups, **zero** share a rung with another group of the
+same level triple - each is the only one of its shape where it lives. There is
+nothing to pool with and no code was written.
+
+**AND POOLING MUST NOT GO ACROSS RUNGS**, which also says the within-rung-only
+guard was right rather than lucky:
+
+```
+levels          sd of `a` WITHIN a rung    sd ACROSS rungs
+0.25 -> 1.25           0.0387                  1.5574    (40x)
+0 -> 1                 0.0255                  0.4618    (18x)
+```
+
+Groups inside a rung agree on their threshold to about 0.03; different rungs
+differ by 0.5 to 1.6. Pooling across them would average quantities that are
+not the same quantity.
+
+###### AND A THIRD IDEA DIED WELL: THERE IS NO LINE TO BORROW
+
+Scored out of sample BY THE FORM the fitter chose, the groups that could not
+fit a line are the worst population left:
+
+```
+form     readings    rate
+line2      10194    94.69%
+line3       1124    91.10%
+split       1149    87.03%   <- 7.7 points down
+bands         61    42.62%   <- a band table memorises, so it cannot generalise
+```
+
+All ten split groups are at TWO springs. So they could borrow a line from
+their rung's 1, 3 and 4 spring siblings, which did fit lines - and the
+`BORROW_REPORT` in `derive.mjs` measures exactly that, honestly on both sides.
+
+**THE ANSWER IS NO, AND THE REASON IS THE FINDING.** `fitLine` refuses the
+siblings' union every time, because **the level set is a function of the
+spring count**:
+
+```
+0.295/0.2437   1spr  {0, 1}
+               2spr  {0, 0.25, 1, 1.25}    <- both sets at once
+               3spr  {0.25, 1.25}
+               4spr  {0.25, 1.25}
+```
+
+That is `duplexSnapToGrid` lifting whole inches to the quarter above at 3+
+springs and not at 2 - already in this file as real at 3+ and false at 2. The
+siblings do not merely hold a different threshold, **they disagree about which
+levels exist**, their union has four, and no two-level line spans it. A group
+cannot borrow a line from siblings answering a different question.
+
+That also explains the 2-spring splits structurally: two springs is the count
+that carries BOTH level sets, so the quarter-vs-whole choice is a second
+decision stacked on the 0-vs-1 one, and a single line in frac cannot hold it.
+
+###### THE KNOB THAT WAS POSITIVE ALL ALONG
+
+The 2026-11-12 entry rejected `LINE_SLACK=0.10` with a 95% interval of -12.5
+to +21.0, and recorded the real lesson itself: *"the screen was not a weak
+test of those knobs; it was incapable of testing them at all."* **It was more
+right than it knew** - the instrument was the problem, and the knob was good.
+
+Scored PAIRED, which removes all of the between-fold variance:
+
+```
+                       MOD=5                        MOD=4
+LINE_SLACK=0.10    +27  72/45  p=0.0159      +56  98/42  p<0.0001
+LEVEL_SUPPORT=0.20 -170 74/244 p<0.0001      (not re-run - decisive)
+```
+
+So `LINE_SLACK` ships at **0.10** and `LEVEL_SUPPORT` is now closed HARD at
+0.06 rather than merely unresolved. The 0.20 test was aimed at a real
+mechanism - `0.295/0.2437 2spr` is dominated by two levels with a third at
+14.8%, which `LEVEL_SUPPORT=0.06` admits and which forces three levels and
+then a split - and raising the gate to exclude it costs 170 readings. **The
+third level is real and needed.**
+
+**IT COSTS SEVENTEEN MINUTES PER RE-DERIVE.** A stricter slack pushes more
+groups into `fitSplit`, which cross-validates every candidate split point, so
+`sh dev/apply.sh` went from about two minutes to about seventeen. Measured -
+the first figure written into `derive.mjs` was a guessed five.
+
+###### THE RULE THIS ESTABLISHES FOR EVERY FUTURE KNOB
+
+**NEVER COMPARE AGGREGATE FOLD TOTALS AGAIN.** Three gates were called settled
+on a test with a noise floor of +/-21 readings; one of them was worth +27 to
++56. Pair the same reading across both settings and run McNemar on the
+discordant pairs - `dev/shrink-report.mjs` does it, `PER_READING=1` on
+`holdout-score.mjs` emits the rows, and the whole comparison costs no more
+than the runs it compares.
+
+**AND CONFIRM ON A SECOND PARTITION BEFORE SHIPPING.** Every one of today's
+three shipped changes was run on MOD=5 and again on MOD=4; the weakest first
+reading (p=0.0159) came back p<0.0001 on the second, and the baseline itself
+moves between partitions (12018 against 11966), so the comparison is only ever
+valid WITHIN one.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2

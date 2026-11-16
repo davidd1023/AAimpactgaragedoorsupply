@@ -1857,7 +1857,38 @@ function fitLineAnyOrder(ls, maxLevels) {
 //
 // The five-fold holdout said 92% throughout while the samples said 98%. The
 // holdout was right, and dev/README.md says so at length.
-const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.18));
+//
+// --- AND THEN 0.10 WON, ON THE THIRD ASKING (2026-11-16) ------------------
+//
+// Everything above measured this knob with AGGREGATE fold scores, and that
+// test cannot see this knob. The per-fold spread is 10.5 readings, so nothing
+// under about +-21 is resolvable: the 2026-11-12 sweep read 0.10 as +10 on
+// one fold, confirmed it at +17 over four more, got a 95% interval of -12.5
+// to +21.0, and rejected it. **That was the right decision on that evidence
+// and the knob was positive all along.**
+//
+// Scored PAIRED instead - the same reading under both settings, McNemar on
+// the discordant pairs, which removes all of the between-fold variance:
+//
+//   MOD=5   +27 readings   72 fixed / 45 broken   p = 0.0159
+//   MOD=4   +56 readings   98 fixed / 42 broken   p < 0.0001
+//
+// So the default is 0.10. `LINE_SLACK=0.18` is the old value.
+//
+// TWO THINGS WORTH KNOWING BEFORE TOUCHING IT. It was measured ON TOP of the
+// pooling (SHRINK / POOL_JOINT), not instead of it, so the three interact and
+// the figure is the marginal gain with pooling already in place. And a
+// stricter slack pushes more groups off the line fitter and into `fitSplit`,
+// which cross-validates every candidate split point - so `dev/apply.sh` now
+// takes about SEVENTEEN minutes rather than two, measured rather than
+// guessed (the first estimate written here was five). That is the cost of the
+// +27, and it is worth knowing before anybody waits on a re-derive.
+//
+// THE GENERAL LESSON IS THE INSTRUMENT, NOT THE KNOB: three gates were called
+// settled on a test that had no power to settle them. `LEVEL_SUPPORT` was
+// re-asked the same way at the same time and came back **-170 readings,
+// p < 0.0001** - decisively worse, so that one really is closed.
+const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.10));
 
 function fitThreshold(rows, above) {
     let best = null;
@@ -2284,6 +2315,83 @@ const out = [...rungs.values()]
                     v.line.a = Number((v.line.a + lambda * (meanA - v.line.a)).toFixed(5));
                     v.line.b = Number((v.line.b + lambda * (meanB - v.line.b)).toFixed(6));
                 }
+            }
+        }
+
+        // BORROW_REPORT=1 asks whether a group that could NOT fit its own line
+        // would do better borrowing its rung's.
+        //
+        // WHY THE QUESTION IS WORTH ASKING. Scored out of sample by form, the
+        // groups that fell short of a line are the worst population left:
+        //
+        //   line2  10194 readings  94.69%
+        //   line3   1124           91.10%
+        //   split   1149           87.03%   <- 7.7 points down, ~88 failures
+        //   bands     61           42.62%   <- a band table memorises
+        //
+        // and all ten split groups are at TWO springs, each the only one of
+        // its shape in its rung - so the pooling above cannot reach them for
+        // want of a sibling of the same shape. What they do have is siblings
+        // of a DIFFERENT shape: the same rung's 1, 3 and 4 spring groups,
+        // which did fit lines, and whose threshold the within-rung spread
+        // says is nearly the same quantity (sd 0.03 within a rung against
+        // 0.5-1.6 across rungs).
+        //
+        // THE COMPARISON IS HONEST ON BOTH SIDES. The borrowed line is fitted
+        // on the siblings ONLY, so scoring it on this group's readings is a
+        // clean out-of-sample estimate; the incumbent split already carries
+        // its own `score`, which is `cvScore`'s five-fold estimate on the
+        // same readings. Neither number has seen what it is scored against.
+        //
+        // AND THE ANSWER IS NO - THERE IS NO LINE TO BORROW. Run, the
+        // borrowed score comes back -1 on every group of any size, because
+        // `fitLine` REFUSES the siblings' union. The reason is structural and
+        // is the useful part:
+        //
+        //   0.295/0.2437   1spr  levels {0, 1}
+        //                  2spr  levels {0, 0.25, 1, 1.25}   <- both sets
+        //                  3spr  levels {0.25, 1.25}
+        //                  4spr  levels {0.25, 1.25}
+        //
+        // THE LEVEL SET IS A FUNCTION OF THE SPRING COUNT - one spring on the
+        // whole inch, three and four on the quarter, and two carrying BOTH.
+        // That is `duplexSnapToGrid` lifting whole inches to the quarter above
+        // at 3+ springs and not at 2, already recorded in CLAUDE.md as real at
+        // 3+ and false at 2.
+        //
+        // So the siblings do not merely have a different threshold, they
+        // disagree about WHICH LEVELS EXIST, their union has four, and no
+        // two-level line can span it. A group cannot borrow a line from
+        // siblings that are not answering its question.
+        //
+        // The three "wins" printed for one-reading band groups are an
+        // artefact: the borrowed line scores 0.000 there and the incumbent
+        // cvScore is -1 because one reading cannot be cross-validated at all.
+        //
+        // KEPT AS A MEASUREMENT, NOT A LEVER. The report is cheap and the
+        // idea is an obvious one to have twice.
+        if (process.env.BORROW_REPORT) {
+            for (const [sp, v] of Object.entries(byCount)) {
+                if (v.line) continue;
+
+                const mine = lsBySp[sp] ?? [];
+                const siblings = Object.entries(lsBySp)
+                    .filter(([osp]) => osp !== sp)
+                    .flatMap(([, ls]) => ls);
+
+                if (!mine.length || !siblings.length) continue;
+
+                const borrowed = fitLine(siblings);
+                const got = borrowed
+                    ? mine.filter((l) =>
+                        linePredict(borrowed, l.active) === l.bonus).length / mine.length
+                    : -1;
+                const incumbent = v.split ? v.split.score : -1;
+
+                console.error(`BORROW\t${g.outer}/${g.inner}\t${sp}\t`
+                    + `${v.split ? "split" : "bands"}\t${mine.length}\t`
+                    + `${incumbent.toFixed(4)}\t${got.toFixed(4)}\t`
+                    + `${siblings.length}`);
             }
         }
 
