@@ -4963,17 +4963,23 @@ had tested and it quietly underwrites every figure quoted here. Worth
 repeating if a campaign ever spans months rather than weeks; `dev/pull.mjs`
 on a sweep rebuilt from any old eval file is the whole method.
 
-##### PARTIAL POOLING: A REAL GAIN, MEASURED, NOT YET SHIPPED (2026-11-13)
+##### PARTIAL POOLING BEAT THE PER-GROUP FIT, AND IT SHIPPED (2026-11-13, confirmed and shipped 2026-11-16)
 
 *"keep running stuff until you are completely out of ideas ... as long as they
 dont permanently damage the results"*. Four long shots were run. Three closed
 large areas at a stroke; the fourth is **the first genuine accuracy gain in
-weeks**, and it is PAUSED ONE CONFIRMATION SHORT OF SHIPPING.
+weeks, and the only duplex LENGTH change ever shipped from this line of work.**
 
-**NOTHING IS SHIPPED. The engine is byte-identical to `27a9cb4`** - golden 725
-byte-identical, 20/20 invariants, and `SHRINK` defaults to 0, which was proved
-rather than assumed: a default `derive.mjs` run installs a table that `diff`
-says is identical to the committed one.
+**IT IS SHIPPED. `SHRINK` DEFAULTS TO 60 AND THE TABLE CAME FROM
+`sh dev/apply.sh`**, so the documented routine reproduces exactly what is
+installed. Golden **725 byte-identical** - which is the proof that the SINGLE
+path is untouched, since this only moves the duplex rung table - **20/20
+invariants**, Single unmoved at **99.9%**, `spring_engineering` **0 failed 0
+errors of 348**, `spring_calculator` regenerated and `--check` clean.
+
+**AND DUPLEX IS CALCULATED BUT NOT SOLD**, which is what made this safe enough
+to ship on a measured out-of-sample gain rather than referring it upward: the
+change cannot reach a cart, and `SHRINK=0 sh dev/apply.sh` is the way back.
 
 ###### THE TIPPT ORACLE CLOSES EVERYTHING UPSTREAM OF TIPPT, AT ONCE
 
@@ -5063,24 +5069,65 @@ same reading across two configurations removes all of that;
 - **k = 60 WAS CHOSEN BY LOOKING AT THE HOLDOUT.** "Pooling helps" is not a
   selection artefact - every k tested wins - but "60 is best" is.
 
-###### WHERE IT WAS PAUSED, AND HOW TO FINISH IT
+###### THE CONFIRMATION RAN, AND IT REPRODUCED (2026-11-16)
 
-A confirmation under a DIFFERENT fold partition was running and was stopped:
+A second five-fold run would have re-used the same partition, so the
+confirmation used **four folds**, which assigns every reading to a different
+fold AND fits on three quarters of the corpus rather than four fifths:
 
 ```
-MOD=4 OUT=/home/odoo/logs/m4 sh dev/shrink-sweep.sh 0 60     # ~60 minutes
-node dev/shrink-report.mjs /home/odoo/logs/m4-0.rows /home/odoo/logs/m4-60.rows
+                baseline   SHRINK=60    net   fixed/broken   McNemar p
+MOD=5 (first)     12018      12054      +36      65/29        0.0003
+MOD=4 (confirm)   11966      11994      +28      57/29        0.0034
 ```
 
-If that reproduces a significant positive, the remaining steps are: install
-with `SHRINK=60 node dev/derive.mjs --json | python3 dev/install.py`, then
-golden / invariants / `envelope.mjs` / the 348 tests / regenerate
-`spring_calculator`, and decide whether a +0.28 point out-of-sample gain is
-worth a 0.10 point drop in the in-sample figure that has been quoted. **That
-last one is the owner's call, not the agent's.**
+**TWO INDEPENDENT PARTITIONS, SAME DIRECTION, SAME ORDER OF MAGNITUDE, BOTH
+SIGNIFICANT.** The baseline itself moves (12018 to 11966) because a four-fold
+run trains on less, which is exactly why the comparison has to be PAIRED
+WITHIN a partition and never across one.
 
-The six holdout runs are committed under `dev/shrink-evidence/` so none of
-this has to be recomputed to be re-read.
+###### THE DEFAULT HAD TO MOVE, AND THAT IS THE PART THAT WOULD HAVE BITTEN
+
+`SHRINK` was written defaulting to 0 so the experiment could not disturb
+anything. **Shipping it that way would have silently reverted itself**:
+`dev/apply.sh` is the documented routine after every pull and it passes no
+environment at all, so the next person to run it would have re-installed the
+unpooled table with no code change and no warning.
+
+So the default IS the shipped value, 60, and the installed table was produced
+by plain `sh dev/apply.sh` rather than by an env-var run - the routine and the
+product agree by construction. `SHRINK=0 sh dev/apply.sh` is the revert.
+
+**A KNOB WHOSE DEFAULT IS NOT THE SHIPPED VALUE IS A TIME BOMB IN A FILE
+WHOSE WHOLE POINT IS THAT THE TABLE IS RE-DERIVED, NOT EDITED.**
+
+###### THE TRADE, STATED SO THE NUMBERS CANNOT SURPRISE ANYBODY
+
+```
+                        BEFORE    AFTER
+in sample (envelope.mjs)
+  inside 96"            98.20%   98.10%     <- 12 readings WORSE
+  96-120"               94.08%   94.08%
+  over 120"             67.93%   67.76%
+out of sample (holdout, 12,938 readings, paired)
+  MOD=5                 12018    12054      <- 36 readings BETTER
+  MOD=4                 11966    11994      <- 28 readings BETTER
+```
+
+**THAT IS THE REGULARISATION SIGNATURE AND IT IS THE RIGHT WAY ROUND.**
+`envelope.mjs` scores the corpus the table was FITTED ON; `honest.sh` says of
+that section in its own words that it "says nothing about a new door; it is
+here to catch a regression". The holdout is the figure that answers "will the
+next door be right", and it improved twice over.
+
+**SO IF SOMEBODY ASKS WHAT ACCURACY IS AND READS 98.10%, THAT IS NOT A
+REGRESSION** - it is the same table being honest about its own training data
+while predicting unseen doors better. The never-tuned eval sets moved by net
+-1 clean and +2 flagged, which on 535 clean readings has no power to resolve a
+0.2 point effect either way.
+
+The six holdout runs are committed under `dev/shrink-evidence/`, and the
+confirmation's two are reproducible with the command in that README.
 
 ###### KILLING A SWEEP LEAVES THE ENGINE HOLDING A FOLD'S TABLE
 

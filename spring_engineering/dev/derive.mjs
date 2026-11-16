@@ -946,10 +946,25 @@ const contradictions = [];
 const overfit = [];
 const MAX_BANDS = Number(process.env.MAX_BANDS || 64);
 
-// PARTIAL POOLING OF THE THRESHOLD ACROSS SPRING COUNTS. 0 is off and is the
-// shipped fit, byte for byte. See the block near the end of the rung map for
-// what it does and why; `dev/shrink-sweep.sh` is how it was measured.
-const SHRINK = Number(process.env.SHRINK || 0);
+// PARTIAL POOLING OF THE THRESHOLD ACROSS SPRING COUNTS.
+//
+// 60 IS SHIPPED, AND THE DEFAULT HAS TO BE THE SHIPPED VALUE. `dev/apply.sh`
+// is the documented routine after a pull and it passes no environment at all,
+// so a default of 0 here would silently revert this the next time anybody ran
+// it - the table would go back without a line of code changing.
+//
+// `SHRINK=0 sh dev/apply.sh` is the way back to the unpooled fit.
+//
+// See the block near the end of the rung map for what it does; measured by
+// `dev/shrink-sweep.sh` over two independent fold partitions:
+//
+//   MOD=5   +36 readings   65 fixed / 29 broken   McNemar p = 0.0003
+//   MOD=4   +28 readings   57 fixed / 29 broken   McNemar p = 0.0034
+//
+// and the curve has an interior peak (k = 10/25/60/150/400 giving
+// +15/+23/+36/+20/+22 on the five-fold run), which is the shape partial
+// pooling should have rather than a lucky point.
+const SHRINK = Number(process.env.SHRINK ?? 60);
 
 // HOW FINELY THE THRESHOLD SLOPE IS SCANNED. b runs over +-BLO/B_STEPS in steps
 // of 1/B_STEPS, so 2000 is a step of 0.0005 over a range of +-0.25.
@@ -2165,7 +2180,8 @@ const out = [...rungs.values()]
             }
         }
 
-        // SHRINK=<k> POOLS THE THRESHOLD ACROSS SPRING COUNTS. Off by default.
+        // SHRINK=<k> POOLS THE THRESHOLD ACROSS SPRING COUNTS. 60 is shipped;
+        // `SHRINK=0` is the unpooled fit this replaced.
         //
         // Each (rung, spring count) group fits its own line alone, and
         // dev/group-density.mjs shows groups under ten readings failing eight
