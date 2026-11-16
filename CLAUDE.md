@@ -5312,6 +5312,76 @@ reading (p=0.0159) came back p<0.0001 on the second, and the baseline itself
 moves between partitions (12018 against 11966), so the comparison is only ever
 valid WITHIN one.
 
+##### THE BONUS IS TWO DECISIONS, AND ONE OF THEM IS UNEXPLAINED (2026-11-16)
+
+The structural find above - that the level set is a function of the spring
+count - said the two-spring bonus factors exactly:
+
+```
+bonus  =  step        +  quarter
+          (0 or 1)       (0 or 0.25)
+```
+
+with the quarter frozen at 0 for one spring and at 0.25 for three and four, so
+**two springs is the only count where it is live**, and that is exactly where
+all ten split groups and the worst accuracy sit. `dev/factor-bonus.mjs` fits
+each decision as its own two-level problem - every reading in the group rather
+than a quarter of them, which is the argument that made pooling work.
+
+**THE TWO DECISIONS ARE NOT ALIKE AT ALL**, five-fold cross-validated:
+
+```
+                         pooled      range over the rungs
+step    (0 or 1)                     91.7% - 99.1%     always predictable
+quarter (0 or 0.25)                  56.7% - 99.1%     bimodal
+BOTH together             87.0%
+```
+
+**87.0% AGAINST THE 87.03% THE SPLIT FORM ALREADY SCORES.** Factoring buys
+nothing pooled - which is a compliment to `fitSplit`, because it says the
+existing form is already extracting essentially everything the two decisions
+contain. No code was changed.
+
+###### AND HALF THE RUNGS HAVE A QUARTER NOTHING EXPLAINS
+
+The quarter splits cleanly into predictable rungs (96-99%: `0.3437/0.273`,
+`0.295/0.2343`, `0.3625/0.283`, `0.3065/0.2437`, ...) and rungs at near
+chance (56-79%: `0.3938/0.3195`, `0.375/0.3065`, `0.4615/0.375`, ...). On the
+second group **whether the reference lifts to the quarter is not a function of
+the active length.**
+
+`dev/quarter-variable.mjs` asks what else it could be, on those nine rungs
+only - which is the "ask the question where it lives" lesson applied, since
+the 2026-11-13 missing-variable test pooled everything and was drowned:
+
+```
+always answering the commoner way        58.3%   <- the baseline to beat
+frac (a CONTROL, already in the model)   66.7%
+turns                                    61.7%
+active length / floor / reference length  59.9%
+tippt  59.2%   door height 58.6%   cycles 57.0%
+weight / lb per spring / radius          56.7%
+```
+
+**NOTHING PREDICTS IT.** Thirteen candidates including door height, weight,
+lb per spring, cycle target, radius, turns and the required IPPT, and the only
+one above baseline is the control. And the quarter is genuinely BALANCED on
+several of those rungs - 54%, 48%, 46% - so there is a real decision being
+made and no input available to us makes it.
+
+**WHICH POINTS BACK AT THE SAME LIMIT AS EVERYTHING ELSE.** `frac` carries
+real but weak signal (66.7% against 58.3%), and the straddler work of
+2026-11-13 measured our active length's precision at about **0.0133 in frac**.
+A quarter decision taken on a frac threshold we can only locate to a
+hundredth is exactly the pattern already recorded three times over - the 54
+duplex wire misses, the Single tie at margin 1.000, and the 63 length
+straddlers.
+
+So this is a fourth instance of one mechanism rather than a new problem, and
+the two tools are committed so nobody re-derives it. **Do not re-run the
+factorisation without a more precise active length**; with one, the step is
+already solved and the quarter becomes a plain two-level fit.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
