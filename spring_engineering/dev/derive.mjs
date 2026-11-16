@@ -966,6 +966,20 @@ const MAX_BANDS = Number(process.env.MAX_BANDS || 64);
 // pooling should have rather than a lucky point.
 const SHRINK = Number(process.env.SHRINK ?? 60);
 
+// WHAT THE POOLING SHRINKS TOWARD: a line REFITTED on the union of the
+// family's readings, not the average of their separate fits. On by default
+// for the same reason `SHRINK` is - `dev/apply.sh` passes no environment, so
+// a default of off would silently revert it. `POOL_JOINT=0` is the way back
+// to the averaged target.
+//
+// Measured against the averaged target it replaced, paired, two partitions:
+//
+//   MOD=5   +17 readings   37 fixed / 20 broken   McNemar p = 0.0331
+//   MOD=4   +35 readings   52 fixed / 17 broken   McNemar p < 0.0001
+//
+// and against no pooling at all, +53 and +63.
+const POOL_JOINT = (process.env.POOL_JOINT ?? "1") !== "0";
+
 // HOW FINELY THE THRESHOLD SLOPE IS SCANNED. b runs over +-BLO/B_STEPS in steps
 // of 1/B_STEPS, so 2000 is a step of 0.0005 over a range of +-0.25.
 //
@@ -2088,12 +2102,19 @@ const out = [...rungs.values()]
         const S = 2 * (divider(g.inner, 3.75) + divider(g.outer, 6));
         const byCount = {};
 
+        // The readings each spring count was fitted on, kept so the pooling
+        // block below can REFIT on their union rather than only average the
+        // separate fits. See POOL_JOINT there.
+        const lsBySp = {};
+
         for (const sp of [1, 2, 3, 4]) {
             const ls = g.lens.filter((l) => l.springs === sp && l.ok);
 
             if (!ls.length) {
                 continue;
             }
+
+            lsBySp[sp] = ls;
 
             const b = bands(ls);
 
@@ -2222,7 +2243,40 @@ const out = [...rungs.values()]
                     wn += v.n;
                 }
 
-                const meanA = wa / wn, meanB = wb / wn;
+                let meanA = wa / wn, meanB = wb / wn;
+
+                // SHRINK TOWARD A LINE REFITTED ON THE UNION rather than
+                // toward the average of the separate fits. `POOL_JOINT=0`
+                // falls back to the average, which is what this replaced.
+                //
+                // Averaging two fitted lines throws the readings away and
+                // keeps only their summaries; refitting on all of them at
+                // once uses every reading and is what "the rung's threshold"
+                // actually means. The average is a crude stand-in for it, and
+                // the measured curve says the target matters: complete
+                // pooling toward the AVERAGE (k=400) scores +22 where partial
+                // pooling scores +36, so a better-founded target should lift
+                // the whole curve rather than only its tail.
+                //
+                // IT ONLY COUNTS IF THE JOINT FIT WANTS THE SAME TWO LEVELS.
+                // `fitLine` is free to come back with `cuts`, a `mid`, or a
+                // different (lo, hi) on the pooled readings - and a threshold
+                // separating a different pair of levels is an answer to a
+                // different question, so it is refused and the average
+                // stands. That guard is the same reasoning that limits the
+                // families to a matching (lo, hi) in the first place.
+                if (POOL_JOINT) {
+                    const union = members.flatMap(([sp]) => lsBySp[sp] ?? []);
+                    const joint = union.length ? fitLine(union) : null;
+                    const [, v0] = members[0];
+
+                    if (joint && joint.a !== undefined
+                        && joint.cuts === undefined && joint.mid === undefined
+                        && joint.lo === v0.line.lo && joint.hi === v0.line.hi) {
+                        meanA = joint.a;
+                        meanB = joint.b;
+                    }
+                }
 
                 for (const [, v] of members) {
                     const lambda = SHRINK / (SHRINK + v.n);

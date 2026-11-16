@@ -5101,7 +5101,7 @@ product agree by construction. `SHRINK=0 sh dev/apply.sh` is the revert.
 **A KNOB WHOSE DEFAULT IS NOT THE SHIPPED VALUE IS A TIME BOMB IN A FILE
 WHOSE WHOLE POINT IS THAT THE TABLE IS RE-DERIVED, NOT EDITED.**
 
-###### THE TRADE, STATED SO THE NUMBERS CANNOT SURPRISE ANYBODY
+###### THE TRADE THE AVERAGED TARGET CARRIED (since removed - see below)
 
 ```
                         BEFORE    AFTER
@@ -5128,6 +5128,53 @@ while predicting unseen doors better. The never-tuned eval sets moved by net
 
 The six holdout runs are committed under `dev/shrink-evidence/`, and the
 confirmation's two are reproducible with the command in that README.
+
+###### AND THEN THE TARGET WAS DONE PROPERLY, WHICH REMOVED THE TRADE ENTIRELY
+
+The version above shrinks each line toward **the n-weighted AVERAGE of the
+separate fits**, which throws the readings away and keeps only their
+summaries. `POOL_JOINT` shrinks toward a line **REFITTED on the union** of the
+family's readings instead - which is what "the rung's threshold" actually
+means, and uses every reading rather than two numbers.
+
+The guard matters: `fitLine` on the pooled readings is free to come back with
+`cuts`, a `mid`, or a different `(lo, hi)`, and a threshold separating a
+different pair of levels answers a different question. It is refused there and
+the average stands. 103 of 142 line groups move; 39 keep the average.
+
+```
+                          MOD=5                    MOD=4
+                     net  fixed/broken    p     net  fixed/broken    p
+vs the average       +17     37/20     0.0331   +35     52/17     <0.0001
+vs NO pooling        +53     73/20    <0.0001   +63     77/14     <0.0001
+```
+
+**AND IT IS BETTER IN SAMPLE AS WELL, WHICH THE AVERAGED VERSION WAS NOT:**
+
+```
+in sample (envelope.mjs)   no pooling   averaged   JOINT (shipped)
+  inside 96"                 98.20%      98.10%       98.24%
+  96-120"                    94.08%      94.08%       94.49%
+  over 120"                  67.93%      67.76%       67.76%
+  ALL DUPLEX                 96.66%      96.52%       96.67%
+```
+
+**SO THE TRADE IN THE PREVIOUS SECTION IS GONE.** The awkward part of
+shipping the averaged target was that the in-sample headline fell 0.10 while
+the holdout rose; the joint target raises BOTH, and the honest figure to quote
+inside 96" is **98.24%**, up from 98.20%. Nothing about the earlier reasoning
+was wrong - it is just that averaging fitted summaries was a crude stand-in
+for refitting, and the crude version was the one that had to borrow from the
+training fit to pay for the generalisation.
+
+**THE SAME DEFAULT TRAP, HANDLED THE SAME WAY**: `POOL_JOINT` defaults ON,
+because `dev/apply.sh` passes no environment. `POOL_JOINT=0` is the averaged
+target and `SHRINK=0` is no pooling at all; both are one word at the front of
+`sh dev/apply.sh`.
+
+Golden **725 byte-identical**, **20/20 invariants**, Single unmoved at
+**99.9%**, **0 failed 0 errors of 348**, `spring_calculator` regenerated and
+`--check` clean.
 
 ###### KILLING A SWEEP LEAVES THE ENGINE HOLDING A FOLD'S TABLE
 
