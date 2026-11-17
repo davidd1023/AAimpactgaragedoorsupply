@@ -946,6 +946,40 @@ const contradictions = [];
 const overfit = [];
 const MAX_BANDS = Number(process.env.MAX_BANDS || 64);
 
+// PARTIAL POOLING OF THE THRESHOLD ACROSS SPRING COUNTS.
+//
+// 60 IS SHIPPED, AND THE DEFAULT HAS TO BE THE SHIPPED VALUE. `dev/apply.sh`
+// is the documented routine after a pull and it passes no environment at all,
+// so a default of 0 here would silently revert this the next time anybody ran
+// it - the table would go back without a line of code changing.
+//
+// `SHRINK=0 sh dev/apply.sh` is the way back to the unpooled fit.
+//
+// See the block near the end of the rung map for what it does; measured by
+// `dev/shrink-sweep.sh` over two independent fold partitions:
+//
+//   MOD=5   +36 readings   65 fixed / 29 broken   McNemar p = 0.0003
+//   MOD=4   +28 readings   57 fixed / 29 broken   McNemar p = 0.0034
+//
+// and the curve has an interior peak (k = 10/25/60/150/400 giving
+// +15/+23/+36/+20/+22 on the five-fold run), which is the shape partial
+// pooling should have rather than a lucky point.
+const SHRINK = Number(process.env.SHRINK ?? 60);
+
+// WHAT THE POOLING SHRINKS TOWARD: a line REFITTED on the union of the
+// family's readings, not the average of their separate fits. On by default
+// for the same reason `SHRINK` is - `dev/apply.sh` passes no environment, so
+// a default of off would silently revert it. `POOL_JOINT=0` is the way back
+// to the averaged target.
+//
+// Measured against the averaged target it replaced, paired, two partitions:
+//
+//   MOD=5   +17 readings   37 fixed / 20 broken   McNemar p = 0.0331
+//   MOD=4   +35 readings   52 fixed / 17 broken   McNemar p < 0.0001
+//
+// and against no pooling at all, +53 and +63.
+const POOL_JOINT = (process.env.POOL_JOINT ?? "1") !== "0";
+
 // HOW FINELY THE THRESHOLD SLOPE IS SCANNED. b runs over +-BLO/B_STEPS in steps
 // of 1/B_STEPS, so 2000 is a step of 0.0005 over a range of +-0.25.
 //
@@ -1218,12 +1252,24 @@ function fitSplit(ls) {
     // pay for.
     const sideLine = (rows) => {
         let best = null;
+        // A side gets SIDE_SLACK where one is set, LINE_SLACK otherwise. The
+        // restore is in a `finally` because every path out of here must put
+        // the budget back - a leaked override would silently re-slacken every
+        // top-level line fitted afterwards, which is the kind of fault that
+        // produces a plausible table and no error at all.
+        const prev = slackNow;
 
-        for (const cand of [fitLineAnyOrder(rows, 2), fitLineAnyOrder(rows, 3),
-                            fitLineOwnSlopes(rows, 3)]) {
-            if (cand && (!best || cand.bad < best.bad)) {
-                best = cand;
+        slackNow = SIDE_SLACK;
+
+        try {
+            for (const cand of [fitLineAnyOrder(rows, 2), fitLineAnyOrder(rows, 3),
+                                fitLineOwnSlopes(rows, 3)]) {
+                if (cand && (!best || cand.bad < best.bad)) {
+                    best = cand;
+                }
             }
+        } finally {
+            slackNow = prev;
         }
 
         return best;
@@ -1823,7 +1869,60 @@ function fitLineAnyOrder(ls, maxLevels) {
 //
 // The five-fold holdout said 92% throughout while the samples said 98%. The
 // holdout was right, and dev/README.md says so at length.
-const lineSlack = (n) => Math.floor(n * Number(process.env.LINE_SLACK || 0.18));
+//
+// --- AND THEN 0.10 WON, ON THE THIRD ASKING (2026-11-16) ------------------
+//
+// Everything above measured this knob with AGGREGATE fold scores, and that
+// test cannot see this knob. The per-fold spread is 10.5 readings, so nothing
+// under about +-21 is resolvable: the 2026-11-12 sweep read 0.10 as +10 on
+// one fold, confirmed it at +17 over four more, got a 95% interval of -12.5
+// to +21.0, and rejected it. **That was the right decision on that evidence
+// and the knob was positive all along.**
+//
+// Scored PAIRED instead - the same reading under both settings, McNemar on
+// the discordant pairs, which removes all of the between-fold variance:
+//
+//   MOD=5   +27 readings   72 fixed / 45 broken   p = 0.0159
+//   MOD=4   +56 readings   98 fixed / 42 broken   p < 0.0001
+//
+// So the default is 0.10. `LINE_SLACK=0.18` is the old value.
+//
+// TWO THINGS WORTH KNOWING BEFORE TOUCHING IT. It was measured ON TOP of the
+// pooling (SHRINK / POOL_JOINT), not instead of it, so the three interact and
+// the figure is the marginal gain with pooling already in place. And a
+// stricter slack pushes more groups off the line fitter and into `fitSplit`,
+// which cross-validates every candidate split point - so `dev/apply.sh` now
+// takes about SEVENTEEN minutes rather than two, measured rather than
+// guessed (the first estimate written here was five). That is the cost of the
+// +27, and it is worth knowing before anybody waits on a re-derive.
+//
+// THE GENERAL LESSON IS THE INSTRUMENT, NOT THE KNOB: three gates were called
+// settled on a test that had no power to settle them. `LEVEL_SUPPORT` was
+// re-asked the same way at the same time and came back **-170 readings,
+// p < 0.0001** - decisively worse, so that one really is closed.
+// SIDE_SLACK=<x> GIVES A SPLIT'S SIDE LINES THEIR OWN BUDGET.
+//
+// `sideLine` inside `fitSplit` fits each regime with the same `lineSlack`, so
+// tightening the top-level slack tightens the sides too - and that is how
+// 0.295/0.2437 at two springs fell from a split to a 36-band table when
+// LINE_SLACK moved to 0.10: on a side of about 86 readings the budget went
+// from 15 misses to 8, neither side could be placed, `fitSplit` returned null
+// and the group memorised instead.
+//
+// The two are different questions. The top-level slack decides whether ONE
+// line may stand for a whole group; a side's slack decides whether a REGIME
+// of that group can be described once the split has already been granted.
+// There is no reason they should be the same number, and CLAUDE.md's "ONE
+// SLACK FOR BOTH FITTERS" was about two LINE fitters disagreeing, not about
+// split sides.
+//
+// Unset, this is `null` and nothing changes - `lineSlack` reads LINE_SLACK as
+// before.
+const SIDE_SLACK = process.env.SIDE_SLACK ? Number(process.env.SIDE_SLACK) : null;
+// Set only while a side line is being fitted; see `sideLine`.
+let slackNow = null;
+const lineSlack = (n) =>
+    Math.floor(n * (slackNow ?? Number(process.env.LINE_SLACK || 0.10)));
 
 function fitThreshold(rows, above) {
     let best = null;
@@ -2068,12 +2167,19 @@ const out = [...rungs.values()]
         const S = 2 * (divider(g.inner, 3.75) + divider(g.outer, 6));
         const byCount = {};
 
+        // The readings each spring count was fitted on, kept so the pooling
+        // block below can REFIT on their union rather than only average the
+        // separate fits. See POOL_JOINT there.
+        const lsBySp = {};
+
         for (const sp of [1, 2, 3, 4]) {
             const ls = g.lens.filter((l) => l.springs === sp && l.ok);
 
             if (!ls.length) {
                 continue;
             }
+
+            lsBySp[sp] = ls;
 
             const b = bands(ls);
 
@@ -2118,11 +2224,101 @@ const out = [...rungs.values()]
                 }
             }
 
-            if (line && line.mid !== undefined) {
+            // A SPLIT IS NEVER EVEN COMPUTED WHILE A LINE EXISTS, two
+            // statements below: `const split = line ? null : ...`. So a line
+            // beats a split by PRECEDENCE rather than by measurement, and
+            // that is what `LINE_SLACK=0.10` exploited by accident - its
+            // whole gain was one group, `0.2625/0.2253` at two springs over
+            // 467 readings, where tightening the budget DENIED the line so
+            // the split could be tried. Not one line's fitted a,b moved.
+            //
+            // `FORM_BY_CV=1` asks the question directly instead: offer the
+            // split as a third candidate beside the line and the bands, and
+            // take whichever cross-validates best.
+            //
+            // NOT TO EVERY LINE, because of cost: `fitSplit` tries every
+            // distinct floor with a five-fold refit of both sides, so offering
+            // it to all 140 line groups would turn a seventeen-minute
+            // re-derive into hours. The gate here already compares the line
+            // against bands, so the split is a third option in an existing
+            // contest rather than a new one.
+            //
+            // THE VERDICT: IT LOSES, AND IT IS OFF. Paired five-fold holdout
+            // over the whole corpus, against the shipped configuration:
+            //
+            //   12,938 readings   -19   27 fixed / 46 broken   p = 0.0344
+            //
+            // Significantly WORSE. Do not re-run this without a new idea -
+            // and read the next paragraph before believing any gate of this
+            // shape, because the way it lied is general.
+            //
+            // THE MARGINS WERE SELECTION, NOT SIGNAL. In-group the seven
+            // groups that took the split beat their line by +0.7 to +2.1
+            // points, each a proper five-fold cross-validation over 100 to
+            // 467 readings. That looked like evidence and was not: **a
+            // cross-validated score is unbiased for a FIXED candidate, and
+            // the MAXIMUM over three candidates is not.** Taking the best of
+            // line, split and bands inflates the winner by however much noise
+            // happened to favour it, and on groups this size that noise is a
+            // point or two - exactly the margins seen. The out-of-sample
+            // folds, which chose nothing, say the truth.
+            //
+            // This is the "+3 readings at cut 0.55" mistake wearing better
+            // clothes: there the selection was across 26 configurations on a
+            // holdout and obvious, here each individual score really was a
+            // cross-validation, which is what made it look legitimate.
+            //
+            // AND THE AIM WAS RIGHT EVEN THOUGH THE ANSWER IS NO. `bad > 0`
+            // correctly found the only lines a richer form could beat. The
+            // answer is that a floor split cannot fix their accepted misses -
+            // consistent with the straddler finding, that those failures hug
+            // their threshold within 0.0133 of frac, which a piecewise-linear
+            // boundary in floor does not help with either.
+            //
+            // AIMED BY MEASUREMENT, NOT BY ANECDOTE - and the first version of
+            // this gate was aimed by anecdote. It fired on three-level lines
+            // only, because the group LINE_SLACK=0.10 happened to move was a
+            // three-level line. Run that way it moved exactly ONE group of 24
+            // readings, and the table it produced explained why:
+            //
+            //   128 of 140 fitted lines miss NOTHING in sample (bad === 0)
+            //
+            // A line that already accounts for every reading in its group
+            // cannot be beaten by a richer form except by luck in a small
+            // cross-validation, which is all that 24-reading win ever was. The
+            // lines a split could actually beat are the ones ACCEPTING MISSES
+            // under the slack budget, and the two worst are TWO-level:
+            //
+            //   0.2625/0.2253 4spr   387 readings   bad 11
+            //   0.2625/0.2253 3spr   312 readings   bad  4
+            //
+            // which are precisely the two groups `inenv-shape.mjs` names as
+            // the biggest failing groups in the corpus (13 and 7 failures).
+            // Those failures ARE this `bad` count. The first gate could not
+            // see them.
+            //
+            // So the gate is `bad > 0`: 12 groups over 2,132 readings instead
+            // of 140 over everything, which keeps the cost argument intact
+            // while pointing it where the error is. And there is a mechanism
+            // rather than a hope - a split fits one (a, b) per floor regime,
+            // so it captures a boundary that is piecewise-linear in floor
+            // where the single line `a + b*floor` cannot.
+            if (line && line.bad > 0) {
                 const lineCv = cvScore(ls, lineFitter, linePredict);
                 const bandCv = cvScore(ls, (t) => bands(t).bands, bandPredict);
+                const splitCand = process.env.FORM_BY_CV && needed ? fitSplit(ls) : null;
+                const splitCv = splitCand ? splitCand.score : -1;
 
-                if (!(lineCv > bandCv)) {
+                if (splitCv > lineCv && splitCv > bandCv) {
+                    crossValidated.push(
+                        `${g.outer}/${g.inner} at ${sp} spring(s): a SPLIT ` +
+                        `${(splitCv * 100).toFixed(1)}% beats the line (bad ` +
+                        `${line.bad}) ${(lineCv * 100).toFixed(1)}% and bands ` +
+                        `${(bandCv * 100).toFixed(1)}% out of sample over ` +
+                        `${ls.length} readings - took the split`
+                    );
+                    line = null;
+                } else if (!(lineCv > bandCv)) {
                     crossValidated.push(
                         `${g.outer}/${g.inner} at ${sp} spring(s): two thresholds ` +
                         `${(lineCv * 100).toFixed(1)}% vs bands ${(bandCv * 100).toFixed(1)}% ` +
@@ -2157,6 +2353,169 @@ const out = [...rungs.values()]
                 contradictions.push(
                     `${g.outer}/${g.inner} at ${sp} spring(s): bonus is not monotonic in frac`
                 );
+            }
+        }
+
+        // SHRINK=<k> POOLS THE THRESHOLD ACROSS SPRING COUNTS. 60 is shipped;
+        // `SHRINK=0` is the unpooled fit this replaced.
+        //
+        // Each (rung, spring count) group fits its own line alone, and
+        // dev/group-density.mjs shows groups under ten readings failing eight
+        // times as often as the rest - the classic small-sample variance that
+        // partial pooling exists to cut. The structure is plainly there:
+        // 0.2625/0.2253 fits a = 0.78222 at three springs and 0.78311 at
+        // four, independently, with the same slope and the same two levels.
+        //
+        // So each line is pulled toward its RUNG's n-weighted mean by
+        // lambda = k / (k + n): a thin group moves most, a thick one barely
+        // at all, and k = 0 is exactly the shipped fit.
+        //
+        // ONLY PLAIN TWO-LEVEL LINES, AND ONLY WITHIN A MATCHING (lo, hi).
+        // Averaging a threshold that separates 0.25 from 1.25 with one that
+        // separates 0 from 1 would be averaging two different questions.
+        if (SHRINK > 0) {
+            const plain = Object.entries(byCount).filter(([, v]) =>
+                v.line && v.line.a !== undefined
+                && v.line.cuts === undefined && v.line.mid === undefined);
+            const families = new Map();
+
+            for (const [sp, v] of plain) {
+                const key = `${v.line.lo}|${v.line.hi}`;
+
+                if (!families.has(key)) families.set(key, []);
+
+                families.get(key).push([sp, v]);
+            }
+
+            for (const members of families.values()) {
+                if (members.length < 2) continue;
+
+                let wa = 0, wb = 0, wn = 0;
+
+                for (const [, v] of members) {
+                    wa += v.line.a * v.n;
+                    wb += v.line.b * v.n;
+                    wn += v.n;
+                }
+
+                let meanA = wa / wn, meanB = wb / wn;
+
+                // SHRINK TOWARD A LINE REFITTED ON THE UNION rather than
+                // toward the average of the separate fits. `POOL_JOINT=0`
+                // falls back to the average, which is what this replaced.
+                //
+                // Averaging two fitted lines throws the readings away and
+                // keeps only their summaries; refitting on all of them at
+                // once uses every reading and is what "the rung's threshold"
+                // actually means. The average is a crude stand-in for it, and
+                // the measured curve says the target matters: complete
+                // pooling toward the AVERAGE (k=400) scores +22 where partial
+                // pooling scores +36, so a better-founded target should lift
+                // the whole curve rather than only its tail.
+                //
+                // IT ONLY COUNTS IF THE JOINT FIT WANTS THE SAME TWO LEVELS.
+                // `fitLine` is free to come back with `cuts`, a `mid`, or a
+                // different (lo, hi) on the pooled readings - and a threshold
+                // separating a different pair of levels is an answer to a
+                // different question, so it is refused and the average
+                // stands. That guard is the same reasoning that limits the
+                // families to a matching (lo, hi) in the first place.
+                if (POOL_JOINT) {
+                    const union = members.flatMap(([sp]) => lsBySp[sp] ?? []);
+                    const joint = union.length ? fitLine(union) : null;
+                    const [, v0] = members[0];
+
+                    if (joint && joint.a !== undefined
+                        && joint.cuts === undefined && joint.mid === undefined
+                        && joint.lo === v0.line.lo && joint.hi === v0.line.hi) {
+                        meanA = joint.a;
+                        meanB = joint.b;
+                    }
+                }
+
+                for (const [, v] of members) {
+                    const lambda = SHRINK / (SHRINK + v.n);
+
+                    v.line.a = Number((v.line.a + lambda * (meanA - v.line.a)).toFixed(5));
+                    v.line.b = Number((v.line.b + lambda * (meanB - v.line.b)).toFixed(6));
+                }
+            }
+        }
+
+        // BORROW_REPORT=1 asks whether a group that could NOT fit its own line
+        // would do better borrowing its rung's.
+        //
+        // WHY THE QUESTION IS WORTH ASKING. Scored out of sample by form, the
+        // groups that fell short of a line are the worst population left:
+        //
+        //   line2  10194 readings  94.69%
+        //   line3   1124           91.10%
+        //   split   1149           87.03%   <- 7.7 points down, ~88 failures
+        //   bands     61           42.62%   <- a band table memorises
+        //
+        // and all ten split groups are at TWO springs, each the only one of
+        // its shape in its rung - so the pooling above cannot reach them for
+        // want of a sibling of the same shape. What they do have is siblings
+        // of a DIFFERENT shape: the same rung's 1, 3 and 4 spring groups,
+        // which did fit lines, and whose threshold the within-rung spread
+        // says is nearly the same quantity (sd 0.03 within a rung against
+        // 0.5-1.6 across rungs).
+        //
+        // THE COMPARISON IS HONEST ON BOTH SIDES. The borrowed line is fitted
+        // on the siblings ONLY, so scoring it on this group's readings is a
+        // clean out-of-sample estimate; the incumbent split already carries
+        // its own `score`, which is `cvScore`'s five-fold estimate on the
+        // same readings. Neither number has seen what it is scored against.
+        //
+        // AND THE ANSWER IS NO - THERE IS NO LINE TO BORROW. Run, the
+        // borrowed score comes back -1 on every group of any size, because
+        // `fitLine` REFUSES the siblings' union. The reason is structural and
+        // is the useful part:
+        //
+        //   0.295/0.2437   1spr  levels {0, 1}
+        //                  2spr  levels {0, 0.25, 1, 1.25}   <- both sets
+        //                  3spr  levels {0.25, 1.25}
+        //                  4spr  levels {0.25, 1.25}
+        //
+        // THE LEVEL SET IS A FUNCTION OF THE SPRING COUNT - one spring on the
+        // whole inch, three and four on the quarter, and two carrying BOTH.
+        // That is `duplexSnapToGrid` lifting whole inches to the quarter above
+        // at 3+ springs and not at 2, already recorded in CLAUDE.md as real at
+        // 3+ and false at 2.
+        //
+        // So the siblings do not merely have a different threshold, they
+        // disagree about WHICH LEVELS EXIST, their union has four, and no
+        // two-level line can span it. A group cannot borrow a line from
+        // siblings that are not answering its question.
+        //
+        // The three "wins" printed for one-reading band groups are an
+        // artefact: the borrowed line scores 0.000 there and the incumbent
+        // cvScore is -1 because one reading cannot be cross-validated at all.
+        //
+        // KEPT AS A MEASUREMENT, NOT A LEVER. The report is cheap and the
+        // idea is an obvious one to have twice.
+        if (process.env.BORROW_REPORT) {
+            for (const [sp, v] of Object.entries(byCount)) {
+                if (v.line) continue;
+
+                const mine = lsBySp[sp] ?? [];
+                const siblings = Object.entries(lsBySp)
+                    .filter(([osp]) => osp !== sp)
+                    .flatMap(([, ls]) => ls);
+
+                if (!mine.length || !siblings.length) continue;
+
+                const borrowed = fitLine(siblings);
+                const got = borrowed
+                    ? mine.filter((l) =>
+                        linePredict(borrowed, l.active) === l.bonus).length / mine.length
+                    : -1;
+                const incumbent = v.split ? v.split.score : -1;
+
+                console.error(`BORROW\t${g.outer}/${g.inner}\t${sp}\t`
+                    + `${v.split ? "split" : "bands"}\t${mine.length}\t`
+                    + `${incumbent.toFixed(4)}\t${got.toFixed(4)}\t`
+                    + `${siblings.length}`);
             }
         }
 

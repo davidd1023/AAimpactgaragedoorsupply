@@ -36,5 +36,17 @@ for (const r of c.readings) {
     const wok = s && `${s.outerWire}/${s.innerWire}` === refW;
     const lok = wok && comp.duplexInnerLength === r.expect.duplexInnerLength;
     n += 1; wire += wok ? 1 : 0; len += lok ? 1 : 0; all += lok ? 1 : 0;
+
+    // PER-READING OUTCOMES, for a PAIRED comparison between two fits.
+    //
+    // Comparing two aggregate fold scores has a standard deviation of about
+    // 10.5 readings, so it cannot resolve anything under about +-21 - which
+    // is how the LINE_SLACK screen of 2026-11-12 came to read noise as a
+    // finding. Pairing the SAME reading under two configurations removes all
+    // of that between-fold variance: only the readings that actually CHANGED
+    // carry any signal, and McNemar's test on those is exact.
+    if (process.env.PER_READING) {
+        console.log(`ROW\t${r.id ?? key}\t${lok ? 1 : 0}`);
+    }
 }
 console.log(`  held out: ${n}   wire ${wire}/${n}   wire+length ${len}/${n}`);

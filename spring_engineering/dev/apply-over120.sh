@@ -22,7 +22,10 @@ node dev/derive-over120.mjs
 python3 - <<'PY'
 import pathlib, re, json
 offs = json.loads(pathlib.Path("dev/over120-offsets.json").read_text())
-tbl = "\n".join('    "{}": {},'.format(k, v) for k, v in sorted(offs.items()))
+tbl = "\n".join(
+    '    "{}": {{ t: {}, lo: {}, hi: {} }},'.format(
+        k, "null" if v["t"] is None else v["t"], v["lo"], v["hi"])
+    for k, v in sorted(offs.items()))
 p = pathlib.Path("static/src/js/spring_engineering.js")
 s = p.read_text()
 m = re.search(r"const DUPLEX_LONG_OFFSET = \{.*?\n\};", s, re.S)

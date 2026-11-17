@@ -3700,6 +3700,2061 @@ cannot be got wrong, and the deriver's header says why in full.
   threshold tie at margin 1.000 and a quarter inch on one reading.
 - **What is left is the FORM**, as it has been since 2026-11-10.
 
+##### THE TWELFTH FORM WON, AND IT WAS THE FIRST ONE MEASURED RATHER THAN INVENTED (2026-11-12)
+
+*"alright, so is there no avenues left to explore to find how to increase
+duplex accuracy"* - asked after being told the work was finished. **It was not
+finished, and the answer was a form, which is what every entry above said was
+required.**
+
+```
+band                          n     exact BEFORE    exact AFTER
+inside 96"  (recommended)   11839      98.20%         98.20%   <- UNCHANGED
+96-120"     (supported)       490      93.66%         94.08%
+over 120"   (DISCLAIMED)      608      61.57%         67.93%
+```
+
+Golden **725 byte-identical**, **20 invariants pass**, `spring_engineering`
+**0 failed 0 errors of 348**, `spring_calculator` regenerated.
+
+**THE MEASUREMENT CAME FIRST, AND THAT IS THE WHOLE DIFFERENCE.** Eleven forms
+had been tried for this band and eleven lost to the per-rung constant, every
+one of them a shape somebody thought of. The twelfth came from looking at what
+the band's implied bonus actually LOOKS like past the gate:
+
+```
+0.5312/0.4218 1spr   n=20   levels: -1:3   0:17
+0.5625/0.4531 1spr   n=17   levels: -1:3   0:14
+0.625/0.49    1spr   n=24   levels: -2:3   -1:10   0:10
+0.2625/0.2253 4spr   n=21   levels: 0.25:14   1.25:7
+```
+
+**EXACTLY TWO LEVELS, ONE INCH APART, IN EVERY SINGLE GROUP** - never a
+spread. A constant per rung can only pick the majority level and must lose the
+other, which is precisely the 53% it was scoring. **The residual had been
+telling us its own shape all along**; the earlier entry even names "a pile at
++1 and +2" as the thing to look for and then reasons past it.
+
+**AND THE SEPARATOR IS THE FLOOR OF THE ACTIVE LENGTH.** Frac, door height,
+weight and cycle count were all tried; floor is the only one that generalises,
+and frac actively loses. That is the SAME variable `splitByCount` splits on
+in-envelope - where the fitter has never produced a split above floor 59.
+
+**WHY THE FORM IS RIGHT RATHER THAN LUCKY, STRUCTURALLY.** In-envelope the
+bonus is a line in floor CLAMPED to two levels (`lo`/`hi`). Past 120" that
+line saturates, so the second level it wants is unreachable by construction -
+and this table is exactly the mechanism that supplies it. The constant was the
+saturated level; the two-level entry is both of them.
+
+**FIVE SHUFFLES, FIVE WINS**, because 606 readings against ~75 parameters is
+enough freedom for one lucky split:
+
+```
+seed        none    const (shipped)   two levels on floor
+20261112   46.4%        54.3%              59.6%   WINS
+61006      46.4%        51.7%              60.1%   WINS
+20261007   46.4%        53.5%              57.6%   WINS
+20261009   46.4%        53.3%              60.4%   WINS
+777001     46.4%        53.3%              59.1%   WINS
+POOLED     46.37%       53.20%             59.34%   +6.14 points
+```
+
+**QUOTE 59.3%, NOT 67.93%** - the first is out of sample over 3,030 scorings,
+the second is the shipped table measured on data it was fitted to. The
+deriver's own guard ladder settles on **min 8 readings per rung** and reads
+62.4% against a 46.6% baseline.
+
+**NEARLY EVERY ENTRY IS `lo: 0, hi: 1`**, which is what makes it readable
+rather than a curve: below a per-rung threshold on the active length no
+correction is needed at all, and above it exactly one inch. **The overshoot
+has a point where it STARTS**, and the table now says where, per rung.
+
+**SIMPLER IS USUALLY BETTER IN THIS PROJECT AND THIS IS THE ONE PLACE IT WAS
+NOT.** `LINE_LEVELS`, the per-group capacity experiment and the per-rung line
+all lost to the simpler option. Here three parameters per rung beat one - and
+the reason is that the extra freedom was MEASURED to be needed (two levels are
+visibly there) rather than hoped to be.
+
+###### AND THE CIRCULARITY TRAP BIT A SECOND TIME, IN THE DIAGNOSTIC
+
+The first split-half run of this reported **baseline 57.6%, shipped constant
+52.3%** - no correction beating the correction, which is impossible and read
+as "the table is now harmful".
+
+**`DUPLEX_LONG_OFFSET` IS NOT EXPORTED OFF THE HARNESS**, so
+`mod.DUPLEX_LONG_OFFSET?.[rung] ?? 0` silently resolved to zero and the
+un-correction did nothing. "No correction at all" was therefore the SHIPPED
+TABLE's own score, and every candidate form was being fitted on top of it.
+Reading the table from `dev/over120-offsets.json` instead put the baseline
+back to 46.4% and the real answer appeared.
+
+**SIXTH OF THE FAMILY** - after `i.springId`, `c.singleWireSize`,
+`duplexCycles` returning `"48,000"`, `cycleLife` read after its inputs
+changed, and the deriver fitting on corrected output. Five of the six are the
+same mistake in two flavours: **an invented or absent field read as a default,
+and a correct measurement of the wrong thing.** The tell both times was a
+number that could not be true - a baseline beating a fit, a correction
+reporting itself unnecessary.
+
+**AN OPTIONAL CHAIN IS NOT A SAFE WAY TO READ A TABLE THAT MUST BE THERE.**
+`?? 0` turned a missing export into a plausible zero. Where the value is
+required, read it from its source of truth and let it throw.
+
+##### PAST 120": FIVE MORE FORMS TRIED, AND THE HEADLINE GOT WORSE ON PURPOSE (owner, 2026-11-12)
+
+*"we really need to fix those duplex springs that are over 120", what can we
+do for those?"*
+
+**READ THE NUMBER CHANGE FIRST, BECAUSE IT LOOKS LIKE A REGRESSION AND IS
+NOT:**
+
+```
+band                        before            after
+over 120"       268 readings  61.57%    608 readings  56.25%
+exact COUNT              165               ->   342
+```
+
+The percentage fell because **340 of the hardest doors that exist joined the
+denominator**. Nothing regressed: the three never-tuned validation sets read
+*identically* before and after, golden is 725 byte-identical, inside-96" is
+unchanged at 98.20%, and 96-120" improved to 94.08%. Same shape as batch V15 -
+coverage, not a headline.
+
+**AND THE NEW FIGURE IS THE HONEST ONE.** Out of sample on 603 readings the
+correction is worth **+7.6 points (46.6% -> 54.2%)**, where the same split-half
+on 266 readings read **+13.9**. The old number was flattering because the band
+was small and easy. Quote 54.2%.
+
+###### THE RESIDUAL AFTER THE CORRECTION - NOBODY HAD LOOKED
+
+Every earlier measurement of this band was taken BEFORE any correction
+existed. `dev/over120-residual.mjs` looks after it, and it must MEASURE
+corrected output where `derive-over120.mjs` must FIT uncorrected output -
+same engine, opposite requirement, which is why that near-miss happened.
+
+**THE BIAS IS GONE**: 44 short against 53 long, median 0.00, where before the
+correction it was 143 long against 4 short. So no further constant can win -
+that is settled rather than assumed.
+
+**AND THE FAILURE IS NOT EVENLY SPREAD, WHICH IS THE USEFUL PART:**
+
+```
+past 120"     n    exact     short  long
+0-10"        47   76.6%        9      2
+10-25"       54   59.3%       17      5
+25-50"       60   73.3%       10      6
+50-100"      48   66.7%        7      9
+100-+"       53   39.6%        1     31     <- springs over 220"
+```
+
+**Just over the line we are at 76.6%.** The catastrophic bucket is springs
+past **220 inches** - over eighteen feet - where the reference's own answer is
+nearly twice the length it says it supports. That is where the 56% comes
+from, and it is not a number anybody can act on.
+
+###### FIVE FORMS, ALL MEASURED, ALL LOST
+
+```
+form                                       out of sample
+no correction                                     43.6%
+per-rung CONSTANT (shipped)                       57.5%
+a global second term (per-inch or flat)      no gain even IN-sample
+keyed on (rung, SPRING COUNT)                     51.5%
+frac-banded per rung                              51.1%
+one global frac rule on top of the constant       +0
+```
+
+**THE SPRING-COUNT KEY LOSING IS WORTH KEEPING.** The main bonus table keys
+per spring count via `lineByCount`, so copying that here looked obviously
+right - and it costs six points, because it halves the readings per key. The
+density curve again: freedom that is not paid for in generalisation is
+freedom that chases noise.
+
+**AND FRAC CARRIES REAL SIGNAL THAT CANNOT BE USED**, which is the subtlest
+result of the day:
+
+```
+residual -1"   median frac 0.547
+residual  0    median frac 0.440
+residual +1"   median frac 0.200
+```
+
+Monotone, and in the direction you would predict. But the distributions
+overlap (p10-p90 of 0.16-0.91 against 0.01-0.72), so a per-rung cut on five
+readings cannot find the threshold, and **one global rule fitted freely chose
++0 on BOTH sides in BOTH halves**. A signal being real is not the same as its
+being exploitable.
+
+###### BATCH L1: THE BAND HAD NEVER BEEN FED DIRECTLY
+
+`dev/group-target-sample.mjs` EXCLUDED it by construction - its filter was
+`duplexOuterLength <= 120` because it was chasing in-envelope groups - and
+V16 only reached it by accident. So the offsets were fitted on about **eight
+readings a rung**, squarely inside the regime where `group-density.mjs` says
+data pays eight times over.
+
+`dev/over120-target-sample.mjs` aims there. **360 requests, 340 usable, ZERO
+clean** - and the zero does not matter here, which is the distinction worth
+recording: `derive.mjs` drops a flagged reading's LENGTH from the rung fit,
+but `derive-over120.mjs` fits the length error directly against whatever the
+reference returned, so **flagged readings feed this table and not that one**.
+
+The refit then chose a **stricter** guard - min 8 readings a rung rather than
+min 3 - kept 10 rungs rather than 12, and came out **better**: +46 out of
+sample against +42. More data per rung lets the fit afford to be choosier.
+
+###### SO WHAT IS LEFT FOR THIS BAND
+
+- **The form is spent.** Seven variants now, counting the per-rung line and
+  global drift from 2026-11-11. The per-rung constant is the ceiling.
+- **Data still pays a little**, but it buys a better-founded table rather than
+  a better percentage, and each batch makes the headline look worse because
+  the doors it adds are harder than the ones already held.
+- **The honest product answer has not been built**: a duplex pair past 120" is
+  an extrapolation past what Service Spring supports, and the page prints the
+  figure without saying so. One getter and one line. **NOT DONE, because the
+  owner's standing rule is that the duplex message REPLACES the wire warning
+  rather than stacking** - so where a third note goes is his call, not mine.
+
+##### MAX DOOR HEIGHT IS 220", AND THAT RE-CUTS THE WHOLE BAND (owner, 2026-11-12)
+
+*"our max height for doors is 220" so it is a possibility that we will need
+to make springs for doors of that height, so keep looking for answers in any
+way that you can"*
+
+**I HAD DISMISSED THE BAND AS ABSURD DOORS AND THAT WAS WRONG.** The entry
+above reads "springs over 220 inches - over eighteen feet - where the
+reference's own answer is nearly twice the length it says it supports", and
+calls it "not a number anybody can act on". Every earlier cut of this band was
+by SPRING length, which is a derived quantity nobody orders.
+`dev/by-door-height.mjs` cuts it by the thing a customer actually asks for:
+
+```
+by DOOR height                   n    exact   wire right
+0-96" tall                    5129   97.06%    99.45%
+96-144" tall                  5295   96.22%    99.11%
+144-180" tall                 1446   95.16%    98.89%
+180-220" tall                  813   93.48%    99.38%
+220"+ tall (outside envelope)  254   86.61%    99.21%
+
+DOORS HE CAN BUILD (<=220")  12683   96.26%    99.24%
+```
+
+**SO THE ANSWER TO HIS BUSINESS QUESTION IS 96.26%, AND 93.48% AT THE 220"
+LIMIT** - not 56%. And the WIRE at 180-220" is **99.38%**, better than the
+overall, which is the figure that decides whether a door is sprung safely.
+
+**AND THE PAST-120" FAILURES ARE HEAVY DOORS, NOT TALL ONES:**
+
+```
+past-120" band, by door height    n    exact
+0-144" tall                     348   49.43%   <- the WORST, and they are SHORT
+144-180" tall                    85   62.35%
+180-220" tall                   113   67.26%
+220"+ tall                       62   66.13%
+```
+
+Only **62 of 608** are doors taller than 220". The rest are ordinary heights
+needing long springs because they are heavy, and every one is orderable. The
+"absurd doors" framing was exactly backwards.
+
+###### THE REFERENCE IS PERFECTLY DETERMINISTIC PAST 120"
+
+All 12,937 readings assume it is and nobody had checked. Fifty doors re-asked
+- **30 we FAIL and 20 we PASS as a control**, so the result could not be read
+as "hard doors are noisy":
+
+```
+SAME answer as before: 50      DIFFERENT: 0
+```
+
+**SO THE 55% IS OUR ERROR AND THE TARGET IS CLEAN.** That also kills a
+reading I had written down an hour earlier: the flat mechanism search below
+looked like "noise in the target", and it is not. The band is winnable in
+principle.
+
+###### NO MECHANISM, IN ANY VARIABLE (`dev/over120-mechanism.mjs`)
+
+Flat everywhere, which is why the search is recorded rather than repeated:
+
+```
+weight against the drum's rating   54.5 / 55.3 / 61.3 / 51.4%   (0 clamp cases)
+spring count 1/2/3/4               61.4 / 55.5 / 54.5 / 50.0%
+lb per spring (5 bands)            70.8 / 49.6 / 48.0 / 66.2 / 57.9%   non-monotone
+cycle target (5 bands)             flat 48-58%
+the four crossed cells             50-63%
+```
+
+###### TEN CORRECTION SHAPES, AND THE CONSTANT STILL WINS
+
+```
+no correction                                   46.4%
+per-rung CONSTANT                               54.8%   <- shipped
+two levels per rung + ONE global frac cut       55.3%   best of 26 configs = noise
+per-rung LINEAR (2 params)                      52.1%
+keyed on (rung, spring count)                   51.5%
+frac-banded per rung (3 params)                 51.1%
+per-rung SCALE (raw * k)                        49.3%
+per-rung EXCESS scale                           48.0%
+a global second term on top          no gain even IN-sample
+one global frac rule on top                     +0
+```
+
+**AND NOW THERE IS A REASON THE CONSTANT IS RIGHT RATHER THAN LUCKY.** Each
+rung's bonus is a line in floor(active length) CLAMPED to two levels, so past
+120" the line saturates at `hi`. A per-rung constant is exactly the saturated
+level the clamp cannot reach - **it is not a bolt-on, it is the long-regime
+bonus the existing form cannot express.** What it cannot do is supply TWO
+levels, which is what the residual pile at -1" and +1" is asking for, and
+every attempt to supply two has lost or tied.
+
+**THE +3 READINGS AT cut 0.55 ARE NOT A FINDING.** Thirteen cuts by two
+minimums is 26 configurations, the best of them beat the baseline by three
+readings of 606, and the cut was chosen by looking at the holdout. That is a
+selection on the test set, not an out-of-sample gain.
+
+###### SO WHERE THE ERROR ACTUALLY IS, AND WHAT IT WOULD COST
+
+A clean deterministic target, ten output transforms exhausted, seven
+explanatory variables flat. **The information is already lost by the time the
+output exists** - which puts the error inside `duplexActiveLength`, the
+stiffness model, in the long regime.
+
+Fixing that means a long-regime term INSIDE `derive.mjs` - refitting sMult/K
+or letting the bonus line fit a separate band for floor > 119 - rather than
+correcting its output. **That is the first thing all session that could move
+this number, and it is also the one thing that risks the 98.20% in-envelope.**
+Not attempted; it needs its own session with the never-tuned sets, the golden
+snapshot and `envelope.mjs` all watched, and a revert ready.
+
+###### BATCH L1 AND THE TOOLS
+
+`dev/over120-target-sample.mjs` fed the band directly for the first time -
+360 requests, 340 usable, **zero clean**, which does not matter because
+`derive-over120.mjs` fits against whatever length the reference returned where
+`derive.mjs` drops flagged lengths. Corpus 12,596 -> 12,937.
+
+The refit chose a **stricter** guard (min 8 rather than 3), kept 10 rungs
+rather than 12, and came out better: +46 out of sample against +42.
+
+##### THE FITTER'S OWN GATES: SWEPT, CONFIRMED, AND REJECTED (2026-11-12/13)
+
+*"is there anythng left that can be done t improve the accuracy"* - and there
+was a real gap: **only `LINE_LEVELS` had ever been swept.** Three knobs gate
+the fit itself and were left at whatever they were first set to:
+
+```
+SPLIT_MIN_SIDE  readings needed either side of a floor split   (8)
+LEVEL_SUPPORT   share of a group a bonus level must carry      (0.06)
+LINE_SLACK      misses a line fit may tolerate                 (0.18)
+```
+
+**NOTHING SHIPPED. The answer is no**, and the way it came out is worth more
+than the answer.
+
+**WHY IT WAS WORTH ASKING - the twelfth-form method pointed in-envelope.**
+`dev/inenv-shape.mjs` shows the two biggest failing groups are TWO-level with
+500+ readings each:
+
+```
+0.2625/0.2253 4spr   558 readings  13 fails   levels 0.25:405  1.25:153
+0.2625/0.2253 3spr   473 readings   7 fails   levels 0.25:347  1.25:126
+```
+
+The form ALLOWS two levels, so those failures are neither capacity nor data.
+**53 of the 128 in-envelope failures sit in groups of that shape**; 46 sit in
+4+-level groups, which is the capacity experiment already run twice and lost.
+That reasoning still stands - it simply is not the GATES that hold them.
+
+**THE SCREEN (fold 0, 2,587 held-out readings) LOOKED PROMISING:**
+
+```
+baseline (installed)   2413      SPLIT_MIN_SIDE=4    2413   <- IDENTICAL
+LEVEL_SUPPORT=0.03     2417      SPLIT_MIN_SIDE=16   2413   <- IDENTICAL
+LEVEL_SUPPORT=0.12     2405      LINE_SLACK=0.10     2423   <- best, +10
+                                 LINE_SLACK=0.26     2414
+```
+
+**AND THE CONFIRMATION ON FOUR UNSEEN FOLDS KILLED IT:**
+
+```
+fold   baseline   LINE_SLACK=0.10   delta
+  1      2409          2408           -1
+  2      2395          2408          +13
+  3      2394          2407          +13
+  4      2407          2399           -8
+TOTAL    9605          9622          +17   over 10,351 readings  (+0.16 pts)
+
+per-fold delta: mean +4.25  sd 10.50  se 5.25
+t = 0.81 on 3 df (needs 3.18)     95% CI  -12.5 to +21.0
+2 wins, 2 losses
+```
+
+**THE CONFIDENCE INTERVAL STRADDLES ZERO AND THE WIN COUNT IS A COIN TOSS.**
+Not shipped.
+
+###### THE REAL FINDING: THE SCREEN COULD NEVER HAVE WORKED
+
+**THE PER-FOLD STANDARD DEVIATION IS 10.5 READINGS**, so a single fold cannot
+resolve anything smaller than about **+/-21**. Every result in that fold-0
+screen - `LEVEL_SUPPORT` +4, `LINE_SLACK` +10 - was **inside the noise
+floor**. The screen was not a weak test of those knobs; it was incapable of
+testing them at all, and I read its ordering as signal. The "monotone in both
+directions" argument for `LEVEL_SUPPORT` (+4 / baseline / -8) was three
+numbers drawn from a distribution with sd 10.
+
+**SO: MEASURE THE NOISE FLOOR BEFORE TRUSTING A SCREEN.** One baseline run on
+two different folds would have cost twelve minutes and shown the spread
+immediately. This is the same family as the "+3 readings at cut 0.55" result
+past 120" - a small difference taken as a finding - except there it was
+selection across configs and here it was a screen with no resolving power.
+**Both failures are "I did not ask how big an effect this test can see."**
+
+**ONE NEGATIVE IS SOLID, AND IT IS SOLID FOR A DIFFERENT REASON.**
+`SPLIT_MIN_SIDE` at 4 and at 16 returned **exactly 2413**, the same number as
+the baseline, because the fitted table was byte-identical - not a small
+difference but NO difference. That is not subject to the noise floor at all,
+and it kills a lead recorded the same day: the floor-split gate is NOT what
+stops `splitByCount` reaching the long regime. **Do not chase that again.**
+
+**THE TOOLING IS COMMITTED** - `dev/knob-sweep.sh` (screen and confirm) and
+`dev/inenv-shape.mjs`, both carrying these numbers in their headers, because
+they lived in `/home/odoo/logs` and that is how this repository has lost
+tooling before.
+
+**EVERY FOLD INSTALLS A THROWAWAY TABLE INTO THE ENGINE FILE.** The script's
+trap restores it, but **never commit while a holdout run is going** - that
+would ship a one-fifth-of-the-corpus table as the product. `git status` and
+`grep -c "lo:"` before any commit that follows this work.
+
+**`pkill -f confirm.sh` KILLED MY OWN SHELL** (exit 144) before the heredoc
+had written the script, so the relaunch failed with "cannot open" and the
+engine file was left holding a fold's table. Kill background jobs BY PID from
+`ps`, never by a pattern a tool call's own shell matches.
+
+###### SO THE LIST OF SPENT LEVERS IS NOW SIX
+
+More data; more capacity globally; more capacity per group; coil-count
+quantisation; the IPPT inversion; and now the fit's own gates. What remains
+for in-envelope duplex is unchanged and is named above: **a long-regime term
+INSIDE `derive.mjs`** rather than a correction to its output - the one thing
+that risks the 98.20%, and which needs its own session with the never-tuned
+sets, the golden snapshot and `envelope.mjs` all watched and a revert ready.
+
+##### THE IN-ENVELOPE FAILURES ARE THRESHOLD STRADDLERS (2026-11-13)
+
+*"ok anything else you can try?"* - after six levers had been spent. Yes, one,
+and it was a METHOD rather than a knob: **nobody had ever looked at a single
+in-envelope failure.** Every measurement before this was an aggregate - group
+shapes, knob sweeps, form ladders, fold scores - while the only two things
+that ever worked in this project came from printing one concrete case.
+
+`dev/miss-margin.mjs` computes, for every failure in a plain two-level group,
+its distance from the threshold that decided it:
+
+```
+bonus  = frac > (a + b * floor) ? hi : lo
+margin = frac - (a + b * floor)
+```
+
+**THE FAILURES HUG THE BOUNDARY, 18x OVER:**
+
+```
+|margin|     failures        all readings
+0-0.01       28  40.0%       203   2.2%
+0-0.025      44  62.9%       554   5.9%
+median       0.0133          0.2490          <- 19x closer
+```
+
+**AND THEY STRADDLE IT, WHICH IS WHAT CLOSES THE QUESTION:**
+
+```
+we said HI, reference wanted LO:  30
+we said LO, reference wanted HI:  33
+neither level was right:           7   <- outside the form entirely
+
+sliding every boundary IN-SAMPLE, knowing the answers: recovers 5 of 70
+and ZERO on the two biggest groups (0.2625/0.2253 4spr, 0.289/0.2343 2spr)
+```
+
+**MOVING THE LINE FIXES 30 AND BREAKS 33.** Even granted perfect hindsight
+and a free parameter per group, the best a differently-placed threshold can
+do is five readings - and that is the CEILING, before cross-validation takes
+most of it back. The boundary is not misplaced; the readings are ambiguous at
+the resolution we can compute them to.
+
+**THIS IS THE THIRD INSTANCE OF ONE MECHANISM, AND THAT IS THE FINDING.**
+
+```
+54 duplex WIRE misses      27 softer / 27 stiffer    symmetric
+ 1 Single WIRE miss        margin exactly 1.000      a tie
+63 duplex LENGTH misses    30 one way / 33 the other  straddling
+```
+
+All three are **a threshold decision taken on a quantity known to about a per
+cent**, and all three are irreducible for the same reason: no placement of a
+boundary can sort readings whose true position is uncertain by more than the
+distance they sit from it.
+
+**SO THE 53-IN-TWO-LEVEL-GROUPS OBSERVATION IS NOW EXPLAINED.** The earlier
+entry is right that those failures are neither capacity nor data nor the
+gates - and the reason is that they are not a property of the BONUS TABLE at
+all. They are the precision of `duplexActiveLength` showing through it.
+
+**WHICH NAMES THE TARGET IN A NUMBER FOR THE FIRST TIME: 0.0133.** That is
+the median failing margin, in fractional inches of active length. An active
+length accurate to about one hundredth of an inch better than today's would
+halve these failures, and nothing else will touch them. That is the SAME item
+already standing as the one remaining lever - the stiffness model inside
+`derive.mjs` - except the evidence now covers the whole range rather than
+only past 120", and it comes with a precision target instead of a hope.
+
+**SEVEN READINGS WANTED NEITHER LEVEL**, so even a perfect active length
+leaves those: the two-level form genuinely cannot hold them.
+
+##### THE LAST LEVER, MEASURED AND CLOSED (owner, 2026-11-13)
+
+*"as long as you can revert any changes the can cause the accuracy to go down
+you can make any tests you want, they can aslo take as long as you want"* -
+so the one remaining item was finally attempted: the stiffness model inside
+`derive.mjs`, standing since 2026-11-12 as *"the first thing all session that
+could move this number"*.
+
+**IT CANNOT MOVE IT, AND THAT IS NOW PROVED RATHER THAN ARGUED.**
+
+###### THE ARGUMENT: `b` ALREADY ABSORBS A STIFFNESS SCALE ERROR
+
+A two-level group decides by `frac > a + b*floor`, which is the same as
+`active > floor*(1+b) + a`. Scaling `duplexActiveLength` by (1+eps) moves
+frac by about `eps*floor` - **which IS a change in `b`**. The fitted slope has
+been quietly undoing any linear scale error in the active length all along,
+per rung and per spring count.
+
+###### THE PROOF: PERTURB sMult AND REFIT
+
+```
+BASELINE (sMult as shipped)       2413 / 2587
+sMult x 1.003, then REFITTED      2413 / 2587    IDENTICAL
+sMult x 1.010, then REFITTED      2413 / 2587    IDENTICAL
+```
+
+**A ONE PER CENT PERTURBATION OF THE STIFFNESS MODEL - seventy-five times
+the 0.0133 median failing margin - REFITS TO THE SAME SCORE.** The fitter
+re-absorbs it completely. Refitting sMult or K is not a lever; it is a
+reparametrisation of something already fitted.
+
+###### AND NO MISSING INPUT DISAMBIGUATES THE STRADDLERS EITHER
+
+What `b` cannot absorb is error varying with something OTHER than floor. So
+`dev/missing-variable.mjs` asks whether any input the decision does not
+currently see predicts which side the reference chose - door height, weight,
+lb per spring, cycles, radius, hi-lift, active length, turns and the required
+IPPT, with `floor` and `frac` as controls.
+
+```
+AT THE BOUNDARY (|margin| < 0.05, 1067 readings) the two answers differ by:
+  frac +5.8   hiLift -2.0   cycles +1.1   radius -0.9   ...   turns +0.0
+
+PREDICTING THE SIDE, c fitted on one half and scored on the other:
+  noise floor  512.5 of 533, sd 3.39  -> a candidate must beat it by 6.8
+  EVERY variable scored +0.0 or WORSE
+```
+
+**`frac` IS A CONTROL AND ITS +5.8 IS THE EXPECTED ARTEFACT** - `margin` is
+`frac - (a + b*floor)`, so inside a margin band frac tracks the answer by
+construction. Everything real is noise: 33 tests were run and one or two at
+|t| ~ 2 is what chance gives.
+
+###### THE FIRST VERSION OF THAT TEST WAS DOMINATED AND SAID NOTHING
+
+Scoring a GLOBAL `c` over all 9,398 readings returned **exactly** the
+baseline for all eleven candidates - every fold chose c = 0. A correction big
+enough to flip a reading sitting 0.01 from its boundary also moves the 8,850
+sitting nowhere near one, so the easy readings drown the question. **ASK THE
+QUESTION WHERE IT LIVES**: restricted to the boundary band, the test has
+power and still finds nothing.
+
+###### SO IN-ENVELOPE DUPLEX LENGTH IS CLOSED ON SEVEN LEVERS
+
+```
+more data                          measured, flat above 25 readings a group
+more capacity, globally            loses 2.45 points
+more capacity, per group           loses 2.07 points
+coil-count quantisation            refuted by a test with power to confirm
+the IPPT inversion                 19.26% against the table's 98.81%
+the fitter's own gates             +17 of 10,351, CI straddles zero
+the stiffness model                REFITS TO AN IDENTICAL SCORE
+```
+
+**WHAT IS LEFT IS NOT A LEVER BUT A LIMIT.** 63 of 70 failures straddle their
+threshold within a hundredth of an inch; no boundary sorts readings whose
+position is uncertain by more than their distance from it. The same mechanism
+as the 54 duplex wire misses and the Single tie at margin 1.000.
+
+**NOTHING WAS SHIPPED AND NOTHING WAS LEFT MODIFIED.** The perturbation runs
+install throwaway tables; the script's trap restores the engine and `git
+status` was checked clean afterwards, with the 24-rung table and all 48 sMult
+values intact.
+
+##### THE CYCLE MODEL, CHECKED AGAINST DIRECT SUPERVISION FOR THE FIRST TIME (2026-11-13)
+
+Every accuracy session has been about LENGTH, and every WIRE miss ever
+recorded - 54 duplex and the one Single - is a threshold decision on cycle
+life. **The cycle model had never been checked against anything.**
+
+**IT HAS THE ONE THING LENGTH DOES NOT: DIRECT SUPERVISION.** The reference
+REPORTS its cycle figure in every response. The raw pull and eval files carry it on
+**6,932 readings** - and the CORPUS carries it too, on **12,932 of 12,941**,
+as a top-level `referenceCycles` key. The entry first written here said the
+corpus discarded it; that was wrong, and wrong because I looked only inside
+`expect`. The conclusions below stand - they were drawn on the smaller set and
+the larger one is the same data - but **`referenceCycles` is the better source
+and needs no raw files**.
+
+**AND NOTHING ABSORBS AN ERROR THERE**, which is what made it worth doing.
+In the length model the fitted slope `b` absorbs a scale error, which is why
+refitting the stiffness model changed nothing. The cycle targets are FIXED
+CONSTANTS - 10,000 / 25,000 / 50,000 / 100,000 - so a one per cent bias moves
+real decisions and nothing undoes it.
+
+`dev/cycle-error.mjs` compares, on the 3,851 clean readings where our wire
+ALREADY matches theirs (anything else compares two different springs).
+
+###### THE EXPONENTS ARE RIGHT, AND THAT IS NOW MEASURED
+
+```
+OUR cycles / THEIRS          p10    median    p90
+by wire 0-.25 ... .4-.47   0.973  0.999..1.007  1.028   <- FLAT, no drift
+by spring count 1/2/3/4           1.004..1.001          <- FLAT
+```
+
+A median that drifted with wire size would mean `CYCLE_WIRE_EXPONENT` is off.
+It does not drift. The three constants - `CYCLE_COEFFICIENT 124205`,
+`CYCLE_WIRE_EXPONENT 2.79`, `CYCLE_EXPONENT 4.67` - are not the problem.
+
+###### THE REFERENCE REPORTS ONLY MULTIPLES OF 1,000
+
+**All 6,923 figures, without exception.** Under 20,000 the distinct values are
+9000, 10000, 11000 ... So at an 11,000-cycle answer its own reporting
+granularity is **+/-4.5%**.
+
+That killed a finding before it was believed. The first cut showed the 10,000
+target reading **1.3% high with only 45.7% within 2%**, against ~1.000 and 81%
+at every other target - which is the commonest target, and high means we think
+a spring lasts longer and pick a SOFTER wire. It is the rounding: a declining
+density of true values inside each 1,000-wide bin biases the ratio upward.
+**Cycle agreement can never be measured to better than +/-500.**
+
+###### SINGLE'S CYCLE MODEL IS EXACT
+
+```
+rounded to the reference's own precision:   Single 1245/1245 = 100.0%
+                                            Duplex  41.9% exact, 93.2% +/-1 step
+```
+
+**Every clean Single reading reproduces the reference's cycle figure exactly.**
+That independently confirms what the Single wire miss was already argued to be:
+a pure threshold tie at margin 1.000, not a model fault.
+
+###### AND THE ROUNDING FLAG IS SETTLED BY MEASUREMENT, NOT BY ITS COMMENT
+
+`duplexCyclesForStep(step, {rounded})` rounds TIPPT and turns to ONE DECIMAL
+because the reference does - **not an output rounding, which is what the flag
+name suggests and what I first assumed**. Measured both ways against the
+reference's reported figure:
+
+```
+Duplex, ROUNDED tippt/turns     41.9% exact   93.2% within one step
+Duplex, UNROUNDED               24.6% exact   60.7% within one step
+```
+
+The rounded figure is far closer - and **the wire DECISION deliberately uses
+the unrounded one**. That looked like a free win. It is not:
+
+```
+wire accuracy, shipped (unrounded)   12839/12937 = 99.242%
+wire accuracy, rounded selection     11689/12937 = 90.353%   <- 1,150 WORSE
+```
+
+**EIGHT AND A HALF POINTS WORSE.** The engine's choice is right and the comment
+at the call site says why: each `K` was BRACKETED against the unrounded
+comparison, so the two are coupled. Agreeing better with the reference's
+*reported* figure does not mean agreeing better with its *decision*.
+
+Reverted; engine byte-identical to the commit, both `rounded: false` call sites
+intact.
+
+###### SO LEVER EIGHT IS SPENT, AND THE WIRE MISSES STAND
+
+The cycle model is exact where it can be checked exactly, its exponents do not
+drift, and the one change that looked available costs nine points. The 54
+duplex wire misses remain what they were measured to be in 2026-11-10: marginal
+doors sorted by a threshold on a quantity known to about a per cent, half of
+them one step soft.
+
+**WORTH KNOWING FOR ANY FUTURE PULL**: `import.mjs` now keeps `cycles`,
+`turnsOnSprings`, `totalInchPoundPerTurn` and `multiplier`, but **the corpus
+`expect` still holds only the six**. Cycle supervision lives in the raw files
+and will be lost if they are ever pruned.
+
+##### THE LAST TWO UNMEASURED SLICES, AND THE LEDGER CLOSES (2026-11-13)
+
+Asked again whether anything was left. Two slices had genuinely never been
+looked at, and both are now measured.
+
+###### DUPLEX WEIGHT IS SOUND, AND IT IS THE ONE THAT TOUCHES MONEY
+
+`dev/envelope.mjs` scores a reading EXACT on wire and length. **Weight is a
+third output the reference reports and nothing here had ever scored it for
+duplex** - so a systematic weight error would have been invisible to every
+tool in `dev/`. It matters more than a specification would: weight x the
+per-pound rate IS the price.
+
+```
+11,754 readings with the wire right     p10/median/p90    within 0.5%
+inner spring                            1.0000 all three      99.0%
+outer spring                            1.0000 all three      99.0%
+inner, where the LENGTH is right        1.0000 all three     100.0%
+outer, where the LENGTH is right        1.0000 all three     100.0%
+```
+
+**Weight carries no error of its own.** The 1% shortfall is exactly the length
+misses coming through, which is what the formula says should happen - wire
+cross-section x length x density. Pricing is safe.
+
+###### THE MULTI-LEVEL GROUPS ARE A DIFFERENT SHAPE, AND IT RESOLVES TO ONE GROUP
+
+`dev/miss-margin.mjs` covered only PLAIN TWO-LEVEL groups; every group with
+`cuts` or `mid` was skipped. That was 2,044 in-envelope readings and 54
+failures never examined individually - the largest unexamined slice left.
+
+```
+                                     two-level      multi-level
+failures within 0.01 of a threshold   40.0% (18x)    27.8% (5.5x)
+failures FURTHER than 0.4 from one    12.9%          24.1%
+median failing margin                 0.0133         0.0629
+```
+
+So a quarter of them are **not** straddlers. `/home/odoo/logs/farmiss.mjs`
+named them, and all thirteen are **the same group**:
+
+```
+0.295/0.2437 2spr   x13   we gave 1.25, reference wanted 1
+                          margins 0.408 to 0.493 - all BETWEEN thresholds
+                          13 of 13 wanted a level the group ALREADY HAS
+```
+
+**THAT GROUP IS ALREADY DIAGNOSED ABOVE.** `group-shape.mjs` records it
+carrying FIVE real bonus levels (`-1:2  0:84  0.25:2  1:26  1.25:62`) where
+the fitter allows three. It has level 1; what it cannot do is place the
+1-vs-1.25 boundary while also serving 0. That is capacity, and capacity was
+measured twice - **globally -2.45 points, per group -2.07** - with this very
+group noted as having "failed on both paths and memorised bands".
+
+###### THE LEDGER
+
+```
+more data                      flat above 25 readings a group
+more capacity, globally        -2.45 points
+more capacity, per group       -2.07 points
+coil-count quantisation        refuted by a test with power to confirm
+the IPPT inversion             19.26% against the table's 98.81%
+the fitter's own gates         +17 of 10,351, CI -12.5 to +21.0
+the stiffness model            refits to a BYTE-IDENTICAL score
+the cycle model                exact on Single; the one change costs 9 points
+```
+
+Plus twelve correction forms for the past-120 band, of which one won.
+
+**WHAT IS LEFT IS ABOUT A TENTH OF A POINT**, and every route to it has been
+tried: ~111 two-level straddlers where sliding every boundary in-sample
+recovers five, 41 multi-level straddlers of the same kind, and 13 readings in
+one capacity-bound group. **No further duplex work should start without a new
+idea about the FORM**, and the three open items worth more than a decimal are
+unchanged: the drum rule is known and unimplemented, the vendor disagrees
+about filler length, and a past-120" figure is still printed without saying it
+is an extrapolation.
+
+##### TWO MORE LEVERS, PUSHED ON REQUEST, AND BOTH LOSE (owner, 2026-11-13)
+
+*"as long as there is you should keep trying even if the gain is very small"* -
+and he has been right to push before. So two things were found that had never
+been tried. Both are negatives, and both are worth keeping because each had a
+real argument behind it.
+
+###### THE THRESHOLD SEARCH GRID IS NOT THE LIMIT
+
+`b` is scanned over +-0.25 in steps of `1/B_STEPS` = **0.0005**. The threshold
+is `a + b*floor`, so at a typical floor of 30 **one grid step moves it by 0.015
+in frac** - and the median failing margin is **0.0133**. The grid is as coarse
+as the errors it makes, which nobody had noticed.
+
+```
+baseline  B_STEPS=2000  step 0.0005     2413 / 2587
+finer     B_STEPS=8000  step 0.000125   2411 / 2587    -2
+```
+
+Same range, four times finer, **two readings worse** against a noise floor of
+sd 10.5. A finer search necessarily fits the TRAINING data better and
+generalises no better - the extra precision chases noise. Costs four times the
+run for nothing. **Do not re-raise B_STEPS.**
+
+###### THE ALLOCATION HYPOTHESIS IS REFUTED
+
+1,522 readings are held out of the fit by `fit: false`. Re-enabling them
+WHOLESALE was measured at net -3 (p = 0.607) and dropped - but `derive.mjs`'s
+own comment left the door open:
+
+> *"uniform data lands on rungs in proportion to how often a door hits them -
+> so it piles onto the four rungs already at 100% and barely touches the thin
+> ones ... the allocation, not the data, may have been what failed."*
+
+`ENABLE_UNFIT_RUNGS` was built for exactly that and **had never been used**.
+The starved rungs were found by counting: `0.5625/0.4375` has **0 fitted
+length readings and 14 held out**, `0.625/0.4687` 0 and 5, and four more would
+roughly triple.
+
+```
+baseline                     2413 / 2587
+8 starved rungs admitted     2410 / 2587    -3
+```
+
+**The same answer as the wholesale test, to within one reading.** Aiming the
+held-out readings at the thin rungs does no better than admitting them all, so
+the allocation was not what failed - the data simply does not help. That
+hypothesis is now closed rather than open.
+
+###### TEN LEVERS
+
+```
+more data                      flat above 25 readings a group
+more capacity, globally        -2.45 points
+more capacity, per group       -2.07 points
+coil-count quantisation        refuted by a test with power to confirm
+the IPPT inversion             19.26% against the table's 98.81%
+the fitter's own gates         +17 of 10,351, CI -12.5 to +21.0
+the stiffness model            refits to a BYTE-IDENTICAL score
+the cycle model                exact on Single; the one change costs 9 points
+the search grid                -2, and four times the cost
+held-out readings, per rung    -3, same as wholesale
+```
+
+**AND THE REMAINING CEILING IS ABOUT A TENTH OF A POINT**, concentrated in
+~111 two-level straddlers (sliding every boundary in-sample recovers five), 41
+multi-level straddlers of the same kind, and 13 readings in one capacity-bound
+group. Every knob in the fitter has now been swept. **What is wanted is a new
+IDEA about the form, not another parameter** - and the honest thing to say when
+asked again is that the next person to find one should test it, not that none
+exists.
+
+##### A COMPLETE CAUSAL CHAIN, AT LAST: THE HI-LIFT POLE (owner, 2026-11-13)
+
+*"okay keep going"*, after ten levers. This one found something real - not a
+lever that moves the headline, but **the first time a length failure has been
+traced all the way to a root cause** rather than described as a straddler.
+
+###### THE CHAIN, EACH STEP MEASURED
+
+```
+length  <- TIPPT, rounded to a tenth          dev/tippt-rounding.mjs
+tippt   <- weight * rEff / TURNS              corr(turns err, ippt err) -0.897
+turns   <- rEff / MULTIPLIER   (hi-lift only) dev/turns-hilift.mjs
+                                              dev/hilift-pole.mjs
+```
+
+**IT STARTED WITH A ROUNDING.** `duplexActiveLength` takes TIPPT as its only
+reading-specific input and rounds it to one decimal, because the reference
+computes from the figure it shows - its own comment says using the exact value
+cost ten points. So the length hangs on WHICH TENTH our tippt lands in:
+
+```
+our tippt rounds to the SAME tenth as theirs   524 readings   11.3% failing
+to a DIFFERENT tenth                           175 readings   35.4% failing
+of those, 2+ tenths out                         42 readings   81.0% failing
+```
+
+**51% of the failures sit on a different tenth, where only 25% of readings
+do.** That is the mechanism, and it is the first one found that points at an
+input rather than at a boundary.
+
+###### AND THE 2+ TENTH GROUP IS ONE CONFIGURATION
+
+Every one of the 42 is **hi-lift**; 39 of 42 are LOW; the relative error
+correlates **-0.937 with turns**. Following that to the turns comparison:
+
+```
+13 of 699 readings have a turns error over 1%, up to 9.18%
+ALL are drum D800-120.  ALL have hiLift / door height > 1.1.
+0 of 418 readings below that ratio are wrong.
+```
+
+**NOT A ROUNDING THIS TIME, AND THAT WAS CHECKED.** The reference reports
+turns to 0.01 and the bulk agree to 0.027 absolute; these differ by 1.7 to
+**85 turns**. Real.
+
+###### IT IS AMPLIFICATION AT A POLE, AND THE ENGINE SAYS SO ITSELF
+
+`turnsExact` on a hi-lift drum is a DIVISION, and its own comment names the
+hazard: *"a hi-lift drum has a smooth MULTIPLIER and the turns fall out of
+that, which is what lets turns go to a pole where the multiplier crosses
+zero."*
+
+The reference reports its own multiplier, so the quantity BEFORE the division
+can be compared. Predicted error `-(mult err)/mult` against the actual:
+
+```
+ |mult|     mult err    predicted   actual turns err
+5.63e-3     -4.74e-4       8.41%          9.18%
+1.07e-2     -5.81e-4       5.43%          5.74%
+8.92e-3     -3.88e-4       4.34%          4.54%
+   ...        ...           ...            ...
+2.87e-2     -3.24e-4       1.13%          1.14%
+```
+
+**Every row matches.** The turns error is entirely the multiplier error
+divided by a near-zero multiplier.
+
+**TWO THINGS CONSPIRE.** The bad readings sit where `|multiplier|` is about
+twenty times smaller than typical (5.6e-3 against a median 3.4e-1) AND where
+the multiplier is about fifty times less accurate (4.3e-4 against 8.8e-6). So
+it is not only a small denominator - the fit itself degrades near its own zero
+crossing, which is what any fitted surface does.
+
+**AND THE `rEff` CANCELS, so going through turns neither causes nor cures it:**
+
+```
+turns = rEff / mult   =>   tippt = weight * rEff / turns = weight * mult
+```
+
+The relative error in tippt simply IS the relative error in the multiplier.
+Computing tippt directly would change nothing - **do not "fix" it that way.**
+
+###### WHAT COULD ACTUALLY BE DONE, AND THE RISK
+
+`hiLiftMultiplier` is a FITTED SURFACE - six basis functions in height,
+quintics in `u`, `drum.multCoeffs` per drum. The only fix is a more accurate
+multiplier near its zero crossing: refit D800-120's coefficients with the 706
+readings carrying `referenceMultiplier`, weighted toward small `|mult|`.
+
+**NOT ATTEMPTED, and the reason is the trade.** That surface feeds turns,
+tippt, cycles and length for EVERY hi-lift door, and the readings that would
+pull the fit are thirteen at the edge of one drum's range. Weighting a fit
+toward its worst-conditioned corner is how the other 632 hi-lift readings get
+worse. It needs its own session with the never-tuned sets watched.
+
+###### THE ENTRY CONDITION, WHICH IS THE USEFUL PART
+
+**`D800-120` with hi-lift more than about 1.1x the door height.** Inside that
+band the figures are hypersensitive: a multiplier right to four decimal places
+still gives turns out by 9%. Outside it - 418 readings - nothing is wrong at
+all.
+
+That is a product fact as much as an accuracy one, and it is the same shape as
+the past-120" extrapolation: a region where the answer should be marked rather
+than quietly printed.
+
+**MEASURED ON DUPLEX, BUT `turnsExact` IS SHARED WITH SINGLE**, so the same
+band is hypersensitive there. Single measures 99.9% over 1,246 clean readings
+including hi-lift to 119" - but those draws were residential doors, mostly
+standard lift, so the band may simply never have been sampled. **A Single draw
+aimed at hiLift > 1.1x height on D800-120 would settle it**, and that is the
+one pull left in this whole line of work that could matter to what he sells.
+
+`dev/tippt-rounding.mjs`, `dev/turns-hilift.mjs` and `dev/hilift-pole.mjs` are
+committed; none needs a database or a request.
+
+##### THE POLE IS THE DRUM CATALOGUE'S OWN EDGE, AND IT SHIPPED A GUARD (2026-11-13)
+
+*"run it"* - the one pull named above. It was run, and it changed the finding
+from an accuracy curiosity into **a defect on the assembly the business
+actually sells.** First time in this line of work that anything shipped.
+
+###### THE CHEAPEST HALF COST NOTHING AND SHOULD HAVE BEEN DONE FIRST
+
+Before any request: **only 7 of 2,061 Single readings ever taken sit past
+ratio 1.1, and all 7 are junk** - 300,000-cycle doors with 2,481" springs,
+drawn by `single-gap-sample.mjs` when it was chasing blind spots. So the band
+was never asked a real question. `dev/hilift-band.mjs` cuts hi-lift readings
+**by the RATIO** rather than by hi-lift inches, which is why no earlier tool
+could see this: 105" of hi-lift on a 227" door is ratio 0.46 and safe, the
+same 105" on an 84" door is ratio 1.25 and in the pole. `single-breakdown.mjs`
+slices by the inches and puts them in the same bucket.
+
+###### THE MECHANISM, READ OUT OF THE ENGINE'S OWN TABLE
+
+`HL800_COLUMNS` carries, per hi-lift column, **the catalogue's lowest and
+highest published door height** - and `hl800Base` reads `window[j][a + 3]`,
+so those two fields are **documentation that nothing consults.** Printed out,
+the floor is exactly:
+
+```
+hiLift     0  12  24  36  48  60  72  84  96 108 120
+min height 72  72  72  72  72  72  72  84  96 108 120   = max(72", hiLift)
+```
+
+**SO "HI-LIFT ABOVE THE DOOR'S OWN HEIGHT" IS, BY CONSTRUCTION, BELOW THE
+BOTTOM OF EVERY COLUMN.** The 1.1 ratio measured on duplex is that boundary.
+Below it the surface is interpolated between published rows; above it the
+quintic in `10/H` is extrapolating where `10/H` is largest, so the high-order
+terms run away - and `turnsExact` DIVIDES by the result:
+
+```
+D800-120, 96" of hi-lift     height 96"  ratio 1.00   mult  1.96e-1  turns      26.4
+                             height 84"  ratio 1.14   mult -3.38e-4  turns -15260.8
+                             height 72"  ratio 1.33   mult -3.65e-1  turns     -14.1
+```
+
+**62.5% of configurations past the floor return a NEGATIVE spring length**,
+and before this they were printed to the customer **with no warning at all** -
+a negative length, a negative steel weight, and `cannotBeSold` reading only
+duplex and wire stock, so nothing in the page knew. Nothing was BUYABLE, which
+was checked over 47,328 configurations and is **luck, not design**: the wire
+that falls out of a nonsense turns figure is always one the shop does not
+stock.
+
+###### THE PULL: 100 REQUESTS, AND THE REFERENCE IS IN THE SAME PLACE
+
+A 40-case probe first (the V16 lesson), half of it a CONTROL at ratio 0.5-0.9
+on the same drums and door sizes - without which a poor yield in the band
+reads as "hi-lift doors are awkward" rather than as the pole. Then 60 aimed
+at D800-120 between 0.80 and 1.05, because the strip just BELOW the floor is
+the only part of the band a customer can reach with a sellable door.
+
+```
+D800-120   |turns error| against the reference      575-120
+ ratio      n    median    WORST                     n   WORST
+ 0.00-0.80   6   0.228%    0.27%                      9   0.39%
+ 0.80-0.90  32   0.182%    0.40%                      1   0.19%
+ 0.90-0.95   8   0.181%    0.27%                      1   0.13%
+ 0.95-1.00  13   0.108%    0.21%                      -      -
+ 1.00-1.10  16   0.107%    0.42%                      2   0.19%
+ 1.10-1.25   3   6.154%   37.45%   <- the pole        2   0.16%
+ 1.25-  up   2   1.913%    1.91%                      5   0.52%
+```
+
+**EXACT TO 0.42% ALL THE WAY TO RATIO 1.10 OVER 75 READINGS, THEN 37%.** And
+every clean reading in the probe - 20 of them - is 100% on wire, length AND
+weight. The engine is right up to the catalogue's edge and nowhere past it.
+
+**THE REFERENCE EXTRAPOLATES TO THE SAME PLACE**, which is what makes this a
+refusal rather than something to fit: its own reported turns come back
+NEGATIVE there (-21.4, -25.9, -7.8, -15.0), its own multiplier agrees with
+ours in sign and magnitude on all five bad readings (2.52e-3 against our
+1.83e-3; -2.98e-1 against our -3.10e-1), and **of 245 readings ever pulled
+with the hi-lift above the door height it stood behind SIX.**
+
+###### 1.1 WAS CONFIRMED, NOT FITTED - AND IT NEEDED A SECOND CONDITION
+
+The ratio came from the duplex data on 2026-11-12, before any of this. Today's
+Single draw is independent of it and lands in the same place:
+
+```
+every hi-lift Single reading with a turns error over 1%   ratios 1.16 .. 1.53
+every reading past the floor the reference called CLEAN   ratios 1.01 .. 1.08
+```
+
+Nothing falls between. A gate at 1.0 would refuse those six good answers.
+
+**BUT THE RATIO ALONE IS NOT ENOUGH**, and a 341,088-configuration sweep found
+the hole rather than reasoning finding it: **D800-120, a 72" door with 78" of
+hi-lift, ratio 1.08, multiplier -2.8e-3, turns -1757.7.** The crossing sits a
+little above the door height but not by a fixed amount. So the guard is
+`hiLift > 1.1 x height` **OR a non-positive multiplier**, the second being
+nonsense by construction - the spring would have to unwind to lift the door -
+and provably safe: six hi-lift Single readings have one, the reference agrees
+on all six, and it called **none** of them clean.
+
+**After both conditions: 30,400 negative lengths, 0 still unwarned, and 0
+false fires across 310,688 sane configurations.**
+
+###### WHAT SHIPPED
+
+A red `hilift-past-pole` in the existing hi-lift block, beside
+`hilift-over-max`, which already red-flags the other end for the identical
+reason ("past that the fitted curves leave their measured band entirely").
+`HILIFT_POLE_RATIO` carries the argument.
+
+Golden **725 byte-identical**, **20/20 invariants**, `spring_engineering`
+**0 failed 0 errors of 348**, duplex envelope unmoved (98.20 / 94.08 / 67.93),
+Single unmoved at 99.9%, `spring_calculator` regenerated and `--check` clean.
+
+**NOT DONE, AND IT IS HIS CALL**: `cannotBeSold` still knows nothing about
+this. Nothing in the band is buyable today, but only because the wire happens
+to be unstocked. Making that explicit is one clause.
+
+###### TWO THINGS THAT COST A RUN EACH
+
+**`c.messages` DOES NOT EXIST - THE GETTER IS `c.warnings`**, and it returns
+an empty list unless `resultsVisible`. A diagnostic written as
+`c.messages || c.warnings || []` read the second and I recorded it as the
+first, so the next tool asked for `c.messages` alone and reported the guard
+was not firing when it was. **Seventh of the invented-field-name family**, and
+the first one where an earlier tool's `||` fallback hid which name was real.
+
+**`test_every_string_the_calculator_can_show_is_in_the_file` JOINS THE JS
+LITERALS WITHOUT UNESCAPING THEM** and compares against a `.po` file it DOES
+unescape, so a `\"` inside a message can never match however the `.po` is
+written. The inch marks ride in the ARGUMENTS instead - the msgid carries no
+quote and the customer still reads `115"` and `96"`. Spanish is a tripwire
+here: every new `_t()` fails that test until `i18n/es.po` carries it.
+
+`dev/hilift-band.mjs` and `dev/single-pole-sample.mjs` are committed, with
+`dev/eval-pole-probe-seed20261113.json` and
+`dev/eval-pole-floor-seed2026111302.json` (line id stripped).
+`DRUM=` and `RATIO=lo:hi` aim the sampler.
+
+##### THE WHOLE INPUT SURFACE, AND THE AUDIT THE POLE SUGGESTED (2026-11-13)
+
+*"is there anything else accuracy related left"* - asked straight after the
+pole shipped. The pole was found by noticing a table that declares a range the
+code never consults, so the obvious next move was to ask **where else that is
+true.** The sweep cost no requests and closed four questions.
+
+###### THE OTHER EDGE OF THE SAME TABLE IS BENIGN, AND STRUCTURALLY SO
+
+`HL800_COLUMNS` has a published CEILING as well as a floor, and the engine
+clamps only at the drum's 384" maxHeight - so at low hi-lift there is up to
+**10 feet of door above the last published row**:
+
+```
+hiLift      0   12   24   36   48   60   72   84   96  108  120
+published  22   23   24   25   26   27   28   29   30   31   32  ft
+engine     32   32   32   32   32   32   32   32   32   32   32  ft
+```
+
+**It does not blow up, and the reason is the basis.** The columns are
+polynomials in `10/H`, so extrapolating to a TALLER door sends `10/H` toward
+zero and the high-order terms vanish; extrapolating toward the floor sends it
+up and they run away. Measured on D800-120 at 12" of hi-lift, the multiplier
+declines smoothly 0.404 -> 0.273 from 21 to 32 ft with turns and length
+climbing smoothly with it. **The floor is dangerous and the ceiling is safe,
+by construction rather than by luck.**
+
+**IT IS STILL UNMEASURED AGAINST THE REFERENCE - zero readings above the
+published ceiling, ever.** The maths says benign and this project has a long
+record of the maths being right and worth checking anyway. About 20 requests
+would close it.
+
+###### THE GUARD'S COVERAGE, CHECKED RATHER THAN ASSUMED
+
+- **525-54HL**: exactly two geometries reach |multiplier| under 0.03, and both
+  are a **48" door** - four feet, not a garage door. Both fire the guard
+  anyway (ratios 1.10 and 1.13). No silent case.
+- **DUPLEX IS COVERED TOO.** The hi-lift block is keyed on the lift type and
+  the drum, never on the assembly, so an 84" duplex door with 96" of hi-lift
+  raises `hilift-past-pole` as well - which is where the original 13 bad
+  duplex readings lived.
+
+###### THE REFERENCE'S COMPLETE REQUEST, FROM ITS OWN CODE
+
+Worth writing down so nobody derives it again. Its `engineerTorsionSpring()`
+sends exactly:
+
+```
+garageDoorLineId  assembly  duplexInnerSpringInnerDiameter
+duplexOuterSpringInnerDiameter  lift  radius  numberOfSprings  innerDiameter
+drumName  cycles  doorWidthInches  doorHeightInches  doorWeightPounds
+pitch  coneType  handSelection  hiLift
+```
+
+`dev/pull.mjs` sends all of them except the last four of that list bar
+hiLift. **`coneType` and `handSelection` are hard-coded `null` in the
+reference's own UI**, so neither can move an answer. **That leaves `pitch` as
+the ONLY input in existence that we do not send** - and the UI sends it as
+`null` whenever track radius is chosen, which is what omitting it amounts to.
+**So every reading in the corpus is an uncontaminated radius reading**, and no
+past measurement needs revisiting.
+
+###### PITCH IS NOT A BUG, BUT IT WOULD COME BACK DEAD
+
+An audit for "fields defined in a data table and read nowhere" turned up
+`state.pitch` and `state.pitchAmount`, set by the UI and consulted by no
+calculation, reaching no order, no work order sheet and no shop floor card.
+That is **not** a defect: `d137f57` put Vertical lift, Pitch and Triplex away
+on the owner's instruction, *"not needed at the moment, wanted back later"*,
+keeping the state and the toggle so they return intact.
+
+**WHAT IS WORTH KNOWING IS WHAT COMES BACK.** In the reference, pitch is an
+ALTERNATIVE TO RADIUS - the control is a two-tab chooser, and picking Pitch
+emits `radius-changed(null)` while picking Track emits `pitch-changed(null)`.
+Radius is already documented here as changing TURNS and nothing else. There is
+no pitch arithmetic anywhere in this engine, so **un-commenting those two
+buttons would restore a control that changes nothing** - precisely the bug
+already recorded against the Radius control ("written to state and read by
+nothing").
+
+Bringing pitch back is therefore a calibration job, not a template edit: a
+draw across the pitch options against a radius baseline would say whether
+pitch maps onto an effective radius (cheap) or is its own surface (a
+campaign). **Nobody should re-enable it without that.**
+
+###### SO WHERE ACCURACY STANDS
+
+Twelve levers measured and spent, twelve correction forms for the past-120
+band of which one won, and today a thirteenth line of work that produced a
+REFUSAL rather than a number. What is left is not an idea anybody is holding
+back: ~111 two-level straddlers, 41 multi-level ones and 13 readings in one
+capacity-bound group, all three of them the same mechanism - a threshold
+decided on a quantity known to about a per cent.
+
+The two genuinely unmeasured things are both small and both the owner's call:
+**the ceiling band** (~20 requests, expected to confirm what the basis
+argument already says) and **pitch** (a feature, not a fix).
+
+##### THE DOMINANT CONFIGURATION, AND WHETHER THE TARGET ITSELF HAS MOVED (2026-11-13)
+
+*"so now you are out of ideas"* - asked a third time. Two things had genuinely
+never been measured, and both are now closed. Neither changed any code.
+
+###### STANDARD LIFT HAD BEEN SCORED ON 54 READINGS. IT IS 4,307.
+
+`dev/turns-hilift.mjs` carried standard lift as a CONTROL, on the 54 rows the
+corpus happens to hold `referenceTurns` for. **Standard lift is very nearly
+everything the business sells**, and `turnsOnSprings` and
+`totalInchPoundPerTurn` ride on every raw pull and eval file - so eighty times
+the evidence was already paid for and sitting on disk. `dev/turns-standard.mjs`
+reads it.
+
+```
+                       n        median       p90      worst
+TURNS   all          4307      +0.138%    +0.501%    0.878%
+        radius 10    1218      -0.038%
+        radius 12    1334      +0.103%
+        radius 15    1755      +0.294%     <- the bias TRACKS THE RADIUS
+
+TIPPT   all          4307      +0.0014%   +0.039%    0.187%
+        radius 10/12/15        +0.0015 / +0.0002 / +0.0021%   <- FLAT
+```
+
+**IT IS NOT ROUNDING**, which is the first thing to rule out: the reference
+reports turns to 0.01 and only **14.7%** of ours land within a whole step of
+its figure, the worst out by 0.0512 of a turn.
+
+**BUT IT NEVER REACHES TIPPT, AND TIPPT IS WHAT THE LENGTH IS BUILT FROM.**
+Turns carries a radius-dependent bias; tippt is flat in radius and exact to
+0.0014%. So `rEff` and `turns` are fitted JOINTLY with only their ratio pinned
+by the data, and the error cancels in `weight * rEff / turns`. **Same shape as
+the `b` slope absorbing a stiffness scale error** - a parameter pair where one
+combination is determined and the other is free.
+
+So the only thing carrying it is **the turns figure on screen**, out by under
+0.05 of a turn on a typical 8.6 - well inside the quarter turn an installer
+adjusts by. Correcting it means moving `rEff`, which feeds the tippt
+everything depends on. **Not worth it, and now measured rather than assumed.**
+
+###### THE REFERENCE HAS NOT MOVED IN FIVE WEEKS
+
+Every accuracy figure in this file is scored against data pulled between
+2026-10-06 and now, and **nobody had ever checked that the reference still
+gives those answers.** If SSC had updated their calculator mid-campaign, old
+and new readings would conflict, the fitter would split the difference, and
+the never-tuned yardsticks would be measuring agreement with a dead version.
+
+25 readings from `eval-validation-seed61006.json` - the oldest committed
+yardstick, **2026-10-06** - re-asked and compared on wire, both lengths and
+cycles:
+
+```
+re-asked 25    IDENTICAL 25    DIFFERENT 0
+```
+
+**The target is stable and the corpus is not stale.** That is a risk nobody
+had tested and it quietly underwrites every figure quoted here. Worth
+repeating if a campaign ever spans months rather than weeks; `dev/pull.mjs`
+on a sweep rebuilt from any old eval file is the whole method.
+
+##### PARTIAL POOLING BEAT THE PER-GROUP FIT, AND IT SHIPPED (2026-11-13, confirmed and shipped 2026-11-16)
+
+*"keep running stuff until you are completely out of ideas ... as long as they
+dont permanently damage the results"*. Four long shots were run. Three closed
+large areas at a stroke; the fourth is **the first genuine accuracy gain in
+weeks, and the only duplex LENGTH change ever shipped from this line of work.**
+
+**IT IS SHIPPED. `SHRINK` DEFAULTS TO 60 AND THE TABLE CAME FROM
+`sh dev/apply.sh`**, so the documented routine reproduces exactly what is
+installed. Golden **725 byte-identical** - which is the proof that the SINGLE
+path is untouched, since this only moves the duplex rung table - **20/20
+invariants**, Single unmoved at **99.9%**, `spring_engineering` **0 failed 0
+errors of 348**, `spring_calculator` regenerated and `--check` clean.
+
+**AND DUPLEX IS CALCULATED BUT NOT SOLD**, which is what made this safe enough
+to ship on a measured out-of-sample gain rather than referring it upward: the
+change cannot reach a cart, and `SHRINK=0 sh dev/apply.sh` is the way back.
+
+###### THE TIPPT ORACLE CLOSES EVERYTHING UPSTREAM OF TIPPT, AT ONCE
+
+`duplexActiveLength` takes TIPPT as its ONLY reading-specific input. So hand
+it the reference's own reported TIPPT - a perfect oracle - and whatever that
+recovers is the CEILING on refitting the multiplier surface, the weight model,
+rEff, the turns, or the rounding mode. One measurement, every idea upstream.
+
+```
+                            699 readings, wire already right
+as shipped                  578   82.69%
+with the REFERENCE's tippt  568   81.26%      fixed 5, BROKEN 15
+```
+
+**A PERFECT TIPPT IS WORSE.** The rung table was fitted against OUR tippt
+including its bias, so handing it the truth moves readings off the thresholds
+it learned - the same mechanism as `b` absorbing a stiffness scale error. Even
+in the clean band it is -2.
+
+**SO THE DEFERRED D800-120 `multCoeffs` REFIT IS NOW CLOSED TOO**, along with
+every other upstream idea. `dev/tippt-oracle.mjs`, no requests.
+
+Also closed, both free: **floating point at the floor boundary** - zero of
+12,839 readings have an active length within 1e-6 of a whole inch, so no
+epsilon-snap is needed; and **the slope scan range**, where fitted slopes have
+a median of 0.0055 and a p90 of 0.0195 against a +-0.25 scan, twelve times
+wider than it needs to be. **Max-margin threshold placement was already
+implemented** - `fitLine` maximises the gap and tie-breaks on flatness, with a
+cap, and `if (best && bad > best.bad) continue;` stops a worse fit winning on
+margin. Do not re-propose any of these four.
+
+###### THE ONE THAT WORKED: POOLING THE THRESHOLD ACROSS SPRING COUNTS
+
+Every (rung, spring count) group fits its own line alone, and
+`group-density.mjs` shows thin groups failing eight times as often - classic
+small-sample variance. The structure is visible: `0.2625/0.2253` fits
+a = 0.78222 at three springs and a = 0.78311 at four, independently, same
+slope, same two levels.
+
+`SHRINK=k` pulls each line toward its rung's n-weighted mean by
+`lambda = k / (k + n)`, only across groups sharing a `(lo, hi)` level pair -
+averaging a threshold that separates 0.25 from 1.25 with one that separates 0
+from 1 would be averaging two different questions.
+
+**FIVE-FOLD HOLDOUT OVER THE WHOLE CORPUS, 12,938 READINGS SCORED OUT OF
+SAMPLE, PAIRED:**
+
+```
+k        correct    net    fixed/broken   McNemar p
+0         12018       -         -             -
+10        12033     +15        32/17        0.0444
+25        12041     +23        48/25        0.0095
+60        12054     +36        65/29        0.0003   <- best
+150       12038     +20
+400       12040     +22
+```
+
+**EVERY AMOUNT OF POOLING BEATS NONE**, with an interior peak - exactly the
+shape partial pooling should have. The gain concentrates in groups of 25-49
+readings (net +15), which fits the mechanism: a group needs enough data for a
+LINE to be fitted at all, but not so much that its own estimate is stable.
+
+**THE COMPARISON IS PAIRED, AND THAT IS WHY IT COULD BE SEEN.** Fold totals
+have a standard deviation of 10.5 readings, so comparing them cannot resolve
+anything under about +-21 - the lesson from the LINE_SLACK screen. Pairing the
+same reading across two configurations removes all of that;
+`dev/shrink-report.mjs` runs an exact McNemar on the discordant pairs, and
+`PER_READING=1` on `holdout-score.mjs` emits the rows.
+
+###### WHAT ARGUES AGAINST IT, STATED PLAINLY
+
+- **THE IN-SAMPLE HEADLINE FALLS**: inside 96" goes 98.20% -> 98.10% and the
+  past-120 band 67.93% -> 67.76%. That is the textbook regularisation
+  signature - worse on the training data, better on a new door - and
+  `envelope.mjs` scores the corpus the table was fitted on. It is still the
+  number quoted elsewhere in this file, so **shipping this changes a figure
+  the owner has been told.**
+- **THE NEVER-TUNED SETS CANNOT CONFIRM IT.** Clean arms went 98.9 -> 98.3,
+  96.6 -> 96.6, 97.3 -> 97.3 (net -1 reading); flagged arms 87.7 -> 88.2,
+  89.2 -> 89.2, 88.0 -> 88.5 (net +2). With 535 clean readings a +0.28 point
+  effect is about 1.5 readings - those sets have **no power** here. They do
+  not contradict it either.
+- **THE HOLDOUT FLATTERS REGULARISATION.** Each fold fits on four fifths of
+  the corpus, so groups are thinner there than in production, where
+  shrinkage helps less. `lambda = k/(k+n)` self-adjusts, so the SIGN carries
+  over; the MAGNITUDE at full data will be smaller than +36.
+- **k = 60 WAS CHOSEN BY LOOKING AT THE HOLDOUT.** "Pooling helps" is not a
+  selection artefact - every k tested wins - but "60 is best" is.
+
+###### THE CONFIRMATION RAN, AND IT REPRODUCED (2026-11-16)
+
+A second five-fold run would have re-used the same partition, so the
+confirmation used **four folds**, which assigns every reading to a different
+fold AND fits on three quarters of the corpus rather than four fifths:
+
+```
+                baseline   SHRINK=60    net   fixed/broken   McNemar p
+MOD=5 (first)     12018      12054      +36      65/29        0.0003
+MOD=4 (confirm)   11966      11994      +28      57/29        0.0034
+```
+
+**TWO INDEPENDENT PARTITIONS, SAME DIRECTION, SAME ORDER OF MAGNITUDE, BOTH
+SIGNIFICANT.** The baseline itself moves (12018 to 11966) because a four-fold
+run trains on less, which is exactly why the comparison has to be PAIRED
+WITHIN a partition and never across one.
+
+###### THE DEFAULT HAD TO MOVE, AND THAT IS THE PART THAT WOULD HAVE BITTEN
+
+`SHRINK` was written defaulting to 0 so the experiment could not disturb
+anything. **Shipping it that way would have silently reverted itself**:
+`dev/apply.sh` is the documented routine after every pull and it passes no
+environment at all, so the next person to run it would have re-installed the
+unpooled table with no code change and no warning.
+
+So the default IS the shipped value, 60, and the installed table was produced
+by plain `sh dev/apply.sh` rather than by an env-var run - the routine and the
+product agree by construction. `SHRINK=0 sh dev/apply.sh` is the revert.
+
+**A KNOB WHOSE DEFAULT IS NOT THE SHIPPED VALUE IS A TIME BOMB IN A FILE
+WHOSE WHOLE POINT IS THAT THE TABLE IS RE-DERIVED, NOT EDITED.**
+
+###### THE TRADE THE AVERAGED TARGET CARRIED (since removed - see below)
+
+```
+                        BEFORE    AFTER
+in sample (envelope.mjs)
+  inside 96"            98.20%   98.10%     <- 12 readings WORSE
+  96-120"               94.08%   94.08%
+  over 120"             67.93%   67.76%
+out of sample (holdout, 12,938 readings, paired)
+  MOD=5                 12018    12054      <- 36 readings BETTER
+  MOD=4                 11966    11994      <- 28 readings BETTER
+```
+
+**THAT IS THE REGULARISATION SIGNATURE AND IT IS THE RIGHT WAY ROUND.**
+`envelope.mjs` scores the corpus the table was FITTED ON; `honest.sh` says of
+that section in its own words that it "says nothing about a new door; it is
+here to catch a regression". The holdout is the figure that answers "will the
+next door be right", and it improved twice over.
+
+**SO IF SOMEBODY ASKS WHAT ACCURACY IS AND READS 98.10%, THAT IS NOT A
+REGRESSION** - it is the same table being honest about its own training data
+while predicting unseen doors better. The never-tuned eval sets moved by net
+-1 clean and +2 flagged, which on 535 clean readings has no power to resolve a
+0.2 point effect either way.
+
+The six holdout runs are committed under `dev/shrink-evidence/`, and the
+confirmation's two are reproducible with the command in that README.
+
+###### AND THEN THE TARGET WAS DONE PROPERLY, WHICH REMOVED THE TRADE ENTIRELY
+
+The version above shrinks each line toward **the n-weighted AVERAGE of the
+separate fits**, which throws the readings away and keeps only their
+summaries. `POOL_JOINT` shrinks toward a line **REFITTED on the union** of the
+family's readings instead - which is what "the rung's threshold" actually
+means, and uses every reading rather than two numbers.
+
+The guard matters: `fitLine` on the pooled readings is free to come back with
+`cuts`, a `mid`, or a different `(lo, hi)`, and a threshold separating a
+different pair of levels answers a different question. It is refused there and
+the average stands. 103 of 142 line groups move; 39 keep the average.
+
+```
+                          MOD=5                    MOD=4
+                     net  fixed/broken    p     net  fixed/broken    p
+vs the average       +17     37/20     0.0331   +35     52/17     <0.0001
+vs NO pooling        +53     73/20    <0.0001   +63     77/14     <0.0001
+```
+
+**AND IT IS BETTER IN SAMPLE AS WELL, WHICH THE AVERAGED VERSION WAS NOT:**
+
+```
+in sample (envelope.mjs)   no pooling   averaged   JOINT (shipped)
+  inside 96"                 98.20%      98.10%       98.24%
+  96-120"                    94.08%      94.08%       94.49%
+  over 120"                  67.93%      67.76%       67.76%
+  ALL DUPLEX                 96.66%      96.52%       96.67%
+```
+
+**SO THE TRADE IN THE PREVIOUS SECTION IS GONE.** The awkward part of
+shipping the averaged target was that the in-sample headline fell 0.10 while
+the holdout rose; the joint target raises BOTH, and the honest figure to quote
+inside 96" is **98.24%**, up from 98.20%. Nothing about the earlier reasoning
+was wrong - it is just that averaging fitted summaries was a crude stand-in
+for refitting, and the crude version was the one that had to borrow from the
+training fit to pay for the generalisation.
+
+**THE SAME DEFAULT TRAP, HANDLED THE SAME WAY**: `POOL_JOINT` defaults ON,
+because `dev/apply.sh` passes no environment. `POOL_JOINT=0` is the averaged
+target and `SHRINK=0` is no pooling at all; both are one word at the front of
+`sh dev/apply.sh`.
+
+Golden **725 byte-identical**, **20/20 invariants**, Single unmoved at
+**99.9%**, **0 failed 0 errors of 348**, `spring_calculator` regenerated and
+`--check` clean.
+
+###### KILLING A SWEEP LEAVES THE ENGINE HOLDING A FOLD'S TABLE
+
+`shrink-sweep.sh` installs a throwaway table on every fold and restores the
+real one from a trap - but **a trap does not run when the shell is killed.**
+It was killed to pause, and the engine was left holding a four-fifths table
+(50 rung lines different, 70 `lo:` entries against 71). `git checkout` on the
+one file put it back, confirmed by golden 725 byte-identical and 20/20.
+
+**ALWAYS `git status` THE ENGINE AFTER STOPPING A SWEEP**, and never commit
+while one is running.
+
+##### THE GATES, RE-ASKED WITH AN INSTRUMENT THAT COULD SEE (2026-11-16)
+
+Three ideas were chased after the pooling shipped. Two closed in a single
+measurement each; the third found that **a knob rejected on 2026-11-12 was
+positive all along, and the rejection was the right decision on the evidence
+available.**
+
+```
+in sample, inside 96"       failures      ALL DUPLEX
+  this morning   98.20%        140          96.66%
+  + pooling      98.24%        123          96.67%
+  + LINE_SLACK   98.52%         90          96.92%
+
+out of sample (paired, 12,938 readings)   MOD=5    MOD=4
+  no pooling                              12018    11966
+  + pooling (averaged)                    12054    11994
+  + joint target                          12071    12029
+  + LINE_SLACK=0.10                       12098    12085
+                                          -----    -----
+  total for the day                        +80     +119
+```
+
+Golden **725 byte-identical**, **20/20 invariants**, Single unmoved at
+**99.9%**, **0 failed 0 errors of 348**, `spring_calculator` regenerated.
+
+###### THE TWO THAT CLOSED, BOTH FREE
+
+**POOLING CANNOT REACH THE MULTI-LEVEL GROUPS, FOR WANT OF A SIBLING.** Of
+the nine three-level groups, **zero** share a rung with another group of the
+same level triple - each is the only one of its shape where it lives. There is
+nothing to pool with and no code was written.
+
+**AND POOLING MUST NOT GO ACROSS RUNGS**, which also says the within-rung-only
+guard was right rather than lucky:
+
+```
+levels          sd of `a` WITHIN a rung    sd ACROSS rungs
+0.25 -> 1.25           0.0387                  1.5574    (40x)
+0 -> 1                 0.0255                  0.4618    (18x)
+```
+
+Groups inside a rung agree on their threshold to about 0.03; different rungs
+differ by 0.5 to 1.6. Pooling across them would average quantities that are
+not the same quantity.
+
+###### AND A THIRD IDEA DIED WELL: THERE IS NO LINE TO BORROW
+
+Scored out of sample BY THE FORM the fitter chose, the groups that could not
+fit a line are the worst population left:
+
+```
+form     readings    rate
+line2      10194    94.69%
+line3       1124    91.10%
+split       1149    87.03%   <- 7.7 points down
+bands         61    42.62%   <- a band table memorises, so it cannot generalise
+```
+
+All ten split groups are at TWO springs. So they could borrow a line from
+their rung's 1, 3 and 4 spring siblings, which did fit lines - and the
+`BORROW_REPORT` in `derive.mjs` measures exactly that, honestly on both sides.
+
+**THE ANSWER IS NO, AND THE REASON IS THE FINDING.** `fitLine` refuses the
+siblings' union every time, because **the level set is a function of the
+spring count**:
+
+```
+0.295/0.2437   1spr  {0, 1}
+               2spr  {0, 0.25, 1, 1.25}    <- both sets at once
+               3spr  {0.25, 1.25}
+               4spr  {0.25, 1.25}
+```
+
+That is `duplexSnapToGrid` lifting whole inches to the quarter above at 3+
+springs and not at 2 - already in this file as real at 3+ and false at 2. The
+siblings do not merely hold a different threshold, **they disagree about which
+levels exist**, their union has four, and no two-level line spans it. A group
+cannot borrow a line from siblings answering a different question.
+
+That also explains the 2-spring splits structurally: two springs is the count
+that carries BOTH level sets, so the quarter-vs-whole choice is a second
+decision stacked on the 0-vs-1 one, and a single line in frac cannot hold it.
+
+###### THE KNOB THAT WAS POSITIVE ALL ALONG
+
+The 2026-11-12 entry rejected `LINE_SLACK=0.10` with a 95% interval of -12.5
+to +21.0, and recorded the real lesson itself: *"the screen was not a weak
+test of those knobs; it was incapable of testing them at all."* **It was more
+right than it knew** - the instrument was the problem, and the knob was good.
+
+Scored PAIRED, which removes all of the between-fold variance:
+
+```
+                       MOD=5                        MOD=4
+LINE_SLACK=0.10    +27  72/45  p=0.0159      +56  98/42  p<0.0001
+LEVEL_SUPPORT=0.20 -170 74/244 p<0.0001      (not re-run - decisive)
+```
+
+So `LINE_SLACK` ships at **0.10** and `LEVEL_SUPPORT` is now closed HARD at
+0.06 rather than merely unresolved. The 0.20 test was aimed at a real
+mechanism - `0.295/0.2437 2spr` is dominated by two levels with a third at
+14.8%, which `LEVEL_SUPPORT=0.06` admits and which forces three levels and
+then a split - and raising the gate to exclude it costs 170 readings. **The
+third level is real and needed.**
+
+**IT COSTS SEVENTEEN MINUTES PER RE-DERIVE.** A stricter slack pushes more
+groups into `fitSplit`, which cross-validates every candidate split point, so
+`sh dev/apply.sh` went from about two minutes to about seventeen. Measured -
+the first figure written into `derive.mjs` was a guessed five.
+
+###### THE RULE THIS ESTABLISHES FOR EVERY FUTURE KNOB
+
+**NEVER COMPARE AGGREGATE FOLD TOTALS AGAIN.** Three gates were called settled
+on a test with a noise floor of +/-21 readings; one of them was worth +27 to
++56. Pair the same reading across both settings and run McNemar on the
+discordant pairs - `dev/shrink-report.mjs` does it, `PER_READING=1` on
+`holdout-score.mjs` emits the rows, and the whole comparison costs no more
+than the runs it compares.
+
+**AND CONFIRM ON A SECOND PARTITION BEFORE SHIPPING.** Every one of today's
+three shipped changes was run on MOD=5 and again on MOD=4; the weakest first
+reading (p=0.0159) came back p<0.0001 on the second, and the baseline itself
+moves between partitions (12018 against 11966), so the comparison is only ever
+valid WITHIN one.
+
+##### THE BONUS IS TWO DECISIONS, AND ONE OF THEM IS UNEXPLAINED (2026-11-16)
+
+The structural find above - that the level set is a function of the spring
+count - said the two-spring bonus factors exactly:
+
+```
+bonus  =  step        +  quarter
+          (0 or 1)       (0 or 0.25)
+```
+
+with the quarter frozen at 0 for one spring and at 0.25 for three and four, so
+**two springs is the only count where it is live**, and that is exactly where
+all ten split groups and the worst accuracy sit. `dev/factor-bonus.mjs` fits
+each decision as its own two-level problem - every reading in the group rather
+than a quarter of them, which is the argument that made pooling work.
+
+**THE TWO DECISIONS ARE NOT ALIKE AT ALL**, five-fold cross-validated:
+
+```
+                         pooled      range over the rungs
+step    (0 or 1)                     91.7% - 99.1%     always predictable
+quarter (0 or 0.25)                  56.7% - 99.1%     bimodal
+BOTH together             87.0%
+```
+
+**87.0% AGAINST THE 87.03% THE SPLIT FORM ALREADY SCORES.** Factoring buys
+nothing pooled - which is a compliment to `fitSplit`, because it says the
+existing form is already extracting essentially everything the two decisions
+contain. No code was changed.
+
+###### AND HALF THE RUNGS HAVE A QUARTER NOTHING EXPLAINS
+
+The quarter splits cleanly into predictable rungs (96-99%: `0.3437/0.273`,
+`0.295/0.2343`, `0.3625/0.283`, `0.3065/0.2437`, ...) and rungs at near
+chance (56-79%: `0.3938/0.3195`, `0.375/0.3065`, `0.4615/0.375`, ...). On the
+second group **whether the reference lifts to the quarter is not a function of
+the active length.**
+
+`dev/quarter-variable.mjs` asks what else it could be, on those nine rungs
+only - which is the "ask the question where it lives" lesson applied, since
+the 2026-11-13 missing-variable test pooled everything and was drowned:
+
+```
+always answering the commoner way        58.3%   <- the baseline to beat
+frac (a CONTROL, already in the model)   66.7%
+turns                                    61.7%
+active length / floor / reference length  59.9%
+tippt  59.2%   door height 58.6%   cycles 57.0%
+weight / lb per spring / radius          56.7%
+```
+
+**NOTHING PREDICTS IT.** Thirteen candidates including door height, weight,
+lb per spring, cycle target, radius, turns and the required IPPT, and the only
+one above baseline is the control. And the quarter is genuinely BALANCED on
+several of those rungs - 54%, 48%, 46% - so there is a real decision being
+made and no input available to us makes it.
+
+**WHICH POINTS BACK AT THE SAME LIMIT AS EVERYTHING ELSE.** `frac` carries
+real but weak signal (66.7% against 58.3%), and the straddler work of
+2026-11-13 measured our active length's precision at about **0.0133 in frac**.
+A quarter decision taken on a frac threshold we can only locate to a
+hundredth is exactly the pattern already recorded three times over - the 54
+duplex wire misses, the Single tie at margin 1.000, and the 63 length
+straddlers.
+
+So this is a fourth instance of one mechanism rather than a new problem, and
+the two tools are committed so nobody re-derives it. **Do not re-run the
+factorisation without a more precise active length**; with one, the step is
+already solved and the quarter becomes a plain two-level fit.
+
+##### WHERE LINE_SLACK=0.10's GAIN ACTUALLY CAME FROM, AND A PREDICTION THAT WAS WRONG (2026-11-16)
+
+The commit shipping `LINE_SLACK=0.10` explained it as "a stricter slack pushes
+more groups off the line fitter and into `fitSplit`". **The slowness is real
+and that explanation of the ACCURACY is wrong**, which a two-minute check
+after the fact settled:
+
+```
+                 slack 0.18                 slack 0.10
+  line2 133   line3 9   split 10   bands 9  ->  line2 133  line3 8  split 10  bands 10
+
+  line groups whose fitted a,b MOVED:  0 of 141
+  groups that changed FORM:            2
+```
+
+**Not one line parameter moved, and only two groups changed form at all:**
+
+```
+0.2625/0.2253 2spr   467 readings   line3 (bad=11)  ->  split
+0.295/0.2437  2spr   172 readings   split           ->  bands
+```
+
+So the whole in-sample gain is the biggest group in the corpus - the one this
+file has long recorded as carrying half the remaining error - moving from a
+three-level line to the richer split form, PARTLY OFFSET by a 172-reading
+group falling from a split to a band table. (The holdout gain is larger than
+two groups would suggest because a FOLD fits on four fifths, so more groups
+sit near the slack boundary there than on the full corpus. The comparison was
+still paired within a partition, so it stands.)
+
+###### AND THE OBVIOUS FOLLOW-UP WAS A CONFOUND, NOT A FINDING
+
+That second move looked like a free fix. Scored by form, band tables are
+catastrophic out of sample:
+
+```
+bands     61 readings   42.62%
+none     409 readings   89.98%
+```
+
+so refusing to memorise - `MAX_BANDS=4`, which rejects exactly the two large
+tables (36 bands over 172 readings, 17 over 20) and sends them to plain
+rounding - looked like roughly +90 readings for nothing.
+
+**IT LOSES 32, p = 0.0001** (15 fixed, 47 broken). `MAX_BANDS` stays at 64.
+
+**THE PREDICTION WAS WRONG BECAUSE THOSE TWO PERCENTAGES ARE DIFFERENT
+POPULATIONS, NOT DIFFERENT FORMS.** A group gets a band table precisely
+BECAUSE it is hard - nothing else would fit it - while a group gets no entry
+because plain rounding already works on it. Comparing 42.62% against 89.98%
+compares hard groups with easy ones and says nothing whatever about whether
+banding beats not banding. On the groups that actually get them, a band table
+is better than nothing by 32 readings.
+
+**EIGHTH OF THE FAMILY**, and the same shape as the rest: a correct
+measurement of the wrong thing. The tell available in advance was that one
+number came from 61 readings and the other from 409 - two populations that
+have no reason to be comparable. **A rate computed over whoever happened to
+land in a bucket is not an estimate of what putting somebody there does.**
+
+##### SIDE_SLACK: THE REGRESSION WAS REAL AND COSTS NOTHING (2026-11-16)
+
+The entry above found that shipping `LINE_SLACK=0.10` moved
+`0.295/0.2437 2spr` - 172 readings - from a split to a **36-band table**, and
+named it a regression. The cause is that `sideLine` inside `fitSplit` fits
+each regime with the SAME `lineSlack`, so tightening the top-level budget
+tightened the sides too: on a side of about 86 readings it went from 15
+permitted misses to 8, neither side could be placed, `fitSplit` returned null
+and the group memorised.
+
+`SIDE_SLACK` decouples them, and the two really are different questions - the
+top-level slack decides whether ONE line may stand for a whole group, a side's
+decides whether a REGIME can be described once a split has been granted.
+(CLAUDE.md's "ONE SLACK FOR BOTH FITTERS" was about two LINE fitters
+disagreeing, not about split sides.)
+
+**IT DOES EXACTLY WHAT IT WAS MEANT TO AND GAINS NOTHING:**
+
+```
+LINE_SLACK=0.10 alone   line2 133  line3 8  split 10  bands 10
+  + SIDE_SLACK=0.18     line2 133  line3 8  split 11  bands  9
+
+the only change:  0.295/0.2437 2spr  172 readings  bands -> split
+
+paired holdout, 4 of 5 folds, 10,348 readings scored by both:
+  -5 readings   25 fixed / 30 broken   McNemar p = 0.5901
+```
+
+**A WASH.** So the "regression" was real in form and worth nothing in
+accuracy - which is the `MAX_BANDS` lesson arriving from the other direction:
+a band table on a genuinely hard group is not the disaster its
+population-level rate suggests. Two independent experiments now say the same
+thing about banding, having been designed on the assumption that it was
+terrible.
+
+**KEPT, OFF BY DEFAULT**, because the knob is one line, the reasoning behind
+it is sound, and the next person to notice that group memorising will want the
+measurement rather than the idea. `SIDE_SLACK=0.18` reproduces it.
+
+**THE FOURTH FOLD WAS ENOUGH.** The run was stopped at 4 of 5 to pause, and
+that does not invalidate anything: `dev/shrink-report.mjs` intersects on
+shared reading ids, so a partial run is a smaller paired sample rather than a
+biased one. At -5 with 55 discordant pairs the fifth fold could not have made
+it a win, which is worth knowing the next time a sweep has to be cut short.
+
+##### PAST 120": THE THIN RUNGS WERE GETTING NOTHING, AND NOW THEY POOL (owner, 2026-11-17)
+
+*"the over 120\" drums are still a problem can you do anything to fix them or
+have you exhausted every method"* - and no, one thing was left, in the place
+the ledger had not looked: **the over-120 table's own GUARD.**
+
+```
+band                          n     exact BEFORE   exact AFTER
+inside 96"  (recommended)   11839      98.52%        98.52%   <- UNCHANGED
+96-120"     (supported)       490      94.49%        94.49%   <- UNCHANGED
+over 120"   (DISCLAIMED)      608      67.76%        68.42%
+ALL DUPLEX                  12937      96.92%        96.95%
+```
+
+Golden **725 byte-identical**, **invariants 20/20**, `spring_engineering`
+**0 failed 0 errors of 348**, `spring_calculator` regenerated and `--check`
+clean.
+
+###### FIRST, THE ANSWER TO WHAT HE ACTUALLY ASKED
+
+**IT IS SPRING LENGTH PAST 120", NOT THE DRUM, AND NOT A TALL DOOR.** Cut by
+what a customer orders, the band he is worried about is mostly ordinary doors
+that are HEAVY - 348 of 608 are doors under 144" tall. By door height:
+
+```
+DOORS HE CAN BUILD (<=220" tall)   12683   97.03% exact   99.24% wire
+180-220" tall (at his limit)         813   95.20%         99.38%
+```
+
+So the honest figure for his own catalogue is **97.03%**, and the WIRE - the
+figure that decides whether a door is sprung safely - is **99.2% in every
+band, including past 120"**. Only LENGTH degrades, and only where Service
+Spring disclaims its own answer.
+
+###### THE GUARD WAS A CHOICE BETWEEN TWO BAD OPTIONS, AND THE SCRIPT SAID SO
+
+`fitOffsets` skips any rung with fewer than `min` readings, and a skipped rung
+gets **no correction at all**. Its own split-half shows both ends losing:
+
+```
+min  2   thin rungs get their OWN fit    61.2%   small-sample noise
+min  8   thin rungs get NOTHING          62.5%   pure bias - ~12 rungs
+none     nobody gets anything            47.1%     left at the baseline
+```
+
+**That is the gap partial pooling fills** - the mechanism that gave the
+biggest in-envelope gain of the week, never once tried on this table. And the
+prior is strong here in a way it is not in-envelope: the band's error is
+one-sided (143 long against 4 short before any correction, median +1.00) and
+the fitted offsets are nearly all exactly one inch, where in-envelope
+thresholds differ ACROSS rungs by 0.46 to 1.56 and must not be pooled at all.
+
+`POOL_FALLBACK` gives a too-thin rung the GLOBAL entry instead of nothing -
+complete pooling for the thin, none for the thick, **one** extra global
+parameter rather than one per rung.
+
+###### PINNING THE GUARD IS WHAT MADE THE COMPARISON HONEST
+
+```
+                  unpinned (min scanned)   PINNED at min 8
+5 shuffles              +24                     +32
+```
+
+**THE SCAN SELECTS ON THE TEST HALF** - it reports the best of six minimums,
+which flatters whichever arm has more freedom to move, and the pooled arm
+moved `min` far more (6/8/4/10/10 against 8/8/6/4/2). Unpinned it was
+**costing the pooled arm its own effect**. `MIN=` exists for this now, and
+the rule is general: *scanning is right when the only question is which guard
+to ship; it is wrong as a yardstick.*
+
+Twenty shuffles, guard pinned for both arms:
+
+```
+net +69 readings   mean delta 3.45   sd 4.87   se 1.09
+t = 3.17 on 19 df   15 wins   5 losses
+```
+
+**THE TWENTY SHUFFLES ARE NOT TWENTY SAMPLES**, and that is stated rather than
+glossed: they re-partition the SAME 603 readings. This establishes the gain on
+this data under repeated split-half - the standard the two-level form itself
+was accepted on, and a stronger version of it - not evidence about a reading
+nobody has pulled.
+
+**AND THE SIZE IS SMALL: four readings of 608.** Worth shipping because it is
+measured, principled, costs nothing anywhere else, and removes an obvious
+bias; not worth quoting as a breakthrough.
+
+###### THE GLOBAL ENTRY IS READABLE, WHICH IS WHY IT IS A PRIOR AND NOT A GUESS
+
+`{t: 165, lo: 0, hi: 1}` - below an active length of 165 no correction at all,
+above it exactly one inch. The same shape as the per-rung entries, so the
+eight thin rungs that inherit it are being given the band's own structure
+rather than a fitted number. Two rungs measured to want NO correction keep an
+explicit zero, so the fallback cannot overrule a measured answer.
+
+The table goes 24 rungs -> 32. **A rung the corpus has never seen still gets
+nothing at runtime**, exactly as before: the fallback is EXPANDED into
+explicit per-rung entries at emit time, so the engine stays a plain lookup and
+needed no change.
+
+###### AND THE DEFAULT TRAP WAS WALKED INTO AND CAUGHT
+
+`POOL_FALLBACK` was written defaulting OFF so the experiment could not disturb
+anything - and the table was then fitted with it ON. **`apply-over120.sh`
+passes no environment**, so the next routine refit would have silently
+re-installed the unpooled table with no code change and no warning. The
+default IS the shipped value and the installed table came from plain
+`sh dev/apply-over120.sh`. `POOL_FALLBACK=0` is the revert.
+
+Second time this exact trap has appeared (after `SHRINK`), and the second time
+it was the writing-down that caught it rather than a test.
+
+###### A STALENESS CHECK THAT CAME BACK CLEAN
+
+Worth recording so nobody repeats it: the suspicion was that the in-envelope
+refits of 2026-11-16 (pooling, `LINE_SLACK`) moved the engine's lengths and
+left `DUPLEX_LONG_OFFSET` fitted against the old output. **It had not** - a
+fresh refit returns the same 24 rungs with four minor threshold shifts. Two
+minutes to kill a plausible theory.
+
+##### A LINE BEATS A SPLIT BY PRECEDENCE - AND WHEN ASKED PROPERLY, IT DESERVES TO (2026-11-17)
+
+A real structural gap, found by reading `derive.mjs` rather than by measuring:
+
+```
+const split = line ? null : (needed ? fitSplit(ls) : null);
+```
+
+**A SPLIT IS NEVER EVEN COMPUTED WHILE A LINE EXISTS.** The form ladder is
+PRECEDENCE, not measurement - and that is exactly what `LINE_SLACK=0.10`
+exploited by accident, its whole gain being one group where tightening the
+budget denied the line so the split could be tried.
+
+`FORM_BY_CV=1` offers the split as a third candidate in the cross-validation
+gate that already compares the line against bands. **It loses, and the way it
+lied is worth more than the result.**
+
+###### THE FIRST AIM WAS WRONG, AND THE TABLE SAID SO
+
+It fired on three-level lines only, because the group LINE_SLACK moved was
+one. Run that way it moved **exactly one group of 24 readings** - and the
+table it produced explained why:
+
+```
+128 of 140 fitted lines miss NOTHING in sample (bad === 0)
+```
+
+A line that already accounts for every reading in its group cannot be beaten
+by a richer form except by luck in a small cross-validation, which is all
+that 24-reading win ever was. **The lines a split could beat are the ones
+ACCEPTING MISSES under the slack budget, and the two worst are TWO-level:**
+
+```
+0.2625/0.2253 4spr   387 readings   bad 11      <- the gate could not see
+0.2625/0.2253 3spr   312 readings   bad  4         either of these
+```
+
+Those are precisely the groups `inenv-shape.mjs` names as the biggest failing
+groups in the corpus - **13 and 7 failures - and those failures ARE the `bad`
+count**, the line accepting them under its budget. Re-aimed at `bad > 0`: 12
+groups over 2,132 readings, which keeps the cost argument while pointing it
+where the error is.
+
+###### SEVEN GROUPS TOOK THE SPLIT, AND EVERY MARGIN WAS SELECTION
+
+```
+group                  n    split     line          bands
+0.2625/0.2253 2spr   467    97.6%   -100.0%(fails)  79.4%
+0.2625/0.2253 3spr   312    99.0%     97.4%         95.5%
+0.2625/0.2253 4spr   387    97.4%     96.1%         94.3%
+0.4062/0.331  1spr   149    98.7%     96.6%         87.9%
+0.375/0.295   1spr   155    98.1%     97.4%         87.1%
+0.3938/0.3125 2spr   103    98.1%     97.1%         84.5%
+0.3065/0.2437 3spr   116    96.6%     95.7%         87.9%
+```
+
++0.7 to +2.1 points, each a proper five-fold cross-validation over 100 to 467
+readings. **Paired five-fold holdout over the whole corpus says the
+opposite:**
+
+```
+                              net   fixed/broken   McNemar p
+fold 0   2,587 readings        -3      8/11         0.6476
+fold 1   5,170                 -2     19/21         0.8746
+fold 2   7,764                 -5     21/26         0.5601
+fold 3  10,348                -15     26/41         0.0864
+FINAL   12,938                -19     27/46         0.0344   ** WORSE **
+```
+
+**A CROSS-VALIDATED SCORE IS UNBIASED FOR A FIXED CANDIDATE; THE MAXIMUM OVER
+SEVERAL IS NOT.** Taking the best of line, split and bands inflates the winner
+by however much noise happened to favour it, and on groups that size the noise
+is a point or two - exactly the margins seen. Only the outer folds, which
+selected nothing, told the truth.
+
+**THIS IS THE "+3 READINGS AT cut 0.55" MISTAKE WEARING BETTER CLOTHES.**
+There the selection was across 26 configurations on a holdout and obvious;
+here each individual score really was a cross-validation, which is what made
+it look legitimate. The tell, available in advance: *something chose the
+winner, so the winner's own score is not an estimate of it.*
+
+###### AND THE AIM WAS RIGHT EVEN THOUGH THE ANSWER IS NO
+
+`bad > 0` correctly found the only lines a richer form could possibly beat.
+The answer is that **a floor split cannot fix their accepted misses** - which
+agrees with the straddler finding of 2026-11-13: those failures hug their
+threshold within 0.0133 of frac, and a boundary that is piecewise-linear in
+floor does not help with that either. Same limit, reached by a new road.
+
+###### A REFINEMENT ON WHAT LINE_SLACK ACTUALLY DID
+
+From the same output: the line on `0.2625/0.2253 2spr` cross-validates at
+**-1** - it fails to fit on a fold at all - so the EXISTING line-vs-bands gate
+rejected it and `fitSplit` ran. **The slack never denied the fit**: 11 misses
+sit well inside a budget of 46. The commit that shipped `LINE_SLACK=0.10`
+reasoned about the budget; the mechanism was the gate. The gain is real and
+measured either way.
+
+**THE KNOB IS OFF AND STAYS OFF.** Evidence committed as
+`dev/shrink-evidence/holdout-rows-formbycv.tar.gz`. No MOD=4 confirmation was
+run: that rule guards SHIPPING, and nothing here ships.
+
+**ELEVEN LEVERS NOW.** The engine, the golden snapshot and the shipped table
+were untouched throughout - every fold installs a throwaway table and the
+trap restored it, confirmed at 71 rungs with a clean `git status`.
+
+##### THE CEILING IS BENIGN, AND NOW IT IS MEASURED (2026-11-17)
+
+The last named blind spot. `HL800_COLUMNS` publishes a highest door height
+per hi-lift column as well as a lowest, `hl800Base` reads neither, and the
+FLOOR turned out to be the hi-lift pole and shipped a guard. **The ceiling had
+never been asked: zero readings above it, ever**, with up to ten feet of door
+above the last published row at low hi-lift.
+
+40 requests on D800-120, **half above the ceiling and half below it** at the
+same hi-lifts and the same weights - without that control a poor result reads
+as "tall doors are hard" rather than as the ceiling.
+
+```
+band                  n    median      p90     WORST    clean
+BELOW the ceiling    20    0.176%   0.357%   0.530%        0
+ABOVE the ceiling    20    0.181%   0.266%   0.292%        0
+
+0-2 ft above          7    0.234%            0.266%
+2-5 ft above          9    0.118%            0.292%
+5+ ft above           4    0.168%            0.181%
+
+non-positive multipliers (the pole's signature)            0
+```
+
+**ABOVE IS IF ANYTHING TIGHTER THAN BELOW**, there is no drift with distance,
+and nothing approaches the pole's behaviour. So the basis argument was right
+and is now confirmed by the reference rather than by our own engine agreeing
+with itself: a polynomial in `10/H` extrapolated to a TALLER door sends
+`10/H` toward zero and the high-order terms vanish.
+
+**ZERO OF THE 40 CAME BACK CLEAN, AND THAT IS WHY TURNS WAS THE THING TO
+SCORE.** These are 16 to 31 ft doors whose springs run far past the
+reference's own 120" limit, so it flags essentially all of them - but it
+reports `turnsOnSprings` regardless, and turns is the quantity the pole
+moved. Scoring length here would have measured nothing at all.
+
+**SO THE FLOOR IS DANGEROUS AND THE CEILING IS SAFE, BY CONSTRUCTION AND BY
+MEASUREMENT.** No guard is needed above and none was added.
+`dev/ceiling-sample.mjs` reads the published columns out of the engine's own
+source rather than retyping them - the fourth-copy lesson - and
+`dev/eval-ceiling-seed20261117.json` is committed with the line id stripped.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
