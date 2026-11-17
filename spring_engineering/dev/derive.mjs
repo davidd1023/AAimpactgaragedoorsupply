@@ -2243,6 +2243,38 @@ const out = [...rungs.values()]
             // against bands, so the split is a third option in an existing
             // contest rather than a new one.
             //
+            // THE VERDICT: IT LOSES, AND IT IS OFF. Paired five-fold holdout
+            // over the whole corpus, against the shipped configuration:
+            //
+            //   12,938 readings   -19   27 fixed / 46 broken   p = 0.0344
+            //
+            // Significantly WORSE. Do not re-run this without a new idea -
+            // and read the next paragraph before believing any gate of this
+            // shape, because the way it lied is general.
+            //
+            // THE MARGINS WERE SELECTION, NOT SIGNAL. In-group the seven
+            // groups that took the split beat their line by +0.7 to +2.1
+            // points, each a proper five-fold cross-validation over 100 to
+            // 467 readings. That looked like evidence and was not: **a
+            // cross-validated score is unbiased for a FIXED candidate, and
+            // the MAXIMUM over three candidates is not.** Taking the best of
+            // line, split and bands inflates the winner by however much noise
+            // happened to favour it, and on groups this size that noise is a
+            // point or two - exactly the margins seen. The out-of-sample
+            // folds, which chose nothing, say the truth.
+            //
+            // This is the "+3 readings at cut 0.55" mistake wearing better
+            // clothes: there the selection was across 26 configurations on a
+            // holdout and obvious, here each individual score really was a
+            // cross-validation, which is what made it look legitimate.
+            //
+            // AND THE AIM WAS RIGHT EVEN THOUGH THE ANSWER IS NO. `bad > 0`
+            // correctly found the only lines a richer form could beat. The
+            // answer is that a floor split cannot fix their accepted misses -
+            // consistent with the straddler finding, that those failures hug
+            // their threshold within 0.0133 of frac, which a piecewise-linear
+            // boundary in floor does not help with either.
+            //
             // AIMED BY MEASUREMENT, NOT BY ANECDOTE - and the first version of
             // this gate was aimed by anecdote. It fired on three-level lines
             // only, because the group LINE_SLACK=0.10 happened to move was a

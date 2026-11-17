@@ -5487,6 +5487,112 @@ shared reading ids, so a partial run is a smaller paired sample rather than a
 biased one. At -5 with 55 discordant pairs the fifth fold could not have made
 it a win, which is worth knowing the next time a sweep has to be cut short.
 
+##### A LINE BEATS A SPLIT BY PRECEDENCE - AND WHEN ASKED PROPERLY, IT DESERVES TO (2026-11-17)
+
+A real structural gap, found by reading `derive.mjs` rather than by measuring:
+
+```
+const split = line ? null : (needed ? fitSplit(ls) : null);
+```
+
+**A SPLIT IS NEVER EVEN COMPUTED WHILE A LINE EXISTS.** The form ladder is
+PRECEDENCE, not measurement - and that is exactly what `LINE_SLACK=0.10`
+exploited by accident, its whole gain being one group where tightening the
+budget denied the line so the split could be tried.
+
+`FORM_BY_CV=1` offers the split as a third candidate in the cross-validation
+gate that already compares the line against bands. **It loses, and the way it
+lied is worth more than the result.**
+
+###### THE FIRST AIM WAS WRONG, AND THE TABLE SAID SO
+
+It fired on three-level lines only, because the group LINE_SLACK moved was
+one. Run that way it moved **exactly one group of 24 readings** - and the
+table it produced explained why:
+
+```
+128 of 140 fitted lines miss NOTHING in sample (bad === 0)
+```
+
+A line that already accounts for every reading in its group cannot be beaten
+by a richer form except by luck in a small cross-validation, which is all
+that 24-reading win ever was. **The lines a split could beat are the ones
+ACCEPTING MISSES under the slack budget, and the two worst are TWO-level:**
+
+```
+0.2625/0.2253 4spr   387 readings   bad 11      <- the gate could not see
+0.2625/0.2253 3spr   312 readings   bad  4         either of these
+```
+
+Those are precisely the groups `inenv-shape.mjs` names as the biggest failing
+groups in the corpus - **13 and 7 failures - and those failures ARE the `bad`
+count**, the line accepting them under its budget. Re-aimed at `bad > 0`: 12
+groups over 2,132 readings, which keeps the cost argument while pointing it
+where the error is.
+
+###### SEVEN GROUPS TOOK THE SPLIT, AND EVERY MARGIN WAS SELECTION
+
+```
+group                  n    split     line          bands
+0.2625/0.2253 2spr   467    97.6%   -100.0%(fails)  79.4%
+0.2625/0.2253 3spr   312    99.0%     97.4%         95.5%
+0.2625/0.2253 4spr   387    97.4%     96.1%         94.3%
+0.4062/0.331  1spr   149    98.7%     96.6%         87.9%
+0.375/0.295   1spr   155    98.1%     97.4%         87.1%
+0.3938/0.3125 2spr   103    98.1%     97.1%         84.5%
+0.3065/0.2437 3spr   116    96.6%     95.7%         87.9%
+```
+
++0.7 to +2.1 points, each a proper five-fold cross-validation over 100 to 467
+readings. **Paired five-fold holdout over the whole corpus says the
+opposite:**
+
+```
+                              net   fixed/broken   McNemar p
+fold 0   2,587 readings        -3      8/11         0.6476
+fold 1   5,170                 -2     19/21         0.8746
+fold 2   7,764                 -5     21/26         0.5601
+fold 3  10,348                -15     26/41         0.0864
+FINAL   12,938                -19     27/46         0.0344   ** WORSE **
+```
+
+**A CROSS-VALIDATED SCORE IS UNBIASED FOR A FIXED CANDIDATE; THE MAXIMUM OVER
+SEVERAL IS NOT.** Taking the best of line, split and bands inflates the winner
+by however much noise happened to favour it, and on groups that size the noise
+is a point or two - exactly the margins seen. Only the outer folds, which
+selected nothing, told the truth.
+
+**THIS IS THE "+3 READINGS AT cut 0.55" MISTAKE WEARING BETTER CLOTHES.**
+There the selection was across 26 configurations on a holdout and obvious;
+here each individual score really was a cross-validation, which is what made
+it look legitimate. The tell, available in advance: *something chose the
+winner, so the winner's own score is not an estimate of it.*
+
+###### AND THE AIM WAS RIGHT EVEN THOUGH THE ANSWER IS NO
+
+`bad > 0` correctly found the only lines a richer form could possibly beat.
+The answer is that **a floor split cannot fix their accepted misses** - which
+agrees with the straddler finding of 2026-11-13: those failures hug their
+threshold within 0.0133 of frac, and a boundary that is piecewise-linear in
+floor does not help with that either. Same limit, reached by a new road.
+
+###### A REFINEMENT ON WHAT LINE_SLACK ACTUALLY DID
+
+From the same output: the line on `0.2625/0.2253 2spr` cross-validates at
+**-1** - it fails to fit on a fold at all - so the EXISTING line-vs-bands gate
+rejected it and `fitSplit` ran. **The slack never denied the fit**: 11 misses
+sit well inside a budget of 46. The commit that shipped `LINE_SLACK=0.10`
+reasoned about the budget; the mechanism was the gate. The gain is real and
+measured either way.
+
+**THE KNOB IS OFF AND STAYS OFF.** Evidence committed as
+`dev/shrink-evidence/holdout-rows-formbycv.tar.gz`. No MOD=4 confirmation was
+run: that rule guards SHIPPING, and nothing here ships.
+
+**ELEVEN LEVERS NOW.** The engine, the golden snapshot and the shipped table
+were untouched throughout - every fold installs a throwaway table and the
+trap restored it, confirmed at 71 rungs with a clean `git status`.
+
 ##### THE CEILING IS BENIGN, AND NOW IT IS MEASURED (2026-11-17)
 
 The last named blind spot. `HL800_COLUMNS` publishes a highest door height

@@ -34,3 +34,35 @@ LINE_SLACK screen of 2026-11-12 came to read noise as a finding.
 
 The second is the confirmation under a different fold partition that was
 still running when this was saved.
+
+## The other tarballs
+
+Each holds one five-fold run, to be paired against the baseline for its own
+partition - `sl10-60.rows` for MOD=5, `sl4-60.rows` for MOD=4. **Never pair
+across partitions**: a four-fold run trains on less, so its baseline differs
+(12,018 against 11,966) and the comparison is only valid within one.
+
+    holdout-rows-joint.tar.gz       POOL_JOINT, the refitted pooling target
+    holdout-rows-slack.tar.gz       LINE_SLACK=0.10
+    holdout-rows-mod4.tar.gz        the MOD=4 confirmations
+    holdout-rows-sideslack.tar.gz   SIDE_SLACK=0.18, a wash (-5, p = 0.59)
+    holdout-rows-formbycv.tar.gz    FORM_BY_CV=1, REJECTED (see below)
+
+## FORM_BY_CV is a rejection, and the reason generalises (2026-11-17)
+
+`fbc5-60.rows` is the five-fold run of `FORM_BY_CV=1`, which offers a split
+as a third candidate to every line that accepts misses. Paired against
+`sl10-60.rows`:
+
+    12,938 readings   -19   27 fixed / 46 broken   p = 0.0344
+
+Significantly **worse** - the shipped configuration wins. It is kept because
+of HOW it misled: in-group, the seven groups that took the split beat their
+line by +0.7 to +2.1 points, each a proper five-fold cross-validation over
+100 to 467 readings.
+
+**A cross-validated score is unbiased for a FIXED candidate; the MAXIMUM over
+several is not.** Taking the best of line, split and bands inflates the
+winner by whatever noise favoured it, and on groups that size the noise is a
+point or two - precisely the margins seen. Only the outer folds, which
+selected nothing, told the truth.
