@@ -2224,11 +2224,69 @@ const out = [...rungs.values()]
                 }
             }
 
-            if (line && line.mid !== undefined) {
+            // A SPLIT IS NEVER EVEN COMPUTED WHILE A LINE EXISTS, two
+            // statements below: `const split = line ? null : ...`. So a line
+            // beats a split by PRECEDENCE rather than by measurement, and
+            // that is what `LINE_SLACK=0.10` exploited by accident - its
+            // whole gain was one group, `0.2625/0.2253` at two springs over
+            // 467 readings, where tightening the budget DENIED the line so
+            // the split could be tried. Not one line's fitted a,b moved.
+            //
+            // `FORM_BY_CV=1` asks the question directly instead: offer the
+            // split as a third candidate beside the line and the bands, and
+            // take whichever cross-validates best.
+            //
+            // NOT TO EVERY LINE, because of cost: `fitSplit` tries every
+            // distinct floor with a five-fold refit of both sides, so offering
+            // it to all 140 line groups would turn a seventeen-minute
+            // re-derive into hours. The gate here already compares the line
+            // against bands, so the split is a third option in an existing
+            // contest rather than a new one.
+            //
+            // AIMED BY MEASUREMENT, NOT BY ANECDOTE - and the first version of
+            // this gate was aimed by anecdote. It fired on three-level lines
+            // only, because the group LINE_SLACK=0.10 happened to move was a
+            // three-level line. Run that way it moved exactly ONE group of 24
+            // readings, and the table it produced explained why:
+            //
+            //   128 of 140 fitted lines miss NOTHING in sample (bad === 0)
+            //
+            // A line that already accounts for every reading in its group
+            // cannot be beaten by a richer form except by luck in a small
+            // cross-validation, which is all that 24-reading win ever was. The
+            // lines a split could actually beat are the ones ACCEPTING MISSES
+            // under the slack budget, and the two worst are TWO-level:
+            //
+            //   0.2625/0.2253 4spr   387 readings   bad 11
+            //   0.2625/0.2253 3spr   312 readings   bad  4
+            //
+            // which are precisely the two groups `inenv-shape.mjs` names as
+            // the biggest failing groups in the corpus (13 and 7 failures).
+            // Those failures ARE this `bad` count. The first gate could not
+            // see them.
+            //
+            // So the gate is `bad > 0`: 12 groups over 2,132 readings instead
+            // of 140 over everything, which keeps the cost argument intact
+            // while pointing it where the error is. And there is a mechanism
+            // rather than a hope - a split fits one (a, b) per floor regime,
+            // so it captures a boundary that is piecewise-linear in floor
+            // where the single line `a + b*floor` cannot.
+            if (line && line.bad > 0) {
                 const lineCv = cvScore(ls, lineFitter, linePredict);
                 const bandCv = cvScore(ls, (t) => bands(t).bands, bandPredict);
+                const splitCand = process.env.FORM_BY_CV && needed ? fitSplit(ls) : null;
+                const splitCv = splitCand ? splitCand.score : -1;
 
-                if (!(lineCv > bandCv)) {
+                if (splitCv > lineCv && splitCv > bandCv) {
+                    crossValidated.push(
+                        `${g.outer}/${g.inner} at ${sp} spring(s): a SPLIT ` +
+                        `${(splitCv * 100).toFixed(1)}% beats the line (bad ` +
+                        `${line.bad}) ${(lineCv * 100).toFixed(1)}% and bands ` +
+                        `${(bandCv * 100).toFixed(1)}% out of sample over ` +
+                        `${ls.length} readings - took the split`
+                    );
+                    line = null;
+                } else if (!(lineCv > bandCv)) {
                     crossValidated.push(
                         `${g.outer}/${g.inner} at ${sp} spring(s): two thresholds ` +
                         `${(lineCv * 100).toFixed(1)}% vs bands ${(bandCv * 100).toFixed(1)}% ` +
