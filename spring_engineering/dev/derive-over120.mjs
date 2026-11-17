@@ -119,7 +119,7 @@ const snap = (x) => {
 const hit = (x, off) => snap(x.ourIn - off) === x.refIn
     && snap(x.ourOut - off) === x.refOut;
 const score = (set, offs) => set.filter((x) =>
-    hit(x, offFor(offs.get(x.rung), x))).length;
+    hit(x, offFor(entryFor(offs, x), x))).length;
 
 const OFFSETS = [];
 
@@ -145,6 +145,89 @@ const bestOffset = (g) => {
 // is always tried first and a split has to beat it outright, so a rung that
 // genuinely wants one level gets one - which is what `t: null` records. Each
 // side needs two readings, or the "split" is a level fitted to a single door.
+// Fit the two-level form to ONE set of rows. Pulled out of the loop below so
+// the same code can fit a rung and fit the pooled fallback.
+const fitOne = (g) => {
+    const [c, ch] = bestOffset(g);
+    let best = { hit: ch, t: null, lo: c, hi: c };
+
+    for (const t of [...new Set(g.map((x) => x.floor))].sort((a, b) => a - b)) {
+        const below = g.filter((x) => x.floor < t);
+        const above = g.filter((x) => x.floor >= t);
+
+        if (below.length < 2 || above.length < 2) continue;
+
+        const [lo, lh] = bestOffset(below);
+        const [hi, hh] = bestOffset(above);
+
+        if (lh + hh > best.hit) best = { hit: lh + hh, t, lo, hi };
+    }
+
+    return best;
+};
+
+// POOL_FALLBACK=1: A RUNG TOO THIN TO FIT GETS THE GLOBAL ENTRY, NOT NOTHING.
+//
+// The guard above is a hard choice between two bad options, and the script's
+// own split-half shows BOTH losing:
+//
+//     min  2   thin rungs get their OWN fit   61.2%    noisy
+//     min  8   thin rungs get NOTHING         62.5%    biased - ~12 rungs
+//     none     nobody gets anything           47.1%      left at the baseline
+//
+// Own-fit is small-sample variance; nothing is pure bias, and it is a large
+// bias here because the band's error is strongly one-sided (143 long against
+// 4 short before any correction, median +1.00) and nine of the fitted offsets
+// are exactly one inch. So the thin rungs are being left at ~47% when the
+// thing they almost certainly want is already known globally.
+//
+// That is the gap partial pooling fills, and it is the mechanism that gave
+// the biggest in-envelope gain of the week. Here it is the simplest form of
+// it - complete pooling for the thin, none for the thick - which adds ONE
+// global entry rather than a parameter per rung.
+//
+// NO PER-RUNG SELECTION, DELIBERATELY. The obvious richer version is to let
+// each rung choose between its own fit, the global one and nothing. That is
+// exactly the trap FORM_BY_CV fell into on 2026-11-17: picking the best of
+// several estimates inflates the winner by whatever noise favoured it, and
+// the gain evaporates out of sample. This is ONE global rule, scored by the
+// same split-half as everything else.
+//
+// THE VERDICT: IT WINS, AND IT IS SHIPPED. Twenty split-half shuffles with
+// the guard PINNED at min 8 for both arms, so nothing is chosen on the test
+// half:
+//
+//     net +69 readings   mean delta 3.45   sd 4.87   se 1.09
+//     t = 3.17 on 19 df   15 wins   5 losses
+//
+// THE GUARD MUST BE PINNED FOR ANY SUCH COMPARISON. Left to scan, the arm
+// with more freedom to move `min` is flattered - unpinned, the five-shuffle
+// reading was +24 against +32 pinned, so the scan was costing the pooled arm
+// its own effect. `MIN=` exists for this.
+//
+// AND THE TWENTY SHUFFLES ARE NOT TWENTY SAMPLES. They re-partition the SAME
+// 603 readings, so this establishes the gain on this data under repeated
+// split-half - the standard the two-level form itself was accepted on, and a
+// stronger version of it (twenty shuffles against five). It is not evidence
+// about a reading nobody has pulled.
+//
+// WHAT IT BUYS, AND THE HONEST SIZE OF IT: the band goes 67.76% -> 68.42% in
+// sample, four readings of 608. Inside 96" is UNCHANGED at 98.52% and 96-120"
+// unchanged at 94.49%, which the `inner > 119` gate guarantees and which was
+// checked rather than assumed. Golden 725 byte-identical, invariants 20/20.
+//
+// The global entry comes out {t: 165, lo: 0, hi: 1} - below active length 165
+// no correction, above it exactly one inch. The same readable shape as the
+// per-rung entries, which is why eight thin rungs inheriting it is a prior
+// rather than a guess.
+// THE DEFAULT IS THE SHIPPED VALUE, AND THAT IS NOT A STYLE CHOICE.
+// `apply-over120.sh` is the documented routine after every pull and it passes
+// no environment at all, so a knob defaulting OFF while the installed table
+// was fitted with it ON would silently revert itself the next time anybody
+// refitted - no code change, no warning. That is the `SHRINK` lesson of
+// 2026-11-16. `POOL_FALLBACK=0` is the revert.
+const POOL_FALLBACK = process.env.POOL_FALLBACK !== "0";
+
 const fitOffsets = (train, min) => {
     const out = new Map();
 
@@ -153,26 +236,24 @@ const fitOffsets = (train, min) => {
 
         if (g.length < min) continue;
 
-        const [c, ch] = bestOffset(g);
-        let best = { hit: ch, t: null, lo: c, hi: c };
+        const best = fitOne(g);
 
-        for (const t of [...new Set(g.map((x) => x.floor))].sort((a, b) => a - b)) {
-            const below = g.filter((x) => x.floor < t);
-            const above = g.filter((x) => x.floor >= t);
-
-            if (below.length < 2 || above.length < 2) continue;
-
-            const [lo, lh] = bestOffset(below);
-            const [hi, hh] = bestOffset(above);
-
-            if (lh + hh > best.hit) best = { hit: lh + hh, t, lo, hi };
-        }
-
+        // A rung with enough readings whose answer is "no correction" keeps
+        // that answer explicitly, so the fallback cannot overrule a measured
+        // zero. Without POOL_FALLBACK there is nothing to overrule it with,
+        // so the default behaviour stays byte-identical.
         if (best.lo !== 0 || best.hi !== 0) out.set(rg, best);
+        else if (POOL_FALLBACK) out.set(rg, { t: null, lo: 0, hi: 0 });
     }
+
+    if (POOL_FALLBACK) out.set("__fallback__", fitOne(train));
 
     return out;
 };
+
+// The entry a reading is corrected by: its own rung's, else the pooled
+// fallback when there is one, else nothing.
+const entryFor = (offs, x) => offs.get(x.rung) ?? offs.get("__fallback__");
 
 const offFor = (e, x) => (!e ? 0
     : (e.t === null || x.floor < e.t ? e.lo : e.hi));
@@ -180,7 +261,11 @@ const offFor = (e, x) => (!e ? 0
 console.log(`${rows.length} past-120" readings with the wire right, `
     + `${new Set(rows.map((x) => x.rung)).size} rungs\n`);
 
-const { rnd } = makeRnd(20261111);
+// SEED= re-runs the split-half on a different shuffle. 603 readings against
+// ~75 parameters is enough freedom for one lucky split, which is why the
+// two-level form was accepted on FIVE shuffles and five wins rather than on
+// one. Any new comparison here is held to the same standard.
+const { rnd } = makeRnd(process.env.SEED || 20261111);
 const sh = rows.slice();
 
 for (let i = sh.length - 1; i > 0; i--) {
@@ -197,13 +282,20 @@ console.log("  min   rungs kept   exact out of sample");
 
 let bestMin = 1, bestTotal = -1;
 
-for (const min of [2, 4, 6, 8, 10, 12]) {
+// MIN= pins the guard instead of scanning for it. THE SCAN SELECTS ON THE
+// TEST HALF - it reports the best of six, which is optimistic for whichever
+// arm has more freedom to move - so any A/B comparison of a change to this
+// fitter must pin the guard for both arms. Scanning is right when the only
+// question is which guard to ship; it is wrong as a yardstick.
+const MINS = process.env.MIN ? [Number(process.env.MIN)] : [2, 4, 6, 8, 10, 12];
+
+for (const min of MINS) {
     let tot = 0, kept = 0;
 
     for (const [train, test] of [[A, B], [B, A]]) {
         const offs = fitOffsets(train, min);
 
-        kept += offs.size;
+        kept += [...offs.keys()].filter((k) => k !== "__fallback__").length;
         tot += score(test, offs);
     }
 
@@ -226,6 +318,25 @@ console.log(`\n  best guard: min ${bestMin} readings per rung, `
 // use all the data. Scoring it on the same data would be meaningless and is
 // not done.
 const final = fitOffsets(rows, bestMin);
+
+// THE FALLBACK IS EXPANDED, NOT SHIPPED AS A FALLBACK. The engine looks an
+// offset up BY RUNG and has no notion of a default, so under POOL_FALLBACK
+// every rung seen in the corpus that has no fit of its own is written out
+// carrying the global entry explicitly. The table stays a plain lookup and
+// the engine needs no change. A rung the corpus has never seen still gets
+// nothing at runtime, exactly as today.
+if (POOL_FALLBACK) {
+    const fb = final.get("__fallback__");
+
+    final.delete("__fallback__");
+
+    for (const rg of new Set(rows.map((x) => x.rung))) {
+        if (!final.has(rg)) final.set(rg, fb);
+    }
+
+    console.log(`POOL_FALLBACK: the global entry {t:${fb.t}, lo:${fb.lo}, `
+        + `hi:${fb.hi}} is written out to every rung with no fit of its own\n`);
+}
 
 console.log(`SHIPPED TABLE: ${final.size} rungs carry an offset `
     + `(the rest are left alone)\n`);

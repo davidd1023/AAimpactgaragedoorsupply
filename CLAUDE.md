@@ -5487,6 +5487,126 @@ shared reading ids, so a partial run is a smaller paired sample rather than a
 biased one. At -5 with 55 discordant pairs the fifth fold could not have made
 it a win, which is worth knowing the next time a sweep has to be cut short.
 
+##### PAST 120": THE THIN RUNGS WERE GETTING NOTHING, AND NOW THEY POOL (owner, 2026-11-17)
+
+*"the over 120\" drums are still a problem can you do anything to fix them or
+have you exhausted every method"* - and no, one thing was left, in the place
+the ledger had not looked: **the over-120 table's own GUARD.**
+
+```
+band                          n     exact BEFORE   exact AFTER
+inside 96"  (recommended)   11839      98.52%        98.52%   <- UNCHANGED
+96-120"     (supported)       490      94.49%        94.49%   <- UNCHANGED
+over 120"   (DISCLAIMED)      608      67.76%        68.42%
+ALL DUPLEX                  12937      96.92%        96.95%
+```
+
+Golden **725 byte-identical**, **invariants 20/20**, `spring_engineering`
+**0 failed 0 errors of 348**, `spring_calculator` regenerated and `--check`
+clean.
+
+###### FIRST, THE ANSWER TO WHAT HE ACTUALLY ASKED
+
+**IT IS SPRING LENGTH PAST 120", NOT THE DRUM, AND NOT A TALL DOOR.** Cut by
+what a customer orders, the band he is worried about is mostly ordinary doors
+that are HEAVY - 348 of 608 are doors under 144" tall. By door height:
+
+```
+DOORS HE CAN BUILD (<=220" tall)   12683   97.03% exact   99.24% wire
+180-220" tall (at his limit)         813   95.20%         99.38%
+```
+
+So the honest figure for his own catalogue is **97.03%**, and the WIRE - the
+figure that decides whether a door is sprung safely - is **99.2% in every
+band, including past 120"**. Only LENGTH degrades, and only where Service
+Spring disclaims its own answer.
+
+###### THE GUARD WAS A CHOICE BETWEEN TWO BAD OPTIONS, AND THE SCRIPT SAID SO
+
+`fitOffsets` skips any rung with fewer than `min` readings, and a skipped rung
+gets **no correction at all**. Its own split-half shows both ends losing:
+
+```
+min  2   thin rungs get their OWN fit    61.2%   small-sample noise
+min  8   thin rungs get NOTHING          62.5%   pure bias - ~12 rungs
+none     nobody gets anything            47.1%     left at the baseline
+```
+
+**That is the gap partial pooling fills** - the mechanism that gave the
+biggest in-envelope gain of the week, never once tried on this table. And the
+prior is strong here in a way it is not in-envelope: the band's error is
+one-sided (143 long against 4 short before any correction, median +1.00) and
+the fitted offsets are nearly all exactly one inch, where in-envelope
+thresholds differ ACROSS rungs by 0.46 to 1.56 and must not be pooled at all.
+
+`POOL_FALLBACK` gives a too-thin rung the GLOBAL entry instead of nothing -
+complete pooling for the thin, none for the thick, **one** extra global
+parameter rather than one per rung.
+
+###### PINNING THE GUARD IS WHAT MADE THE COMPARISON HONEST
+
+```
+                  unpinned (min scanned)   PINNED at min 8
+5 shuffles              +24                     +32
+```
+
+**THE SCAN SELECTS ON THE TEST HALF** - it reports the best of six minimums,
+which flatters whichever arm has more freedom to move, and the pooled arm
+moved `min` far more (6/8/4/10/10 against 8/8/6/4/2). Unpinned it was
+**costing the pooled arm its own effect**. `MIN=` exists for this now, and
+the rule is general: *scanning is right when the only question is which guard
+to ship; it is wrong as a yardstick.*
+
+Twenty shuffles, guard pinned for both arms:
+
+```
+net +69 readings   mean delta 3.45   sd 4.87   se 1.09
+t = 3.17 on 19 df   15 wins   5 losses
+```
+
+**THE TWENTY SHUFFLES ARE NOT TWENTY SAMPLES**, and that is stated rather than
+glossed: they re-partition the SAME 603 readings. This establishes the gain on
+this data under repeated split-half - the standard the two-level form itself
+was accepted on, and a stronger version of it - not evidence about a reading
+nobody has pulled.
+
+**AND THE SIZE IS SMALL: four readings of 608.** Worth shipping because it is
+measured, principled, costs nothing anywhere else, and removes an obvious
+bias; not worth quoting as a breakthrough.
+
+###### THE GLOBAL ENTRY IS READABLE, WHICH IS WHY IT IS A PRIOR AND NOT A GUESS
+
+`{t: 165, lo: 0, hi: 1}` - below an active length of 165 no correction at all,
+above it exactly one inch. The same shape as the per-rung entries, so the
+eight thin rungs that inherit it are being given the band's own structure
+rather than a fitted number. Two rungs measured to want NO correction keep an
+explicit zero, so the fallback cannot overrule a measured answer.
+
+The table goes 24 rungs -> 32. **A rung the corpus has never seen still gets
+nothing at runtime**, exactly as before: the fallback is EXPANDED into
+explicit per-rung entries at emit time, so the engine stays a plain lookup and
+needed no change.
+
+###### AND THE DEFAULT TRAP WAS WALKED INTO AND CAUGHT
+
+`POOL_FALLBACK` was written defaulting OFF so the experiment could not disturb
+anything - and the table was then fitted with it ON. **`apply-over120.sh`
+passes no environment**, so the next routine refit would have silently
+re-installed the unpooled table with no code change and no warning. The
+default IS the shipped value and the installed table came from plain
+`sh dev/apply-over120.sh`. `POOL_FALLBACK=0` is the revert.
+
+Second time this exact trap has appeared (after `SHRINK`), and the second time
+it was the writing-down that caught it rather than a test.
+
+###### A STALENESS CHECK THAT CAME BACK CLEAN
+
+Worth recording so nobody repeats it: the suspicion was that the in-envelope
+refits of 2026-11-16 (pooling, `LINE_SLACK`) moved the engine's lengths and
+left `DUPLEX_LONG_OFFSET` fitted against the old output. **It had not** - a
+fresh refit returns the same 24 rungs with four minor threshold shifts. Two
+minutes to kill a plausible theory.
+
 ##### A LINE BEATS A SPLIT BY PRECEDENCE - AND WHEN ASKED PROPERLY, IT DESERVES TO (2026-11-17)
 
 A real structural gap, found by reading `derive.mjs` rather than by measuring:
