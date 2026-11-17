@@ -5487,6 +5487,48 @@ shared reading ids, so a partial run is a smaller paired sample rather than a
 biased one. At -5 with 55 discordant pairs the fifth fold could not have made
 it a win, which is worth knowing the next time a sweep has to be cut short.
 
+##### THE CEILING IS BENIGN, AND NOW IT IS MEASURED (2026-11-17)
+
+The last named blind spot. `HL800_COLUMNS` publishes a highest door height
+per hi-lift column as well as a lowest, `hl800Base` reads neither, and the
+FLOOR turned out to be the hi-lift pole and shipped a guard. **The ceiling had
+never been asked: zero readings above it, ever**, with up to ten feet of door
+above the last published row at low hi-lift.
+
+40 requests on D800-120, **half above the ceiling and half below it** at the
+same hi-lifts and the same weights - without that control a poor result reads
+as "tall doors are hard" rather than as the ceiling.
+
+```
+band                  n    median      p90     WORST    clean
+BELOW the ceiling    20    0.176%   0.357%   0.530%        0
+ABOVE the ceiling    20    0.181%   0.266%   0.292%        0
+
+0-2 ft above          7    0.234%            0.266%
+2-5 ft above          9    0.118%            0.292%
+5+ ft above           4    0.168%            0.181%
+
+non-positive multipliers (the pole's signature)            0
+```
+
+**ABOVE IS IF ANYTHING TIGHTER THAN BELOW**, there is no drift with distance,
+and nothing approaches the pole's behaviour. So the basis argument was right
+and is now confirmed by the reference rather than by our own engine agreeing
+with itself: a polynomial in `10/H` extrapolated to a TALLER door sends
+`10/H` toward zero and the high-order terms vanish.
+
+**ZERO OF THE 40 CAME BACK CLEAN, AND THAT IS WHY TURNS WAS THE THING TO
+SCORE.** These are 16 to 31 ft doors whose springs run far past the
+reference's own 120" limit, so it flags essentially all of them - but it
+reports `turnsOnSprings` regardless, and turns is the quantity the pole
+moved. Scoring length here would have measured nothing at all.
+
+**SO THE FLOOR IS DANGEROUS AND THE CEILING IS SAFE, BY CONSTRUCTION AND BY
+MEASUREMENT.** No guard is needed above and none was added.
+`dev/ceiling-sample.mjs` reads the published columns out of the engine's own
+source rather than retyping them - the fourth-copy lesson - and
+`dev/eval-ceiling-seed20261117.json` is committed with the line id stripped.
+
 ##### A LONG JOB MUST NOT INHERIT A BACKGROUND TASK'S PIPE
 
 A replay launched from inside a background task sat for **TWO HOURS using 0.2
