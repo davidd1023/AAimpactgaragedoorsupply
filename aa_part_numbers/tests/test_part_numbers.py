@@ -120,3 +120,17 @@ class TestPartNumbers(TransactionCase):
         self.assertEqual(first.get('name'), 'name')
         domain = safe_eval(first.get('filter_domain'), {'self': number})
         self.assertIn(hinge, self.env['product.template'].search(domain))
+
+    def test_archived_products_are_not_numbered_until_brought_back(self):
+        """111 archived templates in his database must not eat 111 numbers."""
+        old = self._template('PN Old Merged Track', self.bolts)
+        old_number = old.aa_part_base
+        archived = self.env['product.template'].create({
+            'name': 'PN Archived', 'categ_id': self.bolts.id, 'is_storable': True,
+            'type': 'consu', 'active': False})
+        self.assertFalse(archived.with_context(active_test=False).product_variant_ids.aa_part_number)
+        nxt = self._template('PN Next Nut', self.bolts)
+        self.assertEqual(int(nxt.aa_part_base[-3:]), int(old_number[-3:]) + 1,
+                         'an archived product must not take a number')
+        archived.active = True
+        self.assertRegex(archived.product_variant_id.aa_part_number, r'^AA-BLT-\d{3}$')

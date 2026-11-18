@@ -73,8 +73,9 @@ class ProductTemplate(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        # A product that starts being kept in stock gets its number then.
-        if vals.get('is_storable') and self.product_variant_ids:
+        # A product that starts being kept in stock, or is brought back from
+        # the archive, gets its number then.
+        if (vals.get('is_storable') or vals.get('active')) and self.product_variant_ids:
             self.product_variant_ids._aa_assign_part_numbers()
         return res
 
@@ -124,6 +125,12 @@ class ProductProduct(models.Model):
             products._aa_assign_part_numbers()
         return products
 
+    def write(self, vals):
+        res = super().write(vals)
+        if vals.get('active'):
+            self._aa_assign_part_numbers()
+        return res
+
     def _aa_variant_key(self):
         values = self.product_template_attribute_value_ids
         return (tuple((v.attribute_id.sequence, v.attribute_id.id,
@@ -134,9 +141,13 @@ class ProductProduct(models.Model):
 
     @api.model
     def _aa_assign_all(self):
-        """Install: number every stocked product, archived ones included,
-        so an archived variant keeps its letter if it is ever brought back."""
-        self.sudo().with_context(active_test=False).search([])._aa_assign_part_numbers()
+        """Install: number every ACTIVE stocked product.
+
+        NOT the archived ones. His database holds 111 archived templates -
+        the products the catalogue merge of 2026-10-21 folded into variants -
+        and numbering them put 111 gaps in the families before a single real
+        part. An archived product gets its number if it is brought back."""
+        self.sudo().search([])._aa_assign_part_numbers()
 
     def _aa_assign_part_numbers(self):
         """Number whichever of these stocked products has no number yet.
@@ -144,9 +155,9 @@ class ProductProduct(models.Model):
         Templates are taken in family then name order, so on the first run
         related parts sit together and the numbering reads sensibly.
         """
-        Product = self.env['product.product'].sudo().with_context(active_test=False)
-        products = self.sudo().with_context(active_test=False).filtered(
-            lambda p: p.is_storable and not p.aa_part_number)
+        Product = self.env['product.product'].sudo()
+        products = self.sudo().filtered(
+            lambda p: p.active and p.is_storable and not p.aa_part_number)
         if not products:
             return
         Template = self.env['product.template'].sudo()
@@ -156,8 +167,11 @@ class ProductProduct(models.Model):
             if not template.aa_part_base:
                 template.aa_part_base = Template._aa_next_base(Template._aa_prefix(template))
             base = template.aa_part_base
+            # Letters already given are reserved even on an archived variant,
+            # so a number is never handed out twice.
+            numbered = Product.with_context(active_test=False).search(
+                [('product_tmpl_id', '=', template.id), ('aa_part_number', '!=', False)])
             siblings = Product.search([('product_tmpl_id', '=', template.id)])
-            numbered = siblings.filtered('aa_part_number')
             todo = (siblings - numbered).filtered('is_storable').sorted(
                 lambda p: p._aa_variant_key())
             if not todo:
