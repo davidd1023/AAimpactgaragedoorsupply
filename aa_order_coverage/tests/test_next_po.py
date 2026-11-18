@@ -135,3 +135,23 @@ class TestNextPO(TransactionCase):
             {trim: 17}, lambda p: Line._aa_family(p, {}))
         row = [r for v in data['vendors'] for r in v['lines'] if r['id'] == trim.id][0]
         self.assertEqual(row['qty'], 30)
+
+    def test_coil_is_ordered_as_whole_coils(self):
+        coil = self.env['product.product'].create({
+            'name': 'NextPO coil', 'default_code': 'COIL-262-2.625-L',
+            'is_storable': True, 'purchase_ok': True,
+            'seller_ids': [(0, 0, {'partner_id': self.vendor.id})]})
+        Line = self.env['aa.order.coverage.line']
+        data = self.env['aa.next.po'].aa_next_po(
+            {coil: 100}, lambda p: Line._aa_family(p, {}))
+        vendor = [v for v in data['vendors'] if v['id'] == self.vendor.id][0]
+        row = [r for r in vendor['lines'] if r['id'] == coil.id][0]
+        self.assertTrue(row['coil'])
+        self.assertEqual(vendor['coil_feet'], 7)
+        NextPO = self.env['aa.next.po']
+        NextPO.aa_set_coil_feet(self.vendor.id, 8)
+        po = self.env['purchase.order'].browse(NextPO.aa_draft_po(
+            self.vendor.id, [{'product_id': coil.id, 'coils': 2, 'feet': 8}])['id'])
+        self.assertEqual(po.order_line.product_qty, 192)
+        self.assertIn('2 coils of 8 ft', po.order_line.name)
+        self.assertEqual(self.vendor.aa_coil_feet, 8)

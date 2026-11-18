@@ -40,6 +40,9 @@ export class OrderCoverageBoard extends Component {
         this.state.data = await this.orm.call(
             "aa.order.coverage.line", "aa_board_data", []
         );
+        for (const vendor of this.state.data.next_po.vendors) {
+            this.setCoils(vendor);
+        }
         this.state.loading = false;
     }
 
@@ -173,15 +176,39 @@ export class OrderCoverageBoard extends Component {
     get nextPoCount() {
         return this.vendors.length;
     }
+    // SPRING COIL: ordered as whole coils ("serpientes") of 7 or 8 ft,
+    // picked per vendor; the inches still to cover set how many.
+    hasCoils(block) {
+        return block.lines.some((l) => l.coil);
+    }
+    setCoils(vendor) {
+        const inches = (vendor.coil_feet || 7) * 12;
+        for (const line of vendor.lines) {
+            if (line.coil) {
+                line.coils = Math.max(Math.ceil(line.need_in / inches - 1e-6), 1);
+            }
+        }
+    }
+    async changeCoilFeet(vendor, ev) {
+        vendor.coil_feet = Number(ev.target.value);
+        this.setCoils(vendor);
+        await this.orm.call("aa.next.po", "aa_set_coil_feet", [vendor.id, vendor.coil_feet]);
+    }
+    coilInches(p, v) {
+        return (Number(p.coils) || 0) * v.coil_feet * 12;
+    }
     // Templates cannot reach Number or Math: the arithmetic lives here.
-    lineTotal(p) {
+    lineTotal(p, v) {
+        if (p.coil && v) {
+            return this.coilInches(p, v) * p.price;
+        }
         return (Number(p.qty) || 0) * p.price;
     }
     perMonth(p) {
         return p.per_month ? this.fmt(Math.round(p.per_month * 10) / 10) : "";
     }
     vendorTotal(block) {
-        return block.lines.reduce((sum, l) => sum + (Number(l.qty) || 0) * l.price, 0);
+        return block.lines.reduce((sum, l) => sum + this.lineTotal(l, block.vendor), 0);
     }
     money(value) {
         return value.toLocaleString(undefined, { style: "currency", currency: "USD" });
@@ -193,7 +220,12 @@ export class OrderCoverageBoard extends Component {
         await this.load();
     }
     async draftPo(block) {
-        const lines = block.lines.map((l) => ({ product_id: l.id, qty: Number(l.qty) || 0 }));
+        const v = block.vendor;
+        const lines = block.lines.map((l) =>
+            l.coil
+                ? { product_id: l.id, coils: Number(l.coils) || 0, feet: v.coil_feet }
+                : { product_id: l.id, qty: Number(l.qty) || 0 }
+        );
         const po = await this.orm.call("aa.next.po", "aa_draft_po", [block.vendor.id, lines]);
         this.notification.add(`${po.name} saved in Purchase as a draft.`, { type: "success" });
         await this.load();

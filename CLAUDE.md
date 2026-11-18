@@ -3971,6 +3971,14 @@ counted as coming. "Create draft P.O." makes an RFQ flagged `aa_suggested`;
 pressing it again REWRITES that draft rather than making a second. Products
 with any BoM are never suggested - their raw parts carry the use.
 
+**SPRING COIL IS ORDERED IN WHOLE COILS** (owner, same day: *"el PO de
+muelles me lo tienes que dar en serpientes y yo debo escoger el largo ...
+7 u 8 pies"*). `COIL-` rows carry `need_in`; the card has a 7/8 ft selector
+(`aa_coil_feet` on the vendor, default 7) and the PO line is coils x ft x 12
+INCHES, its description naming the coils. Cable rounds to whole 500 ft reels
+and anything whose vendor description says "N pcs/box" (Action's trims, 15)
+to whole boxes.
+
 ## AA part numbers (`aa_part_numbers`, owner 2026-11-18)
 
 *"quiero ponerle nuestro part number a todos nuestros productos"* - and when

@@ -67,6 +67,11 @@ class ResPartner(models.Model):
         'Days between P.O.s',
         help="How long each P.O. to this vendor must last after it arrives. "
              "Blank means as long as the lead time.")
+    aa_coil_feet = fields.Integer(
+        'Spring coil length (ft)', default=7,
+        help="Spring coil ('serpiente') is stocked in inches but bought in "
+             "whole coils, usually 7 or 8 ft. The Next P.O. orders coil in "
+             "whole coils of this length; it is chosen on the tab.")
 
 
 class PurchaseOrder(models.Model):
@@ -248,7 +253,15 @@ class NextPurchaseOrder(models.AbstractModel):
             else:
                 runs_out = today if spare < 0 else False
             family = family_of(product)
+            # SPRING COIL IS BOUGHT AS WHOLE COILS (owner, 2026-11-18: "el
+            # PO de muelles me lo tienes que dar en serpientes y yo debo
+            # escoger el largo, que usualmente es 7 u 8 pies"). The inches
+            # still to cover go to the screen, which turns them into coils
+            # of whatever length is picked there.
+            coil = (product.default_code or '').upper().startswith('COIL-')
             row = {
+                'coil': coil,
+                'need_in': short,
                 'id': product.id,
                 'name': product.display_name,
                 'code': product.default_code or '',
@@ -274,6 +287,7 @@ class NextPurchaseOrder(models.AbstractModel):
                 'lead': lead,
                 'lead_set': bool(vendor.aa_lead_days),
                 'cycle': vendor.aa_cycle_days or 0,
+                'coil_feet': vendor.aa_coil_feet or 7,
                 'arrives': fields.Date.to_string(today + timedelta(days=lead)),
                 'lines': [],
                 'draft': False,
@@ -314,6 +328,19 @@ class NextPurchaseOrder(models.AbstractModel):
         return True
 
     @api.model
+    def aa_set_coil_feet(self, vendor_id, feet):
+        if not self.env.user.has_group('purchase.group_purchase_user') and \
+                not self.env.user.has_group('stock.group_stock_manager'):
+            raise UserError("Only purchasing or an inventory manager can change this.")
+        feet = int(feet or 0)
+        if not 1 <= feet <= 20:
+            raise UserError("A coil length must be between 1 and 20 feet.")
+        vendor = self.env['res.partner'].sudo().browse(int(vendor_id)).exists()
+        if vendor:
+            vendor.aa_coil_feet = feet
+        return True
+
+    @api.model
     def aa_draft_po(self, vendor_id, lines):
         """Create, or rewrite, the vendor's draft P.O. from the board.
 
@@ -326,10 +353,27 @@ class NextPurchaseOrder(models.AbstractModel):
         if not vendor:
             raise UserError("That vendor no longer exists.")
         wanted = []
+        Product = self.env['product.product']
         for line in lines:
-            qty = float(line.get('qty') or 0)
-            if qty > 0:
-                wanted.append((int(line['product_id']), qty))
+            product = Product.browse(int(line['product_id']))
+            vals = {'product_id': product.id}
+            if line.get('coils') is not None and line.get('feet'):
+                # Whole coils: the line is in INCHES, the stock unit, and its
+                # description says how many coils of what length that is.
+                coils = int(float(line['coils'] or 0))
+                feet = int(line['feet'])
+                if coils <= 0:
+                    continue
+                vals['product_qty'] = coils * feet * 12
+                vals['name'] = "%s\n%d coil%s of %d ft (%d in)" % (
+                    product.display_name, coils, '' if coils == 1 else 's',
+                    feet, coils * feet * 12)
+            else:
+                qty = float(line.get('qty') or 0)
+                if qty <= 0:
+                    continue
+                vals['product_qty'] = qty
+            wanted.append(vals)
         if not wanted:
             raise UserError("There is nothing to order from %s." % vendor.display_name)
         PO = self.env['purchase.order']
@@ -340,8 +384,7 @@ class NextPurchaseOrder(models.AbstractModel):
             [('partner_id', '=', vendor.id)], limit=1)
         lead = self._lead_days(vendor, seller)
         planned = fields.Datetime.now() + timedelta(days=lead)
-        values = [(0, 0, {'product_id': pid, 'product_qty': qty,
-                          'date_planned': planned}) for pid, qty in wanted]
+        values = [(0, 0, dict(vals, date_planned=planned)) for vals in wanted]
         if po:
             po.order_line.unlink()
             po.write({'order_line': values})

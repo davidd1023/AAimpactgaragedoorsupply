@@ -124,6 +124,13 @@
             <span class="small">days</span>
             <button class="btn btn-sm btn-outline-secondary" t-on-click="() => this.saveDays(v)">Save</button>
             <span t-if="!v.lead_set" class="small text-warning">Lead time not set: confirm it</span>
+            <t t-if="hasCoils(block)">
+              <span class="small ms-2">Coils of</span>
+              <select class="form-select form-select-sm w-auto" t-on-change="(ev) => this.changeCoilFeet(v, ev)">
+                <option value="7" t-att-selected="v.coil_feet === 7">7 ft</option>
+                <option value="8" t-att-selected="v.coil_feet === 8">8 ft</option>
+              </select>
+            </t>
             <span class="small text-muted ms-2">Arrives about <t t-out="v.arrives"/></span>
             <span class="ms-auto fw-bold" t-out="money(vendorTotal(block))"/>
             <button t-if="v.draft" class="btn btn-sm btn-link" t-on-click="() => this.openPo(v.draft.id)">
@@ -154,10 +161,15 @@
                 </td>
                 <td t-out="p.minimum ? fmt(p.minimum) : ''"/>
                 <td t-out="p.runs_out"/>
-                <td><input type="number" min="0" class="form-control form-control-sm" style="width: 6em"
+                <td t-if="p.coil" class="text-nowrap">
+                  <input type="number" min="0" class="form-control form-control-sm d-inline-block" style="width: 5em"
+                         t-model="p.coils"/>
+                  <span class="small"> coils = <t t-out="fmt(coilInches(p, v))"/> in</span>
+                </td>
+                <td t-else=""><input type="number" min="0" class="form-control form-control-sm" style="width: 6em"
                            t-model="p.qty"/></td>
                 <td t-out="money(p.price)"/>
-                <td t-out="money(lineTotal(p))"/>
+                <td t-out="money(lineTotal(p, v))"/>
               </tr>
             </tbody>
           </table>
