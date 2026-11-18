@@ -75,6 +75,39 @@ import { makeRnd } from "./rnd.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const mod = await load();
+
+// IT NOW REFUSES RATHER THAN RELYING ON SOMEBODY REMEMBERING.
+//
+// Everything above explains that fitting with the table installed fits a
+// correction on top of itself, and `apply-over120.sh` clears it first - but
+// the script ENDS by installing, so a bare `node dev/derive-over120.mjs`
+// straight afterwards is wrong, silently, and reports the gains collapsed to
+// nothing. That has now happened three times in one day and twice in the
+// session that wrote the warning.
+//
+// A comment cannot stop it; reading the engine can. The tell is unmistakable
+// - a non-empty DUPLEX_LONG_OFFSET block - so this refuses with the one
+// command that does it properly. `ALLOW_INSTALLED=1` is the deliberate
+// bypass for anybody who genuinely wants the circular measurement.
+const engineSrc = readFileSync(
+    join(HERE, "..", "static/src/js/spring_engineering.js"), "utf8");
+const installed = engineSrc.match(/const DUPLEX_LONG_OFFSET = \{(.*?)\n\};/s);
+
+if (installed && installed[1].trim() && !process.env.ALLOW_INSTALLED) {
+    const n = (installed[1].match(/"[\d.\/]+":/g) || []).length;
+
+    console.error(`REFUSING TO FIT: DUPLEX_LONG_OFFSET already holds ${n} rungs.`);
+    console.error("");
+    console.error("The gate below reads the engine's length AFTER those offsets");
+    console.error("are applied, so this would fit a correction on top of itself");
+    console.error("and report that none is needed. Run the routine instead:");
+    console.error("");
+    console.error("    sh dev/apply-over120.sh        empty -> derive -> install");
+    console.error("");
+    console.error("ALLOW_INSTALLED=1 bypasses this on purpose.");
+    process.exit(1);
+}
+
 const corpus = JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8"));
 const rows = [];
 
@@ -105,6 +138,8 @@ for (const r of corpus.readings) {
         floor: Math.floor(c.duplexActiveLength),
         refIn: r.expect.duplexInnerLength, refOut: r.expect.duplexOuterLength,
         rung: `${s.outerWire}/${s.innerWire}`,
+        // Needed by SNAP=engine: `duplexSnapToGrid` is spring-count dependent.
+        springs: c.duplexSpringCount,
     });
 }
 
@@ -115,9 +150,38 @@ const snap = (x) => {
     return [lo, lo + 0.25, lo + 1].reduce((a, b) =>
         (Math.abs(b - x) < Math.abs(a - x) ? b : a));
 };
+
+// SNAP=engine REPLACES THAT WITH WHAT THE ENGINE ACTUALLY DOES, and the two
+// are NOT the same function.
+//
+// The engine's post-offset step is `duplexSnapToGrid(raw - off, springs)`,
+// which despite its name is not a grid snap: it lifts a WHOLE inch to the
+// quarter above at 3+ springs and passes everything else through untouched.
+// So on `125.00 - 0.25` the engine returns **124.75** where the model above
+// predicts **125**.
+//
+// That means every quarter-valued offset has been evaluated against a
+// prediction of the engine that is wrong, and the six entries carrying
+// `hi: 0.75` or `hi: 1.75` were chosen on it. Under whole-inch offsets the
+// two agree exactly and the question does not arise - which is the other
+// reason `whole` is worth having.
+//
+// It also decides whether the reference's `.75` answers are reachable at all:
+// they are only produced by a quarter offset, and only the engine's real
+// transform preserves one.
+const engineSnap = (x, springs) => (springs >= 3
+    && Math.abs(x - Math.round(x)) < 1e-9 ? x + 0.25 : x);
+// THE ENGINE-EXACT MODEL IS THE DEFAULT, because it is the true one and
+// because under whole-inch offsets it is provably identical to the old model
+// (the `whole` and `whole + engine` arms returned the same number on all
+// twenty shuffles). `SNAP=legacy` restores the three-candidate rounding.
+const SNAP = process.env.SNAP || "engine";
+const out1 = (x, off) => (SNAP === "engine"
+    ? engineSnap(x.ourIn - off, x.springs) : snap(x.ourIn - off));
+const out2 = (x, off) => (SNAP === "engine"
+    ? engineSnap(x.ourOut - off, x.springs) : snap(x.ourOut - off));
 // Correcting the inner carries the outer, which is always inner + 1.
-const hit = (x, off) => snap(x.ourIn - off) === x.refIn
-    && snap(x.ourOut - off) === x.refOut;
+const hit = (x, off) => out1(x, off) === x.refIn && out2(x, off) === x.refOut;
 const score = (set, offs) => set.filter((x) =>
     hit(x, offFor(entryFor(offs, x), x))).length;
 
@@ -125,16 +189,144 @@ const OFFSETS = [];
 
 for (let a = -1; a <= 4.001; a += 0.25) OFFSETS.push(Math.round(a * 100) / 100);
 
-const bestOffset = (g) => {
+// CONSTRAIN= RESTRICTS WHAT AN ENTRY MAY SAY, AND THE RESIDUAL ASKED FOR IT.
+//
+// `over120-residual.mjs` on the shipped table names the rungs still failing
+// worst, and every one of the top three carries `lo: 1` - a correction applied
+// BELOW its own threshold - with two of them now over-correcting:
+//
+//   0.4615/0.375   lo:1 hi:0.75   22 readings   16 failing   median +0.25
+//   0.5/0.4062     lo:1 hi:1.75   22            12          median -0.75
+//   0.49/0.3938    lo:1 hi:2      31            10          median -1.00
+//
+// And `0.4615/0.375` DECREASES with length, where the band's whole documented
+// mechanism is an overshoot that GROWS with it (143 long against 4 short
+// before any correction). That entry is fitted against the physics, on 22
+// readings, and it is the worst rung in the table.
+//
+//   mono     refuse hi < lo - the correction may not shrink with length
+//   lozero   force lo = 0 - below the threshold, no correction at all
+//   unit     lo = 0 and hi in {0, 1} - only `t` is free, one parameter a rung
+//
+// Each is a RESTRICTION, so each can only help by generalising better. That
+// is the direction this project has repeatedly found wins in, and the
+// readable majority entry is already `{lo: 0, hi: 1}`.
+//
+// THE VERDICT: ALL THREE FAIL. Twenty shuffles, MIN pinned at 8:
+//
+//     mono      +10 readings   t = +0.34    11 wins / 8    a wash
+//     lozero    -48 readings   t = -1.75     7 wins / 12   LOSES
+//     unit       +0 readings   t = +0.00    10 wins / 9    exactly a wash
+//
+// **AND THE ARGUMENT FOR `lozero` WAS THE `MAX_BANDS` CONFOUND AGAIN.** The
+// residual says the rungs failing worst all carry `lo: 1` - but a rung gets
+// `lo: 1` precisely BECAUSE it is hard and needs a big correction, so its
+// failure rate is a property of the population, not of the treatment. A rate
+// computed over whoever landed in a bucket is not an estimate of what putting
+// somebody there does; that lesson was already in CLAUDE.md and was walked
+// past anyway. Forcing those rungs to zero costs 48 readings.
+//
+// `0.4615/0.375` really does decrease with length (`lo:1, hi:0.75`) where the
+// overshoot grows, and it really is the worst rung in the table - but
+// refusing that shape is a wash, so it is not costing anything either.
+//   whole    every offset a WHOLE INCH - see below, this one is a defect fix
+//
+// `whole` IS NOT ABOUT ACCURACY, AND THAT IS WHY IT SHIPS ON A WASH. The
+// reference returns a length on `{n, n+0.25}` in envelope (20,344 readings)
+// and on `{n, n+0.25, n+0.75}` past 120" - it NEVER returns a half. But
+// `duplexSnapToGrid` is not a grid snap at all: it only lifts a whole inch to
+// the quarter above at 3+ springs and passes anything else through. So a
+// quarter-valued offset off a `.00`/`.25` base lands on `.50` and is printed:
+//
+//     OUR length past 120"    .00 54.0%   .25 39.4%   .50 6.6%
+//     REFERENCE past 120"     .00 53.8%   .25 39.7%   .75 6.5%
+//
+// **6.6% of past-120 figures are quoted on a grid the manufacturer does not
+// use**, and the cause is the six entries carrying `hi: 0.75` or `hi: 1.75`.
+// Restricting the offsets to whole inches removes that by construction while
+// keeping the whole-inch 2" entries that `unit` would have thrown away.
+const CONSTRAIN = process.env.CONSTRAIN || "";
+const UNIT_OFFSETS = [0, 1];
+const WHOLE_OFFSETS = OFFSETS.filter((o) => Math.abs(o - Math.round(o)) < 1e-9);
+
+// WHOLE-INCH OFFSETS ARE THE DEFAULT, AND THEY WIN TWICE OVER.
+//
+// Twenty shuffles, MIN pinned at 8, against the quarter-stepped table:
+//
+//     whole            +46 readings   t = +2.60 on 19 df   15 wins / 3
+//     engine snap      +31 readings   t = +2.49            12 wins / 4
+//     whole + engine   +46 readings   IDENTICAL to whole
+//
+// ACCURACY IS THE SECOND REASON. The first is that a quarter-valued offset
+// makes the engine PRINT a length on a grid the manufacturer never uses -
+// `.50`, on 6.6% of past-120 figures - and the cause of the accuracy gain is
+// the same defect seen from the fitting side: those six entries were chosen
+// against a prediction of the engine that is wrong for exactly them, so they
+// were mis-specified from the start. Correcting the model recovers +31 of it;
+// restricting to the regime where model and engine AGREE recovers +46.
+//
+// `WHOLE_ONLY=0` restores quarter-stepped offsets. The default is the shipped
+// value because `apply-over120.sh` passes no environment - the SHRINK lesson.
+const WHOLE_ONLY = process.env.WHOLE_ONLY !== "0";
+const POOL = WHOLE_ONLY ? WHOLE_OFFSETS : OFFSETS;
+// SIDE_MIN= readings a split needs either side. Two is the shipped value and
+// the comment below says why; it was a gate PICKED rather than measured, so
+// it got the same treatment as the rung minimum - and two is right:
+//
+//     SIDE_MIN=3    -29 readings   t = -1.36    6 wins / 10
+//     SIDE_MIN=4   -100 readings   t = -3.54    2 wins / 17
+//
+// Raising it denies splits, and a denied split falls back to one constant for
+// the whole rung - the saturated level, which is what the two-level form was
+// introduced to improve on. Same shape as raising the rung minimum.
+const SIDE_MIN = Number(process.env.SIDE_MIN || 2);
+
+const bestOffsetIn = (g, offs) => {
     let best = 0, bestHit = g.filter((x) => hit(x, 0)).length;
 
-    for (const off of OFFSETS) {
+    for (const off of offs) {
         const h = g.filter((x) => hit(x, off)).length;
 
         if (h > bestHit) { bestHit = h; best = off; }
     }
 
     return [best, bestHit];
+};
+
+const bestOffset = (g) => bestOffsetIn(g, POOL);
+
+// THE TWO SIDES ARE CHOSEN TOGETHER, because `mono` couples them: the best
+// `hi` depends on which `lo` was taken. Picking `lo` first and then the best
+// `hi >= lo` is greedy and can lose a better pair. `lozero` and `unit` do not
+// couple, but one joint search covers all three and costs nothing at this
+// size. Unconstrained, it is left to `bestOffset` so the default fit stays
+// byte-identical - that function seeds with 0 and replaces only on strictly
+// more hits, so 0 wins every tie, and a joint rewrite would not reproduce it.
+const bestPair = (below, above) => {
+    if (!CONSTRAIN) {
+        const [lo, lh] = bestOffset(below);
+        const [hi, hh] = bestOffset(above);
+
+        return { lo, hi, hit: lh + hh };
+    }
+
+    const pool = CONSTRAIN === "unit" ? UNIT_OFFSETS
+        : CONSTRAIN === "whole" ? WHOLE_OFFSETS : POOL;
+    const loPool = CONSTRAIN === "lozero" || CONSTRAIN === "unit" ? [0] : pool;
+    const hiPool = pool;
+    const loHits = loPool.map((o) => [o, below.filter((x) => hit(x, o)).length]);
+    const hiHits = hiPool.map((o) => [o, above.filter((x) => hit(x, o)).length]);
+    let best = null;
+
+    for (const [lo, lh] of loHits) {
+        for (const [hi, hh] of hiHits) {
+            if (CONSTRAIN === "mono" && hi < lo) continue;
+
+            if (!best || lh + hh > best.hit) best = { lo, hi, hit: lh + hh };
+        }
+    }
+
+    return best;
 };
 
 // A rung with too few readings is a constant fitted to noise, so the guard is
@@ -148,19 +340,24 @@ const bestOffset = (g) => {
 // Fit the two-level form to ONE set of rows. Pulled out of the loop below so
 // the same code can fit a rung and fit the pooled fallback.
 const fitOne = (g) => {
-    const [c, ch] = bestOffset(g);
+    // The one-constant form obeys the same restriction - under `unit` a lone
+    // constant may only be 0 or 1, and under `lozero` a rung with no split is
+    // saying "no correction anywhere", which is what lo = hi = 0 means.
+    const [c, ch] = CONSTRAIN === "unit" ? bestOffsetIn(g, UNIT_OFFSETS)
+        : CONSTRAIN === "whole" ? bestOffsetIn(g, WHOLE_OFFSETS)
+            : CONSTRAIN === "lozero" ? [0, g.filter((x) => hit(x, 0)).length]
+                : bestOffset(g);
     let best = { hit: ch, t: null, lo: c, hi: c };
 
     for (const t of [...new Set(g.map((x) => x.floor))].sort((a, b) => a - b)) {
         const below = g.filter((x) => x.floor < t);
         const above = g.filter((x) => x.floor >= t);
 
-        if (below.length < 2 || above.length < 2) continue;
+        if (below.length < SIDE_MIN || above.length < SIDE_MIN) continue;
 
-        const [lo, lh] = bestOffset(below);
-        const [hi, hh] = bestOffset(above);
+        const p = bestPair(below, above);
 
-        if (lh + hh > best.hit) best = { hit: lh + hh, t, lo, hi };
+        if (p.hit > best.hit) best = { hit: p.hit, t, lo: p.lo, hi: p.hi };
     }
 
     return best;
@@ -228,8 +425,47 @@ const fitOne = (g) => {
 // 2026-11-16. `POOL_FALLBACK=0` is the revert.
 const POOL_FALLBACK = process.env.POOL_FALLBACK !== "0";
 
+// T_SHRINK=k PULLS EACH RUNG'S THRESHOLD TOWARD THE GLOBAL ONE.
+//
+// `POOL_FALLBACK` is complete pooling for the rungs too thin to fit at all
+// and none for the rest. This is the middle of that: a rung that DOES get its
+// own fit still places `t` on eight to thirty readings, and the in-envelope
+// `SHRINK` win says exactly that estimate is the noisy one. Same formula -
+// `lambda = k / (k + n)` - so a thin rung leans on the global threshold and a
+// thick one keeps its own, with no new parameter and nothing selected.
+//
+// Only `t` is shrunk. The offsets are a handful of discrete quarter-inch
+// levels, where an average is not a level and the readable `{0, 1}` pair
+// would be smeared into something that cannot be printed; `t` is a position
+// on a continuum and is the thing a small sample misplaces.
+//
+// THE VERDICT: IT LOSES BADLY, AND THE REASON WAS ALREADY WRITTEN DOWN.
+// Twenty shuffles, MIN pinned at 8, POOL_FALLBACK on in both arms:
+//
+//     T_SHRINK=20   -104 readings   t = -3.38 on 19 df    4 wins / 16
+//     T_SHRINK=60   -236 readings   t = -7.46 on 19 df    2 wins / 18
+//
+// **POOLING MUST NOT GO ACROSS RUNGS** - measured in-envelope on 2026-11-16,
+// where groups INSIDE a rung agree on their threshold to about 0.03 while
+// different rungs differ by 0.46 to 1.56. This table has one entry per rung
+// and no siblings, so every bit of shrinkage here is across-rung by
+// construction. The `t` values run 125 to 257 because the active length at
+// which a rung starts overshooting is a PER-RUNG physical quantity, not a
+// noisy estimate of one shared number.
+//
+// AND THAT IS EXACTLY WHY `POOL_FALLBACK` WINS WHERE THIS LOSES, which is
+// the distinction worth keeping: a rung too thin to fit has NO estimate at
+// all, so any prior beats nothing and the gain is pure bias reduction. A rung
+// that HAS an estimate is being dragged toward other rungs' thresholds, which
+// are different quantities. Complete pooling for the thin is right; partial
+// pooling for the thick is wrong. Do not re-run this.
+const T_SHRINK = Number(process.env.T_SHRINK || 0);
+
 const fitOffsets = (train, min) => {
     const out = new Map();
+    // Needed before the rung loop when shrinking, so it is computed up front
+    // and reused as the fallback below rather than fitted twice.
+    const global = POOL_FALLBACK || T_SHRINK ? fitOne(train) : null;
 
     for (const rg of new Set(train.map((x) => x.rung))) {
         const g = train.filter((x) => x.rung === rg);
@@ -237,6 +473,12 @@ const fitOffsets = (train, min) => {
         if (g.length < min) continue;
 
         const best = fitOne(g);
+
+        if (T_SHRINK && best.t !== null && global && global.t !== null) {
+            const lambda = T_SHRINK / (T_SHRINK + g.length);
+
+            best.t = Math.round(lambda * global.t + (1 - lambda) * best.t);
+        }
 
         // A rung with enough readings whose answer is "no correction" keeps
         // that answer explicitly, so the fallback cannot overrule a measured
@@ -246,7 +488,7 @@ const fitOffsets = (train, min) => {
         else if (POOL_FALLBACK) out.set(rg, { t: null, lo: 0, hi: 0 });
     }
 
-    if (POOL_FALLBACK) out.set("__fallback__", fitOne(train));
+    if (POOL_FALLBACK) out.set("__fallback__", global);
 
     return out;
 };
