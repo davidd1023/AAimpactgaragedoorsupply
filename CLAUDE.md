@@ -3999,6 +3999,14 @@ default the LOW end, 6 and 10, edited on the tab). A TRACK is one door's set
 its springs inside it. Red orders take no capacity. Computed in the browser
 (`schedule()` in board.js) from `tracks`/`boxes` per order (`_aa_work_left`).
 
+**A SETTINGS TAB HOLDS ALL OF IT** (owner, same day: lead time per vendor +
+shipping time + tracks, boxes AND springs a day). Springs became their own
+bench (`per_day_springs`, default 20, counted per spring on spring jobs). A
+P.O. arrives `aa_lead_days` (calendar, to the day it ships) then
+`aa_ship_days` WORKING days later (`_arrival_date`) - ATL ships 12/11 and is
+here 12/18 with 5. The ready date only lets the TICKED families hold an
+order back, like the rest of the tab.
+
 ## AA part numbers (`aa_part_numbers`, owner 2026-11-18)
 
 *"quiero ponerle nuestro part number a todos nuestros productos"* - and when

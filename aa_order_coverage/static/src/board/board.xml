@@ -15,6 +15,10 @@
                   t-on-click="() => this.state.tab = 'nextpo'">
             Next P.O. <span class="badge text-bg-warning ms-1" t-out="nextPoCount"/>
           </button>
+          <button class="btn" t-att-class="state.tab === 'settings' ? 'btn-primary' : 'btn-secondary'"
+                  t-on-click="openSettings">
+            <i class="fa fa-cog"/> Settings
+          </button>
         </div>
         <input type="search" class="form-control w-auto ms-auto" placeholder="Search W/O, PO, customer"
                t-model="state.search"/>
@@ -47,13 +51,9 @@
                   t-on-click="() => this.state.show = 'can'">Can make <t t-out="c.can"/></button>
           <button class="btn btn-sm" t-att-class="state.show === 'short' ? 'btn-danger' : 'btn-outline-danger'"
                   t-on-click="() => this.state.show = 'short'">Missing parts <t t-out="c.short"/></button>
-          <span class="ms-auto small d-flex align-items-center gap-1">
-            Shop makes
-            <input type="number" min="1" class="form-control form-control-sm" style="width: 4.5em" t-model="state.cap.tracks"/>
-            tracks and
-            <input type="number" min="1" class="form-control form-control-sm" style="width: 4.5em" t-model="state.cap.boxes"/>
-            boxes a day
-            <button class="btn btn-sm btn-outline-secondary" t-on-click="saveCapacity">Apply</button>
+          <span class="ms-auto small text-muted">
+            Dates count <t t-out="state.cap.tracks"/> tracks, <t t-out="state.cap.boxes"/> boxes and
+            <t t-out="state.cap.springs"/> springs a day (Settings)
           </span>
           <span t-if="c.firstShort" class="text-muted ms-2">
             Stock runs out at order #<t t-out="c.firstShort.seq"/> (<t t-out="c.firstShort.wo"/>)
@@ -104,7 +104,7 @@
                   </div>
                   <div t-if="!row.noPo" class="mb-2">
                     Ready about <b t-out="row.finishBy"/>
-                    <span class="text-muted">- <t t-out="fmt(row.tracks)"/> track set(s) and <t t-out="fmt(row.boxes)"/> box(es) still to make,
+                    <span class="text-muted">- <t t-out="fmt(row.tracks)"/> track set(s), <t t-out="fmt(row.boxes)"/> box(es) and <t t-out="fmt(row.springs)"/> spring(s) still to make,
                     in line behind the orders ready before it.</span>
                   </div>
                   <table class="table table-sm mb-2">
@@ -146,23 +146,10 @@
           <t t-set="v" t-value="block.vendor"/>
           <div class="card-header d-flex flex-wrap align-items-center gap-2">
             <strong class="me-2" t-out="v.name"/>
-            <span class="small">Lead time</span>
-            <input type="number" min="0" class="form-control form-control-sm" style="width: 5em"
-                   t-att-class="v.lead_set ? '' : 'border-warning'" t-model="v.lead"/>
-            <span class="small">days</span>
-            <span class="small ms-2">Between P.O.s</span>
-            <input type="number" min="0" class="form-control form-control-sm" style="width: 5em"
-                   placeholder="= lead" t-model="v.cycle"/>
-            <span class="small">days</span>
-            <button class="btn btn-sm btn-outline-secondary" t-on-click="() => this.saveDays(v)">Save</button>
-            <span t-if="!v.lead_set" class="small text-warning">Lead time not set: confirm it</span>
-            <t t-if="hasCoils(block)">
-              <span class="small ms-2">Coils of</span>
-              <select class="form-select form-select-sm w-auto" t-on-change="(ev) => this.changeCoilFeet(v, ev)">
-                <option value="7" t-att-selected="v.coil_feet === 7">7 ft</option>
-                <option value="8" t-att-selected="v.coil_feet === 8">8 ft</option>
-              </select>
-            </t>
+            <span class="small text-muted">
+              Lead <t t-out="v.lead_days"/> days + shipping <t t-out="v.ship_days"/> working days
+            </span>
+            <span t-if="!v.lead_set" class="small text-warning">Lead time not set: Settings</span>
             <span class="small text-muted ms-2">Arrives about <t t-out="v.arrives"/></span>
             <span class="ms-auto fw-bold" t-out="money(vendorTotal(block))"/>
             <button t-if="v.draft" class="btn btn-sm btn-link" t-on-click="() => this.openPo(v.draft.id)">
@@ -224,6 +211,39 @@
             </tbody>
           </table>
         </div>
+      </t>
+
+      <!-- SETTINGS: each vendor's times and the shop's daily capacity, in
+           one place (owner, 2026-11-18). -->
+      <t t-elif="state.tab === 'settings'">
+        <div t-if="!state.settings" class="text-muted">Loading...</div>
+        <t t-else="">
+          <h5>What the shop makes in a day</h5>
+          <div class="d-flex gap-3 align-items-center mb-1">
+            <label class="d-flex align-items-center gap-1">Tracks (door sets)
+              <input type="number" min="1" class="form-control form-control-sm" style="width: 5em" t-model="state.settings.capacity.tracks"/></label>
+            <label class="d-flex align-items-center gap-1">Hardware boxes
+              <input type="number" min="1" class="form-control form-control-sm" style="width: 5em" t-model="state.settings.capacity.boxes"/></label>
+            <label class="d-flex align-items-center gap-1">Springs
+              <input type="number" min="1" class="form-control form-control-sm" style="width: 5em" t-model="state.settings.capacity.springs"/></label>
+          </div>
+          <p class="small text-muted">Used for the ready date of every order: each bench works through the orders as their parts arrive, oldest first.</p>
+          <h5 class="mt-3">Vendors</h5>
+          <table class="table table-sm align-middle" style="max-width: 900px">
+            <thead><tr><th>Vendor</th><th>Products</th><th>Lead time (days to ship)</th><th>Shipping (working days)</th><th>Days between P.O.s</th></tr></thead>
+            <tbody>
+              <tr t-foreach="state.settings.vendors" t-as="v" t-key="v.id">
+                <td t-out="v.name"/>
+                <td t-out="v.products"/>
+                <td><input type="number" min="0" class="form-control form-control-sm" style="width: 6em" t-model="v.lead"/></td>
+                <td><input type="number" min="0" class="form-control form-control-sm" style="width: 6em" t-model="v.ship"/></td>
+                <td><input type="number" min="0" class="form-control form-control-sm" style="width: 6em" t-model="v.cycle" placeholder="= lead"/></td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="small text-muted">A P.O. arrives lead time + shipping after it is placed. Days between P.O.s is how long each P.O. must last; blank means the same as the lead time.</p>
+          <button class="btn btn-primary" t-on-click="saveSettings">Save settings</button>
+        </t>
       </t>
 
       <!-- WHAT WE DON'T HAVE: every part the open orders need more of than

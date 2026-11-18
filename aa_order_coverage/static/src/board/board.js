@@ -26,11 +26,12 @@ export class OrderCoverageBoard extends Component {
         this.state = useState({
             loading: true,
             data: { families: [], orders: [], lines: [], products: [], next_po: { vendors: [], no_vendor: [] }, capacity: {} },
-            cap: { tracks: 6, boxes: 10 },
+            cap: { tracks: 6, boxes: 10, springs: 20 },
             plan: {}, // seq -> {date, noPo, partsBy}
             picked: [], // family ids; none ticked means every family
             show: "all", // all | can | short
-            tab: "orders", // orders | missing | nextpo
+            tab: "orders", // orders | missing | nextpo | settings
+            settings: null,
             search: "",
             open: {}, // seq -> unfolded
         });
@@ -62,9 +63,11 @@ export class OrderCoverageBoard extends Component {
         } else {
             picked.push(familyId);
         }
+        this.schedule();
     }
     clearFamilies() {
         this.state.picked.splice(0);
+        this.schedule();
     }
     inFamilies(line) {
         const picked = this.state.picked;
@@ -185,9 +188,14 @@ export class OrderCoverageBoard extends Component {
     schedule() {
         const perTrack = Number(this.state.cap.tracks) || 6;
         const perBox = Number(this.state.cap.boxes) || 10;
+        const perSpring = Number(this.state.cap.springs) || 20;
+        // ONLY THE TICKED FAMILIES hold an order back, like everything else
+        // on this tab: "tracks only" answers when the tracks are done.
         const bySeq = {};
         for (const line of this.state.data.lines) {
-            (bySeq[line.seq] = bySeq[line.seq] || []).push(line);
+            if (this.inFamilies(line)) {
+                (bySeq[line.seq] = bySeq[line.seq] || []).push(line);
+            }
         }
         const plan = {};
         const queue = [];
@@ -205,8 +213,13 @@ export class OrderCoverageBoard extends Component {
         queue.sort((a, b) => a.ready - b.ready || a.order.seq - b.order.seq);
         let trackAt = 0;
         let boxAt = 0;
+        let springAt = 0;
         for (const { order, ready, partsBy } of queue) {
             let done = ready;
+            if (order.springs > 0) {
+                springAt = Math.max(springAt, ready) + order.springs / perSpring;
+                done = Math.max(done, Math.ceil(springAt - 1e-9) - 1);
+            }
             if (order.tracks > 0) {
                 trackAt = Math.max(trackAt, ready) + order.tracks / perTrack;
                 done = Math.max(done, Math.ceil(trackAt - 1e-9) - 1);
@@ -219,11 +232,18 @@ export class OrderCoverageBoard extends Component {
         }
         this.state.plan = plan;
     }
-    async saveCapacity() {
-        await this.orm.call("aa.order.coverage.line", "aa_set_capacity", [
-            Number(this.state.cap.tracks), Number(this.state.cap.boxes),
+    // ------------------------------------------------------------ settings
+    async openSettings() {
+        this.state.tab = "settings";
+        this.state.settings = await this.orm.call("aa.next.po", "aa_settings_data", []);
+    }
+    async saveSettings() {
+        const s = this.state.settings;
+        this.state.settings = await this.orm.call("aa.next.po", "aa_save_settings", [
+            s.vendors, s.capacity,
         ]);
-        this.schedule();
+        this.notification.add("Settings saved.", { type: "success" });
+        await this.load();
     }
     addWorkdays(iso, n) {
         const d = new Date(iso + "T12:00:00");

@@ -63,6 +63,11 @@ class ResPartner(models.Model):
         'P.O. lead time (days)',
         help="How many days a purchase order to this vendor takes to arrive. "
              "Used by Inventory > Reporting > Orders to Make > Next P.O.")
+    aa_ship_days = fields.Integer(
+        'Shipping time (working days)',
+        help="Working days from the day this vendor ships to the day it is in "
+             "our warehouse. Added to the lead time (owner, 2026-11-18: ATL "
+             "ships, then 5 working days to reach us).")
     aa_cycle_days = fields.Integer(
         'Days between P.O.s',
         help="How long each P.O. to this vendor must last after it arrives. "
@@ -191,7 +196,21 @@ class NextPurchaseOrder(models.AbstractModel):
 
     @api.model
     def _lead_days(self, vendor, seller):
-        return vendor.aa_lead_days or seller.delay or 1
+        """Calendar days from ordering today to the goods being in OUR
+        warehouse: the vendor's lead time (to the day it ships), then its
+        shipping time in WORKING days."""
+        today = fields.Date.context_today(self)
+        return (self._arrival_date(vendor, seller, today) - today).days
+
+    @api.model
+    def _arrival_date(self, vendor, seller, start):
+        day = start + timedelta(days=(vendor.aa_lead_days or seller.delay or 1))
+        left = vendor.aa_ship_days or 0
+        while left > 0:
+            day += timedelta(days=1)
+            if day.weekday() < 5:
+                left -= 1
+        return day
 
     # ------------------------------------------------------------------
     # The answer
@@ -285,6 +304,8 @@ class NextPurchaseOrder(models.AbstractModel):
                 'id': vendor.id,
                 'name': vendor.display_name,
                 'lead': lead,
+                'lead_days': vendor.aa_lead_days or 0,
+                'ship_days': vendor.aa_ship_days or 0,
                 'lead_set': bool(vendor.aa_lead_days),
                 'cycle': vendor.aa_cycle_days or 0,
                 'coil_feet': vendor.aa_coil_feet or 7,
@@ -314,6 +335,51 @@ class NextPurchaseOrder(models.AbstractModel):
     # ------------------------------------------------------------------
     # Buttons
     # ------------------------------------------------------------------
+
+    # ------------------------------------------------------------------
+    # Settings tab
+    # ------------------------------------------------------------------
+
+    @api.model
+    def aa_settings_data(self):
+        """Every vendor something we stock is bought from, with its times,
+        and the shop's daily capacity - one screen for all of it (owner,
+        2026-11-18: "un menu como ajustes para poner lead time de cada
+        vendedor + shipping time + cuantos tracks, cajas y springs podemos
+        hacer en un dia")."""
+        sellers = self.env['product.supplierinfo'].sudo().search([
+            ('product_tmpl_id.is_storable', '=', True)])
+        vendors = sellers.mapped('partner_id').sorted('name')
+        counts = {}
+        for s in sellers:
+            counts[s.partner_id.id] = counts.get(s.partner_id.id, 0) + 1
+        return {
+            'vendors': [{
+                'id': v.id, 'name': v.display_name,
+                'lead': v.aa_lead_days or 0, 'ship': v.aa_ship_days or 0,
+                'cycle': v.aa_cycle_days or 0, 'products': counts.get(v.id, 0),
+            } for v in vendors],
+            'capacity': self.env['aa.order.coverage.line']._aa_capacity(),
+        }
+
+    @api.model
+    def aa_save_settings(self, vendors, capacity):
+        if not self.env.user.has_group('purchase.group_purchase_user') and \
+                not self.env.user.has_group('stock.group_stock_manager'):
+            raise UserError("Only purchasing or an inventory manager can change these settings.")
+        Partner = self.env['res.partner'].sudo()
+        for row in vendors or []:
+            vendor = Partner.browse(int(row['id'])).exists()
+            if vendor:
+                vendor.write({
+                    'aa_lead_days': max(int(float(row.get('lead') or 0)), 0),
+                    'aa_ship_days': max(int(float(row.get('ship') or 0)), 0),
+                    'aa_cycle_days': max(int(float(row.get('cycle') or 0)), 0),
+                })
+        if capacity:
+            self.env['aa.order.coverage.line'].sudo().aa_set_capacity(
+                capacity.get('tracks'), capacity.get('boxes'), capacity.get('springs'))
+        return self.aa_settings_data()
 
     @api.model
     def aa_set_vendor_days(self, vendor_id, lead, cycle):

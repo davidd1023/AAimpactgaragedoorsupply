@@ -414,7 +414,7 @@ class AaOrderCoverageLine(models.Model):
     # How much work is left, and how much the shop does in a day
     # ------------------------------------------------------------------
 
-    CAPACITY_DEFAULTS = {'tracks': 6, 'boxes': 10}
+    CAPACITY_DEFAULTS = {'tracks': 6, 'boxes': 10, 'springs': 20}
 
     @api.model
     def _aa_capacity(self):
@@ -433,11 +433,14 @@ class AaOrderCoverageLine(models.Model):
         return out
 
     @api.model
-    def aa_set_capacity(self, tracks, boxes):
-        if not self.env.user.has_group('stock.group_stock_manager'):
+    def aa_set_capacity(self, tracks, boxes, springs=None):
+        if not self.env.su and not self.env.user.has_group('stock.group_stock_manager'):
             raise UserError(_("Only an inventory manager can change the shop's daily capacity."))
         ICP = self.env['ir.config_parameter'].sudo()
-        for key, value in (('tracks', tracks), ('boxes', boxes)):
+        pairs = [('tracks', tracks), ('boxes', boxes)]
+        if springs is not None:
+            pairs.append(('springs', springs))
+        for key, value in pairs:
             value = float(value or 0)
             if value <= 0:
                 raise UserError(_("A daily capacity must be more than nothing."))
@@ -451,8 +454,9 @@ class AaOrderCoverageLine(models.Model):
         A TRACK IS ONE DOOR'S SET: the prepared-track jobs come one per
         horizontal and one per vertical, each in the number of doors, so a
         door's tracks are the larger of the two counts, not their sum.
-        A BOX is a hardware kit job; its springs go in it, so a spring job only
-        counts as a box when the order has no kit at all.
+        A BOX is a hardware kit job. SPRINGS are their own bench (owner,
+        2026-11-18, the settings asked for tracks, boxes AND springs a day),
+        counted one per spring on the spring jobs.
         """
         jobs = self.sudo()._aa_open_jobs(sale_order)
         horizontal = vertical = other = boxes = springs = 0.0
@@ -462,7 +466,7 @@ class AaOrderCoverageLine(models.Model):
             if kind == 'kit':
                 boxes += qty
             elif kind == 'spring':
-                springs += 1
+                springs += qty
             elif kind == 'cable':
                 continue
             else:
@@ -476,9 +480,7 @@ class AaOrderCoverageLine(models.Model):
                 else:
                     other += qty
         tracks = max(horizontal, vertical) + other
-        if not boxes and springs:
-            boxes = 1
-        return {'tracks': tracks, 'boxes': boxes}
+        return {'tracks': tracks, 'boxes': boxes, 'springs': springs}
 
     @api.model
     def aa_board_data(self):

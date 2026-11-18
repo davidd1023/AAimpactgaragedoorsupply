@@ -169,12 +169,25 @@ class TestNextPO(TransactionCase):
 
     def test_capacity_defaults_and_setting(self):
         Line = self.env['aa.order.coverage.line']
-        self.assertEqual(Line._aa_capacity(), {'tracks': 6, 'boxes': 10})
-        Line.aa_set_capacity(8, 12)
-        self.assertEqual(Line._aa_capacity(), {'tracks': 8.0, 'boxes': 12.0})
+        self.assertEqual(Line._aa_capacity(), {'tracks': 6, 'boxes': 10, 'springs': 20})
+        Line.aa_set_capacity(8, 12, 30)
+        self.assertEqual(Line._aa_capacity(), {'tracks': 8.0, 'boxes': 12.0, 'springs': 30.0})
 
     def test_board_orders_carry_work_left(self):
         data = self.env['aa.order.coverage.line'].aa_board_data()
         for order in data['orders']:
             self.assertIn('tracks', order)
             self.assertIn('boxes', order)
+
+    def test_shipping_days_add_working_days_to_the_lead(self):
+        NextPO = self.env['aa.next.po']
+        self.vendor.write({'aa_lead_days': 32, 'aa_ship_days': 5})
+        from datetime import date
+        # Ordered Mon 2026-11-09: ships Fri 12-11, +5 working days = Fri 12-18.
+        self.assertEqual(NextPO._arrival_date(self.vendor, self.env['product.supplierinfo'], date(2026, 11, 9)),
+                         date(2026, 12, 18))
+        data = NextPO.aa_save_settings(
+            [{'id': self.vendor.id, 'lead': 10, 'ship': 2, 'cycle': 0}],
+            {'tracks': 7, 'boxes': 11, 'springs': 25})
+        self.assertEqual(self.vendor.aa_ship_days, 2)
+        self.assertEqual(data['capacity']['springs'], 25)
