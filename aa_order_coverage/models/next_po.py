@@ -36,6 +36,7 @@ tracks) are never bought, so they are left out: their raw parts carry the
 demand, because a job's consumption is counted as use.
 """
 import math
+import re
 from datetime import timedelta
 
 from odoo import api, fields, models
@@ -43,6 +44,11 @@ from odoo.exceptions import UserError
 from odoo.tools import float_compare
 
 FORECAST_DAYS_DEFAULT = 90
+
+# Cable is stocked in FEET but bought by the REEL - "1/8" 7X19 GAC (500 FT
+# REEL)". Nobody can order 1,708 ft of a 500 ft reel, so the quantity is
+# rounded up to whole reels when the name says how long one is.
+REEL = re.compile(r'(\d+)\s*FT\s*REEL', re.I)
 
 
 class ResPartner(models.Model):
@@ -218,6 +224,10 @@ class NextPurchaseOrder(models.AbstractModel):
                 continue
             # Whole units: nobody orders 3.4 hinges or 17.2 inches of cable.
             qty = math.ceil(short - 1e-6)
+            reel = REEL.search(product.name or '')
+            if reel and int(reel.group(1)):
+                size = int(reel.group(1))
+                qty = math.ceil(qty / size) * size
             if seller and seller.min_qty and qty < seller.min_qty:
                 qty = seller.min_qty
             # When the stock would run out at today's pace, the open orders

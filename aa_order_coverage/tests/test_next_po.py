@@ -112,3 +112,14 @@ class TestNextPO(TransactionCase):
         for vendor in data['next_po']['vendors']:
             for row in vendor['lines']:
                 self.assertIn(row['family_id'], ids)
+
+    def test_cable_is_ordered_in_whole_reels(self):
+        reel = self.env['product.product'].create({
+            'name': 'NextPO 1/8 GAC (500 FT REEL)', 'is_storable': True,
+            'purchase_ok': True,
+            'seller_ids': [(0, 0, {'partner_id': self.vendor.id})]})
+        Line = self.env['aa.order.coverage.line']
+        data = self.env['aa.next.po'].aa_next_po(
+            {reel: 1208}, lambda p: Line._aa_family(p, {}))
+        row = [r for v in data['vendors'] for r in v['lines'] if r['id'] == reel.id][0]
+        self.assertEqual(row['qty'], 1500)
