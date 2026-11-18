@@ -112,6 +112,17 @@ msgstr ""
 
 #. module: spring_engineering
 #. odoo-javascript
+#: code:addons/spring_engineering/static/src/js/spring_engineering.js:0
+msgid ""
+"A hi-lift of %s on a %s door is outside the drum's published range, so these"
+" figures cannot be relied on. Please contact us."
+msgstr ""
+"Un alto levante de %s en una puerta de %s está fuera del rango publicado del"
+" tambor, por lo que no se puede confiar en estas cifras. Comuníquese con "
+"nosotros."
+
+#. module: spring_engineering
+#. odoo-javascript
 #: code:addons/spring_engineering/static/src/xml/spring_engineering.xml:0
 msgid "APCO 1100-18"
 msgstr ""
