@@ -66,6 +66,12 @@ def _letter_index(letters):
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    # THE SUPPLIER'S NUMBER, SAID SO (owner, 2026-11-18: "quisiera mantener
+    # el # de parte del proveedor como referencia" - kept, and labelled so
+    # nobody mistakes it for ours). Only the label changes; the field, its
+    # values and everything that reads it are Odoo's own.
+    default_code = fields.Char(string='Supplier Part #')
+
     aa_part_base = fields.Char(
         string='AA Part #', copy=False, index=True, readonly=True,
         help="AA Impact's own part number. Variants share it and add a "
@@ -110,6 +116,8 @@ class ProductTemplate(models.Model):
 
 class ProductProduct(models.Model):
     _inherit = 'product.product'
+
+    default_code = fields.Char(string='Supplier Part #')
 
     aa_part_number = fields.Char(
         string='AA Part #', copy=False, index=True, readonly=True,

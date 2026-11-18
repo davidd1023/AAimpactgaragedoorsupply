@@ -134,3 +134,14 @@ class TestPartNumbers(TransactionCase):
                          'an archived product must not take a number')
         archived.active = True
         self.assertRegex(archived.product_variant_id.aa_part_number, r'^AA-BLT-\d{3}$')
+
+    def test_the_supplier_number_is_labelled_and_beside_ours(self):
+        """Owner: keep the supplier's part number as a reference, side by side."""
+        for model in ('product.template', 'product.product'):
+            self.assertEqual(self.env[model]._fields['default_code'].string, 'Supplier Part #')
+        form = self.env['product.template'].get_views([(False, 'form')])['views']['form']['arch']
+        node = etree.fromstring(form).xpath("//field[@name='default_code']")[0]
+        self.assertEqual(node.get('string'), 'Supplier Part #')
+        lst = self.env['product.template'].get_views([(False, 'list')])['views']['list']['arch']
+        names = [f.get('name') for f in etree.fromstring(lst).xpath('//field')]
+        self.assertEqual(names[names.index('aa_part_base') + 1], 'default_code')

@@ -1,6 +1,6 @@
 {
     'name': 'AA Part Numbers',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': "AA Impact's own part number on every stocked product",
     'description': """
 Owner, 2026-11-18: "quiero ponerle nuestro part number a todos nuestros

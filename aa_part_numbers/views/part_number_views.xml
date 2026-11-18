@@ -13,6 +13,11 @@
       <field name="default_code" position="before">
         <field name="aa_part_base" invisible="not aa_part_base"/>
       </field>
+      <!-- Odoo writes string="Reference" on this one view, which beats the
+           field's own label - so it is said again here. -->
+      <field name="default_code" position="attributes">
+        <attribute name="string">Supplier Part #</attribute>
+      </field>
     </field>
   </record>
 
@@ -23,6 +28,10 @@
     <field name="arch" type="xml">
       <field name="name" position="before">
         <field name="aa_part_base"/>
+      </field>
+      <!-- SIDE BY SIDE, ours then the supplier's (owner, 2026-11-18). -->
+      <field name="aa_part_base" position="after">
+        <field name="default_code" position="move"/>
       </field>
     </field>
   </record>

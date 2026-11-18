@@ -3978,6 +3978,13 @@ The family is the product CATEGORY, mapped to three letters by hand in
 sleeves, thimbles and stops have no category and are CBL. Variants are
 lettered in attribute order (attribute sequence, then value sequence).
 
+**THE SUPPLIER'S NUMBER IS LABELLED "Supplier Part #"** (owner, same day:
+"quisiera mantener el # de parte del proveedor como referencia") - Odoo's own
+`default_code`, only its label changed (field string on both models, plus the
+template form, where Odoo writes `string="Reference"` itself), and moved next
+to AA Part # in the product list. 57 of his 368 stocked variants have none and
+never had one (RAW tracks, flag angles, hinges #8/#9).
+
 **`_aa_next_base` READS WITH RAW SQL, SO IT FLUSHES FIRST** - otherwise two
 products numbered in one run get the same base. New module: Apps > Update
 Apps List > install "AA Part Numbers"; the install numbers everything.
