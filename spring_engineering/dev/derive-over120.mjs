@@ -125,16 +125,104 @@ const OFFSETS = [];
 
 for (let a = -1; a <= 4.001; a += 0.25) OFFSETS.push(Math.round(a * 100) / 100);
 
-const bestOffset = (g) => {
+// CONSTRAIN= RESTRICTS WHAT AN ENTRY MAY SAY, AND THE RESIDUAL ASKED FOR IT.
+//
+// `over120-residual.mjs` on the shipped table names the rungs still failing
+// worst, and every one of the top three carries `lo: 1` - a correction applied
+// BELOW its own threshold - with two of them now over-correcting:
+//
+//   0.4615/0.375   lo:1 hi:0.75   22 readings   16 failing   median +0.25
+//   0.5/0.4062     lo:1 hi:1.75   22            12          median -0.75
+//   0.49/0.3938    lo:1 hi:2      31            10          median -1.00
+//
+// And `0.4615/0.375` DECREASES with length, where the band's whole documented
+// mechanism is an overshoot that GROWS with it (143 long against 4 short
+// before any correction). That entry is fitted against the physics, on 22
+// readings, and it is the worst rung in the table.
+//
+//   mono     refuse hi < lo - the correction may not shrink with length
+//   lozero   force lo = 0 - below the threshold, no correction at all
+//   unit     lo = 0 and hi in {0, 1} - only `t` is free, one parameter a rung
+//
+// Each is a RESTRICTION, so each can only help by generalising better. That
+// is the direction this project has repeatedly found wins in, and the
+// readable majority entry is already `{lo: 0, hi: 1}`.
+//
+// THE VERDICT: ALL THREE FAIL. Twenty shuffles, MIN pinned at 8:
+//
+//     mono      +10 readings   t = +0.34    11 wins / 8    a wash
+//     lozero    -48 readings   t = -1.75     7 wins / 12   LOSES
+//     unit       +0 readings   t = +0.00    10 wins / 9    exactly a wash
+//
+// **AND THE ARGUMENT FOR `lozero` WAS THE `MAX_BANDS` CONFOUND AGAIN.** The
+// residual says the rungs failing worst all carry `lo: 1` - but a rung gets
+// `lo: 1` precisely BECAUSE it is hard and needs a big correction, so its
+// failure rate is a property of the population, not of the treatment. A rate
+// computed over whoever landed in a bucket is not an estimate of what putting
+// somebody there does; that lesson was already in CLAUDE.md and was walked
+// past anyway. Forcing those rungs to zero costs 48 readings.
+//
+// `0.4615/0.375` really does decrease with length (`lo:1, hi:0.75`) where the
+// overshoot grows, and it really is the worst rung in the table - but
+// refusing that shape is a wash, so it is not costing anything either.
+const CONSTRAIN = process.env.CONSTRAIN || "";
+const UNIT_OFFSETS = [0, 1];
+// SIDE_MIN= readings a split needs either side. Two is the shipped value and
+// the comment below says why; it was a gate PICKED rather than measured, so
+// it got the same treatment as the rung minimum - and two is right:
+//
+//     SIDE_MIN=3    -29 readings   t = -1.36    6 wins / 10
+//     SIDE_MIN=4   -100 readings   t = -3.54    2 wins / 17
+//
+// Raising it denies splits, and a denied split falls back to one constant for
+// the whole rung - the saturated level, which is what the two-level form was
+// introduced to improve on. Same shape as raising the rung minimum.
+const SIDE_MIN = Number(process.env.SIDE_MIN || 2);
+
+const bestOffsetIn = (g, offs) => {
     let best = 0, bestHit = g.filter((x) => hit(x, 0)).length;
 
-    for (const off of OFFSETS) {
+    for (const off of offs) {
         const h = g.filter((x) => hit(x, off)).length;
 
         if (h > bestHit) { bestHit = h; best = off; }
     }
 
     return [best, bestHit];
+};
+
+const bestOffset = (g) => bestOffsetIn(g, OFFSETS);
+
+// THE TWO SIDES ARE CHOSEN TOGETHER, because `mono` couples them: the best
+// `hi` depends on which `lo` was taken. Picking `lo` first and then the best
+// `hi >= lo` is greedy and can lose a better pair. `lozero` and `unit` do not
+// couple, but one joint search covers all three and costs nothing at this
+// size. Unconstrained, it is left to `bestOffset` so the default fit stays
+// byte-identical - that function seeds with 0 and replaces only on strictly
+// more hits, so 0 wins every tie, and a joint rewrite would not reproduce it.
+const bestPair = (below, above) => {
+    if (!CONSTRAIN) {
+        const [lo, lh] = bestOffset(below);
+        const [hi, hh] = bestOffset(above);
+
+        return { lo, hi, hit: lh + hh };
+    }
+
+    const loPool = CONSTRAIN === "lozero" || CONSTRAIN === "unit" ? [0] : OFFSETS;
+    const hiPool = CONSTRAIN === "unit" ? UNIT_OFFSETS : OFFSETS;
+    const loHits = loPool.map((o) => [o, below.filter((x) => hit(x, o)).length]);
+    const hiHits = hiPool.map((o) => [o, above.filter((x) => hit(x, o)).length]);
+    let best = null;
+
+    for (const [lo, lh] of loHits) {
+        for (const [hi, hh] of hiHits) {
+            if (CONSTRAIN === "mono" && hi < lo) continue;
+
+            if (!best || lh + hh > best.hit) best = { lo, hi, hit: lh + hh };
+        }
+    }
+
+    return best;
 };
 
 // A rung with too few readings is a constant fitted to noise, so the guard is
@@ -148,19 +236,23 @@ const bestOffset = (g) => {
 // Fit the two-level form to ONE set of rows. Pulled out of the loop below so
 // the same code can fit a rung and fit the pooled fallback.
 const fitOne = (g) => {
-    const [c, ch] = bestOffset(g);
+    // The one-constant form obeys the same restriction - under `unit` a lone
+    // constant may only be 0 or 1, and under `lozero` a rung with no split is
+    // saying "no correction anywhere", which is what lo = hi = 0 means.
+    const [c, ch] = CONSTRAIN === "unit" ? bestOffsetIn(g, UNIT_OFFSETS)
+        : CONSTRAIN === "lozero" ? [0, g.filter((x) => hit(x, 0)).length]
+            : bestOffset(g);
     let best = { hit: ch, t: null, lo: c, hi: c };
 
     for (const t of [...new Set(g.map((x) => x.floor))].sort((a, b) => a - b)) {
         const below = g.filter((x) => x.floor < t);
         const above = g.filter((x) => x.floor >= t);
 
-        if (below.length < 2 || above.length < 2) continue;
+        if (below.length < SIDE_MIN || above.length < SIDE_MIN) continue;
 
-        const [lo, lh] = bestOffset(below);
-        const [hi, hh] = bestOffset(above);
+        const p = bestPair(below, above);
 
-        if (lh + hh > best.hit) best = { hit: lh + hh, t, lo, hi };
+        if (p.hit > best.hit) best = { hit: p.hit, t, lo: p.lo, hi: p.hi };
     }
 
     return best;
@@ -228,8 +320,47 @@ const fitOne = (g) => {
 // 2026-11-16. `POOL_FALLBACK=0` is the revert.
 const POOL_FALLBACK = process.env.POOL_FALLBACK !== "0";
 
+// T_SHRINK=k PULLS EACH RUNG'S THRESHOLD TOWARD THE GLOBAL ONE.
+//
+// `POOL_FALLBACK` is complete pooling for the rungs too thin to fit at all
+// and none for the rest. This is the middle of that: a rung that DOES get its
+// own fit still places `t` on eight to thirty readings, and the in-envelope
+// `SHRINK` win says exactly that estimate is the noisy one. Same formula -
+// `lambda = k / (k + n)` - so a thin rung leans on the global threshold and a
+// thick one keeps its own, with no new parameter and nothing selected.
+//
+// Only `t` is shrunk. The offsets are a handful of discrete quarter-inch
+// levels, where an average is not a level and the readable `{0, 1}` pair
+// would be smeared into something that cannot be printed; `t` is a position
+// on a continuum and is the thing a small sample misplaces.
+//
+// THE VERDICT: IT LOSES BADLY, AND THE REASON WAS ALREADY WRITTEN DOWN.
+// Twenty shuffles, MIN pinned at 8, POOL_FALLBACK on in both arms:
+//
+//     T_SHRINK=20   -104 readings   t = -3.38 on 19 df    4 wins / 16
+//     T_SHRINK=60   -236 readings   t = -7.46 on 19 df    2 wins / 18
+//
+// **POOLING MUST NOT GO ACROSS RUNGS** - measured in-envelope on 2026-11-16,
+// where groups INSIDE a rung agree on their threshold to about 0.03 while
+// different rungs differ by 0.46 to 1.56. This table has one entry per rung
+// and no siblings, so every bit of shrinkage here is across-rung by
+// construction. The `t` values run 125 to 257 because the active length at
+// which a rung starts overshooting is a PER-RUNG physical quantity, not a
+// noisy estimate of one shared number.
+//
+// AND THAT IS EXACTLY WHY `POOL_FALLBACK` WINS WHERE THIS LOSES, which is
+// the distinction worth keeping: a rung too thin to fit has NO estimate at
+// all, so any prior beats nothing and the gain is pure bias reduction. A rung
+// that HAS an estimate is being dragged toward other rungs' thresholds, which
+// are different quantities. Complete pooling for the thin is right; partial
+// pooling for the thick is wrong. Do not re-run this.
+const T_SHRINK = Number(process.env.T_SHRINK || 0);
+
 const fitOffsets = (train, min) => {
     const out = new Map();
+    // Needed before the rung loop when shrinking, so it is computed up front
+    // and reused as the fallback below rather than fitted twice.
+    const global = POOL_FALLBACK || T_SHRINK ? fitOne(train) : null;
 
     for (const rg of new Set(train.map((x) => x.rung))) {
         const g = train.filter((x) => x.rung === rg);
@@ -237,6 +368,12 @@ const fitOffsets = (train, min) => {
         if (g.length < min) continue;
 
         const best = fitOne(g);
+
+        if (T_SHRINK && best.t !== null && global && global.t !== null) {
+            const lambda = T_SHRINK / (T_SHRINK + g.length);
+
+            best.t = Math.round(lambda * global.t + (1 - lambda) * best.t);
+        }
 
         // A rung with enough readings whose answer is "no correction" keeps
         // that answer explicitly, so the fallback cannot overrule a measured
@@ -246,7 +383,7 @@ const fitOffsets = (train, min) => {
         else if (POOL_FALLBACK) out.set(rg, { t: null, lo: 0, hi: 0 });
     }
 
-    if (POOL_FALLBACK) out.set("__fallback__", fitOne(train));
+    if (POOL_FALLBACK) out.set("__fallback__", global);
 
     return out;
 };
