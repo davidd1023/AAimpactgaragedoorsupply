@@ -336,4 +336,79 @@ class AaOrderCoverageLine(models.Model):
                         short, 0.0, precision_rounding=rounding) > 0,
                 })
         Line.create(values)
-        return True
+        return stock
+
+    # ------------------------------------------------------------------
+    # The board: orders to make, and what to order
+    # ------------------------------------------------------------------
+
+    @api.model
+    def aa_board_data(self):
+        """Everything the Orders to Make screen draws, in one call.
+
+        Owner, 2026-11-18: "quiero ver las ordenes por hacer y que me salgan
+        segun los filtros que ponga, que podemos hacer y que falta por pedir"
+        - and "por pedir me refiero a que no tengamos".
+
+        The screen decides "can we make it" in the browser from these lines,
+        for whichever families are ticked, because each part is handed out
+        on its own (see the module docstring): an order can be made for a set
+        of families exactly when none of its lines in those families is
+        short. So ticking a box needs no round trip.
+        """
+        stock = self.sudo()._aa_rebuild()
+        lines = self.search([('user_id', '=', self.env.uid)])
+        orders, seen = [], set()
+        for line in lines:
+            if line.seq in seen:
+                continue
+            seen.add(line.seq)
+            orders.append({
+                'seq': line.seq,
+                'wo': line.wo_number or '',
+                'po': line.po_number or '',
+                'customer': line.partner_id.display_name or '',
+                'pickup': fields.Date.to_string(line.pickup_date) if line.pickup_date else '',
+                'picking_id': line.picking_id.id,
+            })
+        products = {}
+        for line in lines:
+            info = products.setdefault(line.product_id.id, {
+                'id': line.product_id.id,
+                'name': line.product_id.display_name,
+                'family_id': line.family_id.id,
+                'uom': line.uom_id.name or '',
+                'needed': 0.0,
+                'orders': 0,
+            })
+            info['needed'] += line.qty_needed
+            info['orders'] += 1
+        Product = self.env['product.product'].sudo()
+        for pid, info in products.items():
+            product = Product.browse(pid)
+            on_hand = stock.get(product, 0.0)
+            info['on_hand'] = on_hand
+            # WHAT WE DO NOT HAVE: everything the open orders want, less the
+            # shelf. Incoming purchases are shown beside it, not taken off,
+            # so it is plain what is already on its way.
+            info['missing'] = max(info['needed'] - max(on_hand, 0.0), 0.0)
+            info['incoming'] = product.incoming_qty
+            info['to_order'] = max(info['missing'] - product.incoming_qty, 0.0)
+            seller = product.seller_ids[:1]
+            info['vendor'] = seller.partner_id.display_name if seller else ''
+        families = self.env['aa.order.coverage.family'].search(
+            [('is_all', '=', False), ('line_ids.user_id', '=', self.env.uid)])
+        return {
+            'families': [{'id': f.id, 'name': f.name} for f in families],
+            'orders': orders,
+            'lines': [{
+                'seq': l.seq,
+                'product_id': l.product_id.id,
+                'product': l.product_id.display_name,
+                'family_id': l.family_id.id,
+                'needed': l.qty_needed,
+                'before': l.qty_before,
+                'short': l.qty_short,
+            } for l in lines],
+            'products': sorted(products.values(), key=lambda p: p['name']),
+        }

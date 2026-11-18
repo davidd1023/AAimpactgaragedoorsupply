@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="aa_order_coverage.Board">
+    <div class="o_action aa_board h-100 overflow-auto p-3">
+      <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+        <h4 class="m-0 me-3">Orders to Make</h4>
+        <div class="btn-group">
+          <button class="btn" t-att-class="state.tab === 'orders' ? 'btn-primary' : 'btn-secondary'"
+                  t-on-click="() => this.state.tab = 'orders'">Orders</button>
+          <button class="btn" t-att-class="state.tab === 'missing' ? 'btn-primary' : 'btn-secondary'"
+                  t-on-click="() => this.state.tab = 'missing'">
+            What We Don't Have <span class="badge text-bg-danger ms-1" t-out="missing.length"/>
+          </button>
+        </div>
+        <input type="search" class="form-control w-auto ms-auto" placeholder="Search W/O, PO, customer"
+               t-model="state.search"/>
+        <button class="btn btn-secondary" t-on-click="() => this.load()" title="Work it out again">
+          <i class="fa fa-refresh"/> Refresh
+        </button>
+      </div>
+
+      <!-- THE FILTER: tick Tracks, or Hinges, and every order is judged on
+           those parts alone. Nothing ticked means every part. -->
+      <div class="d-flex flex-wrap gap-1 mb-3 align-items-center">
+        <span class="text-muted me-1">Parts:</span>
+        <button class="btn btn-sm" t-att-class="state.picked.length ? 'btn-outline-secondary' : 'btn-dark'"
+                t-on-click="clearFamilies">All</button>
+        <t t-foreach="state.data.families" t-as="family" t-key="family.id">
+          <button class="btn btn-sm"
+                  t-att-class="isPicked(family.id) ? 'btn-dark' : 'btn-outline-secondary'"
+                  t-on-click="() => this.toggleFamily(family.id)" t-out="family.name"/>
+        </t>
+      </div>
+
+      <div t-if="state.loading" class="text-muted p-4">Working it out...</div>
+
+      <t t-elif="state.tab === 'orders'">
+        <t t-set="c" t-value="counts"/>
+        <div class="d-flex gap-2 mb-2 flex-wrap align-items-center">
+          <button class="btn btn-sm" t-att-class="state.show === 'all' ? 'btn-dark' : 'btn-outline-secondary'"
+                  t-on-click="() => this.state.show = 'all'">All <t t-out="c.total"/></button>
+          <button class="btn btn-sm" t-att-class="state.show === 'can' ? 'btn-success' : 'btn-outline-success'"
+                  t-on-click="() => this.state.show = 'can'">Can make <t t-out="c.can"/></button>
+          <button class="btn btn-sm" t-att-class="state.show === 'short' ? 'btn-danger' : 'btn-outline-danger'"
+                  t-on-click="() => this.state.show = 'short'">Missing parts <t t-out="c.short"/></button>
+          <span t-if="c.firstShort" class="text-muted ms-2">
+            Stock runs out at order #<t t-out="c.firstShort.seq"/> (<t t-out="c.firstShort.wo"/>)
+          </span>
+          <span t-elif="c.total" class="text-success ms-2">Stock covers every order</span>
+        </div>
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>#</th><th>W/O</th><th>PO</th><th>Customer</th><th>Pickup</th>
+              <th>Status</th><th>Missing</th><th/>
+            </tr>
+          </thead>
+          <tbody>
+            <t t-foreach="rows" t-as="row" t-key="row.seq">
+              <tr t-on-click="() => this.toggleOpen(row.seq)" style="cursor: pointer;">
+                <td t-out="row.seq"/>
+                <td t-out="row.wo"/>
+                <td t-out="row.po"/>
+                <td t-out="row.customer"/>
+                <td t-out="row.pickup"/>
+                <td>
+                  <span t-if="row.canMake" class="badge text-bg-success">Can make</span>
+                  <span t-else="" class="badge text-bg-danger">Missing parts</span>
+                </td>
+                <td class="small text-danger" t-out="shortText(row)"/>
+                <td>
+                  <button class="btn btn-sm btn-link" title="Open the Work Order"
+                          t-on-click.stop="() => this.openWorkOrder(row)">
+                    <i class="fa fa-external-link"/>
+                  </button>
+                </td>
+              </tr>
+              <tr t-if="state.open[row.seq]">
+                <td/>
+                <td colspan="7">
+                  <table class="table table-sm mb-2">
+                    <thead><tr><th>Part</th><th>Needs</th><th>Left when its turn came</th><th>Missing</th></tr></thead>
+                    <tbody>
+                      <tr t-foreach="row.lines" t-as="line" t-key="line.product_id"
+                          t-att-class="line.short > 0 ? 'text-danger' : 'text-success'">
+                        <td t-out="line.product"/>
+                        <td t-out="fmt(line.needed)"/>
+                        <td t-out="fmt(line.before)"/>
+                        <td t-out="line.short > 0 ? fmt(line.short) : ''"/>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </t>
+            <tr t-if="!rows.length"><td colspan="8" class="text-muted">No orders.</td></tr>
+          </tbody>
+        </table>
+      </t>
+
+      <!-- WHAT WE DON'T HAVE: every part the open orders need more of than
+           the shelf holds. "Coming" is what purchasing already has on order,
+           so it is plain what is still to be bought. -->
+      <t t-else="">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Part</th><th>Family</th><th>Orders</th><th>Needed</th><th>On hand</th>
+              <th class="text-danger">Don't have</th><th>Coming</th><th>Still to order</th><th>Vendor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr t-foreach="missing" t-as="p" t-key="p.id">
+              <td t-out="p.name"/>
+              <td t-out="familyName(p.family_id)"/>
+              <td t-out="p.orders"/>
+              <td t-out="fmt(p.needed)"/>
+              <td t-out="fmt(p.on_hand)"/>
+              <td class="text-danger fw-bold" t-out="fmt(p.missing)"/>
+              <td t-out="p.incoming ? fmt(p.incoming) : ''"/>
+              <td class="fw-bold" t-out="fmt(p.to_order)"/>
+              <td t-out="p.vendor"/>
+            </tr>
+            <tr t-if="!missing.length"><td colspan="9" class="text-success">Nothing missing for these parts.</td></tr>
+          </tbody>
+        </table>
+      </t>
+    </div>
+  </t>
+</templates>

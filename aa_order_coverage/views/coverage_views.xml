@@ -154,6 +154,21 @@
     <field name="group_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
   </record>
 
+  <!-- ORDERS TO MAKE: the screen he asked for on 2026-11-18 - every open
+       order, judged on whichever parts are ticked, and a second tab with
+       what we do not have. A client action, because "can we make it" has to
+       follow the ticked families and a list view's rows cannot. -->
+  <record id="action_aa_order_board" model="ir.actions.client">
+    <field name="name">Orders to Make</field>
+    <field name="tag">aa_order_coverage.board</field>
+  </record>
+
+  <menuitem id="menu_aa_order_board"
+            name="Orders to Make"
+            parent="stock.menu_warehouse_report"
+            action="action_aa_order_board"
+            sequence="19"/>
+
   <menuitem id="menu_aa_order_coverage"
             name="Order Coverage"
             parent="stock.menu_warehouse_report"

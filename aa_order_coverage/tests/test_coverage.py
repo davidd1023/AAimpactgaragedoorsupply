@@ -157,3 +157,25 @@ class TestOrderCoverage(TransactionCase):
             # and what it opens can be read by that user
             model = self.env[action['res_model']].with_user(clerk)
             model.search_read(action['domain'], list(model._fields)[:5])
+
+    def test_board_data_says_what_we_do_not_have(self):
+        """5 tracks on the shelf, two orders wanting 3 each: 1 missing."""
+        self._order('PO-B1', [(self.track, 3), (self.hinge, 10)], 5)
+        self._order('PO-B2', [(self.track, 3)], 1)
+        clerk = self.env['res.users'].create({
+            'name': 'Board Clerk', 'login': 'board_clerk',
+            'group_ids': [(6, 0, [self.env.ref('stock.group_stock_user').id])],
+        })
+        data = self.Line.with_user(clerk).aa_board_data()
+        track = next(p for p in data['products'] if p['id'] == self.track.id)
+        self.assertEqual(track['needed'], 6)
+        self.assertEqual(track['on_hand'], 5)
+        self.assertEqual(track['missing'], 1)
+        self.assertEqual(track['to_order'], 1)
+        hinge = next(p for p in data['products'] if p['id'] == self.hinge.id)
+        self.assertEqual(hinge['missing'], 0)
+        # the second order is short of a track and of nothing else
+        seq = {o['po']: o['seq'] for o in data['orders']}
+        short = [l for l in data['lines'] if l['seq'] == seq['PO-B2'] and l['short']]
+        self.assertEqual([l['product_id'] for l in short], [self.track.id])
+        self.assertIn(self.tracks.name, [f['name'] for f in data['families']])
