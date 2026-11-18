@@ -229,8 +229,27 @@
           </div>
           <p class="small text-muted">Used for the ready date of every order: each bench works through the orders as their parts arrive, oldest first.</p>
           <h5 class="mt-3">Days the shop is closed</h5>
-          <textarea class="form-control form-control-sm" rows="3" style="max-width: 360px" t-model="state.settings.closed" placeholder="2026-12-24..2027-01-03"/>
-          <p class="small text-muted">One date per line, or a range as FROM..TO (2026-12-24..2027-01-03). Weekends are already skipped. No order is dated on a closed day.</p>
+          <table class="table table-sm align-middle mb-2" style="max-width: 560px">
+            <tbody>
+              <tr t-foreach="closedEntries" t-as="c" t-key="c_index">
+                <td t-att-class="c.valid ? '' : 'text-danger'">
+                  <t t-out="closedLabel(c)"/>
+                  <span t-if="!c.valid" class="small"> (not a valid date)</span>
+                </td>
+                <td class="text-muted small" t-out="c.valid ? (c.days === 1 ? '1 day' : c.days + ' days') : ''"/>
+                <td class="text-end"><button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeClosed(c_index)"><i class="fa fa-trash"/> Remove</button></td>
+              </tr>
+              <tr t-if="!closedEntries.length"><td colspan="3" class="text-muted">No closed days.</td></tr>
+            </tbody>
+          </table>
+          <div class="d-flex gap-2 align-items-end mb-1">
+            <label class="small">First day
+              <input type="date" class="form-control form-control-sm" t-model="state.closedFrom"/></label>
+            <label class="small">Last day (optional)
+              <input type="date" class="form-control form-control-sm" t-model="state.closedTo" t-att-min="state.closedFrom"/></label>
+            <button class="btn btn-sm btn-secondary" t-on-click="addClosed"><i class="fa fa-plus"/> Add</button>
+          </div>
+          <p class="small text-muted">Pick one day, or a first and last day for a range. Weekends are already skipped. No order is dated on a closed day. Press Save settings to keep the changes.</p>
           <h5 class="mt-3">Vendors</h5>
           <table class="table table-sm align-middle" style="max-width: 900px">
             <thead><tr><th>Vendor</th><th>Products</th><th>Lead time (days to ship)</th><th>Shipping (working days)</th><th>Days between P.O.s</th></tr></thead>
