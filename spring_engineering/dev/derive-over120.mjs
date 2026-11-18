@@ -75,6 +75,39 @@ import { makeRnd } from "./rnd.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const mod = await load();
+
+// IT NOW REFUSES RATHER THAN RELYING ON SOMEBODY REMEMBERING.
+//
+// Everything above explains that fitting with the table installed fits a
+// correction on top of itself, and `apply-over120.sh` clears it first - but
+// the script ENDS by installing, so a bare `node dev/derive-over120.mjs`
+// straight afterwards is wrong, silently, and reports the gains collapsed to
+// nothing. That has now happened three times in one day and twice in the
+// session that wrote the warning.
+//
+// A comment cannot stop it; reading the engine can. The tell is unmistakable
+// - a non-empty DUPLEX_LONG_OFFSET block - so this refuses with the one
+// command that does it properly. `ALLOW_INSTALLED=1` is the deliberate
+// bypass for anybody who genuinely wants the circular measurement.
+const engineSrc = readFileSync(
+    join(HERE, "..", "static/src/js/spring_engineering.js"), "utf8");
+const installed = engineSrc.match(/const DUPLEX_LONG_OFFSET = \{(.*?)\n\};/s);
+
+if (installed && installed[1].trim() && !process.env.ALLOW_INSTALLED) {
+    const n = (installed[1].match(/"[\d.\/]+":/g) || []).length;
+
+    console.error(`REFUSING TO FIT: DUPLEX_LONG_OFFSET already holds ${n} rungs.`);
+    console.error("");
+    console.error("The gate below reads the engine's length AFTER those offsets");
+    console.error("are applied, so this would fit a correction on top of itself");
+    console.error("and report that none is needed. Run the routine instead:");
+    console.error("");
+    console.error("    sh dev/apply-over120.sh        empty -> derive -> install");
+    console.error("");
+    console.error("ALLOW_INSTALLED=1 bypasses this on purpose.");
+    process.exit(1);
+}
+
 const corpus = JSON.parse(readFileSync(join(HERE, "corpus.json"), "utf8"));
 const rows = [];
 
@@ -105,6 +138,8 @@ for (const r of corpus.readings) {
         floor: Math.floor(c.duplexActiveLength),
         refIn: r.expect.duplexInnerLength, refOut: r.expect.duplexOuterLength,
         rung: `${s.outerWire}/${s.innerWire}`,
+        // Needed by SNAP=engine: `duplexSnapToGrid` is spring-count dependent.
+        springs: c.duplexSpringCount,
     });
 }
 
@@ -115,9 +150,38 @@ const snap = (x) => {
     return [lo, lo + 0.25, lo + 1].reduce((a, b) =>
         (Math.abs(b - x) < Math.abs(a - x) ? b : a));
 };
+
+// SNAP=engine REPLACES THAT WITH WHAT THE ENGINE ACTUALLY DOES, and the two
+// are NOT the same function.
+//
+// The engine's post-offset step is `duplexSnapToGrid(raw - off, springs)`,
+// which despite its name is not a grid snap: it lifts a WHOLE inch to the
+// quarter above at 3+ springs and passes everything else through untouched.
+// So on `125.00 - 0.25` the engine returns **124.75** where the model above
+// predicts **125**.
+//
+// That means every quarter-valued offset has been evaluated against a
+// prediction of the engine that is wrong, and the six entries carrying
+// `hi: 0.75` or `hi: 1.75` were chosen on it. Under whole-inch offsets the
+// two agree exactly and the question does not arise - which is the other
+// reason `whole` is worth having.
+//
+// It also decides whether the reference's `.75` answers are reachable at all:
+// they are only produced by a quarter offset, and only the engine's real
+// transform preserves one.
+const engineSnap = (x, springs) => (springs >= 3
+    && Math.abs(x - Math.round(x)) < 1e-9 ? x + 0.25 : x);
+// THE ENGINE-EXACT MODEL IS THE DEFAULT, because it is the true one and
+// because under whole-inch offsets it is provably identical to the old model
+// (the `whole` and `whole + engine` arms returned the same number on all
+// twenty shuffles). `SNAP=legacy` restores the three-candidate rounding.
+const SNAP = process.env.SNAP || "engine";
+const out1 = (x, off) => (SNAP === "engine"
+    ? engineSnap(x.ourIn - off, x.springs) : snap(x.ourIn - off));
+const out2 = (x, off) => (SNAP === "engine"
+    ? engineSnap(x.ourOut - off, x.springs) : snap(x.ourOut - off));
 // Correcting the inner carries the outer, which is always inner + 1.
-const hit = (x, off) => snap(x.ourIn - off) === x.refIn
-    && snap(x.ourOut - off) === x.refOut;
+const hit = (x, off) => out1(x, off) === x.refIn && out2(x, off) === x.refOut;
 const score = (set, offs) => set.filter((x) =>
     hit(x, offFor(entryFor(offs, x), x))).length;
 
@@ -165,8 +229,46 @@ for (let a = -1; a <= 4.001; a += 0.25) OFFSETS.push(Math.round(a * 100) / 100);
 // `0.4615/0.375` really does decrease with length (`lo:1, hi:0.75`) where the
 // overshoot grows, and it really is the worst rung in the table - but
 // refusing that shape is a wash, so it is not costing anything either.
+//   whole    every offset a WHOLE INCH - see below, this one is a defect fix
+//
+// `whole` IS NOT ABOUT ACCURACY, AND THAT IS WHY IT SHIPS ON A WASH. The
+// reference returns a length on `{n, n+0.25}` in envelope (20,344 readings)
+// and on `{n, n+0.25, n+0.75}` past 120" - it NEVER returns a half. But
+// `duplexSnapToGrid` is not a grid snap at all: it only lifts a whole inch to
+// the quarter above at 3+ springs and passes anything else through. So a
+// quarter-valued offset off a `.00`/`.25` base lands on `.50` and is printed:
+//
+//     OUR length past 120"    .00 54.0%   .25 39.4%   .50 6.6%
+//     REFERENCE past 120"     .00 53.8%   .25 39.7%   .75 6.5%
+//
+// **6.6% of past-120 figures are quoted on a grid the manufacturer does not
+// use**, and the cause is the six entries carrying `hi: 0.75` or `hi: 1.75`.
+// Restricting the offsets to whole inches removes that by construction while
+// keeping the whole-inch 2" entries that `unit` would have thrown away.
 const CONSTRAIN = process.env.CONSTRAIN || "";
 const UNIT_OFFSETS = [0, 1];
+const WHOLE_OFFSETS = OFFSETS.filter((o) => Math.abs(o - Math.round(o)) < 1e-9);
+
+// WHOLE-INCH OFFSETS ARE THE DEFAULT, AND THEY WIN TWICE OVER.
+//
+// Twenty shuffles, MIN pinned at 8, against the quarter-stepped table:
+//
+//     whole            +46 readings   t = +2.60 on 19 df   15 wins / 3
+//     engine snap      +31 readings   t = +2.49            12 wins / 4
+//     whole + engine   +46 readings   IDENTICAL to whole
+//
+// ACCURACY IS THE SECOND REASON. The first is that a quarter-valued offset
+// makes the engine PRINT a length on a grid the manufacturer never uses -
+// `.50`, on 6.6% of past-120 figures - and the cause of the accuracy gain is
+// the same defect seen from the fitting side: those six entries were chosen
+// against a prediction of the engine that is wrong for exactly them, so they
+// were mis-specified from the start. Correcting the model recovers +31 of it;
+// restricting to the regime where model and engine AGREE recovers +46.
+//
+// `WHOLE_ONLY=0` restores quarter-stepped offsets. The default is the shipped
+// value because `apply-over120.sh` passes no environment - the SHRINK lesson.
+const WHOLE_ONLY = process.env.WHOLE_ONLY !== "0";
+const POOL = WHOLE_ONLY ? WHOLE_OFFSETS : OFFSETS;
 // SIDE_MIN= readings a split needs either side. Two is the shipped value and
 // the comment below says why; it was a gate PICKED rather than measured, so
 // it got the same treatment as the rung minimum - and two is right:
@@ -191,7 +293,7 @@ const bestOffsetIn = (g, offs) => {
     return [best, bestHit];
 };
 
-const bestOffset = (g) => bestOffsetIn(g, OFFSETS);
+const bestOffset = (g) => bestOffsetIn(g, POOL);
 
 // THE TWO SIDES ARE CHOSEN TOGETHER, because `mono` couples them: the best
 // `hi` depends on which `lo` was taken. Picking `lo` first and then the best
@@ -208,8 +310,10 @@ const bestPair = (below, above) => {
         return { lo, hi, hit: lh + hh };
     }
 
-    const loPool = CONSTRAIN === "lozero" || CONSTRAIN === "unit" ? [0] : OFFSETS;
-    const hiPool = CONSTRAIN === "unit" ? UNIT_OFFSETS : OFFSETS;
+    const pool = CONSTRAIN === "unit" ? UNIT_OFFSETS
+        : CONSTRAIN === "whole" ? WHOLE_OFFSETS : POOL;
+    const loPool = CONSTRAIN === "lozero" || CONSTRAIN === "unit" ? [0] : pool;
+    const hiPool = pool;
     const loHits = loPool.map((o) => [o, below.filter((x) => hit(x, o)).length]);
     const hiHits = hiPool.map((o) => [o, above.filter((x) => hit(x, o)).length]);
     let best = null;
@@ -240,8 +344,9 @@ const fitOne = (g) => {
     // constant may only be 0 or 1, and under `lozero` a rung with no split is
     // saying "no correction anywhere", which is what lo = hi = 0 means.
     const [c, ch] = CONSTRAIN === "unit" ? bestOffsetIn(g, UNIT_OFFSETS)
-        : CONSTRAIN === "lozero" ? [0, g.filter((x) => hit(x, 0)).length]
-            : bestOffset(g);
+        : CONSTRAIN === "whole" ? bestOffsetIn(g, WHOLE_OFFSETS)
+            : CONSTRAIN === "lozero" ? [0, g.filter((x) => hit(x, 0)).length]
+                : bestOffset(g);
     let best = { hit: ch, t: null, lo: c, hi: c };
 
     for (const t of [...new Set(g.map((x) => x.floor))].sort((a, b) => a - b)) {

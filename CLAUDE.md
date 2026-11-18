@@ -5607,6 +5607,122 @@ left `DUPLEX_LONG_OFFSET` fitted against the old output. **It had not** - a
 fresh refit returns the same 24 rungs with four minor threshold shifts. Two
 minutes to kill a plausible theory.
 
+##### THE DERIVER AND THE ENGINE DISAGREED, AND THE BAND WAS PAYING FOR IT (owner, 2026-11-18)
+
+*"anything else you can try?"* - and the answer was yes, but not another knob.
+Seven machinery arms had just lost, so the next move was to check the form's
+own ASSUMPTIONS rather than its parameters. Three had never been tested.
+
+```
+band                          n     exact BEFORE   exact AFTER
+inside 96"  (recommended)   11839      98.52%        98.52%   <- UNCHANGED
+96-120"     (supported)       490      94.49%        94.49%   <- UNCHANGED
+over 120"   (DISCLAIMED)      608      68.42%        71.22%
+ALL DUPLEX                  12937      96.95%        97.09%
+```
+
+Golden **725 byte-identical**, **invariants 20/20**, **0 failed 0 errors of
+348**, `spring_calculator` regenerated and `--check` clean. Every changed hunk
+is inside `DUPLEX_LONG_OFFSET`; zero rung-table lines moved.
+
+###### ONE ASSUMPTION HELD, AND TWO DID NOT
+
+**THE PAIR MOVES TOGETHER - CONFIRMED.** The form applies ONE offset to both
+springs, which is only sound if the gap is constant. Outer minus inner is
+exactly 1" in our output AND in the reference's, on all 602 past-120 readings.
+Closed.
+
+**THE GRID IS NOT THE SAME GRID OUT HERE**, and the snap was carried past the
+gate from a fact that is false there:
+
+```
+REFERENCE length, fractional part
+  in envelope    .00 56.5%   .25 43.5%                 <- the documented grid
+  past 120"      .00 53.8%   .25 39.7%   .75  6.5%     <- a THIRD value
+OUR length
+  past 120"      .00 54.0%   .25 39.4%   .50  6.6%     <- one the reference
+                                                          NEVER returns
+```
+
+**WE WERE PRINTING `.50` ON 6.6% OF PAST-120 FIGURES** - a length the
+manufacturer does not quote anywhere, in envelope or out. That is a product
+defect found by looking at the output's own shape rather than at its accuracy.
+
+###### THE CAUSE: `duplexSnapToGrid` IS NOT A GRID SNAP
+
+Despite the name it does one thing - lift a WHOLE inch to the quarter above at
+3+ springs - and passes everything else through untouched. So an offset of
+0.75 off a `.00`/`.25` base lands on `.50` and is printed as-is. Six entries
+carried `hi: 0.75` or `hi: 1.75`.
+
+**AND THE DERIVER MODELLED THAT WRONGLY.** Its `snap` rounds to the nearest of
+`{lo, lo+0.25, lo+1}`, so on `125.00 - 0.25` it predicts **125** where the
+engine returns **124.75**. *Every quarter-valued offset was therefore chosen
+against a prediction of the engine that is wrong for exactly those offsets.*
+The deriver was not fitting the engine it ships.
+
+###### THE FIX WINS TWICE, AND THE TWO ARMS CORROBORATE EACH OTHER
+
+Twenty shuffles, MIN pinned at 8, table emptied before fitting:
+
+```
+arm              net    mean     sd      t       wins/losses
+whole            +46   +2.30   3.96   +2.60   15/3    <- shipped
+engine snap      +31   +1.55   2.78   +2.49   12/4
+whole + engine   +46   +2.30   3.96   +2.60   15/3   IDENTICAL to whole
+```
+
+**ACCURACY IS THE SECOND REASON; VALIDITY WAS THE FIRST.** And the mechanism
+is one thing seen from two sides: correcting the model of the engine recovers
++31, and restricting to the regime where model and engine AGREE recovers +46.
+`whole + engine` matching `whole` on all twenty shuffles is the check that
+they do agree there - predicted before it was run.
+
+Both are now DEFAULTS (`WHOLE_ONLY=0` and `SNAP=legacy` revert), because
+`apply-over120.sh` passes no environment - the `SHRINK` lesson for the third
+time. The table's offsets are now `{0, 1, 2}` and nothing else.
+
+**QUOTE THE OUT-OF-SAMPLE FIGURE, NOT THE BAND'S.** In sample the band moved
++17 readings (68.42% -> 71.22%); out of sample the gain is **+2.3 readings of
+603 per shuffle, about +0.4 points.** The in-sample number flatters by seven
+times because the shipped table is fitted on everything and scored on the
+same data - the split-half arms are the honest ones.
+
+###### AND THE BAND HAS A CEILING NOBODY HAD NAMED: 93.5%
+
+The reference's `.75` answers cannot be produced by this engine at all. Its
+bonus levels are quarter-valued and learned in-envelope, where `.75` never
+occurs, so no base plus a whole-inch offset reaches it. **39 of 602 readings,
+6.5%, are unmatchable by construction** - which caps this band at 93.5%
+however good the correction gets.
+
+They are not the near-misses they might have been: the `.75` readings run
++2.5, +6.5, +24.5, +156.5 out, so most are wildly wrong for other reasons.
+Reaching them needs a `.75` bonus level in the main table, which is a
+calibration job in-envelope where it would buy nothing.
+
+###### THE WILD RESIDUALS ARE ALL CONFIGURATIONS THE PAGE NOW REFUSES
+
+Every one of the 14 readings out by more than 20" carries `hilift-past-pole`,
+and **139 of the 602 past-120 readings carry it**. So the band's score counts
+doors the engine explicitly tells the customer not to rely on. Not corrected
+for - the figure stays pessimistic on purpose - but worth knowing before
+anybody treats 71.22% as the product's answer on doors it will actually quote.
+
+###### THE DERIVER NOW REFUSES TO FIT ON ITS OWN OUTPUT
+
+The circularity trap - fitting while the table is installed - bit **three
+times in one day**, twice in the session that had written the warning, because
+`apply-over120.sh` ENDS by installing, so a bare `node dev/derive-over120.mjs`
+straight afterwards is silently circular and reports the gains collapsed to
+nothing. The tell is unmistakable (a non-empty `DUPLEX_LONG_OFFSET`), so the
+script now reads the engine and **exits 1 naming the routine to run instead**.
+`ALLOW_INSTALLED=1` is the deliberate bypass. A comment could not stop this;
+a check can.
+
+**AND `pkill -f` MATCHED MY OWN SHELL AGAIN** (exit 144), which is the lesson
+already in this file from 2026-11-12. Kill background jobs BY PID from `ps`.
+
 ##### A LINE BEATS A SPLIT BY PRECEDENCE - AND WHEN ASKED PROPERLY, IT DESERVES TO (2026-11-17)
 
 A real structural gap, found by reading `derive.mjs` rather than by measuring:
