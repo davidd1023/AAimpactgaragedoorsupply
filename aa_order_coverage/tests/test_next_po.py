@@ -123,3 +123,15 @@ class TestNextPO(TransactionCase):
             {reel: 1208}, lambda p: Line._aa_family(p, {}))
         row = [r for v in data['vendors'] for r in v['lines'] if r['id'] == reel.id][0]
         self.assertEqual(row['qty'], 1500)
+
+    def test_boxed_parts_are_ordered_in_whole_boxes(self):
+        trim = self.env['product.product'].create({
+            'name': 'NextPO Trim', 'is_storable': True, 'purchase_ok': True,
+            'seller_ids': [(0, 0, {
+                'partner_id': self.vendor.id, 'price': 16.194, 'min_qty': 15,
+                'product_name': "2in Vinyl Stop 18' Dark Brown (P5), 15 pcs/box"})]})
+        Line = self.env['aa.order.coverage.line']
+        data = self.env['aa.next.po'].aa_next_po(
+            {trim: 17}, lambda p: Line._aa_family(p, {}))
+        row = [r for v in data['vendors'] for r in v['lines'] if r['id'] == trim.id][0]
+        self.assertEqual(row['qty'], 30)

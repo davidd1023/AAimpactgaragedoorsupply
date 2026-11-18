@@ -49,6 +49,11 @@ FORECAST_DAYS_DEFAULT = 90
 # REEL)". Nobody can order 1,708 ft of a 500 ft reel, so the quantity is
 # rounded up to whole reels when the name says how long one is.
 REEL = re.compile(r'(\d+)\s*FT\s*REEL', re.I)
+# The same for anything the vendor sells by the box - Action's trims are
+# "2" Uniflex Vinyl Stop 18' Dark Brown (P5), 15 pcs/box" (owner, 2026-11-18:
+# "es el precio por una caja de 15 trims"). Read off the VENDOR'S description
+# first, which is where the box is stated, then the product's own name.
+PACK = re.compile(r'(\d+)\s*(?:pcs|pieces|pc)\s*/\s*(?:box|case|pack)', re.I)
 
 
 class ResPartner(models.Model):
@@ -227,6 +232,11 @@ class NextPurchaseOrder(models.AbstractModel):
             reel = REEL.search(product.name or '')
             if reel and int(reel.group(1)):
                 size = int(reel.group(1))
+                qty = math.ceil(qty / size) * size
+            pack = PACK.search(seller.product_name or '') if seller else None
+            pack = pack or PACK.search(product.name or '')
+            if pack and int(pack.group(1)):
+                size = int(pack.group(1))
                 qty = math.ceil(qty / size) * size
             if seller and seller.min_qty and qty < seller.min_qty:
                 qty = seller.min_qty
