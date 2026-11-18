@@ -133,6 +133,12 @@
     <field name="model_id" ref="model_aa_order_coverage_line"/>
     <field name="state">code</field>
     <field name="code">action = model.action_open_coverage()</field>
+    <!-- WITHOUT A GROUP ODOO ASKS FOR WRITE ACCESS to the model before it
+         runs a server action (ir.actions.server._can_execute_action_on_records),
+         and these lines are read-only to everybody - so even the
+         administrator got "You don't have enough access rights". The group
+         is what lets a stock user open the screen. -->
+    <field name="group_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
   </record>
 
   <record id="server_action_aa_coverage_family" model="ir.actions.server">
@@ -140,6 +146,12 @@
     <field name="model_id" ref="model_aa_order_coverage_line"/>
     <field name="state">code</field>
     <field name="code">action = model.action_open_families()</field>
+    <!-- WITHOUT A GROUP ODOO ASKS FOR WRITE ACCESS to the model before it
+         runs a server action (ir.actions.server._can_execute_action_on_records),
+         and these lines are read-only to everybody - so even the
+         administrator got "You don't have enough access rights". The group
+         is what lets a stock user open the screen. -->
+    <field name="group_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
   </record>
 
   <menuitem id="menu_aa_order_coverage"

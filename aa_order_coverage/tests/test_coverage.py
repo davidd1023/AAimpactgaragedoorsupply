@@ -140,3 +140,20 @@ class TestOrderCoverage(TransactionCase):
         picking.action_cancel()
         self.Line.action_open_coverage()
         self.assertFalse(self._lines(picking))
+
+    def test_a_stock_user_can_open_both_menus(self):
+        """The menus are server actions; Odoo refuses those to anyone without
+        write access unless the action names a group. Run them as a plain
+        stock user, the way the web client does, not as the superuser."""
+        clerk = self.env['res.users'].create({
+            'name': 'Coverage Menu Clerk', 'login': 'coverage_menu_clerk',
+            'group_ids': [(6, 0, [self.env.ref('stock.group_stock_user').id])],
+        })
+        self._order('PO-MENU', [(self.track, 1)], 2)
+        for xmlid in ('aa_order_coverage.server_action_aa_coverage_lines',
+                      'aa_order_coverage.server_action_aa_coverage_family'):
+            action = self.env.ref(xmlid).with_user(clerk).run()
+            self.assertTrue(action and action.get('res_model'), xmlid)
+            # and what it opens can be read by that user
+            model = self.env[action['res_model']].with_user(clerk)
+            model.search_read(action['domain'], list(model._fields)[:5])
