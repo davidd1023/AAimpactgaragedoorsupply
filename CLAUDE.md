@@ -6081,3 +6081,145 @@ them; a paid one is left alone with a note to issue a credit note. Springs
 take their plastic filler with them. A box taken off re-runs
 `_aa_create_station_productions` so its boxed lift cables get a job of their
 own.
+
+## Order Coverage (`aa_order_coverage`, owner 2026-11-18)
+
+*"necesito hacer algo en inventario que cuando entre me salgan todas las
+ordenes ... ver hasta cual me da con el inventario que tengo actualmente ...
+y ademas filtros por los articulos que llevan las ordenes, por ejemplo
+quiero saber solamente de los tracks hasta que orden me llega o las
+visagras."* Built on staging1 first, at his request.
+
+**FIRST COME FIRST SERVED, PER PART.** Open Work Orders (the warehouse's
+`pick_type_id`) are queued by sale order date; each part's on-hand stock is
+handed down the queue, and an order that finds too little takes what is
+left and is SHORT. Because each part is allocated on its own, "tracks only"
+is the same lines with the rest hidden - the family filter is a plain search
+panel and nothing is recomputed when it changes.
+
+**WHAT AN ORDER NEEDS** is its open Work Order moves plus the raw moves of
+its open jobs (found by `origin` = sale order name); a part the order's own
+open job will make (prepared track, spring assembly) is not asked of the
+shelf twice. Springs are coil (`aa_spring_stock`) and are not in this answer.
+
+The lines are rebuilt every time the menu opens, ONE SET PER USER (record
+rule), read with sudo so a stock clerk can see figures that need sale orders
+and jobs.
+
+**ONE MENU: Inventory > Reporting > Orders to Make** (owner: "dejemos
+solamente el que creamos ahora"). A client action: part-family chips, every
+open order marked Can make / Missing parts for the ticked families (decided
+in the browser - exact, because stock is allocated per part), and a What We
+Don't Have tab ("por pedir me refiero a que no tengamos") = what the open
+orders need less the shelf, with incoming purchases shown beside it, not
+taken off. The old Order Coverage / Coverage by Family menus were removed;
+their views remain.
+
+**A SERVER ACTION WITH NO GROUP DEMANDS WRITE ACCESS** to its model
+(`_can_execute_action_on_records`), so menus on a read-only model refused
+even the administrator. Tests that run as superuser cannot see it - open
+menus as a plain stock user.
+Families are the product category name; uncategorised cable parts are
+"Cables". New module: Apps > Update Apps List > install "AA Order Coverage".
+
+### THE NEXT P.O. TAB (owner, 2026-11-18)
+
+*"que el sistema solo me haga el proximo PO de hardware ... que entienda que
+me viene en una fecha determinada ... basado en las ordenes puestas y un
+pronostico del futuro"*. His answers: ONE P.O. PER VENDOR (the product's
+first vendor), kept on the screen until it is put in Purchase and confirmed;
+forecast = AVERAGE USE (done moves to customer or production, last 90 days,
+`aa_order_coverage.forecast_days`); how much depends on each VENDOR'S LEAD
+TIME. `models/next_po.py`:
+
+    order = open orders + use/day x (lead + cycle) + Min/Max minimum
+            - on hand - CONFIRMED P.O.s still to arrive
+
+`aa_lead_days` / `aa_cycle_days` on res.partner (cycle blank = the lead
+again), edited on the tab. Every supplierinfo `delay` in his data is 1, so
+the lead is ONLY meaningful once set - the card says so. A DRAFT is not
+counted as coming. "Create draft P.O." makes an RFQ flagged `aa_suggested`;
+pressing it again REWRITES that draft rather than making a second. Products
+with any BoM are never suggested - their raw parts carry the use.
+
+**SPRING COIL IS ORDERED IN WHOLE COILS** (owner, same day: *"el PO de
+muelles me lo tienes que dar en serpientes y yo debo escoger el largo ...
+7 u 8 pies"*). `COIL-` rows carry `need_in`; the card has a 7/8 ft selector
+(`aa_coil_feet` on the vendor, default 7) and the PO line is coils x ft x 12
+INCHES, its description naming the coils. Cable rounds to whole 500 ft reels
+and anything whose vendor description says "N pcs/box" (Action's trims, 15)
+to whole boxes.
+
+**THE ORDERS TAB DATES WHAT IS SHORT** (owner, same day: a green dot for
+what can be made, click to see what is missing, which P.O. is on its way and
+when, and roughly when the order could be finished). FIRST COME FIRST SERVED
+carries on past the shelf: a short line is covered on the date the shelf plus
+CONFIRMED P.O. arrivals (`date_planned`, earliest first) reach all demand up
+to and including that order (`_aa_lines_with_arrivals`). The order is ready
+about the last such date plus 2 working days (the shop's lead time); one short
+part on no P.O. means red, no date.
+
+**THE DATE NOW COUNTS THE SHOP'S CAPACITY** (owner, same day: *"hacemos 6-9
+tracks al dia, y 10 a 15 cajas de hardware con sus muelles, dame una fecha mas
+realistica"*). An order can start the working day after its last missing part
+lands (today when nothing is missing); the track bench and the hardware bench
+then work through orders in the order they become ready, oldest first among
+equals, each at its own rate (`aa_order_coverage.per_day_tracks` / `_boxes`,
+default the LOW end, 6 and 10, edited on the tab). A TRACK is one door's set
+(the larger of the horizontal and vertical job quantities); a BOX is a kit job,
+its springs inside it. Red orders take no capacity. Computed in the browser
+(`schedule()` in board.js) from `tracks`/`boxes` per order (`_aa_work_left`).
+
+**A SETTINGS TAB HOLDS ALL OF IT** (owner, same day: lead time per vendor +
+shipping time + tracks, boxes AND springs a day). Springs became their own
+bench (`per_day_springs`, default 20, counted per spring on spring jobs). A
+P.O. arrives `aa_lead_days` (calendar, to the day it ships) then
+`aa_ship_days` WORKING days later (`_arrival_date`) - ATL ships 12/11 and is
+here 12/18 with 5. The ready date only lets the TICKED families hold an
+order back, like the rest of the tab.
+
+**CLOSED DAYS** (owner, 2026-11-18: *"nosotros empezamos enero 4 a
+trabajar"*, closed from the 24th of December). `aa_order_coverage.closed_days`,
+edited on the Settings tab: one date or FROM..TO per line, default
+`2026-12-24..2027-01-03` while UNSET. Saved empty is stored as a space, because
+Odoo's `set_param` DELETES a param given a falsy value and the default would
+come straight back. The schedule (`isWorkday` in board.js) skips weekends and
+these; a vendor's shipping days do not, since a truck still drives.
+
+## AA part numbers (`aa_part_numbers`, owner 2026-11-18)
+
+*"quiero ponerle nuestro part number a todos nuestros productos"* - and when
+asked: made and given here ("lo crearas tu y los pondras tu"), a prefix per
+family ("AA-TRK-001"), variants sharing the number with a letter at the end,
+stocked products only.
+
+**A FIELD OF ITS OWN, NEVER `default_code`** - his standing rule is that the
+supplier's code stays in Internal Reference. `aa_part_base` on the template,
+`aa_part_number` (unique) on the variant.
+
+**A NUMBER NEVER CHANGES ONCE GIVEN** - renaming or recategorising leaves it.
+New products take the next number of their family on create; a new variant
+takes the next free letter; a once-single product keeps its bare number and
+it stands for A. Letters run A..Z, AA, AB (Cut Down Hinge has 27 variants).
+
+**ACTIVE PRODUCTS ONLY.** The first staging install numbered 111 archived
+templates - the products the 2026-10-21 catalogue merge folded into variants
+- putting 111 gaps in the families before a single real part. An archived
+product is numbered when brought back (write on `active`); a letter already
+given stays reserved even on an archived variant.
+
+The family is the product CATEGORY, mapped to three letters by hand in
+`FAMILY_PREFIX` (TRK HNG SPR DRM RLR SHF EBP MSC BLT MTR KIT); his cable,
+sleeves, thimbles and stops have no category and are CBL. Variants are
+lettered in attribute order (attribute sequence, then value sequence).
+
+**THE SUPPLIER'S NUMBER IS LABELLED "Supplier Part #"** (owner, same day:
+"quisiera mantener el # de parte del proveedor como referencia") - Odoo's own
+`default_code`, only its label changed (field string on both models, plus the
+template form, where Odoo writes `string="Reference"` itself), and moved next
+to AA Part # in the product list. 57 of his 368 stocked variants have none and
+never had one (RAW tracks, flag angles, hinges #8/#9).
+
+**`_aa_next_base` READS WITH RAW SQL, SO IT FLUSHES FIRST** - otherwise two
+products numbered in one run get the same base. New module: Apps > Update
+Apps List > install "AA Part Numbers"; the install numbers everything.

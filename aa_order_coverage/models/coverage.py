@@ -34,6 +34,7 @@ screen; a spring job carries no raw material lines here, so springs are not
 part of this answer.
 """
 
+import re
 from datetime import timedelta
 
 from odoo.exceptions import UserError
@@ -42,6 +43,26 @@ from odoo.tools import float_compare, float_is_zero
 
 
 CABLE_WORDS = ('gac', 'sleeve', 'thimble', 'cable')
+
+# 3" Vertical Track RAW - 7'4" Black   /   2" Horizontal Track RAW - 9'6" White
+RAW_TRACK = re.compile(
+    r"^\s*(\d)\"\s*(Vertical|Horizontal)\s+Track\s+RAW\s*-\s*(\d+)'\s*(?:(\d+)\")?\s*([\w ]+?)\s*$",
+    re.I)
+
+
+def raw_track_facts(product):
+    """(size, kind, colour, inches) of a RAW track, or None."""
+    for name in (product.name, product.with_context(display_default_code=False).display_name):
+        hit = RAW_TRACK.match(name or '')
+        if hit:
+            return (hit.group(1), hit.group(2).lower(), hit.group(5).strip().lower(),
+                    int(hit.group(3)) * 12 + int(hit.group(4) or 0))
+    return None
+
+
+def inches_text(inches):
+    feet, rest = divmod(int(inches), 12)
+    return "%d'%d\"" % (feet, rest) if rest else "%d'" % feet
 
 
 class AaOrderCoverageFamily(models.Model):
@@ -155,7 +176,19 @@ class AaOrderCoverageLine(models.Model):
         string='Left When Its Turn Came', digits='Product Unit',
         help='Stock still free once every older order took its share.')
     qty_short = fields.Float(string='Short', digits='Product Unit')
-    is_short = fields.Boolean(string='Is Short')
+    is_short = fields.Boolean(
+        string='Is Short',
+        help='Short even after cutting it from a longer track.')
+    # CUT IT FROM A LONGER TRACK (owner, 2026-11-18): "cuando se nos acabe
+    # algun track de cierta medida y haya alguno mas grande, que nos diga que
+    # es posible fabricarlo pero usando un track de x medida".
+    swap_product_id = fields.Many2one(
+        'product.product', string='Cut From',
+        help='A longer RAW track of the same size, kind and colour that is '
+             'left over after every open order took its own.')
+    qty_swap = fields.Float(
+        string='Cut From Longer', digits='Product Unit',
+        help='How many of the short pieces the longer track covers.')
 
     # ------------------------------------------------------------------
     # The menu
@@ -338,8 +371,56 @@ class AaOrderCoverageLine(models.Model):
                     'is_short': float_compare(
                         short, 0.0, precision_rounding=rounding) > 0,
                 })
+        self._aa_cut_from_longer(values, stock)
         Line.create(values)
         return stock
+
+    @api.model
+    def _aa_cut_from_longer(self, values, stock):
+        """Cover a short RAW track with a LONGER one of the same size, kind
+        and colour (owner, 2026-11-18).
+
+        ONLY WHAT IS SPARE: a longer piece counts only once every open order
+        that needs THAT length has had its own, so cutting one never leaves
+        another order short. The spare goes to the oldest short order first,
+        shortest piece that fits first (less is thrown away - the offcut is
+        discarded). One longer piece makes one shorter piece.
+        """
+        Product = self.env['product.product']
+        tracks = {}
+        demand = {}
+        for v in values:
+            demand[v['product_id']] = demand.get(v['product_id'], 0.0) + v['qty_needed']
+        for product, qty in stock.items():
+            facts = raw_track_facts(product)
+            if facts:
+                tracks[product.id] = facts
+        for pid in demand:
+            if pid not in tracks:
+                facts = raw_track_facts(Product.browse(pid))
+                if facts:
+                    tracks[pid] = facts
+        spare = {}
+        for pid in tracks:
+            free = max(stock.get(Product.browse(pid), 0.0), 0.0) - demand.get(pid, 0.0)
+            if free >= 1:
+                spare[pid] = float(int(free + 1e-6))  # whole pieces
+        for v in values:
+            if not v['is_short'] or v['product_id'] not in tracks:
+                continue
+            size, kind, colour, inches = tracks[v['product_id']]
+            fits = sorted(
+                (tracks[pid][3], pid) for pid, free in spare.items()
+                if free > 0 and tracks[pid][:3] == (size, kind, colour)
+                and tracks[pid][3] > inches)
+            if not fits:
+                continue
+            pid = fits[0][1]
+            take = min(spare[pid], float(int(v['qty_short'] + 1 - 1e-6)))
+            spare[pid] -= take
+            v['swap_product_id'] = pid
+            v['qty_swap'] = take
+            v['is_short'] = v['qty_short'] - take > 1e-6
 
     # ------------------------------------------------------------------
     # The board: orders to make, and what to order
@@ -388,7 +469,7 @@ class AaOrderCoverageLine(models.Model):
             demand[product] = demand.get(product, 0.0) + l.qty_needed
             eta = po = ''
             coming = arrivals.get(product, [])
-            if l.qty_short > 0:
+            if l.is_short:
                 still = demand[product] - max(stock.get(product, 0.0), 0.0)
                 got = 0.0
                 for when, qty, name in coming:
@@ -404,7 +485,14 @@ class AaOrderCoverageLine(models.Model):
                 'family_id': l.family_id.id,
                 'needed': l.qty_needed,
                 'before': l.qty_before,
-                'short': l.qty_short,
+                # SHORT AFTER CUTTING FROM A LONGER TRACK: what holds the order back.
+                'short': max(l.qty_short - l.qty_swap, 0.0) if l.is_short else 0.0,
+                'missing': l.qty_short,
+                'swap': l.swap_product_id.with_context(
+                    display_default_code=False).display_name if l.swap_product_id else '',
+                'swap_qty': l.qty_swap,
+                'swap_length': inches_text(raw_track_facts(l.swap_product_id)[3])
+                if l.swap_product_id and raw_track_facts(l.swap_product_id) else '',
                 'eta': eta,
                 'po': po,
                 'coming': [{'date': fields.Date.to_string(w) if w else '',
