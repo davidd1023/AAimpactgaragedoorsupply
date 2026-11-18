@@ -241,6 +241,42 @@ class AaOrderCoverageLine(models.Model):
 
         return [(p, orders[p]) for p in pickings.sorted(queue_key)]
 
+    # The note work_order_sheet leaves when the last station finishes but the
+    # Work Order cannot go to Dispatch yet (something is not in stock).
+    STATIONS_DONE_NOTE = 'All stations are done'
+
+    @api.model
+    def _aa_through_shop_floor(self, queue):
+        """The Work Orders that have already been through the Shop Floor.
+
+        Owner, 2026-11-18: "las ordenes que ya pasaron por el shop floor no
+        deben salir aca, por ejemplo 942". Such an order is made - it is
+        waiting at Dispatch for paperwork, not for the shop. It counts when
+        every manufacturing job of the order is done, OR Odoo recorded on its
+        Work Order that all stations were done: W/O #344 (942) finished on
+        10 Nov and jobs created for it on 11 Nov would otherwise put it back.
+        """
+        done = set()
+        pickings = self.env['stock.picking'].browse([p.id for p, _so in queue])
+        if not pickings:
+            return done
+        noted = set(self.env['mail.message'].sudo().search([
+            ('model', '=', 'stock.picking'),
+            ('res_id', 'in', pickings.ids),
+            ('body', 'ilike', self.STATIONS_DONE_NOTE),
+        ]).mapped('res_id'))
+        Production = self.env['mrp.production'].sudo()
+        for picking, so in queue:
+            if picking.id in noted:
+                done.add(picking.id)
+                continue
+            if not so:
+                continue
+            jobs = Production.search([('origin', '=', so.name), ('state', '!=', 'cancel')])
+            if jobs and all(j.state == 'done' for j in jobs):
+                done.add(picking.id)
+        return done
+
     @api.model
     def _aa_sale_order(self, picking):
         if picking.sale_id:
@@ -332,6 +368,18 @@ class AaOrderCoverageLine(models.Model):
         queue = self._aa_open_orders()
         pickings = self.env['stock.picking'].browse([p.id for p, _so in queue])
         stock = self._aa_on_hand(pickings)
+        # ALREADY THROUGH THE SHOP FLOOR: not shown, but what goes out with
+        # them is in their boxes and still on the books, so it comes off the
+        # shelf FIRST - nobody else can count on it.
+        finished = self._aa_through_shop_floor(queue)
+        for picking, _so in queue:
+            if picking.id not in finished:
+                continue
+            for move in picking.move_ids:
+                if move.state in ('done', 'cancel') or not move.product_id.is_storable:
+                    continue
+                stock[move.product_id] = stock.get(move.product_id, 0.0) - move.product_qty
+        queue = [(p, so) for p, so in queue if p.id not in finished]
         left = dict(stock)
         families = {}
         values = []

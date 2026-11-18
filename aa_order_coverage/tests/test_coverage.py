@@ -237,3 +237,24 @@ class TestCutFromLonger(TestOrderCoverage):
         self.assertEqual(row['missing'], 1)
         self.assertEqual(row['swap_qty'], 1)
         self.assertEqual(row['swap_length'], "9'4\"")
+
+
+@tagged('post_install', '-at_install')
+class TestThroughShopFloor(TestOrderCoverage):
+    """Owner, 2026-11-18: an order already through the Shop Floor (942) is
+    not one to make - but its box holds its parts."""
+
+    def test_finished_order_hidden_and_its_parts_set_aside(self):
+        _so1, done = self._order('PO-942', [(self.track, 3)], 9)
+        done.message_post(body='All stations are done, but not everything on this '
+                               'work order is in stock yet, so it was not sent to Dispatch.')
+        _so2, waiting = self._order('PO-NEXT', [(self.track, 3)], 1)
+        self.Line.action_open_coverage()
+
+        self.assertFalse(self._lines(done), 'already through the Shop Floor')
+        line = self._lines(waiting).filtered(lambda l: l.product_id == self.track)
+        # 5 tracks, 3 of them in the finished order's box.
+        self.assertEqual(line.qty_before, 2)
+        self.assertEqual(line.qty_short, 1)
+        data = self.Line.aa_board_data()
+        self.assertNotIn('PO-942', [o['po'] for o in data['orders']])
