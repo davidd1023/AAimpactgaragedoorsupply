@@ -191,3 +191,19 @@ class TestNextPO(TransactionCase):
             {'tracks': 7, 'boxes': 11, 'springs': 25})
         self.assertEqual(self.vendor.aa_ship_days, 2)
         self.assertEqual(data['capacity']['springs'], 25)
+
+    def test_closed_days(self):
+        """Owner, 2026-11-18: closed from 24 December, back 4 January."""
+        Line = self.env['aa.order.coverage.line']
+        days = Line._aa_closed_days()
+        self.assertEqual(days[0], '2026-12-24')
+        self.assertEqual(days[-1], '2027-01-03')
+        self.assertEqual(len(days), 11)
+        self.assertIn('2026-12-31', Line.aa_board_data()['closed_days'])
+        # A mistyped line is ignored, not raised.
+        self.assertEqual(Line._aa_closed_days('2026-07-03\nnot a date\n2026-12-01..2026-12-02'),
+                         ['2026-07-03', '2026-12-01', '2026-12-02'])
+        # Saved empty means none - not the default back again.
+        self.env['aa.next.po'].aa_save_settings([], {}, '')
+        self.assertEqual(Line._aa_closed_days(), [])
+        self.assertEqual(self.env['aa.next.po'].aa_settings_data()['closed'], '')

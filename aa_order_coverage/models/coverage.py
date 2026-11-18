@@ -34,6 +34,8 @@ screen; a spring job carries no raw material lines here, so springs are not
 part of this answer.
 """
 
+from datetime import timedelta
+
 from odoo.exceptions import UserError
 from odoo import _, api, fields, models
 from odoo.tools import float_compare, float_is_zero
@@ -432,6 +434,49 @@ class AaOrderCoverageLine(models.Model):
             out[key] = value if value > 0 else default
         return out
 
+    # Owner, 2026-11-18: "nosotros empezamos enero 4 a trabajar", closed
+    # from the 24th of December. One date or a FROM..TO range per line; a
+    # line that does not read as a date is ignored rather than raising,
+    # the same call as the pickup holidays. Unset means this shutdown;
+    # saved empty means no closed days at all.
+    CLOSED_DEFAULT = '2026-12-24..2027-01-03'
+
+    @api.model
+    def _aa_closed_text(self):
+        value = self.env['ir.config_parameter'].sudo().get_param('aa_order_coverage.closed_days')
+        return self.CLOSED_DEFAULT if value is False or value is None else value
+
+    @api.model
+    def _aa_closed_days(self, text=None):
+        """Every closed date, as ISO strings, sorted."""
+        text = self._aa_closed_text() if text is None else text
+        out = set()
+        for raw in (text or '').replace(',', '\n').splitlines():
+            raw = raw.strip()
+            if not raw:
+                continue
+            start, _sep, end = raw.partition('..')
+            try:
+                first = fields.Date.to_date(start.strip())
+                last = fields.Date.to_date(end.strip()) if end.strip() else first
+            except ValueError:
+                continue
+            if not first or not last or last < first or (last - first).days > 366:
+                continue
+            day = first
+            while day <= last:
+                out.add(day.isoformat())
+                day += timedelta(days=1)
+        return sorted(out)
+
+    @api.model
+    def aa_set_closed_days(self, text):
+        if not self.env.su and not self.env.user.has_group('stock.group_stock_manager'):
+            raise UserError(_("Only an inventory manager can change the shop's closed days."))
+        self.env['ir.config_parameter'].sudo().set_param(
+            'aa_order_coverage.closed_days', (text or '').strip() or ' ')
+        return self._aa_closed_days()
+
     @api.model
     def aa_set_capacity(self, tracks, boxes, springs=None):
         if not self.env.su and not self.env.user.has_group('stock.group_stock_manager'):
@@ -552,6 +597,7 @@ class AaOrderCoverageLine(models.Model):
         return {
             'next_po': next_po,
             'capacity': self._aa_capacity(),
+            'closed_days': self._aa_closed_days(),
             'families': [{'id': f.id, 'name': f.name} for f in families],
             'orders': orders,
             'lines': self._aa_lines_with_arrivals(lines, stock),

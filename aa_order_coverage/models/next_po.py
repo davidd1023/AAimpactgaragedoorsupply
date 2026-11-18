@@ -360,10 +360,11 @@ class NextPurchaseOrder(models.AbstractModel):
                 'cycle': v.aa_cycle_days or 0, 'products': counts.get(v.id, 0),
             } for v in vendors],
             'capacity': self.env['aa.order.coverage.line']._aa_capacity(),
+            'closed': self.env['aa.order.coverage.line']._aa_closed_text().strip(),
         }
 
     @api.model
-    def aa_save_settings(self, vendors, capacity):
+    def aa_save_settings(self, vendors, capacity, closed=None):
         if not self.env.user.has_group('purchase.group_purchase_user') and \
                 not self.env.user.has_group('stock.group_stock_manager'):
             raise UserError("Only purchasing or an inventory manager can change these settings.")
@@ -379,6 +380,8 @@ class NextPurchaseOrder(models.AbstractModel):
         if capacity:
             self.env['aa.order.coverage.line'].sudo().aa_set_capacity(
                 capacity.get('tracks'), capacity.get('boxes'), capacity.get('springs'))
+        if closed is not None:
+            self.env['aa.order.coverage.line'].sudo().aa_set_closed_days(closed)
         return self.aa_settings_data()
 
     @api.model

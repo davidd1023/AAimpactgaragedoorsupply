@@ -228,6 +228,9 @@
               <input type="number" min="1" class="form-control form-control-sm" style="width: 5em" t-model="state.settings.capacity.springs"/></label>
           </div>
           <p class="small text-muted">Used for the ready date of every order: each bench works through the orders as their parts arrive, oldest first.</p>
+          <h5 class="mt-3">Days the shop is closed</h5>
+          <textarea class="form-control form-control-sm" rows="3" style="max-width: 360px" t-model="state.settings.closed" placeholder="2026-12-24..2027-01-03"/>
+          <p class="small text-muted">One date per line, or a range as FROM..TO (2026-12-24..2027-01-03). Weekends are already skipped. No order is dated on a closed day.</p>
           <h5 class="mt-3">Vendors</h5>
           <table class="table table-sm align-middle" style="max-width: 900px">
             <thead><tr><th>Vendor</th><th>Products</th><th>Lead time (days to ship)</th><th>Shipping (working days)</th><th>Days between P.O.s</th></tr></thead>

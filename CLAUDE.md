@@ -4007,6 +4007,14 @@ P.O. arrives `aa_lead_days` (calendar, to the day it ships) then
 here 12/18 with 5. The ready date only lets the TICKED families hold an
 order back, like the rest of the tab.
 
+**CLOSED DAYS** (owner, 2026-11-18: *"nosotros empezamos enero 4 a
+trabajar"*, closed from the 24th of December). `aa_order_coverage.closed_days`,
+edited on the Settings tab: one date or FROM..TO per line, default
+`2026-12-24..2027-01-03` while UNSET. Saved empty is stored as a space, because
+Odoo's `set_param` DELETES a param given a falsy value and the default would
+come straight back. The schedule (`isWorkday` in board.js) skips weekends and
+these; a vendor's shipping days do not, since a truck still drives.
+
 ## AA part numbers (`aa_part_numbers`, owner 2026-11-18)
 
 *"quiero ponerle nuestro part number a todos nuestros productos"* - and when

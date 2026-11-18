@@ -166,25 +166,38 @@ export class OrderCoverageBoard extends Component {
         let n = 0;
         while (cur < d) {
             cur.setDate(cur.getDate() + 1);
-            if (cur.getDay() !== 0 && cur.getDay() !== 6) {
+            if (this.isWorkday(cur)) {
                 n++;
             }
         }
         return n + 1;
     }
+    /* A weekday the shop is open: not Saturday, Sunday, or a closed day in
+     * Settings (owner, 2026-11-18: closed 24 Dec - 3 Jan, back the 4th). */
+    isWorkday(d) {
+        if (d.getDay() === 0 || d.getDay() === 6) {
+            return false;
+        }
+        const closed = this.state.data.closed_days || [];
+        return !closed.includes(this.iso(d));
+    }
+    iso(d) {
+        const pad = (x) => String(x).padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
     workdayDate(index) {
         const d = new Date(this.today() + "T12:00:00");
-        while (d.getDay() === 0 || d.getDay() === 6) {
+        while (!this.isWorkday(d)) {
             d.setDate(d.getDate() + 1);
         }
         let n = index;
         while (n > 0) {
             d.setDate(d.getDate() + 1);
-            if (d.getDay() !== 0 && d.getDay() !== 6) {
+            if (this.isWorkday(d)) {
                 n--;
             }
         }
-        return d.toISOString().slice(0, 10);
+        return this.iso(d);
     }
     today() {
         const d = new Date();
@@ -246,7 +259,7 @@ export class OrderCoverageBoard extends Component {
     async saveSettings() {
         const s = this.state.settings;
         this.state.settings = await this.orm.call("aa.next.po", "aa_save_settings", [
-            s.vendors, s.capacity,
+            s.vendors, s.capacity, s.closed || "",
         ]);
         this.notification.add("Settings saved.", { type: "success" });
         await this.load();
@@ -255,11 +268,11 @@ export class OrderCoverageBoard extends Component {
         const d = new Date(iso + "T12:00:00");
         while (n > 0) {
             d.setDate(d.getDate() + 1);
-            if (d.getDay() !== 0 && d.getDay() !== 6) {
+            if (this.isWorkday(d)) {
                 n--;
             }
         }
-        return d.toISOString().slice(0, 10);
+        return this.iso(d);
     }
     dotClass(row) {
         if (row.canMake) {
