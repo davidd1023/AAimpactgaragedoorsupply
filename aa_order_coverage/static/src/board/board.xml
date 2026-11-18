@@ -148,7 +148,7 @@
                 <td t-out="p.family"/>
                 <td t-out="fmt(p.on_hand)"/>
                 <td t-out="p.open ? fmt(p.open) : ''"/>
-                <td t-out="p.per_month ? fmt(Math.round(p.per_month * 10) / 10) : ''"/>
+                <td t-out="perMonth(p)"/>
                 <td>
                   <t t-if="p.coming"><t t-out="fmt(p.coming)"/> <span class="small text-muted" t-out="p.coming_date"/></t>
                 </td>
@@ -157,7 +157,7 @@
                 <td><input type="number" min="0" class="form-control form-control-sm" style="width: 6em"
                            t-model="p.qty"/></td>
                 <td t-out="money(p.price)"/>
-                <td t-out="money((Number(p.qty) || 0) * p.price)"/>
+                <td t-out="money(lineTotal(p))"/>
               </tr>
             </tbody>
           </table>
@@ -174,7 +174,7 @@
               <tr t-foreach="noVendor" t-as="p" t-key="p.id">
                 <td t-out="p.name"/><td t-out="p.family"/><td t-out="fmt(p.on_hand)"/>
                 <td t-out="p.open ? fmt(p.open) : ''"/>
-                <td t-out="p.per_month ? fmt(Math.round(p.per_month * 10) / 10) : ''"/>
+                <td t-out="perMonth(p)"/>
                 <td class="fw-bold" t-out="fmt(p.qty)"/>
               </tr>
             </tbody>

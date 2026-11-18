@@ -173,6 +173,13 @@ export class OrderCoverageBoard extends Component {
     get nextPoCount() {
         return this.vendors.length;
     }
+    // Templates cannot reach Number or Math: the arithmetic lives here.
+    lineTotal(p) {
+        return (Number(p.qty) || 0) * p.price;
+    }
+    perMonth(p) {
+        return p.per_month ? this.fmt(Math.round(p.per_month * 10) / 10) : "";
+    }
     vendorTotal(block) {
         return block.lines.reduce((sum, l) => sum + (Number(l.qty) || 0) * l.price, 0);
     }
