@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- EACH PERSON SEES HIS OWN FIGURES. The lines are rebuilt every time the
+       screen is opened, one set per user, so somebody opening it a minute
+       later does not change the numbers under somebody else's nose. -->
+  <record id="rule_aa_coverage_line_own" model="ir.rule">
+    <field name="name">Order Coverage: own lines</field>
+    <field name="model_id" ref="model_aa_order_coverage_line"/>
+    <field name="domain_force">[('user_id', '=', user.id)]</field>
+  </record>
+</odoo>

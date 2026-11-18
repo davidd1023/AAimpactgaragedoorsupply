@@ -3910,3 +3910,29 @@ them; a paid one is left alone with a note to issue a credit note. Springs
 take their plastic filler with them. A box taken off re-runs
 `_aa_create_station_productions` so its boxed lift cables get a job of their
 own.
+
+## Order Coverage (`aa_order_coverage`, owner 2026-11-18)
+
+*"necesito hacer algo en inventario que cuando entre me salgan todas las
+ordenes ... ver hasta cual me da con el inventario que tengo actualmente ...
+y ademas filtros por los articulos que llevan las ordenes, por ejemplo
+quiero saber solamente de los tracks hasta que orden me llega o las
+visagras."* Built on staging1 first, at his request.
+
+**FIRST COME FIRST SERVED, PER PART.** Open Work Orders (the warehouse's
+`pick_type_id`) are queued by sale order date; each part's on-hand stock is
+handed down the queue, and an order that finds too little takes what is
+left and is SHORT. Because each part is allocated on its own, "tracks only"
+is the same lines with the rest hidden - the family filter is a plain search
+panel and nothing is recomputed when it changes.
+
+**WHAT AN ORDER NEEDS** is its open Work Order moves plus the raw moves of
+its open jobs (found by `origin` = sale order name); a part the order's own
+open job will make (prepared track, spring assembly) is not asked of the
+shelf twice. Springs are coil (`aa_spring_stock`) and are not in this answer.
+
+The lines are rebuilt every time the menu opens, ONE SET PER USER (record
+rule), read with sudo so a stock clerk can see figures that need sale orders
+and jobs. Inventory > Reporting > Order Coverage and Coverage by Family.
+Families are the product category name; uncategorised cable parts are
+"Cables". New module: Apps > Update Apps List > install "AA Order Coverage".

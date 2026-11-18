@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+  <!-- The row that answers "which orders can I complete at all". The other
+       families are made as the parts turn up, from the product category. -->
+  <record id="family_all" model="aa.order.coverage.family">
+    <field name="name">All Parts</field>
+    <field name="is_all" eval="True"/>
+  </record>
+</odoo>
