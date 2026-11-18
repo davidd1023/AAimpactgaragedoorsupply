@@ -154,17 +154,23 @@ export class OrderCoverageBoard extends Component {
      * missing a part nobody has ordered is left out and takes no capacity. */
     workdayIndex(iso) {
         // working days from today to the working day AFTER iso
+        // Working days strictly after today up to and including iso, plus
+        // one: the goods land at the end of their day and work starts the
+        // NEXT working day. Already overdue counts as here now.
         const today = this.today();
-        let d = new Date(iso + "T12:00:00");
-        let n = 0;
+        if (iso < today) {
+            return 0;
+        }
+        const d = new Date(iso + "T12:00:00");
         const cur = new Date(today + "T12:00:00");
-        while (cur <= d) {
+        let n = 0;
+        while (cur < d) {
             cur.setDate(cur.getDate() + 1);
             if (cur.getDay() !== 0 && cur.getDay() !== 6) {
                 n++;
             }
         }
-        return n;
+        return n + 1;
     }
     workdayDate(index) {
         const d = new Date(this.today() + "T12:00:00");
