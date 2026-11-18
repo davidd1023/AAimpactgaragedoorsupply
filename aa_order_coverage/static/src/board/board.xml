@@ -67,9 +67,11 @@
                 <td t-out="row.po"/>
                 <td t-out="row.customer"/>
                 <td t-out="row.pickup"/>
-                <td>
-                  <span t-if="row.canMake" class="badge text-bg-success">Can make</span>
-                  <span t-else="" class="badge text-bg-danger">Missing parts</span>
+                <td class="text-nowrap">
+                  <i class="fa fa-circle me-1" t-att-class="dotClass(row)"/>
+                  <span t-if="row.canMake" class="text-success">Can make</span>
+                  <span t-elif="row.noPo" class="text-danger">Missing - not ordered</span>
+                  <span t-else="" class="text-warning">Ready ~<t t-out="row.finishBy"/></span>
                 </td>
                 <td class="small text-danger" t-out="shortText(row)"/>
                 <td>
@@ -82,8 +84,18 @@
               <tr t-if="state.open[row.seq]">
                 <td/>
                 <td colspan="7">
+                  <div t-if="!row.canMake" class="mb-2">
+                    <t t-if="row.noPo">
+                      <span class="text-danger fw-bold">Can't be finished yet:</span>
+                      something it is missing is not on any confirmed P.O.
+                    </t>
+                    <t t-else="">
+                      Missing parts all arrive by <b t-out="row.partsBy"/>;
+                      the order could be finished about <b t-out="row.finishBy"/> (2 working days after).
+                    </t>
+                  </div>
                   <table class="table table-sm mb-2">
-                    <thead><tr><th>Part</th><th>Needs</th><th>Left when its turn came</th><th>Missing</th></tr></thead>
+                    <thead><tr><th>Part</th><th>Needs</th><th>Left when its turn came</th><th>Missing</th><th>Arriving</th></tr></thead>
                     <tbody>
                       <tr t-foreach="row.lines" t-as="line" t-key="line.product_id"
                           t-att-class="line.short > 0 ? 'text-danger' : 'text-success'">
@@ -91,6 +103,13 @@
                         <td t-out="fmt(line.needed)"/>
                         <td t-out="fmt(line.before)"/>
                         <td t-out="line.short > 0 ? fmt(line.short) : ''"/>
+                        <td class="small">
+                          <t t-if="line.short > 0">
+                            <span t-if="line.eta" class="text-warning">Covered by <t t-out="line.po"/> on <t t-out="line.eta"/></span>
+                            <span t-else="" class="text-danger">Not ordered</span>
+                            <div t-if="line.coming.length" class="text-muted" t-out="comingText(line)"/>
+                          </t>
+                        </td>
                       </tr>
                     </tbody>
                   </table>

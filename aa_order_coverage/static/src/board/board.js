@@ -91,6 +91,15 @@ export class OrderCoverageBoard extends Component {
             }
             const short = lines.filter((l) => l.short > 0);
             const row = { ...order, lines, short, canMake: !short.length };
+            // WHEN COULD IT BE FINISHED: the last of its missing parts to
+            // land on a confirmed P.O., plus the shop's two working days.
+            // One missing part with nothing ordered means no date at all.
+            if (short.length) {
+                const etas = short.map((l) => l.eta);
+                row.noPo = etas.some((e) => !e);
+                row.partsBy = row.noPo ? "" : etas.sort().at(-1);
+                row.finishBy = row.partsBy ? this.addWorkdays(row.partsBy, 2) : "";
+            }
             if (this.state.show === "can" && !row.canMake) {
                 continue;
             }
@@ -128,6 +137,25 @@ export class OrderCoverageBoard extends Component {
             }
         }
         return { can, total, short: total - can, firstShort };
+    }
+    addWorkdays(iso, n) {
+        const d = new Date(iso + "T12:00:00");
+        while (n > 0) {
+            d.setDate(d.getDate() + 1);
+            if (d.getDay() !== 0 && d.getDay() !== 6) {
+                n--;
+            }
+        }
+        return d.toISOString().slice(0, 10);
+    }
+    dotClass(row) {
+        if (row.canMake) {
+            return "text-success";
+        }
+        return row.noPo ? "text-danger" : "text-warning";
+    }
+    comingText(line) {
+        return line.coming.map((c) => `${c.po}: ${this.fmt(c.qty)} on ${c.date || "?"}`).join(", ");
     }
     toggleOpen(seq) {
         this.state.open[seq] = !this.state.open[seq];

@@ -343,6 +343,73 @@ class AaOrderCoverageLine(models.Model):
     # ------------------------------------------------------------------
 
     @api.model
+    def _aa_arrivals(self, products):
+        """{product: [(date, qty, P.O. name)]} still to arrive on CONFIRMED
+        purchase orders, earliest first. A draft is not counted: nothing is
+        coming until somebody has actually sent the order."""
+        arrivals = {}
+        if not products:
+            return arrivals
+        PoLine = self.env['purchase.order.line'].sudo()
+        for line in PoLine.search([
+                ('product_id', 'in', products.ids),
+                ('order_id.state', '=', 'purchase'),
+                ('display_type', '=', False)]):
+            left = line.product_qty - line.qty_received
+            if left <= 0:
+                continue
+            qty = line.product_uom_id._compute_quantity(left, line.product_id.uom_id)
+            when = (line.date_planned or line.order_id.date_planned)
+            arrivals.setdefault(line.product_id, []).append(
+                (when.date() if when else False, qty, line.order_id.name))
+        for rows in arrivals.values():
+            rows.sort(key=lambda r: (r[0] or fields.Date.today(), r[2]))
+        return arrivals
+
+    @api.model
+    def _aa_lines_with_arrivals(self, lines, stock):
+        """Each line, and - when it is short - the P.O. that covers it.
+
+        Owner, 2026-11-18: click an order and see what is missing, whether a
+        P.O. is on its way and when it lands, and roughly when the order
+        could be finished. FIRST COME FIRST SERVED CARRIES ON PAST THE SHELF:
+        an arriving P.O. covers the oldest short order first, so a line is
+        covered on the day the shelf PLUS everything arrived by then reaches
+        all the demand up to and including this order.
+        """
+        arrivals = self._aa_arrivals(lines.mapped('product_id'))
+        demand = {}
+        out = []
+        for l in lines:
+            product = l.product_id
+            demand[product] = demand.get(product, 0.0) + l.qty_needed
+            eta = po = ''
+            coming = arrivals.get(product, [])
+            if l.qty_short > 0:
+                still = demand[product] - max(stock.get(product, 0.0), 0.0)
+                got = 0.0
+                for when, qty, name in coming:
+                    got += qty
+                    if got >= still - 1e-6:
+                        eta = fields.Date.to_string(when) if when else ''
+                        po = name
+                        break
+            out.append({
+                'seq': l.seq,
+                'product_id': product.id,
+                'product': product.display_name,
+                'family_id': l.family_id.id,
+                'needed': l.qty_needed,
+                'before': l.qty_before,
+                'short': l.qty_short,
+                'eta': eta,
+                'po': po,
+                'coming': [{'date': fields.Date.to_string(w) if w else '',
+                            'qty': q, 'po': n} for w, q, n in coming],
+            })
+        return out
+
+    @api.model
     def aa_board_data(self):
         """Everything the Orders to Make screen draws, in one call.
 
@@ -412,14 +479,6 @@ class AaOrderCoverageLine(models.Model):
             'next_po': next_po,
             'families': [{'id': f.id, 'name': f.name} for f in families],
             'orders': orders,
-            'lines': [{
-                'seq': l.seq,
-                'product_id': l.product_id.id,
-                'product': l.product_id.display_name,
-                'family_id': l.family_id.id,
-                'needed': l.qty_needed,
-                'before': l.qty_before,
-                'short': l.qty_short,
-            } for l in lines],
+            'lines': self._aa_lines_with_arrivals(lines, stock),
             'products': sorted(products.values(), key=lambda p: p['name']),
         }

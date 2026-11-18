@@ -3979,6 +3979,15 @@ INCHES, its description naming the coils. Cable rounds to whole 500 ft reels
 and anything whose vendor description says "N pcs/box" (Action's trims, 15)
 to whole boxes.
 
+**THE ORDERS TAB DATES WHAT IS SHORT** (owner, same day: a green dot for
+what can be made, click to see what is missing, which P.O. is on its way and
+when, and roughly when the order could be finished). FIRST COME FIRST SERVED
+carries on past the shelf: a short line is covered on the date the shelf plus
+CONFIRMED P.O. arrivals (`date_planned`, earliest first) reach all demand up
+to and including that order (`_aa_lines_with_arrivals`). The order is ready
+about the last such date plus 2 working days (the shop's lead time); one short
+part on no P.O. means red, no date.
+
 ## AA part numbers (`aa_part_numbers`, owner 2026-11-18)
 
 *"quiero ponerle nuestro part number a todos nuestros productos"* - and when

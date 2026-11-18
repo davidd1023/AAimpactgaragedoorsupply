@@ -155,3 +155,14 @@ class TestNextPO(TransactionCase):
         self.assertEqual(po.order_line.product_qty, 192)
         self.assertIn('2 coils of 8 ft', po.order_line.name)
         self.assertEqual(self.vendor.aa_coil_feet, 8)
+
+    def test_short_line_is_dated_by_the_po_that_covers_it(self):
+        Line = self.env['aa.order.coverage.line']
+        po = self.env['purchase.order'].create({
+            'partner_id': self.vendor.id,
+            'order_line': [(0, 0, {'product_id': self.part.id, 'product_qty': 50,
+                                   'date_planned': '2030-01-15 12:00:00'})]})
+        po.button_confirm()
+        arrivals = Line._aa_arrivals(self.part)
+        self.assertEqual(arrivals[self.part][0][1], 50)
+        self.assertEqual(str(arrivals[self.part][0][0]), '2030-01-15')
