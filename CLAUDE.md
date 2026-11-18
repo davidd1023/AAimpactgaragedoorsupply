@@ -3967,6 +3967,12 @@ New products take the next number of their family on create; a new variant
 takes the next free letter; a once-single product keeps its bare number and
 it stands for A. Letters run A..Z, AA, AB (Cut Down Hinge has 27 variants).
 
+**ACTIVE PRODUCTS ONLY.** The first staging install numbered 111 archived
+templates - the products the 2026-10-21 catalogue merge folded into variants
+- putting 111 gaps in the families before a single real part. An archived
+product is numbered when brought back (write on `active`); a letter already
+given stays reserved even on an archived variant.
+
 The family is the product CATEGORY, mapped to three letters by hand in
 `FAMILY_PREFIX` (TRK HNG SPR DRM RLR SHF EBP MSC BLT MTR KIT); his cable,
 sleeves, thimbles and stops have no category and are CBL. Variants are
