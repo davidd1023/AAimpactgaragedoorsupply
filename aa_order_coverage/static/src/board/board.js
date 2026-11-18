@@ -25,7 +25,9 @@ export class OrderCoverageBoard extends Component {
         this.notification = useService("notification");
         this.state = useState({
             loading: true,
-            data: { families: [], orders: [], lines: [], products: [], next_po: { vendors: [], no_vendor: [] } },
+            data: { families: [], orders: [], lines: [], products: [], next_po: { vendors: [], no_vendor: [] }, capacity: {} },
+            cap: { tracks: 6, boxes: 10 },
+            plan: {}, // seq -> {date, noPo, partsBy}
             picked: [], // family ids; none ticked means every family
             show: "all", // all | can | short
             tab: "orders", // orders | missing | nextpo
@@ -43,6 +45,8 @@ export class OrderCoverageBoard extends Component {
         for (const vendor of this.state.data.next_po.vendors) {
             this.setCoils(vendor);
         }
+        this.state.cap = { ...this.state.data.capacity };
+        this.schedule();
         this.state.loading = false;
     }
 
@@ -91,15 +95,13 @@ export class OrderCoverageBoard extends Component {
             }
             const short = lines.filter((l) => l.short > 0);
             const row = { ...order, lines, short, canMake: !short.length };
-            // WHEN COULD IT BE FINISHED: the last of its missing parts to
-            // land on a confirmed P.O., plus the shop's two working days.
-            // One missing part with nothing ordered means no date at all.
-            if (short.length) {
-                const etas = short.map((l) => l.eta);
-                row.noPo = etas.some((e) => !e);
-                row.partsBy = row.noPo ? "" : etas.sort().at(-1);
-                row.finishBy = row.partsBy ? this.addWorkdays(row.partsBy, 2) : "";
-            }
+            // WHEN WILL IT BE READY: worked out over the whole order, every
+            // part and the shop's daily capacity (see schedule()), so the
+            // date does not change with the family chips ticked.
+            const plan = this.state.plan[order.seq] || {};
+            row.noPo = plan.noPo;
+            row.partsBy = plan.partsBy || "";
+            row.finishBy = plan.date || "";
             if (this.state.show === "can" && !row.canMake) {
                 continue;
             }
@@ -137,6 +139,91 @@ export class OrderCoverageBoard extends Component {
             }
         }
         return { can, total, short: total - can, firstShort };
+    }
+    // ------------------------------------------------------------ the plan
+    /* Owner, 2026-11-18: "hacemos 6-9 tracks al dia, y 10 a 15 cajas de
+     * hardware con sus muelles, dame una fecha mas realistica". Each order
+     * can start once ALL its parts are in (today, or the working day after
+     * the last confirmed P.O. it waits for lands); the track bench and the
+     * hardware bench then work through the orders in the order they become
+     * ready, oldest first among equals, each at its own daily rate. An order
+     * is ready the working day both of its benches finish it. An order
+     * missing a part nobody has ordered is left out and takes no capacity. */
+    workdayIndex(iso) {
+        // working days from today to the working day AFTER iso
+        const today = this.today();
+        let d = new Date(iso + "T12:00:00");
+        let n = 0;
+        const cur = new Date(today + "T12:00:00");
+        while (cur <= d) {
+            cur.setDate(cur.getDate() + 1);
+            if (cur.getDay() !== 0 && cur.getDay() !== 6) {
+                n++;
+            }
+        }
+        return n;
+    }
+    workdayDate(index) {
+        const d = new Date(this.today() + "T12:00:00");
+        while (d.getDay() === 0 || d.getDay() === 6) {
+            d.setDate(d.getDate() + 1);
+        }
+        let n = index;
+        while (n > 0) {
+            d.setDate(d.getDate() + 1);
+            if (d.getDay() !== 0 && d.getDay() !== 6) {
+                n--;
+            }
+        }
+        return d.toISOString().slice(0, 10);
+    }
+    today() {
+        const d = new Date();
+        const pad = (x) => String(x).padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+    schedule() {
+        const perTrack = Number(this.state.cap.tracks) || 6;
+        const perBox = Number(this.state.cap.boxes) || 10;
+        const bySeq = {};
+        for (const line of this.state.data.lines) {
+            (bySeq[line.seq] = bySeq[line.seq] || []).push(line);
+        }
+        const plan = {};
+        const queue = [];
+        for (const order of this.state.data.orders) {
+            const short = (bySeq[order.seq] || []).filter((l) => l.short > 0);
+            const etas = short.map((l) => l.eta);
+            if (etas.some((e) => !e)) {
+                plan[order.seq] = { noPo: true };
+                continue;
+            }
+            const partsBy = etas.length ? etas.sort().at(-1) : "";
+            const ready = partsBy ? this.workdayIndex(partsBy) : 0;
+            queue.push({ order, ready, partsBy });
+        }
+        queue.sort((a, b) => a.ready - b.ready || a.order.seq - b.order.seq);
+        let trackAt = 0;
+        let boxAt = 0;
+        for (const { order, ready, partsBy } of queue) {
+            let done = ready;
+            if (order.tracks > 0) {
+                trackAt = Math.max(trackAt, ready) + order.tracks / perTrack;
+                done = Math.max(done, Math.ceil(trackAt - 1e-9) - 1);
+            }
+            if (order.boxes > 0) {
+                boxAt = Math.max(boxAt, ready) + order.boxes / perBox;
+                done = Math.max(done, Math.ceil(boxAt - 1e-9) - 1);
+            }
+            plan[order.seq] = { date: this.workdayDate(Math.max(done, ready)), partsBy };
+        }
+        this.state.plan = plan;
+    }
+    async saveCapacity() {
+        await this.orm.call("aa.order.coverage.line", "aa_set_capacity", [
+            Number(this.state.cap.tracks), Number(this.state.cap.boxes),
+        ]);
+        this.schedule();
     }
     addWorkdays(iso, n) {
         const d = new Date(iso + "T12:00:00");

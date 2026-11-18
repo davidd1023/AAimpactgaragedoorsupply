@@ -34,7 +34,8 @@ screen; a spring job carries no raw material lines here, so springs are not
 part of this answer.
 """
 
-from odoo import api, fields, models
+from odoo.exceptions import UserError
+from odoo import _, api, fields, models
 from odoo.tools import float_compare, float_is_zero
 
 
@@ -409,6 +410,76 @@ class AaOrderCoverageLine(models.Model):
             })
         return out
 
+    # ------------------------------------------------------------------
+    # How much work is left, and how much the shop does in a day
+    # ------------------------------------------------------------------
+
+    CAPACITY_DEFAULTS = {'tracks': 6, 'boxes': 10}
+
+    @api.model
+    def _aa_capacity(self):
+        """Owner, 2026-11-18: "hacemos 6-9 tracks al dia, y 10 a 15 cajas de
+        hardware con sus muelles". The LOW end is the default, because a date
+        that is met beats one that is not; both are settings, changed on the
+        screen."""
+        ICP = self.env['ir.config_parameter'].sudo()
+        out = {}
+        for key, default in self.CAPACITY_DEFAULTS.items():
+            try:
+                value = float(ICP.get_param('aa_order_coverage.per_day_%s' % key) or default)
+            except ValueError:
+                value = default
+            out[key] = value if value > 0 else default
+        return out
+
+    @api.model
+    def aa_set_capacity(self, tracks, boxes):
+        if not self.env.user.has_group('stock.group_stock_manager'):
+            raise UserError(_("Only an inventory manager can change the shop's daily capacity."))
+        ICP = self.env['ir.config_parameter'].sudo()
+        for key, value in (('tracks', tracks), ('boxes', boxes)):
+            value = float(value or 0)
+            if value <= 0:
+                raise UserError(_("A daily capacity must be more than nothing."))
+            ICP.set_param('aa_order_coverage.per_day_%s' % key, value)
+        return self._aa_capacity()
+
+    @api.model
+    def _aa_work_left(self, sale_order):
+        """Tracks and boxes this order still has to go through the shop.
+
+        A TRACK IS ONE DOOR'S SET: the prepared-track jobs come one per
+        horizontal and one per vertical, each in the number of doors, so a
+        door's tracks are the larger of the two counts, not their sum.
+        A BOX is a hardware kit job; its springs go in it, so a spring job only
+        counts as a box when the order has no kit at all.
+        """
+        jobs = self.sudo()._aa_open_jobs(sale_order)
+        horizontal = vertical = other = boxes = springs = 0.0
+        for job in jobs:
+            kind = job.aa_station_kind if 'aa_station_kind' in job._fields else False
+            qty = job.product_qty
+            if kind == 'kit':
+                boxes += qty
+            elif kind == 'spring':
+                springs += 1
+            elif kind == 'cable':
+                continue
+            else:
+                name = (job.product_id.name or '').lower()
+                if 'track' not in name and kind != 'track':
+                    continue
+                if 'vertical' in name:
+                    vertical += qty
+                elif 'horizontal' in name:
+                    horizontal += qty
+                else:
+                    other += qty
+        tracks = max(horizontal, vertical) + other
+        if not boxes and springs:
+            boxes = 1
+        return {'tracks': tracks, 'boxes': boxes}
+
     @api.model
     def aa_board_data(self):
         """Everything the Orders to Make screen draws, in one call.
@@ -437,6 +508,7 @@ class AaOrderCoverageLine(models.Model):
                 'customer': line.partner_id.display_name or '',
                 'pickup': fields.Date.to_string(line.pickup_date) if line.pickup_date else '',
                 'picking_id': line.picking_id.id,
+                **self._aa_work_left(line.sale_id),
             })
         products = {}
         for line in lines:
@@ -477,6 +549,7 @@ class AaOrderCoverageLine(models.Model):
             [('is_all', '=', False), ('id', 'in', list(family_ids))])
         return {
             'next_po': next_po,
+            'capacity': self._aa_capacity(),
             'families': [{'id': f.id, 'name': f.name} for f in families],
             'orders': orders,
             'lines': self._aa_lines_with_arrivals(lines, stock),

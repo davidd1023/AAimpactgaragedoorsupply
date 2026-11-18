@@ -47,6 +47,14 @@
                   t-on-click="() => this.state.show = 'can'">Can make <t t-out="c.can"/></button>
           <button class="btn btn-sm" t-att-class="state.show === 'short' ? 'btn-danger' : 'btn-outline-danger'"
                   t-on-click="() => this.state.show = 'short'">Missing parts <t t-out="c.short"/></button>
+          <span class="ms-auto small d-flex align-items-center gap-1">
+            Shop makes
+            <input type="number" min="1" class="form-control form-control-sm" style="width: 4.5em" t-model="state.cap.tracks"/>
+            tracks and
+            <input type="number" min="1" class="form-control form-control-sm" style="width: 4.5em" t-model="state.cap.boxes"/>
+            boxes a day
+            <button class="btn btn-sm btn-outline-secondary" t-on-click="saveCapacity">Apply</button>
+          </span>
           <span t-if="c.firstShort" class="text-muted ms-2">
             Stock runs out at order #<t t-out="c.firstShort.seq"/> (<t t-out="c.firstShort.wo"/>)
           </span>
@@ -69,9 +77,10 @@
                 <td t-out="row.pickup"/>
                 <td class="text-nowrap">
                   <i class="fa fa-circle me-1" t-att-class="dotClass(row)"/>
-                  <span t-if="row.canMake" class="text-success">Can make</span>
-                  <span t-elif="row.noPo" class="text-danger">Missing - not ordered</span>
-                  <span t-else="" class="text-warning">Ready ~<t t-out="row.finishBy"/></span>
+                  <span t-if="row.noPo" class="text-danger">Missing - not ordered</span>
+                  <span t-else="" t-att-class="row.canMake ? 'text-success' : 'text-warning'">
+                    <t t-if="row.canMake">Can make · </t>ready ~<t t-out="row.finishBy"/>
+                  </span>
                 </td>
                 <td class="small text-danger" t-out="shortText(row)"/>
                 <td>
@@ -90,9 +99,13 @@
                       something it is missing is not on any confirmed P.O.
                     </t>
                     <t t-else="">
-                      Missing parts all arrive by <b t-out="row.partsBy"/>;
-                      the order could be finished about <b t-out="row.finishBy"/> (2 working days after).
+                      Missing parts all arrive by <b t-out="row.partsBy"/>.
                     </t>
+                  </div>
+                  <div t-if="!row.noPo" class="mb-2">
+                    Ready about <b t-out="row.finishBy"/>
+                    <span class="text-muted">- <t t-out="fmt(row.tracks)"/> track set(s) and <t t-out="fmt(row.boxes)"/> box(es) still to make,
+                    in line behind the orders ready before it.</span>
                   </div>
                   <table class="table table-sm mb-2">
                     <thead><tr><th>Part</th><th>Needs</th><th>Left when its turn came</th><th>Missing</th><th>Arriving</th></tr></thead>

@@ -166,3 +166,15 @@ class TestNextPO(TransactionCase):
         arrivals = Line._aa_arrivals(self.part)
         self.assertEqual(arrivals[self.part][0][1], 50)
         self.assertEqual(str(arrivals[self.part][0][0]), '2030-01-15')
+
+    def test_capacity_defaults_and_setting(self):
+        Line = self.env['aa.order.coverage.line']
+        self.assertEqual(Line._aa_capacity(), {'tracks': 6, 'boxes': 10})
+        Line.aa_set_capacity(8, 12)
+        self.assertEqual(Line._aa_capacity(), {'tracks': 8.0, 'boxes': 12.0})
+
+    def test_board_orders_carry_work_left(self):
+        data = self.env['aa.order.coverage.line'].aa_board_data()
+        for order in data['orders']:
+            self.assertIn('tracks', order)
+            self.assertIn('boxes', order)

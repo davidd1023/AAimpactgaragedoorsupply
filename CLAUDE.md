@@ -3988,6 +3988,17 @@ to and including that order (`_aa_lines_with_arrivals`). The order is ready
 about the last such date plus 2 working days (the shop's lead time); one short
 part on no P.O. means red, no date.
 
+**THE DATE NOW COUNTS THE SHOP'S CAPACITY** (owner, same day: *"hacemos 6-9
+tracks al dia, y 10 a 15 cajas de hardware con sus muelles, dame una fecha mas
+realistica"*). An order can start the working day after its last missing part
+lands (today when nothing is missing); the track bench and the hardware bench
+then work through orders in the order they become ready, oldest first among
+equals, each at its own rate (`aa_order_coverage.per_day_tracks` / `_boxes`,
+default the LOW end, 6 and 10, edited on the tab). A TRACK is one door's set
+(the larger of the horizontal and vertical job quantities); a BOX is a kit job,
+its springs inside it. Red orders take no capacity. Computed in the browser
+(`schedule()` in board.js) from `tracks`/`boxes` per order (`_aa_work_left`).
+
 ## AA part numbers (`aa_part_numbers`, owner 2026-11-18)
 
 *"quiero ponerle nuestro part number a todos nuestros productos"* - and when
