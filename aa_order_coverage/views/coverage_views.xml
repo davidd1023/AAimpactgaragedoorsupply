@@ -60,6 +60,8 @@
         <field name="qty_needed" sum="Needs"/>
         <field name="qty_before"/>
         <field name="qty_short" sum="Short"/>
+        <field name="swap_product_id" optional="show"/>
+        <field name="qty_swap" optional="show"/>
         <field name="uom_id" optional="hide"/>
       </list>
     </field>

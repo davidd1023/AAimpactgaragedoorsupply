@@ -79,10 +79,15 @@
                   <i class="fa fa-circle me-1" t-att-class="dotClass(row)"/>
                   <span t-if="row.noPo" class="text-danger">Missing - not ordered</span>
                   <span t-else="" t-att-class="row.canMake ? 'text-success' : 'text-warning'">
-                    <t t-if="row.canMake">Can make · </t>ready ~<t t-out="row.finishBy"/>
+                    <t t-if="row.canMake">Can make<t t-if="row.swaps.length"> (cut from longer track)</t> · </t>ready ~<t t-out="row.finishBy"/>
                   </span>
                 </td>
-                <td class="small text-danger" t-out="shortText(row)"/>
+                <td class="small">
+                  <span class="text-danger" t-out="shortText(row)"/>
+                  <div t-foreach="row.swaps" t-as="sw" t-key="sw_index" class="text-primary">
+                    <i class="fa fa-scissors me-1"/>Cut <t t-out="fmt(sw.swap_qty)"/> from <t t-out="sw.swap_length"/> instead of <t t-out="sw.product"/>
+                  </div>
+                </td>
                 <td>
                   <button class="btn btn-sm btn-link" title="Open the Work Order"
                           t-on-click.stop="() => this.openWorkOrder(row)">
@@ -108,15 +113,19 @@
                     in line behind the orders ready before it.</span>
                   </div>
                   <table class="table table-sm mb-2">
-                    <thead><tr><th>Part</th><th>Needs</th><th>Left when its turn came</th><th>Missing</th><th>Arriving</th></tr></thead>
+                    <thead><tr><th>Part</th><th>Needs</th><th>Left when its turn came</th><th>Missing</th><th>Arriving / cut from</th></tr></thead>
                     <tbody>
                       <tr t-foreach="row.lines" t-as="line" t-key="line.product_id"
                           t-att-class="line.short > 0 ? 'text-danger' : 'text-success'">
                         <td t-out="line.product"/>
                         <td t-out="fmt(line.needed)"/>
                         <td t-out="fmt(line.before)"/>
-                        <td t-out="line.short > 0 ? fmt(line.short) : ''"/>
+                        <td t-out="line.missing > 0 ? fmt(line.missing) : ''"/>
                         <td class="small">
+                          <div t-if="line.swap_qty > 0" class="text-primary">
+                            <i class="fa fa-scissors me-1"/>Can be made: cut <t t-out="fmt(line.swap_qty)"/> from <b t-out="line.swap"/>
+                            <span class="text-muted">(spare after every order took its own; offcut discarded)</span>
+                          </div>
                           <t t-if="line.short > 0">
                             <span t-if="line.eta" class="text-warning">Covered by <t t-out="line.po"/> on <t t-out="line.eta"/></span>
                             <span t-else="" class="text-danger">Not ordered</span>

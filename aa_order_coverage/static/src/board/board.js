@@ -100,6 +100,9 @@ export class OrderCoverageBoard extends Component {
             }
             const short = lines.filter((l) => l.short > 0);
             const row = { ...order, lines, short, canMake: !short.length };
+            // CUT FROM A LONGER TRACK (owner, 2026-11-18): the server found a
+            // spare longer piece of the same size, kind and colour.
+            row.swaps = lines.filter((l) => l.swap_qty > 0);
             // WHEN WILL IT BE READY: worked out over the whole order, every
             // part and the shop's daily capacity (see schedule()), so the
             // date does not change with the family chips ticked.
