@@ -3933,6 +3933,20 @@ shelf twice. Springs are coil (`aa_spring_stock`) and are not in this answer.
 
 The lines are rebuilt every time the menu opens, ONE SET PER USER (record
 rule), read with sudo so a stock clerk can see figures that need sale orders
-and jobs. Inventory > Reporting > Order Coverage and Coverage by Family.
+and jobs.
+
+**ONE MENU: Inventory > Reporting > Orders to Make** (owner: "dejemos
+solamente el que creamos ahora"). A client action: part-family chips, every
+open order marked Can make / Missing parts for the ticked families (decided
+in the browser - exact, because stock is allocated per part), and a What We
+Don't Have tab ("por pedir me refiero a que no tengamos") = what the open
+orders need less the shelf, with incoming purchases shown beside it, not
+taken off. The old Order Coverage / Coverage by Family menus were removed;
+their views remain.
+
+**A SERVER ACTION WITH NO GROUP DEMANDS WRITE ACCESS** to its model
+(`_can_execute_action_on_records`), so menus on a read-only model refused
+even the administrator. Tests that run as superuser cannot see it - open
+menus as a plain stock user.
 Families are the product category name; uncategorised cable parts are
 "Cables". New module: Apps > Update Apps List > install "AA Order Coverage".

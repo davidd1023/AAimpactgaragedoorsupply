@@ -127,33 +127,6 @@
     </field>
   </record>
 
-  <!-- THE MENUS WORK THE FIGURES OUT FRESH EVERY TIME THEY ARE OPENED. -->
-  <record id="server_action_aa_coverage_lines" model="ir.actions.server">
-    <field name="name">Order Coverage</field>
-    <field name="model_id" ref="model_aa_order_coverage_line"/>
-    <field name="state">code</field>
-    <field name="code">action = model.action_open_coverage()</field>
-    <!-- WITHOUT A GROUP ODOO ASKS FOR WRITE ACCESS to the model before it
-         runs a server action (ir.actions.server._can_execute_action_on_records),
-         and these lines are read-only to everybody - so even the
-         administrator got "You don't have enough access rights". The group
-         is what lets a stock user open the screen. -->
-    <field name="group_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
-  </record>
-
-  <record id="server_action_aa_coverage_family" model="ir.actions.server">
-    <field name="name">Coverage by Family</field>
-    <field name="model_id" ref="model_aa_order_coverage_line"/>
-    <field name="state">code</field>
-    <field name="code">action = model.action_open_families()</field>
-    <!-- WITHOUT A GROUP ODOO ASKS FOR WRITE ACCESS to the model before it
-         runs a server action (ir.actions.server._can_execute_action_on_records),
-         and these lines are read-only to everybody - so even the
-         administrator got "You don't have enough access rights". The group
-         is what lets a stock user open the screen. -->
-    <field name="group_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
-  </record>
-
   <!-- ORDERS TO MAKE: the screen he asked for on 2026-11-18 - every open
        order, judged on whichever parts are ticked, and a second tab with
        what we do not have. A client action, because "can we make it" has to
@@ -163,22 +136,16 @@
     <field name="tag">aa_order_coverage.board</field>
   </record>
 
+  <!-- THE ONLY MENU (owner, 2026-11-18: "dejemos solamente el que creamos
+       ahora"). Order Coverage and Coverage by Family showed the same figures
+       as a raw list and a per-family summary; their menus are gone, the list
+       and pivot views stay because the models behind this screen use them. -->
   <menuitem id="menu_aa_order_board"
             name="Orders to Make"
             parent="stock.menu_warehouse_report"
             action="action_aa_order_board"
             sequence="19"/>
 
-  <menuitem id="menu_aa_order_coverage"
-            name="Order Coverage"
-            parent="stock.menu_warehouse_report"
-            action="server_action_aa_coverage_lines"
-            sequence="20"/>
 
-  <menuitem id="menu_aa_coverage_family"
-            name="Coverage by Family"
-            parent="stock.menu_warehouse_report"
-            action="server_action_aa_coverage_family"
-            sequence="21"/>
 
 </odoo>
