@@ -3950,3 +3950,28 @@ even the administrator. Tests that run as superuser cannot see it - open
 menus as a plain stock user.
 Families are the product category name; uncategorised cable parts are
 "Cables". New module: Apps > Update Apps List > install "AA Order Coverage".
+
+## AA part numbers (`aa_part_numbers`, owner 2026-11-18)
+
+*"quiero ponerle nuestro part number a todos nuestros productos"* - and when
+asked: made and given here ("lo crearas tu y los pondras tu"), a prefix per
+family ("AA-TRK-001"), variants sharing the number with a letter at the end,
+stocked products only.
+
+**A FIELD OF ITS OWN, NEVER `default_code`** - his standing rule is that the
+supplier's code stays in Internal Reference. `aa_part_base` on the template,
+`aa_part_number` (unique) on the variant.
+
+**A NUMBER NEVER CHANGES ONCE GIVEN** - renaming or recategorising leaves it.
+New products take the next number of their family on create; a new variant
+takes the next free letter; a once-single product keeps its bare number and
+it stands for A. Letters run A..Z, AA, AB (Cut Down Hinge has 27 variants).
+
+The family is the product CATEGORY, mapped to three letters by hand in
+`FAMILY_PREFIX` (TRK HNG SPR DRM RLR SHF EBP MSC BLT MTR KIT); his cable,
+sleeves, thimbles and stops have no category and are CBL. Variants are
+lettered in attribute order (attribute sequence, then value sequence).
+
+**`_aa_next_base` READS WITH RAW SQL, SO IT FLUSHES FIRST** - otherwise two
+products numbered in one run get the same base. New module: Apps > Update
+Apps List > install "AA Part Numbers"; the install numbers everything.
