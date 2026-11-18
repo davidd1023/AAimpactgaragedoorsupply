@@ -32,6 +32,8 @@ export class OrderCoverageBoard extends Component {
             show: "all", // all | can | short
             tab: "orders", // orders | missing | nextpo | settings
             settings: null,
+            closedFrom: "", // Settings: closed day / range being added
+            closedTo: "",
             search: "",
             open: {}, // seq -> unfolded
         });
@@ -98,6 +100,9 @@ export class OrderCoverageBoard extends Component {
             }
             const short = lines.filter((l) => l.short > 0);
             const row = { ...order, lines, short, canMake: !short.length };
+            // CUT FROM A LONGER TRACK (owner, 2026-11-18): the server found a
+            // spare longer piece of the same size, kind and colour.
+            row.swaps = lines.filter((l) => l.swap_qty > 0);
             // WHEN WILL IT BE READY: worked out over the whole order, every
             // part and the shop's daily capacity (see schedule()), so the
             // date does not change with the family chips ticked.
@@ -263,6 +268,62 @@ export class OrderCoverageBoard extends Component {
         ]);
         this.notification.add("Settings saved.", { type: "success" });
         await this.load();
+    }
+    /* Closed days as a list (owner, 2026-11-18: "deberiamos poder agregar
+     * mas fechas y removerlas"). Still saved as the same text, one date or
+     * FROM..TO range per line, so the server side is unchanged. */
+    get closedEntries() {
+        const text = (this.state.settings && this.state.settings.closed) || "";
+        return text.replace(/,/g, "\n").split("\n").map((t) => t.trim()).filter(Boolean)
+            .map((raw) => {
+                const [from, to] = raw.split("..").map((t) => t.trim());
+                const ok = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "");
+                const valid = ok(from) && (!to || (ok(to) && to >= from));
+                let days = 1;
+                if (valid && to) {
+                    days = Math.round((new Date(to + "T12:00:00") - new Date(from + "T12:00:00")) / 86400000) + 1;
+                }
+                return { raw, from, to: to || "", valid, days };
+            });
+    }
+    closedLabel(entry) {
+        if (!entry.valid) {
+            return entry.raw;
+        }
+        const f = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("en-US",
+            { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+        return entry.to && entry.to !== entry.from ? `${f(entry.from)}  →  ${f(entry.to)}` : f(entry.from);
+    }
+    writeClosed(entries) {
+        entries.sort((a, b) => (a.from || "").localeCompare(b.from || ""));
+        this.state.settings.closed = entries.map((e) => e.raw).join("\n");
+    }
+    addClosed() {
+        const from = this.state.closedFrom;
+        const to = this.state.closedTo;
+        if (!from) {
+            this.notification.add("Pick the first closed day.", { type: "warning" });
+            return;
+        }
+        if (to && to < from) {
+            this.notification.add("The last day is before the first day.", { type: "warning" });
+            return;
+        }
+        const raw = to && to !== from ? `${from}..${to}` : from;
+        const entries = this.closedEntries;
+        if (entries.some((e) => e.raw === raw)) {
+            this.notification.add("That date is already on the list.", { type: "warning" });
+            return;
+        }
+        entries.push({ raw, from });
+        this.writeClosed(entries);
+        this.state.closedFrom = "";
+        this.state.closedTo = "";
+    }
+    removeClosed(index) {
+        const entries = this.closedEntries;
+        entries.splice(index, 1);
+        this.writeClosed(entries);
     }
     addWorkdays(iso, n) {
         const d = new Date(iso + "T12:00:00");

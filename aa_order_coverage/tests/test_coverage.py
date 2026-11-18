@@ -172,3 +172,68 @@ class TestOrderCoverage(TransactionCase):
         short = [l for l in data['lines'] if l['seq'] == seq['PO-B2'] and l['short']]
         self.assertEqual([l['product_id'] for l in short], [self.track.id])
         self.assertIn(self.tracks.name, [f['name'] for f in data['families']])
+
+
+@tagged('post_install', '-at_install')
+class TestCutFromLonger(TestOrderCoverage):
+    """Owner, 2026-11-18: out of one length, a longer one of the same size,
+    kind and colour can be cut down - but only what no order needs itself."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        Product = cls.env['product.product']
+        Quant = cls.env['stock.quant']
+
+        def raw(name, qty):
+            product = Product.create({
+                'name': name, 'is_storable': True, 'categ_id': cls.tracks.id})
+            if qty:
+                Quant._update_available_quantity(product, cls.stock, qty)
+            return product
+        cls.short74 = raw('9" Vertical Track RAW - 7\'4" Black', 0)
+        cls.long94 = raw('9" Vertical Track RAW - 9\'4" Black', 3)
+        cls.long134 = raw('9" Vertical Track RAW - 13\'4" Black', 5)
+        cls.white94 = raw('9" Vertical Track RAW - 9\'4" White', 10)
+        cls.horiz = raw('9" Horizontal Track RAW - 9\'6" Black', 10)
+
+    def _line(self, picking, product):
+        return self._lines(picking).filtered(lambda l: l.product_id == product)
+
+    def test_cut_from_shortest_spare_longer_piece(self):
+        # Another order needs 2 of the 9'4": only 1 of the 3 is spare.
+        _so0, other = self._order('PO-NEEDS-94', [(self.long94, 2)], 9)
+        _so1, first = self._order('PO-CUT-1', [(self.short74, 2)], 5)
+        _so2, second = self._order('PO-CUT-2', [(self.short74, 6)], 1)
+        self.Line.action_open_coverage()
+
+        self.assertFalse(self._line(other, self.long94).is_short)
+        one = self._line(first, self.short74)
+        # The 1 spare 9'4" (shortest that fits); one line takes one longer length.
+        self.assertEqual(one.swap_product_id, self.long94)
+        self.assertEqual(one.qty_swap, 1)
+        self.assertTrue(one.is_short, 'one piece still missing on this line')
+        two = self._line(second, self.short74)
+        self.assertEqual(two.swap_product_id, self.long134)
+        self.assertEqual(two.qty_swap, 5)
+        self.assertTrue(two.is_short)
+        self.assertEqual(two.qty_short, 6, 'the shortage of the part itself stays')
+
+    def test_never_another_colour_or_kind(self):
+        _so, order = self._order('PO-WHITE', [(self.short74, 1)], 1)
+        self.long94.stock_quant_ids.sudo().unlink()
+        self.long134.stock_quant_ids.sudo().unlink()
+        self.Line.action_open_coverage()
+        line = self._line(order, self.short74)
+        self.assertFalse(line.swap_product_id)
+        self.assertTrue(line.is_short)
+
+    def test_board_shows_the_cut(self):
+        _so, order = self._order('PO-BOARD', [(self.short74, 1)], 1)
+        data = self.Line.aa_board_data()
+        seq = self._line(order, self.short74).seq
+        row = [l for l in data['lines'] if l['seq'] == seq and l['product_id'] == self.short74.id][0]
+        self.assertEqual(row['short'], 0, 'covered by the longer piece')
+        self.assertEqual(row['missing'], 1)
+        self.assertEqual(row['swap_qty'], 1)
+        self.assertEqual(row['swap_length'], "9'4\"")
