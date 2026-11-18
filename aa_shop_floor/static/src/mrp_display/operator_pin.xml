@@ -9,11 +9,21 @@
                     <i class="fa fa-key me-2" role="img"/>Change PIN
                 </button>
             </li>
+            <!-- ENGLISH / ESPAÑOL, for whoever is signed in (owner, 2026-11-11).
+                 Named in the language it switches TO, so it can be found by
+                 somebody who cannot read the other one. -->
+            <li>
+                <button class="dropdown-item py-2" t-on-click="() => this.aaSwitchLanguage()">
+                    <i class="fa fa-language me-2" role="img"/>
+                    <t t-if="aaIsSpanish" t-translation="off">English</t>
+                    <t t-else="" t-translation="off">Español</t>
+                </button>
+            </li>
         </xpath>
     </t>
 
     <t t-name="aa_shop_floor.OperatorPinDialog">
-        <Dialog title="'Operator PINs'" size="'md'">
+        <Dialog title.translate="Operator PINs" size="'md'">
             <div t-if="state.loading" class="text-center py-4">
                 <i class="fa fa-circle-o-notch fa-spin fa-2x"/>
             </div>

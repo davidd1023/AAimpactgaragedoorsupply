@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="aa_order_coverage.Board">
+    <div class="o_action aa_board h-100 overflow-auto p-3">
+      <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+        <h4 class="m-0 me-3">Orders to Make</h4>
+        <div class="btn-group">
+          <button class="btn" t-att-class="state.tab === 'orders' ? 'btn-primary' : 'btn-secondary'"
+                  t-on-click="() => this.state.tab = 'orders'">Orders</button>
+          <button class="btn" t-att-class="state.tab === 'missing' ? 'btn-primary' : 'btn-secondary'"
+                  t-on-click="() => this.state.tab = 'missing'">
+            What We Don't Have <span class="badge text-bg-danger ms-1" t-out="missing.length"/>
+          </button>
+          <button class="btn" t-att-class="state.tab === 'nextpo' ? 'btn-primary' : 'btn-secondary'"
+                  t-on-click="() => this.state.tab = 'nextpo'">
+            Next P.O. <span class="badge text-bg-warning ms-1" t-out="nextPoCount"/>
+          </button>
+          <button class="btn" t-att-class="state.tab === 'settings' ? 'btn-primary' : 'btn-secondary'"
+                  t-on-click="openSettings">
+            <i class="fa fa-cog"/> Settings
+          </button>
+        </div>
+        <input type="search" class="form-control w-auto ms-auto" placeholder="Search W/O, PO, customer"
+               t-model="state.search"/>
+        <button class="btn btn-secondary" t-on-click="() => this.load()" title="Work it out again">
+          <i class="fa fa-refresh"/> Refresh
+        </button>
+      </div>
+
+      <!-- THE FILTER: tick Tracks, or Hinges, and every order is judged on
+           those parts alone. Nothing ticked means every part. -->
+      <div class="d-flex flex-wrap gap-1 mb-3 align-items-center">
+        <span class="text-muted me-1">Parts:</span>
+        <button class="btn btn-sm" t-att-class="state.picked.length ? 'btn-outline-secondary' : 'btn-dark'"
+                t-on-click="clearFamilies">All</button>
+        <t t-foreach="state.data.families" t-as="family" t-key="family.id">
+          <button class="btn btn-sm"
+                  t-att-class="isPicked(family.id) ? 'btn-dark' : 'btn-outline-secondary'"
+                  t-on-click="() => this.toggleFamily(family.id)" t-out="family.name"/>
+        </t>
+      </div>
+
+      <div t-if="state.loading" class="text-muted p-4">Working it out...</div>
+
+      <t t-elif="state.tab === 'orders'">
+        <t t-set="c" t-value="counts"/>
+        <div class="d-flex gap-2 mb-2 flex-wrap align-items-center">
+          <button class="btn btn-sm" t-att-class="state.show === 'all' ? 'btn-dark' : 'btn-outline-secondary'"
+                  t-on-click="() => this.state.show = 'all'">All <t t-out="c.total"/></button>
+          <button class="btn btn-sm" t-att-class="state.show === 'can' ? 'btn-success' : 'btn-outline-success'"
+                  t-on-click="() => this.state.show = 'can'">Can make <t t-out="c.can"/></button>
+          <button class="btn btn-sm" t-att-class="state.show === 'short' ? 'btn-danger' : 'btn-outline-danger'"
+                  t-on-click="() => this.state.show = 'short'">Missing parts <t t-out="c.short"/></button>
+          <span class="ms-auto small text-muted">
+            Dates count <t t-out="state.cap.tracks"/> tracks, <t t-out="state.cap.boxes"/> boxes and
+            <t t-out="state.cap.springs"/> springs a day (Settings)
+          </span>
+          <span t-if="c.firstShort" class="text-muted ms-2">
+            Stock runs out at order #<t t-out="c.firstShort.seq"/> (<t t-out="c.firstShort.wo"/>)
+          </span>
+          <span t-elif="c.total" class="text-success ms-2">Stock covers every order</span>
+        </div>
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>#</th><th>W/O</th><th>PO</th><th>Customer</th><th>Pickup</th>
+              <th>Status</th><th>Missing</th><th/>
+            </tr>
+          </thead>
+          <tbody>
+            <t t-foreach="rows" t-as="row" t-key="row.seq">
+              <tr t-on-click="() => this.toggleOpen(row.seq)" style="cursor: pointer;">
+                <td t-out="row.seq"/>
+                <td t-out="row.wo"/>
+                <td t-out="row.po"/>
+                <td t-out="row.customer"/>
+                <td t-out="row.pickup"/>
+                <td class="text-nowrap">
+                  <i class="fa fa-circle me-1" t-att-class="dotClass(row)"/>
+                  <span t-if="row.noPo" class="text-danger">Missing - not ordered</span>
+                  <span t-else="" t-att-class="row.canMake ? 'text-success' : 'text-warning'">
+                    <t t-if="row.canMake">Can make · </t>ready ~<t t-out="row.finishBy"/>
+                  </span>
+                </td>
+                <td class="small text-danger" t-out="shortText(row)"/>
+                <td>
+                  <button class="btn btn-sm btn-link" title="Open the Work Order"
+                          t-on-click.stop="() => this.openWorkOrder(row)">
+                    <i class="fa fa-external-link"/>
+                  </button>
+                </td>
+              </tr>
+              <tr t-if="state.open[row.seq]">
+                <td/>
+                <td colspan="7">
+                  <div t-if="!row.canMake" class="mb-2">
+                    <t t-if="row.noPo">
+                      <span class="text-danger fw-bold">Can't be finished yet:</span>
+                      something it is missing is not on any confirmed P.O.
+                    </t>
+                    <t t-else="">
+                      Missing parts all arrive by <b t-out="row.partsBy"/>.
+                    </t>
+                  </div>
+                  <div t-if="!row.noPo" class="mb-2">
+                    Ready about <b t-out="row.finishBy"/>
+                    <span class="text-muted">- <t t-out="fmt(row.tracks)"/> track set(s), <t t-out="fmt(row.boxes)"/> box(es) and <t t-out="fmt(row.springs)"/> spring(s) still to make,
+                    in line behind the orders ready before it.</span>
+                  </div>
+                  <table class="table table-sm mb-2">
+                    <thead><tr><th>Part</th><th>Needs</th><th>Left when its turn came</th><th>Missing</th><th>Arriving</th></tr></thead>
+                    <tbody>
+                      <tr t-foreach="row.lines" t-as="line" t-key="line.product_id"
+                          t-att-class="line.short > 0 ? 'text-danger' : 'text-success'">
+                        <td t-out="line.product"/>
+                        <td t-out="fmt(line.needed)"/>
+                        <td t-out="fmt(line.before)"/>
+                        <td t-out="line.short > 0 ? fmt(line.short) : ''"/>
+                        <td class="small">
+                          <t t-if="line.short > 0">
+                            <span t-if="line.eta" class="text-warning">Covered by <t t-out="line.po"/> on <t t-out="line.eta"/></span>
+                            <span t-else="" class="text-danger">Not ordered</span>
+                            <div t-if="line.coming.length" class="text-muted" t-out="comingText(line)"/>
+                          </t>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </t>
+            <tr t-if="!rows.length"><td colspan="8" class="text-muted">No orders.</td></tr>
+          </tbody>
+        </table>
+      </t>
+
+      <!-- THE NEXT P.O.: one card per vendor. It stays here until the
+           draft is confirmed in Purchase; from then on it is "coming". -->
+      <t t-elif="state.tab === 'nextpo'">
+        <p class="text-muted small">
+          Order = open orders + what is used in (lead time + days between P.O.s) + the minimum,
+          less what is on hand and on confirmed P.O.s. Use is the average of the last
+          <t t-out="state.data.next_po.forecast_days"/> days. Quantities can be changed before saving.
+        </p>
+        <div t-foreach="vendors" t-as="block" t-key="block.vendor.id" class="card mb-3">
+          <t t-set="v" t-value="block.vendor"/>
+          <div class="card-header d-flex flex-wrap align-items-center gap-2">
+            <strong class="me-2" t-out="v.name"/>
+            <span class="small text-muted">
+              Lead <t t-out="v.lead_days"/> days + shipping <t t-out="v.ship_days"/> working days
+            </span>
+            <span t-if="!v.lead_set" class="small text-warning">Lead time not set: Settings</span>
+            <span class="small text-muted ms-2">Arrives about <t t-out="v.arrives"/></span>
+            <span class="ms-auto fw-bold" t-out="money(vendorTotal(block))"/>
+            <button t-if="v.draft" class="btn btn-sm btn-link" t-on-click="() => this.openPo(v.draft.id)">
+              <t t-out="v.draft.name"/> (draft)
+            </button>
+            <button class="btn btn-sm btn-primary" t-on-click="() => this.draftPo(block)">
+              <t t-if="v.draft">Update draft P.O.</t><t t-else="">Create draft P.O.</t>
+            </button>
+          </div>
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Part</th><th>Supplier #</th><th>Family</th><th>On hand</th><th>Open orders</th>
+                <th>Used / month</th><th>Coming</th><th>Minimum</th><th>Runs out</th>
+                <th>Order</th><th>Price</th><th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr t-foreach="block.lines" t-as="p" t-key="p.id">
+                <td t-out="p.name"/>
+                <td class="small" t-out="p.code"/>
+                <td t-out="p.family"/>
+                <td t-out="fmt(p.on_hand)"/>
+                <td t-out="p.open ? fmt(p.open) : ''"/>
+                <td t-out="perMonth(p)"/>
+                <td>
+                  <t t-if="p.coming"><t t-out="fmt(p.coming)"/> <span class="small text-muted" t-out="p.coming_date"/></t>
+                </td>
+                <td t-out="p.minimum ? fmt(p.minimum) : ''"/>
+                <td t-out="p.runs_out"/>
+                <td t-if="p.coil" class="text-nowrap">
+                  <input type="number" min="0" class="form-control form-control-sm d-inline-block" style="width: 5em"
+                         t-model="p.coils"/>
+                  <span class="small"> coils = <t t-out="fmt(coilInches(p, v))"/> in</span>
+                </td>
+                <td t-else=""><input type="number" min="0" class="form-control form-control-sm" style="width: 6em"
+                           t-model="p.qty"/></td>
+                <td t-out="money(p.price)"/>
+                <td t-out="money(lineTotal(p, v))"/>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div t-if="!vendors.length" class="text-success">Nothing to order for these parts.</div>
+        <div t-if="noVendor.length" class="card mb-3 border-warning">
+          <div class="card-header">
+            <strong>No vendor</strong>
+            <span class="small text-muted ms-2">These need ordering but no vendor is set on the product, so they cannot go on a P.O.</span>
+          </div>
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Part</th><th>Family</th><th>On hand</th><th>Open orders</th><th>Used / month</th><th>Order</th></tr></thead>
+            <tbody>
+              <tr t-foreach="noVendor" t-as="p" t-key="p.id">
+                <td t-out="p.name"/><td t-out="p.family"/><td t-out="fmt(p.on_hand)"/>
+                <td t-out="p.open ? fmt(p.open) : ''"/>
+                <td t-out="perMonth(p)"/>
+                <td class="fw-bold" t-out="fmt(p.qty)"/>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </t>
+
+      <!-- SETTINGS: each vendor's times and the shop's daily capacity, in
+           one place (owner, 2026-11-18). -->
+      <t t-elif="state.tab === 'settings'">
+        <div t-if="!state.settings" class="text-muted">Loading...</div>
+        <t t-else="">
+          <h5>What the shop makes in a day</h5>
+          <div class="d-flex gap-3 align-items-center mb-1">
+            <label class="d-flex align-items-center gap-1">Tracks (door sets)
+              <input type="number" min="1" class="form-control form-control-sm" style="width: 5em" t-model="state.settings.capacity.tracks"/></label>
+            <label class="d-flex align-items-center gap-1">Hardware boxes
+              <input type="number" min="1" class="form-control form-control-sm" style="width: 5em" t-model="state.settings.capacity.boxes"/></label>
+            <label class="d-flex align-items-center gap-1">Springs
+              <input type="number" min="1" class="form-control form-control-sm" style="width: 5em" t-model="state.settings.capacity.springs"/></label>
+          </div>
+          <p class="small text-muted">Used for the ready date of every order: each bench works through the orders as their parts arrive, oldest first.</p>
+          <h5 class="mt-3">Days the shop is closed</h5>
+          <textarea class="form-control form-control-sm" rows="3" style="max-width: 360px" t-model="state.settings.closed" placeholder="2026-12-24..2027-01-03"/>
+          <p class="small text-muted">One date per line, or a range as FROM..TO (2026-12-24..2027-01-03). Weekends are already skipped. No order is dated on a closed day.</p>
+          <h5 class="mt-3">Vendors</h5>
+          <table class="table table-sm align-middle" style="max-width: 900px">
+            <thead><tr><th>Vendor</th><th>Products</th><th>Lead time (days to ship)</th><th>Shipping (working days)</th><th>Days between P.O.s</th></tr></thead>
+            <tbody>
+              <tr t-foreach="state.settings.vendors" t-as="v" t-key="v.id">
+                <td t-out="v.name"/>
+                <td t-out="v.products"/>
+                <td><input type="number" min="0" class="form-control form-control-sm" style="width: 6em" t-model="v.lead"/></td>
+                <td><input type="number" min="0" class="form-control form-control-sm" style="width: 6em" t-model="v.ship"/></td>
+                <td><input type="number" min="0" class="form-control form-control-sm" style="width: 6em" t-model="v.cycle" placeholder="= lead"/></td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="small text-muted">A P.O. arrives lead time + shipping after it is placed. Days between P.O.s is how long each P.O. must last; blank means the same as the lead time.</p>
+          <button class="btn btn-primary" t-on-click="saveSettings">Save settings</button>
+        </t>
+      </t>
+
+      <!-- WHAT WE DON'T HAVE: every part the open orders need more of than
+           the shelf holds. "Coming" is what purchasing already has on order,
+           so it is plain what is still to be bought. -->
+      <t t-else="">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Part</th><th>Family</th><th>Orders</th><th>Needed</th><th>On hand</th>
+              <th class="text-danger">Don't have</th><th>Coming</th><th>Still to order</th><th>Vendor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr t-foreach="missing" t-as="p" t-key="p.id">
+              <td t-out="p.name"/>
+              <td t-out="familyName(p.family_id)"/>
+              <td t-out="p.orders"/>
+              <td t-out="fmt(p.needed)"/>
+              <td t-out="fmt(p.on_hand)"/>
+              <td class="text-danger fw-bold" t-out="fmt(p.missing)"/>
+              <td t-out="p.incoming ? fmt(p.incoming) : ''"/>
+              <td class="fw-bold" t-out="fmt(p.to_order)"/>
+              <td t-out="p.vendor"/>
+            </tr>
+            <tr t-if="!missing.length"><td colspan="9" class="text-success">Nothing missing for these parts.</td></tr>
+          </tbody>
+        </table>
+      </t>
+    </div>
+  </t>
+</templates>

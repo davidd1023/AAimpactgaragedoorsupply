@@ -1,3 +1,4 @@
+import { _t } from "@web/core/l10n/translation";
 import { useState } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { patch } from "@web/core/utils/patch";
@@ -333,6 +334,14 @@ patch(MrpDisplay.prototype, {
         this.aaOverview.query = query;
     },
 
+    // THE CARD'S OWN WORDS IN THE USER'S LANGUAGE (owner, 2026-11-11). The
+    // rows are stored in English ("Cut to|160\" (LH + RH)"), so the label -
+    // and a value that is a fixed phrase - is looked up in i18n/es.po here;
+    // anything not listed there (a size, a count) comes back unchanged.
+    aaT(text) {
+        return text ? String(_t(text)) : text;
+    },
+
     aaToggleRow(key) {
         this.aaOverview.open[key] = !this.aaOverview.open[key];
     },
@@ -348,10 +357,11 @@ patch(MrpDisplay.prototype, {
 
     aaRemovePart(parts, item, order) {
         this.aaPartsDialog.add(ConfirmationDialog, {
-            title: `Remove ${item.label}`,
-            body: `Take the ${item.label.toLowerCase()} off ${order}? Their Shop Floor work is cancelled, ` +
+            title: _t("Remove %s", _t(item.label)),
+            body: _t("Take the %(part)s off %(order)s? Their Shop Floor work is cancelled, " +
                 "the lines go to 0 and the unpaid invoice is redone.",
-            confirmLabel: "Remove",
+                { part: String(_t(item.label)).toLowerCase(), order }),
+            confirmLabel: _t("Remove"),
             confirm: async () => {
                 try {
                     const message = await this.model.orm.call("sale.order", "aa_remove_part", [[parts.order_id], item.part]);
@@ -369,14 +379,15 @@ patch(MrpDisplay.prototype, {
     // back to its station, and the stock it moved is put back.
     aaSendBack(job, order) {
         this.aaPartsDialog.add(ConfirmationDialog, {
-            title: `Send back ${job.station}`,
-            body: `${job.station} on ${order} was marked done. Send it back to the station as not done? ` +
+            title: _t("Send back %s", job.station),
+            body: _t("%(station)s on %(order)s was marked done. Send it back to the station as not done? " +
                 "The stock it moved is put back and the station gets the job again.",
-            confirmLabel: "Send back",
+                { station: job.station, order }),
+            confirmLabel: _t("Send back"),
             confirm: async () => {
                 try {
                     await this.model.orm.call("mrp.production", "aa_send_back", [job.send_back_ids]);
-                    this.aaPartsNotify.add(`${job.station} on ${order} is back at the station.`, { type: "success" });
+                    this.aaPartsNotify.add(_t("%(station)s on %(order)s is back at the station.", { station: job.station, order }), { type: "success" });
                 } catch (error) {
                     this.aaPartsNotify.add(error.data?.message || error.message || String(error), { type: "danger" });
                 }

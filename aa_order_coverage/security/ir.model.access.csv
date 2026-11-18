@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_aa_coverage_line_user,aa.order.coverage.line user,model_aa_order_coverage_line,stock.group_stock_user,1,0,0,0
+access_aa_coverage_family_user,aa.order.coverage.family user,model_aa_order_coverage_family,stock.group_stock_user,1,0,0,0
+access_aa_coverage_family_manager,aa.order.coverage.family manager,model_aa_order_coverage_family,stock.group_stock_manager,1,1,1,1

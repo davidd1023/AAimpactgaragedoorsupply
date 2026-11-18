@@ -6,6 +6,7 @@
 // as well - hiding a button is not a lock. No PIN ever comes back from the
 // server, only whether one is set.
 
+import { _t } from "@web/core/l10n/translation";
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { patch } from "@web/core/utils/patch";
@@ -41,13 +42,13 @@ export class AaOperatorPinDialog extends Component {
     async save(operator) {
         const pin = this.state.typed[operator.id] || "";
         if (pin.length < 4) {
-            this.notification.add("The PIN must be at least 4 digits.", { type: "danger" });
+            this.notification.add(_t("The PIN must be at least 4 digits."), { type: "danger" });
             return;
         }
         this.state.saving = true;
         try {
             await this.orm.call("hr.employee", "aa_set_shop_floor_pin", [operator.id, pin]);
-            this.notification.add(`${operator.name}'s PIN is changed.`, { type: "success" });
+            this.notification.add(_t("%s's PIN is changed.", operator.name), { type: "success" });
             this.state.typed[operator.id] = "";
             await this.load();
         } finally {
@@ -61,6 +62,16 @@ patch(MrpDisplay.prototype, {
         super.setup();
         this.aaPinDialog = useService("dialog");
         this.aaIsAdmin = user.isSystem;
+        this.aaLangOrm = useService("orm");
+        this.aaIsSpanish = (user.lang || "").toLowerCase().startsWith("es");
+    },
+
+    // The user's own Odoo language; the page reloads so everything - Odoo's
+    // screens and ours - comes back in it.
+    async aaSwitchLanguage() {
+        await this.aaLangOrm.call("res.users", "aa_set_shop_floor_language",
+            [this.aaIsSpanish ? "en" : "es"]);
+        window.location.reload();
     },
 
     aaOpenOperatorPins() {

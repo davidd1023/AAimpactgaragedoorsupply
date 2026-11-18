@@ -1,9 +1,18 @@
+import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 import { MrpDisplayRecord } from "@mrp_workorder/mrp_display/mrp_display_record";
 
 // Tick a row of the card when that piece is in the box. Saved on the
 // manufacturing order, so every tablet sees the same ticks.
 patch(MrpDisplayRecord.prototype, {
+    // THE CARD'S OWN WORDS IN THE USER'S LANGUAGE (owner, 2026-11-11). The
+    // rows are stored in English ("Cut to|160\" (LH + RH)"), so the label -
+    // and a value that is a fixed phrase - is looked up in i18n/es.po here;
+    // anything not listed there (a size, a count) comes back unchanged.
+    aaT(text) {
+        return text ? String(_t(text)) : text;
+    },
+
     aaPackedKeys() {
         try {
             return JSON.parse(this.props.record.data.aa_packed || "[]");

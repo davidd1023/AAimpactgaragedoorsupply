@@ -1,0 +1,209 @@
+from datetime import timedelta
+
+from odoo import fields
+from odoo.tests import tagged
+from odoo.tests.common import TransactionCase
+
+
+@tagged('post_install', '-at_install')
+class TestNextPO(TransactionCase):
+    """The Next P.O. tab: one suggestion per vendor, by lead time."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.warehouse = cls.env['stock.warehouse'].search(
+            [('company_id', '=', cls.env.company.id)], limit=1)
+        cls.stock = cls.warehouse.lot_stock_id
+        cls.vendor = cls.env['res.partner'].create({
+            'name': 'NextPO Vendor', 'aa_lead_days': 70})
+        cls.part = cls.env['product.product'].create({
+            'name': 'NextPO Hinge', 'is_storable': True, 'purchase_ok': True,
+            'seller_ids': [(0, 0, {'partner_id': cls.vendor.id, 'price': 2.0})],
+        })
+        cls.env['stock.quant']._update_available_quantity(cls.part, cls.stock, 100)
+        # 90 used over the forecast window: one a day.
+        cls._use(cls.part, 90)
+
+    @classmethod
+    def _use(cls, product, qty):
+        customer = cls.env.ref('stock.stock_location_customers')
+        move = cls.env['stock.move'].create({
+            'product_id': product.id, 'product_uom_qty': qty,
+            'product_uom': product.uom_id.id,
+            'location_id': cls.stock.id, 'location_dest_id': customer.id,
+        })
+        move._action_confirm()
+        move._action_assign()
+        move.quantity = qty
+        move.picked = True
+        move._action_done()
+
+    def _row(self, open_needs=None):
+        Line = self.env['aa.order.coverage.line']
+        cache = {}
+        data = self.env['aa.next.po'].aa_next_po(
+            open_needs or {}, lambda p: Line._aa_family(p, cache))
+        for vendor in data['vendors']:
+            if vendor['id'] == self.vendor.id:
+                rows = [r for r in vendor['lines'] if r['id'] == self.part.id]
+                return vendor, (rows[0] if rows else None)
+        return None, None
+
+    def test_order_covers_lead_time_and_next_cycle(self):
+        # 1 a day x (70 lead + 70 cycle) = 140, less the 10 left on hand.
+        vendor, row = self._row()
+        self.assertEqual(vendor['lead'], 70)
+        self.assertEqual(row['on_hand'], 10)
+        self.assertEqual(row['qty'], 130)
+        self.assertAlmostEqual(row['per_month'], 30.0)
+
+    def test_open_orders_and_minimum_are_added(self):
+        self.env['stock.warehouse.orderpoint'].create({
+            'product_id': self.part.id, 'location_id': self.stock.id,
+            'product_min_qty': 20, 'product_max_qty': 20, 'trigger': 'manual'})
+        vendor, row = self._row({self.part: 15})
+        self.assertEqual(row['qty'], 130 + 15 + 20)
+
+    def test_cycle_setting_shortens_the_order(self):
+        self.vendor.aa_cycle_days = 30
+        vendor, row = self._row()
+        self.assertEqual(row['qty'], 100 - 10)
+
+    def test_confirmed_po_is_coming_and_draft_is_not(self):
+        po = self.env['purchase.order'].create({
+            'partner_id': self.vendor.id,
+            'order_line': [(0, 0, {'product_id': self.part.id, 'product_qty': 50})]})
+        vendor, row = self._row()
+        self.assertEqual(row['qty'], 130, "a draft is a suggestion, not stock")
+        po.button_confirm()
+        vendor, row = self._row()
+        self.assertEqual(row['coming'], 50)
+        self.assertEqual(row['qty'], 80)
+
+    def test_draft_is_created_then_rewritten_not_duplicated(self):
+        NextPO = self.env['aa.next.po']
+        first = NextPO.aa_draft_po(self.vendor.id, [{'product_id': self.part.id, 'qty': 130}])
+        second = NextPO.aa_draft_po(self.vendor.id, [{'product_id': self.part.id, 'qty': 99}])
+        self.assertEqual(first['id'], second['id'])
+        po = self.env['purchase.order'].browse(second['id'])
+        self.assertTrue(po.aa_suggested)
+        self.assertEqual(po.state, 'draft')
+        self.assertEqual(po.order_line.product_qty, 99)
+        self.assertEqual(po.order_line.price_unit, 2.0)
+        vendor, row = self._row()
+        self.assertEqual(vendor['draft']['id'], po.id)
+        # Confirmed, it leaves the tab as a draft and counts as coming.
+        po.button_confirm()
+        vendor, row = self._row()
+        self.assertFalse(vendor and vendor['draft'])
+        self.assertEqual(row["qty"], 140 - 10 - 99)
+
+    def test_parts_made_here_are_never_bought(self):
+        tmpl = self.part.product_tmpl_id
+        self.env['mrp.bom'].create({'product_tmpl_id': tmpl.id, 'type': 'normal'})
+        vendor, row = self._row()
+        self.assertIsNone(row)
+
+    def test_board_carries_the_next_po(self):
+        data = self.env['aa.order.coverage.line'].aa_board_data()
+        self.assertIn('next_po', data)
+        ids = {f['id'] for f in data['families']}
+        for vendor in data['next_po']['vendors']:
+            for row in vendor['lines']:
+                self.assertIn(row['family_id'], ids)
+
+    def test_cable_is_ordered_in_whole_reels(self):
+        reel = self.env['product.product'].create({
+            'name': 'NextPO 1/8 GAC (500 FT REEL)', 'is_storable': True,
+            'purchase_ok': True,
+            'seller_ids': [(0, 0, {'partner_id': self.vendor.id})]})
+        Line = self.env['aa.order.coverage.line']
+        data = self.env['aa.next.po'].aa_next_po(
+            {reel: 1208}, lambda p: Line._aa_family(p, {}))
+        row = [r for v in data['vendors'] for r in v['lines'] if r['id'] == reel.id][0]
+        self.assertEqual(row['qty'], 1500)
+
+    def test_boxed_parts_are_ordered_in_whole_boxes(self):
+        trim = self.env['product.product'].create({
+            'name': 'NextPO Trim', 'is_storable': True, 'purchase_ok': True,
+            'seller_ids': [(0, 0, {
+                'partner_id': self.vendor.id, 'price': 16.194, 'min_qty': 15,
+                'product_name': "2in Vinyl Stop 18' Dark Brown (P5), 15 pcs/box"})]})
+        Line = self.env['aa.order.coverage.line']
+        data = self.env['aa.next.po'].aa_next_po(
+            {trim: 17}, lambda p: Line._aa_family(p, {}))
+        row = [r for v in data['vendors'] for r in v['lines'] if r['id'] == trim.id][0]
+        self.assertEqual(row['qty'], 30)
+
+    def test_coil_is_ordered_as_whole_coils(self):
+        coil = self.env['product.product'].create({
+            'name': 'NextPO coil', 'default_code': 'COIL-262-2.625-L',
+            'is_storable': True, 'purchase_ok': True,
+            'seller_ids': [(0, 0, {'partner_id': self.vendor.id})]})
+        Line = self.env['aa.order.coverage.line']
+        data = self.env['aa.next.po'].aa_next_po(
+            {coil: 100}, lambda p: Line._aa_family(p, {}))
+        vendor = [v for v in data['vendors'] if v['id'] == self.vendor.id][0]
+        row = [r for r in vendor['lines'] if r['id'] == coil.id][0]
+        self.assertTrue(row['coil'])
+        self.assertEqual(vendor['coil_feet'], 7)
+        NextPO = self.env['aa.next.po']
+        NextPO.aa_set_coil_feet(self.vendor.id, 8)
+        po = self.env['purchase.order'].browse(NextPO.aa_draft_po(
+            self.vendor.id, [{'product_id': coil.id, 'coils': 2, 'feet': 8}])['id'])
+        self.assertEqual(po.order_line.product_qty, 192)
+        self.assertIn('2 coils of 8 ft', po.order_line.name)
+        self.assertEqual(self.vendor.aa_coil_feet, 8)
+
+    def test_short_line_is_dated_by_the_po_that_covers_it(self):
+        Line = self.env['aa.order.coverage.line']
+        po = self.env['purchase.order'].create({
+            'partner_id': self.vendor.id,
+            'order_line': [(0, 0, {'product_id': self.part.id, 'product_qty': 50,
+                                   'date_planned': '2030-01-15 12:00:00'})]})
+        po.button_confirm()
+        arrivals = Line._aa_arrivals(self.part)
+        self.assertEqual(arrivals[self.part][0][1], 50)
+        self.assertEqual(str(arrivals[self.part][0][0]), '2030-01-15')
+
+    def test_capacity_defaults_and_setting(self):
+        Line = self.env['aa.order.coverage.line']
+        self.assertEqual(Line._aa_capacity(), {'tracks': 6, 'boxes': 10, 'springs': 20})
+        Line.aa_set_capacity(8, 12, 30)
+        self.assertEqual(Line._aa_capacity(), {'tracks': 8.0, 'boxes': 12.0, 'springs': 30.0})
+
+    def test_board_orders_carry_work_left(self):
+        data = self.env['aa.order.coverage.line'].aa_board_data()
+        for order in data['orders']:
+            self.assertIn('tracks', order)
+            self.assertIn('boxes', order)
+
+    def test_shipping_days_add_working_days_to_the_lead(self):
+        NextPO = self.env['aa.next.po']
+        self.vendor.write({'aa_lead_days': 32, 'aa_ship_days': 5})
+        from datetime import date
+        # Ordered Mon 2026-11-09: ships Fri 12-11, +5 working days = Fri 12-18.
+        self.assertEqual(NextPO._arrival_date(self.vendor, self.env['product.supplierinfo'], date(2026, 11, 9)),
+                         date(2026, 12, 18))
+        data = NextPO.aa_save_settings(
+            [{'id': self.vendor.id, 'lead': 10, 'ship': 2, 'cycle': 0}],
+            {'tracks': 7, 'boxes': 11, 'springs': 25})
+        self.assertEqual(self.vendor.aa_ship_days, 2)
+        self.assertEqual(data['capacity']['springs'], 25)
+
+    def test_closed_days(self):
+        """Owner, 2026-11-18: closed from 24 December, back 4 January."""
+        Line = self.env['aa.order.coverage.line']
+        days = Line._aa_closed_days()
+        self.assertEqual(days[0], '2026-12-24')
+        self.assertEqual(days[-1], '2027-01-03')
+        self.assertEqual(len(days), 11)
+        self.assertIn('2026-12-31', Line.aa_board_data()['closed_days'])
+        # A mistyped line is ignored, not raised.
+        self.assertEqual(Line._aa_closed_days('2026-07-03\nnot a date\n2026-12-01..2026-12-02'),
+                         ['2026-07-03', '2026-12-01', '2026-12-02'])
+        # Saved empty means none - not the default back again.
+        self.env['aa.next.po'].aa_save_settings([], {}, '')
+        self.assertEqual(Line._aa_closed_days(), [])
+        self.assertEqual(self.env['aa.next.po'].aa_settings_data()['closed'], '')
