@@ -3951,6 +3951,26 @@ menus as a plain stock user.
 Families are the product category name; uncategorised cable parts are
 "Cables". New module: Apps > Update Apps List > install "AA Order Coverage".
 
+### THE NEXT P.O. TAB (owner, 2026-11-18)
+
+*"que el sistema solo me haga el proximo PO de hardware ... que entienda que
+me viene en una fecha determinada ... basado en las ordenes puestas y un
+pronostico del futuro"*. His answers: ONE P.O. PER VENDOR (the product's
+first vendor), kept on the screen until it is put in Purchase and confirmed;
+forecast = AVERAGE USE (done moves to customer or production, last 90 days,
+`aa_order_coverage.forecast_days`); how much depends on each VENDOR'S LEAD
+TIME. `models/next_po.py`:
+
+    order = open orders + use/day x (lead + cycle) + Min/Max minimum
+            - on hand - CONFIRMED P.O.s still to arrive
+
+`aa_lead_days` / `aa_cycle_days` on res.partner (cycle blank = the lead
+again), edited on the tab. Every supplierinfo `delay` in his data is 1, so
+the lead is ONLY meaningful once set - the card says so. A DRAFT is not
+counted as coming. "Create draft P.O." makes an RFQ flagged `aa_suggested`;
+pressing it again REWRITES that draft rather than making a second. Products
+with any BoM are never suggested - their raw parts carry the use.
+
 ## AA part numbers (`aa_part_numbers`, owner 2026-11-18)
 
 *"quiero ponerle nuestro part number a todos nuestros productos"* - and when

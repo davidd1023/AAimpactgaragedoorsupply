@@ -11,6 +11,10 @@
                   t-on-click="() => this.state.tab = 'missing'">
             What We Don't Have <span class="badge text-bg-danger ms-1" t-out="missing.length"/>
           </button>
+          <button class="btn" t-att-class="state.tab === 'nextpo' ? 'btn-primary' : 'btn-secondary'"
+                  t-on-click="() => this.state.tab = 'nextpo'">
+            Next P.O. <span class="badge text-bg-warning ms-1" t-out="nextPoCount"/>
+          </button>
         </div>
         <input type="search" class="form-control w-auto ms-auto" placeholder="Search W/O, PO, customer"
                t-model="state.search"/>
@@ -96,6 +100,86 @@
             <tr t-if="!rows.length"><td colspan="8" class="text-muted">No orders.</td></tr>
           </tbody>
         </table>
+      </t>
+
+      <!-- THE NEXT P.O.: one card per vendor. It stays here until the
+           draft is confirmed in Purchase; from then on it is "coming". -->
+      <t t-elif="state.tab === 'nextpo'">
+        <p class="text-muted small">
+          Order = open orders + what is used in (lead time + days between P.O.s) + the minimum,
+          less what is on hand and on confirmed P.O.s. Use is the average of the last
+          <t t-out="state.data.next_po.forecast_days"/> days. Quantities can be changed before saving.
+        </p>
+        <div t-foreach="vendors" t-as="block" t-key="block.vendor.id" class="card mb-3">
+          <t t-set="v" t-value="block.vendor"/>
+          <div class="card-header d-flex flex-wrap align-items-center gap-2">
+            <strong class="me-2" t-out="v.name"/>
+            <span class="small">Lead time</span>
+            <input type="number" min="0" class="form-control form-control-sm" style="width: 5em"
+                   t-att-class="v.lead_set ? '' : 'border-warning'" t-model="v.lead"/>
+            <span class="small">days</span>
+            <span class="small ms-2">Between P.O.s</span>
+            <input type="number" min="0" class="form-control form-control-sm" style="width: 5em"
+                   placeholder="= lead" t-model="v.cycle"/>
+            <span class="small">days</span>
+            <button class="btn btn-sm btn-outline-secondary" t-on-click="() => this.saveDays(v)">Save</button>
+            <span t-if="!v.lead_set" class="small text-warning">Lead time not set: confirm it</span>
+            <span class="small text-muted ms-2">Arrives about <t t-out="v.arrives"/></span>
+            <span class="ms-auto fw-bold" t-out="money(vendorTotal(block))"/>
+            <button t-if="v.draft" class="btn btn-sm btn-link" t-on-click="() => this.openPo(v.draft.id)">
+              <t t-out="v.draft.name"/> (draft)
+            </button>
+            <button class="btn btn-sm btn-primary" t-on-click="() => this.draftPo(block)">
+              <t t-if="v.draft">Update draft P.O.</t><t t-else="">Create draft P.O.</t>
+            </button>
+          </div>
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Part</th><th>Supplier #</th><th>Family</th><th>On hand</th><th>Open orders</th>
+                <th>Used / month</th><th>Coming</th><th>Minimum</th><th>Runs out</th>
+                <th>Order</th><th>Price</th><th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr t-foreach="block.lines" t-as="p" t-key="p.id">
+                <td t-out="p.name"/>
+                <td class="small" t-out="p.code"/>
+                <td t-out="p.family"/>
+                <td t-out="fmt(p.on_hand)"/>
+                <td t-out="p.open ? fmt(p.open) : ''"/>
+                <td t-out="p.per_month ? fmt(Math.round(p.per_month * 10) / 10) : ''"/>
+                <td>
+                  <t t-if="p.coming"><t t-out="fmt(p.coming)"/> <span class="small text-muted" t-out="p.coming_date"/></t>
+                </td>
+                <td t-out="p.minimum ? fmt(p.minimum) : ''"/>
+                <td t-out="p.runs_out"/>
+                <td><input type="number" min="0" class="form-control form-control-sm" style="width: 6em"
+                           t-model="p.qty"/></td>
+                <td t-out="money(p.price)"/>
+                <td t-out="money((Number(p.qty) || 0) * p.price)"/>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div t-if="!vendors.length" class="text-success">Nothing to order for these parts.</div>
+        <div t-if="noVendor.length" class="card mb-3 border-warning">
+          <div class="card-header">
+            <strong>No vendor</strong>
+            <span class="small text-muted ms-2">These need ordering but no vendor is set on the product, so they cannot go on a P.O.</span>
+          </div>
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Part</th><th>Family</th><th>On hand</th><th>Open orders</th><th>Used / month</th><th>Order</th></tr></thead>
+            <tbody>
+              <tr t-foreach="noVendor" t-as="p" t-key="p.id">
+                <td t-out="p.name"/><td t-out="p.family"/><td t-out="fmt(p.on_hand)"/>
+                <td t-out="p.open ? fmt(p.open) : ''"/>
+                <td t-out="p.per_month ? fmt(Math.round(p.per_month * 10) / 10) : ''"/>
+                <td class="fw-bold" t-out="fmt(p.qty)"/>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </t>
 
       <!-- WHAT WE DON'T HAVE: every part the open orders need more of than

@@ -1,6 +1,6 @@
 {
     'name': 'AA Order Coverage',
-    'version': '19.0.1.2.0',
+    'version': '19.0.1.3.0',
     'summary': 'Which open orders the stock on hand can complete, first come first served',
     'description': """
 Owner, 2026-11-18: "necesito hacer algo en inventario que cuando entre me
@@ -23,7 +23,7 @@ The figures are worked out fresh every time the menu is opened.
 """,
     'author': 'AA Impact Garage Door Supply',
     'category': 'Inventory/Inventory',
-    'depends': ['stock', 'mrp', 'sale_stock'],
+    'depends': ['stock', 'mrp', 'sale_stock', 'purchase_stock'],
     'data': [
         'security/ir.model.access.csv',
         'security/coverage_rules.xml',

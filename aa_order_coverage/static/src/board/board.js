@@ -22,12 +22,13 @@ export class OrderCoverageBoard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        this.notification = useService("notification");
         this.state = useState({
             loading: true,
-            data: { families: [], orders: [], lines: [], products: [] },
+            data: { families: [], orders: [], lines: [], products: [], next_po: { vendors: [], no_vendor: [] } },
             picked: [], // family ids; none ticked means every family
             show: "all", // all | can | short
-            tab: "orders", // orders | missing
+            tab: "orders", // orders | missing | nextpo
             search: "",
             open: {}, // seq -> unfolded
         });
@@ -150,6 +151,54 @@ export class OrderCoverageBoard extends Component {
     familyName(familyId) {
         const f = this.state.data.families.find((x) => x.id === familyId);
         return f ? f.name : "";
+    }
+
+    // ---------------------------------------------------------- the next P.O.
+    /* Owner, 2026-11-18: one P.O. per vendor, from the open orders and the
+     * pace parts have been used at, waiting here until it is put in Purchase
+     * and confirmed. The family chips narrow it like everything else. */
+    get vendors() {
+        const out = [];
+        for (const vendor of this.state.data.next_po.vendors) {
+            const lines = vendor.lines.filter((l) => this.inFamilies(l));
+            if (lines.length) {
+                out.push({ vendor, lines });
+            }
+        }
+        return out;
+    }
+    get noVendor() {
+        return this.state.data.next_po.no_vendor.filter((l) => this.inFamilies(l));
+    }
+    get nextPoCount() {
+        return this.vendors.length;
+    }
+    vendorTotal(block) {
+        return block.lines.reduce((sum, l) => sum + (Number(l.qty) || 0) * l.price, 0);
+    }
+    money(value) {
+        return value.toLocaleString(undefined, { style: "currency", currency: "USD" });
+    }
+    async saveDays(vendor) {
+        await this.orm.call("aa.next.po", "aa_set_vendor_days", [
+            vendor.id, Number(vendor.lead) || 0, Number(vendor.cycle) || 0,
+        ]);
+        await this.load();
+    }
+    async draftPo(block) {
+        const lines = block.lines.map((l) => ({ product_id: l.id, qty: Number(l.qty) || 0 }));
+        const po = await this.orm.call("aa.next.po", "aa_draft_po", [block.vendor.id, lines]);
+        this.notification.add(`${po.name} saved in Purchase as a draft.`, { type: "success" });
+        await this.load();
+    }
+    openPo(id) {
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            res_model: "purchase.order",
+            res_id: id,
+            views: [[false, "form"]],
+            target: "current",
+        });
     }
 
     fmt(value) {

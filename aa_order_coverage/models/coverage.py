@@ -396,9 +396,20 @@ class AaOrderCoverageLine(models.Model):
             info['to_order'] = max(info['missing'] - product.incoming_qty, 0.0)
             seller = product.seller_ids[:1]
             info['vendor'] = seller.partner_id.display_name if seller else ''
+        # THE NEXT P.O.: what each vendor should be sent, from the open
+        # orders above plus the pace parts have been used at.
+        open_needs = {Product.browse(pid): info['needed'] for pid, info in products.items()}
+        cache = {}
+        next_po = self.env['aa.next.po'].sudo().aa_next_po(
+            open_needs, lambda product: self._aa_family(product, cache))
+        family_ids = set(lines.mapped('family_id').ids)
+        for vendor in next_po['vendors']:
+            family_ids.update(row['family_id'] for row in vendor['lines'])
+        family_ids.update(row['family_id'] for row in next_po['no_vendor'])
         families = self.env['aa.order.coverage.family'].search(
-            [('is_all', '=', False), ('line_ids.user_id', '=', self.env.uid)])
+            [('is_all', '=', False), ('id', 'in', list(family_ids))])
         return {
+            'next_po': next_po,
             'families': [{'id': f.id, 'name': f.name} for f in families],
             'orders': orders,
             'lines': [{
