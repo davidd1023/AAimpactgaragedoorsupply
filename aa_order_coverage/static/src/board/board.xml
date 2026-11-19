@@ -81,11 +81,15 @@
                   <span t-else="" t-att-class="row.canMake ? 'text-success' : 'text-warning'">
                     <t t-if="row.canMake">Can make<t t-if="row.swaps.length"> (cut from longer track)</t> · </t>ready ~<t t-out="row.finishBy"/>
                   </span>
+                  <div t-if="row.canPaint" class="text-primary small"><i class="fa fa-paint-brush me-1"/>Can make if Galvanized is painted</div>
                 </td>
                 <td class="small">
                   <span class="text-danger" t-out="shortText(row)"/>
                   <div t-foreach="row.swaps" t-as="sw" t-key="sw_index" class="text-primary">
                     <i class="fa fa-scissors me-1"/>Cut <t t-out="fmt(sw.swap_qty)"/> from <t t-out="sw.swap_length"/> instead of <t t-out="sw.product"/>
+                  </div>
+                  <div t-foreach="row.paints" t-as="pt" t-key="pt_index" class="text-primary">
+                    <i class="fa fa-paint-brush me-1"/>Paint <t t-out="fmt(pt.paint_qty)"/> Galvanized for <t t-out="pt.product"/>
                   </div>
                 </td>
                 <td>
@@ -125,6 +129,12 @@
                           <div t-if="line.swap_qty > 0" class="text-primary">
                             <i class="fa fa-scissors me-1"/>Can be made: cut <t t-out="fmt(line.swap_qty)"/> from <b t-out="line.swap"/>
                             <span class="text-muted">(spare after every order took its own; offcut discarded)</span>
+                          </div>
+                          <div t-if="line.paint_qty > 0" class="text-primary">
+                            <i class="fa fa-paint-brush me-1"/>Can be painted: <t t-out="fmt(line.paint_qty)"/> from <b t-out="line.paint"/>
+                            <span class="text-muted">(spare after every order took its own)</span>
+                            <button class="btn btn-sm btn-outline-primary ms-2 py-0" t-on-click.stop="() => this.paintPo(line)">
+                              <i class="fa fa-plus"/> Paint P.O.</button>
                           </div>
                           <t t-if="line.short > 0">
                             <span t-if="line.eta" class="text-warning">Covered by <t t-out="line.po"/> on <t t-out="line.eta"/></span>
@@ -259,6 +269,22 @@
             <button class="btn btn-sm btn-secondary" t-on-click="addClosed"><i class="fa fa-plus"/> Add</button>
           </div>
           <p class="small text-muted">Pick one day, or a first and last day for a range. Weekends are already skipped. No order is dated on a closed day. Press Save settings to keep the changes.</p>
+          <h5 class="mt-3">Painters</h5>
+          <table class="table table-sm align-middle mb-2" style="max-width: 560px">
+            <tbody>
+              <tr t-foreach="state.settings.painters || []" t-as="pa" t-key="pa.id">
+                <td t-out="pa.name"/>
+                <td class="text-end"><button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removePainter(pa)"><i class="fa fa-trash"/> Remove</button></td>
+              </tr>
+              <tr t-if="!(state.settings.painters || []).length"><td colspan="2" class="text-muted">No painters yet.</td></tr>
+            </tbody>
+          </table>
+          <div class="d-flex gap-2 align-items-end mb-1">
+            <input class="form-control form-control-sm" style="max-width: 300px" placeholder="Painter's name (e.g. Pacific Powder Coating)" t-model="state.painterName"/>
+            <button class="btn btn-sm btn-secondary" t-on-click="addPainter"><i class="fa fa-plus"/> Add</button>
+          </div>
+          <p class="small text-muted">Mill Finish and Galvanized are the same thing: a spare Galvanized part can be painted to finish an order. A P.O. to a painter for the coloured part is the paint job - its expected arrival (the pickup date) is the order's ready date, and receiving it takes the Galvanized parts off the shelf. Saved at once.</p>
+
           <h5 class="mt-3">Vendors</h5>
           <table class="table table-sm align-middle" style="max-width: 900px">
             <thead><tr><th>Vendor</th><th>Products</th><th>Lead time (days to ship)</th><th>Shipping (working days)</th><th>Days between P.O.s</th></tr></thead>

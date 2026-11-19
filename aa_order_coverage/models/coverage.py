@@ -189,6 +189,16 @@ class AaOrderCoverageLine(models.Model):
     qty_swap = fields.Float(
         string='Cut From Longer', digits='Product Unit',
         help='How many of the short pieces the longer track covers.')
+    # PAINT A GALVANIZED ONE (owner, 2026-11-19): "si hay algun material mill
+    # finish que podamos pintar y terminar ordenes ... aqui quiero ver que me
+    # diga eso". Mill Finish and Galvanized are the same thing.
+    paint_product_id = fields.Many2one(
+        'product.product', string='Paint From',
+        help='The same part in Galvanized, spare after every open order took '
+             'its own and after what is already at the painter.')
+    qty_paint = fields.Float(
+        string='Paint From Galvanized', digits='Product Unit',
+        help='How many of the missing pieces a painted Galvanized one covers.')
 
     # ------------------------------------------------------------------
     # The menu
@@ -240,6 +250,42 @@ class AaOrderCoverageLine(models.Model):
             return (when, picking.id)
 
         return [(p, orders[p]) for p in pickings.sorted(queue_key)]
+
+    # The note work_order_sheet leaves when the last station finishes but the
+    # Work Order cannot go to Dispatch yet (something is not in stock).
+    STATIONS_DONE_NOTE = 'All stations are done'
+
+    @api.model
+    def _aa_through_shop_floor(self, queue):
+        """The Work Orders that have already been through the Shop Floor.
+
+        Owner, 2026-11-18: "las ordenes que ya pasaron por el shop floor no
+        deben salir aca, por ejemplo 942". Such an order is made - it is
+        waiting at Dispatch for paperwork, not for the shop. It counts when
+        every manufacturing job of the order is done, OR Odoo recorded on its
+        Work Order that all stations were done: W/O #344 (942) finished on
+        10 Nov and jobs created for it on 11 Nov would otherwise put it back.
+        """
+        done = set()
+        pickings = self.env['stock.picking'].browse([p.id for p, _so in queue])
+        if not pickings:
+            return done
+        noted = set(self.env['mail.message'].sudo().search([
+            ('model', '=', 'stock.picking'),
+            ('res_id', 'in', pickings.ids),
+            ('body', 'ilike', self.STATIONS_DONE_NOTE),
+        ]).mapped('res_id'))
+        Production = self.env['mrp.production'].sudo()
+        for picking, so in queue:
+            if picking.id in noted:
+                done.add(picking.id)
+                continue
+            if not so:
+                continue
+            jobs = Production.search([('origin', '=', so.name), ('state', '!=', 'cancel')])
+            if jobs and all(j.state == 'done' for j in jobs):
+                done.add(picking.id)
+        return done
 
     @api.model
     def _aa_sale_order(self, picking):
@@ -332,6 +378,18 @@ class AaOrderCoverageLine(models.Model):
         queue = self._aa_open_orders()
         pickings = self.env['stock.picking'].browse([p.id for p, _so in queue])
         stock = self._aa_on_hand(pickings)
+        # ALREADY THROUGH THE SHOP FLOOR: not shown, but what goes out with
+        # them is in their boxes and still on the books, so it comes off the
+        # shelf FIRST - nobody else can count on it.
+        finished = self._aa_through_shop_floor(queue)
+        for picking, _so in queue:
+            if picking.id not in finished:
+                continue
+            for move in picking.move_ids:
+                if move.state in ('done', 'cancel') or not move.product_id.is_storable:
+                    continue
+                stock[move.product_id] = stock.get(move.product_id, 0.0) - move.product_qty
+        queue = [(p, so) for p, so in queue if p.id not in finished]
         left = dict(stock)
         families = {}
         values = []
@@ -372,6 +430,7 @@ class AaOrderCoverageLine(models.Model):
                         short, 0.0, precision_rounding=rounding) > 0,
                 })
         self._aa_cut_from_longer(values, stock)
+        self._aa_paint_from_galvanized(values, stock)
         Line.create(values)
         return stock
 
@@ -425,6 +484,111 @@ class AaOrderCoverageLine(models.Model):
     # ------------------------------------------------------------------
     # The board: orders to make, and what to order
     # ------------------------------------------------------------------
+
+    @api.model
+    def _aa_paint_lines(self):
+        """Open purchase lines to a painter, not yet received - drafts too,
+        since the Galvanized parts are spoken for once the P.O. is written."""
+        return self.env['purchase.order.line'].sudo().search([
+            ('order_id.state', 'in', ('draft', 'sent', 'to approve', 'purchase')),
+            '|', ('order_id.partner_id.aa_paints_parts', '=', True),
+            ('order_id.partner_id.commercial_partner_id.aa_paints_parts', '=', True),
+            ('display_type', '=', False),
+        ]).filtered(lambda l: l.product_qty > l.qty_received)
+
+    @api.model
+    def _aa_paint_from_galvanized(self, values, stock):
+        """Cover what is still missing with a Galvanized twin, painted.
+
+        AFTER CUTTING FROM A LONGER TRACK, which is immediate; painting takes
+        a trip to the painter, so the line stays short - its date comes from
+        the paint P.O. once there is one.
+
+        ONLY WHAT IS SPARE, as with the longer tracks: a Galvanized part counts
+        once every open order that needs it Galvanized has had its own, and
+        once what already sits on a paint P.O. is set aside for that P.O.
+
+        WHAT IS ALREADY AT THE PAINTER COVERS FIRST: a paint P.O. for the
+        coloured part goes to the oldest short orders, so the same part is
+        not suggested twice.
+        """
+        from .paint import galvanized_twin
+        Product = self.env['product.product'].sudo()
+        cache = {}
+        demand = {}
+        for v in values:
+            demand[v['product_id']] = demand.get(v['product_id'], 0.0) + v['qty_needed']
+        painting = {}   # coloured product id -> qty already on a paint P.O.
+        promised = {}   # twin id -> qty already going to the painter
+        for line in self._aa_paint_lines():
+            qty = line.product_uom_id._compute_quantity(
+                line.product_qty - line.qty_received, line.product_id.uom_id)
+            painting[line.product_id.id] = painting.get(line.product_id.id, 0.0) + qty
+            twin = galvanized_twin(line.product_id, cache)
+            if twin:
+                promised[twin.id] = promised.get(twin.id, 0.0) + qty
+        spare = {}
+        for v in values:
+            remaining = v['qty_short'] - v.get('qty_swap', 0.0)
+            if remaining <= 1e-6:
+                continue
+            pid = v['product_id']
+            if painting.get(pid, 0.0) > 0:
+                took = min(painting[pid], remaining)
+                painting[pid] -= took
+                remaining -= took
+                if remaining <= 1e-6:
+                    continue
+            twin = galvanized_twin(Product.browse(pid), cache)
+            if not twin:
+                continue
+            if twin.id not in spare:
+                spare[twin.id] = float(int(
+                    max(stock.get(twin, 0.0), 0.0) - demand.get(twin.id, 0.0)
+                    - promised.get(twin.id, 0.0) + 1e-6))
+            take = min(spare[twin.id], float(int(remaining + 1 - 1e-6)))
+            if take <= 0:
+                continue
+            spare[twin.id] -= take
+            v['paint_product_id'] = twin.id
+            v['qty_paint'] = take
+
+    @api.model
+    def aa_paint_po(self, product_id, qty, vendor_id=False):
+        """A draft paint P.O. for a coloured part, opened for the date to be
+        set - the date the painted parts are picked up is the expected
+        arrival, and confirming it is what puts it on Orders to Make."""
+        from .paint import galvanized_twin
+        if not self.env.user.has_group('purchase.group_purchase_user') and \
+                not self.env.user.has_group('stock.group_stock_manager'):
+            raise UserError(_('Only purchasing or an inventory manager can create a paint P.O.'))
+        product = self.env['product.product'].browse(int(product_id)).exists()
+        if not product:
+            raise UserError(_('That part no longer exists.'))
+        twin = galvanized_twin(product)
+        Partner = self.env['res.partner'].sudo()
+        painter = Partner.browse(int(vendor_id)).exists() if vendor_id else \
+            Partner.search([('aa_paints_parts', '=', True)], order='name', limit=1)
+        if not painter:
+            raise UserError(_('Add a painter first: Orders to Make > Settings > Painters.'))
+        name = _('Paint %(part)s from %(twin)s', part=product.display_name,
+                 twin=twin.display_name if twin else _('Galvanized'))
+        order = self.env['purchase.order'].create({
+            'partner_id': painter.id,
+            'origin': _('Paint (Orders to Make)'),
+            'order_line': [(0, 0, {
+                'product_id': product.id,
+                'name': name,
+                'product_qty': max(float(qty or 0), 1.0),
+            })],
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'purchase.order',
+            'res_id': order.id,
+            'views': [[False, 'form']],
+            'target': 'current',
+        }
 
     @api.model
     def _aa_arrivals(self, products):
@@ -493,6 +657,9 @@ class AaOrderCoverageLine(models.Model):
                 'swap_qty': l.qty_swap,
                 'swap_length': inches_text(raw_track_facts(l.swap_product_id)[3])
                 if l.swap_product_id and raw_track_facts(l.swap_product_id) else '',
+                'paint': l.paint_product_id.with_context(
+                    display_default_code=False).display_name if l.paint_product_id else '',
+                'paint_qty': l.qty_paint,
                 'eta': eta,
                 'po': po,
                 'coming': [{'date': fields.Date.to_string(w) if w else '',

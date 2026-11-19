@@ -34,6 +34,7 @@ export class OrderCoverageBoard extends Component {
             settings: null,
             closedFrom: "", // Settings: closed day / range being added
             closedTo: "",
+            painterName: "", // Settings: painter being added
             search: "",
             open: {}, // seq -> unfolded
         });
@@ -103,6 +104,12 @@ export class OrderCoverageBoard extends Component {
             // CUT FROM A LONGER TRACK (owner, 2026-11-18): the server found a
             // spare longer piece of the same size, kind and colour.
             row.swaps = lines.filter((l) => l.swap_qty > 0);
+            // PAINT A GALVANIZED ONE (owner, 2026-11-19): what is still short
+            // could be finished by painting spare Galvanized parts. The order
+            // can be made once they are painted; the paint P.O. gives the date.
+            row.paints = lines.filter((l) => l.paint_qty > 0);
+            row.canPaint = !row.canMake && short.every((l) => l.eta || l.paint_qty >= l.short - 1e-6)
+                && row.paints.length > 0;
             // WHEN WILL IT BE READY: worked out over the whole order, every
             // part and the shop's daily capacity (see schedule()), so the
             // date does not change with the family chips ticked.
@@ -355,6 +362,23 @@ export class OrderCoverageBoard extends Component {
             views: [[false, "form"]],
             target: "current",
         });
+    }
+    async paintPo(line) {
+        const action = await this.orm.call("aa.order.coverage.line", "aa_paint_po",
+            [line.product_id, line.paint_qty]);
+        this.action.doAction(action);
+    }
+    async addPainter() {
+        const name = (this.state.painterName || "").trim();
+        if (!name) {
+            this.notification.add("Type the painter's name.", { type: "warning" });
+            return;
+        }
+        this.state.settings.painters = await this.orm.call("aa.next.po", "aa_add_painter", [name]);
+        this.state.painterName = "";
+    }
+    async removePainter(painter) {
+        this.state.settings.painters = await this.orm.call("aa.next.po", "aa_remove_painter", [painter.id]);
     }
     shortText(row) {
         return row.short.map((l) => `${l.product} (${this.fmt(l.short)})`).join(", ");
