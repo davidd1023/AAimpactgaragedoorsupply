@@ -1,6 +1,6 @@
 {
     'name': 'AA Order Coverage',
-    'version': '19.0.1.11.0',
+    'version': '19.0.1.12.0',
     'summary': 'Which open orders the stock on hand can complete, first come first served',
     'description': """
 Owner, 2026-11-18: "necesito hacer algo en inventario que cuando entre me

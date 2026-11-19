@@ -258,3 +258,63 @@ class TestThroughShopFloor(TestOrderCoverage):
         self.assertEqual(line.qty_short, 1)
         data = self.Line.aa_board_data()
         self.assertNotIn('PO-942', [o['po'] for o in data['orders']])
+
+
+@tagged('post_install', '-at_install')
+class TestPaintGalvanized(TestOrderCoverage):
+    """Owner, 2026-11-19: Mill Finish = Galvanized, and anything with a
+    colour can be painted to finish an order; the paint P.O. gives the date."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        Product = cls.env['product.product']
+        Quant = cls.env['stock.quant']
+
+        def raw(name, qty):
+            product = Product.create({
+                'name': name, 'is_storable': True, 'categ_id': cls.tracks.id})
+            if qty:
+                Quant._update_available_quantity(product, cls.stock, qty)
+            return product
+        cls.black = raw('8" Vertical Track RAW - 7\'4" Black', 0)
+        cls.galv = raw('8" Vertical Track RAW - 7\'4" Galvanized', 5)
+        cls.painter = cls.env['res.partner'].create({
+            'name': 'Coverage Test Painter', 'is_company': True, 'aa_paints_parts': True})
+
+    def _line(self, picking, product):
+        return self._lines(picking).filtered(lambda l: l.product_id == product)
+
+    def test_twin_by_name(self):
+        from odoo.addons.aa_order_coverage.models.paint import galvanized_twin
+        self.assertEqual(galvanized_twin(self.black), self.galv)
+        self.assertFalse(galvanized_twin(self.galv), 'Galvanized is not painted again')
+
+    def test_spare_galvanized_is_suggested_and_others_keep_theirs(self):
+        _s0, needs_galv = self._order('PO-GALV', [(self.galv, 2)], 9)
+        _s1, first = self._order('PO-PAINT-1', [(self.black, 2)], 5)
+        _s2, second = self._order('PO-PAINT-2', [(self.black, 4)], 1)
+        self.Line.action_open_coverage()
+        self.assertFalse(self._line(needs_galv, self.galv).is_short)
+        one = self._line(first, self.black)
+        self.assertEqual((one.paint_product_id, one.qty_paint), (self.galv, 2))
+        self.assertTrue(one.is_short, 'still has to go to the painter')
+        two = self._line(second, self.black)
+        self.assertEqual(two.qty_paint, 1, '5 Galvanized, 2 needed as they are, 2 painted first')
+
+    def test_paint_po_covers_first_and_receiving_takes_the_galvanized(self):
+        _s1, order = self._order('PO-PAINT-3', [(self.black, 2)], 5)
+        action = self.Line.aa_paint_po(self.black.id, 2)
+        po = self.env['purchase.order'].browse(action['res_id'])
+        self.assertEqual(po.partner_id, self.painter)
+        self.Line.action_open_coverage()
+        line = self._line(order, self.black)
+        self.assertFalse(line.qty_paint, 'already at the painter: not suggested twice')
+        po.button_confirm()
+        picking = po.picking_ids
+        for move in picking.move_ids:
+            move.quantity = move.product_uom_qty
+            move.picked = True
+        picking.button_validate()
+        self.assertEqual(self.black.qty_available, 2)
+        self.assertEqual(self.galv.qty_available, 3, 'the two painted came off the Galvanized')

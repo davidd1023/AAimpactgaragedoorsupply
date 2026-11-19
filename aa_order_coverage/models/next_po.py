@@ -361,7 +361,41 @@ class NextPurchaseOrder(models.AbstractModel):
             } for v in vendors],
             'capacity': self.env['aa.order.coverage.line']._aa_capacity(),
             'closed': self.env['aa.order.coverage.line']._aa_closed_text().strip(),
+            'painters': self._aa_painters(),
         }
+
+    # PAINTERS (owner, 2026-11-19): a P.O. to one of these for a coloured part
+    # is a Galvanized part being painted.
+    @api.model
+    def _aa_painters(self):
+        return [{'id': p.id, 'name': p.display_name} for p in
+                self.env['res.partner'].sudo().search(
+                    [('aa_paints_parts', '=', True)], order='name')]
+
+    def _aa_check_settings_rights(self):
+        if not self.env.user.has_group('purchase.group_purchase_user') and \
+                not self.env.user.has_group('stock.group_stock_manager'):
+            raise UserError("Only purchasing or an inventory manager can change these settings.")
+
+    @api.model
+    def aa_add_painter(self, name):
+        """Tick an existing company of that name as a painter, or create it."""
+        self._aa_check_settings_rights()
+        name = (name or '').strip()
+        if not name:
+            raise UserError("Type the painter's name.")
+        Partner = self.env['res.partner'].sudo()
+        partner = Partner.search([('name', '=ilike', name), ('parent_id', '=', False)], limit=1)
+        if not partner:
+            partner = Partner.create({'name': name, 'is_company': True, 'supplier_rank': 1})
+        partner.aa_paints_parts = True
+        return self._aa_painters()
+
+    @api.model
+    def aa_remove_painter(self, partner_id):
+        self._aa_check_settings_rights()
+        self.env['res.partner'].sudo().browse(int(partner_id)).exists().aa_paints_parts = False
+        return self._aa_painters()
 
     @api.model
     def aa_save_settings(self, vendors, capacity, closed=None):
