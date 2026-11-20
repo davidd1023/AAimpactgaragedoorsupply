@@ -318,3 +318,39 @@ class TestPaintGalvanized(TestOrderCoverage):
         picking.button_validate()
         self.assertEqual(self.black.qty_available, 2)
         self.assertEqual(self.galv.qty_available, 3, 'the two painted came off the Galvanized')
+
+
+@tagged('post_install', '-at_install')
+class TestOtherFlag(TestOrderCoverage):
+    """Owner, 2026-11-20: "puedes usar el otro flag" - the other size, same colour."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        Attr = cls.env['product.attribute']
+        colour = Attr.create({'name': 'Colour', 'value_ids': [(0, 0, {'name': 'Black'}), (0, 0, {'name': 'White'})]})
+        size = Attr.create({'name': 'Flag Angle Size', 'value_ids': [(0, 0, {'name': '5.9"'}), (0, 0, {'name': '6-3/8"'})]})
+        tmpl = cls.env['product.template'].create({
+            'name': 'Flag Angle', 'is_storable': True, 'categ_id': cls.tracks.id,
+            'attribute_line_ids': [
+                (0, 0, {'attribute_id': colour.id, 'value_ids': [(6, 0, colour.value_ids.ids)]}),
+                (0, 0, {'attribute_id': size.id, 'value_ids': [(6, 0, size.value_ids.ids)]}),
+            ]})
+
+        def variant(c, z):
+            return tmpl.product_variant_ids.filtered(
+                lambda p: set(p.product_template_attribute_value_ids.mapped('name')) == {c, z})
+        cls.big_black = variant('Black', '6-3/8"')
+        cls.small_black = variant('Black', '5.9"')
+        cls.small_white = variant('White', '5.9"')
+        Quant = cls.env['stock.quant']
+        Quant._update_available_quantity(cls.small_black, cls.stock, 3)
+        Quant._update_available_quantity(cls.small_white, cls.stock, 10)
+
+    def test_other_size_same_colour(self):
+        _so, order = self._order('PO-FLAG', [(self.big_black, 4)], 1)
+        self.Line.action_open_coverage()
+        line = self._lines(order).filtered(lambda l: l.product_id == self.big_black)
+        self.assertEqual(line.swap_product_id, self.small_black, 'never the White one')
+        self.assertEqual(line.qty_swap, 3)
+        self.assertTrue(line.is_short, 'one still missing')

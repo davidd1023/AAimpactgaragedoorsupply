@@ -430,6 +430,7 @@ class AaOrderCoverageLine(models.Model):
                         short, 0.0, precision_rounding=rounding) > 0,
                 })
         self._aa_cut_from_longer(values, stock)
+        self._aa_use_other_flag(values, stock)
         self._aa_paint_from_galvanized(values, stock)
         Line.create(values)
         return stock
@@ -478,6 +479,55 @@ class AaOrderCoverageLine(models.Model):
             take = min(spare[pid], float(int(v['qty_short'] + 1 - 1e-6)))
             spare[pid] -= take
             v['swap_product_id'] = pid
+            v['qty_swap'] = take
+            v['is_short'] = v['qty_short'] - take > 1e-6
+
+    @api.model
+    def _aa_flag_facts(self, product):
+        """(template id, colour) of a Flag Angle variant, or None."""
+        if 'flag angle' not in (product.name or '').lower():
+            return None
+        colour = product.product_template_attribute_value_ids.filtered(
+            lambda v: (v.attribute_id.name or '').strip().lower()
+            in ('colour', 'color', 'finish color', 'finish colour'))[:1]
+        return (product.product_tmpl_id.id, (colour.name or '').strip().lower())
+
+    @api.model
+    def _aa_use_other_flag(self, values, stock):
+        """Out of one flag angle, use the OTHER size in the same colour
+        (owner, 2026-11-20: "puedes usar el otro flag" - 5.9" for a 3" track
+        when the 6-3/8" runs out, and the other way round).
+
+        ONLY WHAT IS SPARE, oldest order first, the same rule as cutting a
+        longer track: the other size counts once every open order that needs
+        IT has had its own. Shown on the line as the part to use instead.
+        """
+        Product = self.env['product.product'].sudo()
+        demand = {}
+        for v in values:
+            demand[v['product_id']] = demand.get(v['product_id'], 0.0) + v['qty_needed']
+        facts, spare = {}, {}
+        for v in values:
+            if not v['is_short'] or v.get('qty_swap'):
+                continue
+            pid = v['product_id']
+            if pid not in facts:
+                facts[pid] = self._aa_flag_facts(Product.browse(pid))
+            mine = facts[pid]
+            if not mine:
+                continue
+            others = Product.browse(pid).product_tmpl_id.product_variant_ids.filtered(
+                lambda p: p.id != pid and self._aa_flag_facts(p) == mine)
+            for other in others:
+                if other.id not in spare:
+                    spare[other.id] = float(int(max(
+                        max(stock.get(other, 0.0), 0.0) - demand.get(other.id, 0.0), 0.0) + 1e-6))
+            pick = next((o for o in others if spare.get(o.id, 0) > 0), None)
+            if not pick:
+                continue
+            take = min(spare[pick.id], float(int(v['qty_short'] + 1 - 1e-6)))
+            spare[pick.id] -= take
+            v['swap_product_id'] = pick.id
             v['qty_swap'] = take
             v['is_short'] = v['qty_short'] - take > 1e-6
 

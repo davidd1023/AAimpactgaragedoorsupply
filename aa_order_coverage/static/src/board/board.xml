@@ -79,14 +79,15 @@
                   <i class="fa fa-circle me-1" t-att-class="dotClass(row)"/>
                   <span t-if="row.noPo" class="text-danger">Missing - not ordered or not enough on order</span>
                   <span t-else="" t-att-class="row.canMake ? 'text-success' : 'text-warning'">
-                    <t t-if="row.canMake">Can make<t t-if="row.swaps.length"> (cut from longer track)</t> · </t>ready ~<t t-out="row.finishBy"/>
+                    <t t-if="row.canMake">Can make<t t-if="row.swaps.length"> (using another size)</t> · </t>ready ~<t t-out="row.finishBy"/>
                   </span>
                   <div t-if="row.canPaint" class="text-primary small"><i class="fa fa-paint-brush me-1"/>Can make if Galvanized is painted</div>
                 </td>
                 <td class="small">
                   <span class="text-danger" t-out="shortText(row)"/>
                   <div t-foreach="row.swaps" t-as="sw" t-key="sw_index" class="text-primary">
-                    <i class="fa fa-scissors me-1"/>Cut <t t-out="fmt(sw.swap_qty)"/> from <t t-out="sw.swap_length"/> instead of <t t-out="sw.product"/>
+                    <t t-if="sw.swap_length"><i class="fa fa-scissors me-1"/>Cut <t t-out="fmt(sw.swap_qty)"/> from <t t-out="sw.swap_length"/> instead of <t t-out="sw.product"/></t>
+                    <t t-else=""><i class="fa fa-exchange me-1"/>Use <t t-out="fmt(sw.swap_qty)"/> <t t-out="sw.swap"/> instead of <t t-out="sw.product"/></t>
                   </div>
                   <div t-foreach="row.paints" t-as="pt" t-key="pt_index" class="text-primary">
                     <i class="fa fa-paint-brush me-1"/>Paint <t t-out="fmt(pt.paint_qty)"/> Galvanized for <t t-out="pt.product"/>
@@ -127,8 +128,9 @@
                         <td t-out="line.missing > 0 ? fmt(line.missing) : ''"/>
                         <td class="small">
                           <div t-if="line.swap_qty > 0" class="text-primary">
-                            <i class="fa fa-scissors me-1"/>Can be made: cut <t t-out="fmt(line.swap_qty)"/> from <b t-out="line.swap"/>
-                            <span class="text-muted">(spare after every order took its own; offcut discarded)</span>
+                            <t t-if="line.swap_length"><i class="fa fa-scissors me-1"/>Can be made: cut <t t-out="fmt(line.swap_qty)"/> from <b t-out="line.swap"/></t>
+                            <t t-else=""><i class="fa fa-exchange me-1"/>Can be made: use <t t-out="fmt(line.swap_qty)"/> <b t-out="line.swap"/></t>
+                            <span class="text-muted">(spare after every order took its own)</span>
                           </div>
                           <div t-if="line.paint_qty > 0" class="text-primary">
                             <i class="fa fa-paint-brush me-1"/>Can be painted: <t t-out="fmt(line.paint_qty)"/> from <b t-out="line.paint"/>
