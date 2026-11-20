@@ -77,7 +77,7 @@
                 <td t-out="row.pickup"/>
                 <td class="text-nowrap">
                   <i class="fa fa-circle me-1" t-att-class="dotClass(row)"/>
-                  <span t-if="row.noPo" class="text-danger">Missing - not ordered</span>
+                  <span t-if="row.noPo" class="text-danger">Missing - not ordered or not enough on order</span>
                   <span t-else="" t-att-class="row.canMake ? 'text-success' : 'text-warning'">
                     <t t-if="row.canMake">Can make<t t-if="row.swaps.length"> (cut from longer track)</t> · </t>ready ~<t t-out="row.finishBy"/>
                   </span>
@@ -105,7 +105,7 @@
                   <div t-if="!row.canMake" class="mb-2">
                     <t t-if="row.noPo">
                       <span class="text-danger fw-bold">Can't be finished yet:</span>
-                      something it is missing is not on any confirmed P.O.
+                      something it is missing is not on a confirmed P.O., or the P.O. does not bring enough to reach this order.
                     </t>
                     <t t-else="">
                       Missing parts all arrive by <b t-out="row.partsBy"/>.
@@ -138,6 +138,7 @@
                           </div>
                           <t t-if="line.short > 0">
                             <span t-if="line.eta" class="text-warning">Covered by <t t-out="line.po"/> on <t t-out="line.eta"/></span>
+                            <span t-elif="line.coming.length" class="text-danger">Not enough on order - the P.O. goes to older orders first; order more</span>
                             <span t-else="" class="text-danger">Not ordered</span>
                             <div t-if="line.coming.length" class="text-muted" t-out="comingText(line)"/>
                           </t>
