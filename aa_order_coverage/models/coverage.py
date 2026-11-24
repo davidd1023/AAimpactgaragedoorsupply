@@ -713,23 +713,29 @@ class AaOrderCoverageLine(models.Model):
             product = l.product_id
             key = pool_of.get(product, product)
             demand[key] = demand.get(key, 0.0) + l.qty_needed
-            eta = po = ''
+            eta = po = po_part = ''
             if key in pooled_arrivals:
                 mine = product.with_context(display_default_code=False).display_name
                 coming = [(w, q, n if part == mine else '%s (%s)' % (n, part))
                           for w, q, n, part in pooled_arrivals[key]]
+                parts = [part if part != mine else ''
+                         for _w, _q, _n, part in pooled_arrivals[key]]
                 shelf = pooled_stock[key]
             else:
                 coming = arrivals.get(product, [])
+                parts = [''] * len(coming)
                 shelf = max(stock.get(product, 0.0), 0.0)
             if l.is_short:
                 still = demand[key] - shelf
                 got = 0.0
-                for when, qty, name in coming:
+                # THE OTHER FLAG SIZE IS WHAT ARRIVES: `po_part` says so, so
+                # the screen reads "use the 5.9\" when it comes", not "missing".
+                for (when, qty, name), part in zip(coming, parts):
                     got += qty
                     if got >= still - 1e-6:
                         eta = fields.Date.to_string(when) if when else ''
-                        po = name
+                        po = name.split(' (', 1)[0] if part else name
+                        po_part = part
                         break
             out.append({
                 'seq': l.seq,
@@ -751,6 +757,7 @@ class AaOrderCoverageLine(models.Model):
                 'paint_qty': l.qty_paint,
                 'eta': eta,
                 'po': po,
+                'po_part': po_part,
                 'coming': [{'date': fields.Date.to_string(w) if w else '',
                             'qty': q, 'po': n} for w, q, n in coming],
             })

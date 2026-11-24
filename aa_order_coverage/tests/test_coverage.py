@@ -371,8 +371,8 @@ class TestOtherFlag(TestOrderCoverage):
                     and l['seq'] == self._lines(order)[:1].seq)
         self.assertTrue(line['short'] > 0, 'the shelf alone does not cover it')
         self.assertEqual(line['eta'], '2030-01-15')
-        self.assertIn(po.name, line['po'])
-        self.assertIn('5.9', line['po'], 'says which size is coming')
+        self.assertEqual(line['po'], po.name)
+        self.assertIn('5.9', line['po_part'], 'says which size is coming')
 
     def test_other_colour_on_a_po_does_not_count(self):
         vendor = self.env['res.partner'].create({'name': 'Flag Vendor 2'})
@@ -387,3 +387,26 @@ class TestOtherFlag(TestOrderCoverage):
                     if l['product_id'] == self.big_black.id
                     and l['seq'] == self._lines(order)[:1].seq)
         self.assertEqual(line['eta'], '', 'White never covers Black')
+
+    def test_next_po_does_not_ask_for_a_size_the_other_covers(self):
+        """Owner, 2026-11-24: "arregla lo de los flags" - the Next P.O. tab
+        kept suggesting 6-3/8" while 5.9" of the same colour was on its way."""
+        vendor = self.env['res.partner'].create({'name': 'Flag Vendor 3'})
+        po = self.env['purchase.order'].create({
+            'partner_id': vendor.id,
+            'order_line': [(0, 0, {'product_id': self.small_black.id, 'product_qty': 10,
+                                   'date_planned': '2030-01-15 12:00:00'})]})
+        po.button_confirm()
+        self._order('PO-FLAG-NEXT', [(self.big_black, 4)], 1)
+        data = self.Line.aa_board_data()['next_po']
+        rows = [r for v in data['vendors'] for r in v['lines']] + data['no_vendor']
+        self.assertFalse([r for r in rows if r['id'] == self.big_black.id],
+                         'the 5.9" on its way covers the 6-3/8" the order wants')
+
+    def test_next_po_still_asks_when_the_other_size_is_short_too(self):
+        self._order('PO-FLAG-NEXT2', [(self.big_black, 20)], 1)
+        data = self.Line.aa_board_data()['next_po']
+        rows = [r for v in data['vendors'] for r in v['lines']] + data['no_vendor']
+        row = next(r for r in rows if r['id'] == self.big_black.id)
+        self.assertEqual(row['qty'], 17, '20 wanted, 3 spare 5.9" on the shelf')
+        self.assertEqual(row['other_size'], 3)

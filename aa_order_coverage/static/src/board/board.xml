@@ -89,6 +89,9 @@
                     <t t-if="sw.swap_length"><i class="fa fa-scissors me-1"/>Cut <t t-out="fmt(sw.swap_qty)"/> from <t t-out="sw.swap_length"/> instead of <t t-out="sw.product"/></t>
                     <t t-else=""><i class="fa fa-exchange me-1"/>Use <t t-out="fmt(sw.swap_qty)"/> <t t-out="sw.swap"/> instead of <t t-out="sw.product"/></t>
                   </div>
+                  <div t-foreach="row.poSwaps" t-as="ps" t-key="ps_index" class="text-primary">
+                    <i class="fa fa-truck me-1"/>Use <t t-out="fmt(ps.short)"/> <t t-out="ps.po_part"/> from <t t-out="ps.po"/> (<t t-out="ps.eta"/>) instead of <t t-out="ps.product"/>
+                  </div>
                   <div t-foreach="row.paints" t-as="pt" t-key="pt_index" class="text-primary">
                     <i class="fa fa-paint-brush me-1"/>Paint <t t-out="fmt(pt.paint_qty)"/> Galvanized for <t t-out="pt.product"/>
                   </div>
@@ -139,7 +142,7 @@
                               <i class="fa fa-plus"/> Paint P.O.</button>
                           </div>
                           <t t-if="line.short > 0">
-                            <span t-if="line.eta" class="text-warning">Covered by <t t-out="line.po"/> on <t t-out="line.eta"/></span>
+                            <span t-if="line.eta" class="text-warning">Covered by <t t-out="line.po"/><t t-if="line.po_part"> (<t t-out="line.po_part"/>)</t> on <t t-out="line.eta"/></span>
                             <span t-elif="line.coming.length" class="text-danger">Not enough on order - the P.O. goes to older orders first; order more</span>
                             <span t-else="" class="text-danger">Not ordered</span>
                             <div t-if="line.coming.length" class="text-muted" t-out="comingText(line)"/>

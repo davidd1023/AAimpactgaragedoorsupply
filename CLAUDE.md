@@ -6194,8 +6194,16 @@ flag angles only, so every order wanting a 6-3/8" read "not ordered" - the
 flag angle, not the track, held the order red. `_aa_lines_with_arrivals` now
 pools shelf, demand and confirmed arrivals of both sizes of ONE colour (never
 another colour), first come first served; an arrival of the other size shows
-as `P00009 (Flag Angle (Black, 5.9"))`. The Next P.O. tab still counts each
-size on its own.
+as `P00009 (Flag Angle (Black, 5.9"))`.
+
+**AND THEN THE NEXT P.O. TAB AND THE MISSING COLUMN** (owner, same day:
+*"arregla lo de los flags todavia sigue"*). Next P.O. kept suggesting 6-3/8"
+(36 Galvanized, 12 White on staging) with the 5.9" on its way: what one size
+has spare (shelf + confirmed P.O.s - its own open orders, forecast and
+minimum) now comes off what the other would be ordered (`other_size` on the
+row). On the Orders tab a short flag covered by the OTHER size's P.O. leaves
+the red Missing text and shows as "Use N Flag Angle (..., 5.9") from P00009
+(date)" - `po_part` on the line.
 
 ## AA part numbers (`aa_part_numbers`, owner 2026-11-18)
 

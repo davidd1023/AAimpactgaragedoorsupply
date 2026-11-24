@@ -108,6 +108,9 @@ export class OrderCoverageBoard extends Component {
             // could be finished by painting spare Galvanized parts. The order
             // can be made once they are painted; the paint P.O. gives the date.
             row.paints = lines.filter((l) => l.paint_qty > 0);
+            // THE OTHER FLAG SIZE IS ON ITS WAY (owner, 2026-11-24): shown as
+            // the part to use and when, not in red as if nothing were ordered.
+            row.poSwaps = short.filter((l) => l.po_part);
             row.canPaint = !row.canMake && short.every((l) => l.eta || l.paint_qty >= l.short - 1e-6)
                 && row.paints.length > 0;
             // WHEN WILL IT BE READY: worked out over the whole order, every
@@ -381,7 +384,8 @@ export class OrderCoverageBoard extends Component {
         this.state.settings.painters = await this.orm.call("aa.next.po", "aa_remove_painter", [painter.id]);
     }
     shortText(row) {
-        return row.short.map((l) => `${l.product} (${this.fmt(l.short)})`).join(", ");
+        return row.short.filter((l) => !l.po_part)
+            .map((l) => `${l.product} (${this.fmt(l.short)})`).join(", ");
     }
 
     // ---------------------------------------------------------- what to order
