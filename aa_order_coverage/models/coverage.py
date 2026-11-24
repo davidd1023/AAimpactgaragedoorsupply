@@ -675,16 +675,55 @@ class AaOrderCoverageLine(models.Model):
         covered on the day the shelf PLUS everything arrived by then reaches
         all the demand up to and including this order.
         """
-        arrivals = self._aa_arrivals(lines.mapped('product_id'))
+        # BOTH FLAG ANGLE SIZES OF ONE COLOUR ARE ONE POOL (owner,
+        # 2026-11-24): P00009 brought the 5.9" only, and every order wanting
+        # a 6-3/8" read "not ordered" while 365 Black and 35 Galvanized 5.9"
+        # were on their way. The shop uses either size, so the shelf, the
+        # demand and the arrivals of the two are counted together - first
+        # come first served over the pair, exactly as for one part.
+        products = lines.mapped('product_id')
+        pool_of, members = {}, {}
+        for product in products:
+            facts = self._aa_flag_facts(product)
+            if not facts:
+                continue
+            pool_of[product] = ('flag',) + facts
+            for twin in product.product_tmpl_id.product_variant_ids:
+                if twin != product and self._aa_flag_facts(twin) == facts:
+                    pool_of.setdefault(twin, ('flag',) + facts)
+        for product, key in pool_of.items():
+            members.setdefault(key, self.env['product.product'])
+            members[key] |= product
+        wanted = products
+        for group in members.values():
+            wanted |= group
+        arrivals = self._aa_arrivals(wanted)
+        pooled_arrivals, pooled_stock = {}, {}
+        for key, group in members.items():
+            rows = []
+            for member in group:
+                label = member.with_context(display_default_code=False).display_name
+                rows += [(w, q, n, label) for w, q, n in arrivals.get(member, [])]
+            rows.sort(key=lambda r: (r[0] or fields.Date.today(), r[2]))
+            pooled_arrivals[key] = rows
+            pooled_stock[key] = sum(max(stock.get(m, 0.0), 0.0) for m in group)
         demand = {}
         out = []
         for l in lines:
             product = l.product_id
-            demand[product] = demand.get(product, 0.0) + l.qty_needed
+            key = pool_of.get(product, product)
+            demand[key] = demand.get(key, 0.0) + l.qty_needed
             eta = po = ''
-            coming = arrivals.get(product, [])
+            if key in pooled_arrivals:
+                mine = product.with_context(display_default_code=False).display_name
+                coming = [(w, q, n if part == mine else '%s (%s)' % (n, part))
+                          for w, q, n, part in pooled_arrivals[key]]
+                shelf = pooled_stock[key]
+            else:
+                coming = arrivals.get(product, [])
+                shelf = max(stock.get(product, 0.0), 0.0)
             if l.is_short:
-                still = demand[product] - max(stock.get(product, 0.0), 0.0)
+                still = demand[key] - shelf
                 got = 0.0
                 for when, qty, name in coming:
                     got += qty
