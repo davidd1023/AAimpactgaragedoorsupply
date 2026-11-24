@@ -6186,6 +6186,17 @@ Odoo's `set_param` DELETES a param given a falsy value and the default would
 come straight back. The schedule (`isWorkday` in board.js) skips weekends and
 these; a vendor's shipping days do not, since a truck still drives.
 
+### BOTH FLAG ANGLE SIZES ARE ONE POOL FOR THE ARRIVAL DATE (owner, 2026-11-24)
+
+*"si ya hay una orden de chi puesta por una cantidad grande de hardware no
+tenemos tracks para 391"*. P00009 was counted all along; it brought the 5.9"
+flag angles only, so every order wanting a 6-3/8" read "not ordered" - the
+flag angle, not the track, held the order red. `_aa_lines_with_arrivals` now
+pools shelf, demand and confirmed arrivals of both sizes of ONE colour (never
+another colour), first come first served; an arrival of the other size shows
+as `P00009 (Flag Angle (Black, 5.9"))`. The Next P.O. tab still counts each
+size on its own.
+
 ## AA part numbers (`aa_part_numbers`, owner 2026-11-18)
 
 *"quiero ponerle nuestro part number a todos nuestros productos"* - and when
