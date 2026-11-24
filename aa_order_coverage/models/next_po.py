@@ -234,9 +234,7 @@ class NextPurchaseOrder(models.AbstractModel):
         minimum = self._minimums(products)
         today = fields.Date.context_today(self)
 
-        vendors = {}
-        no_vendor = []
-        for product in products:
+        def figures(product):
             seller = self._vendor_of(product)
             vendor = seller.partner_id
             lead = self._lead_days(vendor, seller) if vendor else 0
@@ -247,7 +245,41 @@ class NextPurchaseOrder(models.AbstractModel):
             have = max(on_hand.get(product, 0.0), 0.0)
             arriving, next_date = coming.get(product, [0.0, False])
             need = committed + rate * (lead + cycle) + floor
+            return (seller, vendor, lead, cycle, rate, committed, floor, have,
+                    arriving, next_date, need)
+
+        # BOTH FLAG ANGLE SIZES OF ONE COLOUR ARE ONE PART (owner,
+        # 2026-11-24: "arregla lo de los flags"). The shop uses either size,
+        # so what one size has to spare - shelf plus confirmed P.O.s, less
+        # its own open orders, forecast and minimum - comes off what the
+        # other size would be ordered. P00009 brought 5.9" only, and the tab
+        # kept asking for 6-3/8" as if nothing were coming.
+        Line = self.env['aa.order.coverage.line']
+        flag_of, spare_flag = {}, {}
+        for product in products:
+            facts = Line._aa_flag_facts(product)
+            if facts:
+                flag_of[product] = facts
+                f = figures(product)
+                spare_flag[product] = f[7] + f[8] - f[10]
+
+        vendors = {}
+        no_vendor = []
+        for product in products:
+            (seller, vendor, lead, cycle, rate, committed, floor, have,
+             arriving, next_date, need) = figures(product)
             short = need - have - arriving
+            other_spare = 0.0
+            if product in flag_of and short > 0:
+                for twin, spare in spare_flag.items():
+                    if twin == product or flag_of[twin] != flag_of[product] or spare <= 0:
+                        continue
+                    take = min(spare, short - other_spare)
+                    spare_flag[twin] -= take
+                    other_spare += take
+                    if other_spare >= short - 1e-6:
+                        break
+                short -= other_spare
             rounding = product.uom_id.rounding
             if float_compare(short, 0.0, precision_rounding=rounding) <= 0:
                 continue
@@ -295,6 +327,7 @@ class NextPurchaseOrder(models.AbstractModel):
                 'minimum': floor,
                 'runs_out': fields.Date.to_string(runs_out) if runs_out else '',
                 'qty': qty,
+                'other_size': other_spare,
                 'price': seller.price if seller else 0.0,
             }
             if not vendor:

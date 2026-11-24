@@ -430,6 +430,7 @@ class AaOrderCoverageLine(models.Model):
                         short, 0.0, precision_rounding=rounding) > 0,
                 })
         self._aa_cut_from_longer(values, stock)
+        self._aa_use_other_flag(values, stock)
         self._aa_paint_from_galvanized(values, stock)
         Line.create(values)
         return stock
@@ -478,6 +479,55 @@ class AaOrderCoverageLine(models.Model):
             take = min(spare[pid], float(int(v['qty_short'] + 1 - 1e-6)))
             spare[pid] -= take
             v['swap_product_id'] = pid
+            v['qty_swap'] = take
+            v['is_short'] = v['qty_short'] - take > 1e-6
+
+    @api.model
+    def _aa_flag_facts(self, product):
+        """(template id, colour) of a Flag Angle variant, or None."""
+        if 'flag angle' not in (product.name or '').lower():
+            return None
+        colour = product.product_template_attribute_value_ids.filtered(
+            lambda v: (v.attribute_id.name or '').strip().lower()
+            in ('colour', 'color', 'finish color', 'finish colour'))[:1]
+        return (product.product_tmpl_id.id, (colour.name or '').strip().lower())
+
+    @api.model
+    def _aa_use_other_flag(self, values, stock):
+        """Out of one flag angle, use the OTHER size in the same colour
+        (owner, 2026-11-20: "puedes usar el otro flag" - 5.9" for a 3" track
+        when the 6-3/8" runs out, and the other way round).
+
+        ONLY WHAT IS SPARE, oldest order first, the same rule as cutting a
+        longer track: the other size counts once every open order that needs
+        IT has had its own. Shown on the line as the part to use instead.
+        """
+        Product = self.env['product.product'].sudo()
+        demand = {}
+        for v in values:
+            demand[v['product_id']] = demand.get(v['product_id'], 0.0) + v['qty_needed']
+        facts, spare = {}, {}
+        for v in values:
+            if not v['is_short'] or v.get('qty_swap'):
+                continue
+            pid = v['product_id']
+            if pid not in facts:
+                facts[pid] = self._aa_flag_facts(Product.browse(pid))
+            mine = facts[pid]
+            if not mine:
+                continue
+            others = Product.browse(pid).product_tmpl_id.product_variant_ids.filtered(
+                lambda p: p.id != pid and self._aa_flag_facts(p) == mine)
+            for other in others:
+                if other.id not in spare:
+                    spare[other.id] = float(int(max(
+                        max(stock.get(other, 0.0), 0.0) - demand.get(other.id, 0.0), 0.0) + 1e-6))
+            pick = next((o for o in others if spare.get(o.id, 0) > 0), None)
+            if not pick:
+                continue
+            take = min(spare[pick.id], float(int(v['qty_short'] + 1 - 1e-6)))
+            spare[pick.id] -= take
+            v['swap_product_id'] = pick.id
             v['qty_swap'] = take
             v['is_short'] = v['qty_short'] - take > 1e-6
 
@@ -625,22 +675,67 @@ class AaOrderCoverageLine(models.Model):
         covered on the day the shelf PLUS everything arrived by then reaches
         all the demand up to and including this order.
         """
-        arrivals = self._aa_arrivals(lines.mapped('product_id'))
+        # BOTH FLAG ANGLE SIZES OF ONE COLOUR ARE ONE POOL (owner,
+        # 2026-11-24): P00009 brought the 5.9" only, and every order wanting
+        # a 6-3/8" read "not ordered" while 365 Black and 35 Galvanized 5.9"
+        # were on their way. The shop uses either size, so the shelf, the
+        # demand and the arrivals of the two are counted together - first
+        # come first served over the pair, exactly as for one part.
+        products = lines.mapped('product_id')
+        pool_of, members = {}, {}
+        for product in products:
+            facts = self._aa_flag_facts(product)
+            if not facts:
+                continue
+            pool_of[product] = ('flag',) + facts
+            for twin in product.product_tmpl_id.product_variant_ids:
+                if twin != product and self._aa_flag_facts(twin) == facts:
+                    pool_of.setdefault(twin, ('flag',) + facts)
+        for product, key in pool_of.items():
+            members.setdefault(key, self.env['product.product'])
+            members[key] |= product
+        wanted = products
+        for group in members.values():
+            wanted |= group
+        arrivals = self._aa_arrivals(wanted)
+        pooled_arrivals, pooled_stock = {}, {}
+        for key, group in members.items():
+            rows = []
+            for member in group:
+                label = member.with_context(display_default_code=False).display_name
+                rows += [(w, q, n, label) for w, q, n in arrivals.get(member, [])]
+            rows.sort(key=lambda r: (r[0] or fields.Date.today(), r[2]))
+            pooled_arrivals[key] = rows
+            pooled_stock[key] = sum(max(stock.get(m, 0.0), 0.0) for m in group)
         demand = {}
         out = []
         for l in lines:
             product = l.product_id
-            demand[product] = demand.get(product, 0.0) + l.qty_needed
-            eta = po = ''
-            coming = arrivals.get(product, [])
+            key = pool_of.get(product, product)
+            demand[key] = demand.get(key, 0.0) + l.qty_needed
+            eta = po = po_part = ''
+            if key in pooled_arrivals:
+                mine = product.with_context(display_default_code=False).display_name
+                coming = [(w, q, n if part == mine else '%s (%s)' % (n, part))
+                          for w, q, n, part in pooled_arrivals[key]]
+                parts = [part if part != mine else ''
+                         for _w, _q, _n, part in pooled_arrivals[key]]
+                shelf = pooled_stock[key]
+            else:
+                coming = arrivals.get(product, [])
+                parts = [''] * len(coming)
+                shelf = max(stock.get(product, 0.0), 0.0)
             if l.is_short:
-                still = demand[product] - max(stock.get(product, 0.0), 0.0)
+                still = demand[key] - shelf
                 got = 0.0
-                for when, qty, name in coming:
+                # THE OTHER FLAG SIZE IS WHAT ARRIVES: `po_part` says so, so
+                # the screen reads "use the 5.9\" when it comes", not "missing".
+                for (when, qty, name), part in zip(coming, parts):
                     got += qty
                     if got >= still - 1e-6:
                         eta = fields.Date.to_string(when) if when else ''
-                        po = name
+                        po = name.split(' (', 1)[0] if part else name
+                        po_part = part
                         break
             out.append({
                 'seq': l.seq,
@@ -662,6 +757,7 @@ class AaOrderCoverageLine(models.Model):
                 'paint_qty': l.qty_paint,
                 'eta': eta,
                 'po': po,
+                'po_part': po_part,
                 'coming': [{'date': fields.Date.to_string(w) if w else '',
                             'qty': q, 'po': n} for w, q, n in coming],
             })

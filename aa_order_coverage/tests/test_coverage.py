@@ -318,3 +318,95 @@ class TestPaintGalvanized(TestOrderCoverage):
         picking.button_validate()
         self.assertEqual(self.black.qty_available, 2)
         self.assertEqual(self.galv.qty_available, 3, 'the two painted came off the Galvanized')
+
+
+@tagged('post_install', '-at_install')
+class TestOtherFlag(TestOrderCoverage):
+    """Owner, 2026-11-20: "puedes usar el otro flag" - the other size, same colour."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        Attr = cls.env['product.attribute']
+        colour = Attr.create({'name': 'Colour', 'value_ids': [(0, 0, {'name': 'Black'}), (0, 0, {'name': 'White'})]})
+        size = Attr.create({'name': 'Flag Angle Size', 'value_ids': [(0, 0, {'name': '5.9"'}), (0, 0, {'name': '6-3/8"'})]})
+        tmpl = cls.env['product.template'].create({
+            'name': 'Flag Angle', 'is_storable': True, 'categ_id': cls.tracks.id,
+            'attribute_line_ids': [
+                (0, 0, {'attribute_id': colour.id, 'value_ids': [(6, 0, colour.value_ids.ids)]}),
+                (0, 0, {'attribute_id': size.id, 'value_ids': [(6, 0, size.value_ids.ids)]}),
+            ]})
+
+        def variant(c, z):
+            return tmpl.product_variant_ids.filtered(
+                lambda p: set(p.product_template_attribute_value_ids.mapped('name')) == {c, z})
+        cls.big_black = variant('Black', '6-3/8"')
+        cls.small_black = variant('Black', '5.9"')
+        cls.small_white = variant('White', '5.9"')
+        Quant = cls.env['stock.quant']
+        Quant._update_available_quantity(cls.small_black, cls.stock, 3)
+        Quant._update_available_quantity(cls.small_white, cls.stock, 10)
+
+    def test_other_size_same_colour(self):
+        _so, order = self._order('PO-FLAG', [(self.big_black, 4)], 1)
+        self.Line.action_open_coverage()
+        line = self._lines(order).filtered(lambda l: l.product_id == self.big_black)
+        self.assertEqual(line.swap_product_id, self.small_black, 'never the White one')
+        self.assertEqual(line.qty_swap, 3)
+        self.assertTrue(line.is_short, 'one still missing')
+
+    def test_other_size_on_a_po_dates_the_order(self):
+        """Owner, 2026-11-24: P00009 brought 5.9" only, and every order
+        wanting a 6-3/8" read "not ordered". The other size on a P.O. covers it."""
+        vendor = self.env['res.partner'].create({'name': 'Flag Vendor'})
+        po = self.env['purchase.order'].create({
+            'partner_id': vendor.id,
+            'order_line': [(0, 0, {'product_id': self.small_black.id, 'product_qty': 10,
+                                   'date_planned': '2030-01-15 12:00:00'})]})
+        po.button_confirm()
+        _so, order = self._order('PO-FLAG-PO', [(self.big_black, 4)], 1)
+        data = self.Line.aa_board_data()
+        line = next(l for l in data['lines']
+                    if l['product_id'] == self.big_black.id
+                    and l['seq'] == self._lines(order)[:1].seq)
+        self.assertTrue(line['short'] > 0, 'the shelf alone does not cover it')
+        self.assertEqual(line['eta'], '2030-01-15')
+        self.assertEqual(line['po'], po.name)
+        self.assertIn('5.9', line['po_part'], 'says which size is coming')
+
+    def test_other_colour_on_a_po_does_not_count(self):
+        vendor = self.env['res.partner'].create({'name': 'Flag Vendor 2'})
+        po = self.env['purchase.order'].create({
+            'partner_id': vendor.id,
+            'order_line': [(0, 0, {'product_id': self.small_white.id, 'product_qty': 50,
+                                   'date_planned': '2030-01-15 12:00:00'})]})
+        po.button_confirm()
+        _so, order = self._order('PO-FLAG-WHITE', [(self.big_black, 4)], 1)
+        data = self.Line.aa_board_data()
+        line = next(l for l in data['lines']
+                    if l['product_id'] == self.big_black.id
+                    and l['seq'] == self._lines(order)[:1].seq)
+        self.assertEqual(line['eta'], '', 'White never covers Black')
+
+    def test_next_po_does_not_ask_for_a_size_the_other_covers(self):
+        """Owner, 2026-11-24: "arregla lo de los flags" - the Next P.O. tab
+        kept suggesting 6-3/8" while 5.9" of the same colour was on its way."""
+        vendor = self.env['res.partner'].create({'name': 'Flag Vendor 3'})
+        po = self.env['purchase.order'].create({
+            'partner_id': vendor.id,
+            'order_line': [(0, 0, {'product_id': self.small_black.id, 'product_qty': 10,
+                                   'date_planned': '2030-01-15 12:00:00'})]})
+        po.button_confirm()
+        self._order('PO-FLAG-NEXT', [(self.big_black, 4)], 1)
+        data = self.Line.aa_board_data()['next_po']
+        rows = [r for v in data['vendors'] for r in v['lines']] + data['no_vendor']
+        self.assertFalse([r for r in rows if r['id'] == self.big_black.id],
+                         'the 5.9" on its way covers the 6-3/8" the order wants')
+
+    def test_next_po_still_asks_when_the_other_size_is_short_too(self):
+        self._order('PO-FLAG-NEXT2', [(self.big_black, 20)], 1)
+        data = self.Line.aa_board_data()['next_po']
+        rows = [r for v in data['vendors'] for r in v['lines']] + data['no_vendor']
+        row = next(r for r in rows if r['id'] == self.big_black.id)
+        self.assertEqual(row['qty'], 17, '20 wanted, 3 spare 5.9" on the shelf')
+        self.assertEqual(row['other_size'], 3)
