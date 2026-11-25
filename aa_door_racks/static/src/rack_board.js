@@ -2,6 +2,8 @@
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { scanBarcode } from "@web/core/barcode/barcode_dialog";
+import { isBarcodeScannerSupported } from "@web/core/barcode/barcode_video_scanner";
 import { _t } from "@web/core/l10n/translation";
 
 const ROW_MIN = 34;
@@ -244,6 +246,22 @@ export class RackBoard extends Component {
             }
         }
         this.focusScan();
+    }
+    get cameraOk() {
+        return isBarcodeScannerSupported();
+    }
+    async scanCamera() {
+        let code;
+        try {
+            code = await scanBarcode(this.env);
+        } catch {
+            this.notification.add(_t("No camera could be opened. Use a scanner or type the AA order #."), { type: "warning" });
+            return;
+        }
+        if (code) {
+            this.state.lookup = code;
+            await this.scan();
+        }
     }
     removeDoor(idx) {
         this.state.doors.splice(idx, 1);
