@@ -6081,3 +6081,18 @@ them; a paid one is left alone with a note to issue a credit note. Springs
 take their plastic filler with them. A box taken off re-runs
 `_aa_create_station_productions` so its boxed lift cables get a job of their
 own.
+
+## Door Racks (`aa_door_racks`, owner 2026-11-25)
+
+Finished doors from Hialeah are stored at 9753 on cantilever racks; the owner
+wanted the system to know the racks, say where each incoming BUNDLE goes,
+pack them tightly, find an AA order # and let an admin move them. Inventory >
+Door Racks > Rack Map (an Owl client action, `static/src/rack_board.*`).
+Built on staging1 first at his request. Every rule is in plain Python in
+`models/engine.py`, and `README.md` lists them with his numbers: sides A-D
+(arms 0/74.5/134.5/209), E (0/74/148), 24" overhang, 2 arms up to 10', 3
+above, 11' on one 74.5" unit (my call, his "decide the best"), never one arm
+or a shared arm, back/front rows (53" arms), level 1 = floor legs 39", 2-4
+36", 5 unlimited, stack = panels x 3" + 1.5" board between doors (none under
+the bottom one). A door leaves the rack when the Supply order whose PO Number
+is its AA order # is dispatched (`stock.picking._action_done`).
