@@ -113,6 +113,7 @@ class AaDoorBundle(models.Model):
             spacer=num("aa_door_racks.spacer", 1.5),
             two_arm_max=num("aa_door_racks.two_arm_max", 120.0),
             fallback_max=num("aa_door_racks.fallback_max", 132.0),
+            lift_room=num("aa_door_racks.lift_room", 5.0),
         )
 
     @api.model

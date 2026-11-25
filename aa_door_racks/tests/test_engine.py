@@ -19,6 +19,20 @@ class TestEngine(BaseCase):
         self.assertEqual(engine.bundle_height([4], RULES), 13)
         self.assertEqual(engine.bundle_height([4, 4], RULES), 27.5)
 
+    def test_forklift_room(self):
+        # Andy's photo: 4 + 4 panels stacked at the back; 5 + 4 must still leave 3-5" to lift
+        a = side()
+        level = "A2"   # 36"
+        four = engine.bundle_height([4], RULES)
+        five = engine.bundle_height([5], RULES)
+        p = [engine.Placed(1, "A", level, "back", 0, 1, 0, 96, five)]
+        on_top = [c for c in engine.candidates([a], p, 96, four, RULES) if c.stacked]
+        room = a.levels[level] - (five + RULES.spacer + four)
+        self.assertEqual(bool(on_top), room >= RULES.lift_room)
+        self.assertTrue(on_top)   # 30.75" + 5" fits under 36"
+        tight = engine.Rules(lift_room=a.levels[level])
+        self.assertFalse([c for c in engine.candidates([a], [], 96, four, tight) if c.level == level])
+
     def test_support_rules(self):
         a, e = side(), side("E", E, False)
         self.assertEqual(engine.support_groups(a, 96, RULES), [(0, 1), (1, 2), (2, 3)])

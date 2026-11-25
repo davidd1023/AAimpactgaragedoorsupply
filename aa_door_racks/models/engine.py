@@ -31,6 +31,7 @@ class Rules:
     spacer: float = 1.5
     two_arm_max: float = 120.0      # 10' and under on two arms
     fallback_max: float = 132.0     # 11' doors on one unit where allowed
+    lift_room: float = 5.0          # kept free above a stack so the forklift can lift it (Andy: 3-5")
 
 
 @dataclass
@@ -219,7 +220,7 @@ def candidates(sides, placed, length, height, rules, exclude=None):
                         new_h = height
                         stacked = False
                         seq = 1
-                    if clearance and new_h > clearance + EPS:
+                    if clearance and new_h + rules.lift_room > clearance + EPS:
                         continue
                     start = _free_start(rng[0], rng[1], preferred, length, others)
                     if start is None:
@@ -228,7 +229,7 @@ def candidates(sides, placed, length, height, rules, exclude=None):
                     row_extent = side.arms[-1] - side.arms[0] + 2 * side.overhang
                     waste = (row_extent - length) if j - i >= 2 else 0.0
                     if clearance:
-                        height_frac = (clearance - new_h) / clearance
+                        height_frac = max(0.0, clearance - rules.lift_room - new_h) / clearance
                     else:
                         height_frac = 0.8 if new_h <= 39 else 0.2
                     score = (1000 * isolated

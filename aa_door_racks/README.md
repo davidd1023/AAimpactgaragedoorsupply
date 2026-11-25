@@ -21,6 +21,8 @@ Where every finished AA Impact door sits on the cantilever racks at 9753
 - An 11' door cannot reach three arms on A-D, so it rests on one 74.5" unit
   (decided for the owner as the safest use of the space). E does not take it.
 - Never one arm, and two doors never share an arm: E's middle post has no room.
+- 5" is always left free above a stack so the forklift can lift it (Andy,
+  2026-11-25: "obligatorio ... por lo menos de 3 a 5 pulgadas"), a setting.
 - Stack height = panels x 3 1/4" (packed, with cardboard - measured by Andy 2026-11-25) + a 1.5" board between doors (none under the
   bottom door). A bundle may go on top of another on the same arms if the
   stack still fits the level.
