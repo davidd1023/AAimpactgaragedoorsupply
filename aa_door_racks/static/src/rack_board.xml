@@ -87,7 +87,7 @@
                         <t t-if="!state.bundleSize">
                             <p class="small text-muted">How many doors are in the bundle?</p>
                             <button class="btn btn-primary w-100 mb-2 o_rack_size" t-on-click="() => this.chooseSize(1)">Single - 1 door</button>
-                            <button class="btn btn-primary w-100 mb-2 o_rack_size" t-on-click="() => this.chooseSize(2)">Double - 2 doors, one on top of the other</button>
+                            <button class="btn btn-primary w-100 mb-2 o_rack_size" t-on-click="() => this.chooseSize(2)">Double - 2 doors</button>
                             <button class="btn btn-secondary w-100" t-on-click="cancel">Cancel</button>
                         </t>
                         <t t-else="">
