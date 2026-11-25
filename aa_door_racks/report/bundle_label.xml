@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_bundle_label" model="report.paperformat">
+        <field name="name">Door Bundle Label 4x6</field>
+        <field name="format">custom</field>
+        <field name="page_height">152</field>
+        <field name="page_width">102</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">4</field>
+        <field name="margin_bottom">4</field>
+        <field name="margin_left">4</field>
+        <field name="margin_right">4</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="report_bundle_label" model="ir.actions.report">
+        <field name="name">Bundle Label</field>
+        <field name="model">aa.door.bundle</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">aa_door_racks.bundle_label</field>
+        <field name="report_file">aa_door_racks.bundle_label</field>
+        <field name="paperformat_id" ref="paperformat_bundle_label"/>
+        <field name="binding_model_id" ref="model_aa_door_bundle"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="bundle_label">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="b">
+                <div class="page" style="font-family: sans-serif; page-break-after: always;">
+                    <div style="font-size: 54px; font-weight: bold; text-align: center;" t-out="b.level_id.code or '-'"/>
+                    <div style="font-size: 18px; text-align: center;" t-out="b.location or 'Not placed'"/>
+                    <div style="font-size: 16px; text-align: center; margin-bottom: 8px;" t-out="b.name"/>
+                    <table style="width: 100%; font-size: 16px; border-collapse: collapse;">
+                        <t t-foreach="b.door_ids.filtered(lambda d: d.state == 'stored')" t-as="d">
+                            <tr style="border-top: 1px solid #000;">
+                                <td style="padding: 4px; font-weight: bold;" t-out="d.order_ref"/>
+                                <td style="padding: 4px;" t-out="d.customer or ''"/>
+                                <td style="padding: 4px; text-align: right;"><t t-out="d.width_label"/> · <t t-out="d.panels"/> pnl</td>
+                            </tr>
+                        </t>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

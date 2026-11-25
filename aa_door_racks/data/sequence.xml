@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_bundle" model="ir.sequence">
+        <field name="name">Door Bundle</field>
+        <field name="code">aa.door.bundle</field>
+        <field name="prefix">BND-</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

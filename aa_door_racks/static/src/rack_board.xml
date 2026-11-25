@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="aa_door_racks.RackBoard">
+        <div class="o_rack_board">
+            <div class="o_rack_top">
+                <h2 class="m-0">Door Racks</h2>
+                <div class="o_rack_search">
+                    <i class="fa fa-search"/>
+                    <input type="text" placeholder="Find an order # or customer, press Enter"
+                           t-att-value="state.term" t-on-keyup="onSearch"/>
+                    <button t-if="state.term" class="btn btn-link btn-sm" t-on-click="clearSearch">Clear</button>
+                </div>
+                <div class="o_rack_free" t-if="state.data.free">
+                    <span>Room now for about <b t-out="state.data.free.small"/> doors of 9'</span>
+                    <span>or <b t-out="state.data.free.big"/> of 16'</span>
+                    <span class="text-muted">· <t t-out="state.data.free.rows_empty"/> of <t t-out="state.data.free.rows_total"/> rows empty</span>
+                </div>
+                <button class="btn btn-primary" t-if="state.mode === 'view'" t-on-click="startReceive">
+                    <i class="fa fa-plus"/> Receive Bundle
+                </button>
+                <button class="btn btn-secondary" t-if="state.mode === 'view' and state.data.admin" t-on-click="startBlock">
+                    <i class="fa fa-ban"/> Close a Spot
+                </button>
+            </div>
+
+            <div class="o_rack_body">
+                <div class="o_rack_map">
+                    <t t-foreach="state.data.sides" t-as="side" t-key="side.id">
+                        <div class="o_rack_side">
+                            <div class="o_rack_side_name">Rack <t t-out="side.name"/></div>
+                            <t t-foreach="side.levels" t-as="level" t-key="level.id">
+                                <div class="o_rack_level">
+                                    <div class="o_rack_level_name">
+                                        <b t-out="level.code"/>
+                                        <small t-out="levelFill(side, level)"/>
+                                    </div>
+                                    <div class="o_rack_rows">
+                                        <t t-foreach="['back', 'front']" t-as="depth" t-key="depth">
+                                            <div class="o_rack_row" t-att-class="'o_' + depth" t-att-style="rowStyle(side, level, depth)">
+                                                <span class="o_rack_depth" t-out="depth === 'back' ? 'Back' : 'Front'"/>
+                                                <t t-foreach="side.arms" t-as="arm" t-key="arm_index">
+                                                    <span class="o_rack_arm" t-att-style="armStyle(side, arm)"/>
+                                                </t>
+                                                <t t-foreach="blocksFor(side, level, depth)" t-as="blk" t-key="blk.id">
+                                                    <div class="o_rack_block" t-att-class="{'o_selected': state.selectedBlock === blk.id}"
+                                                         t-att-style="boxStyle(side, blk.start, blk.length)"
+                                                         t-att-title="'Closed: ' + (blk.note || '')"
+                                                         t-on-click="() => this.selectBlock(blk)">
+                                                        <span><i class="fa fa-ban"/> <t t-out="blk.note || 'Closed'"/></span>
+                                                    </div>
+                                                </t>
+                                                <t t-foreach="stacksFor(side, level, depth)" t-as="stack" t-key="stack.key">
+                                                    <div class="o_rack_stack" t-att-style="boxStyle(side, stack.start, stack.length)">
+                                                        <t t-foreach="stack.bundles" t-as="b" t-key="b.id">
+                                                            <div class="o_rack_bundle"
+                                                                 t-att-data-bundle="b.id"
+                                                                 t-att-class="{'o_hit': state.highlight.includes(b.id), 'o_selected': state.selected === b.id, 'o_moving': state.moving === b.id}"
+                                                                 t-att-title="b.name + ' · ' + b.orders + ' · ' + feetLabel(b.length) + ' · ' + b.height + '&quot; tall'"
+                                                                 t-on-click="() => this.selectBundle(b.id)">
+                                                                <span t-out="b.orders || b.name"/>
+                                                            </div>
+                                                        </t>
+                                                    </div>
+                                                </t>
+                                                <t t-foreach="spotsFor(side, level, depth)" t-as="spot" t-key="spot_index">
+                                                    <div class="o_rack_spot"
+                                                         t-att-class="{'o_best': spot.best, 'o_chosen': isChosen(spot), 'o_on_top': spot.stacked}"
+                                                         t-att-style="boxStyle(side, spot.start, state.suggestInfo ? state.suggestInfo.length : 0)"
+                                                         t-on-click="() => this.chooseSpot(spot)">
+                                                        <span t-if="spot.best">Best</span>
+                                                        <span t-elif="spot.stacked">On top</span>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="o_rack_panel">
+                    <!-- receive a bundle -->
+                    <t t-if="state.mode === 'receive'">
+                        <h4>Receive a bundle</h4>
+                        <t t-if="!state.bundleSize">
+                            <p class="small text-muted">How many doors are in the bundle?</p>
+                            <button class="btn btn-primary w-100 mb-2 o_rack_size" t-on-click="() => this.chooseSize(1)">Single - 1 door</button>
+                            <button class="btn btn-primary w-100 mb-2 o_rack_size" t-on-click="() => this.chooseSize(2)">Double - 2 doors</button>
+                            <button class="btn btn-secondary w-100" t-on-click="cancel">Cancel</button>
+                        </t>
+                        <t t-else="">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <b t-out="state.bundleSize === 1 ? 'Single bundle' : 'Double bundle'"/>
+                            <button class="btn btn-link btn-sm p-0" t-on-click="() => this.chooseSize(0)">Change</button>
+                        </div>
+                        <div t-if="!scanDone" class="o_rack_scan mt-1">
+                            <div class="small mb-1">
+                                <i class="fa fa-qrcode"/> Scan the big label of door <t t-out="state.doors.length + 1"/> of <t t-out="state.bundleSize"/>
+                                <t t-if="state.bundleSize > 1 and !state.doors.length"> (bottom door first)</t>
+                            </div>
+                            <div class="d-flex gap-1">
+                                <input class="form-control" placeholder="Scan, or type the AA order #" t-model="state.lookup" t-on-keyup="scan"/>
+                                <button class="btn btn-secondary" t-on-click="() => this.scan()">Add</button>
+                            </div>
+                            <button t-if="cameraOk" class="btn btn-primary w-100 mt-2 o_rack_camera" t-on-click="scanCamera"><i class="fa fa-camera"/> Scan with camera</button>
+                            <div class="small text-muted mt-1">A handheld scanner works too: click the box and scan.</div>
+                        </div>
+                        <div t-if="state.lookupMsg" t-attf-class="small mt-1 alert alert-{{ state.lookupLevel === 'info' ? 'info' : state.lookupLevel }} py-1 px-2 mb-0" t-out="state.lookupMsg"/>
+                        <t t-foreach="state.doors" t-as="door" t-key="door_index">
+                            <div class="o_rack_door_input mt-2">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <b t-out="door.order_ref"/><t t-if="door.door_no"> · door <t t-out="door.door_no"/></t> <span class="text-muted" t-out="door.customer"/>
+                                        <div class="small text-muted" t-if="door.order" t-out="door.order"/>
+                                    </div>
+                                    <button class="btn btn-link text-danger p-0" t-on-click="() => this.removeDoor(door_index)"><i class="fa fa-times"/></button>
+                                </div>
+                                <div t-if="door.locked" class="small">
+                                    <t t-out="door.feet"/>' <t t-out="door.inches"/>" wide<t t-if="door.height"> x <t t-out="feetLabel(door.height)"/></t> · <t t-out="door.panels"/> panels
+                                </div>
+                                <div t-else="" class="d-flex gap-1 mt-1 align-items-center">
+                                    <input class="form-control" type="number" min="0" placeholder="ft" t-model="door.feet" t-on-input="onDoorInput"/>
+                                    <span>'</span>
+                                    <input class="form-control" type="number" min="0" step="0.5" placeholder="in" t-model="door.inches" t-on-input="onDoorInput"/>
+                                    <span>"</span>
+                                    <input class="form-control" type="number" min="1" placeholder="panels" t-model="door.panels" t-on-input="onDoorInput"/>
+                                    <span class="small">pnl</span>
+                                </div>
+                            </div>
+                        </t>
+                        <div class="d-flex gap-2 mt-2">
+                            <button class="btn btn-primary" t-on-click="findSpot" t-att-disabled="!scanDone">Find a spot</button>
+                            <button class="btn btn-secondary" t-on-click="cancel">Cancel</button>
+                        </div>
+                        </t>
+                    </t>
+
+                    <t t-if="state.mode === 'block'">
+                        <h4>Close a spot</h4>
+                        <p class="small text-muted">For a spot holding something else. Nothing will be put there until it is opened again.</p>
+                        <label class="small">Rack</label>
+                        <select class="form-select mb-2" t-on-change="onBlockSide">
+                            <t t-foreach="state.data.sides" t-as="sd" t-key="sd.id">
+                                <option t-att-value="sd.id" t-att-selected="sd.id === state.block.side" t-out="sd.name"/>
+                            </t>
+                        </select>
+                        <label class="small">Level</label>
+                        <select class="form-select mb-2" t-model.number="state.block.level">
+                            <t t-foreach="levelsFor(state.block.side)" t-as="lv" t-key="lv.id">
+                                <option t-att-value="lv.id" t-out="lv.code"/>
+                            </t>
+                        </select>
+                        <label class="small">Which part</label>
+                        <select class="form-select mb-2" t-model="state.block.part">
+                            <t t-foreach="partsFor(state.block.side)" t-as="pt" t-key="pt[0]">
+                                <option t-att-value="pt[0]" t-out="pt[1]"/>
+                            </t>
+                        </select>
+                        <label class="small">Row</label>
+                        <select class="form-select mb-2" t-model="state.block.depth">
+                            <option value="both">Back and Front</option>
+                            <option value="back">Back</option>
+                            <option value="front">Front</option>
+                        </select>
+                        <input class="form-control mb-2" placeholder="What is there (optional)" t-model="state.block.note"/>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" t-on-click="saveBlock">Close it</button>
+                            <button class="btn btn-secondary" t-on-click="cancel">Cancel</button>
+                        </div>
+                    </t>
+
+                    <t t-if="state.mode === 'view' and selectedBlockData">
+                        <h4>Closed spot</h4>
+                        <div class="o_rack_chosen_loc" t-out="selectedBlockData.level_code"/>
+                        <p t-out="selectedBlockData.note || 'No note'"/>
+                        <button t-if="state.data.admin" class="btn btn-primary btn-sm" t-on-click="() => this.unblock(selectedBlockData.id)">Open this spot</button>
+                    </t>
+
+                    <t t-if="state.mode === 'move'">
+                        <h4>Move to…</h4>
+                        <p class="small">Click a green spot on the map, then Save here.</p>
+                        <button class="btn btn-secondary" t-on-click="cancel">Cancel</button>
+                    </t>
+
+                    <!-- the spot chosen -->
+                    <t t-if="state.mode !== 'view' and state.chosen">
+                        <div class="o_rack_chosen">
+                            <div class="small text-muted">Bundle <t t-out="feetLabel(state.suggestInfo.length)"/> long, <t t-out="state.suggestInfo.height"/>" tall</div>
+                            <div class="o_rack_chosen_loc" t-out="chosenLabel"/>
+                            <ul t-if="state.chosen.why and state.chosen.why.length" class="small mb-1 ps-3">
+                                <li t-foreach="state.chosen.why" t-as="w" t-key="w_index" t-out="w"/>
+                            </ul>
+                            <button class="btn btn-success w-100 mt-2" t-on-click="saveHere"><i class="fa fa-check"/> Save here</button>
+                        </div>
+                        <div class="small fw-bold mt-3">Where it can go</div>
+                        <t t-foreach="state.spots" t-as="spot" t-key="spot_index">
+                            <div t-attf-class="o_rack_option {{ spot === state.chosen ? 'o_on' : '' }}" t-on-click="() => this.chooseSpot(spot)">
+                                <span class="o_rack_option_loc" t-out="spotLabel(spot)"/>
+                                <span t-if="spot.best" class="badge text-bg-success ms-1">Recommended</span>
+                                <span t-elif="spot.stacked" class="badge text-bg-secondary ms-1">On top</span>
+                            </div>
+                        </t>
+                    </t>
+
+                    <!-- search results -->
+                    <t t-if="state.mode === 'view' and state.results">
+                        <h4>Results</h4>
+                        <p t-if="!state.results.length" class="text-muted">Nothing on the racks for that.</p>
+                        <t t-foreach="state.results" t-as="r" t-key="r.id">
+                            <div class="o_rack_result" t-on-click="() => this.selectBundle(r.bundle)">
+                                <b t-out="r.order_ref"/> <span class="text-muted" t-out="r.customer"/>
+                                <div class="o_rack_result_loc" t-out="r.location"/>
+                                <div class="small text-muted"><t t-out="r.width_label"/> · <t t-out="r.panels"/> panels · <t t-out="r.bundle_name"/></div>
+                            </div>
+                        </t>
+                    </t>
+
+                    <!-- a bundle -->
+                    <t t-if="state.mode === 'view' and selectedBundle">
+                        <div class="o_rack_detail">
+                            <h4 class="mb-0" t-out="selectedBundle.name"/>
+                            <div class="o_rack_chosen_loc" t-out="selectedBundle.location"/>
+                            <div class="small text-muted mb-2"><t t-out="feetLabel(selectedBundle.length)"/> long · <t t-out="selectedBundle.height"/>" tall</div>
+                            <t t-foreach="selectedBundle.doors" t-as="d" t-key="d.id">
+                                <div class="o_rack_door">
+                                    <div><b t-out="d.order_ref"/> <span class="text-muted" t-out="d.customer"/></div>
+                                    <div class="small"><t t-out="d.width_label"/> · <t t-out="d.panels"/> panels<t t-if="d.sale_order"> · <t t-out="d.sale_order"/></t></div>
+                                    <div class="d-flex gap-2 mt-1">
+                                        <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.askRemove({door: d.id})">Remove</button>
+                                        <button t-if="state.data.admin and selectedBundle.doors.length > 1" class="btn btn-sm btn-outline-secondary" t-on-click="() => this.splitDoor(d)">Take out</button>
+                                    </div>
+                                    <t t-if="isRemoving('door', d.id)" t-call="aa_door_racks.RemoveChoice"/>
+                                </div>
+                            </t>
+                            <t t-if="isRemoving('bundle', selectedBundle.id)" t-call="aa_door_racks.RemoveChoice"/>
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                <button class="btn btn-danger btn-sm" t-on-click="() => this.askRemove({bundle: selectedBundle.id})"><i class="fa fa-sign-out"/> Remove bundle</button>
+                                <button t-if="state.data.admin" class="btn btn-primary btn-sm" t-on-click="() => this.startMove(selectedBundle.id)"><i class="fa fa-arrows"/> Move</button>
+                                <button class="btn btn-secondary btn-sm" t-on-click="() => this.printLabel(selectedBundle.id)"><i class="fa fa-print"/> Label</button>
+                                <button class="btn btn-link btn-sm" t-on-click="() => this.openBundle(selectedBundle.id)">History</button>
+                            </div>
+                        </div>
+                    </t>
+
+                    <t t-if="state.mode === 'view' and !selectedBundle and !state.results and !selectedBlockData">
+                        <div class="text-muted">
+                            <p>Click a bundle to see its doors.</p>
+                            <p>Each bar is a bundle, drawn at its real length. The grey ticks are the arms.</p>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="aa_door_racks.RemoveChoice">
+        <div class="o_rack_remove">
+            <div class="small mb-1">Why is it coming off the rack?</div>
+            <button class="btn btn-sm btn-success w-100 mb-1" t-on-click="() => this.remove('delivered')">Picked up / delivered</button>
+            <button t-if="state.data.admin" class="btn btn-sm btn-outline-danger w-100 mb-1" t-on-click="() => this.remove('mistake')">Entered by mistake - delete it</button>
+            <button class="btn btn-sm btn-link w-100" t-on-click="() => this.askRemove(null)">Cancel</button>
+        </div>
+    </t>
+</templates>

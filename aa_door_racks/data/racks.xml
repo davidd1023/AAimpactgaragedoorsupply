@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The racks at 9753 as the owner described them on 2026-11-25. noupdate:
+     once installed they are his to edit in Configuration > Racks. -->
+<odoo noupdate="1">
+    <record id="side_a" model="aa.rack.side">
+        <field name="name">A</field>
+        <field name="sequence">10</field>
+        <field name="arm_positions">0, 74.5, 134.5, 209</field>
+        <field name="allow_fallback" eval="True"/>
+    </record>
+    <record id="level_a1" model="aa.rack.level">
+        <field name="side_id" ref="side_a"/>
+        <field name="number">1</field>
+        <field name="clearance">39</field>
+    </record>
+    <record id="level_a2" model="aa.rack.level">
+        <field name="side_id" ref="side_a"/>
+        <field name="number">2</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_a3" model="aa.rack.level">
+        <field name="side_id" ref="side_a"/>
+        <field name="number">3</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_a4" model="aa.rack.level">
+        <field name="side_id" ref="side_a"/>
+        <field name="number">4</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_a5" model="aa.rack.level">
+        <field name="side_id" ref="side_a"/>
+        <field name="number">5</field>
+        <field name="clearance">0</field>
+    </record>
+    <record id="side_b" model="aa.rack.side">
+        <field name="name">B</field>
+        <field name="sequence">20</field>
+        <field name="arm_positions">0, 74.5, 134.5, 209</field>
+        <field name="allow_fallback" eval="True"/>
+    </record>
+    <record id="level_b1" model="aa.rack.level">
+        <field name="side_id" ref="side_b"/>
+        <field name="number">1</field>
+        <field name="clearance">39</field>
+    </record>
+    <record id="level_b2" model="aa.rack.level">
+        <field name="side_id" ref="side_b"/>
+        <field name="number">2</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_b3" model="aa.rack.level">
+        <field name="side_id" ref="side_b"/>
+        <field name="number">3</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_b4" model="aa.rack.level">
+        <field name="side_id" ref="side_b"/>
+        <field name="number">4</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_b5" model="aa.rack.level">
+        <field name="side_id" ref="side_b"/>
+        <field name="number">5</field>
+        <field name="clearance">0</field>
+    </record>
+    <record id="side_c" model="aa.rack.side">
+        <field name="name">C</field>
+        <field name="sequence">30</field>
+        <field name="arm_positions">0, 74.5, 134.5, 209</field>
+        <field name="allow_fallback" eval="True"/>
+    </record>
+    <record id="level_c1" model="aa.rack.level">
+        <field name="side_id" ref="side_c"/>
+        <field name="number">1</field>
+        <field name="clearance">39</field>
+    </record>
+    <record id="level_c2" model="aa.rack.level">
+        <field name="side_id" ref="side_c"/>
+        <field name="number">2</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_c3" model="aa.rack.level">
+        <field name="side_id" ref="side_c"/>
+        <field name="number">3</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_c4" model="aa.rack.level">
+        <field name="side_id" ref="side_c"/>
+        <field name="number">4</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_c5" model="aa.rack.level">
+        <field name="side_id" ref="side_c"/>
+        <field name="number">5</field>
+        <field name="clearance">0</field>
+    </record>
+    <record id="side_d" model="aa.rack.side">
+        <field name="name">D</field>
+        <field name="sequence">40</field>
+        <field name="arm_positions">0, 74.5, 134.5, 209</field>
+        <field name="allow_fallback" eval="True"/>
+    </record>
+    <record id="level_d1" model="aa.rack.level">
+        <field name="side_id" ref="side_d"/>
+        <field name="number">1</field>
+        <field name="clearance">39</field>
+    </record>
+    <record id="level_d2" model="aa.rack.level">
+        <field name="side_id" ref="side_d"/>
+        <field name="number">2</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_d3" model="aa.rack.level">
+        <field name="side_id" ref="side_d"/>
+        <field name="number">3</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_d4" model="aa.rack.level">
+        <field name="side_id" ref="side_d"/>
+        <field name="number">4</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_d5" model="aa.rack.level">
+        <field name="side_id" ref="side_d"/>
+        <field name="number">5</field>
+        <field name="clearance">0</field>
+    </record>
+    <record id="side_e" model="aa.rack.side">
+        <field name="name">E</field>
+        <field name="sequence">50</field>
+        <field name="arm_positions">0, 74, 148</field>
+        <field name="allow_fallback" eval="False"/>
+    </record>
+    <record id="level_e1" model="aa.rack.level">
+        <field name="side_id" ref="side_e"/>
+        <field name="number">1</field>
+        <field name="clearance">39</field>
+    </record>
+    <record id="level_e2" model="aa.rack.level">
+        <field name="side_id" ref="side_e"/>
+        <field name="number">2</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_e3" model="aa.rack.level">
+        <field name="side_id" ref="side_e"/>
+        <field name="number">3</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_e4" model="aa.rack.level">
+        <field name="side_id" ref="side_e"/>
+        <field name="number">4</field>
+        <field name="clearance">36</field>
+    </record>
+    <record id="level_e5" model="aa.rack.level">
+        <field name="side_id" ref="side_e"/>
+        <field name="number">5</field>
+        <field name="clearance">0</field>
+    </record>
+</odoo>

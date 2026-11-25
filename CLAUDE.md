@@ -6299,3 +6299,19 @@ never had one (RAW tracks, flag angles, hinges #8/#9).
 **`_aa_next_base` READS WITH RAW SQL, SO IT FLUSHES FIRST** - otherwise two
 products numbered in one run get the same base. New module: Apps > Update
 Apps List > install "AA Part Numbers"; the install numbers everything.
+
+## Door Racks (`aa_door_racks`, owner 2026-11-25)
+
+Finished doors from Hialeah are stored at 9753 on cantilever racks; the owner
+wanted the system to know the racks, say where each incoming BUNDLE goes,
+pack them tightly, find an AA order # and let an admin move them. Inventory >
+Door Racks > Rack Map (an Owl client action, `static/src/rack_board.*`).
+Built on staging1 first at his request. Every rule is in plain Python in
+`models/engine.py`, and `README.md` lists them with his numbers: sides A-D
+(arms 0/74.5/134.5/209), E (0/74/148), 24" overhang, 2 arms up to 10', 3
+above, 11' on one 74.5" unit (my call, his "decide the best"), never one arm
+or a shared arm, back/front rows (53" arms), level 1 = floor legs 39", 2-4
+36", 5 unlimited, stack = panels x 3 1/4" (packed, with cardboard) + 1.5"
+board between doors (none under the bottom one), and 5" is always left free
+above a stack for the forklift (a setting). A door leaves the rack when the Supply order whose PO Number
+is its AA order # is dispatched (`stock.picking._action_done`).

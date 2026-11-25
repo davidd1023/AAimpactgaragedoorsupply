@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_side_user,side user,model_aa_rack_side,stock.group_stock_user,1,0,0,0
+access_side_manager,side manager,model_aa_rack_side,stock.group_stock_manager,1,1,1,1
+access_level_user,level user,model_aa_rack_level,stock.group_stock_user,1,0,0,0
+access_level_manager,level manager,model_aa_rack_level,stock.group_stock_manager,1,1,1,1
+access_bundle_user,bundle user,model_aa_door_bundle,stock.group_stock_user,1,1,1,0
+access_bundle_manager,bundle manager,model_aa_door_bundle,stock.group_stock_manager,1,1,1,1
+access_door_user,door user,model_aa_door,stock.group_stock_user,1,1,1,0
+access_door_manager,door manager,model_aa_door,stock.group_stock_manager,1,1,1,1
+access_move_user,move user,model_aa_door_move,stock.group_stock_user,1,0,1,0
+access_move_manager,move manager,model_aa_door_move,stock.group_stock_manager,1,1,1,1
+access_block_user,block user,model_aa_rack_block,stock.group_stock_user,1,0,0,0
+access_block_manager,block manager,model_aa_rack_block,stock.group_stock_manager,1,1,1,1
