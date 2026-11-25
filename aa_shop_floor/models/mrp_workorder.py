@@ -291,6 +291,8 @@ class MrpProduction(models.Model):
                 # everybody else and to any order that was a purchase. Asked
                 # through hasattr so this module does not depend on it.
                 "parts": order._aa_parts_board() if order and hasattr(order, "_aa_parts_board") else None,
+                # CHANGE A SPRING BEFORE IT IS WOUND (owner, 2026-11-25), admins only.
+                "springs_edit": order._aa_spring_edit_board() if order else None,
                 "received": received,
                 "can_assign": can_assign,
                 "send_ids": [j["id"] for j in jobs if j["can_send"]],

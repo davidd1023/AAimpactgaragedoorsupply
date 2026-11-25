@@ -6082,6 +6082,31 @@ take their plastic filler with them. A box taken off re-runs
 `_aa_create_station_productions` so its boxed lift cables get a job of their
 own.
 
+## ADMIN: CHANGE A SPRING BEFORE IT IS WOUND (`aa_shop_floor`, owner 2026-11-25)
+
+*"que admin antes de mandar los muelles a michel pueda modificarlos ...
+cambiar cable, id y el drum que se uso para el calculo y cambiar tipo de lift
+o cantidad de high lift ... deben recalcularse y actualizar la orden con su
+precio"*.
+
+Shop Floor > Overview list > open an order > **Springs (admin): Change
+springs** (`models/spring_edit.py`, `static/src/mrp_display/spring_edit.*`).
+Spring I.D., wire (recommended or any stocked size), springs on the door,
+lift type, hi-lift / track radius, drum, door weight and height, cycles.
+
+**THE CALCULATOR RUNS HEADLESS IN THE DIALOG**, as `spring_bridge.js` does for
+the Quick Order - no second spring model. The server only runs
+`quote_assembly` on the posted spec, then rewrites the spring line (spec,
+description, door, price netted after tax like `add_assembly_lines`), adds /
+re-measures / zeroes the 5 1/4" filler line, redoes an UNPAID invoice (a paid
+one is named in the chatter), and gives the Springs job the new spec with a
+fresh coil plan (`_aa_replan_coil_cuts`). Before / after goes in the order's
+chatter.
+
+Admins only (`base.group_system`), any order. **Refused once the Springs job
+is in progress or done, or delivered**, and for anything but a Single (duplex
+is not sold). A red warning blocks Save.
+
 ## Order Coverage (`aa_order_coverage`, owner 2026-11-18)
 
 *"necesito hacer algo en inventario que cuando entre me salgan todas las
