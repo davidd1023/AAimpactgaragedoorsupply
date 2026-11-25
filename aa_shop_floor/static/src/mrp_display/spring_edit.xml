@@ -100,7 +100,7 @@
             </div>
 
             <t t-set-slot="footer">
-                <button class="btn btn-primary" t-att-disabled="res.error or res.red or ui.busy"
+                <button class="btn btn-primary" t-att-disabled="result.error or result.red or ui.busy"
                         t-on-click="save">Save and update the order</button>
                 <button class="btn btn-secondary" t-on-click="props.close">Cancel</button>
             </t>
