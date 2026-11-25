@@ -6205,6 +6205,38 @@ row). On the Orders tab a short flag covered by the OTHER size's P.O. leaves
 the red Missing text and shows as "Use N Flag Angle (..., 5.9") from P00009
 (date)" - `po_part` on the line.
 
+### ONE DOOR, ONE HARDWARE LINE: CHI OR ATL (owner, 2026-11-25)
+
+*"yo no puedo mesclar hinges de chi con jamb brackets de ATL"*. His three
+answers: the parts that must come from ONE line on a door are **jamb
+brackets, hinges and bottom bracket**; **CHI goes first when the hardware is
+powder coated, mill finish takes whichever line has the stock**; and **the ATL
+horizontal needs the 2x2 angle bolted on**, where CHI's comes with it.
+
+`models/hw_line.py`. On the template: `aa_hw_line` (CHI / ATL / blank = fits
+both), `aa_line_must_match`, `aa_line_twin_id` (the same part from the other
+line - variants paired by their value NAMES, so the ATL template must carry
+the same Colour / Size values; paired both ways on create and write),
+`aa_prep_part_id` / `aa_prep_part_qty` / `aa_prep_note` (the 2x2 angle).
+
+**ORDERS TO MAKE** (`_aa_other_line`, after the flag swap, before paint):
+the must-match parts of an order switch TOGETHER, only when the other line
+has spare for every one of them; a part with no twin (no ATL hinge yet) keeps
+the whole door on its line - never half a door. A powder-coated order on ATL
+is offered CHI back. A part that fits either line (the horizontal) is offered
+on its own. Buttons: **Make with ATL** -> `sale.order.aa_set_hw_line`, **Use
+it** -> `aa_use_twin` (adds the prep part to the job).
+
+**THE SWITCH WRITES `product_id` ON THE OPEN MOVES**, Work Order, its
+`move_dest_ids` and the job raw moves - not cancel-and-recreate - because a
+kit's delivered quantity is counted by each move's `bom_line_id`, which a
+product write keeps. All or nothing; refused once a part is picked. The kit
+card reads the BoM (CHI), so `_aa_pieces_for_line` in aa_shop_floor maps its
+box contents through the order's line.
+
+**THE DATA IS NOT ALL THERE YET**: until ATL hinges and an ATL bottom bracket
+exist and are paired, no kit door can go ATL - which is the rule working.
+
 ## AA part numbers (`aa_part_numbers`, owner 2026-11-18)
 
 *"quiero ponerle nuestro part number a todos nuestros productos"* - and when
