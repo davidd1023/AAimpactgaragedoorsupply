@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_side_list" model="ir.ui.view">
+        <field name="name">aa.rack.side.list</field>
+        <field name="model">aa.rack.side</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="arm_positions"/>
+                <field name="overhang"/>
+                <field name="allow_fallback"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_side_form" model="ir.ui.view">
+        <field name="name">aa.rack.side.form</field>
+        <field name="model">aa.rack.side</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="arm_positions"/>
+                            <field name="overhang"/>
+                        </group>
+                        <group>
+                            <field name="arm_length"/>
+                            <field name="allow_fallback"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <field name="level_ids">
+                        <list editable="bottom">
+                            <field name="number"/>
+                            <field name="clearance"/>
+                            <field name="active"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sides" model="ir.actions.act_window">
+        <field name="name">Racks</field>
+        <field name="res_model">aa.rack.side</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
