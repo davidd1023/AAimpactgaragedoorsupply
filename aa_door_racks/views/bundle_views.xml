@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_door_list" model="ir.ui.view">
+        <field name="name">aa.door.list</field>
+        <field name="model">aa.door</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-muted="state == 'delivered'">
+                <field name="order_ref"/>
+                <field name="customer"/>
+                <field name="width_label" string="Width"/>
+                <field name="panels"/>
+                <field name="location"/>
+                <field name="bundle_id"/>
+                <field name="sale_order_id" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'stored'"/>
+                <field name="delivered_on" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_door_search" model="ir.ui.view">
+        <field name="name">aa.door.search</field>
+        <field name="model">aa.door</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="order_ref"/>
+                <field name="customer"/>
+                <field name="bundle_id"/>
+                <filter name="stored" string="On Rack" domain="[('state', '=', 'stored')]"/>
+                <filter name="delivered" string="Delivered" domain="[('state', '=', 'delivered')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_doors" model="ir.actions.act_window">
+        <field name="name">Doors on Racks</field>
+        <field name="res_model">aa.door</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_stored': 1}</field>
+    </record>
+
+    <record id="view_bundle_list" model="ir.ui.view">
+        <field name="name">aa.door.bundle.list</field>
+        <field name="model">aa.door.bundle</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <field name="name"/>
+                <field name="order_refs"/>
+                <field name="location"/>
+                <field name="length"/>
+                <field name="height"/>
+                <field name="received_on"/>
+                <field name="state" widget="badge" decoration-success="state == 'stored'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_bundle_form" model="ir.ui.view">
+        <field name="name">aa.door.bundle.form</field>
+        <field name="model">aa.door.bundle</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_out" type="object" string="All Delivered" invisible="state != 'stored'"
+                            confirm="Mark every door in this bundle as delivered?"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <h1><field name="name"/></h1>
+                    <group>
+                        <group>
+                            <field name="location"/>
+                            <field name="length"/>
+                            <field name="height"/>
+                        </group>
+                        <group>
+                            <field name="received_on"/>
+                            <field name="order_refs"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Doors">
+                            <field name="door_ids">
+                                <list editable="bottom">
+                                    <field name="order_ref"/>
+                                    <field name="customer"/>
+                                    <field name="width"/>
+                                    <field name="panels"/>
+                                    <field name="sale_order_id"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="History">
+                            <field name="move_ids" readonly="1">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="from_location"/>
+                                    <field name="to_location"/>
+                                    <field name="note"/>
+                                    <field name="user_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bundle_search" model="ir.ui.view">
+        <field name="name">aa.door.bundle.search</field>
+        <field name="model">aa.door.bundle</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="order_refs"/>
+                <field name="name"/>
+                <field name="location"/>
+                <filter name="stored" string="On Rack" domain="[('state', '=', 'stored')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_bundles" model="ir.actions.act_window">
+        <field name="name">Door Bundles</field>
+        <field name="res_model">aa.door.bundle</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_stored': 1}</field>
+    </record>
+</odoo>
