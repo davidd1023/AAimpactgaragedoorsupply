@@ -27,7 +27,7 @@ UNLIMITED = 0.0
 
 @dataclass
 class Rules:
-    panel_thickness: float = 3.0
+    panel_thickness: float = 3.25
     spacer: float = 1.5
     two_arm_max: float = 120.0      # 10' and under on two arms
     fallback_max: float = 132.0     # 11' doors on one unit where allowed

@@ -18,7 +18,7 @@ class TestBoard(TransactionCase):
         self.assertEqual([s["name"] for s in data["sides"]], ["A", "B", "C", "D", "E"])
         b = self._receive([{"order_ref": "1234", "width": 96, "panels": 4},
                            {"order_ref": "1250", "width": 108, "panels": 4}])
-        self.assertEqual(b["height"], 25.5)
+        self.assertEqual(b["height"], 27.5)
         self.assertTrue(b["location"])
         found = self.Bundle.board_search("1250")
         self.assertEqual(found[0]["bundle"], b["id"])
@@ -74,7 +74,7 @@ class TestBoard(TransactionCase):
                            {"order_ref": "A2", "width": 96, "panels": 4}])
         door = self.Bundle.browse(b["id"]).door_ids[1]
         new = self.Bundle.board_split(door.id)
-        self.assertEqual(self.Bundle.browse(b["id"]).height, 12)
+        self.assertEqual(self.Bundle.browse(b["id"]).height, 13)
         spots = self.Bundle.board_suggest([], new["id"])["spots"]
         self.Bundle.board_move(new["id"], spots[0])
         self.assertEqual(self.Bundle.browse(new["id"]).state, "stored")
