@@ -16,8 +16,8 @@ def side(key="A", arms=AD, fallback=True):
 class TestEngine(BaseCase):
 
     def test_height(self):
-        self.assertEqual(engine.bundle_height([4], RULES), 12)
-        self.assertEqual(engine.bundle_height([4, 4], RULES), 25.5)
+        self.assertEqual(engine.bundle_height([4], RULES), 13)
+        self.assertEqual(engine.bundle_height([4, 4], RULES), 27.5)
 
     def test_support_rules(self):
         a, e = side(), side("E", E, False)

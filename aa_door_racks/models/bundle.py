@@ -109,7 +109,7 @@ class AaDoorBundle(models.Model):
             except (TypeError, ValueError):
                 return default
         return engine.Rules(
-            panel_thickness=num("aa_door_racks.panel_thickness", 3.0),
+            panel_thickness=num("aa_door_racks.panel_thickness", 3.25),
             spacer=num("aa_door_racks.spacer", 1.5),
             two_arm_max=num("aa_door_racks.two_arm_max", 120.0),
             fallback_max=num("aa_door_racks.fallback_max", 132.0),
