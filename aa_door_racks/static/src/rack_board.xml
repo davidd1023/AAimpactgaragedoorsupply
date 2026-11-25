@@ -84,17 +84,33 @@
                     <!-- receive a bundle -->
                     <t t-if="state.mode === 'receive'">
                         <h4>Receive a bundle</h4>
-                        <p class="text-muted small">Type the AA order # of each door in the bundle, bottom door first.</p>
-                        <div class="d-flex gap-1">
-                            <input class="form-control" placeholder="AA order # (e.g. 1051)" t-model="state.lookup" t-on-keyup="addOrder"/>
-                            <button class="btn btn-secondary" t-on-click="() => this.addOrder()">Add</button>
+                        <t t-if="!state.bundleSize">
+                            <p class="small text-muted">How many doors are in the bundle?</p>
+                            <button class="btn btn-primary w-100 mb-2 o_rack_size" t-on-click="() => this.chooseSize(1)">Single - 1 door</button>
+                            <button class="btn btn-primary w-100 mb-2 o_rack_size" t-on-click="() => this.chooseSize(2)">Double - 2 doors, one on top of the other</button>
+                            <button class="btn btn-secondary w-100" t-on-click="cancel">Cancel</button>
+                        </t>
+                        <t t-else="">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <b t-out="state.bundleSize === 1 ? 'Single bundle' : 'Double bundle'"/>
+                            <button class="btn btn-link btn-sm p-0" t-on-click="() => this.chooseSize(0)">Change</button>
                         </div>
-                        <div class="small mt-1 text-muted" t-if="state.lookupMsg" t-out="state.lookupMsg"/>
+                        <div t-if="!scanDone" class="o_rack_scan mt-1">
+                            <div class="small mb-1">
+                                <i class="fa fa-qrcode"/> Scan the big label of door <t t-out="state.doors.length + 1"/> of <t t-out="state.bundleSize"/>
+                                <t t-if="state.bundleSize > 1 and !state.doors.length"> (bottom door first)</t>
+                            </div>
+                            <div class="d-flex gap-1">
+                                <input class="form-control" placeholder="Scan, or type the AA order #" t-model="state.lookup" t-on-keyup="scan"/>
+                                <button class="btn btn-secondary" t-on-click="() => this.scan()">Add</button>
+                            </div>
+                        </div>
+                        <div t-if="state.lookupMsg" t-attf-class="small mt-1 alert alert-{{ state.lookupLevel === 'info' ? 'info' : state.lookupLevel }} py-1 px-2 mb-0" t-out="state.lookupMsg"/>
                         <t t-foreach="state.doors" t-as="door" t-key="door_index">
                             <div class="o_rack_door_input mt-2">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <b t-out="door.order_ref"/> <span class="text-muted" t-out="door.customer"/>
+                                        <b t-out="door.order_ref"/><t t-if="door.door_no"> · door <t t-out="door.door_no"/></t> <span class="text-muted" t-out="door.customer"/>
                                         <div class="small text-muted" t-if="door.order" t-out="door.order"/>
                                     </div>
                                     <button class="btn btn-link text-danger p-0" t-on-click="() => this.removeDoor(door_index)"><i class="fa fa-times"/></button>
@@ -113,9 +129,10 @@
                             </div>
                         </t>
                         <div class="d-flex gap-2 mt-2">
-                            <button class="btn btn-primary" t-on-click="findSpot" t-att-disabled="!state.doors.length">Find a spot</button>
+                            <button class="btn btn-primary" t-on-click="findSpot" t-att-disabled="!scanDone">Find a spot</button>
                             <button class="btn btn-secondary" t-on-click="cancel">Cancel</button>
                         </div>
+                        </t>
                     </t>
 
                     <t t-if="state.mode === 'block'">
@@ -170,9 +187,19 @@
                         <div class="o_rack_chosen">
                             <div class="small text-muted">Bundle <t t-out="feetLabel(state.suggestInfo.length)"/> long, <t t-out="state.suggestInfo.height"/>" tall</div>
                             <div class="o_rack_chosen_loc" t-out="chosenLabel"/>
-                            <div class="small text-muted"><t t-out="state.spots.length"/> spots fit · click any green one</div>
+                            <ul t-if="state.chosen.why and state.chosen.why.length" class="small mb-1 ps-3">
+                                <li t-foreach="state.chosen.why" t-as="w" t-key="w_index" t-out="w"/>
+                            </ul>
                             <button class="btn btn-success w-100 mt-2" t-on-click="saveHere"><i class="fa fa-check"/> Save here</button>
                         </div>
+                        <div class="small fw-bold mt-3">Where it can go</div>
+                        <t t-foreach="state.spots" t-as="spot" t-key="spot_index">
+                            <div t-attf-class="o_rack_option {{ spot === state.chosen ? 'o_on' : '' }}" t-on-click="() => this.chooseSpot(spot)">
+                                <span class="o_rack_option_loc" t-out="spotLabel(spot)"/>
+                                <span t-if="spot.best" class="badge text-bg-success ms-1">Recommended</span>
+                                <span t-elif="spot.stacked" class="badge text-bg-secondary ms-1">On top</span>
+                            </div>
+                        </t>
                     </t>
 
                     <!-- search results -->

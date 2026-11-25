@@ -69,6 +69,27 @@ class TestBoard(TransactionCase):
         with self.assertRaises(AccessError):
             self.Bundle.with_user(user).board_remove(b["id"], [], "mistake")
 
+    def test_scan_sticker(self):
+        r = self.Bundle.board_scan("AAD|1051|2|107|87.5|4", [])
+        self.assertTrue(r["ok"])
+        self.assertEqual((r["door"]["order_ref"], r["door"]["door_no"], r["door"]["width"], r["door"]["panels"]),
+                         ("1051", 2, 107.0, 4))
+        # the same door scanned twice in one bundle
+        again = self.Bundle.board_scan("AAD|1051|2|107|87.5|4", [{"order_ref": "1051", "door_no": 2}])
+        self.assertFalse(again["ok"])
+        # a plain number that is no AA order: sizes must be typed
+        plain = self.Bundle.board_scan("9999", [])
+        self.assertTrue(plain["ok"])
+        self.assertEqual(plain["level"], "warning")
+        # received, then scanned again: warned it is already on the racks
+        b = self.Bundle.board_receive([dict(r["door"])], self.Bundle.board_suggest([r["door"]])["spots"][0])
+        self.assertEqual(self.Bundle.browse(b["id"]).door_ids.door_no, 2)
+        warn = self.Bundle.board_scan("AAD|1051|2|107|87.5|4", [])
+        self.assertIn("already on the racks", warn["msg"])
+        # every suggestion says why
+        spots = self.Bundle.board_suggest([r["door"]])["spots"]
+        self.assertTrue(spots[0]["best"] and spots[0]["why"])
+
     def test_split(self):
         b = self._receive([{"order_ref": "A1", "width": 96, "panels": 4},
                            {"order_ref": "A2", "width": 96, "panels": 4}])

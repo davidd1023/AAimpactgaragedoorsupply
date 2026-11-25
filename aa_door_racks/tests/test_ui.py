@@ -18,7 +18,8 @@ const type = (el, v) => { el.value = v; el.dispatchEvent(new Event("input", {bub
     if (document.querySelectorAll(".o_rack_side").length !== 5) throw new Error("expected 5 sides");
     if (!document.querySelector(".o_rack_bundle")) throw new Error("no bundle drawn");
     [...document.querySelectorAll(".o_rack_top button")].find(b => b.textContent.includes("Receive")).click();
-    const look = await wait(".o_rack_panel input");
+    (await wait(".o_rack_size")).click();
+    const look = await wait(".o_rack_scan input");
     type(look, "UI-55");
     [...document.querySelectorAll(".o_rack_panel button")].find(b => b.textContent.trim() === "Add").click();
     await wait(".o_rack_door_input input");
@@ -27,7 +28,6 @@ const type = (el, v) => { el.value = v; el.dispatchEvent(new Event("input", {bub
     await new Promise(r => setTimeout(r, 200));
     [...document.querySelectorAll(".o_rack_panel button")].find(b => b.textContent.includes("Find a spot")).click();
     await wait(".o_rack_spot.o_chosen");
-    __SHOT__
     [...document.querySelectorAll(".o_rack_panel button")].find(b => b.textContent.includes("Save here")).click();
     await new Promise(r => setTimeout(r, 1500));
     const s = document.querySelector(".o_rack_search input");
@@ -42,6 +42,19 @@ const type = (el, v) => { el.value = v; el.dispatchEvent(new Event("input", {bub
     const t0 = Date.now();
     while (document.querySelector(".o_rack_bundle.o_hit") && Date.now() - t0 < 10000) await new Promise(r => setTimeout(r, 100));
     if (document.querySelector(".o_rack_bundle.o_hit")) throw new Error("bundle still on the rack after Remove");
+    // a double bundle scanned off two big labels: the spots come up by themselves
+    [...document.querySelectorAll(".o_rack_top button")].find(b => b.textContent.includes("Receive")).click();
+    await wait(".o_rack_size");
+    document.querySelectorAll(".o_rack_size")[1].click();
+    let sc = await wait(".o_rack_scan input");
+    type(sc, "AAD|7001|1|96|84|4"); sc.dispatchEvent(new KeyboardEvent("keyup", {key: "Enter", bubbles: true}));
+    await new Promise(r => setTimeout(r, 800));
+    sc = await wait(".o_rack_scan input");
+    type(sc, "AAD|7002|1|108|84|4"); sc.dispatchEvent(new KeyboardEvent("keyup", {key: "Enter", bubbles: true}));
+    await wait(".o_rack_option .badge.text-bg-success");
+    __SHOT__
+    btn("Save here").click();
+    await new Promise(r => setTimeout(r, 1500));
     console.log("test successful");
 })().catch(e => console.error(e.message));
 """
