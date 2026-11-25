@@ -76,6 +76,7 @@ class Candidate:
     stack_height: float             # height of the stack once this bundle is on it
     score: float
     seq: int = 1
+    reasons: list = field(default_factory=list)   # why it scores as it does, for the screen
 
 
 def bundle_height(door_panels, rules):
@@ -239,8 +240,19 @@ def candidates(sides, placed, length, height, rules, exclude=None):
                              + (8 if depth == "front" else 0)
                              + 2 * level_no
                              - (40 if stacked else 0))
+                    reasons = []
+                    if stacked:
+                        reasons.append("stack")
+                    elif row:
+                        reasons.append("beside")
+                    else:
+                        reasons.append("new_row")
+                    if depth == "back":
+                        reasons.append("back")
+                    if clearance:
+                        reasons.append(("room", round(clearance - new_h, 2)))
                     out.append(Candidate(side.key, level, depth, i, j, round(start, 2),
-                                         stacked, round(new_h, 2), round(score, 2), seq))
+                                         stacked, round(new_h, 2), round(score, 2), seq, reasons))
     out.sort(key=lambda c: (c.score, str(c.side), str(c.level), c.depth, c.arm_from))
     return out
 

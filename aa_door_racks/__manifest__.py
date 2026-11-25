@@ -1,6 +1,6 @@
 {
     "name": "Door Racks",
-    "version": "19.0.1.3.0",
+    "version": "19.0.1.4.0",
     "summary": "Where every finished door sits on the cantilever racks at Medley",
     "category": "Inventory/Inventory",
     "depends": ["stock", "sale_stock", "mail"],

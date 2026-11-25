@@ -10,7 +10,7 @@ function doorFrom(order, door) {
     const w = door.width || 0;
     const ft = Math.floor(w / 12 + 1e-9);
     return {
-        order_ref: order.ref, customer: order.customer || "", order: order.order || "",
+        order_ref: order.ref, door_no: door.door_no || 0, customer: order.customer || "", order: order.order || "",
         feet: w ? String(ft) : "", inches: w ? String(Math.round((w - ft * 12) * 100) / 100) : "",
         height: door.height || 0, panels: door.panels || "",
         locked: Boolean(w && door.panels),
@@ -42,6 +42,8 @@ export class RackBoard extends Component {
             doors: [],
             lookup: "",
             lookupMsg: "",
+            lookupLevel: "info",
+            bundleSize: 0,         // 1 = single, 2 = double; one sticker scanned per door
             block: { side: false, level: false, depth: "both", part: "", note: "" },
             selectedBlock: null,
             spots: [],
@@ -113,7 +115,9 @@ export class RackBoard extends Component {
         return this.state.data.bundles.find((b) => b.id === this.state.selected);
     }
     get chosenLabel() {
-        const c = this.state.chosen;
+        return this.spotLabel(this.state.chosen);
+    }
+    spotLabel(c) {
         if (!c) {
             return "";
         }
@@ -156,6 +160,7 @@ export class RackBoard extends Component {
     // ---------- receive ----------
     startReceive() {
         this.state.mode = "receive";
+        this.state.bundleSize = 0;
         this.state.doors = [];
         this.state.lookup = "";
         this.state.lookupMsg = "";
@@ -200,6 +205,46 @@ export class RackBoard extends Component {
         }
         this.state.lookup = "";
     }
+    chooseSize(n) {
+        this.state.bundleSize = n;
+        this.state.doors = [];
+        this.state.spots = [];
+        this.state.chosen = null;
+        this.state.lookupMsg = "";
+        this.focusScan();
+    }
+    focusScan() {
+        setTimeout(() => document.querySelector(".o_rack_scan input")?.focus(), 60);
+    }
+    get scanDone() {
+        return this.state.bundleSize && this.state.doors.length >= this.state.bundleSize;
+    }
+    async scan(ev) {
+        if (ev && ev.key && ev.key !== "Enter") {
+            return;
+        }
+        const code = this.state.lookup.trim();
+        this.state.lookup = "";
+        if (!code || this.scanDone) {
+            return;
+        }
+        const taken = this.state.doors.map((d) => ({ order_ref: d.order_ref, door_no: d.door_no }));
+        const res = await this.orm.call("aa.door.bundle", "board_scan", [code, taken]);
+        this.state.lookupMsg = res.msg || "";
+        this.state.lookupLevel = res.level || "info";
+        if (res.ok) {
+            const d = res.door;
+            this.state.doors.push(doorFrom({ ref: d.order_ref, customer: d.customer, order: d.order }, d));
+            this.state.spots = [];
+            this.state.chosen = null;
+            const ready = this.scanDone && this.state.doors.every((x) => x.locked);
+            if (ready) {
+                await this.findSpot();
+                return;
+            }
+        }
+        this.focusScan();
+    }
     removeDoor(idx) {
         this.state.doors.splice(idx, 1);
         this.state.spots = [];
@@ -212,6 +257,7 @@ export class RackBoard extends Component {
     doorPayload() {
         return this.state.doors.map((d) => ({
             order_ref: d.order_ref,
+            door_no: d.door_no || 0,
             customer: d.customer,
             width: (parseFloat(d.feet) || 0) * 12 + (parseFloat(d.inches) || 0),
             panels: parseInt(d.panels) || 0,

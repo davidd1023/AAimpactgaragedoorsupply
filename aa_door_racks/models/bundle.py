@@ -361,8 +361,77 @@ class AaDoorBundle(models.Model):
                 "depth": c.depth, "arm_from": c.arm_from, "arm_to": c.arm_to,
                 "start": c.start, "stacked": c.stacked, "seq": c.seq,
                 "stack_height": c.stack_height, "score": c.score, "best": idx == 0,
+                "why": self._spot_reasons(c, rules),
             } for idx, c in enumerate(cands[:12])],
         }
+
+    @api.model
+    def _spot_reasons(self, cand, rules):
+        out = []
+        for r in cand.reasons:
+            if r == "stack":
+                out.append(_("On top of a bundle already there - uses no new arms"))
+            elif r == "beside":
+                out.append(_("Beside bundles already in this row"))
+            elif r == "new_row":
+                out.append(_("Starts an empty row"))
+            elif r == "back":
+                out.append(_("Back row - the front stays open"))
+            elif isinstance(r, (list, tuple)) and r[0] == "room":
+                out.append(_('%s" left above (%s" kept for the forklift)', r[1], rules.lift_room))
+        return out
+
+    # ---------- scanning the AA Impact door sticker ----------
+    # The sticker's QR / barcode reads   AAD|<W/O>|<door #>|<width in>|<height in>|<panels>
+    # e.g. AAD|1051|1|107|87.5|4  - one scan = one whole door. A code that is
+    # only the W/O number works too: the sizes come from the Supply order.
+    SCAN_RX = re.compile(r"^\s*AAD[|;,]([^|;,]+)[|;,](\d*)[|;,]([\d.]*)[|;,]([\d.]*)[|;,](\d*)", re.I)
+
+    @api.model
+    def board_scan(self, code, taken=None):
+        """One sticker scanned. taken: [{order_ref, door_no}] already in this bundle.
+        Returns {ok, door, msg, level} - level is info / warning / danger."""
+        code = (code or "").strip()
+        if not code:
+            return {"ok": False, "msg": _("Nothing was scanned."), "level": "warning"}
+        taken = taken or []
+        m = self.SCAN_RX.match(code)
+        if m:
+            num = _order_number(m.group(1))
+            door_no = int(m.group(2) or 0)
+            width, height = float(m.group(3) or 0), float(m.group(4) or 0)
+            panels = int(m.group(5) or 0)
+        else:
+            num, door_no, width, height, panels = _order_number(code), 0, 0.0, 0.0, 0
+        info = self.board_lookup(num)
+        if not door_no:
+            door_no = 1 + sum(1 for t in taken if _order_number(t.get("order_ref")) == num)
+        if any(_order_number(t.get("order_ref")) == num and int(t.get("door_no") or 0) == door_no for t in taken):
+            return {"ok": False, "level": "warning",
+                    "msg": _("Door %(n)s of order %(o)s is already scanned - one sticker per door.", n=door_no, o=num)}
+        doors = info.get("doors") or []
+        if not (width and panels) and doors:
+            if door_no > len(doors):
+                return {"ok": False, "level": "danger",
+                        "msg": _("Order %(o)s has %(c)s door(s) and they are all scanned.", o=num, c=len(doors))}
+            d = doors[door_no - 1]
+            width, height, panels = width or d["width"], height or d["height"], panels or d["panels"]
+        door = {"order_ref": num, "door_no": door_no, "customer": info.get("customer") or "",
+                "order": info.get("order") or "", "width": width, "height": height, "panels": panels}
+        msgs, level = [], "info"
+        stored = self.env["aa.door"].search([("state", "=", "stored"), ("order_ref", "=", num)])
+        same = stored.filtered(lambda d: d.door_no == door_no)
+        if not same and stored and not stored.filtered("door_no") and len(stored) >= max(len(doors), 1):
+            same = stored[:1]
+        if same:
+            msgs.append(_("Careful: door %(n)s of order %(o)s is already on the racks at %(l)s.",
+                          n=door_no, o=num, l=same[:1].bundle_id.location))
+            level = "warning"
+        if not (width and panels):
+            msgs.append(_("Not an AA Impact order - type the door size.") if not info.get("found")
+                        else _("%s has no door sizes - type them.", info.get("order")))
+            level = "warning"
+        return {"ok": True, "door": door, "msg": " ".join(msgs), "level": level}
 
     @api.model
     def board_receive(self, doors, spot):
@@ -371,6 +440,7 @@ class AaDoorBundle(models.Model):
             raise UserError(_("Add at least one door."))
         bundle = self.create({"door_ids": [(0, 0, {
             "order_ref": _order_number(d.get("order_ref")),
+            "door_no": int(d.get("door_no") or 0),
             "customer": (d.get("customer") or "").strip() or False,
             "width": float(d.get("width") or 0),
             "panels": int(d.get("panels") or 0),
@@ -458,6 +528,7 @@ class AaDoor(models.Model):
 
     bundle_id = fields.Many2one("aa.door.bundle", required=True, ondelete="cascade", index=True)
     order_ref = fields.Char(string="AA Order #", required=True, index=True)
+    door_no = fields.Integer(string="Door #", help="Which door of the order (1, 2...) - from the sticker scan")
     customer = fields.Char()
     width = fields.Float(string="Width (in)", required=True)
     panels = fields.Integer(required=True, default=4)
@@ -483,7 +554,8 @@ class AaDoor(models.Model):
 
     def _board_door(self):
         self.ensure_one()
-        return {"id": self.id, "order_ref": self.order_ref, "customer": self.customer or "",
+        return {"id": self.id, "order_ref": self.order_ref, "door_no": self.door_no or 0,
+                "customer": self.customer or "",
                 "width": self.width, "width_label": self.width_label, "panels": self.panels,
                 "bundle": self.bundle_id.id, "bundle_name": self.bundle_id.name,
                 "location": self.location or "", "sale_order": self.sale_order_id.display_name or ""}
