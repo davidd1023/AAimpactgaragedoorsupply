@@ -18,9 +18,12 @@ const type = (el, v) => { el.value = v; el.dispatchEvent(new Event("input", {bub
     if (document.querySelectorAll(".o_rack_side").length !== 5) throw new Error("expected 5 sides");
     if (!document.querySelector(".o_rack_bundle")) throw new Error("no bundle drawn");
     [...document.querySelectorAll(".o_rack_top button")].find(b => b.textContent.includes("Receive")).click();
-    const ref = await wait(".o_rack_door_input input");
+    const look = await wait(".o_rack_panel input");
+    type(look, "UI-55");
+    [...document.querySelectorAll(".o_rack_panel button")].find(b => b.textContent.trim() === "Add").click();
+    await wait(".o_rack_door_input input");
     const inputs = document.querySelectorAll(".o_rack_door_input input");
-    type(inputs[0], "UI-55"); type(inputs[2], "9"); type(inputs[3], "0"); type(inputs[4], "4");
+    type(inputs[0], "9"); type(inputs[1], "0"); type(inputs[2], "4");
     await new Promise(r => setTimeout(r, 200));
     [...document.querySelectorAll(".o_rack_panel button")].find(b => b.textContent.includes("Find a spot")).click();
     await wait(".o_rack_spot.o_chosen");

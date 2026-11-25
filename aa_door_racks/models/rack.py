@@ -71,3 +71,39 @@ class AaRackLevel(models.Model):
     def _compute_code(self):
         for level in self:
             level.code = "%s%s" % (level.side_id.name or "", level.number or "")
+
+
+class AaRackBlock(models.Model):
+    """A spot an admin has closed because something else is stored there."""
+    _name = "aa.rack.block"
+    _description = "Closed Rack Spot"
+    _order = "id desc"
+
+    level_id = fields.Many2one("aa.rack.level", required=True, ondelete="cascade")
+    side_id = fields.Many2one(related="level_id.side_id", store=True)
+    depth = fields.Selection([("back", "Back"), ("front", "Front"), ("both", "Back and Front")],
+                             required=True, default="both")
+    arm_from = fields.Integer(required=True, default=0)
+    arm_to = fields.Integer(required=True, default=1)
+    note = fields.Char(string="What is there")
+    user_id = fields.Many2one("res.users", default=lambda self: self.env.user)
+
+    def _extent(self):
+        """(start, length) over the arms it covers, out to the overhang at an end."""
+        self.ensure_one()
+        arms = self.side_id._arms()
+        a, b = self.arm_from, self.arm_to
+        start = arms[a] - (self.side_id.overhang if a == 0 else 1.0)
+        end = arms[b] + (self.side_id.overhang if b == len(arms) - 1 else 1.0)
+        return start, end - start
+
+    def _placed(self):
+        out = []
+        for block in self:
+            start, length = block._extent()
+            for depth in (("back", "front") if block.depth == "both" else (block.depth,)):
+                out.append(engine.Placed(
+                    key=-1000000 - block.id, side=block.side_id.id, level=block.level_id.id,
+                    depth=depth, arm_from=block.arm_from, arm_to=block.arm_to,
+                    start=start, length=length, height=0.0, blocked=True))
+        return out

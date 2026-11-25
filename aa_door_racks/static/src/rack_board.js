@@ -7,8 +7,15 @@ import { _t } from "@web/core/l10n/translation";
 
 const ROW_MIN = 34;
 
-function newDoor() {
-    return { order_ref: "", customer: "", feet: "", inches: "", panels: 4 };
+function doorFrom(order, door) {
+    const w = door.width || 0;
+    const ft = Math.floor(w / 12 + 1e-9);
+    return {
+        order_ref: order.ref, customer: order.customer || "", order: order.order || "",
+        feet: w ? String(ft) : "", inches: w ? String(Math.round((w - ft * 12) * 100) / 100) : "",
+        height: door.height || 0, panels: door.panels || "",
+        locked: Boolean(w && door.panels),
+    };
 }
 
 function feetLabel(inches) {
@@ -33,7 +40,11 @@ export class RackBoard extends Component {
             results: null,
             highlight: [],
             mode: "view",          // view | receive | move
-            doors: [newDoor()],
+            doors: [],
+            lookup: "",
+            lookupMsg: "",
+            block: { side: false, level: false, depth: "both", part: "", note: "" },
+            selectedBlock: null,
             spots: [],
             chosen: null,
             suggestInfo: null,
@@ -145,7 +156,9 @@ export class RackBoard extends Component {
     // ---------- receive ----------
     startReceive() {
         this.state.mode = "receive";
-        this.state.doors = [newDoor()];
+        this.state.doors = [];
+        this.state.lookup = "";
+        this.state.lookupMsg = "";
         this.state.spots = [];
         this.state.chosen = null;
         this.state.selected = null;
@@ -158,10 +171,34 @@ export class RackBoard extends Component {
         this.state.moving = null;
         this.state.suggestInfo = null;
     }
-    addDoor() {
-        this.state.doors.push(newDoor());
+    async addOrder(ev) {
+        if (ev && ev.key && ev.key !== "Enter") {
+            return;
+        }
+        const ref = this.state.lookup.trim();
+        if (!ref) {
+            return;
+        }
+        const res = await this.orm.call("aa.door.bundle", "board_lookup", [ref]);
         this.state.spots = [];
         this.state.chosen = null;
+        if (res.found && res.doors.length) {
+            for (const d of res.doors) {
+                this.state.doors.push(doorFrom(res, d));
+            }
+            const sizesMissing = res.doors.some((d) => !d.width || !d.panels);
+            this.state.lookupMsg = `${res.order}: ${res.doors.length} door(s) added` +
+                (res.doors.length > 1 ? " - remove any not in this bundle" : "") +
+                (sizesMissing ? ". Fill in what is missing." : "") +
+                (res.on_rack ? `. ${res.on_rack} already on the racks.` : "");
+        } else if (res.found) {
+            this.state.doors.push(doorFrom(res, {}));
+            this.state.lookupMsg = `${res.order} has no door sizes - type them.`;
+        } else {
+            this.state.doors.push(doorFrom({ ref: res.ref || ref }, {}));
+            this.state.lookupMsg = _t("Not an AA Impact order - type the door size.");
+        }
+        this.state.lookup = "";
     }
     removeDoor(idx) {
         this.state.doors.splice(idx, 1);
@@ -224,11 +261,72 @@ export class RackBoard extends Component {
         }
     }
 
+    // ---------- closed spots ----------
+    blocksFor(side, level, depth) {
+        return (this.state.data.blocks || []).filter(
+            (b) => b.side === side.id && b.level === level.id && (b.depth === depth || b.depth === "both")
+        );
+    }
+    partsFor(sideId) {
+        const side = this.state.data.sides.find((s) => s.id === sideId);
+        if (!side) {
+            return [];
+        }
+        const last = side.arms.length - 1;
+        return last === 3
+            ? [["0-1", "Left"], ["2-3", "Right"], ["0-3", "Whole level"]]
+            : [["0-1", "Left"], [`1-${last}`, "Right"], [`0-${last}`, "Whole level"]];
+    }
+    levelsFor(sideId) {
+        const side = this.state.data.sides.find((s) => s.id === sideId);
+        return side ? side.levels : [];
+    }
+    startBlock() {
+        this.cancel();
+        this.state.selected = null;
+        const side = this.state.data.sides[0];
+        this.state.block = { side: side && side.id, level: side && side.levels.at(-1).id,
+                             depth: "both", part: "0-1", note: "" };
+        this.state.mode = "block";
+    }
+    onBlockSide(ev) {
+        const id = parseInt(ev.target.value);
+        this.state.block.side = id;
+        this.state.block.level = this.levelsFor(id).at(-1).id;
+        this.state.block.part = "0-1";
+    }
+    async saveBlock() {
+        const b = this.state.block;
+        const [a, z] = b.part.split("-").map((x) => parseInt(x));
+        await this.orm.call("aa.door.bundle", "board_block", [{
+            level: parseInt(b.level), depth: b.depth, arm_from: a, arm_to: z, note: b.note,
+        }]);
+        this.cancel();
+        await this.load();
+        this.notification.add(_t("Spot closed."), { type: "success" });
+    }
+    selectBlock(block) {
+        if (this.state.mode !== "view") {
+            return;
+        }
+        this.state.selected = null;
+        this.state.selectedBlock = this.state.selectedBlock === block.id ? null : block.id;
+    }
+    get selectedBlockData() {
+        return (this.state.data.blocks || []).find((b) => b.id === this.state.selectedBlock);
+    }
+    async unblock(id) {
+        await this.orm.call("aa.door.bundle", "board_unblock", [id]);
+        this.state.selectedBlock = null;
+        await this.load();
+    }
+
     // ---------- a bundle ----------
     selectBundle(id) {
         if (this.state.mode !== "view") {
             return;
         }
+        this.state.selectedBlock = null;
         this.state.selected = this.state.selected === id ? null : id;
     }
     async startMove(id) {
