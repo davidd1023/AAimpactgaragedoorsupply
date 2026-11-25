@@ -4,6 +4,7 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { MrpDisplay } from "@mrp_workorder/mrp_display/mrp_display";
+import { AaSpringEditDialog } from "./spring_edit";
 
 // THE OVERVIEW AS A LIST (owner, 2026-10-21: "more than 60 orders" on the
 // Shop Floor). The cards stay - one button switches between them - but with
@@ -182,6 +183,7 @@ patch(MrpDisplay.prototype, {
             byStation,
             status,
             parts: board.parts || null,
+            springsEdit: board.springs_edit || null,
         };
     },
 
@@ -353,6 +355,25 @@ patch(MrpDisplay.prototype, {
     // calculator runs there and nowhere else - and comes back here afterwards.
     aaAddPart(parts, part) {
         window.location.href = `/dealer/order/add/${parts.order_id}?part=${part}&back=shop-floor`;
+    },
+
+    // CHANGE A SPRING BEFORE IT IS WOUND (owner, 2026-11-25, admins only).
+    aaEditSpring(item, order) {
+        this.aaPartsDialog.add(AaSpringEditDialog, {
+            item,
+            order,
+            onSaved: async (result) => {
+                this.aaPartsNotify.add(
+                    _t("%(order)s: springs changed, %(old)s -> %(new)s. %(inv)s", {
+                        order,
+                        old: result.old_total.toFixed(2),
+                        new: result.new_total.toFixed(2),
+                        inv: result.invoice || "",
+                    }),
+                    { type: "success" });
+                await this.onClickRefresh();
+            },
+        });
     },
 
     aaRemovePart(parts, item, order) {

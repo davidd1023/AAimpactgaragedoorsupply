@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="aa_shop_floor.SpringEditDialog">
+        <Dialog title="'Change springs - ' + props.order" size="'lg'">
+            <t t-set="res" t-value="result"/>
+            <div class="small text-muted mb-2">
+                Ordered: <t t-esc="start.springs"/> x <t t-esc="start.spring_id"/>,
+                <t t-esc="fmtWire(start.wire)"/> wire, <t t-esc="start.length"/>" long,
+                <t t-esc="start.drum || 'no drum'"/>
+                <t t-if="start.hi_lift">, <t t-esc="start.hi_lift"/>" hi-lift</t>
+            </div>
+            <div class="row g-2">
+                <div class="col-6 col-md-4">
+                    <label class="form-label small mb-0">Spring I.D.</label>
+                    <select class="form-select" t-model="form.springId" t-on-change="onChange">
+                        <t t-foreach="springIds" t-as="sid" t-key="sid">
+                            <option t-att-value="sid" t-esc="sid"/>
+                        </t>
+                    </select>
+                </div>
+                <div class="col-6 col-md-4">
+                    <label class="form-label small mb-0">Wire</label>
+                    <select class="form-select" t-model="form.wire" t-on-change="onChange">
+                        <option value="auto">Recommended<t t-if="res.recommended"> (<t t-esc="fmtWire(res.recommended)"/>)</t></option>
+                        <t t-foreach="stocked" t-as="w" t-key="w">
+                            <option t-att-value="w" t-esc="fmtWire(w)"/>
+                        </t>
+                    </select>
+                </div>
+                <div class="col-6 col-md-4">
+                    <label class="form-label small mb-0">Springs on the door</label>
+                    <select class="form-select" t-model.number="form.springs" t-on-change="onChange">
+                        <option value="1">1</option><option value="2">2</option>
+                        <option value="3">3</option><option value="4">4</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-4">
+                    <label class="form-label small mb-0">Lift</label>
+                    <div class="btn-group w-100">
+                        <button type="button" class="btn" t-att-class="form.liftType === 'Standard' ? 'btn-primary' : 'btn-outline-primary'"
+                                t-on-click="() => this.setLift('Standard')">Standard</button>
+                        <button type="button" class="btn" t-att-class="form.liftType === 'Hi-Lift' ? 'btn-primary' : 'btn-outline-primary'"
+                                t-on-click="() => this.setLift('Hi-Lift')">Hi-Lift</button>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4" t-if="form.liftType === 'Hi-Lift'">
+                    <label class="form-label small mb-0">Hi-lift (in)</label>
+                    <input type="number" class="form-control" t-model.number="form.hiLift" t-on-change="onChange"/>
+                </div>
+                <div class="col-6 col-md-4" t-else="">
+                    <label class="form-label small mb-0">Track radius</label>
+                    <select class="form-select" t-model="form.radius" t-on-change="onChange">
+                        <option value="12">12"</option><option value="15">15"</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-4">
+                    <label class="form-label small mb-0">Drum</label>
+                    <select class="form-select" t-model="form.drum" t-on-change="onChange">
+                        <t t-foreach="drums" t-as="d" t-key="d">
+                            <option t-att-value="d" t-esc="d.replace('CANIMEX/TF ', '')"/>
+                        </t>
+                    </select>
+                </div>
+                <div class="col-4">
+                    <label class="form-label small mb-0">Door weight (lb)</label>
+                    <input type="number" class="form-control" t-model.number="form.weight" t-on-change="onChange"/>
+                </div>
+                <div class="col-4">
+                    <label class="form-label small mb-0">Door height (in)</label>
+                    <input type="number" class="form-control" t-model.number="form.heightIn" t-on-change="onChange"/>
+                </div>
+                <div class="col-4">
+                    <label class="form-label small mb-0">Cycles</label>
+                    <select class="form-select" t-model="form.cycles" t-on-change="onChange">
+                        <t t-foreach="cyclesList" t-as="c" t-key="c">
+                            <option t-att-value="c" t-esc="c"/>
+                        </t>
+                    </select>
+                </div>
+            </div>
+
+            <div class="border rounded p-2 mt-3 bg-light">
+                <div t-if="res.error" class="text-danger" t-esc="res.error"/>
+                <t t-else="">
+                    <div class="fw-bold">
+                        New spring: <t t-esc="form.springs"/> x <t t-esc="form.springId"/>,
+                        <t t-esc="fmtWire(res.wire)"/> wire, <t t-esc="res.length"/>" long,
+                        <t t-esc="res.turns"/> turns
+                    </div>
+                    <div t-if="ui.price" class="mt-1">
+                        Price: <t t-esc="ui.price.old_total.toFixed(2)"/> ->
+                        <b t-esc="ui.price.total.toFixed(2)"/>
+                        <span class="text-muted small"> (springs and filler, before tax)</span>
+                    </div>
+                    <t t-foreach="res.warnings" t-as="w" t-key="w_index">
+                        <div class="small" t-att-class="w.severity === 'red' ? 'text-danger fw-bold' : 'text-warning'" t-esc="w.message"/>
+                    </t>
+                </t>
+                <div t-if="ui.error" class="text-danger small mt-1" t-esc="ui.error"/>
+            </div>
+
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-att-disabled="result.error or result.red or ui.busy"
+                        t-on-click="save">Save and update the order</button>
+                <button class="btn btn-secondary" t-on-click="props.close">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

@@ -143,6 +143,22 @@
                                             </button>
                                         </t>
                                     </div>
+                                    <!-- Admin: change a spring before Michel winds it (owner, 2026-11-25). -->
+                                    <div t-if="aaRow.springsEdit" class="d-flex flex-column gap-1 mb-2 o_aa_spring_edit">
+                                        <t t-foreach="aaRow.springsEdit" t-as="aaSpring" t-key="aaSpring.line_id">
+                                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                                <span class="small text-muted">Springs (admin):</span>
+                                                <span class="small" t-esc="aaSpring.label"/>
+                                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        t-att-disabled="aaSpring.locked ? true : false"
+                                                        t-att-title="aaSpring.locked"
+                                                        t-on-click.stop="() => this.aaEditSpring(aaSpring, aaRow.order)">
+                                                    <i class="fa fa-pencil me-1"/>Change springs
+                                                </button>
+                                                <span t-if="aaSpring.locked" class="small text-muted" t-esc="aaSpring.locked"/>
+                                            </div>
+                                        </t>
+                                    </div>
                                     <div class="o_aa_overview_jobs">
                                         <t t-foreach="aaRow.jobs" t-as="aaJob" t-key="aaJob.id">
                                             <div class="border rounded bg-view p-2" t-att-class="{'opacity-50': aaJob.status === 'done'}">

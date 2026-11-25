@@ -15,3 +15,4 @@ from . import test_shop_floor_only
 from . import test_track_swap
 from . import test_send_back
 from . import test_shop_floor_language
+from . import test_spring_edit
