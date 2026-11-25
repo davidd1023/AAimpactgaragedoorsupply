@@ -36,6 +36,39 @@ class TestBoard(TransactionCase):
         self.assertEqual(bundle.state, "out")
         self.assertFalse(bundle.location)
 
+    def test_remove_delivered_and_mistake(self):
+        b = self._receive([{"order_ref": "R1", "width": 96, "panels": 4},
+                           {"order_ref": "R2", "width": 96, "panels": 4}])
+        bundle = self.Bundle.browse(b["id"])
+        # one door picked up: kept in history, bundle still on the rack
+        self.Bundle.board_remove(False, [bundle.door_ids[0].id], "delivered")
+        self.assertEqual(bundle.door_ids[0].state, "delivered")
+        self.assertEqual(bundle.state, "stored")
+        # the other entered by mistake: deleted, bundle frees its spot
+        mistake = bundle.door_ids.filtered(lambda d: d.state == "stored")
+        self.Bundle.board_remove(False, mistake.ids, "mistake")
+        self.assertFalse(mistake.exists())
+        self.assertEqual(bundle.state, "out")
+        self.assertFalse(self.Bundle.board_search("R2"))
+        # a whole bundle entered by mistake disappears entirely
+        b2 = self._receive([{"order_ref": "R3", "width": 96, "panels": 4}])
+        self.Bundle.board_remove(b2["id"], [], "mistake")
+        self.assertFalse(self.Bundle.browse(b2["id"]).exists())
+        # a whole bundle picked up
+        b3 = self._receive([{"order_ref": "R4", "width": 96, "panels": 4},
+                            {"order_ref": "R5", "width": 96, "panels": 4}])
+        self.Bundle.board_remove(b3["id"], [], "delivered")
+        self.assertEqual(self.Bundle.browse(b3["id"]).state, "out")
+
+    def test_mistake_needs_an_admin(self):
+        from odoo.exceptions import AccessError
+        b = self._receive([{"order_ref": "R9", "width": 96, "panels": 4}])
+        user = self.env["res.users"].create({
+            "name": "Rack clerk", "login": "rack_clerk_t",
+            "group_ids": [(6, 0, [self.env.ref("stock.group_stock_user").id])]})
+        with self.assertRaises(AccessError):
+            self.Bundle.with_user(user).board_remove(b["id"], [], "mistake")
+
     def test_split(self):
         b = self._receive([{"order_ref": "A1", "width": 96, "panels": 4},
                            {"order_ref": "A2", "width": 96, "panels": 4}])

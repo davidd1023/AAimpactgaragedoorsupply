@@ -34,6 +34,14 @@ const type = (el, v) => { el.value = v; el.dispatchEvent(new Event("input", {bub
     s.value = "UI-55"; s.dispatchEvent(new KeyboardEvent("keyup", {key: "Enter", bubbles: true}));
     await wait(".o_rack_bundle.o_hit");
     await wait(".o_rack_result");
+    const btn = (txt) => [...document.querySelectorAll(".o_rack_panel button")].find(b => b.textContent.includes(txt));
+    if (!btn("Remove bundle")) document.querySelector(".o_rack_bundle.o_hit").click();
+    (await (async () => { for (let i = 0; i < 50 && !btn("Remove bundle"); i++) await new Promise(r => setTimeout(r, 100)); return btn("Remove bundle"); })()).click();
+    await wait(".o_rack_remove");
+    btn("Picked up").click();
+    const t0 = Date.now();
+    while (document.querySelector(".o_rack_bundle.o_hit") && Date.now() - t0 < 10000) await new Promise(r => setTimeout(r, 100));
+    if (document.querySelector(".o_rack_bundle.o_hit")) throw new Error("bundle still on the rack after Remove");
     console.log("test successful");
 })().catch(e => console.error(e.message));
 """

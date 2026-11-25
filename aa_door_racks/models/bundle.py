@@ -407,6 +407,33 @@ class AaDoorBundle(models.Model):
         return True
 
     @api.model
+    def board_remove(self, bundle_id=False, door_ids=None, mode="delivered"):
+        """Take doors (or a whole bundle) off the rack.
+        delivered - they left with the customer: kept in the history.
+        mistake   - they were entered wrongly: deleted (admin only)."""
+        if bundle_id:
+            bundle = self.browse(bundle_id)
+            doors = bundle.door_ids.filtered(lambda d: d.state == "stored")
+        else:
+            doors = self.env["aa.door"].browse(door_ids or []).filtered(lambda d: d.state == "stored")
+            bundle = doors.mapped("bundle_id")
+        if mode == "mistake":
+            if not self._is_admin():
+                raise AccessError(_("Only an Inventory administrator can delete doors entered by mistake."))
+            for b in bundle.sudo():
+                left = b.door_ids.filtered(lambda d: d.state == "stored") - doors.sudo()
+                b.message_post(body=_("Deleted as entered by mistake: %s", ", ".join(doors.filtered(
+                    lambda d: d.bundle_id == b).mapped("order_ref"))))
+                if not left and not b.door_ids.filtered(lambda d: d.state == "delivered"):
+                    b.unlink()
+                    continue
+                doors.sudo().filtered(lambda d: d.bundle_id == b).unlink()
+                b._settle()
+            return True
+        doors._mark_delivered(_("Taken off the rack by %s", self.env.user.name))
+        return True
+
+    @api.model
     def board_split(self, door_id):
         """Take one door out of its bundle into a bundle of its own (admin),
         and return the new bundle so the board can place it."""
