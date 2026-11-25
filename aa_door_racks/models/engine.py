@@ -56,6 +56,7 @@ class Placed:
     length: float
     height: float
     seq: int = 1
+    blocked: bool = False           # a spot closed by an admin (something else stored there)
 
     @property
     def end(self):
@@ -202,6 +203,8 @@ def candidates(sides, placed, length, height, rules, exclude=None):
                     own = row.get((level, depth, i, j))
                     others = [(min(m.start for m in v), max(m.end for m in v))
                               for k, v in row.items() if k != (level, depth, i, j)]
+                    if own and any(m.blocked for m in own):
+                        continue
                     if own:
                         # on top of the stack already on these arms
                         if any(group_arms & set(range(a, b + 1))

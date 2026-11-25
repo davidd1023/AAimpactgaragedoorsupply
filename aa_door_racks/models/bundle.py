@@ -1,9 +1,17 @@
+import re
+
 from odoo import api, fields, models, _
 from odoo.exceptions import AccessError, UserError
 
 from . import engine
 
 DEPTHS = [("back", "Back"), ("front", "Front")]
+
+
+def _order_number(ref):
+    """'W/O 1051', '#1051' and '1051' are the same AA order."""
+    ref = (ref or "").strip().lstrip("#").strip()
+    return re.sub(r"(?i)^w\s*/?\s*o\s*#?\s*", "", ref).strip()
 
 
 def _inches_label(inches):
@@ -116,6 +124,7 @@ class AaDoorBundle(models.Model):
             arm_from=b.arm_from, arm_to=b.arm_to, start=b.pos_start,
             length=b.length, height=b.height, seq=b.stack_seq)
             for b in self.search([("state", "=", "stored")])]
+        placed += self.env["aa.rack.block"].search([])._placed()
         return specs, placed
 
     def _candidates(self, length=None, height=None):
@@ -192,10 +201,87 @@ class AaDoorBundle(models.Model):
         return {
             "sides": out_sides,
             "bundles": [b._board_bundle() for b in bundles],
+            "blocks": self._board_blocks(),
             "free": free,
             "admin": self._is_admin(),
             "rules": self._rules().__dict__,
         }
+
+    @api.model
+    def _board_blocks(self):
+        out = []
+        for block in self.env["aa.rack.block"].search([]):
+            start, length = block._extent()
+            out.append({"id": block.id, "side": block.side_id.id, "level": block.level_id.id,
+                        "level_code": block.level_id.code, "depth": block.depth,
+                        "arm_from": block.arm_from, "arm_to": block.arm_to,
+                        "start": start, "length": length, "note": block.note or ""})
+        return out
+
+    @api.model
+    def board_block(self, vals):
+        """Close a spot (admin): level, depth (back/front/both), arms."""
+        if not self._is_admin():
+            raise AccessError(_("Only an Inventory administrator can close a spot."))
+        level = self.env["aa.rack.level"].browse(int(vals["level"]))
+        a, b = int(vals["arm_from"]), int(vals["arm_to"])
+        n = len(level.side_id._arms())
+        if not (0 <= a < b < n):
+            raise UserError(_("Pick which part of the level to close."))
+        depths = ("back", "front") if vals.get("depth") == "both" else (vals.get("depth"),)
+        busy = self.search([("state", "=", "stored"), ("level_id", "=", level.id),
+                            ("depth", "in", depths), ("arm_from", "<=", b), ("arm_to", ">=", a)])
+        if busy:
+            raise UserError(_("%(spot)s holds %(bundles)s - move them first.",
+                              spot=level.code, bundles=", ".join(busy.mapped("name"))))
+        self.env["aa.rack.block"].create({
+            "level_id": level.id, "depth": vals.get("depth") or "both",
+            "arm_from": a, "arm_to": b, "note": (vals.get("note") or "").strip() or False})
+        return True
+
+    @api.model
+    def board_unblock(self, block_id):
+        if not self._is_admin():
+            raise AccessError(_("Only an Inventory administrator can open a spot."))
+        self.env["aa.rack.block"].browse(block_id).unlink()
+        return True
+
+    @api.model
+    def board_lookup(self, ref):
+        """The doors of an AA Impact order, read off the Supply order whose
+        PO Number carries that W/O number ("W/O 1051 - customer"). None found
+        means it is not an AA order and the sizes must be typed."""
+        ref = (ref or "").strip().lstrip("#").strip()
+        if not ref:
+            return {"found": False}
+        num = _order_number(ref)
+        order = self._aa_find_order(num)
+        if not order:
+            return {"found": False, "ref": num}
+        customer = re.sub(r"(?i)^\s*(?:w\s*/?\s*o\s*#?\s*)?%s\s*[-:]*\s*" % re.escape(num), "",
+                          order.client_order_ref or "").strip()
+        doors = []
+        rows = order._aa_door_rows() if hasattr(order, "_aa_door_rows") else []
+        kits = order._aa_kit_lines() if hasattr(order, "_aa_kit_lines") else order.order_line.filtered(
+            lambda l: "Hardware Kit" in (l.product_id.display_name or "") and l.product_uom_qty > 0)
+        for idx, row in enumerate(rows):
+            kit = kits[idx] if idx < len(kits) else False
+            m = re.search(r"(\d+)\s*Panels?", kit.product_id.display_name if kit else "")
+            for _i in range(max(1, int(row.get("qty") or 1))):
+                doors.append({"width": row.get("width_in") or 0, "height": row.get("height_in") or 0,
+                              "panels": int(m.group(1)) if m else 0})
+        stored = self.env["aa.door"].search_count([("state", "=", "stored"), ("order_ref", "=", num)])
+        return {"found": True, "ref": num, "order": order.name, "customer": customer,
+                "doors": doors, "on_rack": stored}
+
+    @api.model
+    def _aa_find_order(self, num):
+        if not num:
+            return self.env["sale.order"]
+        orders = self.env["sale.order"].sudo().search(
+            [("client_order_ref", "ilike", num), ("state", "!=", "cancel")], order="id desc", limit=40)
+        rx = re.compile(r"(?i)^\s*(?:w\s*/?\s*o\s*#?\s*)?%s(?:\b|$)" % re.escape(num))
+        return next((o for o in orders if rx.search(o.client_order_ref or "")), self.env["sale.order"])
 
     def _board_bundle(self):
         self.ensure_one()
@@ -283,7 +369,7 @@ class AaDoorBundle(models.Model):
         if not doors:
             raise UserError(_("Add at least one door."))
         bundle = self.create({"door_ids": [(0, 0, {
-            "order_ref": (d.get("order_ref") or "").strip(),
+            "order_ref": _order_number(d.get("order_ref")),
             "customer": (d.get("customer") or "").strip() or False,
             "width": float(d.get("width") or 0),
             "panels": int(d.get("panels") or 0),
@@ -364,10 +450,8 @@ class AaDoor(models.Model):
     def _compute_sale_order(self):
         """The Supply order whose PO Number is this AA Impact order number."""
         for door in self:
-            ref = (door.order_ref or "").strip()
-            door.sale_order_id = ref and self.env["sale.order"].search(
-                [("client_order_ref", "=ilike", ref), ("state", "!=", "cancel")],
-                order="id desc", limit=1)
+            door.sale_order_id = self.env["aa.door.bundle"]._aa_find_order(
+                _order_number(door.order_ref))
 
     def _board_door(self):
         self.ensure_one()

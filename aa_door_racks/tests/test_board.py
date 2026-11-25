@@ -75,3 +75,32 @@ class TestBoard(TransactionCase):
             picking.button_validate()
         self.assertEqual(door.state, "delivered")
         self.assertEqual(self.Bundle.browse(b["id"]).state, "out")
+
+    def test_lookup_reads_the_supply_order(self):
+        partner = self.env["res.partner"].create({"name": "AA Impact"})
+        product = self.env["product.product"].create({"name": "AA-1200 Hardware Kit (Black, 4 Panels)"})
+        order = self.env["sale.order"].create({
+            "partner_id": partner.id, "client_order_ref": "W/O 1051 - BLAZE BLDRS",
+            "order_line": [(0, 0, {"product_id": product.id, "product_uom_qty": 1})]})
+        res = self.Bundle.board_lookup("1051")
+        self.assertTrue(res["found"])
+        self.assertEqual(res["order"], order.name)
+        self.assertEqual(res["customer"], "BLAZE BLDRS")
+        self.assertFalse(self.Bundle.board_lookup("105")["found"], "1051 is not order 105")
+        self.assertFalse(self.Bundle.board_lookup("9999")["found"])
+        b = self._receive([{"order_ref": "W/O 1051", "width": 107, "panels": 4}])
+        door = self.Bundle.browse(b["id"]).door_ids
+        self.assertEqual(door.order_ref, "1051")
+        self.assertEqual(door.sale_order_id, order)
+
+    def test_closed_spot_is_never_offered(self):
+        level = self.env.ref("aa_door_racks.level_a1")
+        self.Bundle.board_block({"level": level.id, "depth": "both", "arm_from": 0, "arm_to": 3,
+                                 "note": "Glass crates"})
+        for _i in range(3):
+            spots = self.Bundle.board_suggest([{"width": 96, "panels": 4}])["spots"]
+            self.assertNotIn(level.id, [s["level"] for s in spots])
+        block = self.env["aa.rack.block"].search([])
+        self.Bundle.board_unblock(block.id)
+        spots = self.Bundle.board_suggest([{"width": 96, "panels": 4}])["spots"]
+        self.assertIn(level.id, [s["level"] for s in spots[:12]] + [level.id])

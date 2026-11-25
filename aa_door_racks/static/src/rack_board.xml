@@ -18,6 +18,9 @@
                 <button class="btn btn-primary" t-if="state.mode === 'view'" t-on-click="startReceive">
                     <i class="fa fa-plus"/> Receive Bundle
                 </button>
+                <button class="btn btn-secondary" t-if="state.mode === 'view' and state.data.admin" t-on-click="startBlock">
+                    <i class="fa fa-ban"/> Close a Spot
+                </button>
             </div>
 
             <div class="o_rack_body">
@@ -37,6 +40,14 @@
                                                 <span class="o_rack_depth" t-out="depth === 'back' ? 'Back' : 'Front'"/>
                                                 <t t-foreach="side.arms" t-as="arm" t-key="arm_index">
                                                     <span class="o_rack_arm" t-att-style="armStyle(side, arm)"/>
+                                                </t>
+                                                <t t-foreach="blocksFor(side, level, depth)" t-as="blk" t-key="blk.id">
+                                                    <div class="o_rack_block" t-att-class="{'o_selected': state.selectedBlock === blk.id}"
+                                                         t-att-style="boxStyle(side, blk.start, blk.length)"
+                                                         t-att-title="'Closed: ' + (blk.note || '')"
+                                                         t-on-click="() => this.selectBlock(blk)">
+                                                        <span><i class="fa fa-ban"/> <t t-out="blk.note || 'Closed'"/></span>
+                                                    </div>
                                                 </t>
                                                 <t t-foreach="stacksFor(side, level, depth)" t-as="stack" t-key="stack.key">
                                                     <div class="o_rack_stack" t-att-style="boxStyle(side, stack.start, stack.length)">
@@ -73,15 +84,25 @@
                     <!-- receive a bundle -->
                     <t t-if="state.mode === 'receive'">
                         <h4>Receive a bundle</h4>
-                        <p class="text-muted small">One line per door, bottom door first.</p>
+                        <p class="text-muted small">Type the AA order # of each door in the bundle, bottom door first.</p>
+                        <div class="d-flex gap-1">
+                            <input class="form-control" placeholder="AA order # (e.g. 1051)" t-model="state.lookup" t-on-keyup="addOrder"/>
+                            <button class="btn btn-secondary" t-on-click="() => this.addOrder()">Add</button>
+                        </div>
+                        <div class="small mt-1 text-muted" t-if="state.lookupMsg" t-out="state.lookupMsg"/>
                         <t t-foreach="state.doors" t-as="door" t-key="door_index">
-                            <div class="o_rack_door_input">
-                                <div class="d-flex gap-1">
-                                    <input class="form-control" placeholder="AA order #" t-model="door.order_ref" t-on-input="onDoorInput"/>
-                                    <button t-if="state.doors.length > 1" class="btn btn-link text-danger px-1" t-on-click="() => this.removeDoor(door_index)"><i class="fa fa-times"/></button>
+                            <div class="o_rack_door_input mt-2">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <b t-out="door.order_ref"/> <span class="text-muted" t-out="door.customer"/>
+                                        <div class="small text-muted" t-if="door.order" t-out="door.order"/>
+                                    </div>
+                                    <button class="btn btn-link text-danger p-0" t-on-click="() => this.removeDoor(door_index)"><i class="fa fa-times"/></button>
                                 </div>
-                                <input class="form-control mt-1" placeholder="Customer (optional)" t-model="door.customer"/>
-                                <div class="d-flex gap-1 mt-1 align-items-center">
+                                <div t-if="door.locked" class="small">
+                                    <t t-out="door.feet"/>' <t t-out="door.inches"/>" wide<t t-if="door.height"> x <t t-out="feetLabel(door.height)"/></t> · <t t-out="door.panels"/> panels
+                                </div>
+                                <div t-else="" class="d-flex gap-1 mt-1 align-items-center">
                                     <input class="form-control" type="number" min="0" placeholder="ft" t-model="door.feet" t-on-input="onDoorInput"/>
                                     <span>'</span>
                                     <input class="form-control" type="number" min="0" step="0.5" placeholder="in" t-model="door.inches" t-on-input="onDoorInput"/>
@@ -91,11 +112,51 @@
                                 </div>
                             </div>
                         </t>
-                        <button class="btn btn-link px-0" t-on-click="addDoor"><i class="fa fa-plus"/> Another door in this bundle</button>
                         <div class="d-flex gap-2 mt-2">
-                            <button class="btn btn-primary" t-on-click="findSpot">Find a spot</button>
+                            <button class="btn btn-primary" t-on-click="findSpot" t-att-disabled="!state.doors.length">Find a spot</button>
                             <button class="btn btn-secondary" t-on-click="cancel">Cancel</button>
                         </div>
+                    </t>
+
+                    <t t-if="state.mode === 'block'">
+                        <h4>Close a spot</h4>
+                        <p class="small text-muted">For a spot holding something else. Nothing will be put there until it is opened again.</p>
+                        <label class="small">Rack</label>
+                        <select class="form-select mb-2" t-on-change="onBlockSide">
+                            <t t-foreach="state.data.sides" t-as="sd" t-key="sd.id">
+                                <option t-att-value="sd.id" t-att-selected="sd.id === state.block.side" t-out="sd.name"/>
+                            </t>
+                        </select>
+                        <label class="small">Level</label>
+                        <select class="form-select mb-2" t-model.number="state.block.level">
+                            <t t-foreach="levelsFor(state.block.side)" t-as="lv" t-key="lv.id">
+                                <option t-att-value="lv.id" t-out="lv.code"/>
+                            </t>
+                        </select>
+                        <label class="small">Which part</label>
+                        <select class="form-select mb-2" t-model="state.block.part">
+                            <t t-foreach="partsFor(state.block.side)" t-as="pt" t-key="pt[0]">
+                                <option t-att-value="pt[0]" t-out="pt[1]"/>
+                            </t>
+                        </select>
+                        <label class="small">Row</label>
+                        <select class="form-select mb-2" t-model="state.block.depth">
+                            <option value="both">Back and Front</option>
+                            <option value="back">Back</option>
+                            <option value="front">Front</option>
+                        </select>
+                        <input class="form-control mb-2" placeholder="What is there (optional)" t-model="state.block.note"/>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" t-on-click="saveBlock">Close it</button>
+                            <button class="btn btn-secondary" t-on-click="cancel">Cancel</button>
+                        </div>
+                    </t>
+
+                    <t t-if="state.mode === 'view' and selectedBlockData">
+                        <h4>Closed spot</h4>
+                        <div class="o_rack_chosen_loc" t-out="selectedBlockData.level_code"/>
+                        <p t-out="selectedBlockData.note || 'No note'"/>
+                        <button t-if="state.data.admin" class="btn btn-primary btn-sm" t-on-click="() => this.unblock(selectedBlockData.id)">Open this spot</button>
                     </t>
 
                     <t t-if="state.mode === 'move'">
@@ -151,7 +212,7 @@
                         </div>
                     </t>
 
-                    <t t-if="state.mode === 'view' and !selectedBundle and !state.results">
+                    <t t-if="state.mode === 'view' and !selectedBundle and !state.results and !selectedBlockData">
                         <div class="text-muted">
                             <p>Click a bundle to see its doors.</p>
                             <p>Each bar is a bundle, drawn at its real length. The grey ticks are the arms.</p>

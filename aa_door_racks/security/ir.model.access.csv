@@ -9,3 +9,5 @@ access_door_user,door user,model_aa_door,stock.group_stock_user,1,1,1,0
 access_door_manager,door manager,model_aa_door,stock.group_stock_manager,1,1,1,1
 access_move_user,move user,model_aa_door_move,stock.group_stock_user,1,0,1,0
 access_move_manager,move manager,model_aa_door_move,stock.group_stock_manager,1,1,1,1
+access_block_user,block user,model_aa_rack_block,stock.group_stock_user,1,0,0,0
+access_block_manager,block manager,model_aa_rack_block,stock.group_stock_manager,1,1,1,1

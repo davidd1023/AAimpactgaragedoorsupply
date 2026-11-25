@@ -107,6 +107,20 @@
         &.o_selected { box-shadow: 0 0 0 2px #212529; }
         &.o_moving { opacity: 0.4; }
     }
+    .o_rack_block {
+        position: absolute;
+        top: 3px;
+        bottom: 3px;
+        border-radius: 3px;
+        background: repeating-linear-gradient(45deg, #adb5bd, #adb5bd 6px, #ced4da 6px, #ced4da 12px);
+        color: #212529;
+        font-size: 0.75em;
+        padding: 0 6px;
+        overflow: hidden;
+        white-space: nowrap;
+        cursor: pointer;
+        &.o_selected { box-shadow: 0 0 0 2px #212529; }
+    }
     .o_rack_spot {
         position: absolute;
         top: 2px;
