@@ -111,6 +111,11 @@ export class OrderCoverageBoard extends Component {
             // THE OTHER FLAG SIZE IS ON ITS WAY (owner, 2026-11-24): shown as
             // the part to use and when, not in red as if nothing were ordered.
             row.poSwaps = short.filter((l) => l.po_part);
+            // THE OTHER HARDWARE LINE (owner, 2026-11-25): jamb brackets,
+            // hinges and bottom brackets switch together, the whole door;
+            // a part that fits either line (the ATL horizontal) on its own.
+            row.lineLoose = lines.filter((l) => l.line_qty > 0 && !l.line_must_match);
+            row.lineParts = lines.filter((l) => l.line_qty > 0 && l.line_must_match);
             row.canPaint = !row.canMake && short.every((l) => l.eta || l.paint_qty >= l.short - 1e-6)
                 && row.paints.length > 0;
             // WHEN WILL IT BE READY: worked out over the whole order, every
@@ -365,6 +370,19 @@ export class OrderCoverageBoard extends Component {
             views: [[false, "form"]],
             target: "current",
         });
+    }
+    lineName(code) {
+        return { chi: "CHI", atl: "ATL" }[code] || code;
+    }
+    async switchLine(row) {
+        await this.orm.call("sale.order", "aa_set_hw_line", [[row.sale_id], row.line_switch]);
+        this.notification.add(`W/O ${row.wo} is now made with ${this.lineName(row.line_switch)}: its parts were swapped on the Work Order.`, { type: "success" });
+        await this.load();
+    }
+    async useTwin(row, line) {
+        await this.orm.call("sale.order", "aa_use_twin", [[row.sale_id], line.product_id]);
+        this.notification.add(`W/O ${row.wo}: ${line.line_twin} instead of ${line.product}.`, { type: "success" });
+        await this.load();
     }
     async paintPo(line) {
         const action = await this.orm.call("aa.order.coverage.line", "aa_paint_po",

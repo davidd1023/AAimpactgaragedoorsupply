@@ -238,6 +238,16 @@ class MrpProduction(models.Model):
         rows.append(("Pairs", qty_label(pairs)))
 
         if self.move_raw_ids:
+            templates = self.move_raw_ids.mapped("product_id.product_tmpl_id")
+            if "aa_line_must_match" in templates._fields:
+                lines = {t.aa_hw_line for t in templates if t.aa_line_must_match and t.aa_hw_line}
+                if len(lines) == 1:
+                    rows.append(("Hardware line", {"chi": "CHI", "atl": "ATL"}.get(*lines, *lines)))
+                # THE ATL HORIZONTAL COMES WITHOUT ITS 2x2 ANGLE (owner,
+                # 2026-11-25): the part says so, and the card repeats it.
+                for template in templates:
+                    if template.aa_prep_note:
+                        rows.append(("Prep", template.aa_prep_note))
             rows.append(("Parts", ""))
             for move in self.move_raw_ids:
                 part = move.product_id.with_context(display_default_code=False).display_name
@@ -297,6 +307,9 @@ class MrpProduction(models.Model):
         # on it says custom kit".
         pieces = self._aa_kit_pieces_from_bom(product, qty) \
             or self._aa_kit_pieces_from_order()
+        pieces, line_row = self._aa_pieces_for_line(pieces)
+        if line_row:
+            rows.append(line_row)
 
         if pieces:
             rows.append(("Box contents", ""))
@@ -309,6 +322,28 @@ class MrpProduction(models.Model):
             rows.append(("Lift cable", "", "c"))
             rows += self._aa_cable_rows(cable.product_id, cable.product_uom_qty, notes=False)
         return rows
+
+    def _aa_pieces_for_line(self, pieces):
+        """The box as the order's hardware line has it (owner, 2026-11-25:
+        "yo no puedo mesclar hinges de chi con jamb brackets de ATL").
+
+        The kit's BoM is written in CHI parts and does not change when an
+        order is switched to ATL, so its hinges and bottom brackets are read
+        through the order's line here - the card shows the part to pick.
+        aa_order_coverage owns the line; without it nothing changes."""
+        if not pieces or not hasattr(self, "_aa_line_for_card"):
+            return pieces, None
+        line = self._aa_line_for_card()
+        matched = {}
+        must_match = False
+        for part, amount in pieces.items():
+            if part.product_tmpl_id.aa_line_must_match:
+                must_match = True
+                part = part._aa_for_line(line)
+            matched[part] = matched.get(part, 0.0) + amount
+        if not must_match or not line:
+            return matched, None
+        return matched, ("Hardware line", {"chi": "CHI", "atl": "ATL"}.get(line, line))
 
     def _aa_kit_pieces_from_bom(self, product, qty):
         """{part: how many} for a catalogue kit, out of its phantom BoM."""

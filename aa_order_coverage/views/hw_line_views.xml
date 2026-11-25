@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- ONE DOOR, ONE HARDWARE LINE (owner, 2026-11-25): see models/hw_line.py. -->
+
+  <record id="view_product_template_form_aa_hw_line" model="ir.ui.view">
+    <field name="name">product.template.form.aa.hw.line</field>
+    <field name="model">product.template</field>
+    <field name="inherit_id" ref="stock.view_template_property_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//page[@name='inventory']" position="inside">
+        <group string="Hardware Line (CHI / ATL)" name="aa_hw_line">
+          <group>
+            <field name="aa_hw_line"/>
+            <field name="aa_line_must_match"/>
+            <field name="aa_line_twin_id" invisible="not aa_hw_line"/>
+          </group>
+          <group>
+            <field name="aa_prep_part_id"/>
+            <field name="aa_prep_part_qty" invisible="not aa_prep_part_id"/>
+            <field name="aa_prep_note"/>
+          </group>
+        </group>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_product_template_list_aa_hw_line" model="ir.ui.view">
+    <field name="name">product.template.list.aa.hw.line</field>
+    <field name="model">product.template</field>
+    <field name="inherit_id" ref="product.product_template_tree_view"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="aa_hw_line" optional="hide"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_order_form_aa_hw_line" model="ir.ui.view">
+    <field name="name">sale.order.form.aa.hw.line</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='client_order_ref']" position="after">
+        <field name="aa_hw_line" readonly="1"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_picking_form_aa_hw_line" model="ir.ui.view">
+    <field name="name">stock.picking.form.aa.hw.line</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='origin']" position="after">
+        <field name="aa_hw_line" invisible="not aa_hw_line"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

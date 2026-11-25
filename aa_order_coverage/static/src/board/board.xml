@@ -71,7 +71,10 @@
             <t t-foreach="rows" t-as="row" t-key="row.seq">
               <tr t-on-click="() => this.toggleOpen(row.seq)" style="cursor: pointer;">
                 <td t-out="row.seq"/>
-                <td t-out="row.wo"/>
+                <td>
+                  <t t-out="row.wo"/>
+                  <span t-if="row.hw_line === 'atl'" class="badge text-bg-info ms-1" title="Jamb brackets, hinges and bottom brackets come from ATL">ATL</span>
+                </td>
                 <td t-out="row.po"/>
                 <td t-out="row.customer"/>
                 <td t-out="row.pickup"/>
@@ -79,7 +82,7 @@
                   <i class="fa fa-circle me-1" t-att-class="dotClass(row)"/>
                   <span t-if="row.noPo" class="text-danger">Missing - not ordered or not enough on order</span>
                   <span t-else="" t-att-class="row.canMake ? 'text-success' : 'text-warning'">
-                    <t t-if="row.canMake">Can make<t t-if="row.swaps.length"> (using another size)</t> · </t>ready ~<t t-out="row.finishBy"/>
+                    <t t-if="row.canMake">Can make<t t-if="row.swaps.length"> (using another size)</t><t t-if="row.line_switch"> (with <t t-out="lineName(row.line_switch)"/>)</t> · </t>ready ~<t t-out="row.finishBy"/>
                   </span>
                   <div t-if="row.canPaint" class="text-primary small"><i class="fa fa-paint-brush me-1"/>Can make if Galvanized is painted</div>
                 </td>
@@ -91,6 +94,18 @@
                   </div>
                   <div t-foreach="row.poSwaps" t-as="ps" t-key="ps_index" class="text-primary">
                     <i class="fa fa-truck me-1"/>Use <t t-out="fmt(ps.short)"/> <t t-out="ps.po_part"/> from <t t-out="ps.po"/> (<t t-out="ps.eta"/>) instead of <t t-out="ps.product"/>
+                  </div>
+                  <div t-if="row.line_switch and row.lineParts.length" class="text-primary">
+                    <i class="fa fa-random me-1"/>Make with <b t-out="lineName(row.line_switch)"/>:
+                    <t t-foreach="row.lineParts" t-as="lp" t-key="lp_index"><t t-if="lp_index">, </t><t t-out="fmt(lp.line_qty)"/> <t t-out="lp.line_twin"/></t>
+                    <button class="btn btn-sm btn-outline-primary ms-2 py-0" t-on-click.stop="() => this.switchLine(row)">
+                      Make with <t t-out="lineName(row.line_switch)"/>
+                    </button>
+                  </div>
+                  <div t-foreach="row.lineLoose" t-as="ll" t-key="ll_index" class="text-primary">
+                    <i class="fa fa-exchange me-1"/>Use <t t-out="fmt(ll.line_qty)"/> <t t-out="ll.line_twin"/> instead of <t t-out="ll.product"/>
+                    <t t-if="ll.prep_part"> (bolt on <t t-out="ll.prep_part"/>)</t>
+                    <button class="btn btn-sm btn-outline-primary ms-2 py-0" t-on-click.stop="() => this.useTwin(row, ll)">Use it</button>
                   </div>
                   <div t-foreach="row.paints" t-as="pt" t-key="pt_index" class="text-primary">
                     <i class="fa fa-paint-brush me-1"/>Paint <t t-out="fmt(pt.paint_qty)"/> Galvanized for <t t-out="pt.product"/>

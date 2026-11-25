@@ -200,6 +200,17 @@ class AaOrderCoverageLine(models.Model):
         string='Paint From Galvanized', digits='Product Unit',
         help='How many of the missing pieces a painted Galvanized one covers.')
 
+    # THE OTHER HARDWARE LINE (owner, 2026-11-25): a door is all CHI or all
+    # ATL in its jamb brackets, hinges and bottom brackets - see hw_line.py.
+    line_twin_id = fields.Many2one(
+        'product.product', string='Other Line',
+        help='The same part from the other hardware line, spare after every '
+             'open order took its own.')
+    qty_line = fields.Float(string='From Other Line', digits='Product Unit')
+    line_to = fields.Selection(
+        [('chi', 'CHI'), ('atl', 'ATL')], string='Make With',
+        help='The hardware line this order can be made with.')
+
     # ------------------------------------------------------------------
     # The menu
     # ------------------------------------------------------------------
@@ -431,6 +442,7 @@ class AaOrderCoverageLine(models.Model):
                 })
         self._aa_cut_from_longer(values, stock)
         self._aa_use_other_flag(values, stock)
+        self._aa_other_line(values, stock)
         self._aa_paint_from_galvanized(values, stock)
         Line.create(values)
         return stock
@@ -530,6 +542,94 @@ class AaOrderCoverageLine(models.Model):
             v['swap_product_id'] = pick.id
             v['qty_swap'] = take
             v['is_short'] = v['qty_short'] - take > 1e-6
+
+    @api.model
+    def _aa_other_line(self, values, stock):
+        """Make the order with the OTHER hardware line when its own is short
+        (owner, 2026-11-25).
+
+        THE MUST-MATCH PARTS MOVE TOGETHER: jamb brackets, hinges and bottom
+        brackets switch only when the other line has spare for EVERY one of
+        them on the order - half a door of each is never offered. A part
+        with no counterpart in the other line keeps the order where it is.
+
+        "CHI le damos prioridad cuando es powder coated": a powder-coated
+        order on ATL is offered CHI back whenever CHI covers it; otherwise the
+        other line is offered only when the order's own is short.
+
+        A PART THAT FITS EITHER LINE but differs between them - the ATL
+        horizontal, which needs its 2x2 angle bolted on - is offered on its
+        own, line by line, like the other flag size.
+
+        ONLY WHAT IS SPARE, oldest order first, the same rule as everywhere
+        else on this screen.
+        """
+        from .paint import COLOUR_ATTRIBUTES, GALVANIZED
+        Product = self.env['product.product'].sudo()
+        demand = {}
+        for v in values:
+            demand[v['product_id']] = demand.get(v['product_id'], 0.0) + v['qty_needed']
+        twins, spare = {}, {}
+
+        def twin_of(pid):
+            if pid not in twins:
+                twins[pid] = Product.browse(pid)._aa_line_twin()
+            return twins[pid]
+
+        def free(twin):
+            if twin.id not in spare:
+                spare[twin.id] = float(int(max(
+                    max(stock.get(twin, 0.0), 0.0) - demand.get(twin.id, 0.0), 0.0) + 1e-6))
+            return spare[twin.id]
+
+        def powder_coated(product):
+            colour = product.product_template_attribute_value_ids.filtered(
+                lambda x: (x.attribute_id.name or '').strip().lower() in COLOUR_ATTRIBUTES)[:1]
+            return bool(colour) and (colour.name or '').strip().lower() not in GALVANIZED
+
+        by_seq = {}
+        for v in values:
+            by_seq.setdefault(v['seq'], []).append(v)
+        for seq in sorted(by_seq):
+            rows = by_seq[seq]
+            strict = [v for v in rows
+                      if Product.browse(v['product_id']).product_tmpl_id.aa_line_must_match
+                      and Product.browse(v['product_id']).product_tmpl_id.aa_hw_line]
+            if strict:
+                products = [Product.browse(v['product_id']) for v in strict]
+                current = products[0].product_tmpl_id.aa_hw_line
+                short = any(v['is_short'] for v in strict)
+                back_to_chi = current == 'atl' and any(powder_coated(p) for p in products)
+                pairs = [(v, twin_of(v['product_id'])) for v in strict]
+                if (short or back_to_chi) and all(
+                        t and t.product_tmpl_id.aa_hw_line not in (False, current)
+                        for _v, t in pairs):
+                    need = {}
+                    for v, t in pairs:
+                        need[t] = need.get(t, 0.0) + v['qty_needed']
+                    if all(free(t) >= qty - 1e-6 for t, qty in need.items()):
+                        for t, qty in need.items():
+                            spare[t.id] -= qty
+                        for v, t in pairs:
+                            v['line_twin_id'] = t.id
+                            v['qty_line'] = v['qty_needed']
+                            v['line_to'] = t.product_tmpl_id.aa_hw_line
+                            v['is_short'] = False
+            for v in rows:
+                if not v['is_short'] or v.get('qty_swap') or v.get('line_twin_id'):
+                    continue
+                product = Product.browse(v['product_id'])
+                if product.product_tmpl_id.aa_line_must_match:
+                    continue
+                twin = twin_of(v['product_id'])
+                if not twin or not free(twin):
+                    continue
+                take = min(free(twin), float(int(v['qty_short'] + 1 - 1e-6)))
+                spare[twin.id] -= take
+                v['line_twin_id'] = twin.id
+                v['qty_line'] = take
+                v['line_to'] = twin.product_tmpl_id.aa_hw_line or False
+                v['is_short'] = v['qty_short'] - take > 1e-6
 
     # ------------------------------------------------------------------
     # The board: orders to make, and what to order
@@ -745,13 +845,21 @@ class AaOrderCoverageLine(models.Model):
                 'needed': l.qty_needed,
                 'before': l.qty_before,
                 # SHORT AFTER CUTTING FROM A LONGER TRACK: what holds the order back.
-                'short': max(l.qty_short - l.qty_swap, 0.0) if l.is_short else 0.0,
+                'short': max(l.qty_short - l.qty_swap - l.qty_line, 0.0) if l.is_short else 0.0,
                 'missing': l.qty_short,
                 'swap': l.swap_product_id.with_context(
                     display_default_code=False).display_name if l.swap_product_id else '',
                 'swap_qty': l.qty_swap,
                 'swap_length': inches_text(raw_track_facts(l.swap_product_id)[3])
                 if l.swap_product_id and raw_track_facts(l.swap_product_id) else '',
+                'line_twin': l.line_twin_id.with_context(
+                    display_default_code=False).display_name if l.line_twin_id else '',
+                'line_qty': l.qty_line,
+                'line_to': l.line_to or '',
+                'line_must_match': bool(l.product_id.product_tmpl_id.aa_line_must_match),
+                'prep_part': l.line_twin_id.product_tmpl_id.aa_prep_part_id.with_context(
+                    display_default_code=False).display_name
+                if l.line_twin_id and l.line_twin_id.product_tmpl_id.aa_prep_part_id else '',
                 'paint': l.paint_product_id.with_context(
                     display_default_code=False).display_name if l.paint_product_id else '',
                 'paint_qty': l.qty_paint,
@@ -895,12 +1003,20 @@ class AaOrderCoverageLine(models.Model):
         stock = self.sudo()._aa_rebuild()
         lines = self.search([('user_id', '=', self.env.uid)])
         orders, seen = [], set()
+        switches = {}
+        for line in lines.filtered(
+                lambda x: x.line_to and x.product_id.product_tmpl_id.aa_line_must_match):
+            switches.setdefault(line.seq, line)
         for line in lines:
             if line.seq in seen:
                 continue
             seen.add(line.seq)
+            switch = switches.get(line.seq) or self
             orders.append({
                 'seq': line.seq,
+                'sale_id': line.sale_id.id,
+                'hw_line': line.sale_id.sudo()._aa_current_line() if line.sale_id else '',
+                'line_switch': switch.line_to or '',
                 'wo': line.wo_number or '',
                 'po': line.po_number or '',
                 'customer': line.partner_id.display_name or '',
