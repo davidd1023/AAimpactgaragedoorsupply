@@ -2,7 +2,6 @@
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 
 const ROW_MIN = 34;
@@ -50,6 +49,7 @@ export class RackBoard extends Component {
             suggestInfo: null,
             selected: null,        // bundle id
             moving: null,          // bundle id being moved
+            removing: null,        // {bundle} or {door} awaiting the "why"
         });
         this.feetLabel = feetLabel;
         onWillStart(() => this.load());
@@ -334,15 +334,21 @@ export class RackBoard extends Component {
         this.state.moving = id;
         await this.suggest([], id);
     }
-    deliver(door) {
-        this.dialog.add(ConfirmationDialog, {
-            body: _t("Mark the door of order %s as delivered? It leaves the rack.", door.order_ref),
-            confirm: async () => {
-                await this.orm.call("aa.door.bundle", "board_deliver", [[door.id]]);
-                await this.load();
-            },
-            cancel: () => {},
-        });
+    askRemove(what) {
+        this.state.removing = what;
+    }
+    isRemoving(kind, id) {
+        const r = this.state.removing;
+        return r && r[kind] === id;
+    }
+    async remove(mode) {
+        const r = this.state.removing;
+        this.state.removing = null;
+        await this.orm.call("aa.door.bundle", "board_remove", [r.bundle || false, r.door ? [r.door] : [], mode]);
+        const keep = this.state.selected;
+        await this.load();
+        this.state.selected = this.state.data.bundles.some((b) => b.id === keep) ? keep : null;
+        this.notification.add(mode === "mistake" ? _t("Deleted.") : _t("Taken off the rack."), { type: "success" });
     }
     async splitDoor(door) {
         const bundle = await this.orm.call("aa.door.bundle", "board_split", [door.id]);

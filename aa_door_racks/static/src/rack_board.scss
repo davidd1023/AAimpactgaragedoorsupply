@@ -159,5 +159,6 @@
         &:hover { background: rgba(0, 0, 0, 0.04); }
     }
     .o_rack_result_loc { font-weight: 600; color: #b36b00; }
+    .o_rack_remove { border: 1px solid #dc3545; border-radius: 6px; padding: 6px; margin-top: 6px; }
     .o_rack_door { border-top: 1px solid $border-color; padding: 6px 0; }
 }
