@@ -690,3 +690,58 @@ msgstr "1 manga ovalada, 1 guardacabo, 1 tope de aluminio"
 #. odoo-javascript
 msgid "Custom length (see the order)"
 msgstr "Largo especial (ver la orden)"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Vertical"
+msgstr "Vertical"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Horizontal"
+msgstr "Horizontal"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Lift"
+msgstr "Lift"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Take"
+msgstr "Coger"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "On hand"
+msgstr "En inventario"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "not enough, change it"
+msgstr "no alcanza, cámbialo"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Choose the RAW track"
+msgstr "Escoge el track RAW"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Change"
+msgstr "Cambiar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "No cut"
+msgstr "Sin cortar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Jamb brackets per vertical"
+msgstr "Jamb brackets por vertical"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Standard"
+msgstr "Standard"

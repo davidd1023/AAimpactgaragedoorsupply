@@ -81,7 +81,11 @@
                     </div>
                 </t>
             </div>
-            <div t-if="record.aa_shop_spec and !aaOrderData.grouped" class="o_aa_shop_spec border rounded p-2 bg-100">
+            <!-- JORGE'S TRACK CARD (owner, 2026-11-26): what to take, what to cut
+                 it to, the lift and the jamb brackets - nothing else. -->
+            <t t-set="aaTracks" t-value="aaOrderData.grouped ? null : aaTrackCards()"/>
+            <t t-if="aaTracks" t-call="aa_shop_floor.TrackCards"/>
+            <div t-if="record.aa_shop_spec and !aaOrderData.grouped and !aaTracks" class="o_aa_shop_spec border rounded p-2 bg-100">
                 <t t-set="aaRows" t-value="record.aa_shop_spec.split('\n')"/>
                 <!-- Overview shows only the summary; the full list is at the station. -->
                 <t t-set="aaLimit" t-value="aaSpecLimit(aaRows)"/>
@@ -119,7 +123,7 @@
             <!-- ONE TRACK TASK PER ORDER (owner, 2026-11-02): the order's other
                  track job (vertical / horizontal) on this same card. Done with
                  this card, it is done too (track_merge.py). -->
-            <t t-foreach="aaMergePartners()" t-as="aaPartner" t-key="aaPartner.id">
+            <t t-foreach="aaTracks ? [] : aaMergePartners()" t-as="aaPartner" t-key="aaPartner.id">
                 <div class="o_aa_shop_spec o_aa_merged_job border rounded p-2 bg-100 mt-2">
                     <div class="fw-bold" t-esc="aaPartner.product"/>
                     <t t-foreach="aaPartner.spec ? aaPartner.spec.split('\n') : []" t-as="aaRow" t-key="aaRow_index">

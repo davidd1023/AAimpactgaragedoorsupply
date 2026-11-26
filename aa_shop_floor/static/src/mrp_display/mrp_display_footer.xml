@@ -35,7 +35,7 @@
             <!-- A LONGER TRACK (owner, 2026-11-11): when the RAW piece the job
                  asks for is not on the rack, Jorge cuts it from a longer one
                  and inventory follows. -->
-            <button t-if="aaTrackSwappable()"
+            <button t-if="aaTrackSwappable() and !aaTrackCards()"
                     type="button" class="btn btn-outline-secondary o_aa_track_swap_btn"
                     t-on-click.stop="() => this.aaOpenTrackSwap()">
                 <i class="fa fa-exchange me-1"/>Change track

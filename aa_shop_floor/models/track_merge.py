@@ -78,6 +78,8 @@ class MrpWorkorder(models.Model):
                         "product": production.product_id.display_name,
                         "spec": production.aa_shop_spec or "",
                         "packed": production.aa_packed or "[]",
+                        # Jorge's simplified card (track_card.py).
+                        "card": production.aa_track_card or "",
                     })
             wo.aa_track_merge = json.dumps({"hidden": wo != carrier, "partners": partners})
 

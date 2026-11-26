@@ -14,7 +14,9 @@ patch(MrpDisplayAction.prototype, {
             // One Track Prep card per order (owner, 2026-11-02).
             "aa_track_merge",
             // A longer RAW track (owner, 2026-11-11).
-            "aa_track_swappable");
+            "aa_track_swappable",
+            // Jorge's simplified track card (owner, 2026-11-26).
+            "aa_track_card");
         return structure;
     },
 });
