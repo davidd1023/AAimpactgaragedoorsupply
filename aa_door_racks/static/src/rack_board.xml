@@ -26,11 +26,13 @@
             <div class="o_rack_body">
                 <div class="o_rack_map">
                     <t t-foreach="state.data.sides" t-as="side" t-key="side.id">
-                        <div class="o_rack_side">
-                            <div class="o_rack_side_name">Rack <t t-out="side.name"/></div>
+                        <div class="o_rack_side" t-att-class="{'o_picking': state.mode === 'block'}">
+                            <div class="o_rack_side_name" t-on-click="() => this.pickSide(side)">Rack <t t-out="side.name"/>
+                                <small t-if="state.mode === 'block'" class="text-muted fw-normal ms-1">click to pick the whole rack</small>
+                            </div>
                             <t t-foreach="side.levels" t-as="level" t-key="level.id">
                                 <div class="o_rack_level">
-                                    <div class="o_rack_level_name">
+                                    <div class="o_rack_level_name" t-on-click="() => this.pickLevel(side, level)">
                                         <b t-out="level.code"/>
                                         <small t-out="levelFill(side, level)"/>
                                     </div>
@@ -61,6 +63,17 @@
                                                             </div>
                                                         </t>
                                                     </div>
+                                                </t>
+                                                <t t-if="state.mode === 'block'">
+                                                    <t t-foreach="cellsFor(side, level, depth)" t-as="cell" t-key="cell.key">
+                                                        <div class="o_rack_cell"
+                                                             t-att-class="{'o_picked': isPicked(cell), 'o_busy': cell.busy}"
+                                                             t-att-style="boxStyle(side, cell.start, cell.length)"
+                                                             t-att-title="cell.busy === 'doors' ? 'Has doors - move them first' : (cell.busy ? 'Already closed' : 'Click to close')"
+                                                             t-on-click="() => this.pickCell(cell)">
+                                                            <i t-if="isPicked(cell)" class="fa fa-ban"/>
+                                                        </div>
+                                                    </t>
                                                 </t>
                                                 <t t-foreach="spotsFor(side, level, depth)" t-as="spot" t-key="spot_index">
                                                     <div class="o_rack_spot"
@@ -140,33 +153,15 @@
                     <t t-if="state.mode === 'block'">
                         <h4>Close a spot</h4>
                         <p class="small text-muted">For a spot holding something else. Nothing will be put there until it is opened again.</p>
-                        <label class="small">Rack</label>
-                        <select class="form-select mb-2" t-on-change="onBlockSide">
-                            <t t-foreach="state.data.sides" t-as="sd" t-key="sd.id">
-                                <option t-att-value="sd.id" t-att-selected="sd.id === state.block.side" t-out="sd.name"/>
-                            </t>
-                        </select>
-                        <label class="small">Level</label>
-                        <select class="form-select mb-2" t-model.number="state.block.level">
-                            <t t-foreach="levelsFor(state.block.side)" t-as="lv" t-key="lv.id">
-                                <option t-att-value="lv.id" t-out="lv.code"/>
-                            </t>
-                        </select>
-                        <label class="small">Which part</label>
-                        <select class="form-select mb-2" t-model="state.block.part">
-                            <t t-foreach="partsFor(state.block.side)" t-as="pt" t-key="pt[0]">
-                                <option t-att-value="pt[0]" t-out="pt[1]"/>
-                            </t>
-                        </select>
-                        <label class="small">Row</label>
-                        <select class="form-select mb-2" t-model="state.block.depth">
-                            <option value="both">Back and Front</option>
-                            <option value="back">Back</option>
-                            <option value="front">Front</option>
-                        </select>
+                        <p class="small">Click the spots on the map to close them. Click a level name (A1, B2…) for the whole level, or a rack name for the whole rack. Click again to unpick.</p>
+                        <div class="o_rack_chosen_loc mb-1" t-if="state.block.picked.length" t-out="pickedSummary"/>
+                        <div class="small text-muted mb-2">
+                            <t t-out="state.block.picked.length"/> picked
+                            <button t-if="state.block.picked.length" class="btn btn-link btn-sm p-0 ms-2" t-on-click="() => this.state.block.picked.splice(0)">Clear</button>
+                        </div>
                         <input class="form-control mb-2" placeholder="What is there (optional)" t-model="state.block.note"/>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-primary" t-on-click="saveBlock">Close it</button>
+                            <button class="btn btn-primary" t-on-click="saveBlock" t-att-disabled="!state.block.picked.length">Close them</button>
                             <button class="btn btn-secondary" t-on-click="cancel">Cancel</button>
                         </div>
                     </t>

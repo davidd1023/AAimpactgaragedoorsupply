@@ -241,6 +241,45 @@ class AaDoorBundle(models.Model):
         return True
 
     @api.model
+    def board_block_many(self, spots, note=False):
+        """Close several spots at once, picked by clicking on the map.
+
+        `spots` is a list of {level, depth, arm_from, arm_to}, one per clicked
+        half of a row. Halves next to each other on the same row become one
+        closed spot, and a back and front closed the same way become one
+        "Back and Front" spot, so closing all of rack B leaves 5 records, not 20.
+        One transaction: a spot holding a bundle refuses the whole lot."""
+        if not self._is_admin():
+            raise AccessError(_("Only an Inventory administrator can close a spot."))
+        rows = {}
+        for s in spots or []:
+            key = (int(s["level"]), s["depth"])
+            rows.setdefault(key, []).append((int(s["arm_from"]), int(s["arm_to"])))
+        if not rows:
+            raise UserError(_("Click the spots to close first."))
+        merged = {}
+        for key, parts in rows.items():
+            parts.sort()
+            out = [list(parts[0])]
+            for a, b in parts[1:]:
+                if a <= out[-1][1] + 1:
+                    out[-1][1] = max(out[-1][1], b)
+                else:
+                    out.append([a, b])
+            merged[key] = [tuple(p) for p in out]
+        made = 0
+        for (level, depth), parts in sorted(merged.items()):
+            if depth == "front" and merged.get((level, "back")) == parts:
+                continue                              # done with the back, as "both"
+            if depth == "back" and merged.get((level, "front")) == parts:
+                depth = "both"
+            for a, b in parts:
+                self.board_block({"level": level, "depth": depth, "arm_from": a,
+                                  "arm_to": b, "note": note})
+                made += 1
+        return made
+
+    @api.model
     def board_unblock(self, block_id):
         if not self._is_admin():
             raise AccessError(_("Only an Inventory administrator can open a spot."))
