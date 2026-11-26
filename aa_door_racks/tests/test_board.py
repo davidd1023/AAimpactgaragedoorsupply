@@ -1,3 +1,4 @@
+from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
 
 
@@ -158,3 +159,38 @@ class TestBoard(TransactionCase):
         self.Bundle.board_unblock(block.id)
         spots = self.Bundle.board_suggest([{"width": 96, "panels": 4}])["spots"]
         self.assertIn(level.id, [s["level"] for s in spots[:12]] + [level.id])
+
+    def test_close_a_whole_rack_by_clicking(self):
+        """Every half of every row of rack B, clicked: one spot per level."""
+        side = self.env.ref("aa_door_racks.level_b1").side_id
+        clicked = [{"level": lv.id, "depth": depth, "arm_from": a, "arm_to": b}
+                   for lv in side.level_ids.filtered("active") for depth in ("back", "front")
+                   for a, b in ((0, 1), (2, 3))]
+        self.assertEqual(self.Bundle.board_block_many(clicked, "Glass"), 5)
+        blocks = self.env["aa.rack.block"].search([("side_id", "=", side.id)])
+        self.assertEqual(set(blocks.mapped("depth")), {"both"})
+        self.assertEqual({(b.arm_from, b.arm_to) for b in blocks}, {(0, 3)})
+        self.assertEqual(set(blocks.mapped("note")), {"Glass"})
+        spots = self.Bundle.board_suggest([{"width": 96, "panels": 4}])["spots"]
+        self.assertNotIn(side.id, [s["side"] for s in spots])
+
+    def test_close_many_keeps_rows_apart(self):
+        b1 = self.env.ref("aa_door_racks.level_b1")
+        self.Bundle.board_block_many([
+            {"level": b1.id, "depth": "back", "arm_from": 0, "arm_to": 1},
+            {"level": b1.id, "depth": "front", "arm_from": 2, "arm_to": 3},
+        ])
+        blocks = self.env["aa.rack.block"].search([("level_id", "=", b1.id)])
+        self.assertEqual({(b.depth, b.arm_from, b.arm_to) for b in blocks},
+                         {("back", 0, 1), ("front", 2, 3)})
+
+    def test_close_many_refuses_a_spot_with_doors(self):
+        b = self._receive([{"order_ref": "CM1", "width": 96, "panels": 4}])
+        bundle = self.Bundle.browse(b["id"])
+        other = self.env["aa.rack.level"].search([("id", "!=", bundle.level_id.id)], limit=1)
+        with self.assertRaises(UserError):
+            self.Bundle.board_block_many([
+                {"level": other.id, "depth": "both", "arm_from": 0, "arm_to": 1},
+                {"level": bundle.level_id.id, "depth": bundle.depth,
+                 "arm_from": bundle.arm_from, "arm_to": bundle.arm_to},
+            ])

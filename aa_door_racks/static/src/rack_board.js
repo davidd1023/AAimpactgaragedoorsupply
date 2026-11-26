@@ -46,7 +46,7 @@ export class RackBoard extends Component {
             lookupMsg: "",
             lookupLevel: "info",
             bundleSize: 0,         // 1 = single, 2 = double; one sticker scanned per door
-            block: { side: false, level: false, depth: "both", part: "", note: "" },
+            block: { picked: [], note: "" },
             selectedBlock: null,
             spots: [],
             chosen: null,
@@ -331,43 +331,102 @@ export class RackBoard extends Component {
             (b) => b.side === side.id && b.level === level.id && (b.depth === depth || b.depth === "both")
         );
     }
-    partsFor(sideId) {
-        const side = this.state.data.sides.find((s) => s.id === sideId);
-        if (!side) {
-            return [];
-        }
+    // A row is closed by halves: the two cantilever units of A-D (arms 0-1
+    // and 2-3; the 60" gap between them holds nothing on its own) and the two
+    // bays of E (arms 0-1, 1-2).
+    unitsFor(side) {
         const last = side.arms.length - 1;
-        return last === 3
-            ? [["0-1", "Left"], ["2-3", "Right"], ["0-3", "Whole level"]]
-            : [["0-1", "Left"], [`1-${last}`, "Right"], [`0-${last}`, "Whole level"]];
+        return last === 3 ? [[0, 1], [2, 3]] : [[0, 1], [1, last]];
     }
-    levelsFor(sideId) {
-        const side = this.state.data.sides.find((s) => s.id === sideId);
-        return side ? side.levels : [];
+    cellsFor(side, level, depth) {
+        return this.unitsFor(side).map(([a, b]) => {
+            const start = a === 0 ? side.min : side.arms[a] - 1;
+            const end = b === side.arms.length - 1 ? side.max : side.arms[b] + 1;
+            return { key: `${level.id}|${depth}|${a}-${b}`, side: side.id, level: level.id, depth,
+                     arm_from: a, arm_to: b, start, length: end - start,
+                     busy: this.cellBusy(side, level, depth, a, b) };
+        });
+    }
+    cellBusy(side, level, depth, a, b) {
+        const hit = (x) => x.arm_from <= b && x.arm_to >= a;
+        if ((this.state.data.blocks || []).some((x) => x.level === level.id &&
+                (x.depth === depth || x.depth === "both") && hit(x))) {
+            return "closed";
+        }
+        if (this.state.data.bundles.some((x) => x.level === level.id && x.depth === depth && hit(x))) {
+            return "doors";
+        }
+        return false;
+    }
+    isPicked(cell) {
+        return this.state.block.picked.includes(cell.key);
+    }
+    togglePick(cells) {
+        const free = cells.filter((c) => !c.busy);
+        if (!free.length) {
+            return;
+        }
+        const picked = this.state.block.picked;
+        const allOn = free.every((c) => picked.includes(c.key));
+        for (const c of free) {
+            const i = picked.indexOf(c.key);
+            if (allOn && i >= 0) {
+                picked.splice(i, 1);
+            } else if (!allOn && i < 0) {
+                picked.push(c.key);
+            }
+        }
+    }
+    pickCell(cell) {
+        this.togglePick([cell]);
+    }
+    pickLevel(side, level) {
+        if (this.state.mode !== "block") {
+            return;
+        }
+        this.togglePick(["back", "front"].flatMap((d) => this.cellsFor(side, level, d)));
+    }
+    pickSide(side) {
+        if (this.state.mode !== "block") {
+            return;
+        }
+        this.togglePick(side.levels.flatMap((lv) =>
+            ["back", "front"].flatMap((d) => this.cellsFor(side, lv, d))));
     }
     startBlock() {
         this.cancel();
         this.state.selected = null;
-        const side = this.state.data.sides[0];
-        this.state.block = { side: side && side.id, level: side && side.levels.at(-1).id,
-                             depth: "both", part: "0-1", note: "" };
+        this.state.selectedBlock = null;
+        this.state.block = { picked: [], note: "" };
         this.state.mode = "block";
     }
-    onBlockSide(ev) {
-        const id = parseInt(ev.target.value);
-        this.state.block.side = id;
-        this.state.block.level = this.levelsFor(id).at(-1).id;
-        this.state.block.part = "0-1";
+    get pickedSummary() {
+        const codes = {};
+        for (const key of this.state.block.picked) {
+            const level = parseInt(key.split("|")[0]);
+            for (const side of this.state.data.sides) {
+                const lv = side.levels.find((l) => l.id === level);
+                if (lv) {
+                    codes[lv.code] = true;
+                }
+            }
+        }
+        return Object.keys(codes).sort().join(", ");
     }
     async saveBlock() {
-        const b = this.state.block;
-        const [a, z] = b.part.split("-").map((x) => parseInt(x));
-        await this.orm.call("aa.door.bundle", "board_block", [{
-            level: parseInt(b.level), depth: b.depth, arm_from: a, arm_to: z, note: b.note,
-        }]);
+        const spots = this.state.block.picked.map((key) => {
+            const [level, depth, arms] = key.split("|");
+            const [a, b] = arms.split("-").map((x) => parseInt(x));
+            return { level: parseInt(level), depth, arm_from: a, arm_to: b };
+        });
+        if (!spots.length) {
+            this.notification.add(_t("Click the spots to close first."), { type: "warning" });
+            return;
+        }
+        await this.orm.call("aa.door.bundle", "board_block_many", [spots, this.state.block.note]);
         this.cancel();
         await this.load();
-        this.notification.add(_t("Spot closed."), { type: "success" });
+        this.notification.add(_t("Closed."), { type: "success" });
     }
     selectBlock(block) {
         if (this.state.mode !== "view") {
