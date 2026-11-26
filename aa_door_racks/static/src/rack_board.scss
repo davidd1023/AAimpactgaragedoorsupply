@@ -121,6 +121,27 @@
         cursor: pointer;
         &.o_selected { box-shadow: 0 0 0 2px #212529; }
     }
+    .o_rack_cell {
+        position: absolute;
+        top: 2px;
+        bottom: 2px;
+        z-index: 3;
+        border: 2px dashed #dc3545;
+        border-radius: 4px;
+        background: rgba(220, 53, 69, 0.04);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        &:hover { background: rgba(220, 53, 69, 0.15); }
+        &.o_picked { background: rgba(220, 53, 69, 0.75); border-style: solid; }
+        &.o_busy { border: none; background: transparent; cursor: not-allowed; }
+    }
+    .o_picking {
+        .o_rack_side_name, .o_rack_level_name { cursor: pointer; }
+        .o_rack_side_name:hover, .o_rack_level_name:hover { color: #dc3545; }
+    }
     .o_rack_spot {
         position: absolute;
         top: 2px;
