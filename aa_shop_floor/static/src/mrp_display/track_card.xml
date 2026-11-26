@@ -21,7 +21,7 @@
                     <div class="text-muted small text-uppercase" t-esc="aaT('Take')"/>
                     <t t-if="aaCard.take">
                         <div class="fs-4 fw-bold">
-                            <t t-esc="aaCard.take_length or aaCard.take"/> RAW × <t t-esc="aaCard.take_qty"/>
+                            <t t-esc="aaCard.take_length or aaCard.take"/> RAW × <t t-esc="aaCard.take_qty"/> <span class="fs-6 fw-normal" t-esc="aaT('pairs')"/>
                         </div>
                         <div class="small" t-att-class="aaCard.short ? 'text-danger fw-bold' : 'text-muted'">
                             <t t-esc="aaT('On hand')"/>: <t t-esc="aaCard.on_hand"/>
