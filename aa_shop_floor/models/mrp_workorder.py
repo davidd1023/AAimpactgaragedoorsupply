@@ -11,6 +11,11 @@ from odoo.exceptions import AccessError, UserError
 PENDING_XMLID = "aa_shop_floor.workcenter_pending"
 MANAGER_GROUP = "mrp.group_mrp_manager"
 LOCKED_STATES = ("progress", "done", "cancel")
+# REMOVE TAKES BACK EVERYTHING NOT FINISHED (owner, 2026-11-26: "una vez que
+# admin quite la orden debe volver a como estaba antes de mandarse, nada se
+# debera ver en las estaciones"). A job the worker already started is taken
+# back too: its clock is stopped and its time log cleared.
+REMOVE_LOCKED = ("done", "cancel")
 # How many records the Shop Floor loads at once (owner, 2026-10-21: more than
 # 60 orders). Odoo's own is 40 and the Overview then pages: an order is two or
 # three manufacturing orders, so at 40 an order's jobs land on different pages
@@ -92,7 +97,7 @@ class MrpProduction(models.Model):
                     production, production.create_date).strftime("%b %d, %I:%M %p")
             wos = production.workorder_ids.filtered(lambda wo: wo.state not in ("done", "cancel"))
             waiting = wos.filtered(lambda wo: wo.workcenter_id == pending)
-            released = (wos - waiting).filtered(lambda wo: wo.state not in LOCKED_STATES)
+            released = (wos - waiting).filtered(lambda wo: wo.state not in REMOVE_LOCKED)
             # A loop, not mapped(): mapped() calls the function once on an empty set.
             stations = (wos - waiting).workcenter_id
             for wo in waiting:
@@ -219,7 +224,7 @@ class MrpProduction(models.Model):
                     "more": more,
                     "can_send": bool(waiting) and mo.state != "done",
                     "can_remove": bool((open_wos - waiting).filtered(
-                        lambda w: w.state not in LOCKED_STATES)),
+                        lambda w: w.state not in REMOVE_LOCKED)),
                     "can_done": mo.state not in ("done", "cancel"),
                     # SEND BACK (owner, 2026-11-11): admins, finished jobs only.
                     "can_send_back": is_admin and mo.state == "done"
@@ -395,14 +400,37 @@ class MrpProduction(models.Model):
         if not pending:
             raise UserError(_("The Pending Assignment work center is missing."))
         for wo in self.workorder_ids.filtered(lambda w: w.workcenter_id != pending
-                                              and w.state not in LOCKED_STATES):
+                                              and w.state not in REMOVE_LOCKED):
+            if wo.state == "progress":
+                wo._aa_undo_start()
             wo.write({
                 "aa_suggested_workcenter_id": wo.workcenter_id.id,
                 "workcenter_id": pending.id,
             })
+        # The order goes back to "not started" once none of its jobs is.
+        for production in self.filtered(lambda p: p.state == "progress"):
+            if not production.workorder_ids.filtered(lambda w: w.state in ("progress", "done")):
+                production.qty_producing = 0
         return True
 
     def _split_productions(self, *args, **kwargs):
         # A backorder's work orders stay where their order already is.
         return super(MrpProduction, self.with_context(aa_keep_workcenter=True)) \
             ._split_productions(*args, **kwargs)
+
+
+class MrpWorkorderUndoStart(models.Model):
+    _inherit = "mrp.workorder"
+
+    def _aa_undo_start(self):
+        """Back to how it was before anybody pressed Start: clock stopped,
+        its time log cleared, nobody on it, ready to be sent again."""
+        for wo in self:
+            running = wo.time_ids.filtered(lambda t: not t.date_end)
+            if running:
+                running.sudo().write({"date_end": fields.Datetime.now()})
+            wo.time_ids.sudo().unlink()
+            values = {"state": "ready", "date_start": False}
+            if "employee_ids" in wo._fields:
+                values["employee_ids"] = [(5, 0, 0)]
+            wo.sudo().write(values)
