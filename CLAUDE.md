@@ -1268,6 +1268,24 @@ station keeps the normal Shop Floor rather than an empty one.
 order's other stations to decide whether it goes to Dispatch; a rule hiding
 them from the worker would make every order look finished.
 
+## Jorge's track card, straight to the point (`aa_shop_floor`, owner, 2026-11-26)
+
+*"que sea mas simplificado y directo al grano ... que track deberia coger y a
+cuanto lo debe cortar ... opcion de escoger otra medida ... dejar la cantidad
+de jamb bracket que necesita por vertical"* and *"si es high lift debe salir, o
+cualquier tipo de lift"*.
+
+Each track job on a Track Prep card (the carrier and its merged partners) is
+drawn by `aa_shop_floor.TrackCards` from `mrp.production.aa_track_card`
+(models/track_card.py): RAW to take x pieces with on-hand (red when short) and
+a Change button opening the existing longer-track dialog for THAT job; the cut
+length (or "No cut" when the RAW is the exact length); pairs; the lift of the
+door(s) it is for (kit lift via `_aa_door_split` + `_aa_card_lift`, red badge
+when not Standard); jamb brackets per vertical = bracket qty / RAW pieces; and
+any part prep note. Flag angles, lag screws and the parts checklist are no
+longer drawn but are still consumed. The old rows remain the fallback for any
+job without a card, and a card that raises is logged, never fatal.
+
 ## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
 
 *"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one
