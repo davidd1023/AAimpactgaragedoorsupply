@@ -62,3 +62,19 @@ class TrackCardCase(TransactionCase):
     def test_something_that_is_not_a_track_has_no_card(self):
         job = self._job(self.jamb10, 1, [(self.jamb12, 1)])
         self.assertFalse(job.aa_track_card)
+
+
+@tagged("post_install", "-at_install")
+class AaImpactWoCase(TransactionCase):
+
+    def test_the_aa_impact_po_is_its_wo_on_the_card(self):
+        partner = self.env["res.partner"].create({"name": "AA Impact Garage Door", "is_company": True})
+        product = self.env["product.product"].create({"name": "AA WO Test Part", "type": "consu"})
+        order = self.env["sale.order"].create({
+            "partner_id": partner.id, "client_order_ref": "1026",
+            "order_line": [(0, 0, {"product_id": product.id, "product_uom_qty": 1})]})
+        job = self.env["mrp.production"].create({"product_id": product.id, "origin": order.name})
+        self.assertEqual(job.aa_impact_wo, "1026")
+        order.partner_id = self.env["res.partner"].create({"name": "Someone Else"})
+        job.invalidate_recordset(["aa_impact_wo"])
+        self.assertFalse(job.aa_impact_wo, "another customer's PO is not a W/O")

@@ -150,7 +150,27 @@ class MrpProduction(models.Model):
         return " / ".join(lifts)
 
 
+class MrpProductionAaWo(models.Model):
+    """THE AA IMPACT W/O ON EVERY STATION CARD (owner, 2026-11-26: "que salga
+    tambien el AA w/o"). AA Impact types its own work order number into the
+    Quick Order's PO field; `_aa_impact_wo` already knows that rule (it fills
+    the Overview's AA Impact W/O column), so the card asks the same question."""
+
+    _inherit = "mrp.production"
+
+    aa_impact_wo = fields.Char(string="AA Impact W/O", compute="_compute_aa_impact_wo")
+
+    def _compute_aa_impact_wo(self):
+        Workorder = self.env["mrp.workorder"]
+        for production in self:
+            order = production.aa_sale_line_id.order_id
+            if not order and production.origin:
+                order = self.env["sale.order"].sudo().search([("name", "=", production.origin)], limit=1)
+            production.aa_impact_wo = Workorder._aa_impact_wo(order.sudo()) if order else ""
+
+
 class MrpWorkorder(models.Model):
     _inherit = "mrp.workorder"
 
     aa_track_card = fields.Text(related="production_id.aa_track_card")
+    aa_impact_wo = fields.Char(related="production_id.aa_impact_wo")

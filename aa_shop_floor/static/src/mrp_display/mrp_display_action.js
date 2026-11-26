@@ -16,7 +16,9 @@ patch(MrpDisplayAction.prototype, {
             // A longer RAW track (owner, 2026-11-11).
             "aa_track_swappable",
             // Jorge's simplified track card (owner, 2026-11-26).
-            "aa_track_card");
+            "aa_track_card",
+            // AA Impact's own W/O beside ours (owner, 2026-11-26).
+            "aa_impact_wo");
         return structure;
     },
 });
