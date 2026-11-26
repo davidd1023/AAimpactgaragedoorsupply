@@ -17,3 +17,4 @@ from . import track_swap
 from . import send_back
 from . import shop_floor_language
 from . import spring_edit
+from . import station_lock

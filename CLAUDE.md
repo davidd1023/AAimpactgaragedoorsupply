@@ -1247,6 +1247,27 @@ whoever stands at it. The worker devices need a non-admin login.
 (hidden by `user.isSystem`, refused on the server too). Digits only, at least
 4. The list never carries a PIN back to the browser, only whether one is set.
 
+## Each worker sees only his own stations (`aa_shop_floor`, owner, 2026-11-26)
+
+*"jorge nada mas q entre a shopfloor su vista sea lo pendiente de tracks por
+hacer ... michel deve ver solamente las ordenes asignadas a hw y muelles, el
+escoge cual quiere ver"*
+
+**HIS STATIONS ARE THE WORK CENTERS' ALLOWED EMPLOYEES** - Track Prep allows
+Jorge, Hardware and Springs allow Michel. `res.users._aa_shop_floor_stations`
+(models/station_lock.py) reads them and `session_info` carries them to the
+browser as `aa_shop_floor_stations`; `station_lock.js` writes them into the Shop
+Floor's own localStorage key before `MrpDisplay.setup` runs and drops Overview
+(0) and My WO (-1) from the tabs, blocks the work-center picker and refuses
+`selectWorkcenter` for any other station.
+
+**ONLY `group_shop_floor_only`, NEVER AN ADMIN**, and a member with no allowed
+station keeps the normal Shop Floor rather than an empty one.
+
+**IT IS THE SCREEN, NOT A RECORD RULE - deliberately.** Mark as Done reads the
+order's other stations to decide whether it goes to Dispatch; a rule hiding
+them from the worker would make every order look finished.
+
 ## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
 
 *"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one
