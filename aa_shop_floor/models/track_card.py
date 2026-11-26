@@ -99,7 +99,9 @@ class MrpProduction(models.Model):
             "length": inches_label(length),
             "pairs": qty_label(pairs),
             "door": "%s'" % facts["door"] if facts and facts.get("door") else "",
-            "jambs": self._aa_track_jambs(pieces) if kind == "vertical" else [],
+            # RAW TRACK IS COUNTED IN PAIRS (owner): a pair is two verticals,
+            # LH and RH, so the brackets are shared over pairs x 2.
+            "jambs": self._aa_track_jambs(2.0 * pairs) if kind == "vertical" else [],
             "prep": [t.aa_prep_note for t in self.move_raw_ids.product_id.product_tmpl_id
                      if "aa_prep_note" in t._fields and t.aa_prep_note],
         }

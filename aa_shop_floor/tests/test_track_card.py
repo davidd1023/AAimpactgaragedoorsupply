@@ -41,17 +41,17 @@ class TrackCardCase(TransactionCase):
         return json.loads(job.aa_track_card)
 
     def test_a_horizontal_says_what_to_take_and_what_to_cut_it_to(self):
-        card = self._card(self._job(self.horizontal, 2, [(self.raw_h, 4)]))
+        card = self._card(self._job(self.horizontal, 2, [(self.raw_h, 2)]))
         self.assertEqual(card["kind"], "horizontal")
         self.assertEqual(card["take_length"], "9'6\"")
-        self.assertEqual(card["take_qty"], "4")
+        self.assertEqual(card["take_qty"], "2", "RAW is counted in pairs")
         self.assertTrue(card["cut"])
         self.assertEqual(card["length"], '108"')
-        self.assertFalse(card["short"], "5 on hand covers 4")
+        self.assertFalse(card["short"], "5 on hand covers 2")
         self.assertEqual(card["jambs"], [])
 
     def test_a_vertical_used_as_it_comes_with_jambs_per_vertical(self):
-        job = self._job(self.vertical, 2, [(self.raw_v, 4), (self.jamb10, 16), (self.jamb12, 16)])
+        job = self._job(self.vertical, 2, [(self.raw_v, 2), (self.jamb10, 16), (self.jamb12, 16)])
         card = self._card(job)
         self.assertEqual(card["kind"], "vertical")
         self.assertFalse(card["cut"], "a 7'4\" RAW piece is already 88\"")
