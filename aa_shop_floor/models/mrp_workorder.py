@@ -430,7 +430,10 @@ class MrpWorkorderUndoStart(models.Model):
             if running:
                 running.sudo().write({"date_end": fields.Datetime.now()})
             wo.time_ids.sudo().unlink()
-            values = {"state": "ready", "date_start": False}
+            # NOT date_start: clearing it is Odoo's "unplan", which it refuses
+            # on one work order of an order ("It is not possible to unplan one
+            # single Work Order") - found on Prod, W/O #363, 2026-11-26.
+            values = {"state": "ready"}
             if "employee_ids" in wo._fields:
                 values["employee_ids"] = [(5, 0, 0)]
             wo.sudo().write(values)
