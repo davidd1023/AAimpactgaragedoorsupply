@@ -18,3 +18,4 @@ from . import test_shop_floor_language
 from . import test_spring_edit
 from . import test_station_lock
 from . import test_track_card
+from . import test_remove_started
