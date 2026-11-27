@@ -1286,6 +1286,24 @@ any part prep note. Flag angles, lag screws and the parts checklist are no
 longer drawn but are still consumed. The old rows remain the fallback for any
 job without a card, and a card that raises is logged, never fatal.
 
+## Lift cables by the AA calculator's formula (`aa_shop_floor`, owner, 2026-11-27)
+
+*"haz ese cambio para que se calcule, se descuente y se cobren por esa formula"*.
+The formula is the AA calculator's `calc()` (garage-door-calculator index.html):
+FTSC = vertical + track offset (3-15R 17, 2-12R 13.125, 3-LHR 25, 2-LHR 19) +
+EBP allowance (3.125; 4.875 on D575-120 / D800-120); cable = ceil(FTSC + drum
+allowance (D400 8, D525-216 10, D525-54 66, D575-120 133, D800-120 137)), minus
+the high lift on a high-lift door. `aa_calculator_ftsc_cable` in
+models/box_sticker.py is the one copy.
+
+A prepared pair stays the product; `sale.order.line._aa_cable_cut_calc()`
+(models/cable_cut.py) gives the cut from the kit line it belongs to. PRICE
+scales the pair's pricelist price by cost at that length / cost at the recipe's
+length. STOCK: `stock.rule.run` explodes the pair itself and takes the reel at
+2 x cut per pair. Shop floor Cut rows and the box sticker read the same figure.
+A door that does not say enough (no height, 2" 15R, no drum) falls back to the
+recipe, as before. High lift / LHR still have no prepared pair (AA cuts them).
+
 ## The catalogue: ONE PRODUCT PER PART (owner, 2026-10-21)
 
 *"ebp, hinges, rollers, shafts, angles, trims, and brackets should be one

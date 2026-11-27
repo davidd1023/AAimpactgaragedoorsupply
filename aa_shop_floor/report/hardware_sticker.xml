@@ -73,7 +73,64 @@
              way round. -->
         <t t-set="shown" t-value="(card or {}).get('rows') and card['rows'][:layout['rows']] or []"/>
         <t t-set="left_out" t-value="card and (len(card['rows']) - len(shown) + len(card.get('also') or [])) or 0"/>
-        <div t-if="card" class="page"
+        <!-- THE OWNER'S OWN DESIGN, ON THE 4 x 6 (2026-11-27): logo, W/O and
+             Order Ref large, the door's figures in two columns, a dashed
+             line, then tracks and spring. A blank keeps its line for a pen.
+             Smaller labels keep the compact layout below. -->
+        <t t-set="full" t-value="card and o._aa_sticker_is_full_size()"/>
+        <t t-if="full">
+          <t t-set="s" t-value="o._aa_box_sticker()"/>
+          <div class="page aa-box-sticker" style="font-family: Arial, Helvetica, sans-serif; color: #000; font-size: 13pt; line-height: 1.2;">
+            <!-- The PDF's report CSS draws a border round every table cell;
+                 the owner's design has no lines at all. -->
+            <style>
+              .aa-box-sticker table, .aa-box-sticker tr, .aa-box-sticker td, .aa-box-sticker th {
+                border: 0 !important; border-style: none !important; box-shadow: none !important;
+              }
+            </style>
+            <div style="text-align: center; margin-top: 2pt;">
+              <img t-att-src="o._aa_sticker_logo_src()" style="height: 1.45in;"/>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10pt;">
+              <tr>
+                <td style="font-size: 20pt; white-space: nowrap; width: 38%; padding: 3pt 0;">W/O :</td>
+                <td style="font-size: 20pt; font-weight: bold; padding: 3pt 0;"><t t-esc="(s['wo'] or '').replace('W/O ', '')"/></td>
+              </tr>
+              <tr>
+                <td style="font-size: 20pt; white-space: nowrap; padding: 10pt 0 3pt 0;">Order Ref :</td>
+                <td style="font-size: 17pt; font-weight: bold; padding: 10pt 0 3pt 0;"><t t-esc="s['ref']"/></td>
+              </tr>
+            </table>
+            <t t-set="pairs" t-value="[('Door Width', s['width'], 'Drum', s['drum']), ('Door Height', s['height'], 'Cable Length', s['cable_length']), ('Lift Type', s['lift'], 'Cable size', s['cable_size']), ('High Lift', s['high_lift'], 'FTSC', s['ftsc'])]"/>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 12pt;">
+              <tr t-foreach="pairs" t-as="p">
+                <td style="white-space: nowrap; padding: 3pt 2pt 3pt 0; width: 24%;"><t t-esc="p[0]"/> :</td>
+                <td style="font-weight: bold; padding: 3pt 0; width: 24%;"><t t-esc="p[1]"/></td>
+                <td style="width: 4%;"/>
+                <td style="white-space: nowrap; padding: 3pt 2pt 3pt 0; width: 24%;"><t t-esc="p[2]"/> :</td>
+                <td style="font-weight: bold; padding: 3pt 0; width: 24%;"><t t-esc="p[3]"/></td>
+              </tr>
+            </table>
+            <div style="margin: 14pt 0 10pt 0;"/>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="white-space: nowrap; padding: 3pt 2pt 3pt 0; width: 26%; vertical-align: top;">Horizontal Track :</td>
+                <td style="font-weight: bold; padding: 3pt 0; width: 24%; vertical-align: top;"><t t-esc="s['horizontal']"/></td>
+                <td style="width: 4%;"/>
+                <td style="white-space: nowrap; padding: 3pt 2pt 3pt 0; width: 14%; vertical-align: top;">Spring :</td>
+                <td style="font-weight: bold; font-size: 11pt; padding: 3pt 0; vertical-align: top;"><t t-esc="s['spring']"/></td>
+              </tr>
+              <tr>
+                <td style="white-space: nowrap; padding: 3pt 2pt 3pt 0; vertical-align: top;">Vertical Track :</td>
+                <td style="font-weight: bold; padding: 3pt 0; vertical-align: top;"><t t-esc="s['vertical']"/></td>
+                <td/>
+                <td style="white-space: nowrap; padding: 3pt 2pt 3pt 0; vertical-align: top;">Turns :</td>
+                <td style="font-weight: bold; padding: 3pt 0; vertical-align: top;"><t t-esc="s['turns']"/></td>
+              </tr>
+            </table>
+          </div>
+        </t>
+        <div t-if="card and not full" class="page"
              t-attf-style="font-family: Arial, Helvetica, sans-serif; color: #000; font-size: {{layout['root']}}pt; line-height: 1.25;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
