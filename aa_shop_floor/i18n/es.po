@@ -800,3 +800,13 @@ msgstr "Ocultar la lista"
 #. odoo-javascript
 msgid "See the whole list"
 msgstr "Ver toda la lista"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "LH from"
+msgstr "LH sacar de"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "RH from"
+msgstr "RH sacar de"

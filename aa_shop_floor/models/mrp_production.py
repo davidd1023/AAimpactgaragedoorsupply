@@ -130,33 +130,27 @@ class MrpProduction(models.Model):
         rh = (spec.get("rh") or 0) * qty
         rows = []
 
-        if len(items) > 1:
-            rows.append(("Assembly", "%s (%s)" % (
-                assembly, " inside ".join(id_label(i["id"]) for i in reversed(items)))))
-            for item in items:
-                rows.append((item.get("role") or "Spring", '%s wire · %s I.D. · %s long' % (
-                    wire_label(item["wire"]), id_label(item["id"]), inches_label(item["length"]))))
-        else:
-            item = items[0]
-            rows.append(("Assembly", assembly))
-            rows.append(("Wire", wire_label(item["wire"])))
-            rows.append(("I.D.", id_label(item["id"])))
-            rows.append(("Length", inches_label(item["length"])))
-
+        # SIMPLE, IN THE OWNER'S ORDER (2026-11-27): how many LH and RH, the
+        # I.D., the wire size and the cut length - then, below, where to take
+        # each piece from. Door weight/cycles and "Single" are gone.
         rows.append(("LH", qty_label(lh)))
         rows.append(("RH", qty_label(rh)))
         if len(items) > 1:
-            rows.append(("Note", "Each LH / RH is a full set (outer + inner), both the same hand"))
+            rows.append(("Duplex", "Each LH / RH = outer + inner, same hand"))
+            for item in items:
+                role = item.get("role") or "Spring"
+                rows.append(("%s I.D." % role, id_label(item["id"])))
+                rows.append(("%s wire" % role, wire_label(item["wire"])))
+                rows.append(("%s cut" % role, inches_label(item["length"])))
+        else:
+            item = items[0]
+            rows.append(("I.D.", id_label(item["id"])))
+            rows.append(("Wire", wire_label(item["wire"])))
+            rows.append(("Cut", inches_label(item["length"])))
 
         filler = [i for i in items if round(float(i["id"]), 4) == FILLER_ID]
         if filler:
-            rows.append(("Filler", "Plastic filler in each 5 1/4\" spring, cut to %s" % (
-                inches_label(filler[0]["length"]))))
-
-        door = spec.get("door") or {}
-        if door.get("weight"):
-            rows.append(("Door", "%s lb · %s · %s cycles" % (
-                door["weight"], door.get("height") or "", "{:,}".format(int(door.get("cycles") or 0)))))
+            rows.append(("Filler", "Cut to %s" % inches_label(filler[0]["length"])))
         return rows
 
     def _aa_stock_spring_rows(self):

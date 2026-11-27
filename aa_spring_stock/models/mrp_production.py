@@ -280,13 +280,22 @@ class MrpProduction(models.Model):
 
     def _aa_custom_spring_rows(self, spec):
         rows = super()._aa_custom_spring_rows(spec)
-        for cut in self.aa_spring_cut_ids.sorted(lambda c: (c.hand, c.role != "Outer", c.id)):
-            what = "%s %s" % (HAND_LABELS.get(cut.hand, ""), cut.role or "Spring")
-            if cut.state in ("planned", "done"):
-                where = {"Rack": "Rack piece", "Floor": "Floor coil", "Boxes": "Box coil (open it)"}
-                rows.append(("Cut from", '%s %s: %s · %s' % (
-                    what, inches_label(cut.length), cut.lot_id.name, where.get(cut.source, cut.source or ""))))
+        # WHERE TO TAKE EACH PIECE (owner, 2026-11-27): the place it is in now
+        # (Floor, Rack, Box 3...) and the coil's own tag.
+        Quant = self.env["stock.quant"].sudo()
+        cuts = self.aa_spring_cut_ids.sorted(lambda c: (c.hand, c.role != "Outer", c.id))
+        duplex = len(set(cuts.mapped("role"))) > 1
+        for cut in cuts:
+            what = HAND_LABELS.get(cut.hand, "") + (" %s" % cut.role if duplex and cut.role else "")
+            if cut.state in ("planned", "done") and cut.lot_id:
+                quant = Quant.search([("lot_id", "=", cut.lot_id.id), ("quantity", ">", 0),
+                                      ("location_id.usage", "=", "internal")], limit=1)
+                place = quant.location_id.name if quant else (cut.source or "")
+                if place in ("Floor", "Rack") or not quant:
+                    where = place
+                else:
+                    where = "%s (%s)" % (place, cut.source) if cut.source and cut.source != place else place
+                rows.append(("%s from" % what, "%s · %s" % (where, cut.lot_id.name)))
             else:
-                rows.append(("Cut from", "%s %s: NO COIL IN INVENTORY - tell the office" % (
-                    what, inches_label(cut.length))))
+                rows.append(("%s from" % what, "NO COIL - tell the office"))
         return rows
