@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-inherit="mrp_workorder.MrpDisplayRecord" t-inherit-mode="extension">
+        <!-- ONE START BUTTON, TOP RIGHT, GREEN (owner, 2026-11-27). -->
+        <xpath expr="//span[contains(@class, 'o_mrp_display_record_start_btn')]" position="attributes">
+            <attribute name="class">o_mrp_display_record_start_btn btn btn-success text-uppercase fw-bold lh-1 ms-auto px-3 py-2</attribute>
+        </xpath>
         <xpath expr="//span[@class='o_finished_product mt-auto mb-0']" position="after">
             <!-- One card per sale order in the Overview: every job of the order,
                  each with its own Send / Remove, plus Send all / Remove all. -->
@@ -88,7 +92,10 @@
                  it to, the lift and the jamb brackets - nothing else. -->
             <t t-set="aaTracks" t-value="aaOrderData.grouped ? null : aaTrackCards()"/>
             <t t-if="aaTracks" t-call="aa_shop_floor.TrackCards"/>
-            <div t-if="record.aa_shop_spec and !aaOrderData.grouped and !aaTracks" class="o_aa_shop_spec border rounded p-2 bg-100">
+            <!-- THE HARDWARE BOX, ONE PIECE AT A TIME (owner, 2026-11-27). -->
+            <t t-set="aaSteps" t-value="(aaOrderData.grouped or aaTracks) ? null : aaPackSteps()"/>
+            <t t-if="aaSteps" t-call="aa_shop_floor.PackSteps"/>
+            <div t-if="record.aa_shop_spec and !aaOrderData.grouped and !aaTracks and (!aaSteps or aaStepUi.showList)" class="o_aa_shop_spec border rounded p-2 bg-100" t-att-class="{'mt-2': aaSteps}">
                 <t t-set="aaRows" t-value="record.aa_shop_spec.split('\n')"/>
                 <!-- Overview shows only the summary; the full list is at the station. -->
                 <t t-set="aaLimit" t-value="aaSpecLimit(aaRows)"/>
