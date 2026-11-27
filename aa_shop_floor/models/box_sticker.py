@@ -8,8 +8,20 @@ Track and Vertical Track on the left and Spring and Turns on the right.
 Every figure comes off the same reading of the order as the Hardware card
 (hardware_card.py), so the sticker and the card can never disagree. A blank
 is left blank, with its line, for a hand to fill in: a guess on a box label
-is worse than nothing. FTSC has no figure in Odoo yet, so it is always a
-line to write on.
+is worse than nothing.
+
+FTSC (Floor To Shaft Center) AND THE CABLE LENGTH ARE THE AA CALCULATOR'S OWN
+FORMULA (garage-door-calculator index.html, calc(), read 2026-11-27), per
+door, not the prepared cable's table - the owner: "eso no debe ser asi":
+
+    vertical  standard  H - 8      high lift  (H - 8) + (HL - 9)
+              LHR       H - 18 (3") / H - 16 (2")
+    FTSC  = vertical + track offset + end bearing plate allowance
+    cable = ceil(FTSC + drum allowance)          (high lift: - HL)
+
+The table of prepared cables gives the same figure for a whole-foot door
+(7' 15R: 105") and a rounded-up one for any other height, which is why the
+calculation wins and the table is only the fallback.
 
 The box's QR code stays, small, in the free corner under the spring: it is
 how the box is dispatched at the counter (CLAUDE.md, "SCAN THE QR TO
@@ -21,6 +33,7 @@ built to shrink.
 
 import base64
 import logging
+import math
 import re
 
 from odoo import models
@@ -30,6 +43,39 @@ from .mrp_production import inches_label
 from .hardware_card import CABLE_NAME, feet_label
 
 _logger = logging.getLogger(__name__)
+
+
+# The AA calculator's constants, exactly as calc() has them.
+TRACK_OFFSET = {"3-15R": 17.0, "3-LHR": 25.0, "2-LHR": 19.0, "2-12R": 13.125}
+# drum -> (end bearing plate allowance, cable allowance)
+DRUM_ALLOWANCE = {
+    "D400-96": (3.125, 8.0), "D400-144": (3.125, 8.0),
+    "D525-216": (3.125, 10.0), "5250-18": (3.125, 10.0),
+    "D525-54": (3.125, 66.0), "D575-120": (4.875, 133.0), "D800-120": (4.875, 137.0),
+}
+
+
+def aa_calculator_ftsc_cable(height, track, lift, high_lift, drum):
+    """(FTSC, cable inches) the way the AA calculator works them out, or
+    (None, None) when a figure it needs is missing - never a guess."""
+    if not height or track not in TRACK_OFFSET:
+        return None, None
+    key = next((k for k in DRUM_ALLOWANCE if drum and drum.upper().startswith(k.upper())), None)
+    if not key:
+        return None, None
+    high_lift = high_lift or 0.0
+    if lift == "highlift":
+        if not high_lift:
+            return None, None
+        vertical = (height - 8) + (high_lift - 9)
+    elif track.endswith("LHR"):
+        vertical = height - 18 if track == "3-LHR" else height - 16
+    else:
+        vertical = height - 8
+    ebf, allowance = DRUM_ALLOWANCE[key]
+    ftsc = vertical + TRACK_OFFSET[track] + ebf
+    cable = math.ceil(ftsc + allowance - high_lift if lift == "highlift" else ftsc + allowance)
+    return ftsc, cable
 
 
 class MrpProduction(models.Model):
@@ -99,9 +145,22 @@ class MrpProduction(models.Model):
                 size = re.search(r"Lift Cable\s+(\S+)", name, re.I)
                 data["cable_size"] = size.group(1) if size else data["cable_size"]
                 each = self._aa_cable_cut_inches(line.product_id)
-                if each:
+                if each and not data["cable_length"]:
                     data["cable_length"] = inches_label(each)
                 break
+
+            # THE CALCULATOR'S FTSC AND CABLE, from the door on the kit line.
+            fields_ = kit._fields
+            track = kit.aa_track_type if "aa_track_type" in fields_ else False
+            lift_type = (kit.aa_lift_type if "aa_lift_type" in fields_ else False) \
+                or ("highlift" if data["lift"] == "High Lift" else "standard")
+            high = kit.aa_high_lift if "aa_high_lift" in fields_ else 0.0
+            ftsc, cable = aa_calculator_ftsc_cable(
+                kit.aa_door_height_in, track, lift_type, high,
+                (kit.aa_drum if "aa_drum" in fields_ else False) or drum)
+            if ftsc:
+                data["ftsc"] = inches_label(ftsc)
+                data["cable_length"] = inches_label(cable)
 
             horizontal, vertical = [], []
             for line in lines:
