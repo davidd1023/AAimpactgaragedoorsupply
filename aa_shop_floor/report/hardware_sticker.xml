@@ -104,7 +104,7 @@
                 <td style="font-weight: bold; padding: 3pt 0; width: 24%;"><t t-esc="p[3]"/></td>
               </tr>
             </table>
-            <div style="border-top: 2pt dashed #000; margin: 14pt 0 10pt 0;"/>
+            <div style="margin: 14pt 0 10pt 0;"/>
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="white-space: nowrap; padding: 3pt 2pt 3pt 0; width: 26%; vertical-align: top;">Horizontal Track :</td>
@@ -121,9 +121,6 @@
                 <td style="font-weight: bold; padding: 3pt 0; vertical-align: top;"><t t-esc="s['turns']"/></td>
               </tr>
             </table>
-            <div style="text-align: right; margin-top: 8pt;">
-              <img t-att-src="o._aa_box_qr_src(240)" style="width: 0.95in; height: 0.95in;"/>
-            </div>
           </div>
         </t>
         <div t-if="card and not full" class="page"
