@@ -78,6 +78,28 @@ def aa_calculator_ftsc_cable(height, track, lift, high_lift, drum):
     return ftsc, cable
 
 
+def door_inches(text):
+    """'120"' / '10\' 0"' / '7\'' / '84' -> inches, or 0.0 when it can't tell."""
+    text = (text or "").strip()
+    hit = re.match(r"""^(\d+(?:\.\d+)?)\s*'\s*(?:(\d+(?:\.\d+)?)\s*(?:"|'')?)?$""", text)
+    if hit:
+        return float(hit.group(1)) * 12 + float(hit.group(2) or 0)
+    hit = re.match(r'^(\d+(?:\.\d+)?)\s*(?:"|in)?$', text)
+    return float(hit.group(1)) if hit else 0.0
+
+
+def cable_size_for(drum, lift):
+    """The lift cable size the shop uses: high lift is always 3/16"; otherwise
+    by drum - D400-96 1/8", D400-144 5/32", D525-216 3/16"."""
+    if lift == "highlift":
+        return '3/16"'
+    drum = (drum or "").upper()
+    for key, size in (("D400-96", '1/8"'), ("D400-144", '5/32"'), ("D525-216", '3/16"')):
+        if drum.startswith(key):
+            return size
+    return ""
+
+
 class MrpProduction(models.Model):
     _inherit = "mrp.production"
 
@@ -155,9 +177,12 @@ class MrpProduction(models.Model):
             lift_type = (kit.aa_lift_type if "aa_lift_type" in fields_ else False) \
                 or ("highlift" if data["lift"] == "High Lift" else "standard")
             high = kit.aa_high_lift if "aa_high_lift" in fields_ else 0.0
-            ftsc, cable = aa_calculator_ftsc_cable(
-                kit.aa_door_height_in, track, lift_type, high,
-                (kit.aa_drum if "aa_drum" in fields_ else False) or drum)
+            # The height is often only in the dealer's note ("120\" x 120\"").
+            height = kit.aa_door_height_in or door_inches(data["height"])
+            kit_drum = (kit.aa_drum if "aa_drum" in fields_ else False) or drum
+            ftsc, cable = aa_calculator_ftsc_cable(height, track, lift_type, high, kit_drum)
+            if not data["cable_size"]:
+                data["cable_size"] = cable_size_for(kit_drum, lift_type)
             if ftsc:
                 data["ftsc"] = inches_label(ftsc)
                 data["cable_length"] = inches_label(cable)
