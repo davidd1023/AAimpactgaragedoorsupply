@@ -380,7 +380,9 @@ class AaOrderCoverageLine(models.Model):
             [('location_id', 'child_of', locations.ids),
              ('location_id.usage', '=', 'internal')],
             ['product_id'], ['quantity:sum'])
-        return {product: qty for product, qty in groups}
+        # A sum over quants can come back as False, and max(False, 0.0) is
+        # False - which the screen then cannot format (Prod, 2026-11-27).
+        return {product: qty or 0.0 for product, qty in groups}
 
     @api.model
     def _aa_family(self, product, cache):

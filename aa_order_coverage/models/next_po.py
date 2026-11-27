@@ -118,7 +118,7 @@ class NextPurchaseOrder(models.AbstractModel):
             [('product_id', 'in', products.ids),
              ('location_id', 'child_of', locations.ids)],
             ['product_id'], ['quantity:sum'])
-        return {p: q for p, q in groups}
+        return {p: q or 0.0 for p, q in groups}
 
     @api.model
     def _use_per_day(self, products, days):

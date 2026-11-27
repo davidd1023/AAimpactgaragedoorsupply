@@ -502,7 +502,12 @@ export class OrderCoverageBoard extends Component {
     }
 
     fmt(value) {
-        return Number.isInteger(value) ? String(value) : value.toFixed(2);
+        // Never let one odd value take the whole screen down.
+        const n = Number(value || 0);
+        if (Number.isNaN(n)) {
+            return String(value);
+        }
+        return Number.isInteger(n) ? String(n) : n.toFixed(2);
     }
 }
 
