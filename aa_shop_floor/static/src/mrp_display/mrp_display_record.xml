@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-inherit="mrp_workorder.MrpDisplayRecord" t-inherit-mode="extension">
+        <!-- ONE START BUTTON, TOP RIGHT, GREEN (owner, 2026-11-27). -->
+        <xpath expr="//span[contains(@class, 'o_mrp_display_record_start_btn')]" position="attributes">
+            <attribute name="class">o_mrp_display_record_start_btn btn btn-success text-uppercase fw-bold lh-1 ms-auto px-3 py-2</attribute>
+        </xpath>
         <xpath expr="//span[@class='o_finished_product mt-auto mb-0']" position="after">
             <!-- One card per sale order in the Overview: every job of the order,
                  each with its own Send / Remove, plus Send all / Remove all. -->

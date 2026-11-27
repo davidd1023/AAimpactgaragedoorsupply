@@ -40,11 +40,11 @@
                     t-on-click.stop="() => this.aaOpenTrackSwap()">
                 <i class="fa fa-exchange me-1"/>Change track
             </button>
-            <button t-if="!active and !disabled and !['done', 'cancel'].includes(props.record.data.state)"
-                    type="button" class="btn btn-success o_aa_start_btn"
-                    t-on-click.stop="onClickHeader">
-                <i class="fa fa-play me-1"/>Start
-            </button>
+            <!-- ONE START BUTTON (owner, 2026-11-27: "un solo boton para iniciar
+                 en todas las estaciones, el de arriba derecha pero en verde"):
+                 the green Start that sat here is gone; Odoo's own Start at the
+                 top right of the card is the one, now green
+                 (mrp_display_record.xml). -->
         </xpath>
     </t>
     <t t-inherit="mrp_workorder.MrpDisplayProductionFooter" t-inherit-mode="extension">
