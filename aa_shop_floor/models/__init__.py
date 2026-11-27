@@ -19,3 +19,4 @@ from . import shop_floor_language
 from . import spring_edit
 from . import station_lock
 from . import track_card
+from . import box_sticker
