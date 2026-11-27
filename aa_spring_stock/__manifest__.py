@@ -1,6 +1,6 @@
 {
     'name': 'AA Spring Stock',
-    'version': '19.0.1.5.0',
+    'version': '19.0.1.6.0',
     'summary': 'Spring orders consume coil inches; a plain view of the spring inventory',
     'description': """
 Spring coils (COIL-<wire>-<I.D.>-<L/R>, kept in inches, one lot per piece) are
