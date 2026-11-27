@@ -80,7 +80,14 @@
         <t t-set="full" t-value="card and o._aa_sticker_is_full_size()"/>
         <t t-if="full">
           <t t-set="s" t-value="o._aa_box_sticker()"/>
-          <div class="page" style="font-family: Arial, Helvetica, sans-serif; color: #000; font-size: 13pt; line-height: 1.2;">
+          <div class="page aa-box-sticker" style="font-family: Arial, Helvetica, sans-serif; color: #000; font-size: 13pt; line-height: 1.2;">
+            <!-- The PDF's report CSS draws a border round every table cell;
+                 the owner's design has no lines at all. -->
+            <style>
+              .aa-box-sticker table, .aa-box-sticker tr, .aa-box-sticker td, .aa-box-sticker th {
+                border: 0 !important; border-style: none !important; box-shadow: none !important;
+              }
+            </style>
             <div style="text-align: center; margin-top: 2pt;">
               <img t-att-src="o._aa_sticker_logo_src()" style="height: 1.45in;"/>
             </div>
