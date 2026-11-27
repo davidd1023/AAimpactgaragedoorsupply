@@ -6372,3 +6372,53 @@ or a shared arm, back/front rows (53" arms), level 1 = floor legs 39", 2-4
 board between doors (none under the bottom one), and 5" is always left free
 above a stack for the forklift (a setting). A door leaves the rack when the Supply order whose PO Number
 is its AA order # is dispatched (`stock.picking._action_done`).
+
+## RAW TRACKS ARE VARIANTS TOO (owner, 2026-11-27)
+
+*"crea variantes con todos los tracks raws de todas sus medidas al igual que
+los terminados de 2" y 3" y ajusta el codigo sin que nada se rompa"* - the
+RAW stock goes the way the prepared tracks went on 2026-10-23 (when he said
+"Leave RAW alone"; he has now asked for it). His three answers:
+
+- **THE PREPARED TRACKS STAY AS THEY ARE** - they were already four products
+  with variants.
+- **ATL IS A CHOICE ON THE SAME PRODUCT** ("Dentro del mismo producto"), not
+  its own product: a third attribute **Line (CHI / ATL)**, only on a family
+  that has an ATL piece (today the horizontals).
+- **EACH PIECE KEEPS ITS AA PART #** - the engine moves `aa_part_number` from
+  the old product to its variant exactly like the barcode.
+
+FOUR FAMILIES, discovered from the catalogue (`raw_track_families.py`), merged
+by the same engine through **Inventory > Configuration > Catalogue Merge** -
+never by a deploy. Attributes: **Stock Length** (`attribute_raw_track_length`,
+9'6" / 7'4" - its OWN list, never the prepared track's 96"), Colour, and Line
+(`attribute_hardware_line`). Holes (a Black ATL) are archived as usual.
+
+**ONE READER, BOTH SHAPES**: `product.product._aa_raw_track_facts()` in
+`track_facts.py` -> {kind, size, inches, colour, line}, reading
+`_aa_choice_text`, so the old name and the folded variant both work. Every
+name regex that took a RAW track apart is gone or falls back to it: the Track
+Prep swap and card (`track_swap.py`, `track_card.py`, `mrp_production.py`) and
+Orders to Make (`coverage.py`, which keeps its own pattern only for a database
+without spring_engineering). A longer-track swap must match the LINE too - an
+ATL piece comes without its 2x2 angle.
+
+**THE CHI/ATL PAIRING MOVED INTO THE PRODUCT.** `_aa_line()` reads the Line
+value before the template's `aa_hw_line`; `_aa_line_twin()` on a variant with a
+Line value is the ACTIVE sibling with the other line and every other value the
+same. **THE 2x2 ANGLE IS PER VARIANT** (`aa_variant_prep_part_id/qty/note` on
+product.product, shown on the variant form), because each ATL length takes the
+angle of ITS length; the merge carries the old ATL template's prep fields down.
+`_aa_prep_part()` / `_aa_prep_note()` read the variant first, the template
+after - always call those, never the template field.
+
+**THE PRICE PLAN SHORTCUT**: a family whose old products all cost the same
+needs no plan - every extra is nought. Without it the RAW families were refused,
+because the probe "the base in ATL" (a Black ATL piece) does not exist.
+
+**A PICKED MOVE STILL REFUSES ITS FAMILY**: on Prod on 2026-11-27 AAM/MO/00748
+held a picked 3" Horizontal RAW 9'6" Black, which would hold back the whole
+3" horizontal family until that job is finished or reset.
+
+Not installable here: `aa_shop_floor` needs `mrp_workorder` (Enterprise), so
+its changes were compiled and are proved on the Odoo.sh build, not locally.

@@ -40,6 +40,20 @@ from odoo.exceptions import UserError
 LINES = [('chi', 'CHI'), ('atl', 'ATL')]
 LINE_NAMES = dict(LINES)
 
+# THE LINE CAN BE A VARIANT CHOICE (owner, 2026-11-27): the RAW tracks were
+# folded into one product per size and type with ATL kept "dentro del mismo
+# producto", so a RAW piece says its line in a value of this attribute rather
+# than on its template. Read by name, because spring_engineering - which
+# creates the attribute - is not a dependency of this module.
+LINE_ATTRIBUTES = ('line', 'hardware line')
+
+
+def _line_value(product):
+    """The product's Line value (a product.template.attribute.value), or empty."""
+    return product.product_template_attribute_value_ids.filtered(
+        lambda v: (v.attribute_id.name or '').strip().lower() in LINE_ATTRIBUTES
+        and (v.name or '').strip().lower() in LINE_NAMES)[:1]
+
 
 def _names(product):
     return {(v.name or '').strip().lower()
@@ -95,14 +109,60 @@ class ProductTemplate(models.Model):
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
+    # WHAT IS BOLTED ON, PER VARIANT. On the template it could only ever be
+    # one part, and the ATL horizontals take a 2x2 angle OF THEIR OWN LENGTH
+    # (0662116HPA for 11'6", 0662106HPA for 10'6"...) - so once the RAW
+    # lengths are variants of one product the angle has to live on each of
+    # them. The template's fields stay as the fallback for everything else.
+    aa_variant_prep_part_id = fields.Many2one(
+        'product.product', string='Add When Preparing (this variant)',
+        help='A part bolted on at Track Prep because this piece comes without '
+             'it - the 2x2 angle of the same length on an ATL horizontal. '
+             'Wins over the product\'s own setting.')
+    aa_variant_prep_part_qty = fields.Float(
+        string='Per Piece (this variant)', default=1.0, digits='Product Unit')
+    aa_variant_prep_note = fields.Char(
+        string='Preparation Note (this variant)',
+        help='Printed on the Track Prep card whenever this piece is used.')
+
+    def _aa_prep_part(self):
+        """(part, qty per piece) bolted on when this is prepared, or (empty, 0)."""
+        self.ensure_one()
+        if self.aa_variant_prep_part_id:
+            return self.aa_variant_prep_part_id, (self.aa_variant_prep_part_qty or 1.0)
+        template = self.product_tmpl_id
+        if template.aa_prep_part_id:
+            return template.aa_prep_part_id, (template.aa_prep_part_qty or 1.0)
+        return self.env['product.product'], 0.0
+
+    def _aa_prep_note(self):
+        self.ensure_one()
+        return self.aa_variant_prep_note or self.product_tmpl_id.aa_prep_note or ''
+
     def _aa_line(self):
         self.ensure_one()
+        value = _line_value(self)
+        if value:
+            return (value.name or '').strip().lower()
         return self.product_tmpl_id.aa_hw_line or False
 
     def _aa_line_twin(self):
         """The same part from the other line, variant for variant."""
         self.ensure_one()
         Product = self.env['product.product']
+        # A LINE CHOSEN ON THE VARIANT: the twin is the sibling with every
+        # other value the same and the other line. Active ones only - Odoo
+        # archives the combinations that were never stocked (a Black ATL
+        # piece), and an archived variant is not a part anybody can use.
+        value = _line_value(self)
+        if value:
+            rest = _names(self) - {(value.name or '').strip().lower()}
+            mine = (value.name or '').strip().lower()
+            same = self.product_tmpl_id.with_context(active_test=True).product_variant_ids.filtered(
+                lambda v: v != self and _line_value(v)
+                and (_line_value(v).name or '').strip().lower() != mine
+                and _names(v) - {(_line_value(v).name or '').strip().lower()} == rest)
+            return same if len(same) == 1 else Product
         template = self.product_tmpl_id.aa_line_twin_id
         if not template:
             return Product
@@ -126,7 +186,7 @@ class ProductProduct(models.Model):
         self.ensure_one()
         template = self.product_tmpl_id
         if not line or not template.aa_line_must_match or \
-                not template.aa_hw_line or template.aa_hw_line == line:
+                not self._aa_line() or self._aa_line() == line:
             return self
         return self._aa_line_twin() or self
 
@@ -290,10 +350,9 @@ class MrpProduction(models.Model):
             have = job.move_raw_ids.filtered(lambda m: m.state != 'cancel').mapped('product_id')
             add = []
             for move in job.move_raw_ids.filtered(lambda m: m.state != 'cancel'):
-                template = move.product_id.product_tmpl_id
-                part = template.aa_prep_part_id
+                part, per = move.product_id._aa_prep_part()
                 if part and part not in have:
-                    qty = move.product_uom_qty * (template.aa_prep_part_qty or 1.0)
+                    qty = move.product_uom_qty * per
                     add.append((0, 0, job._get_move_raw_values(part, qty, part.uom_id)))
                     have |= part
             if add:

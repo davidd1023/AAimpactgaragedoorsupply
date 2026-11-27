@@ -154,7 +154,11 @@ class ProductTemplate(models.Model):
         # and he keeps adding lengths - so they are assembled from what is
         # actually there (models/track_families.py) and merged by this same
         # engine, with the same refusals and the same report.
-        for spec in list(FAMILIES) + self._aa_track_families():
+        #
+        # AND THE RAW STOCK (owner, 2026-11-27), assembled the same way
+        # (models/raw_track_families.py) and run through the same refusals.
+        for spec in (list(FAMILIES) + self._aa_track_families()
+                     + self._aa_raw_track_families()):
             if only and spec["survivor"] not in only:
                 continue
             reports.append(self._aa_merge_one_family(spec, dry_run=dry_run))
@@ -478,6 +482,29 @@ class ProductTemplate(models.Model):
         None if the old prices cannot be expressed that way.
         """
         base_combo = spec["products"][spec["base"]]
+
+        # ONE PRICE FOR THE WHOLE FAMILY NEEDS NO PLAN. The probe below asks
+        # for the base with ONE value changed, and a family that is not square
+        # may not have that combination at all - the RAW tracks carry an ATL
+        # choice only on Galvanized horizontals, so "the base in ATL" (a Black
+        # ATL piece) does not exist. When every old product costs the same
+        # there is nothing for an extra to explain, so every extra is nought.
+        prices = {tmpl.list_price for tmpl in olds.values()}
+        rounding = self.env.company.currency_id.rounding
+        if olds and spec["base"] in olds and all(
+            not float_compare(p, olds[spec["base"]].list_price,
+                              precision_rounding=rounding)
+            for p in prices
+        ):
+            return {
+                "base_price": olds[spec["base"]].list_price,
+                "extras": {
+                    (attr, value): 0.0
+                    for attr in spec["attributes"]
+                    for value in self._aa_family_values(spec, attr)
+                },
+            }
+
         price_of = {
             tuple(sorted(spec["products"][name].items())): tmpl.list_price
             for name, tmpl in olds.items()
@@ -673,6 +700,21 @@ class ProductTemplate(models.Model):
                 "label": variant.display_name,
                 "default_code": variant.default_code or tmpl.default_code,
                 "barcode": variant.barcode,
+                # AA'S OWN PART NUMBER (aa_part_numbers), when that module is
+                # in: it follows the piece, like the barcode (owner,
+                # 2026-11-27: "Mantener el mismo numero").
+                "aa_part_number": variant.aa_part_number
+                if "aa_part_number" in variant._fields else False,
+                # WHAT IS BOLTED ON AT TRACK PREP (aa_order_coverage): the 2x2
+                # angle of an ATL horizontal lives on its TEMPLATE, and the
+                # template is about to be archived - so it is carried down to
+                # the variant, whose own fields win from now on.
+                "prep": {
+                    "part": tmpl.aa_prep_part_id.id,
+                    "qty": tmpl.aa_prep_part_qty,
+                    "note": tmpl.aa_prep_note,
+                } if "aa_prep_part_id" in tmpl._fields and (
+                    tmpl.aa_prep_part_id or tmpl.aa_prep_note) else None,
                 "standard_price": variant.standard_price,
                 "weight": variant.weight,
                 "volume": variant.volume,
@@ -823,6 +865,21 @@ class ProductTemplate(models.Model):
                 old.barcode = False
 
             values["barcode"] = entry["barcode"]
+        if entry.get("aa_part_number"):
+            # MOVED, NOT COPIED, for the barcode's reason: it is UNIQUE, and
+            # the old product still holds it until the family is retired.
+            old = entry["variant"].exists()
+            if old and old.aa_part_number == entry["aa_part_number"]:
+                old.aa_part_number = False
+                old.flush_recordset(["aa_part_number"])
+            values["aa_part_number"] = entry["aa_part_number"]
+        prep = entry.get("prep")
+        if prep and "aa_variant_prep_part_id" in target._fields:
+            values.update({
+                "aa_variant_prep_part_id": prep["part"] or False,
+                "aa_variant_prep_part_qty": prep["qty"] or 1.0,
+                "aa_variant_prep_note": prep["note"] or False,
+            })
         if entry["weight"]:
             values["weight"] = entry["weight"]
         if entry["volume"]:

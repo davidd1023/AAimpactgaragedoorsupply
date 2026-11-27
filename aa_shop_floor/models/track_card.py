@@ -102,8 +102,11 @@ class MrpProduction(models.Model):
             # RAW TRACK IS COUNTED IN PAIRS (owner): a pair is two verticals,
             # LH and RH, so the brackets are shared over pairs x 2.
             "jambs": self._aa_track_jambs(2.0 * pairs) if kind == "vertical" else [],
-            "prep": [t.aa_prep_note for t in self.move_raw_ids.product_id.product_tmpl_id
-                     if "aa_prep_note" in t._fields and t.aa_prep_note],
+            # PER PIECE, not per product: an ATL RAW length is a variant now
+            # and carries its own 2x2 angle note (owner, 2026-11-27).
+            "prep": [note for note in dict.fromkeys(
+                p._aa_prep_note() for p in self.move_raw_ids.product_id
+                if hasattr(p, "_aa_prep_note")) if note],
         }
         return card
 

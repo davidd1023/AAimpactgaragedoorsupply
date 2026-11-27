@@ -150,6 +150,29 @@
       <field name="sequence">36</field>
     </record>
 
+    <!-- THE RAW STOCK LENGTH (owner, 2026-11-27). RAW track is bought at
+         9'6", 11'6", 7'4"... and a prepared track is cut TO 96", 108"; one
+         list for both would offer lengths that do not exist on either. -->
+    <record id="attribute_raw_track_length" model="product.attribute">
+      <field name="name">Stock Length</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">always</field>
+      <field name="visibility">visible</field>
+      <field name="sequence">37</field>
+    </record>
+
+    <!-- THE HARDWARE LINE ON A RAW TRACK (owner, 2026-11-27): the ATL piece
+         is a choice on the same product ("Dentro del mismo producto"), not a
+         product of its own. hw_line.py reads this value before the
+         template's own Hardware Line. -->
+    <record id="attribute_hardware_line" model="product.attribute">
+      <field name="name">Line</field>
+      <field name="display_type">radio</field>
+      <field name="create_variant">always</field>
+      <field name="visibility">visible</field>
+      <field name="sequence">60</field>
+    </record>
+
     <record id="attribute_shaft_length" model="product.attribute">
       <field name="name">Length</field>
       <field name="display_type">radio</field>

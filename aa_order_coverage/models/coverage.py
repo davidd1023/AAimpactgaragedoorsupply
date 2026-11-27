@@ -51,7 +51,23 @@ RAW_TRACK = re.compile(
 
 
 def raw_track_facts(product):
-    """(size, kind, colour, inches) of a RAW track, or None."""
+    """(size, kind, colour, inches) of a RAW track, or None.
+
+    THE RAW TRACKS ARE VARIANTS NOW (owner, 2026-11-27), so the length, the
+    finish and the line are no longer in the name. spring_engineering's
+    `_aa_raw_track_facts` reads both shapes and is asked first; the pattern
+    below is kept for a database without it. The ATL piece is a DIFFERENT
+    piece to cut from (no 2x2 angle), so its colour reads "galvanized atl",
+    exactly as its old name did - a CHI track is never covered by an ATL one.
+    """
+    if product and hasattr(product, '_aa_raw_track_facts'):
+        facts = product._aa_raw_track_facts()
+        if facts:
+            colour = facts['colour'].lower()
+            if facts['line'] == 'atl':
+                colour += ' atl'
+            return (facts['size'], facts['kind'], colour, facts['inches'])
+        return None
     for name in (product.name, product.with_context(display_default_code=False).display_name):
         hit = RAW_TRACK.match(name or '')
         if hit:
@@ -594,15 +610,15 @@ class AaOrderCoverageLine(models.Model):
             rows = by_seq[seq]
             strict = [v for v in rows
                       if Product.browse(v['product_id']).product_tmpl_id.aa_line_must_match
-                      and Product.browse(v['product_id']).product_tmpl_id.aa_hw_line]
+                      and Product.browse(v['product_id'])._aa_line()]
             if strict:
                 products = [Product.browse(v['product_id']) for v in strict]
-                current = products[0].product_tmpl_id.aa_hw_line
+                current = products[0]._aa_line()
                 short = any(v['is_short'] for v in strict)
                 back_to_chi = current == 'atl' and any(powder_coated(p) for p in products)
                 pairs = [(v, twin_of(v['product_id'])) for v in strict]
                 if (short or back_to_chi) and all(
-                        t and t.product_tmpl_id.aa_hw_line not in (False, current)
+                        t and t._aa_line() not in (False, current)
                         for _v, t in pairs):
                     need = {}
                     for v, t in pairs:
@@ -613,7 +629,7 @@ class AaOrderCoverageLine(models.Model):
                         for v, t in pairs:
                             v['line_twin_id'] = t.id
                             v['qty_line'] = v['qty_needed']
-                            v['line_to'] = t.product_tmpl_id.aa_hw_line
+                            v['line_to'] = t._aa_line()
                             v['is_short'] = False
             for v in rows:
                 if not v['is_short'] or v.get('qty_swap') or v.get('line_twin_id'):
@@ -628,7 +644,7 @@ class AaOrderCoverageLine(models.Model):
                 spare[twin.id] -= take
                 v['line_twin_id'] = twin.id
                 v['qty_line'] = take
-                v['line_to'] = twin.product_tmpl_id.aa_hw_line or False
+                v['line_to'] = twin._aa_line() or False
                 v['is_short'] = v['qty_short'] - take > 1e-6
 
     # ------------------------------------------------------------------
@@ -857,9 +873,9 @@ class AaOrderCoverageLine(models.Model):
                 'line_qty': l.qty_line,
                 'line_to': l.line_to or '',
                 'line_must_match': bool(l.product_id.product_tmpl_id.aa_line_must_match),
-                'prep_part': l.line_twin_id.product_tmpl_id.aa_prep_part_id.with_context(
+                'prep_part': l.line_twin_id._aa_prep_part()[0].with_context(
                     display_default_code=False).display_name
-                if l.line_twin_id and l.line_twin_id.product_tmpl_id.aa_prep_part_id else '',
+                if l.line_twin_id and l.line_twin_id._aa_prep_part()[0] else '',
                 'paint': l.paint_product_id.with_context(
                     display_default_code=False).display_name if l.paint_product_id else '',
                 'paint_qty': l.qty_paint,

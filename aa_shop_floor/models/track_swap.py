@@ -29,22 +29,17 @@ from odoo.exceptions import UserError
 
 from .mrp_production import CUSTOM_TRACK
 
-# 3" Vertical Track RAW - 7'4" Black   /   2" Horizontal Track RAW - 9'6" White
-RAW_TRACK = re.compile(
-    r"^\s*(\d)\"\s*(Vertical|Horizontal)\s+Track\s+RAW\s*-\s*(\d+)'\s*(?:(\d+)\")?\s*(\w+)\s*$", re.I)
-
-
 def raw_track_facts(product):
-    """{size, kind, inches, colour} of a RAW track product, or None."""
-    hit = RAW_TRACK.match(product.with_context(display_default_code=False).name or "")
-    if not hit:
+    """{size, kind, inches, colour, line} of a RAW track product, or None.
+
+    READ OFF THE VARIANT (owner, 2026-11-27): the RAW tracks were folded into
+    one product per size and type, so the length, the finish and the line
+    left the name. spring_engineering's reader takes either shape - the old
+    "3" Vertical Track RAW - 7'4" Black" and the folded variant alike.
+    """
+    if not product:
         return None
-    return {
-        "size": hit.group(1),
-        "kind": hit.group(2).lower(),
-        "inches": int(hit.group(3)) * 12 + int(hit.group(4) or 0),
-        "colour": hit.group(5).title(),
-    }
+    return product.with_context(display_default_code=False)._aa_raw_track_facts()
 
 
 def inches_text(inches):
@@ -103,6 +98,7 @@ class MrpProduction(models.Model):
                     "colour": hit.group(4).strip().title(),
                     # A custom piece is cut to its length: the RAW must be at least that.
                     "min_inches": float(hit.group(3)),
+                    "line": "chi",
                     "current": self.env["product.product"],
                 }
         return None
@@ -134,7 +130,8 @@ class MrpProduction(models.Model):
         for product in candidates:
             facts = raw_track_facts(product)
             if not facts or facts["size"] != need["size"] or facts["kind"] != need["kind"] \
-                    or facts["colour"] != need["colour"] or facts["inches"] < need["min_inches"]:
+                    or facts["colour"] != need["colour"] or facts["inches"] < need["min_inches"] \
+                    or facts["line"] != need.get("line", "chi"):
                 continue
             if product.qty_available <= 0:
                 continue
@@ -167,8 +164,11 @@ class MrpProduction(models.Model):
         facts = raw_track_facts(new) if new else None
         # THE SERVER CHECKS AGAIN: the dialog only offered good choices, but a
         # request can be posted by hand.
+        # THE SAME LINE TOO: an ATL piece comes without its 2x2 angle, so it
+        # is a different piece to cut from, never a longer one of the same.
         if not need or not facts or facts["size"] != need["size"] or facts["kind"] != need["kind"] \
-                or facts["colour"] != need["colour"] or facts["inches"] < need["min_inches"]:
+                or facts["colour"] != need["colour"] or facts["inches"] < need["min_inches"] \
+                or facts["line"] != need.get("line", "chi"):
             raise UserError(_("That RAW track does not fit this job."))
         old_move = self._aa_raw_track_move()
         qty = self._aa_track_pieces()

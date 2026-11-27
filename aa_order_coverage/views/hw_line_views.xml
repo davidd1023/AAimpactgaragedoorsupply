@@ -24,6 +24,24 @@
     </field>
   </record>
 
+  <!-- PER VARIANT (owner, 2026-11-27): an ATL RAW length is a variant of
+       its RAW track now and takes the 2x2 angle of ITS length. Filled in by
+       the catalogue merge from the old product; edited here. -->
+  <record id="view_product_variant_form_aa_prep" model="ir.ui.view">
+    <field name="name">product.product.form.aa.prep</field>
+    <field name="model">product.product</field>
+    <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group[@name='codes']" position="after">
+        <group name="aa_variant_prep" string="Track Prep (this variant)">
+          <field name="aa_variant_prep_part_id"/>
+          <field name="aa_variant_prep_part_qty" invisible="not aa_variant_prep_part_id"/>
+          <field name="aa_variant_prep_note"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+
   <record id="view_product_template_list_aa_hw_line" model="ir.ui.view">
     <field name="name">product.template.list.aa.hw.line</field>
     <field name="model">product.template</field>

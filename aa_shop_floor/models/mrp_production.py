@@ -15,8 +15,6 @@ FILLER_ID = 5.25
 # its length and finish as variant values. The anchored patterns that used to
 # live here could only read the first, and a track whose facts cannot be read
 # gets no bench card at all.
-# The raw stock they are cut from: 3" Horizontal Track RAW - 9'6" White
-RAW_LENGTH = re.compile(r"RAW\s*-\s*(\d+)'\s*(?:(\d+)\")?")
 
 STOCK_SPRING_CODE = re.compile(r"^SPR-(\d{3,4})-(\d+(?:\.\d+)?)-([LR])$")
 
@@ -222,9 +220,15 @@ class MrpProduction(models.Model):
             rows = [("Track", '%s" Vertical · %s' % (size, colour)),
                     ("Door height", "%s'" % facts["door"])]
 
-        raw = self.move_raw_ids.filtered(lambda m: "RAW" in (m.product_id.name or ""))[:1]
-        hit = raw and RAW_LENGTH.search(raw.product_id.name or "")
-        raw_inches = (int(hit.group(1)) * 12 + int(hit.group(2) or 0)) if hit else 0
+        # THE RAW PIECE'S LENGTH, off the variant (owner, 2026-11-27: the RAW
+        # tracks are one product per size and type now, so "9'6"" is a value,
+        # not part of the name the old pattern read).
+        raw_inches = 0
+        for move in self.move_raw_ids:
+            raw_facts = move.product_id._aa_raw_track_facts()
+            if raw_facts:
+                raw_inches = raw_facts["inches"]
+                break
         if not raw_inches or raw_inches > length:
             rows.append(("Cut to", "%s (LH + RH)" % inches_label(length)))
         else:
@@ -239,9 +243,12 @@ class MrpProduction(models.Model):
                     rows.append(("Hardware line", {"chi": "CHI", "atl": "ATL"}.get(*lines, *lines)))
                 # THE ATL HORIZONTAL COMES WITHOUT ITS 2x2 ANGLE (owner,
                 # 2026-11-25): the part says so, and the card repeats it.
-                for template in templates:
-                    if template.aa_prep_note:
-                        rows.append(("Prep", template.aa_prep_note))
+                # PER PIECE: an ATL RAW length carries its own note now.
+                for note in dict.fromkeys(
+                        p._aa_prep_note() for p in self.move_raw_ids.product_id
+                        if hasattr(p, "_aa_prep_note")):
+                    if note:
+                        rows.append(("Prep", note))
             rows.append(("Parts", ""))
             for move in self.move_raw_ids:
                 part = move.product_id.with_context(display_default_code=False).display_name

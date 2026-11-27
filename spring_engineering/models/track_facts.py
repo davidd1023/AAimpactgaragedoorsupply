@@ -45,6 +45,9 @@ _FEET = re.compile(r"(?<!\d)(\d{1,2})\s*'")
 
 _COLOUR = re.compile(r"\b(White|Black|Galvanized|Galvanised)\b", re.I)
 
+# A RAW stock length in feet and inches: 9'6", 13'4", or a bare 15'.
+_RAW_LENGTH = re.compile(r"(?<!\d)(\d{1,2})\s*'\s*(?:(\d{1,2})\s*\")?")
+
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
@@ -89,4 +92,54 @@ class ProductProduct(models.Model):
             "length": float(inches.group(1)),
             "door": int(feet.group(1)) if feet else None,
             "colour": colour.group(1).title(),
+        }
+
+    def _aa_raw_track_facts(self):
+        """{kind, size, inches, colour, line} for a RAW track, or None.
+
+        THE RAW STOCK IS NOW ONE PRODUCT PER SIZE AND TYPE TOO (owner,
+        2026-11-27: "crea variantes con todos los tracks raws de todas sus
+        medidas al igual que los terminados") - so, exactly as for the
+        prepared tracks above, the length, the finish and the line moved out
+        of the name and into variant values, and every reader that took a
+        RAW track apart with an anchored regex over its NAME stopped seeing
+        it. One reader, both shapes:
+
+            before   3" Horizontal Track RAW - 9'6" Galvanized ATL
+            after    3" Horizontal Track RAW 9'6" Galvanized ATL   (choice text)
+
+        kind    "horizontal" or "vertical"
+        size    "2" or "3"
+        inches  the stock length, e.g. 114 for 9'6"
+        colour  "Black", "White" or "Galvanized"
+        line    "atl" when the piece is the ATL one (no 2x2 angle on it),
+                "chi" otherwise - the owner kept ATL inside the same product
+                as a choice rather than a product of its own.
+        """
+        self.ensure_one()
+        text = " ".join((self._aa_choice_text() or "").split())
+
+        if not text or not re.search(r"\bTrack\s+RAW\b", text, re.I):
+            return None
+
+        horizontal = re.search(r"\bHorizontal\s+Track\b", text, re.I)
+        vertical = re.search(r"\bVertical\s+Track\b", text, re.I)
+        if not (horizontal or vertical):
+            return None
+
+        size = _SIZE.search(text)
+        colour = _COLOUR.search(text)
+        # FEET AND INCHES, the way the stock is bought: 9'6", 13'4", 15'.
+        length = _RAW_LENGTH.search(text)
+
+        if not (size and colour and length):
+            return None
+
+        return {
+            "kind": "vertical" if vertical else "horizontal",
+            "size": size.group(1),
+            "inches": int(length.group(1)) * 12 + int(length.group(2) or 0),
+            "colour": "Galvanized" if colour.group(1).lower().startswith("galvani")
+            else colour.group(1).title(),
+            "line": "atl" if re.search(r"\bATL\b", text) else "chi",
         }

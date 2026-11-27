@@ -16,3 +16,4 @@ from . import test_cart_cost
 from . import test_variant_merge
 from . import test_track_facts
 from . import test_shop_price
+from . import test_raw_track_merge
