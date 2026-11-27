@@ -161,12 +161,17 @@ class MrpProductionAaWo(models.Model):
     aa_impact_wo = fields.Char(string="AA Impact W/O", compute="_compute_aa_impact_wo")
 
     def _compute_aa_impact_wo(self):
-        Workorder = self.env["mrp.workorder"]
+        # _aa_impact_wo lives on mrp.production (mrp_workorder.py). Calling it
+        # on mrp.workorder took the whole Shop Floor down on Prod, 2026-11-27.
         for production in self:
-            order = production.aa_sale_line_id.order_id
-            if not order and production.origin:
-                order = self.env["sale.order"].sudo().search([("name", "=", production.origin)], limit=1)
-            production.aa_impact_wo = Workorder._aa_impact_wo(order.sudo()) if order else ""
+            try:
+                order = production.aa_sale_line_id.order_id
+                if not order and production.origin:
+                    order = self.env["sale.order"].sudo().search([("name", "=", production.origin)], limit=1)
+                production.aa_impact_wo = production._aa_impact_wo(order.sudo()) if order else ""
+            except Exception:
+                _logger.exception("AA Impact W/O failed for %s", production.name)
+                production.aa_impact_wo = ""
 
 
 class MrpWorkorder(models.Model):
