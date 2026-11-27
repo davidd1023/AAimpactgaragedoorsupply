@@ -88,7 +88,10 @@
                  it to, the lift and the jamb brackets - nothing else. -->
             <t t-set="aaTracks" t-value="aaOrderData.grouped ? null : aaTrackCards()"/>
             <t t-if="aaTracks" t-call="aa_shop_floor.TrackCards"/>
-            <div t-if="record.aa_shop_spec and !aaOrderData.grouped and !aaTracks" class="o_aa_shop_spec border rounded p-2 bg-100">
+            <!-- THE HARDWARE BOX, ONE PIECE AT A TIME (owner, 2026-11-27). -->
+            <t t-set="aaSteps" t-value="(aaOrderData.grouped or aaTracks) ? null : aaPackSteps()"/>
+            <t t-if="aaSteps" t-call="aa_shop_floor.PackSteps"/>
+            <div t-if="record.aa_shop_spec and !aaOrderData.grouped and !aaTracks and (!aaSteps or aaStepUi.showList)" class="o_aa_shop_spec border rounded p-2 bg-100" t-att-class="{'mt-2': aaSteps}">
                 <t t-set="aaRows" t-value="record.aa_shop_spec.split('\n')"/>
                 <!-- Overview shows only the summary; the full list is at the station. -->
                 <t t-set="aaLimit" t-value="aaSpecLimit(aaRows)"/>

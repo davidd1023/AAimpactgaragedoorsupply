@@ -750,3 +750,53 @@ msgstr "Standard"
 #. odoo-javascript
 msgid "pairs"
 msgstr "pares"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Everything is in the box"
+msgstr "Todo está en la caja"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Go back and check"
+msgstr "Volver a revisar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Step"
+msgstr "Paso"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Already in the box"
+msgstr "Ya está en la caja"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Put in the box"
+msgstr "Echado en la caja"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Back"
+msgstr "Atrás"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Take out"
+msgstr "Sacar"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Next"
+msgstr "Siguiente"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "Hide the list"
+msgstr "Ocultar la lista"
+
+#. module: aa_shop_floor
+#. odoo-javascript
+msgid "See the whole list"
+msgstr "Ver toda la lista"

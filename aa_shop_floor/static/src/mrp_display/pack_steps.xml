@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Called from MrpDisplayRecord with aaSteps set (pack_steps.js). -->
+    <t t-name="aa_shop_floor.PackSteps">
+        <div class="o_aa_pack_steps border rounded p-2 bg-100">
+            <div t-foreach="aaSteps.header" t-as="aaHead" t-key="aaHead_index" class="d-flex justify-content-between gap-3">
+                <span class="text-muted" t-esc="aaT(aaHead[0])"/>
+                <span class="fw-bold text-end" t-esc="aaT(aaHead[1])"/>
+            </div>
+
+            <!-- Progress -->
+            <div class="d-flex justify-content-between align-items-center mt-2">
+                <span class="fw-bold text-uppercase" t-esc="aaT('Box contents')"/>
+                <span class="text-muted"><t t-esc="aaSteps.doneCount"/> / <t t-esc="aaSteps.steps.length"/></span>
+            </div>
+            <div class="progress mt-1" style="height: 8px;">
+                <div class="progress-bar bg-success" role="progressbar"
+                     t-att-style="'width: ' + (100 * aaSteps.doneCount / aaSteps.steps.length) + '%'"/>
+            </div>
+
+            <!-- Everything is in -->
+            <t t-if="aaSteps.showSummary">
+                <div class="text-center bg-success-subtle rounded p-3 mt-3">
+                    <i class="fa fa-check-circle fa-3x text-success"/>
+                    <div class="fs-4 fw-bold mt-2" t-esc="aaT('Everything is in the box')"/>
+                </div>
+                <button type="button" class="btn btn-outline-secondary w-100 mt-2"
+                        t-on-click.stop="() => this.aaStepGo(aaSteps.steps, aaSteps.steps.length - 1)">
+                    <i class="fa fa-arrow-left me-1"/><t t-esc="aaT('Go back and check')"/>
+                </button>
+            </t>
+
+            <!-- One step -->
+            <t t-else="">
+                <t t-set="aaStep" t-value="aaSteps.steps[aaSteps.pos]"/>
+                <div class="text-muted small mt-3">
+                    <t t-esc="aaT('Step')"/> <t t-esc="aaSteps.pos + 1"/> <t t-esc="aaT('of')"/> <t t-esc="aaSteps.steps.length"/>
+                </div>
+                <div class="rounded p-3 mt-1 border"
+                     t-att-class="aaStep.done ? 'bg-success-subtle border-success' : 'bg-white'">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+                        <span class="fs-3 fw-bold" t-esc="aaT(aaStep.name)"/>
+                        <span t-if="aaStep.qty" class="fs-1 fw-bold text-nowrap">× <t t-esc="aaStep.qty"/></span>
+                    </div>
+                    <div t-foreach="aaStep.details" t-as="aaDet" t-key="aaDet_index" class="d-flex justify-content-between gap-3 fs-5">
+                        <span class="text-muted" t-esc="aaT(aaDet[0])"/>
+                        <span class="fw-bold text-end" t-esc="aaT(aaDet[1])"/>
+                    </div>
+                    <div t-if="aaStep.done" class="text-success fw-bold mt-2">
+                        <i class="fa fa-check me-1"/><t t-esc="aaT('Already in the box')"/>
+                    </div>
+                </div>
+
+                <button t-if="!aaStep.done" type="button" class="btn btn-success btn-lg w-100 mt-2 py-3 fs-4"
+                        t-on-click.stop="() => this.aaStepConfirm(aaSteps)">
+                    <i class="fa fa-check me-2"/><t t-esc="aaT('Put in the box')"/>
+                </button>
+                <div class="d-flex gap-2 mt-2">
+                    <button type="button" class="btn btn-outline-secondary btn-lg flex-fill"
+                            t-att-disabled="aaSteps.pos === 0"
+                            t-on-click.stop="() => this.aaStepGo(aaSteps.steps, aaSteps.pos - 1)">
+                        <i class="fa fa-arrow-left me-1"/><t t-esc="aaT('Back')"/>
+                    </button>
+                    <button t-if="aaStep.done" type="button" class="btn btn-outline-danger btn-lg flex-fill"
+                            t-on-click.stop="() => this.aaStepUndo(aaSteps)">
+                        <i class="fa fa-undo me-1"/><t t-esc="aaT('Take out')"/>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-lg flex-fill"
+                            t-att-disabled="aaSteps.pos === aaSteps.steps.length - 1"
+                            t-on-click.stop="() => this.aaStepGo(aaSteps.steps, aaSteps.pos + 1)">
+                        <t t-esc="aaT('Next')"/><i class="fa fa-arrow-right ms-1"/>
+                    </button>
+                </div>
+            </t>
+
+            <button type="button" class="btn btn-link w-100 mt-1"
+                    t-on-click.stop="() => this.aaStepToggleList()">
+                <t t-esc="aaT(aaStepUi.showList ? 'Hide the list' : 'See the whole list')"/>
+            </button>
+        </div>
+    </t>
+</templates>
