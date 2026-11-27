@@ -144,7 +144,7 @@ class MrpProduction(models.Model):
                     continue
                 size = re.search(r"Lift Cable\s+(\S+)", name, re.I)
                 data["cable_size"] = size.group(1) if size else data["cable_size"]
-                each = self._aa_cable_cut_inches(line.product_id)
+                each = self._aa_cable_cut_inches(line.product_id, line)
                 if each and not data["cable_length"]:
                     data["cable_length"] = inches_label(each)
                 break

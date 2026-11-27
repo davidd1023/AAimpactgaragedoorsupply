@@ -539,12 +539,21 @@ class MrpProduction(models.Model):
 
         return ""
 
-    def _aa_cable_cut_inches(self, product):
+    def _aa_cable_cut_inches(self, product, line=None):
         """How long each cable of a prepared pair is cut, in inches, or 0.
+
+        THE AA CALCULATOR FIRST (cable_cut.py, owner 2026-11-27): with the
+        order line, the cut is worked out from its door; the pair's recipe
+        below is only the fallback for a door that does not say enough.
 
         The reel quantity on the pair's own kit BoM is for the PAIR, so one
         cable is half of it.
         """
+        if line and "_aa_cable_cut_calc" in dir(line):
+            calculated = line._aa_cable_cut_calc()
+            if calculated:
+                return calculated
+
         bom = self.env["mrp.bom"].sudo()._bom_find(
             product, bom_type="phantom").get(product)
         reel = bom and bom.bom_line_ids.filtered(
@@ -569,7 +578,7 @@ class MrpProduction(models.Model):
             if not CABLE_NAME.search(name):
                 continue
 
-            each = self._aa_cable_cut_inches(line.product_id)
+            each = self._aa_cable_cut_inches(line.product_id, line)
             size = re.search(r"Lift Cable\s+(\S+)", name, re.I)
             label = size.group(1) if size else line.product_id.display_name
 

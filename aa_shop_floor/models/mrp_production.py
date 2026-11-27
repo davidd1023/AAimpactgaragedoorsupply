@@ -89,7 +89,7 @@ class MrpProduction(models.Model):
             if production.aa_station_kind == "kit":
                 rows = production._aa_kit_rows()
             elif production.aa_station_kind == "cable":
-                rows = production._aa_cable_rows()
+                rows = production._aa_cable_rows(line=production.aa_sale_line_id)
             elif production.aa_station_kind == "track":
                 rows = production._aa_custom_track_rows()
             else:
@@ -320,7 +320,7 @@ class MrpProduction(models.Model):
         for cable in self.aa_cable_line_ids:
             # ONE tick for the whole cable pair (owner, 2026-10-14).
             rows.append(("Lift cable", "", "c"))
-            rows += self._aa_cable_rows(cable.product_id, cable.product_uom_qty, notes=False)
+            rows += self._aa_cable_rows(cable.product_id, cable.product_uom_qty, notes=False, line=cable)
         return rows
 
     def _aa_pieces_for_line(self, pieces):
@@ -405,7 +405,7 @@ class MrpProduction(models.Model):
 
         return pieces
 
-    def _aa_cable_rows(self, product=None, pairs=None, notes=True):
+    def _aa_cable_rows(self, product=None, pairs=None, notes=True, line=None):
         """A prepared lift cable pair. The cut length comes from its kit BoM:
         the reel feet are for the PAIR, so one cable is half."""
         product = product or self.product_id
@@ -416,7 +416,7 @@ class MrpProduction(models.Model):
         # ONE PLACE WORKS OUT THE CUT LENGTH (see hardware_card), so the
         # Cables card and the hardware box's sticker cannot print two
         # different lengths for the same pair of cables.
-        each = self._aa_cable_cut_inches(product)
+        each = self._aa_cable_cut_inches(product, line)
         if each:
             rows.append(("Cut", "%s x %s" % (qty_label(2 * pairs), inches_label(each))))
         else:
